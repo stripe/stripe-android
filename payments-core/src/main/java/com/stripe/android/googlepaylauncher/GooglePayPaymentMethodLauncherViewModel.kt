@@ -14,8 +14,8 @@ import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.BuildConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.IOContext
@@ -203,12 +203,10 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 .create(
                     context = application,
                     enableLogging = BuildConfig.DEBUG,
-                    publishableKeyProvider = {
-                        args.publishableKey ?: PaymentConfiguration.getInstance(application).publishableKey
-                    },
-                    stripeAccountIdProvider = {
-                        PaymentConfiguration.getInstance(application).stripeAccountId
-                    },
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                    ),
                     productUsage = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN),
                     config = args.config,
                     cardBrandFilter = args.cardBrandFilter,

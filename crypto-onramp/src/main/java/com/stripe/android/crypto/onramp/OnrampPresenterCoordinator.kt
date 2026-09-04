@@ -9,6 +9,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
@@ -46,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -93,7 +96,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             config = it,
             readyCallback = ::handleGooglePayIsReady,
             cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter
+            cardFundingFilter = DefaultCardFundingFilter,
+            apiConfigurationProvider = Provider {
+                val paymentConfiguration = PaymentConfiguration.getInstance(activity)
+                ApiConfiguration.State(
+                    publishableKey = paymentConfiguration.publishableKey,
+                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                )
+            },
         )
     }
 
@@ -230,7 +240,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                 clientAttributionMetadata = null,
                                 transactionId = selection.transactionId,
                                 label = selection.label,
-                                publishableKey = it
+                                apiConfiguration = ApiConfiguration.State(
+                                    publishableKey = it,
+                                    stripeAccountId = null,
+                                )
                             )
                         },
                         onFailure = { error ->

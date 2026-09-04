@@ -21,6 +21,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
+import javax.inject.Provider
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
@@ -57,10 +59,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
     googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val cardBrandFilter: CardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        PaymentConfiguration.getInstance(context).publishableKey,
-        setOf(PRODUCT_USAGE_TOKEN)
+        context = context,
+        publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+        defaultProductUsageTokens = setOf(PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
@@ -70,7 +73,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
         lifecycleOwner = lifecycleOwner,
         activityResultLauncher = activityResultLauncher,
         onPaymentDataChangedCallback = null,
-        context = context,
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor,
     )
@@ -102,7 +104,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter
+        DefaultCardFundingFilter,
+        paymentConfigurationApiConfigurationProvider(activity),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -126,7 +129,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter
+        DefaultCardFundingFilter,
+        paymentConfigurationApiConfigurationProvider(activity),
     )
 
     /**
@@ -156,7 +160,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter
+        DefaultCardFundingFilter,
+        paymentConfigurationApiConfigurationProvider(fragment.requireContext()),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -167,7 +172,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config: Config,
         readyCallback: ReadyCallback,
         cardBrandFilter: CardBrandFilter,
-        cardFundingFilter: CardFundingFilter
+        cardFundingFilter: CardFundingFilter,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ) : this(
         lifecycleOwner,
         config,
@@ -179,7 +185,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             override fun invoke(
                 environment: GooglePayEnvironment,
                 cardFundingFilter: CardFundingFilter,
-                cardBrandFilter: CardBrandFilter
+                cardBrandFilter: CardBrandFilter,
+                apiConfiguration: ApiConfiguration.State
             ): GooglePayRepository {
                 return DefaultGooglePayRepository(
                     context = context,
@@ -187,8 +194,10 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
+                    apiConfiguration = apiConfiguration,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
+                        publishableKeyProvider = { apiConfiguration.publishableKey },
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
                     ),
                     cardFundingFilter = cardFundingFilter,
@@ -197,7 +206,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             }
         },
         cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter
+        cardFundingFilter = cardFundingFilter,
+        apiConfigurationProvider = apiConfigurationProvider,
     )
 
     init {
@@ -206,7 +216,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
                 val repository = googlePayRepositoryFactory(
                     environment = config.environment,
                     cardFundingFilter = cardFundingFilter,
-                    cardBrandFilter = cardBrandFilter
+                    cardBrandFilter = cardBrandFilter,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 )
                 readyCallback.onReady(
                     repository.isReady().first().also {
@@ -247,6 +258,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             label = label,
             clientAttributionMetadata = null,
             isElements = false,
+            apiConfiguration = apiConfigurationProvider.get(),
         )
     }
 
@@ -258,7 +270,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
         transactionId: String? = null,
         label: String? = null,
         isElements: Boolean = false,
-        publishableKey: String? = null,
+        apiConfiguration: ApiConfiguration.State,
         displayItems: List<com.stripe.android.GooglePayJsonFactory.DisplayItem> = emptyList(),
         billingEmailOverride: String? = null,
     ) {
@@ -276,7 +288,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             transactionId = transactionId,
             label = label,
             isElements = isElements,
-            publishableKey = publishableKey,
+            apiConfiguration = apiConfiguration,
             displayItems = displayItems,
             billingEmailOverride = billingEmailOverride,
             shippingAddressParameters = null,
@@ -466,7 +478,18 @@ fun rememberGooglePayPaymentMethodLauncher(
                 currentReadyCallback.onReady(it)
             },
             cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter
+            cardFundingFilter = DefaultCardFundingFilter,
+            apiConfigurationProvider = paymentConfigurationApiConfigurationProvider(context),
         )
     }
+}
+
+private fun paymentConfigurationApiConfigurationProvider(
+    context: Context,
+): Provider<ApiConfiguration.State> = Provider {
+    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+    ApiConfiguration.State(
+        publishableKey = paymentConfiguration.publishableKey,
+        stripeAccountId = paymentConfiguration.stripeAccountId,
+    )
 }

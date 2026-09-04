@@ -41,8 +41,8 @@ internal class RemoteCardAccountRangeSourceTest {
             cardAccountRangeStore,
             { },
             PaymentAnalyticsRequestFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
             )
         )
 
@@ -73,8 +73,8 @@ internal class RemoteCardAccountRangeSourceTest {
                 cardAccountRangeStore,
                 { },
                 PaymentAnalyticsRequestFactory(
-                    ApplicationProvider.getApplicationContext(),
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    context = ApplicationProvider.getApplicationContext(),
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
                 )
             )
 
@@ -95,8 +95,8 @@ internal class RemoteCardAccountRangeSourceTest {
             cardAccountRangeStore = cardAccountRangeStore,
             analyticsRequestExecutor = {},
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
             )
         )
 
@@ -112,8 +112,8 @@ internal class RemoteCardAccountRangeSourceTest {
             cardAccountRangeStore = cardAccountRangeStore,
             analyticsRequestExecutor = {},
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
             )
         )
 
@@ -129,8 +129,8 @@ internal class RemoteCardAccountRangeSourceTest {
             cardAccountRangeStore = cardAccountRangeStore,
             analyticsRequestExecutor = {},
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
             )
         )
 
@@ -149,8 +149,8 @@ internal class RemoteCardAccountRangeSourceTest {
                 cardAccountRangeStore,
                 { },
                 PaymentAnalyticsRequestFactory(
-                    ApplicationProvider.getApplicationContext(),
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    context = ApplicationProvider.getApplicationContext(),
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
                 )
             )
 
@@ -195,8 +195,8 @@ internal class RemoteCardAccountRangeSourceTest {
                     analyticsRequests.add(it)
                 },
                 PaymentAnalyticsRequestFactory(
-                    ApplicationProvider.getApplicationContext(),
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    context = ApplicationProvider.getApplicationContext(),
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
                 )
             )
 

@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -110,7 +112,12 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             transactionId = intent.id,
             label = config.customLabel,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = PaymentConfiguration.getInstance(context).let {
+                ApiConfiguration.State(
+                    publishableKey = it.publishableKey,
+                    stripeAccountId = it.stripeAccountId,
+                )
+            },
             displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata, context),
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,
