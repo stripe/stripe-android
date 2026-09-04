@@ -317,6 +317,7 @@ internal class CheckoutPaymentElementTest {
                 INITIAL_TOTAL,
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         ) { context, controller ->
             context.presentPaymentOptions()
             selectCashApp(paymentMethodLayout)
