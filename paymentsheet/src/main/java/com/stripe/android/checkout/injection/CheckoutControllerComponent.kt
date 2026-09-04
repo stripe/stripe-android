@@ -12,6 +12,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutSavedPaymentMethodSelectionHandler
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
@@ -43,7 +44,9 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
@@ -82,6 +85,7 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.paymentsheet.verticalmode.VerticalSavedPaymentMethodSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
@@ -203,6 +207,17 @@ internal interface CheckoutControllerModule {
 
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
+
+    @Binds
+    fun bindsEmbeddedRowSelectionImmediateActionHandler(
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
+    ): EmbeddedRowSelectionImmediateActionHandler
+
+    @Binds
+    @Singleton
+    fun bindsVerticalSavedPaymentMethodSelectionHandler(
+        handler: CheckoutSavedPaymentMethodSelectionHandler,
+    ): VerticalSavedPaymentMethodSelectionHandler
 
     @Binds
     fun bindsCheckoutPaymentOptionDisplayDataFactory(

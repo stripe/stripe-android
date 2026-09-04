@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
@@ -39,10 +40,11 @@ import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_PENDING
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
-import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
@@ -54,6 +56,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
@@ -77,6 +80,7 @@ internal class CheckoutPaymentElementTest {
     fun testBackingOutOfFormPreservesPreviouslySelectedPaymentMethod() {
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
             setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
@@ -108,6 +112,7 @@ internal class CheckoutPaymentElementTest {
         var checkoutResult: CheckoutController.Result? = null
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
             resultCallback = { result -> checkoutResult = result },
             setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
@@ -158,6 +163,7 @@ internal class CheckoutPaymentElementTest {
                 paymentMethods = paymentMethods,
                 defaultPaymentMethodId = firstPaymentMethod.id!!,
             ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         ) { context, controller ->
             enqueueTaxUpdate { response ->
                 requestReceived.countDown()
@@ -217,6 +223,63 @@ internal class CheckoutPaymentElementTest {
             }
             contentPage.assertHasSelectedSavedPaymentMethod(secondPaymentMethod.id!!)
             waitForSessionTotal(controller, UPDATED_TOTAL)
+            context.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionSurvivesHostRecreation() {
+        val updateStarted = CountDownLatch(1)
+        val releaseUpdateResponse = CountDownLatch(1)
+        val updateRequestCount = AtomicInteger()
+        val rowSelectionCallbackCount = AtomicInteger()
+
+        runAutomaticTaxTest(
+            configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                rowSelectionCallbackCount.incrementAndGet()
+            },
+        ) { context, controller ->
+            enqueueTaxUpdate { response ->
+                updateRequestCount.incrementAndGet()
+                updateStarted.countDown()
+                if (!releaseUpdateResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    throw AssertionError("Timed out waiting to release the Checkout Session update response.")
+                }
+                automaticTaxResponseWithSavedPaymentMethod(
+                    UPDATED_TOTAL,
+                    TAX_STATUS_COMPLETE,
+                ).invoke(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            try {
+                assertThat(updateStarted.await(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)).isTrue()
+                assertThat(updateRequestCount.get()).isEqualTo(1)
+                assertSavedPaymentMethodSelectionIsPending()
+                assertThat(rowSelectionCallbackCount.get()).isEqualTo(0)
+
+                context.recreateHost()
+
+                assertSavedPaymentMethodSelectionIsPending()
+                assertThat(updateRequestCount.get()).isEqualTo(1)
+                assertThat(rowSelectionCallbackCount.get()).isEqualTo(0)
+            } finally {
+                releaseUpdateResponse.countDown()
+            }
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            testRules.compose.waitUntil(timeoutMillis = REQUEST_TIMEOUT_SECONDS * 1_000) {
+                rowSelectionCallbackCount.get() == 1
+            }
+            assertSavedPaymentMethodSelectionCompleted()
+            assertThat(updateRequestCount.get()).isEqualTo(1)
+            assertThat(rowSelectionCallbackCount.get()).isEqualTo(1)
             context.markTestSucceeded()
         }
     }
@@ -345,6 +408,7 @@ internal class CheckoutPaymentElementTest {
                 INITIAL_TOTAL,
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         ) { context, controller ->
             context.presentPaymentOptions()
             selectCashApp(paymentMethodLayout)
@@ -386,6 +450,7 @@ internal class CheckoutPaymentElementTest {
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
         checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
+        rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         block = block,
     )
 
@@ -396,17 +461,20 @@ internal class CheckoutPaymentElementTest {
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
+        rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         block = block,
     )
 
     private fun runAutomaticTaxTest(
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
         block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
     ) {
         lateinit var controller: CheckoutController
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
+            rowSelectionBehavior = rowSelectionBehavior,
             checkoutInitResponse = checkoutInitResponse,
             setup = {
                 controller = it
@@ -494,6 +562,37 @@ internal class CheckoutPaymentElementTest {
         )
     }
 
+    private fun assertSavedPaymentMethodSelectionIsPending() {
+        contentPage.waitUntilVisible()
+        testRules.compose.onNodeWithTag(
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$SAVED_PAYMENT_METHOD_ID",
+            useUnmergedTree = true,
+        ).assertIsNotEnabled()
+        testRules.compose.onAllNodesWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(1)
+    }
+
+    private fun assertSavedPaymentMethodSelectionCompleted() {
+        contentPage.waitUntilVisible()
+        testRules.compose.waitUntil(timeoutMillis = REQUEST_TIMEOUT_SECONDS * 1_000) {
+            testRules.compose.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+        }
+        testRules.compose.onNodeWithTag(
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$SAVED_PAYMENT_METHOD_ID",
+            useUnmergedTree = true,
+        ).assertIsEnabled()
+        testRules.compose.onAllNodesWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(0)
+        contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+    }
+
     private fun fillOutCardAndBillingDetails() {
         formPage.fillOutCardDetails()
         fillOutBillingDetails()
@@ -566,6 +665,49 @@ internal class CheckoutPaymentElementTest {
             )
             json.getJSONObject("server_built_elements_session_params")
                 .put("client_default_payment_method", defaultPaymentMethodId)
+        },
+    )
+
+    private fun automaticTaxResponseWithSavedPaymentMethod(
+        total: Long,
+        taxStatus: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        billingAddressCollection = "auto",
+        jsonModifier = { json ->
+            json.put("account_settings", JSONObject("""{"country":"US"}"""))
+            json.put(
+                "customer",
+                JSONObject(
+                    """
+                    {
+                        "id": "cus_123",
+                        "payment_methods": [{
+                            "id": "$SAVED_PAYMENT_METHOD_ID",
+                            "object": "payment_method",
+                            "type": "card",
+                            "billing_details": {
+                                "address": {
+                                    "line1": "$BILLING_ADDRESS_LINE_ONE",
+                                    "city": "$BILLING_ADDRESS_CITY",
+                                    "state": "$BILLING_ADDRESS_STATE",
+                                    "country": "US",
+                                    "postal_code": "$BILLING_ADDRESS_ZIP"
+                                }
+                            },
+                            "card": {
+                                "brand": "visa",
+                                "exp_month": 12,
+                                "exp_year": 2034,
+                                "last4": "4242"
+                            }
+                        }],
+                        "can_detach_payment_method": true
+                    }
+                    """.trimIndent()
+                )
+            )
         },
     )
 
@@ -646,6 +788,7 @@ internal class CheckoutPaymentElementTest {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INITIAL_TOTAL = 5_099L
         const val UPDATED_TOTAL = 5_399L
+        const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
         const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
         const val BILLING_ADDRESS_CITY = "San Francisco"
         const val BILLING_ADDRESS_STATE = "CA"
@@ -653,5 +796,7 @@ internal class CheckoutPaymentElementTest {
         const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
         const val TAX_STATUS_COMPLETE = "complete"
         const val NETWORK_TIMEOUT_SECONDS = 5L
+        const val REQUEST_TIMEOUT_SECONDS = 5L
+        const val UPDATE_RESPONSE_TIMEOUT_SECONDS = 15L
     }
 }
