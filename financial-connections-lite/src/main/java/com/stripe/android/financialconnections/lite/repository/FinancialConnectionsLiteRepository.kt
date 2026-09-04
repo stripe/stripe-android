@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import java.util.Locale
 
 internal interface FinancialConnectionsLiteRepository {
@@ -43,8 +44,11 @@ internal class FinancialConnectionsLiteRepositoryImpl(
                     PARAMS_APPLICATION_ID to applicationId,
                     PARAMS_MOBILE_SDK_TYPE to "fc_lite"
                 ),
-                PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
-            )
+                PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+                PARAMS_PRE_COLLECTED_CONSENT to configuration.preCollectedConsent?.let {
+                    mapOf("consent" to it.consent)
+                }
+            ).filterNotNullValues()
         ),
         SynchronizeSessionResponse.serializer()
     )
@@ -71,6 +75,7 @@ internal class FinancialConnectionsLiteRepositoryImpl(
         internal const val PARAMS_APPLICATION_ID = "application_id"
         internal const val PARAMS_MOBILE_SDK_TYPE = "mobile_sdk_type"
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
+        internal const val PARAMS_PRE_COLLECTED_CONSENT = "pre_collected_consent"
 
         internal val synchronizeSessionUrl: String
             get() = "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"

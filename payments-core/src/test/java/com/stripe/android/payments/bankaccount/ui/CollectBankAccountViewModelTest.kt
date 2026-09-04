@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
@@ -83,6 +84,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -105,6 +107,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -129,6 +132,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -153,6 +157,31 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when args has preCollectedConsent, passes it through to OpenConnectionsFlow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
+
+            // When
+            buildViewModel(viewEffect, paymentIntentConfiguration(preCollectedConsent = preCollectedConsent))
+
+            // Then
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
+                    preCollectedConsent = preCollectedConsent,
                 )
             )
         }
@@ -522,7 +551,8 @@ class CollectBankAccountViewModelTest {
     ).also { viewModelStoreRule.track(it) }
 
     private fun paymentIntentConfiguration(
-        attachToIntent: Boolean = true
+        attachToIntent: Boolean = true,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent? = null,
     ): ForPaymentIntent {
         return ForPaymentIntent(
             publishableKey = publishableKey,
@@ -534,7 +564,8 @@ class CollectBankAccountViewModelTest {
             ),
             attachToIntent = attachToIntent,
             hostedSurface = "payment_element",
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            preCollectedConsent = preCollectedConsent
         )
     }
 
@@ -551,7 +582,8 @@ class CollectBankAccountViewModelTest {
             ),
             attachToIntent = attachToIntent,
             hostedSurface = "payment_element",
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            preCollectedConsent = null
         )
     }
 
