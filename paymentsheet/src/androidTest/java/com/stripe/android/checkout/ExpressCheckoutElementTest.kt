@@ -3,10 +3,6 @@ package com.stripe.android.checkout
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isEnabled
-import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
@@ -21,14 +17,12 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -44,6 +38,8 @@ internal class ExpressCheckoutElementTest {
             around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
             .around(IntentsRule())
     }
+
+    private val page = ExpressCheckoutElementPage(testRules.compose)
 
     @Test
     fun testSuccessfulGooglePayPayment() {
@@ -70,16 +66,6 @@ internal class ExpressCheckoutElementTest {
                 )
             },
         ) {
-            val googlePayButton = hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG) and isEnabled() and hasClickAction()
-            testRules.compose.waitUntil(
-                conditionDescription = "Google Pay button is enabled and clickable",
-                timeoutMillis = 5_000,
-            ) {
-                testRules.compose.onAllNodes(googlePayButton)
-                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                    .isNotEmpty()
-            }
-
             val paymentMethod = PaymentMethodFactory.card()
 
             intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWith(
@@ -99,7 +85,7 @@ internal class ExpressCheckoutElementTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            testRules.compose.onNode(googlePayButton).performClick()
+            page.clickGooglePayButton()
         }
 
         intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
@@ -130,16 +116,6 @@ internal class ExpressCheckoutElementTest {
                 )
             },
         ) {
-            val linkButton = hasTestTag(LinkButtonTestTag) and isEnabled() and hasClickAction()
-            testRules.compose.waitUntil(
-                conditionDescription = "Link button is enabled and clickable",
-                timeoutMillis = 5_000,
-            ) {
-                testRules.compose.onAllNodes(linkButton)
-                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                    .isNotEmpty()
-            }
-
             intending(hasComponent(LinkActivity::class.java.name)).respondWith(
                 Instrumentation.ActivityResult(
                     LinkActivity.RESULT_COMPLETE,
@@ -164,7 +140,7 @@ internal class ExpressCheckoutElementTest {
             }
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
-            testRules.compose.onNode(linkButton).performClick()
+            page.clickLinkButton()
         }
 
         intended(hasComponent(LinkActivity::class.java.name))
