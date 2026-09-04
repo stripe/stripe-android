@@ -24,10 +24,12 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
-internal typealias CommitShippingAddress = suspend (
-    String?,
-    CheckoutController.Address.State,
-) -> Result<Unit>
+internal fun interface CommitShippingAddress {
+    suspend operator fun invoke(
+        name: String?,
+        address: CheckoutController.Address.State,
+    ): Result<Unit>
+}
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -56,7 +58,7 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner = lifecycleOwner,
         paymentConfiguration = paymentConfiguration,
         coroutineScope = coroutineScope,
-        commitShippingAddress = checkoutController::commitShippingAddress,
+        commitShippingAddress = CommitShippingAddress(checkoutController::commitShippingAddress),
         stateHolder = stateHolder,
         shippingAddressElementStateHolder = shippingAddressElementStateHolder,
         errorReporter = errorReporter,
@@ -64,19 +66,27 @@ class ShippingAddressElement internal constructor(
 
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
         activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
-            shippingAddressElementStateHolder.isPresenting = false
             when (result) {
                 is AddressLauncherResult.Succeeded -> {
-                    result.address.address?.toCheckoutAddress()?.let { address ->
+                    val address = result.address.address?.toCheckoutAddress()
+                    if (address == null) {
+                        shippingAddressElementStateHolder.isPresenting = false
+                    } else {
                         coroutineScope.launch {
-                            commitShippingAddress(
-                                result.address.name,
-                                address,
-                            )
+                            try {
+                                commitShippingAddress(
+                                    result.address.name,
+                                    address,
+                                )
+                            } finally {
+                                shippingAddressElementStateHolder.isPresenting = false
+                            }
                         }
                     }
                 }
-                is AddressLauncherResult.Canceled -> Unit
+                is AddressLauncherResult.Canceled -> {
+                    shippingAddressElementStateHolder.isPresenting = false
+                }
             }
         }
 

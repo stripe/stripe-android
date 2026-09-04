@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -165,6 +166,47 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `successful result suppresses presentation until commit completes`() {
+        val commitResult = CompletableDeferred<Result<Unit>>()
+
+        runScenario(
+            configured = true,
+            commitShippingAddress = FakeCommitShippingAddress(commitResult),
+        ) {
+            shippingAddressElement.present()
+            activityLauncher.launchCalls.awaitItem()
+            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+
+            registration.dispatch(
+                AddressLauncherResult.Succeeded(
+                    AddressDetails(
+                        name = "Jenny Rosen",
+                        address = PaymentSheet.Address(
+                            city = "San Francisco",
+                            country = "US",
+                            line1 = "510 Townsend St",
+                            postalCode = "94103",
+                            state = "CA",
+                        ),
+                    )
+                )
+            )
+            commitShippingAddress.calls.awaitItem()
+            assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
+
+            shippingAddressElement.present()
+            activityLauncher.launchCalls.expectNoEvents()
+
+            commitResult.complete(Result.success(Unit))
+            assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
+
+            shippingAddressElement.present()
+            activityLauncher.launchCalls.awaitItem()
+            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
     fun `canceled result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
@@ -231,6 +273,18 @@ internal class ShippingAddressElementTest {
     private fun runScenario(
         configured: Boolean = true,
         block: suspend Scenario.() -> Unit,
+    ) = runScenario(
+        configured = configured,
+        commitShippingAddress = FakeCommitShippingAddress(
+            CompletableDeferred(Result.success(Unit)),
+        ),
+        block = block,
+    )
+
+    private fun runScenario(
+        configured: Boolean,
+        commitShippingAddress: FakeCommitShippingAddress,
+        block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(
@@ -244,7 +298,6 @@ internal class ShippingAddressElementTest {
             PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         )
         val errorReporter = FakeErrorReporter()
-        val commitShippingAddress = FakeCommitShippingAddress()
         val coroutineScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
 
         suspend fun createElement(): ElementScenario {
@@ -255,7 +308,7 @@ internal class ShippingAddressElementTest {
                 lifecycleOwner = lifecycleOwner,
                 paymentConfiguration = paymentConfiguration,
                 coroutineScope = coroutineScope,
-                commitShippingAddress = commitShippingAddress::invoke,
+                commitShippingAddress = commitShippingAddress,
                 stateHolder = stateHolder,
                 shippingAddressElementStateHolder = shippingAddressElementStateHolder,
                 errorReporter = errorReporter,
