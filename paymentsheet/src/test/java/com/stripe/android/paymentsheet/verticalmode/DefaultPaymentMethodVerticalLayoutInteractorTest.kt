@@ -1115,6 +1115,28 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_SelectSavedPaymentMethod_delegatesToHandler() {
+        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        val selections = Turbine<PaymentSelection.Saved>()
+        var rowSelectionCallbackInvoked = false
+        runScenario(
+            invokeRowSelectionCallback = {
+                rowSelectionCallbackInvoked = true
+            },
+            selectSavedPaymentMethod = selections::add,
+        ) {
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+
+            assertThat(selections.awaitItem().paymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
+            assertThat(selection.value).isNull()
+            assertThat(rowSelectionCallbackInvoked).isFalse()
+            updateSelectionTurbine.expectNoEvents()
+            selections.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun verticalModeScreenSelection_isNotUpdatedToNullWhenOnAnotherScreen() {
         val expectedPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
@@ -1960,6 +1982,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             !requiresFormScreen
         },
         invokeRowSelectionCallback: (() -> Unit)? = null,
+        selectSavedPaymentMethod: ((PaymentSelection.Saved) -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
         updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
@@ -2013,7 +2036,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 selection.value = paymentSelection
                 updateSelectionTurbine.add(isFormScreen)
             },
-            selectSavedPaymentMethod = null,
+            selectSavedPaymentMethod = selectSavedPaymentMethod,
             isCurrentScreen = isCurrentScreen,
             reportPaymentMethodTypeSelected = { paymentMethodCode ->
                 reportPaymentMethodTypeSelectedTurbine.add(paymentMethodCode)
