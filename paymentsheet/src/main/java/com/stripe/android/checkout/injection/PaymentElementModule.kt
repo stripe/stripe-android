@@ -6,6 +6,7 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
@@ -18,6 +19,8 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodV
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.Module
@@ -55,6 +58,17 @@ internal interface PaymentElementModule {
 
     @OptIn(CheckoutSessionPreview::class)
     companion object {
+        @Provides
+        fun provideVerticalPaymentSelectionHandler(
+            selectionHolder: EmbeddedSelectionHolder,
+            immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+        ): VerticalPaymentSelectionHandler {
+            return ImmediateVerticalPaymentSelectionHandler(
+                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                completionAction = immediateActionHandler::invoke,
+            )
+        }
+
         @Provides
         fun providePaymentElementConfiguration(
             stateHolder: CheckoutControllerStateHolder,
