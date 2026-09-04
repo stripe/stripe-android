@@ -4,6 +4,7 @@ package com.stripe.android.elements
 
 import app.cash.turbine.Turbine
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.Deferred
 
 internal class FakeCommitShippingAddress(
@@ -12,10 +13,11 @@ internal class FakeCommitShippingAddress(
     val calls = Turbine<Call>()
 
     override suspend fun invoke(
+        updatedCheckoutSessionResponse: CheckoutSessionResponse,
         name: String?,
         address: CheckoutController.Address.State,
     ): Result<Unit> {
-        calls.add(Call(name, address))
+        calls.add(Call(updatedCheckoutSessionResponse, name, address))
         return result.await()
     }
 
@@ -24,6 +26,7 @@ internal class FakeCommitShippingAddress(
     }
 
     data class Call(
+        val checkoutSessionResponse: CheckoutSessionResponse,
         val name: String?,
         val address: CheckoutController.Address.State,
     )

@@ -17,6 +17,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @Composable
 internal fun AddressOptionsAppBar(
     isRootScreen: Boolean,
+    enabled: Boolean,
     onButtonClick: () -> Unit
 ) {
     TopAppBar(
@@ -25,6 +26,7 @@ internal fun AddressOptionsAppBar(
         backgroundColor = MaterialTheme.colors.surface
     ) {
         IconButton(
+            enabled = enabled,
             onClick = onButtonClick
         ) {
             Icon(

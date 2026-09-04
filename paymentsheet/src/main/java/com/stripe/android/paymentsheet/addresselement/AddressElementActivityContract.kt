@@ -7,6 +7,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -72,6 +73,7 @@ internal object AddressElementActivityContract {
         data class CheckoutShipping internal constructor(
             override val publishableKey: String,
             override val config: AddressLauncher.Configuration?,
+            val checkoutSessionResponse: CheckoutSessionResponse,
         ) : Args()
 
         internal companion object {
@@ -109,6 +111,7 @@ internal object AddressElementActivityContract {
         @Parcelize
         data class CheckoutShippingSucceeded(
             val address: AddressDetails,
+            val updatedResponse: CheckoutSessionResponse,
         ) : CheckoutShippingResult {
             override val resultCode: Int
                 get() = Activity.RESULT_OK

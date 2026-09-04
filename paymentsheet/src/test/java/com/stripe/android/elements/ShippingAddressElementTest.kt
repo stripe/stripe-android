@@ -76,6 +76,8 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
+        assertThat(launch.input.checkoutSessionResponse)
+            .isSameInstanceAs(stateHolder.state!!.checkoutSessionResponse)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -137,12 +139,17 @@ internal class ShippingAddressElementTest {
                 state = "CA",
             ),
         )
+        val updatedResponse = stateHolder.state!!.checkoutSessionResponse.copy(liveMode = true)
         registration.dispatch(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                address = addressDetails,
+                updatedResponse = updatedResponse,
+            )
         )
 
         assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
             FakeCommitShippingAddress.Call(
+                checkoutSessionResponse = updatedResponse,
                 name = addressDetails.name,
                 address = CheckoutController.Address.State(
                     city = "San Francisco",
@@ -176,7 +183,7 @@ internal class ShippingAddressElementTest {
 
             registration.dispatch(
                 AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                    AddressDetails(
+                    address = AddressDetails(
                         name = "Jenny Rosen",
                         address = PaymentSheet.Address(
                             city = "San Francisco",
@@ -186,6 +193,7 @@ internal class ShippingAddressElementTest {
                             state = "CA",
                         ),
                     ),
+                    updatedResponse = stateHolder.state!!.checkoutSessionResponse,
                 )
             )
             commitShippingAddress.calls.awaitItem()
@@ -216,20 +224,15 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `malformed successful result clears presentation without committing`() = runScenario {
+    fun `malformed checkout result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                AddressDetails(
-                    name = "Missing country",
-                    address = PaymentSheet.Address(
-                        line1 = "510 Townsend St",
-                        country = " ",
-                    ),
-                ),
+                address = AddressDetails(name = "Missing address"),
+                updatedResponse = stateHolder.state!!.checkoutSessionResponse,
             )
         )
 
