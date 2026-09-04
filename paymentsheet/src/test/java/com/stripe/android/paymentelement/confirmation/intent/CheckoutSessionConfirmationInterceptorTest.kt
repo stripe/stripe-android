@@ -30,6 +30,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainBodyPartsWithPrefix
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
@@ -457,8 +458,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with new payment method omits empty controller shipping`() = runScenario {
         networkRule.checkoutConfirm(
-            not(hasBodyPart("shipping[name]")),
-            not(hasBodyPart("shipping[address][line1]")),
+            doesNotContainBodyPartsWithPrefix("shipping["),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -487,8 +487,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with saved payment method omits empty controller shipping`() = runScenario {
         networkRule.checkoutConfirm(
-            not(hasBodyPart("shipping[name]")),
-            not(hasBodyPart("shipping[address][line1]")),
+            doesNotContainBodyPartsWithPrefix("shipping["),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
