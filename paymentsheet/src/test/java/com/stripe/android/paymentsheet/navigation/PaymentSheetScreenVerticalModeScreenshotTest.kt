@@ -41,7 +41,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        listOf(LayoutDirection.LeftToRight, LayoutDirection.RightToLeft),
+        LayoutDirection.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
