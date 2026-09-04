@@ -181,10 +181,9 @@ internal class EmbeddedContentUiTest {
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            rowSelectionImmediateActionHandler = immediateActionHandler,
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-                onSelectionComplete = immediateActionHandler::invoke,
+                completionAction = immediateActionHandler::invoke,
             ),
             coroutineScope = viewModelScope,
             sheetStateHolder = sheetStateHolder,

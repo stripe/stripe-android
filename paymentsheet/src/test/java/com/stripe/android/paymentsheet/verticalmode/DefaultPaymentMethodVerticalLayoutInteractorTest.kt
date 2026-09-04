@@ -2007,7 +2007,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     selection.value = paymentSelection
                     updateSelectionTurbine.add(isUserInput)
                 },
-                onSelectionComplete = null,
+                completionAction = null,
             )
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
@@ -2130,13 +2130,19 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
 internal class FakeVerticalPaymentSelectionHandler : VerticalPaymentSelectionHandler {
     val selectCalls = Turbine<SelectCall>()
+    val selectionCompleteCalls = Turbine<Unit>()
 
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
         selectCalls.add(SelectCall(selection, isUserInput))
     }
 
+    override fun onSelectionComplete() {
+        selectionCompleteCalls.add(Unit)
+    }
+
     fun ensureAllEventsConsumed() {
         selectCalls.ensureAllEventsConsumed()
+        selectionCompleteCalls.ensureAllEventsConsumed()
     }
 
     data class SelectCall(

@@ -142,7 +142,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             },
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-                onSelectionComplete = null,
+                completionAction = null,
             ),
             isCurrentScreen = isCurrentScreen(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
