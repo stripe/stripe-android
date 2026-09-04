@@ -212,25 +212,37 @@ internal class InputAddressViewModel @Inject constructor(
             return
         }
         _formEnabled.value = false
+        val addressDetails = AddressDetails(
+            name = completedFormValues[FormFieldId.Name]?.value,
+            address = PaymentSheet.Address(
+                city = completedFormValues[FormFieldId.City]?.value,
+                country = completedFormValues[FormFieldId.Country]?.value,
+                line1 = completedFormValues[FormFieldId.Line1]?.value,
+                line2 = completedFormValues[FormFieldId.Line2]?.value,
+                postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
+                state = completedFormValues[FormFieldId.State]?.value
+            ),
+            phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
+            isCheckboxSelected = checkboxChecked
+        )
         dismissWithAddress(
-            AddressDetails(
-                name = completedFormValues?.get(FormFieldId.Name)?.value,
-                address = PaymentSheet.Address(
-                    city = completedFormValues?.get(FormFieldId.City)?.value,
-                    country = completedFormValues?.get(FormFieldId.Country)?.value,
-                    line1 = completedFormValues?.get(FormFieldId.Line1)?.value,
-                    line2 = completedFormValues?.get(FormFieldId.Line2)?.value,
-                    postalCode = completedFormValues?.get(FormFieldId.PostalCode)?.value,
-                    state = completedFormValues?.get(FormFieldId.State)?.value
-                ),
-                phoneNumber = completedFormValues?.get(FormFieldId.Phone)?.value,
-                isCheckboxSelected = checkboxChecked
-            )
+            addressDetails = addressDetails,
+            result = when (args.launchMode) {
+                AddressElementActivityContract.LaunchMode.Standalone -> {
+                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+                }
+                AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+                }
+            },
         )
     }
 
     @VisibleForTesting
-    fun dismissWithAddress(addressDetails: AddressDetails) {
+    fun dismissWithAddress(
+        addressDetails: AddressDetails,
+        result: AddressElementActivityContract.Result,
+    ) {
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
@@ -238,9 +250,7 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
-        )
+        navigator.dismiss(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {

@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNT
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CompletableDeferred
@@ -77,6 +76,8 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
+        assertThat(launch.input.launchMode)
+            .isEqualTo(AddressElementActivityContract.LaunchMode.CheckoutShipping)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -112,7 +113,7 @@ internal class ShippingAddressElementTest {
         assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
-        registration.dispatch(AddressLauncherResult.Canceled())
+        registration.dispatch(AddressElementActivityContract.Result.Canceled)
         paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         shippingAddressElement.present()
@@ -139,9 +140,7 @@ internal class ShippingAddressElementTest {
             ),
         )
         registration.dispatch(
-            AddressLauncherResult.Succeeded(
-                addressDetails,
-            )
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
         )
 
         assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
@@ -178,7 +177,7 @@ internal class ShippingAddressElementTest {
             assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
             registration.dispatch(
-                AddressLauncherResult.Succeeded(
+                AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                     AddressDetails(
                         name = "Jenny Rosen",
                         address = PaymentSheet.Address(
@@ -188,7 +187,7 @@ internal class ShippingAddressElementTest {
                             postalCode = "94103",
                             state = "CA",
                         ),
-                    )
+                    ),
                 )
             )
             commitShippingAddress.calls.awaitItem()
@@ -212,7 +211,7 @@ internal class ShippingAddressElementTest {
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
-        registration.dispatch(AddressLauncherResult.Canceled())
+        registration.dispatch(AddressElementActivityContract.Result.Canceled)
 
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
         commitShippingAddress.calls.expectNoEvents()
@@ -225,14 +224,14 @@ internal class ShippingAddressElementTest {
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(
-            AddressLauncherResult.Succeeded(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                 AddressDetails(
                     name = "Missing country",
                     address = PaymentSheet.Address(
                         line1 = "510 Townsend St",
                         country = " ",
                     ),
-                )
+                ),
             )
         )
 
@@ -254,7 +253,7 @@ internal class ShippingAddressElementTest {
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.expectNoEvents()
 
-        recreated.registration.dispatch(AddressLauncherResult.Canceled())
+        recreated.registration.dispatch(AddressElementActivityContract.Result.Canceled)
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
 
         recreated.shippingAddressElement.present()
@@ -401,8 +400,9 @@ internal class ShippingAddressElementTest {
         val callback: ActivityResultCallback<*>,
     ) {
         @Suppress("UNCHECKED_CAST")
-        fun dispatch(result: AddressLauncherResult) {
-            (callback as ActivityResultCallback<AddressLauncherResult>).onActivityResult(result)
+        fun dispatch(result: AddressElementActivityContract.Result) {
+            (callback as ActivityResultCallback<AddressElementActivityContract.Result>)
+                .onActivityResult(result)
         }
     }
 

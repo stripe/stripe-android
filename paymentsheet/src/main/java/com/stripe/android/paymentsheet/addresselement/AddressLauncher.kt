@@ -41,7 +41,7 @@ class AddressLauncher internal constructor(
         activityResultLauncher = activity.registerForActivityResult(
             AddressElementActivityContract
         ) {
-            callback.onAddressLauncherResult(it)
+            callback.onAddressElementActivityResult(it)
         },
     )
 
@@ -58,7 +58,7 @@ class AddressLauncher internal constructor(
             signal,
             AddressElementActivityContract
         ) {
-            callback.onAddressLauncherResult(it)
+            callback.onAddressElementActivityResult(it)
         },
     )
 
@@ -76,7 +76,7 @@ class AddressLauncher internal constructor(
         activityResultLauncher = fragment.registerForActivityResult(
             AddressElementActivityContract
         ) {
-            callback.onAddressLauncherResult(it)
+            callback.onAddressElementActivityResult(it)
         },
     )
 
@@ -88,6 +88,7 @@ class AddressLauncher internal constructor(
         val args = AddressElementActivityContract.Args(
             publishableKey = publishableKey,
             config = configuration,
+            launchMode = AddressElementActivityContract.LaunchMode.Standalone,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -320,7 +321,7 @@ fun rememberAddressLauncher(
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
         contract = AddressElementActivityContract,
-        onResult = callback::onAddressLauncherResult
+        onResult = callback::onAddressElementActivityResult
     )
 
     val context = LocalContext.current
@@ -331,4 +332,20 @@ fun rememberAddressLauncher(
             activityResultLauncher = activityResultLauncher,
         )
     }
+}
+
+internal fun AddressLauncherResultCallback.onAddressElementActivityResult(
+    result: AddressElementActivityContract.Result,
+) {
+    onAddressLauncherResult(
+        when (result) {
+            AddressElementActivityContract.Result.Canceled -> AddressLauncherResult.Canceled()
+            is AddressElementActivityContract.Result.StandaloneSucceeded -> {
+                AddressLauncherResult.Succeeded(result.address)
+            }
+            is AddressElementActivityContract.Result.CheckoutShippingSucceeded -> {
+                AddressLauncherResult.Succeeded(result.address)
+            }
+        }
+    )
 }

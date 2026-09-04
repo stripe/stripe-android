@@ -39,12 +39,15 @@ class InputAddressViewModelTest {
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        launchMode: AddressElementActivityContract.LaunchMode =
+            AddressElementActivityContract.LaunchMode.Standalone,
     ): InputAddressViewModel {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = config,
+                launchMode = launchMode,
             ),
             navigator,
             eventReporter,
@@ -175,13 +178,14 @@ class InputAddressViewModelTest {
             )
         )
         viewModel.dismissWithAddress(
-            AddressDetails(
+            addressDetails = AddressDetails(
                 address = PaymentSheet.Address(
                     line1 = "99 Broadway St",
                     city = "Seattle",
                     country = "US"
                 )
-            )
+            ),
+            result = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails()),
         )
         verify(eventReporter).onCompleted(
             country = eq("US"),
@@ -974,6 +978,30 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `standalone save emits standalone success`() {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        verify(navigator).dismiss(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
+    fun `checkout shipping save emits checkout success without performing additional work`() {
+        val viewModel = createViewModel(
+            launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        verify(navigator).dismiss(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
     fun `isInlineAutocompleteEnabled is always true`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
@@ -995,6 +1023,7 @@ class InputAddressViewModelTest {
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)
                     .build(),
+                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
             ),
             navigator,
             eventReporter,
@@ -1046,4 +1075,30 @@ class InputAddressViewModelTest {
 
     private fun createShowState(isChecked: Boolean) =
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
+
+    private companion object {
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "+14155551212",
+            isCheckboxSelected = true,
+        )
+        val COMPLETED_FORM_VALUES = mapOf(
+            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+            FormFieldId.City to FormFieldEntry("San Francisco", true),
+            FormFieldId.Country to FormFieldEntry("US", true),
+            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
+            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
+            FormFieldId.Phone to FormFieldEntry("+14155551212", true),
+            FormFieldId.PostalCode to FormFieldEntry("94103", true),
+            FormFieldId.State to FormFieldEntry("CA", true),
+        )
+    }
 }

@@ -21,6 +21,7 @@ class AddressElementViewModelModuleTest {
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration(),
+                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             googlePlacesClient = googlePlacesClient,
@@ -38,6 +39,7 @@ class AddressElementViewModelModuleTest {
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration(billingAddress = null),
+                launchMode = AddressElementActivityContract.LaunchMode.Standalone,
             ),
         )
 

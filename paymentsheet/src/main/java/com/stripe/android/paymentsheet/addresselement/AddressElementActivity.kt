@@ -72,7 +72,7 @@ internal class AddressElementActivity : ComponentActivity() {
             viewModel.navigator.onDismiss = { result ->
                 coroutineScope.launch {
                     bottomSheetState.hide()
-                    setResult(result)
+                    setActivityResult(result)
                     finish()
                 }
             }
@@ -89,7 +89,9 @@ internal class AddressElementActivity : ComponentActivity() {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = {
+                    viewModel.navigator.dismiss(AddressElementActivityContract.Result.Canceled)
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -124,11 +126,11 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
+    private fun setActivityResult(result: AddressElementActivityContract.Result) {
         setResult(
             result.resultCode,
             Intent().putExtras(
-                AddressElementActivityContract.Result(result).toBundle()
+                result.toBundle()
             )
         )
     }

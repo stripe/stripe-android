@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -67,7 +66,7 @@ class ShippingAddressElement internal constructor(
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
         activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
             when (result) {
-                is AddressLauncherResult.Succeeded -> {
+                is AddressElementActivityContract.Result.CheckoutShippingSucceeded -> {
                     val address = result.address.address?.toCheckoutAddress()
                     if (address == null) {
                         shippingAddressElementStateHolder.isPresenting = false
@@ -84,7 +83,8 @@ class ShippingAddressElement internal constructor(
                         }
                     }
                 }
-                is AddressLauncherResult.Canceled -> {
+                AddressElementActivityContract.Result.Canceled,
+                is AddressElementActivityContract.Result.StandaloneSucceeded -> {
                     shippingAddressElementStateHolder.isPresenting = false
                 }
             }
@@ -124,6 +124,7 @@ class ShippingAddressElement internal constructor(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
                 ),
+                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping,
             )
         )
     }

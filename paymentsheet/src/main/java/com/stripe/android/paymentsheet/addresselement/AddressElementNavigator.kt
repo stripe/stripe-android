@@ -22,7 +22,7 @@ internal interface AddressElementNavigator {
 
     fun <T : Any?> getResultFlow(key: String): Flow<T>?
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled())
+    fun dismiss(result: AddressElementActivityContract.Result)
 
     fun onBack()
 
@@ -44,7 +44,7 @@ internal interface AddressElementNavigator {
 @Singleton
 internal class NavHostAddressElementNavigator @Inject constructor() : AddressElementNavigator {
     var navigationController: NavHostController? = null
-    var onDismiss: ((AddressLauncherResult) -> Unit)? = null
+    var onDismiss: ((AddressElementActivityContract.Result) -> Unit)? = null
 
     override fun navigateTo(
         target: AddressElementScreen
@@ -64,14 +64,14 @@ internal class NavHostAddressElementNavigator @Inject constructor() : AddressEle
             .filterNotNull()
     }
 
-    override fun dismiss(result: AddressLauncherResult) {
+    override fun dismiss(result: AddressElementActivityContract.Result) {
         onDismiss?.invoke(result)
     }
 
     override fun onBack() {
         navigationController?.let { navController ->
             if (!navController.popBackStack()) {
-                dismiss()
+                dismiss(AddressElementActivityContract.Result.Canceled)
             }
         }
     }
