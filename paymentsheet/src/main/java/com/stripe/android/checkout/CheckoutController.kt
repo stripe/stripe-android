@@ -175,6 +175,22 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    internal suspend fun commitShippingAddress(
+        name: String?,
+        address: Address.State,
+    ): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = name,
+                    shippingAddress = address,
+                ),
+            )
+        },
+    ) {
+        kotlin.Result.success(checkoutSessionResponse)
+    }
+
     /**
      * Updates the customer's email address.
      *
