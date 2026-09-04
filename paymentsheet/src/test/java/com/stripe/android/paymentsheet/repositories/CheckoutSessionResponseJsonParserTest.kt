@@ -1311,6 +1311,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.allowedShippingCountries).isEqualTo(listOf("US", "CA", "GB"))
+        assertThat(result?.requiresShippingAddress).isTrue()
     }
 
     @Test
@@ -1329,6 +1330,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.allowedShippingCountries).isNull()
+        assertThat(result?.requiresShippingAddress).isFalse()
     }
 
     @Test
@@ -1348,6 +1350,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.allowedShippingCountries).isNull()
+        assertThat(result?.requiresShippingAddress).isTrue()
     }
 
     @Test

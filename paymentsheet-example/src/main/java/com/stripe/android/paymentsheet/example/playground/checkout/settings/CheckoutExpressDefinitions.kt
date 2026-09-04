@@ -43,12 +43,6 @@ internal object CheckoutExpressDefinitions {
         defaultButtonType = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.Pay,
         buttonTypeOptions = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.entries,
     )
-    val shippingRequired = boolean(
-        key = "express.shipping_required",
-        displayName = "Shipping address required",
-        defaultValue = false,
-    )
-
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
@@ -91,7 +85,6 @@ internal object CheckoutExpressDefinitions {
                 shouldSetConfiguration,
                 link.configuration,
                 googlePay.configuration,
-                shippingRequired,
                 appearance.configuration,
             ),
         )
