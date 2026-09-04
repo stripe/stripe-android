@@ -84,7 +84,10 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
-        defaultBillingDetails = collectedDetails.toBillingDetails(checkoutSessionResponse),
+        defaultBillingDetails = configuration.toBillingDetails(
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedEmail = collectedDetails.email,
+        ),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
