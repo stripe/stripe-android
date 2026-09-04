@@ -186,14 +186,16 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `createForExpressCheckoutElement uses automatic billing collection`() {
+    fun `createForExpressCheckoutElement uses automatic billing collection when session has email`() {
         val configuration = CheckoutController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
         val result = factory().createForExpressCheckoutElement(
             configuration = configuration,
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                customerEmail = "customer@example.com",
+            ),
             collectedDetails = collectedDetails(),
         )
 
@@ -224,11 +226,9 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `createForExpressCheckoutElement always collects email when required`() {
+    fun `createForExpressCheckoutElement always collects email when no email is provided`() {
         val configuration = CheckoutController.Configuration()
-            .expressCheckoutElement(
-                ExpressCheckoutElement.Configuration().emailRequired(true)
-            )
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
         val result = factory().createForExpressCheckoutElement(
@@ -239,6 +239,25 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
         assertThat(result?.billingDetailsCollectionConfiguration?.email)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement uses automatic email collection when default email is provided`() {
+        val configuration = CheckoutController.Configuration()
+            .defaults(
+                CheckoutController.Configuration.Defaults().email("default@example.com")
+            )
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = null),
+            collectedDetails = collectedDetails(email = "default@example.com"),
+        )
+
+        assertThat(result?.billingDetailsCollectionConfiguration?.email)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
     }
 
     @Test
