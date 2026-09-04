@@ -133,7 +133,7 @@ class SectionUIScreenshotTest {
             androidx.compose.ui.text.input.KeyboardCapitalization.None
         override val keyboardType: androidx.compose.ui.text.input.KeyboardType =
             androidx.compose.ui.text.input.KeyboardType.Number
-        override val layoutDirection: androidx.compose.ui.unit.LayoutDirection? = null
+        override val textDirection: androidx.compose.ui.text.style.TextDirection? = null
         override val visualTransformation: StateFlow<androidx.compose.ui.text.input.VisualTransformation> =
             MutableStateFlow(androidx.compose.ui.text.input.VisualTransformation.None)
         override val fieldState: StateFlow<TextFieldState> = MutableStateFlow(

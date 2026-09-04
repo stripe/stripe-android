@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.text.style.TextDirection
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -113,7 +113,7 @@ internal class DefaultCardNumberController(
         cardTextFieldConfig.determineVisualTransformation(number, panLength)
     }
 
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val textDirection: TextDirection = TextDirection.Ltr
 
     override val rawFieldValue: StateFlow<String> =
         _fieldValue.mapAsStateFlow { cardTextFieldConfig.convertToRaw(it) }

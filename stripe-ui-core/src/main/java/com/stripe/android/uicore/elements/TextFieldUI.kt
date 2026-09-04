@@ -21,6 +21,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -64,6 +65,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
@@ -227,7 +230,7 @@ fun TextField(
         shouldShowValidationMessage = shouldShowValidationMessage,
         validationMessage = error,
         visualTransformation = visualTransformation,
-        layoutDirection = textFieldController.layoutDirection,
+        textDirection = textFieldController.textDirection,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
@@ -259,7 +262,7 @@ internal fun TextFieldUi(
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    layoutDirection: LayoutDirection? = null,
+    textDirection: TextDirection? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
@@ -278,48 +281,51 @@ internal fun TextFieldUi(
     }
     val colors = TextFieldColors(displayState)
     val textFieldInsets = LocalTextFieldInsets.current
+    val layoutDirection = LocalLayoutDirection.current
 
-    val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
-
-    CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
-        CompatTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = modifier.fillMaxWidth(),
-            enabled = enabled,
-            label = {
-                FormLabel(
-                    text = if (showOptionalLabel) {
-                        stringResource(
-                            R.string.stripe_form_label_optional,
-                            label,
-                        )
-                    } else {
-                        label
-                    },
-                    modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
-                )
-            },
-            placeholder = placeholder?.let {
-                {
-                    Placeholder(text = it)
-                }
-            },
-            trailingIcon = trailingIcon?.let { icon ->
-                {
-                    icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
-                }
-            },
-            isError = shouldShowValidationMessage,
-            errorMessage = validationMessage?.resolvable?.resolve(),
-            visualTransformation = visualTransformation,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = true,
-            colors = colors,
-            contentPadding = textFieldInsets.asPaddingValues(),
-        )
-    }
+    CompatTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        label = {
+            FormLabel(
+                text = if (showOptionalLabel) {
+                    stringResource(
+                        R.string.stripe_form_label_optional,
+                        label,
+                    )
+                } else {
+                    label
+                },
+                modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
+            )
+        },
+        placeholder = placeholder?.let {
+            {
+                Placeholder(text = it)
+            }
+        },
+        trailingIcon = trailingIcon?.let { icon ->
+            {
+                icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
+            }
+        },
+        isError = shouldShowValidationMessage,
+        errorMessage = validationMessage?.resolvable?.resolve(),
+        visualTransformation = visualTransformation,
+        textStyle = textDirection?.let {
+            LocalTextStyle.current.copy(
+                textDirection = it,
+                textAlign = if (layoutDirection == LayoutDirection.Rtl) TextAlign.End else TextAlign.Start,
+            )
+        } ?: LocalTextStyle.current,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = true,
+        colors = colors,
+        contentPadding = textFieldInsets.asPaddingValues(),
+    )
 }
 
 @Composable
