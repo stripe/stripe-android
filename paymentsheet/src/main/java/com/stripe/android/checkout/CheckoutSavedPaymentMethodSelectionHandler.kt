@@ -2,8 +2,8 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.VerticalSavedPaymentMethodSelectionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,28 +15,24 @@ internal class CheckoutSavedPaymentMethodSelectionHandler @Inject constructor(
     private val checkoutController: CheckoutController,
     private val immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-) : EmbeddedSavedPaymentMethodSelectionHandler {
-    private val _pendingSelection = MutableStateFlow<PaymentSelection.Saved?>(null)
-    override val pendingSelection = _pendingSelection.asStateFlow()
-
-    private val _error = MutableStateFlow<Throwable?>(null)
-    override val error = _error.asStateFlow()
+) : VerticalSavedPaymentMethodSelectionHandler {
+    private val _state = MutableStateFlow<VerticalSavedPaymentMethodSelectionHandler.State>(
+        VerticalSavedPaymentMethodSelectionHandler.State.Idle
+    )
+    override val state = _state.asStateFlow()
 
     override fun select(selection: PaymentSelection.Saved) {
-        if (_pendingSelection.value != null) return
+        if (_state.value is VerticalSavedPaymentMethodSelectionHandler.State.Selecting) return
 
-        _pendingSelection.value = selection
-        _error.value = null
+        _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
         coroutineScope.launch {
             checkoutController.selectSavedPaymentMethod(selection).fold(
                 onSuccess = {
-                    _pendingSelection.value = null
-                    _error.value = null
+                    _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Idle
                     immediateActionHandler.invoke()
                 },
                 onFailure = { error ->
-                    _pendingSelection.value = null
-                    _error.value = error
+                    _state.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(error)
                 },
             )
         }

@@ -3,10 +3,12 @@
 package com.stripe.android.checkout
 
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.VerticalSavedPaymentMethodSelectionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -25,15 +27,22 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
         whenever { controller.selectSavedPaymentMethod(selection) }.thenReturn(Result.success(Unit))
         val scenario = createScenario(controller, coroutineScope = this)
 
-        scenario.handler.select(selection)
+        scenario.handler.state.test {
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
 
-        assertThat(scenario.handler.pendingSelection.value).isEqualTo(selection)
-        runCurrent()
+            scenario.handler.select(selection)
+
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
+            scenario.callbackCalls.expectNoEvents()
+            runCurrent()
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
+            ensureAllEventsConsumed()
+        }
 
         verify(controller).selectSavedPaymentMethod(selection)
         assertThat(scenario.callbackCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(scenario.handler.pendingSelection.value).isNull()
-        assertThat(scenario.handler.error.value).isNull()
         verifyNoMoreInteractions(controller)
     }
 
@@ -49,11 +58,20 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
         }.thenReturn(Result.success(Unit))
         val scenario = createScenario(controller, coroutineScope = this)
 
-        scenario.handler.select(firstSelection)
-        scenario.handler.select(secondSelection)
+        scenario.handler.state.test {
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
 
-        assertThat(scenario.handler.pendingSelection.value).isEqualTo(firstSelection)
-        runCurrent()
+            scenario.handler.select(firstSelection)
+            scenario.handler.select(secondSelection)
+
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(firstSelection)
+            )
+            expectNoEvents()
+            runCurrent()
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
+            ensureAllEventsConsumed()
+        }
 
         verify(controller).selectSavedPaymentMethod(firstSelection)
         verify(controller, never()).selectSavedPaymentMethod(secondSelection)
@@ -70,15 +88,58 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
             .thenReturn(Result.failure(expectedError))
         val scenario = createScenario(controller, coroutineScope = this)
 
-        scenario.handler.select(selection)
+        scenario.handler.state.test {
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
 
-        assertThat(scenario.handler.pendingSelection.value).isEqualTo(selection)
-        runCurrent()
+            scenario.handler.select(selection)
+
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
+            runCurrent()
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+            )
+            ensureAllEventsConsumed()
+        }
 
         verify(controller).selectSavedPaymentMethod(selection)
         scenario.callbackCalls.expectNoEvents()
-        assertThat(scenario.handler.pendingSelection.value).isNull()
-        assertThat(scenario.handler.error.value).isSameInstanceAs(expectedError)
+        verifyNoMoreInteractions(controller)
+    }
+
+    @Test
+    fun `selection can retry after failure`() = runTest {
+        val expectedError = IllegalStateException("update failed")
+        val selection = selectionWithBillingAddress()
+        val controller = mock<CheckoutController>()
+        whenever { controller.selectSavedPaymentMethod(selection) }
+            .thenReturn(Result.failure(expectedError), Result.success(Unit))
+        val scenario = createScenario(controller, coroutineScope = this)
+
+        scenario.handler.state.test {
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
+
+            scenario.handler.select(selection)
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
+            runCurrent()
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+            )
+
+            scenario.handler.select(selection)
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
+            runCurrent()
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
+            ensureAllEventsConsumed()
+        }
+
+        verify(controller, org.mockito.kotlin.times(2)).selectSavedPaymentMethod(selection)
+        assertThat(scenario.callbackCalls.awaitItem()).isEqualTo(Unit)
         verifyNoMoreInteractions(controller)
     }
 

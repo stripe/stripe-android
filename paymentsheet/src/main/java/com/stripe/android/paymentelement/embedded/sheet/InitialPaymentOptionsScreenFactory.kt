@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -139,7 +140,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateSelection = { updatedSelection, _ ->
                 selectionHolder.setSelection(updatedSelection)
             },
-            selectSavedPaymentMethod = null,
+            savedPaymentMethodSelectionHandler = ImmediateVerticalSavedPaymentMethodSelectionHandler(
+                updateSelection = selectionHolder::setSelection,
+                onSelectionComplete = {},
+            ),
             isCurrentScreen = isCurrentScreen(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
@@ -169,8 +173,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             linkAccount = linkAccountHolder.linkAccountInfo,
-            pendingSavedPaymentMethod = stateFlowOf(null),
-            selectionError = stateFlowOf(null),
         )
     }
 

@@ -7,7 +7,6 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
@@ -20,6 +19,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodV
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
+import com.stripe.android.paymentsheet.verticalmode.VerticalSavedPaymentMethodSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.Module
@@ -53,9 +53,9 @@ internal interface PaymentElementModule {
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
-    fun bindsEmbeddedSavedPaymentMethodSelectionHandler(
+    fun bindsVerticalSavedPaymentMethodSelectionHandler(
         handler: CheckoutSavedPaymentMethodSelectionHandler,
-    ): EmbeddedSavedPaymentMethodSelectionHandler
+    ): VerticalSavedPaymentMethodSelectionHandler
 
     @Binds
     fun bindsSheetLauncher(launcher: CheckoutSheetLauncher): EmbeddedSheetLauncher

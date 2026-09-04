@@ -43,6 +43,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -75,6 +76,46 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(isProcessing).isTrue()
             }
         }
+    }
+
+    @Test
+    fun state_reflectsSavedPaymentMethodSelectionInProgress() {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(savedPaymentMethodSelectionHandler = handler) {
+            interactor.state.test {
+                assertThat(awaitItem().isProcessing).isFalse()
+
+                handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+
+                awaitItem().run {
+                    assertThat(isProcessing).isTrue()
+                    assertThat(pendingSavedPaymentMethodId).isEqualTo(selection.paymentMethod.id)
+                    assertThat(selectionError).isNull()
+                }
+            }
+        }
+        handler.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun state_reflectsSavedPaymentMethodSelectionFailure() {
+        val expectedError = IllegalStateException("selection failed")
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(savedPaymentMethodSelectionHandler = handler) {
+            interactor.state.test {
+                assertThat(awaitItem().selectionError).isNull()
+
+                handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+
+                awaitItem().run {
+                    assertThat(isProcessing).isFalse()
+                    assertThat(pendingSavedPaymentMethodId).isNull()
+                    assertThat(selectionError).isSameInstanceAs(expectedError)
+                }
+            }
+        }
+        handler.ensureAllEventsConsumed()
     }
 
     @Test
@@ -1117,23 +1158,23 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_SelectSavedPaymentMethod_delegatesToHandler() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        val selections = Turbine<PaymentSelection.Saved>()
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
         var rowSelectionCallbackInvoked = false
         runScenario(
             invokeRowSelectionCallback = {
                 rowSelectionCallbackInvoked = true
             },
-            selectSavedPaymentMethod = selections::add,
+            savedPaymentMethodSelectionHandler = handler,
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
 
-            assertThat(selections.awaitItem().paymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
+            assertThat(handler.selectionCalls.awaitItem().paymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
             assertThat(selection.value).isNull()
             assertThat(rowSelectionCallbackInvoked).isFalse()
             updateSelectionTurbine.expectNoEvents()
-            selections.ensureAllEventsConsumed()
         }
+        handler.ensureAllEventsConsumed()
     }
 
     @Test
@@ -1982,7 +2023,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             !requiresFormScreen
         },
         invokeRowSelectionCallback: (() -> Unit)? = null,
-        selectSavedPaymentMethod: ((PaymentSelection.Saved) -> Unit)? = null,
+        savedPaymentMethodSelectionHandler: VerticalSavedPaymentMethodSelectionHandler? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
         updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
@@ -2036,7 +2077,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 selection.value = paymentSelection
                 updateSelectionTurbine.add(isFormScreen)
             },
-            selectSavedPaymentMethod = selectSavedPaymentMethod,
+            savedPaymentMethodSelectionHandler = savedPaymentMethodSelectionHandler
+                ?: ImmediateVerticalSavedPaymentMethodSelectionHandler(
+                    updateSelection = { paymentSelection ->
+                        selection.value = paymentSelection
+                        updateSelectionTurbine.add(true)
+                    },
+                    onSelectionComplete = invokeRowSelectionCallback ?: {},
+                ),
             isCurrentScreen = isCurrentScreen,
             reportPaymentMethodTypeSelected = { paymentMethodCode ->
                 reportPaymentMethodTypeSelectedTurbine.add(paymentMethodCode)
@@ -2060,8 +2108,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             updateMandateText = updateMandateText,
             linkAccount = linkAccount,
             paymentMethodMessagePromotionsHelper = promotionsHelper,
-            pendingSavedPaymentMethod = stateFlowOf(null),
-            selectionError = stateFlowOf(null),
         )
         closeInteractorRule.track(interactor)
 
@@ -2124,5 +2170,21 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
             visibilitySnapshotTurbine.ensureAllEventsConsumed()
         }
+    }
+}
+
+private class FakeVerticalSavedPaymentMethodSelectionHandler : VerticalSavedPaymentMethodSelectionHandler {
+    val stateSource = MutableStateFlow<VerticalSavedPaymentMethodSelectionHandler.State>(
+        VerticalSavedPaymentMethodSelectionHandler.State.Idle
+    )
+    override val state: StateFlow<VerticalSavedPaymentMethodSelectionHandler.State> = stateSource
+    val selectionCalls = Turbine<PaymentSelection.Saved>()
+
+    override fun select(selection: PaymentSelection.Saved) {
+        selectionCalls.add(selection)
+    }
+
+    fun ensureAllEventsConsumed() {
+        selectionCalls.ensureAllEventsConsumed()
     }
 }

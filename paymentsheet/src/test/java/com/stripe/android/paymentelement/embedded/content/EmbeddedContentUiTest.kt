@@ -13,12 +13,11 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalSavedPaymentMethodSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -183,11 +182,10 @@ internal class EmbeddedContentUiTest {
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             rowSelectionImmediateActionHandler = immediateActionHandler,
-            savedPaymentMethodSelectionHandler = object : EmbeddedSavedPaymentMethodSelectionHandler {
-                override val pendingSelection = stateFlowOf<PaymentSelection.Saved?>(null)
-                override val error = stateFlowOf<Throwable?>(null)
-                override fun select(selection: PaymentSelection.Saved) = Unit
-            },
+            savedPaymentMethodSelectionHandler = ImmediateVerticalSavedPaymentMethodSelectionHandler(
+                updateSelection = selectionHolder::setSelection,
+                onSelectionComplete = immediateActionHandler::invoke,
+            ),
             coroutineScope = viewModelScope,
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
