@@ -16,6 +16,7 @@ internal fun boolean(
     defaultValue: Boolean,
     updateRequest: CheckoutPlaygroundRequestUpdater<Boolean> = {},
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
+    applyFeatureFlags: (Boolean) -> Unit = {},
 ) = choice(
     key = key,
     displayName = displayName,
@@ -24,6 +25,7 @@ internal fun boolean(
     serialize = Boolean::toString,
     updateRequest = updateRequest,
     isApplicable = isApplicable,
+    applyFeatureFlags = applyFeatureFlags,
 )
 
 internal inline fun <reified T : Enum<T>> enumChoice(
@@ -31,6 +33,7 @@ internal inline fun <reified T : Enum<T>> enumChoice(
     displayName: String,
     defaultValue: T,
     noinline updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
+    noinline applyFeatureFlags: (T) -> Unit = {},
 ) = choice(
     key = key,
     displayName = displayName,
@@ -38,6 +41,7 @@ internal inline fun <reified T : Enum<T>> enumChoice(
     options = enumValues<T>().map { it.name to it },
     serialize = { it.name },
     updateRequest = updateRequest,
+    applyFeatureFlags = applyFeatureFlags,
 )
 
 internal fun <T> choice(
@@ -48,6 +52,7 @@ internal fun <T> choice(
     serialize: (T) -> String,
     updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
+    applyFeatureFlags: (T) -> Unit = {},
 ): CheckoutPlaygroundSettingDefinition.Value<T> {
     return value(
         key = key,
@@ -56,6 +61,7 @@ internal fun <T> choice(
         options = options,
         isApplicable = isApplicable,
         updateRequest = updateRequest,
+        applyFeatureFlags = applyFeatureFlags,
         encode = serialize,
         decode = { serialized ->
             options.firstOrNull { (_, option) -> serialize(option) == serialized }
@@ -74,6 +80,7 @@ internal fun <T> value(
     options: List<Pair<String, T>> = emptyList(),
     input: CheckoutPlaygroundSettingDefinition.Value.Input = CheckoutPlaygroundSettingDefinition.Value.Input.Text,
     updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
+    applyFeatureFlags: (T) -> Unit = {},
     encode: (T) -> String,
     decode: (String) -> Result<T>,
 ) = CheckoutPlaygroundSettingDefinition.Value(
@@ -89,6 +96,7 @@ internal fun <T> value(
     input = input,
     isApplicable = isApplicable,
     updateRequest = updateRequest,
+    applyFeatureFlags = applyFeatureFlags,
     encode = encode,
     decode = decode,
 )

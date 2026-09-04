@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.core.content.edit
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -135,7 +134,9 @@ internal class CheckoutPlaygroundSettings private constructor(
         }
 
         fun applyFeatureFlags() {
-            this[CheckoutSessionDefinitions.linkType].applyFeatureFlags()
+            CheckoutPlaygroundDefinitions.root.values().forEach { definition ->
+                definition.applyFeatureFlags(this)
+            }
         }
     }
 

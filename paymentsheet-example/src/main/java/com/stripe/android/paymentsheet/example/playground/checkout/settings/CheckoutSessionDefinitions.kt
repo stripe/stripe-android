@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
+import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import kotlinx.serialization.json.JsonArray
@@ -143,6 +144,7 @@ internal object CheckoutSessionDefinitions {
         defaultValue = LinkType.ServerControlled,
         options = LinkType.entries.map { it.value to it },
         serialize = LinkType::value,
+        applyFeatureFlags = LinkType::applyFeatureFlags,
     )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
