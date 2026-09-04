@@ -100,7 +100,6 @@ import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.attestation.IntegrityRequestManager
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -356,124 +355,38 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with checkout session automatic tax billing and default billing details keeps google pay`() = runScenario {
-        val userFacingLogger = FakeUserFacingLogger()
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            isGooglePayReady = true,
-            userFacingLogger = userFacingLogger,
-        )
-        val checkoutSessionResponse = createCheckoutSessionResponse(
-            canDetachPaymentMethod = true,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            automaticTaxEnabled = true,
-            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-        )
-
-        assertThat(
-            loader.load(
-                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                    instancesKey = "DefaultPaymentElementLoaderTest",
-                    checkoutSessionResponse = checkoutSessionResponse,
-                ),
-                PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
-                    .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
-                    .build(),
-                metadata = PaymentElementLoader.Metadata(
-                    initializedViaCompose = false,
-                ),
-            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
-        ).isTrue()
-
-        assertThat(userFacingLogger.getLoggedMessages())
-            .doesNotContain(
-                "Google Pay is disabled because automatic tax is configured to use the billing address and" +
-                    " no default billing address was provided."
+    fun `load calls getGooglePayState with expected arguments`() = runScenario {
+        val getGooglePayState = FakeGetGooglePayState(
+            result = GooglePayState(
+                isGooglePayReady = true,
+                isGooglePaySupported = true,
             )
+        )
+        val configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+        )
+        val loader = createPaymentElementLoader(
+            getGooglePayStateOverride = getGooglePayState,
+        )
+
+        val state = loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = configuration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        val call = getGooglePayState.calls.awaitItem()
+        assertThat(call.configuration).isEqualTo(configuration.asCommonConfiguration())
+        assertThat(call.elementsSession.stripeIntent).isEqualTo(state.stripeIntent)
+        assertThat(call.initializationMode).isEqualTo(initializationMode)
+        assertThat(call.isGooglePaySupportedOnDevice.await()).isTrue()
+        assertThat(call.isGooglePaySupportedByConfiguration.await()).isTrue()
+        getGooglePayState.ensureAllEventsConsumed()
 
         consumeLoadingEvents()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-    }
-
-    @Test
-    fun `google pay is disabled for automatic tax billing without default billing details`() = runScenario {
-        val userFacingLogger = FakeUserFacingLogger()
-        val getGooglePayState = createGetGooglePayState(
-            isGooglePayReady = true,
-            userFacingLogger = userFacingLogger,
-            errorReporter = FakeErrorReporter(),
-            durationProvider = FakeDurationProvider(),
-        )
-        val checkoutSessionResponse = createCheckoutSessionResponse(
-            canDetachPaymentMethod = true,
-            automaticTaxEnabled = true,
-            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-        )
-
-        val isGooglePayReady = getGooglePayState(
-            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
-                .defaultBillingDetails(null)
-                .build()
-                .asCommonConfiguration(),
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = "DefaultPaymentElementLoaderTest",
-                checkoutSessionResponse = checkoutSessionResponse,
-            ),
-            elementsSession = CompletableDeferred(requireNotNull(checkoutSessionResponse.elementsSession)),
-        ).isGooglePayReady
-
-        assertThat(isGooglePayReady).isFalse()
-        assertThat(userFacingLogger.getLoggedMessages())
-            .contains(
-                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
-                    "default billing address was provided."
-            )
-    }
-
-    @Test
-    fun `load with checkout session automatic tax billing and no google pay config logs missing config`() = runScenario {
-        val userFacingLogger = FakeUserFacingLogger()
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            isGooglePayReady = true,
-            userFacingLogger = userFacingLogger,
-        )
-        val checkoutSessionResponse = createCheckoutSessionResponse(
-            canDetachPaymentMethod = true,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            automaticTaxEnabled = true,
-            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-        )
-
-        assertThat(
-            loader.load(
-                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                    instancesKey = "DefaultPaymentElementLoaderTest",
-                    checkoutSessionResponse = checkoutSessionResponse,
-                ),
-                PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
-                    .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
-                    .build(),
-                metadata = PaymentElementLoader.Metadata(
-                    initializedViaCompose = false,
-                ),
-            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
-        ).isFalse()
-
-        assertThat(userFacingLogger.getLoggedMessages())
-            .contains("GooglePayConfiguration is not set.")
-        assertThat(userFacingLogger.getLoggedMessages())
-            .doesNotContain(
-                "Google Pay is disabled because automatic tax is configured to use the billing address and " +
-                    "no default billing address was provided."
-            )
-
-        consumeLoadingEvents()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadSucceededTurbine.awaitItem()
     }
 
     @Test
@@ -836,9 +749,7 @@ internal class DefaultPaymentElementLoaderTest {
         runScenario {
             prefsRepository.setSavedSelection(null)
 
-            val userFacingLogger = FakeUserFacingLogger()
             val loader = createPaymentElementLoader(
-                userFacingLogger = userFacingLogger,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 isGooglePayReady = true,
                 customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
@@ -855,8 +766,6 @@ internal class DefaultPaymentElementLoaderTest {
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isNull()
-            assertThat(userFacingLogger.getLoggedMessages())
-                .containsExactlyElementsIn(listOf("GooglePayConfiguration is not set."))
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -5010,6 +4919,7 @@ internal class DefaultPaymentElementLoaderTest {
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
+        getGooglePayStateOverride: GetGooglePayState? = null,
     ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -5025,17 +4935,34 @@ internal class DefaultPaymentElementLoaderTest {
 
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
+            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+                override fun invoke(
+                    environment: GooglePayEnvironment,
+                    cardFundingFilter: CardFundingFilter,
+                    cardBrandFilter: CardBrandFilter
+                ): GooglePayRepository {
+                    return GooglePayRepository { flowOf(isGooglePayReady) }
+                }
+            },
             logger = Logger.noop(),
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = testDispatcher,
             createLinkState = createLinkState,
-            getGooglePayState = createGetGooglePayState(
-                isGooglePayReady = isGooglePayReady,
-                userFacingLogger = userFacingLogger,
-                errorReporter = errorReporter,
-                durationProvider = durationProvider,
-            ),
+            getGooglePayState = getGooglePayStateOverride ?: GetGooglePayState {
+                    configuration,
+                    elementsSession,
+                    _,
+                    isGooglePaySupportedOnDevice,
+                    isGooglePaySupportedByConfiguration,
+                ->
+                GooglePayState(
+                    isGooglePayReady = elementsSession.isGooglePayEnabled &&
+                        configuration.googlePay != null &&
+                        isGooglePaySupportedByConfiguration.await(),
+                    isGooglePaySupported = isGooglePaySupportedOnDevice.await(),
+                )
+            },
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             logFcLiteExperiment = logFcLiteExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
@@ -5059,28 +4986,6 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
-        )
-    }
-
-    private fun createGetGooglePayState(
-        isGooglePayReady: Boolean,
-        userFacingLogger: FakeUserFacingLogger,
-        errorReporter: ErrorReporter,
-        durationProvider: DurationProvider,
-    ): DefaultGetGooglePayState {
-        return DefaultGetGooglePayState(
-            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
-                override fun invoke(
-                    environment: GooglePayEnvironment,
-                    cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
-                ): GooglePayRepository {
-                    return GooglePayRepository { flowOf(isGooglePayReady) }
-                }
-            },
-            userFacingLogger = userFacingLogger,
-            errorReporter = errorReporter,
-            durationProvider = durationProvider,
         )
     }
 

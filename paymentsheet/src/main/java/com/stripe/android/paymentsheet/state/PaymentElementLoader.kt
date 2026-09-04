@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
@@ -15,6 +17,8 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.link.LinkController
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -51,6 +55,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -258,6 +263,7 @@ internal interface PaymentElementLoader {
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
+    private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val logger: Logger,
     private val eventReporter: LoadingEventReporter,
     private val errorReporter: ErrorReporter,
@@ -316,25 +322,29 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
 
+        val isGooglePaySupportedOnDevice = async(start = CoroutineStart.UNDISPATCHED) {
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
+            ) {
+                isGooglePaySupportedOnDevice()
+            }
+        }
+        val isGooglePaySupportedByConfiguration = async {
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
+            ) {
+                configuration.isGooglePayReady()
+            }
+        }
+
         val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSessionResult = async {
-            loadSession(
-                initializationMode = initializationMode,
-                configuration = configuration,
-                savedPaymentMethodSelection = savedPaymentMethodSelection,
-            )
-        }
-        // Start Google Pay checks immediately so they continue in parallel with the session load.
-        val googlePayState = async(start = CoroutineStart.UNDISPATCHED) {
-            getGooglePayState(
-                configuration = configuration,
-                initializationMode = initializationMode,
-                elementsSession = elementsSessionResult,
-            )
-        }
-        val elementsSession = elementsSessionResult.await()
+        val elementsSession = loadSession(
+            initializationMode = initializationMode,
+            configuration = configuration,
+            savedPaymentMethodSelection = savedPaymentMethodSelection,
+        )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -343,14 +353,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         fetchPaymentMethodMessaging(elementsSession)
-
-        val savedSelection = async {
-            retrieveSavedSelection(
-                configuration = configuration,
-                isGooglePayReady = googlePayState.await().isGooglePayReady,
-                elementsSession = elementsSession
-            )
-        }
 
         val clientAttributionMetadata = ClientAttributionMetadata.create(
             elementsSessionConfigId = elementsSession.elementsSessionConfigId,
@@ -374,6 +376,25 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
+        }
+
+        val googlePayState = async {
+            linkState.await()
+            getGooglePayState(
+                configuration = configuration,
+                elementsSession = elementsSession,
+                initializationMode = initializationMode,
+                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
+                isGooglePaySupportedByConfiguration = isGooglePaySupportedByConfiguration,
+            )
+        }
+
+        val savedSelection = async {
+            retrieveSavedSelection(
+                configuration = configuration,
+                isGooglePayReady = googlePayState.await().isGooglePayReady,
+                elementsSession = elementsSession
+            )
         }
 
         val paymentMethodMetadata = async {
@@ -618,6 +639,34 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     integrationConfiguration.configuration.paymentMethodLayout
                 }
         }
+    }
+
+    // Default filters are used here because this only determines the ready state,
+    // not what's presented to Google Pay. This check runs async before we fetch the
+    // elements session, so using merchant-defined filters would add latency.
+    private suspend fun isGooglePayReadyForEnvironment(environment: GooglePayEnvironment): Boolean {
+        return googlePayRepositoryFactory(
+            environment = environment,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
+        ).isReady().first()
+    }
+
+    private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
+        return googlePay?.environment?.let { environment ->
+            isGooglePayReadyForEnvironment(
+                when (environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        GooglePayEnvironment.Production
+                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                        GooglePayEnvironment.Test
+                }
+            )
+        } ?: false
+    }
+
+    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
+        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
     }
 
     @Suppress("CyclomaticComplexMethod")
