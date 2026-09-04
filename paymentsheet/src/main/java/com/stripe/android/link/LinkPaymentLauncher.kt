@@ -20,7 +20,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore
-) {
+) : LinkPaymentPresenter {
     private val analyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper
 
     private var linkActivityResultLauncher:
@@ -74,7 +74,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
      *
      * @param configuration The payment and customer settings
      */
-    fun present(
+    override fun present(
         configuration: LinkConfiguration,
         paymentMethodMetadata: PaymentMethodMetadata,
         linkAccountInfo: LinkAccountUpdate.Value,
@@ -93,4 +93,15 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
     }
+}
+
+internal interface LinkPaymentPresenter {
+    fun present(
+        configuration: LinkConfiguration,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        launchMode: LinkLaunchMode,
+        linkExpressMode: LinkExpressMode,
+        statusBarColor: Int?,
+    )
 }
