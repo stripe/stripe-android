@@ -1006,7 +1006,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Builder for an address passed to [updateShippingAddress] and [updateBillingAddress].
+     * Builder for an address passed to [updateShippingAddress].
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
