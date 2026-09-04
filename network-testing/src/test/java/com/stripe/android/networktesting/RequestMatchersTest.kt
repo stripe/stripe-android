@@ -239,6 +239,27 @@ class RequestMatchersTest {
     }
 
     @Test
+    fun `doesNotContainBodyPartsWithPrefix rejects matching body parts`() {
+        val request = postWithFormBody(
+            "shipping[name]" to "Jenny Rosen",
+            "shipping[address][line1]" to "510 Townsend St",
+        )
+
+        val matcher = RequestMatchers.doesNotContainBodyPartsWithPrefix("shipping[")
+
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `doesNotContainBodyPartsWithPrefix matches when no body parts have the prefix`() {
+        val request = postWithFormBody("billing_details[name]" to "Jenny Rosen")
+
+        val matcher = RequestMatchers.doesNotContainBodyPartsWithPrefix("shipping[")
+
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
     fun `query matches plain and pre-encoded keys`() {
         val request = getWithQuery("deferred_intent[on_behalf_of]" to "acct_123")
 
