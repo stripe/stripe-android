@@ -23,12 +23,23 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
     }
 
     @Test
+    fun `invokes supplied completion without updating selection`() = runScenario(
+        completion = { events -> events.add(Event.SelectionCompleted) },
+    ) {
+        handler.onSelectionComplete()
+
+        assertThat(events.awaitItem()).isEqualTo(Event.SelectionCompleted)
+        events.expectNoEvents()
+    }
+
+    @Test
     fun `updates selection when completion action is absent`() = runScenario(
         completion = null,
     ) {
         handler.select(PaymentSelection.GooglePay, false)
 
         assertThat(events.awaitItem()).isEqualTo(Event.SelectionUpdated(PaymentSelection.GooglePay, false))
+        handler.onSelectionComplete()
         events.expectNoEvents()
     }
 
@@ -41,7 +52,7 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
             updateSelection = { selection, isUserInput ->
                 events.add(Event.SelectionUpdated(selection, isUserInput))
             },
-            onSelectionComplete = completion?.let { completion -> { completion(events) } },
+            completionAction = completion?.let { completion -> { completion(events) } },
         )
 
         Scenario(

@@ -65,7 +65,7 @@ internal interface PaymentElementModule {
         ): VerticalPaymentSelectionHandler {
             return ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-                onSelectionComplete = immediateActionHandler::invoke,
+                completionAction = immediateActionHandler::invoke,
             )
         }
 

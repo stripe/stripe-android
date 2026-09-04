@@ -193,7 +193,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection = updateSelection,
                 verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
                     updateSelection = { selection, isUserInput -> updateSelection(selection, isUserInput) },
-                    onSelectionComplete = null,
+                    completionAction = null,
                 ),
                 walletsState = viewModel.walletsState,
                 canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder

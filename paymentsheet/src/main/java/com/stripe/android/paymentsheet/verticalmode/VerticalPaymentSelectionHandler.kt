@@ -2,16 +2,22 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal fun interface VerticalPaymentSelectionHandler {
+internal interface VerticalPaymentSelectionHandler {
     fun select(selection: PaymentSelection, isUserInput: Boolean)
+
+    fun onSelectionComplete()
 }
 
 internal class ImmediateVerticalPaymentSelectionHandler(
     private val updateSelection: (PaymentSelection, Boolean) -> Unit,
-    private val onSelectionComplete: (() -> Unit)?,
+    private val completionAction: (() -> Unit)?,
 ) : VerticalPaymentSelectionHandler {
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
         updateSelection(selection, isUserInput)
-        onSelectionComplete?.invoke()
+        onSelectionComplete()
+    }
+
+    override fun onSelectionComplete() {
+        completionAction?.invoke()
     }
 }
