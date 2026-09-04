@@ -43,6 +43,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -75,6 +76,89 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(isProcessing).isTrue()
             }
         }
+    }
+
+    @Test
+    fun state_reflectsSavedPaymentMethodSelectionInProgress() {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(savedPaymentMethodSelectionHandler = handler) {
+            interactor.state.test {
+                assertThat(awaitItem().isProcessing).isFalse()
+
+                handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+
+                awaitItem().run {
+                    assertThat(isProcessing).isTrue()
+                    assertThat(pendingSavedPaymentMethodId).isEqualTo(selection.paymentMethod.id)
+                    assertThat(selectionError).isNull()
+                }
+            }
+        }
+        handler.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun state_reflectsSavedPaymentMethodSelectionFailure() {
+        val expectedError = IllegalStateException("selection failed")
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(savedPaymentMethodSelectionHandler = handler) {
+            interactor.state.test {
+                assertThat(awaitItem().selectionError).isNull()
+
+                handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+
+                awaitItem().run {
+                    assertThat(isProcessing).isFalse()
+                    assertThat(pendingSavedPaymentMethodId).isNull()
+                    assertThat(selectionError).isSameInstanceAs(expectedError)
+                }
+            }
+        }
+        handler.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun committedWalletSelection_clearsSavedPaymentMethodSelectionFailure() {
+        val expectedError = IllegalStateException("selection failed")
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(
+            initialWalletsState = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList(),
+            ),
+            savedPaymentMethodSelectionHandler = handler,
+        ) {
+            handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+            assertThat(interactor.state.value.selectionError).isSameInstanceAs(expectedError)
+
+            interactor.state.value.displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
+
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handler.clearFailureCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(interactor.state.value.selectionError).isNull()
+        }
+        handler.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun enteringPaymentMethodForm_preservesSavedPaymentMethodSelectionFailure() {
+        val expectedError = IllegalStateException("selection failed")
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
+        runScenario(
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            savedPaymentMethodSelectionHandler = handler,
+        ) {
+            handler.stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
+            handler.clearFailureCalls.expectNoEvents()
+            assertThat(interactor.state.value.selectionError).isSameInstanceAs(expectedError)
+        }
+        handler.ensureAllEventsConsumed()
     }
 
     @Test
@@ -1117,23 +1201,23 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_SelectSavedPaymentMethod_delegatesToHandler() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        val selections = Turbine<PaymentSelection.Saved>()
+        val handler = FakeVerticalSavedPaymentMethodSelectionHandler()
         var rowSelectionCallbackInvoked = false
         runScenario(
             invokeRowSelectionCallback = {
                 rowSelectionCallbackInvoked = true
             },
-            savedPaymentMethodSelectionHandler = selections::add,
+            savedPaymentMethodSelectionHandler = handler,
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
 
-            assertThat(selections.awaitItem().paymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
+            assertThat(handler.selectionCalls.awaitItem().paymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
             assertThat(selection.value).isNull()
             assertThat(rowSelectionCallbackInvoked).isFalse()
             updateSelectionTurbine.expectNoEvents()
-            selections.ensureAllEventsConsumed()
         }
+        handler.ensureAllEventsConsumed()
     }
 
     @Test
@@ -2066,7 +2150,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             updateMandateText = updateMandateText,
             linkAccount = linkAccount,
-            paymentMethodMessagePromotionsHelper = promotionsHelper
+            paymentMethodMessagePromotionsHelper = promotionsHelper,
         )
         closeInteractorRule.track(interactor)
 
@@ -2129,5 +2213,30 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
             visibilitySnapshotTurbine.ensureAllEventsConsumed()
         }
+    }
+}
+
+private class FakeVerticalSavedPaymentMethodSelectionHandler : VerticalSavedPaymentMethodSelectionHandler {
+    val stateSource = MutableStateFlow<VerticalSavedPaymentMethodSelectionHandler.State>(
+        VerticalSavedPaymentMethodSelectionHandler.State.Idle
+    )
+    override val state: StateFlow<VerticalSavedPaymentMethodSelectionHandler.State> = stateSource
+    val selectionCalls = Turbine<PaymentSelection.Saved>()
+    val clearFailureCalls = Turbine<Unit>()
+
+    override fun select(selection: PaymentSelection.Saved) {
+        selectionCalls.add(selection)
+    }
+
+    override fun clearFailure() {
+        clearFailureCalls.add(Unit)
+        if (stateSource.value is VerticalSavedPaymentMethodSelectionHandler.State.Failed) {
+            stateSource.value = VerticalSavedPaymentMethodSelectionHandler.State.Idle
+        }
+    }
+
+    fun ensureAllEventsConsumed() {
+        selectionCalls.ensureAllEventsConsumed()
+        clearFailureCalls.ensureAllEventsConsumed()
     }
 }
