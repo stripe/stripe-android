@@ -65,10 +65,7 @@ internal interface IntentConfirmationChallengeModule {
         @Provides
         fun provideApiConfiguration(
             args: IntentConfirmationChallengeArgs
-        ): ApiConfiguration.State = ApiConfiguration.State(
-            publishableKey = args.publishableKey,
-            stripeAccountId = null,
-        )
+        ): ApiConfiguration.State = args.apiConfiguration
 
         @Provides
         @Named(ENABLE_LOGGING)
