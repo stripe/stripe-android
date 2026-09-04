@@ -1123,7 +1123,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             invokeRowSelectionCallback = {
                 rowSelectionCallbackInvoked = true
             },
-            selectSavedPaymentMethod = selections::add,
+            savedPaymentMethodSelectionHandler = selections::add,
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
 
@@ -1982,7 +1982,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             !requiresFormScreen
         },
         invokeRowSelectionCallback: (() -> Unit)? = null,
-        selectSavedPaymentMethod: ((PaymentSelection.Saved) -> Unit)? = null,
+        savedPaymentMethodSelectionHandler: VerticalSavedPaymentMethodSelectionHandler? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
         updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
@@ -2036,7 +2036,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 selection.value = paymentSelection
                 updateSelectionTurbine.add(isFormScreen)
             },
-            selectSavedPaymentMethod = selectSavedPaymentMethod,
+            savedPaymentMethodSelectionHandler = savedPaymentMethodSelectionHandler
+                ?: ImmediateVerticalSavedPaymentMethodSelectionHandler(
+                    updateSelection = { paymentSelection ->
+                        selection.value = paymentSelection
+                        updateSelectionTurbine.add(true)
+                    },
+                    onSelectionComplete = invokeRowSelectionCallback ?: {},
+                ),
             isCurrentScreen = isCurrentScreen,
             reportPaymentMethodTypeSelected = { paymentMethodCode ->
                 reportPaymentMethodTypeSelectedTurbine.add(paymentMethodCode)

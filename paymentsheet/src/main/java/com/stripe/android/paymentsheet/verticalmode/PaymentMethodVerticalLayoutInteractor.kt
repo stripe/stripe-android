@@ -112,7 +112,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
     private val canChangeCbc: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
-    private val selectSavedPaymentMethod: ((PaymentSelection.Saved) -> Unit)?,
+    private val savedPaymentMethodSelectionHandler: VerticalSavedPaymentMethodSelectionHandler,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
@@ -191,7 +191,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         viewModel.updateSelection(selection)
                     }
                 },
-                selectSavedPaymentMethod = null,
+                savedPaymentMethodSelectionHandler = ImmediateVerticalSavedPaymentMethodSelectionHandler(
+                    updateSelection = viewModel::handlePaymentMethodSelected,
+                    onSelectionComplete = {},
+                ),
                 walletsState = viewModel.walletsState,
                 canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                     .canUpdateCardExpiryAndBillingDetails,
@@ -585,12 +588,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             is ViewAction.SavedPaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected("saved")
                 val selection = PaymentSelection.Saved(viewAction.savedPaymentMethod)
-                if (selectSavedPaymentMethod != null) {
-                    selectSavedPaymentMethod.invoke(selection)
-                } else {
-                    updateSelection(selection, true)
-                    invokeRowSelectionCallback?.invoke()
-                }
+                savedPaymentMethodSelectionHandler.select(selection)
             }
             is ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()
