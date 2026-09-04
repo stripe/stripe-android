@@ -26,30 +26,15 @@ internal class AddressLauncherTest {
 
         val args = activityLauncher.launchCalls.awaitItem()
         assertThat(args.publishableKey).isEqualTo("pk_test_123")
-        assertThat(args.launchMode).isEqualTo(AddressElementActivityContract.LaunchMode.Standalone)
         activityLauncher.launchCalls.ensureAllEventsConsumed()
     }
 
-    @Test
-    fun `public callback receives standalone success as address launcher result`() = runTest {
-        val callbackResults = Turbine<AddressLauncherResult>()
-        val callback = AddressLauncherResultCallback(callbackResults::add)
-        val address = AddressDetails()
-
-        callback.onAddressElementActivityResult(
-            AddressElementActivityContract.Result.StandaloneSucceeded(address)
-        )
-
-        assertThat(callbackResults.awaitItem()).isEqualTo(AddressLauncherResult.Succeeded(address))
-        callbackResults.ensureAllEventsConsumed()
-    }
-
     private class RecordingActivityResultLauncher :
-        ActivityResultLauncher<AddressElementActivityContract.Args>() {
-        val launchCalls = Turbine<AddressElementActivityContract.Args>()
+        ActivityResultLauncher<AddressElementActivityContract.Args.Standalone>() {
+        val launchCalls = Turbine<AddressElementActivityContract.Args.Standalone>()
 
         override fun launch(
-            input: AddressElementActivityContract.Args,
+            input: AddressElementActivityContract.Args.Standalone,
             options: ActivityOptionsCompat?,
         ) {
             launchCalls.add(input)
@@ -57,7 +42,7 @@ internal class AddressLauncherTest {
 
         override fun unregister() = Unit
 
-        override val contract: ActivityResultContract<AddressElementActivityContract.Args, *>
-            get() = AddressElementActivityContract
+        override val contract: ActivityResultContract<AddressElementActivityContract.Args.Standalone, *>
+            get() = AddressElementActivityContract.Standalone
     }
 }

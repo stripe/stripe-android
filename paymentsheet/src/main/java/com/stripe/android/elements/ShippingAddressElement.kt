@@ -63,8 +63,11 @@ class ShippingAddressElement internal constructor(
         errorReporter = errorReporter,
     )
 
-    private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
-        activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
+    private val activityLauncher:
+        ActivityResultLauncher<AddressElementActivityContract.Args.CheckoutShipping> =
+        activityResultCaller.registerForActivityResult(
+            AddressElementActivityContract.CheckoutShipping
+        ) { result ->
             when (result) {
                 is AddressElementActivityContract.Result.CheckoutShippingSucceeded -> {
                     val address = result.address.address?.toCheckoutAddress()
@@ -83,8 +86,7 @@ class ShippingAddressElement internal constructor(
                         }
                     }
                 }
-                AddressElementActivityContract.Result.Canceled,
-                is AddressElementActivityContract.Result.StandaloneSucceeded -> {
+                AddressElementActivityContract.Result.Canceled -> {
                     shippingAddressElementStateHolder.isPresenting = false
                 }
             }
@@ -115,7 +117,7 @@ class ShippingAddressElement internal constructor(
 
         shippingAddressElementStateHolder.isPresenting = true
         activityLauncher.launch(
-            AddressElementActivityContract.Args(
+            AddressElementActivityContract.Args.CheckoutShipping(
                 publishableKey = paymentConfiguration.get().publishableKey,
                 config = AddressLauncher.Configuration(
                     additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
@@ -124,7 +126,6 @@ class ShippingAddressElement internal constructor(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
                 ),
-                launchMode = AddressElementActivityContract.LaunchMode.CheckoutShipping,
             )
         )
     }

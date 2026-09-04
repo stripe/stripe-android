@@ -76,8 +76,6 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
-        assertThat(launch.input.launchMode)
-            .isEqualTo(AddressElementActivityContract.LaunchMode.CheckoutShipping)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -313,7 +311,7 @@ internal class ShippingAddressElementTest {
                 errorReporter = errorReporter,
             )
             val registration = activityResultCaller.registerCalls.awaitItem()
-            assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
+            assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract.CheckoutShipping)
             return ElementScenario(
                 shippingAddressElement = shippingAddressElement,
                 activityResultCaller = activityResultCaller,
@@ -365,12 +363,12 @@ internal class ShippingAddressElementTest {
     }
 
     private class RecordingActivityResultLauncher :
-        ActivityResultLauncher<AddressElementActivityContract.Args>() {
+        ActivityResultLauncher<AddressElementActivityContract.Args.CheckoutShipping>() {
         val launchCalls = Turbine<LaunchCall>()
         val unregisterCalls = Turbine<Unit>()
 
         override fun launch(
-            input: AddressElementActivityContract.Args,
+            input: AddressElementActivityContract.Args.CheckoutShipping,
             options: ActivityOptionsCompat?,
         ) {
             launchCalls.add(LaunchCall(input))
@@ -380,8 +378,9 @@ internal class ShippingAddressElementTest {
             unregisterCalls.add(Unit)
         }
 
-        override val contract: ActivityResultContract<AddressElementActivityContract.Args, *>
-            get() = AddressElementActivityContract
+        override val contract:
+            ActivityResultContract<AddressElementActivityContract.Args.CheckoutShipping, *>
+            get() = AddressElementActivityContract.CheckoutShipping
     }
 
     private class RecordingProvider<T>(
@@ -400,14 +399,14 @@ internal class ShippingAddressElementTest {
         val callback: ActivityResultCallback<*>,
     ) {
         @Suppress("UNCHECKED_CAST")
-        fun dispatch(result: AddressElementActivityContract.Result) {
-            (callback as ActivityResultCallback<AddressElementActivityContract.Result>)
+        fun dispatch(result: AddressElementActivityContract.CheckoutShippingResult) {
+            (callback as ActivityResultCallback<AddressElementActivityContract.CheckoutShippingResult>)
                 .onActivityResult(result)
         }
     }
 
     private data class LaunchCall(
-        val input: AddressElementActivityContract.Args,
+        val input: AddressElementActivityContract.Args.CheckoutShipping,
     )
 
     private data class ElementScenario(

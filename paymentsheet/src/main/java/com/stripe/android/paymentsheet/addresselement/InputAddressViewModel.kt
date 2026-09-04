@@ -227,11 +227,11 @@ internal class InputAddressViewModel @Inject constructor(
         )
         completeWithAddress(
             addressDetails = addressDetails,
-            result = when (args.launchMode) {
-                AddressElementActivityContract.LaunchMode.Standalone -> {
+            result = when (args) {
+                is AddressElementActivityContract.Args.Standalone -> {
                     AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
                 }
-                AddressElementActivityContract.LaunchMode.CheckoutShipping -> {
+                is AddressElementActivityContract.Args.CheckoutShipping -> {
                     AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
                 }
             },
