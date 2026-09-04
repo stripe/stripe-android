@@ -69,14 +69,16 @@ internal class CheckoutControllerStateHolderTest {
                 assertThat(metadata).isSameInstanceAs(paymentElementMetadata)
                 null
             },
-            availableExpressButtonTypesFactory = { metadata, _ ->
+            availableExpressButtonTypesFactory = { metadata, _, requiresShippingAddress ->
                 assertThat(metadata).isSameInstanceAs(expressCheckoutElementMetadata)
+                assertThat(requiresShippingAddress).isTrue()
                 emptyList()
             },
         ) {
             stateHolder.state = committedState(
                 paymentMethodMetadata = paymentElementMetadata,
                 expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementMetadata,
+                requiresShippingAddress = true,
             )
 
             assertThat(stateHolder.session.value).isNotNull()
@@ -199,9 +201,12 @@ internal class CheckoutControllerStateHolderTest {
         previousNewSelections: Bundle = Bundle(),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
+        requiresShippingAddress: Boolean = false,
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            requiresShippingAddress = requiresShippingAddress,
+        ),
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = paymentMethodMetadata,
