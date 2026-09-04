@@ -25,7 +25,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -33,6 +32,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
+    private val resultStateHolder = AddressElementResultStateHolder()
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(
@@ -47,6 +47,7 @@ class InputAddressViewModelTest {
                 config = config,
             ),
             navigator,
+            resultStateHolder,
             eventReporter,
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
@@ -164,7 +165,20 @@ class InputAddressViewModelTest {
         }
 
     @Test
-    fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
+    fun `clickPrimaryButton publishes a succeeded result when form is valid`() = runTest(UnconfinedTestDispatcher()) {
+        val completedFormValues = mapOf(
+            FormFieldId.Line1 to FormFieldEntry(value = "99 Broadway St", isComplete = true),
+            FormFieldId.City to FormFieldEntry(value = "Seattle", isComplete = true),
+            FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+        )
+        val expectedAddress = AddressDetails(
+            address = PaymentSheet.Address(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US",
+            ),
+            isCheckboxSelected = true,
+        )
         val viewModel = createViewModel(
             AddressDetails(
                 address = PaymentSheet.Address(
@@ -174,15 +188,14 @@ class InputAddressViewModelTest {
                 )
             )
         )
-        viewModel.dismissWithAddress(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = "99 Broadway St",
-                    city = "Seattle",
-                    country = "US"
-                )
-            )
+        viewModel.clickPrimaryButton(
+            completedFormValues = completedFormValues,
+            checkboxChecked = true,
         )
+
+        assertThat(resultStateHolder.result.value)
+            .isEqualTo(AddressLauncherResult.Succeeded(expectedAddress))
+        assertThat(viewModel.formEnabled.value).isFalse()
         verify(eventReporter).onCompleted(
             country = eq("US"),
             autocompleteResultSelected = eq(true),
@@ -954,7 +967,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton with null triggers validation errors without dismissing`() = runTest {
+    fun `clickPrimaryButton with null triggers validation errors without a result`() = runTest {
         val viewModel = createViewModel()
 
         val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
@@ -970,7 +983,7 @@ class InputAddressViewModelTest {
 
         assertThat(controller.validationMessage.value).isNotNull()
         assertThat(viewModel.formEnabled.value).isTrue()
-        verify(navigator, never()).dismiss(any())
+        assertThat(resultStateHolder.result.value).isNull()
     }
 
     @Test
@@ -997,6 +1010,7 @@ class InputAddressViewModelTest {
                     .build(),
             ),
             navigator,
+            resultStateHolder,
             eventReporter,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
