@@ -1,9 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.ui.core.R as UiCoreR
 
 internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
@@ -69,12 +69,12 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
 
         val header = if (promotion != null) {
             PaymentMethodMessageHeaderElement(
-                identifier = IdentifierSpec.Generic("afterpay_promotion"),
+                identifier = FormFieldId.Generic("afterpay_promotion"),
                 promotion = promotion
             )
         } else {
             AfterpayClearpayHeaderElement(
-                identifier = IdentifierSpec.Generic("afterpay_header"),
+                identifier = FormFieldId.Generic("afterpay_header"),
                 currency = metadata.stripeIntent.currency
             )
         }

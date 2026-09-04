@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -54,7 +54,7 @@ internal class DefaultCvcFormHelper(
     )
 
     private val cvcElement = CvcElement(
-        _identifier = IdentifierSpec.CardCvc,
+        _identifier = FormFieldId.CardCvc,
         controller = cvcController
     )
 

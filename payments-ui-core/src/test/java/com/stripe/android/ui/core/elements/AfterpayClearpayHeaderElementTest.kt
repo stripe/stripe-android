@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isCashappAfterpay
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +22,7 @@ class AfterpayClearpayHeaderElementTest {
     @Test
     fun `Verify label is correct`() {
         val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
+            FormFieldId.Generic("test"),
             currency = "EUR",
         )
 
@@ -34,7 +34,7 @@ class AfterpayClearpayHeaderElementTest {
     @Test
     fun `Verify infoUrl is correct`() {
         val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
+            FormFieldId.Generic("test"),
             currency = "EUR",
         )
 
@@ -46,7 +46,7 @@ class AfterpayClearpayHeaderElementTest {
     fun `Verify infoUrl is updated as locale changes`() {
         localeRule.setTemporarily(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
+            FormFieldId.Generic("test"),
             currency = "GBP",
         )
 
@@ -62,7 +62,7 @@ class AfterpayClearpayHeaderElementTest {
     fun `Verify infoUrl is localized for GB`() {
         localeRule.setTemporarily(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
+            FormFieldId.Generic("test"),
             currency = "GBP",
         )
 
@@ -74,7 +74,7 @@ class AfterpayClearpayHeaderElementTest {
     fun `Verify infoUrl is localized for France`() {
         localeRule.setTemporarily(Locale.FRANCE)
         val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
+            FormFieldId.Generic("test"),
             currency = "EUR",
         )
 

@@ -13,6 +13,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -136,11 +139,13 @@ class CheckoutPlaygroundSettingsUiTest {
         page.value(definition).performScrollTo().assertIsDisplayed().assertIsNotEnabled()
         assertThat(settings[definition]).isTrue()
 
-        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.New)
         composeRule.waitForIdle()
 
         page.value(definition).assertIsEnabled()
-        composeRule.onNodeWithText("Off").performClick()
+        composeRule.onNode(
+            hasText("Off").and(hasAnyAncestor(hasTestTag(checkoutSettingValueTestTag(definition))))
+        ).performClick()
         assertThat(settings[definition]).isFalse()
     }
 
@@ -180,7 +185,7 @@ class CheckoutPlaygroundSettingsUiTest {
         composeRule.onNodeWithText("Guest").assertIsDisplayed()
         composeRule.onNodeWithText("New").assertIsDisplayed().performClick()
 
-        assertThat(settings[definition]).isEqualTo("new")
+        assertThat(settings[definition]).isEqualTo(CheckoutCustomer.New)
     }
 
     @Test
@@ -198,7 +203,7 @@ class CheckoutPlaygroundSettingsUiTest {
     fun `returning customer without stored ID displays empty customer ID setting`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
         configureSettings = {
-            update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+            update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.Returning)
         },
     ) {
         page.value(CheckoutPlaygroundDefinitions.session.customerId)
@@ -210,7 +215,7 @@ class CheckoutPlaygroundSettingsUiTest {
     fun `returning customer can enter arbitrary customer ID`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
         configureSettings = {
-            update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+            update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.Returning)
         },
     ) {
         page.value(CheckoutPlaygroundDefinitions.session.customerId)
@@ -225,7 +230,7 @@ class CheckoutPlaygroundSettingsUiTest {
     ) {
         page.value(CheckoutPlaygroundDefinitions.session.customerId).assertDoesNotExist()
 
-        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.New)
         composeRule.waitForIdle()
 
         page.value(CheckoutPlaygroundDefinitions.session.customerId).assertDoesNotExist()
@@ -238,11 +243,11 @@ class CheckoutPlaygroundSettingsUiTest {
         val definition = CheckoutPlaygroundDefinitions.session.paymentMethodSave
         page.value(definition).assertDoesNotExist()
 
-        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.New)
         composeRule.waitForIdle()
         page.value(definition).assertIsDisplayed()
 
-        settings.update(CheckoutPlaygroundDefinitions.session.customer, "returning")
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.Returning)
         composeRule.waitForIdle()
         page.value(definition).assertIsDisplayed()
     }
@@ -256,7 +261,9 @@ class CheckoutPlaygroundSettingsUiTest {
         settings.update(CheckoutPlaygroundDefinitions.session.automaticPaymentMethods, false)
         composeRule.waitForIdle()
 
-        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes).assertIsDisplayed()
+        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes)
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 
     private fun runScenario(

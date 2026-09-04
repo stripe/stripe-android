@@ -103,8 +103,8 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
             configuration = ExpressCheckoutElement.Configuration()
                 .paymentMethodOrder(
                     listOf(
-                        ExpressCheckoutElement.PaymentMethod.GooglePay(),
-                        ExpressCheckoutElement.PaymentMethod.Link(),
+                        "google_pay",
+                        "link",
                     )
                 ),
         )
@@ -120,7 +120,7 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay, WalletType.Link),
             configuration = ExpressCheckoutElement.Configuration()
-                .paymentMethodOrder(listOf(ExpressCheckoutElement.PaymentMethod.Link())),
+                .paymentMethodOrder(listOf("link")),
         )
 
         assertThat(availableExpressButtonTypes).containsExactly(
@@ -136,8 +136,8 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
             configuration = ExpressCheckoutElement.Configuration()
                 .paymentMethodOrder(
                     listOf(
-                        ExpressCheckoutElement.PaymentMethod.GooglePay(),
-                        ExpressCheckoutElement.PaymentMethod.Link(),
+                        "google_pay",
+                        "link",
                     )
                 ),
         )

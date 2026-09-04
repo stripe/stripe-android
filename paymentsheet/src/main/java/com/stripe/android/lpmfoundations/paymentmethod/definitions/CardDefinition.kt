@@ -14,9 +14,9 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.replaceHyperlinks
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
-import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.addSavePaymentOptionElements
+import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -37,7 +37,7 @@ import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -127,7 +127,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     coroutineScope = arguments.coroutineScope,
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
                     initialValues = arguments.initialValues,
-                    identifier = IdentifierSpec.Generic("card_details"),
+                    identifier = FormFieldId.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
@@ -177,7 +177,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 val linkBrand = metadata.linkState?.configuration?.linkBrand ?: return@buildList
                 add(
                     CombinedLinkMandateElement(
-                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        identifier = FormFieldId.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
                         linkBrand = linkBrand,
                         signupMode = signupMode,
@@ -189,7 +189,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
             } else if (metadata.hasIntentToSetup(CardDefinition.type.code) && mandateAllowed) {
                 add(
                     MandateTextElement(
-                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        identifier = FormFieldId.Generic("card_mandate"),
                         stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
                         topPadding = when {
                             signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
@@ -274,21 +274,21 @@ private fun cardBillingElements(
     allowedCountries: Set<String>,
     collectionConfiguration: BillingDetailsCollectionConfiguration,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
-    initialValues: Map<IdentifierSpec, String?>,
-    shippingValues: Map<IdentifierSpec, String?>?,
+    initialValues: Map<FormFieldId, String?>,
+    shippingValues: Map<FormFieldId, String?>?,
     requiresBillingAddressForAutomaticTax: Boolean,
 ): List<FormElement> {
     val sameAsShippingElement =
-        shippingValues?.get(IdentifierSpec.SameAsShipping)
+        shippingValues?.get(FormFieldId.SameAsShipping)
             ?.toBooleanStrictOrNull()
             ?.let {
                 SameAsShippingElement(
-                    identifier = IdentifierSpec.SameAsShipping,
+                    identifier = FormFieldId.SameAsShipping,
                     controller = SameAsShippingController(it)
                 )
             }
     val addressElement = BillingAddressElement(
-        IdentifierSpec.Generic("credit_billing"),
+        FormFieldId.Generic("credit_billing"),
         countryCodes = allowedCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
@@ -319,7 +319,7 @@ private fun cardBillingElements(
 }
 
 internal class CombinedLinkMandateElement(
-    identifier: IdentifierSpec,
+    identifier: FormFieldId,
     signupMode: LinkSignupMode?,
     canChangeSaveForFutureUse: Boolean,
     private val merchantName: String,
@@ -330,7 +330,7 @@ internal class CombinedLinkMandateElement(
     allowsUserInteraction = false,
     identifier = identifier
 ) {
-    override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<IdentifierSpec, FormFieldEntry>>())
+    override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<FormFieldId, FormFieldEntry>>())
 
     private val topPadding = when {
         signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
@@ -342,8 +342,8 @@ internal class CombinedLinkMandateElement(
     @Composable
     override fun ComposeUI(
         enabled: Boolean,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(

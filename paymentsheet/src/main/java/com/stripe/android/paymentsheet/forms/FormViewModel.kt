@@ -10,7 +10,7 @@ import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -66,7 +66,7 @@ internal class FormViewModel(
         .filterIsInstance<BillingAddressElement>()
         .firstOrNull()
 
-    private var externalHiddenIdentifiers = MutableStateFlow(emptySet<IdentifierSpec>())
+    private var externalHiddenIdentifiers = MutableStateFlow(emptySet<FormFieldId>())
 
     init {
         viewModelScope.launch {
@@ -75,8 +75,8 @@ internal class FormViewModel(
     }
 
     @VisibleForTesting
-    internal fun addHiddenIdentifiers(identifierSpecs: Set<IdentifierSpec>) {
-        externalHiddenIdentifiers.value = identifierSpecs
+    internal fun addHiddenIdentifiers(formFieldIds: Set<FormFieldId>) {
+        externalHiddenIdentifiers.value = formFieldIds
     }
 
     internal val hiddenIdentifiers = combineAsStateFlow(
@@ -88,7 +88,7 @@ internal class FormViewModel(
 
     // This will convert the save for future use value into a CustomerRequestedSave operation
     private val userRequestedReuse = currentFieldValues().map { currentFieldValues ->
-        currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
+        currentFieldValues.filter { it.first == FormFieldId.SaveForFutureUse }
             .map { it.second.value.toBoolean() }
             .map { saveForFutureUse ->
                 if (saveForFutureUse) {
@@ -108,7 +108,7 @@ internal class FormViewModel(
             formArguments.defaultFormValues,
         ).filterFlow()
 
-    private fun currentFieldValues(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    private fun currentFieldValues(): Flow<List<Pair<FormFieldId, FormFieldEntry>>> {
         return if (elements.isEmpty()) {
             flowOf(emptyList())
         } else {

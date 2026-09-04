@@ -58,8 +58,8 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         TextField(
             textFieldController = this,
@@ -251,8 +251,8 @@ class SimpleTextFieldController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         TextField(
             textFieldController = this,

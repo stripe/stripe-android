@@ -5,19 +5,19 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val auBecsDebitFullRawValues = mapOf(
-    IdentifierSpec.Generic("au_becs_debit[bsb_number]") to "000000",
-    IdentifierSpec.Generic("au_becs_debit[account_number]") to "000123456",
-    IdentifierSpec.Name to "Jenny Rosen",
-    IdentifierSpec.Email to "jenny.rosen@example.com",
-    IdentifierSpec.Line1 to "123 Collins Street",
-    IdentifierSpec.Line2 to "Level 4",
-    IdentifierSpec.City to "Melbourne",
-    IdentifierSpec.State to "VIC",
-    IdentifierSpec.PostalCode to "3000",
-    IdentifierSpec.Country to "AU",
+    FormFieldId.Generic("au_becs_debit[bsb_number]") to "000000",
+    FormFieldId.Generic("au_becs_debit[account_number]") to "000123456",
+    FormFieldId.Name to "Jenny Rosen",
+    FormFieldId.Email to "jenny.rosen@example.com",
+    FormFieldId.Line1 to "123 Collins Street",
+    FormFieldId.Line2 to "Level 4",
+    FormFieldId.City to "Melbourne",
+    FormFieldId.State to "VIC",
+    FormFieldId.PostalCode to "3000",
+    FormFieldId.Country to "AU",
 )
 
 private val auBecsDebitBankDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

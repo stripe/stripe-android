@@ -10,8 +10,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.countryElements
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
@@ -45,7 +45,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -428,7 +428,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test
@@ -518,7 +518,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test

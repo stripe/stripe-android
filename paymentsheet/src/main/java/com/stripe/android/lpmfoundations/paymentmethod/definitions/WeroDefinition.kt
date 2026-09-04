@@ -1,15 +1,15 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object WeroDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Wero
@@ -45,7 +45,7 @@ private object WeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder
             .requireCountry(
                 allowedCountryCodes = setOf("DE", "BE", "FR"),
-                initialValue = arguments.initialValues[IdentifierSpec.Country],
+                initialValue = arguments.initialValues[FormFieldId.Country],
             )
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)

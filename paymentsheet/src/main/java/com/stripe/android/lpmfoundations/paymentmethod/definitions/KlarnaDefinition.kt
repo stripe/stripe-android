@@ -2,9 +2,9 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -17,7 +17,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object KlarnaDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Klarna
@@ -63,7 +63,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .requireCountry(
                 allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                initialValue = arguments.initialValues[IdentifierSpec.Country],
+                initialValue = arguments.initialValues[FormFieldId.Country],
             )
             .apply {
                 if (KlarnaDefinition.requiresMandate(metadata)) {
@@ -87,12 +87,12 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         )
         return if (message != null) {
             PaymentMethodMessageHeaderElement(
-                identifier = IdentifierSpec.Generic("klarna_promotion"),
+                identifier = FormFieldId.Generic("klarna_promotion"),
                 promotion = message
             )
         } else {
             StaticTextElement(
-                identifier = IdentifierSpec.Generic("klarna_header_text"),
+                identifier = FormFieldId.Generic("klarna_header_text"),
                 stringResId = R.string.stripe_klarna_buy_now_pay_later
             )
         }
@@ -120,13 +120,13 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
             builder
                 .header(
                     StaticTextElement(
-                        IdentifierSpec.Generic("klarna_header_text"),
+                        FormFieldId.Generic("klarna_header_text"),
                         stringResId = R.string.stripe_klarna_buy_now_pay_later
                     )
                 )
                 .requireCountry(
                     allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    initialValue = arguments.initialValues[IdentifierSpec.Country]
+                    initialValue = arguments.initialValues[FormFieldId.Country]
                         ?: metadata.stripeIntent.countryCode,
                 )
         }

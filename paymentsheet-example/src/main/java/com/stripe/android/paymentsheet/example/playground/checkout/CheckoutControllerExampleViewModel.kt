@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.checkoutControllerConfiguration
@@ -135,7 +136,7 @@ internal class CheckoutControllerExampleViewModel(
 
                     configurationResult.fold(
                         onSuccess = {
-                            if (snapshot[CheckoutPlaygroundDefinitions.session.customer] == NEW_CUSTOMER) {
+                            if (snapshot[CheckoutPlaygroundDefinitions.session.customer] == CheckoutCustomer.New) {
                                 response.customerId?.let(settings::saveReturningCustomer)
                             }
                             savedStateHandle[RUN_ACTIVE_KEY] = true
@@ -200,7 +201,6 @@ internal class CheckoutControllerExampleViewModel(
     companion object {
         private const val TAG = "CheckoutControllerExample"
         private const val RUN_ACTIVE_KEY = "checkout_controller_run_active"
-        private const val NEW_CUSTOMER = "new"
 
         val factory = viewModelFactory {
             initializer {

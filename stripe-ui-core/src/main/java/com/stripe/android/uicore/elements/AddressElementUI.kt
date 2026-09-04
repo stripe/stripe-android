@@ -17,8 +17,8 @@ import com.stripe.android.uicore.utils.collectAsState
 fun AddressElementUI(
     enabled: Boolean,
     controller: AddressController,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId>,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     val fields by controller.fieldsFlowable.collectAsState()

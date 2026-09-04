@@ -3,16 +3,16 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -49,16 +49,16 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
-        val taxIdElementIdentifierSpec = IdentifierSpec.Generic("boleto[tax_id]")
+        val taxIdElementFormFieldId = FormFieldId.Generic("boleto[tax_id]")
         val taxIdElement = SimpleTextElement(
-            taxIdElementIdentifierSpec,
+            taxIdElementFormFieldId,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_boleto_tax_id_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Ascii,
                 ),
-                initialValue = arguments.initialValues[taxIdElementIdentifierSpec],
+                initialValue = arguments.initialValues[taxIdElementFormFieldId],
             )
         )
 

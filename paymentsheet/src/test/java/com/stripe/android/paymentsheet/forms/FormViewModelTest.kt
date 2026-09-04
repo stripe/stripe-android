@@ -5,7 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
@@ -28,7 +28,7 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -54,7 +54,7 @@ import com.stripe.android.uicore.R as UiCoreR
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
-    private val emailIdentifier = IdentifierSpec.Email
+    private val emailIdentifier = FormFieldId.Email
 
     private val viewModelStoreRule = ViewModelStoreTestRule()
 
@@ -117,11 +117,11 @@ internal class FormViewModelTest {
                 )
             )
 
-            formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
+            formViewModel.addHiddenIdentifiers(setOf(FormFieldId.Email))
 
             // Verify formFieldValues does not contain email
             assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
-                IdentifierSpec.Name.v1
+                FormFieldId.Name.v1
             )
         }
 
@@ -149,13 +149,13 @@ internal class FormViewModelTest {
         // Verify formFieldValues contains email
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs
-        ).containsKey(IdentifierSpec.Email)
+        ).containsKey(FormFieldId.Email)
 
-        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
+        formViewModel.addHiddenIdentifiers(setOf(FormFieldId.Email))
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs)
-            .doesNotContainKey(IdentifierSpec.Email)
+            .doesNotContainKey(FormFieldId.Email)
     }
 
     @Test
@@ -184,7 +184,7 @@ internal class FormViewModelTest {
             // Verify formFieldValues is null because the email is required and invalid
             assertThat(formViewModel.completeFormValues.first()).isNull()
 
-            formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
+            formViewModel.addHiddenIdentifiers(setOf(FormFieldId.Email))
 
             // Verify formFieldValues is not null even though the card number is invalid
             // (because it is not required)
@@ -193,7 +193,7 @@ internal class FormViewModelTest {
                 completeFormFieldValues
             ).isNotNull()
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-                IdentifierSpec.Email
+                FormFieldId.Email
             )
         }
 
@@ -233,23 +233,23 @@ internal class FormViewModelTest {
 
         nameElement?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Name)
         ).isNull()
 
         emailElement?.onValueChange("joe@example.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Email)
                 ?.value
         ).isEqualTo("joe@example.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Name)
                 ?.value
         ).isEqualTo("joe")
 
         emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Name)
         ).isNull()
     }
 
@@ -260,7 +260,7 @@ internal class FormViewModelTest {
             billingDetails = null
         )
         val addressElements = createAddressElements(
-            identifier = IdentifierSpec.Generic("address"),
+            identifier = FormFieldId.Generic("address"),
             allowedCountryCodes = setOf("US", "JP"),
             hideCountry = false,
         )
@@ -282,7 +282,7 @@ internal class FormViewModelTest {
             CoreR.string.stripe_address_label_full_name
         )?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Name)
                 ?.value
         ).isNull()
 
@@ -291,7 +291,7 @@ internal class FormViewModelTest {
             UiCoreR.string.stripe_email
         )?.onValueChange("joe@example.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Email)
                 ?.value
         ).isNull()
 
@@ -300,7 +300,7 @@ internal class FormViewModelTest {
             R.string.stripe_iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(FormFieldId.Generic("iban"))
                 ?.value
         ).isNull()
 
@@ -353,7 +353,7 @@ internal class FormViewModelTest {
             billingDetails = null
         )
         val addressElements = createAddressElements(
-            identifier = IdentifierSpec.Generic("address"),
+            identifier = FormFieldId.Generic("address"),
             allowedCountryCodes = setOf("US", "JP"),
             hideCountry = false,
         )
@@ -469,15 +469,15 @@ internal class FormViewModelTest {
         viewModel.completeFormValues.test {
             assertThat(awaitItem()?.fieldValuePairs).isEqualTo(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
-                    IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
-                    IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                    FormFieldId.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                    FormFieldId.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                    FormFieldId.Phone to FormFieldEntry("+13105551234", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry("456", isComplete = true),
+                    FormFieldId.City to FormFieldEntry("San Francisco", isComplete = true),
+                    FormFieldId.State to FormFieldEntry("CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry("US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry("94111", isComplete = true),
                 )
             )
         }
@@ -508,10 +508,10 @@ internal class FormViewModelTest {
         viewModel.completeFormValues.test {
             assertThat(awaitItem()?.fieldValuePairs).isEqualTo(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
-                    IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                    FormFieldId.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                    FormFieldId.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry("US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry("94111", isComplete = true),
                 )
             )
         }
@@ -620,7 +620,7 @@ internal class FormViewModelTest {
                 billingDetails = PaymentSheet.BillingDetails(),
             )
             val addressElements = createAddressElements(
-                identifier = IdentifierSpec.BillingAddress,
+                identifier = FormFieldId.BillingAddress,
                 allowedCountryCodes = CountryUtils.supportedBillingCountries,
                 hideCountry = true,
             )
@@ -827,7 +827,7 @@ internal class FormViewModelTest {
         )
         val originalElements = listOf(
             AffirmHeaderElement(
-                identifier = IdentifierSpec.Generic("affirm_promotion")
+                identifier = FormFieldId.Generic("affirm_promotion")
             ),
         )
         val formViewModel = createViewModel(args, originalElements)
@@ -836,7 +836,7 @@ internal class FormViewModelTest {
 
         val newElements = listOf(
             StaticTextElement(
-                identifier = IdentifierSpec.Generic("affirm_promotion"),
+                identifier = FormFieldId.Generic("affirm_promotion"),
                 text = resolvableString("Static text"),
             ),
         )
@@ -870,7 +870,7 @@ internal class FormViewModelTest {
     ): FormElement {
         return SectionElement.wrap(
             CountryElement(
-                identifier = IdentifierSpec.Country,
+                identifier = FormFieldId.Country,
                 controller = DropdownFieldController(
                     config = CountryConfig(allowedCountryCodes),
                     initialValue = null,
@@ -892,7 +892,7 @@ internal class FormViewModelTest {
     }
 
     private fun createAddressElements(
-        identifier: IdentifierSpec,
+        identifier: FormFieldId,
         allowedCountryCodes: Set<String>,
         hideCountry: Boolean,
     ): List<FormElement> {
@@ -911,7 +911,7 @@ internal class FormViewModelTest {
     }
 
     private fun createIbanElement(): FormElement {
-        val identifier = IdentifierSpec.Generic("sepa_debit[iban]")
+        val identifier = FormFieldId.Generic("sepa_debit[iban]")
         return SectionElement.wrap(
             SimpleTextElement(
                 identifier = identifier,
@@ -925,7 +925,7 @@ internal class FormViewModelTest {
 
     private fun createMandateElement(): FormElement {
         return MandateTextElement(
-            identifier = IdentifierSpec.Generic("mandate"),
+            identifier = FormFieldId.Generic("mandate"),
             stringResId = R.string.stripe_sepa_mandate,
             args = listOf(""),
         )

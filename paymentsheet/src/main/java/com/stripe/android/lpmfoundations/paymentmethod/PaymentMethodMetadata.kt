@@ -11,7 +11,7 @@ import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
