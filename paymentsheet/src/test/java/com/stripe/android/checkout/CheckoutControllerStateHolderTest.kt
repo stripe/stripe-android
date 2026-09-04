@@ -210,6 +210,7 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = false,
     )
 
     private fun testScenario(

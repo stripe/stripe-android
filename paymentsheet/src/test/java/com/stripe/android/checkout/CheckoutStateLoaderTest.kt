@@ -336,6 +336,13 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `reload preserves eager Link suppression`() = runScenario {
+        loader.reload(committedState(linkEagerPresentationSuppressed = true))
+
+        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isTrue()
+    }
+
+    @Test
     fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
         // A prior state carries a temporary selection and a stashed new payment method; a fresh
         // configuration load must start from a clean slate rather than carrying them forward.
@@ -350,6 +357,15 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.temporarySelection).isNull()
         assertThat(stateHolder.getPreviousNewSelection("cashapp")).isNull()
+    }
+
+    @Test
+    fun `loadInitial resets eager Link suppression for a newly configured session`() = runScenario {
+        stateHolder.state = committedState(linkEagerPresentationSuppressed = true)
+
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
     }
 
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
@@ -370,6 +386,7 @@ internal class CheckoutStateLoaderTest {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
@@ -381,6 +398,7 @@ internal class CheckoutStateLoaderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.

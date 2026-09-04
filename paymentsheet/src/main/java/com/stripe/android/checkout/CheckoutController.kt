@@ -307,6 +307,7 @@ class CheckoutController @Inject internal constructor(
                 registryOwner = activity,
             ),
             lifecycleOwner = activity,
+            activityResultRegistry = activity.activityResultRegistry,
             statusBarColor = StatusBarCompat.color(activity),
         )
         subcomponent.initializer.initialize()
