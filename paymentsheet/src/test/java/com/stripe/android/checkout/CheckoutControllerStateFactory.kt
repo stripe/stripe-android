@@ -32,6 +32,7 @@ internal object CheckoutControllerStateFactory {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        linkEagerPresentationSuppressed: Boolean = false,
     ): CheckoutControllerState {
         return CheckoutControllerState(
             configuration = configuration,
@@ -44,6 +45,7 @@ internal object CheckoutControllerStateFactory {
             paymentSelection = paymentSelection,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
+            linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
         )
     }
 
