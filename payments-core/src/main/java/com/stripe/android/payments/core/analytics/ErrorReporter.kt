@@ -369,6 +369,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK(
             partialEventName = "google_pay.dynamic_callbacks.missing_callback"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE(
+            partialEventName = "google_pay.dynamic_callbacks.parsing_failure"
         );
 
         override val eventName: String
