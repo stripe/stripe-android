@@ -346,7 +346,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     init {
         coroutineScope.launch(mainDispatcher) {
+            var hasReceivedInitialSelection = false
             selection.collect { currentSelection ->
+                if (hasReceivedInitialSelection) {
+                    savedPaymentMethodSelectionHandler.clearFailure()
+                }
+                hasReceivedInitialSelection = true
+
                 if (currentSelection == null && !isCurrentScreen.value) {
                     return@collect
                 }

@@ -35,14 +35,16 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
             assertThat(awaitItem()).isEqualTo(
                 VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
             )
-            scenario.callbackCalls.expectNoEvents()
+            scenario.callbackStates.expectNoEvents()
             runCurrent()
+            assertThat(scenario.callbackStates.awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
             assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
             ensureAllEventsConsumed()
         }
 
         verify(controller).selectSavedPaymentMethod(selection)
-        assertThat(scenario.callbackCalls.awaitItem()).isEqualTo(Unit)
         verifyNoMoreInteractions(controller)
     }
 
@@ -69,13 +71,15 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
             )
             expectNoEvents()
             runCurrent()
+            assertThat(scenario.callbackStates.awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(firstSelection)
+            )
             assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
             ensureAllEventsConsumed()
         }
 
         verify(controller).selectSavedPaymentMethod(firstSelection)
         verify(controller, never()).selectSavedPaymentMethod(secondSelection)
-        assertThat(scenario.callbackCalls.awaitItem()).isEqualTo(Unit)
         verifyNoMoreInteractions(controller)
     }
 
@@ -104,7 +108,7 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
         }
 
         verify(controller).selectSavedPaymentMethod(selection)
-        scenario.callbackCalls.expectNoEvents()
+        scenario.callbackStates.expectNoEvents()
         verifyNoMoreInteractions(controller)
     }
 
@@ -134,12 +138,46 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
                 VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
             )
             runCurrent()
+            assertThat(scenario.callbackStates.awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
             assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
             ensureAllEventsConsumed()
         }
 
         verify(controller, org.mockito.kotlin.times(2)).selectSavedPaymentMethod(selection)
-        assertThat(scenario.callbackCalls.awaitItem()).isEqualTo(Unit)
+        verifyNoMoreInteractions(controller)
+    }
+
+    @Test
+    fun `clearFailure returns failed handler to idle`() = runTest {
+        val expectedError = IllegalStateException("update failed")
+        val selection = selectionWithBillingAddress()
+        val controller = mock<CheckoutController>()
+        whenever { controller.selectSavedPaymentMethod(selection) }
+            .thenReturn(Result.failure(expectedError))
+        val scenario = createScenario(controller, coroutineScope = this)
+
+        scenario.handler.state.test {
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
+
+            scenario.handler.select(selection)
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Selecting(selection)
+            )
+            runCurrent()
+            assertThat(awaitItem()).isEqualTo(
+                VerticalSavedPaymentMethodSelectionHandler.State.Failed(expectedError)
+            )
+
+            scenario.handler.clearFailure()
+
+            assertThat(awaitItem()).isEqualTo(VerticalSavedPaymentMethodSelectionHandler.State.Idle)
+            ensureAllEventsConsumed()
+        }
+
+        scenario.callbackStates.expectNoEvents()
+        verify(controller).selectSavedPaymentMethod(selection)
         verifyNoMoreInteractions(controller)
     }
 
@@ -147,13 +185,14 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
         controller: CheckoutController,
         coroutineScope: CoroutineScope,
     ): Scenario {
-        val callbackCalls = Turbine<Unit>()
-        val handler = CheckoutSavedPaymentMethodSelectionHandler(
+        val callbackStates = Turbine<VerticalSavedPaymentMethodSelectionHandler.State>()
+        lateinit var handler: CheckoutSavedPaymentMethodSelectionHandler
+        handler = CheckoutSavedPaymentMethodSelectionHandler(
             checkoutController = controller,
-            immediateActionHandler = { callbackCalls.add(Unit) },
+            immediateActionHandler = { callbackStates.add(handler.state.value) },
             coroutineScope = coroutineScope,
         )
-        return Scenario(handler, callbackCalls)
+        return Scenario(handler, callbackStates)
     }
 
     private fun selectionWithBillingAddress(): PaymentSelection.Saved {
@@ -168,6 +207,6 @@ internal class CheckoutSavedPaymentMethodSelectionHandlerTest {
 
     private data class Scenario(
         val handler: CheckoutSavedPaymentMethodSelectionHandler,
-        val callbackCalls: Turbine<Unit>,
+        val callbackStates: Turbine<VerticalSavedPaymentMethodSelectionHandler.State>,
     )
 }
