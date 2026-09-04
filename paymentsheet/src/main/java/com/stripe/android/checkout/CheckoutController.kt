@@ -200,7 +200,7 @@ class CheckoutController @Inject internal constructor(
      *
      * @param address The billing address used to calculate automatic tax.
      */
-    suspend fun updateBillingTaxRegionIfNecessary(
+    internal suspend fun updateBillingTaxRegionIfNecessary(
         address: Address,
     ): kotlin.Result<Unit> {
         val builtAddress = address.build()
