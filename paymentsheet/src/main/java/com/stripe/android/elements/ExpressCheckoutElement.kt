@@ -32,10 +32,18 @@ class ExpressCheckoutElement @Inject internal constructor(
     abstract class PaymentMethod private constructor() {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class GooglePay internal constructor() : PaymentMethod()
+        class GooglePay internal constructor() : PaymentMethod() {
+            override fun equals(other: Any?): Boolean = other is GooglePay
+
+            override fun hashCode(): Int = GooglePay::class.java.hashCode()
+        }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Link internal constructor() : PaymentMethod()
+        class Link internal constructor() : PaymentMethod() {
+            override fun equals(other: Any?): Boolean = other is Link
+
+            override fun hashCode(): Int = Link::class.java.hashCode()
+        }
     }
 
     @CheckoutSessionPreview
