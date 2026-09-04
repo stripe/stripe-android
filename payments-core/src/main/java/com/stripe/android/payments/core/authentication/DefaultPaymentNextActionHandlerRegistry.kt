@@ -166,7 +166,7 @@ private fun paymentSheetNextActionHandlers(
     } catch (e: Exception) {
         ErrorReporter.createFallbackInstance(
             context = applicationContext,
-            apiConfiguration = apiConfiguration
+            apiConfigurationProvider = { apiConfiguration },
         )
             .report(
                 // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics

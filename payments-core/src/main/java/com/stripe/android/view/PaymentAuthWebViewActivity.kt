@@ -68,7 +68,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
-                apiConfiguration = ApiConfiguration.State("", null),
+                apiConfigurationProvider = { ApiConfiguration.State("", null) },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
@@ -100,7 +100,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfiguration = args.apiConfiguration,
+                apiConfigurationProvider = { args.apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
@@ -147,7 +147,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (error != null) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfiguration = requireNotNull(_args).apiConfiguration,
+                apiConfigurationProvider = { requireNotNull(_args).apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
