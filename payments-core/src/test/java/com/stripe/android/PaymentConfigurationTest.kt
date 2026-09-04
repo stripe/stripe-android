@@ -82,4 +82,24 @@ class PaymentConfigurationTest {
             ).isLiveMode()
         ).isFalse()
     }
+
+    @Test
+    fun `isUserKey is true for live user key`() {
+        assertThat(PaymentConfiguration(publishableKey = "uk_live_123").isUserKey()).isTrue()
+    }
+
+    @Test
+    fun `isUserKey is true for test user key`() {
+        assertThat(PaymentConfiguration(publishableKey = "uk_test_123").isUserKey()).isTrue()
+    }
+
+    @Test
+    fun `isUserKey is false for live publishable key`() {
+        assertThat(PaymentConfiguration(publishableKey = "pk_live_123").isUserKey()).isFalse()
+    }
+
+    @Test
+    fun `isUserKey is false for test publishable key`() {
+        assertThat(PaymentConfiguration(publishableKey = "pk_test_123").isUserKey()).isFalse()
+    }
 }

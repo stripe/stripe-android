@@ -26,6 +26,11 @@ constructor(
         return !publishableKey.startsWith("pk_test")
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isUserKey(): Boolean {
+        return ApiKeyValidator.isUserKey(publishableKey)
+    }
+
     /**
      * Manages saving and loading [PaymentConfiguration] data to SharedPreferences.
      */
