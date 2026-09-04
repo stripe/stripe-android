@@ -11,7 +11,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -48,8 +48,8 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
             )
             val countryController = DropdownFieldController(CountryConfig(setOf("US", "JP")), "US")
             val controller = AutocompleteAddressController(
-                identifier = IdentifierSpec.Generic("address"),
-                initialValues = mapOf(IdentifierSpec.Country to "US"),
+                identifier = FormFieldId.Generic("address"),
+                initialValues = mapOf(FormFieldId.Country to "US"),
                 countryDropdownFieldController = countryController,
                 phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
                 nameConfig = AddressFieldConfiguration.HIDDEN,

@@ -6,18 +6,18 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutocompleteAddressElement(
-    override val identifier: IdentifierSpec,
-    initialValues: Map<IdentifierSpec, String?>,
+    override val identifier: FormFieldId,
+    initialValues: Map<FormFieldId, String?>,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        initialValues[IdentifierSpec.Country]
+        initialValues[FormFieldId.Country]
     ),
     phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
     nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
     emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
     sameAsShippingElement: SameAsShippingElement?,
-    shippingValuesMap: Map<IdentifierSpec, String?>?,
+    shippingValuesMap: Map<FormFieldId, String?>?,
     interactorFactory: AutocompleteAddressInteractor.Factory,
     hideCountry: Boolean = false,
 ) : AddressFieldsElement {
@@ -47,7 +47,7 @@ class AutocompleteAddressElement(
 
     override fun sectionFieldErrorController() = controller
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         controller.setRawValue(rawValuesMap)
     }
 

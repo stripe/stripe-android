@@ -10,7 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -54,12 +54,12 @@ private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {
         )
         val header = if (message != null) {
             PaymentMethodMessageHeaderElement(
-                identifier = IdentifierSpec.Generic("affirm_promotion"),
+                identifier = FormFieldId.Generic("affirm_promotion"),
                 promotion = message
             )
         } else {
             AffirmHeaderElement(
-                identifier = IdentifierSpec.Generic("affirm_header")
+                identifier = FormFieldId.Generic("affirm_header")
             )
         }
         builder.header(header)

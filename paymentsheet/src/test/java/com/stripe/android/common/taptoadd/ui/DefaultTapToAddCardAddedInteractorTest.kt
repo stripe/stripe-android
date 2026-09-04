@@ -20,7 +20,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -262,7 +262,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     }
 
     private object FakeFormElement : FormElement {
-        override val identifier: IdentifierSpec
+        override val identifier: FormFieldId
             get() = throw IllegalStateException("Should not be retrieved!")
 
         override val controller: Controller
@@ -271,7 +271,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         override val allowsUserInteraction: Boolean = true
         override val mandateText: ResolvableString? = null
 
-        override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
             return stateFlowOf(emptyList())
         }
     }

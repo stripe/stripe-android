@@ -5,7 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class EmailElement(
-    override val identifier: IdentifierSpec = IdentifierSpec.Email,
+    override val identifier: FormFieldId = FormFieldId.Email,
     val initialValue: String? = "",
     override val controller: TextFieldController = SimpleTextFieldController(
         EmailConfig(),

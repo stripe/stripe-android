@@ -126,7 +126,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.ResetMockRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -824,7 +824,7 @@ internal class PaymentSheetViewModelTest {
             formHelper.onFormFieldValuesChanged(
                 formValues = FormFieldValues(
                     fieldValuePairs = mapOf(
-                        IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                        FormFieldId.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
                     ),
                     userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                 ),
@@ -2804,7 +2804,7 @@ internal class PaymentSheetViewModelTest {
                 formHelper.onFormFieldValuesChanged(
                     formValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                            FormFieldId.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     ),
@@ -2836,7 +2836,7 @@ internal class PaymentSheetViewModelTest {
                 formHelper.onFormFieldValuesChanged(
                     formValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Country to FormFieldEntry("CA", true),
+                            FormFieldId.Country to FormFieldEntry("CA", true),
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     ),

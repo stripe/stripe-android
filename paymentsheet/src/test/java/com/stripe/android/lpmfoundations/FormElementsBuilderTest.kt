@@ -18,7 +18,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
@@ -57,9 +57,9 @@ class FormElementsBuilderTest {
     @Test
     fun `build orders fields correctly`() {
         val formElements = formElementsBuilder(arguments())
-            .element(testElement(IdentifierSpec(v1 = "element")))
-            .header(testElement(IdentifierSpec(v1 = "header")))
-            .footer(testElement(IdentifierSpec(v1 = "footer")))
+            .element(testElement(FormFieldId(v1 = "element")))
+            .header(testElement(FormFieldId(v1 = "header")))
+            .footer(testElement(FormFieldId(v1 = "footer")))
             .requireBillingAddressIfAllowed()
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .build()
@@ -74,8 +74,8 @@ class FormElementsBuilderTest {
     @Test
     fun `build orders country requirement after ordinary elements and before footers`() {
         val formElements = formElementsBuilder(arguments())
-            .element(testElement(IdentifierSpec(v1 = "element")))
-            .footer(testElement(IdentifierSpec(v1 = "footer")))
+            .element(testElement(FormFieldId(v1 = "element")))
+            .footer(testElement(FormFieldId(v1 = "footer")))
             .requireCountry(
                 allowedCountryCodes = setOf("US", "CA"),
                 initialValue = "US",
@@ -96,8 +96,8 @@ class FormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
             ),
         )
-            .element(testElement(IdentifierSpec.Generic("element")))
-            .footer(testElement(IdentifierSpec.Generic("footer")))
+            .element(testElement(FormFieldId.Generic("element")))
+            .footer(testElement(FormFieldId.Generic("footer")))
             .build()
 
         assertThat(formElements.map { it.identifier.v1 }).containsExactly(
@@ -130,12 +130,12 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns fields in the order they were added`() {
         val formElements = formElementsBuilder(arguments())
-            .element(testElement(IdentifierSpec(v1 = "element1")))
-            .element(testElement(IdentifierSpec(v1 = "element2")))
-            .footer(testElement(IdentifierSpec(v1 = "footer1")))
-            .footer(testElement(IdentifierSpec(v1 = "footer2")))
-            .header(testElement(IdentifierSpec(v1 = "header1")))
-            .header(testElement(IdentifierSpec(v1 = "header2")))
+            .element(testElement(FormFieldId(v1 = "element1")))
+            .element(testElement(FormFieldId(v1 = "element2")))
+            .footer(testElement(FormFieldId(v1 = "footer1")))
+            .footer(testElement(FormFieldId(v1 = "footer2")))
+            .header(testElement(FormFieldId(v1 = "header1")))
+            .header(testElement(FormFieldId(v1 = "header2")))
             .build()
         assertThat(formElements).hasSize(6)
         assertThat(formElements[0].identifier.v1).isEqualTo("header1")
@@ -154,7 +154,7 @@ class FormElementsBuilderTest {
             )
         )
         val formElements = formElementsBuilder(arguments)
-            .element(testElement(IdentifierSpec(v1 = "element")))
+            .element(testElement(FormFieldId(v1 = "element")))
             .ignoreBillingAddressRequirements()
             .build()
         assertThat(formElements).hasSize(1)
@@ -171,7 +171,7 @@ class FormElementsBuilderTest {
             )
         )
         val formElements = formElementsBuilder(arguments)
-            .element(testElement(IdentifierSpec(v1 = "element")))
+            .element(testElement(FormFieldId(v1 = "element")))
             .ignoreContactInformationRequirements()
             .build()
         assertThat(formElements).hasSize(1)
@@ -258,7 +258,7 @@ class FormElementsBuilderTest {
         return formElements[position] as SectionElement
     }
 
-    private fun testElement(identifier: IdentifierSpec): FormElement {
+    private fun testElement(identifier: FormFieldId): FormElement {
         return StaticTextElement(
             identifier = identifier,
             text = resolvableString("Test element"),
@@ -269,8 +269,8 @@ class FormElementsBuilderTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
-        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
-        shippingValues: Map<IdentifierSpec, String?>? = emptyMap(),
+        initialValues: Map<FormFieldId, String?> = emptyMap(),
+        shippingValues: Map<FormFieldId, String?>? = emptyMap(),
         requiresBillingAddressForAutomaticTax: Boolean = false,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()

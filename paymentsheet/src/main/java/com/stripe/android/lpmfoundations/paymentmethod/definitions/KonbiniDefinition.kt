@@ -12,7 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -51,7 +51,7 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         val confirmationNumberElement = SimpleTextElement(
-            identifier = IdentifierSpec.KonbiniConfirmationNumber,
+            identifier = FormFieldId.KonbiniConfirmationNumber,
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_konbini_confirmation_number_label),
@@ -59,7 +59,7 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     keyboard = KeyboardType.Phone,
                     optional = true,
                 ),
-                initialValue = arguments.initialValues[IdentifierSpec.KonbiniConfirmationNumber],
+                initialValue = arguments.initialValues[FormFieldId.KonbiniConfirmationNumber],
             ),
         )
         builder

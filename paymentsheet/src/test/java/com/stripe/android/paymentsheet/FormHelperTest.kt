@@ -39,7 +39,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -202,8 +202,8 @@ internal class FormHelperTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                IdentifierSpec.Name to FormFieldEntry(name, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.Name to FormFieldEntry(name, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -263,8 +263,8 @@ internal class FormHelperTest {
 
             val formFieldValues = FormFieldValues(
                 fieldValuePairs = mapOf(
-                    IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                    IdentifierSpec.Name to FormFieldEntry(name, true),
+                    FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                    FormFieldId.Name to FormFieldEntry(name, true),
                 ),
                 userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
             )
@@ -287,8 +287,8 @@ internal class FormHelperTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -331,8 +331,8 @@ internal class FormHelperTest {
 
         val firstFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -342,8 +342,8 @@ internal class FormHelperTest {
 
         val secondFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("UK", true),
-                IdentifierSpec.Email to FormFieldEntry("Joey@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("UK", true),
+                FormFieldId.Email to FormFieldEntry("Joey@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -371,8 +371,8 @@ internal class FormHelperTest {
 
         val klarnaFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -382,8 +382,8 @@ internal class FormHelperTest {
 
         val cardFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("joe", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -397,8 +397,8 @@ internal class FormHelperTest {
     fun `onFormFieldValuesChanged & onLinkStateChanged calls create Link Inline selection when card`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -449,8 +449,8 @@ internal class FormHelperTest {
     fun `Skips Link if not being used`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -499,7 +499,7 @@ internal class FormHelperTest {
     fun `onFormFieldValuesChanged & onLinkStateChanged calls create generic selection when not card`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -554,8 +554,8 @@ internal class FormHelperTest {
     fun `Creates null selection if Link input is null when expanded`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -627,8 +627,8 @@ internal class FormHelperTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                IdentifierSpec.Name to FormFieldEntry(name, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.Name to FormFieldEntry(name, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )

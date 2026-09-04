@@ -18,7 +18,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.CoroutineScope
@@ -67,16 +67,16 @@ class BillingAddressFormElementsBuilderTest {
                     allowedCountries = setOf("US"),
                 ),
                 requiresBillingAddressForAutomaticTax = true,
-                initialValues = mapOf(IdentifierSpec.Country to "US"),
+                initialValues = mapOf(FormFieldId.Country to "US"),
             ),
         ).build().billingAddressElement()
 
-        assertThat(billingAddressElement.hiddenIdentifiers.value).contains(IdentifierSpec.Line2)
+        assertThat(billingAddressElement.hiddenIdentifiers.value).contains(FormFieldId.Line2)
         assertThat(billingAddressElement.hiddenIdentifiers.value).containsNoneOf(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.State,
-            IdentifierSpec.PostalCode,
+            FormFieldId.Line1,
+            FormFieldId.City,
+            FormFieldId.State,
+            FormFieldId.PostalCode,
         )
     }
 
@@ -148,7 +148,7 @@ class BillingAddressFormElementsBuilderTest {
     fun `country requirement overrides full address countries and initial country`() {
         val addressElement = billingAddressFormElementsBuilder(
             arguments = arguments(
-                initialValues = mapOf(IdentifierSpec.Country to "US"),
+                initialValues = mapOf(FormFieldId.Country to "US"),
             ),
             requireBillingAddressCollection = true,
             fallbackCountryCodes = setOf("US"),
@@ -169,7 +169,7 @@ class BillingAddressFormElementsBuilderTest {
     fun `country requirement explicit null overrides full address initial country`() {
         val addressElement = billingAddressFormElementsBuilder(
             arguments = arguments(
-                initialValues = mapOf(IdentifierSpec.Country to "US"),
+                initialValues = mapOf(FormFieldId.Country to "US"),
             ),
             requireBillingAddressCollection = true,
             fallbackCountryCodes = setOf("US"),
@@ -190,7 +190,7 @@ class BillingAddressFormElementsBuilderTest {
                     allowedCountries = setOf("US"),
                 ),
                 requiresBillingAddressForAutomaticTax = true,
-                initialValues = mapOf(IdentifierSpec.Country to "US"),
+                initialValues = mapOf(FormFieldId.Country to "US"),
             ),
             countryRequirement = CountryRequirement(
                 allowedCountryCodes = setOf("DE", "FR"),
@@ -212,7 +212,7 @@ class BillingAddressFormElementsBuilderTest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     allowedCountries = setOf("US"),
                 ),
-                initialValues = mapOf(IdentifierSpec.Country to "CA"),
+                initialValues = mapOf(FormFieldId.Country to "CA"),
             ),
             requireBillingAddressCollection = true,
             fallbackCountryCodes = setOf("CA"),
@@ -241,7 +241,7 @@ class BillingAddressFormElementsBuilderTest {
                     allowedCountries = setOf("US", "CA"),
                 ),
                 requiresBillingAddressForAutomaticTax = true,
-                initialValues = mapOf(IdentifierSpec.Country to "CA"),
+                initialValues = mapOf(FormFieldId.Country to "CA"),
             ),
             fallbackCountryCodes = setOf("BS"),
         ).build().billingAddressElement().countryElement
@@ -259,7 +259,7 @@ class BillingAddressFormElementsBuilderTest {
             arguments = arguments(
                 billingDetailsCollectionConfiguration = automaticAddressConfiguration(),
                 requiresBillingAddressForAutomaticTax = true,
-                shippingValues = mapOf(IdentifierSpec.SameAsShipping to "true"),
+                shippingValues = mapOf(FormFieldId.SameAsShipping to "true"),
             ),
         ).build()
 
@@ -333,8 +333,8 @@ class BillingAddressFormElementsBuilderTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
-        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
-        shippingValues: Map<IdentifierSpec, String?>? = emptyMap(),
+        initialValues: Map<FormFieldId, String?> = emptyMap(),
+        shippingValues: Map<FormFieldId, String?>? = emptyMap(),
         requiresBillingAddressForAutomaticTax: Boolean = false,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()

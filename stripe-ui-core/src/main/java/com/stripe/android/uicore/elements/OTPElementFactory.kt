@@ -6,7 +6,7 @@ import androidx.annotation.RestrictTo
 object OTPElementFactory {
     fun create(): OTPElement {
         return OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController(),
         )
     }

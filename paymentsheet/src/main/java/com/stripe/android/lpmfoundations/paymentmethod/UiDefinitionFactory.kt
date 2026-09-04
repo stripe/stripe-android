@@ -27,7 +27,7 @@ import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CoroutineScope
 
 internal sealed interface UiDefinitionFactory {
@@ -50,9 +50,9 @@ internal sealed interface UiDefinitionFactory {
         val coroutineScope: CoroutineScope,
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-        val initialValues: Map<IdentifierSpec, String?>,
+        val initialValues: Map<FormFieldId, String?>,
         val initialLinkUserInput: UserInput?,
-        val shippingValues: Map<IdentifierSpec, String?>?,
+        val shippingValues: Map<FormFieldId, String?>?,
         val saveForFutureUseInitialValue: Boolean,
         val merchantName: String,
         val cbcEligibility: CardBrandChoiceEligibility,

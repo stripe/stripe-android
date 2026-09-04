@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CleanupTestRule
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -93,7 +93,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
 
     private suspend fun createFormParamsFromFormValues(
         config: LpmBillingAddressTestConfiguration,
-        rawValues: Map<IdentifierSpec, String?>,
+        rawValues: Map<FormFieldId, String?>,
     ): LpmBillingAddressFormParams {
         val metadata = config.metadata()
         val formViewModel = createFormViewModel(
@@ -111,7 +111,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     private fun createFormViewModel(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
-        initialValues: Map<IdentifierSpec, String?>,
+        initialValues: Map<FormFieldId, String?>,
     ): FormViewModel {
         val formElements = requireNotNull(
             metadata.formElementsForCode(
@@ -168,7 +168,7 @@ private val specializedFlowDefinitions: Set<PaymentMethodDefinition> = setOf(
 internal data class LpmBillingAddressFormValuesToParamsTestCase(
     val name: String,
     val config: LpmBillingAddressTestConfiguration,
-    val rawValues: Map<IdentifierSpec, String?>,
+    val rawValues: Map<FormFieldId, String?>,
     val expectedParams: LpmBillingAddressFormParams,
 ) {
     override fun toString(): String = name

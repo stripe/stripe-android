@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.stripe.android.identity.example.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -67,12 +67,12 @@ internal fun RequirePhoneVerificationUI(
                 enabled = true,
                 element = SectionElement.wrap(
                     PhoneNumberElement(
-                        identifier = IdentifierSpec.Phone,
+                        identifier = FormFieldId.Phone,
                         controller = phoneController
                     )
                 ),
                 hiddenIdentifiers = emptySet(),
-                lastTextFieldIdentifier = IdentifierSpec.Phone,
+                lastTextFieldIdentifier = FormFieldId.Phone,
             )
         }
     }
