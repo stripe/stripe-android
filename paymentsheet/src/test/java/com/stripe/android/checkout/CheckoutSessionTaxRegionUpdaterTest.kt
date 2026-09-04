@@ -6,6 +6,7 @@ import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
@@ -105,6 +107,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
+            hCaptchaService = mock<HCaptchaService>(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
         )

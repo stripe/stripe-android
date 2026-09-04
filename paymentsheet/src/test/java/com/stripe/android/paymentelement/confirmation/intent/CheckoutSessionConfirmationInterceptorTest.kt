@@ -9,6 +9,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -54,6 +55,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
@@ -582,6 +584,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
+            hCaptchaService = mock<HCaptchaService>(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
         )

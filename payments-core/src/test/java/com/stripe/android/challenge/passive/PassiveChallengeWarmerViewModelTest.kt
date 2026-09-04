@@ -1,15 +1,15 @@
 package com.stripe.android.challenge.passive
 
 import androidx.fragment.app.FragmentActivity
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
 import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.ViewModelStoreTestRule
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -31,23 +31,22 @@ internal class PassiveChallengeWarmerViewModelTest {
     private val testPassiveCaptchaParams = PassiveCaptchaParams(
         siteKey = "test_site_key",
         rqData = "test_rq_data",
-        tokenTimeoutSeconds = null
+        tokenTimeoutSeconds = 30
     )
 
     @Test
-    fun `warmUpPassiveChallenge should emit result when warmUp is complete`() = runTest {
-        fakeHCaptchaService.warmUpResult = { }
-
+    fun `warmUpPassiveChallenge should pass timeout to cacheState`() = runTest {
         val viewModel = createViewModel()
-
-        viewModel.warmUpPassiveChallenge(fakeActivity)
-
-        viewModel.result.test {
-            val result = awaitItem()
-            assertThat(result).isEqualTo(PassiveChallengeWarmerCompleted)
-
-            expectNoEvents()
+        val job = launch {
+            viewModel.warmUpPassiveChallenge(fakeActivity)
         }
+
+        val cacheStateCall = fakeHCaptchaService.awaitCacheStateCall()
+        assertThat(cacheStateCall.timeoutSeconds).isEqualTo(testPassiveCaptchaParams.tokenTimeoutSeconds)
+        fakeHCaptchaService.awaitWarmUpCall()
+
+        job.cancelAndJoin()
+        fakeHCaptchaService.ensureAllEventsConsumed()
     }
 
     @Test
@@ -60,12 +59,18 @@ internal class PassiveChallengeWarmerViewModelTest {
             hCaptchaService = hCaptchaService
         )
 
-        viewModel.warmUpPassiveChallenge(fakeActivity)
+        val job = launch {
+            viewModel.warmUpPassiveChallenge(fakeActivity)
+        }
 
+        hCaptchaService.awaitCacheStateCall()
         val warmUpCall = hCaptchaService.awaitWarmUpCall()
         assertThat(warmUpCall.siteKey).isEqualTo(testPassiveCaptchaParams.siteKey)
         assertThat(warmUpCall.rqData).isEqualTo(testPassiveCaptchaParams.rqData)
         assertThat(warmUpCall.activity).isEqualTo(fakeActivity)
+
+        job.cancelAndJoin()
+        hCaptchaService.ensureAllEventsConsumed()
     }
 
     private fun createViewModel(

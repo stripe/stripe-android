@@ -10,10 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -24,6 +26,7 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -37,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 
@@ -65,6 +69,9 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -111,6 +118,13 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
+                response.elementsSession?.passiveCaptchaParams?.let {
+                    passiveChallengeWarmer.start(
+                        passiveCaptchaParams = it,
+                        publishableKey = publishableKeyProvider(),
+                        productUsage = productUsage,
+                    )
+                }
                 val defaultBillingAddress = configurationState.defaults.billingDetails?.address
                 if (defaultBillingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
@@ -310,6 +324,9 @@ class CheckoutController @Inject internal constructor(
             statusBarColor = StatusBarCompat.color(activity),
         )
         subcomponent.initializer.initialize()
+
+        passiveChallengeWarmer.register(activity)
+
         return subcomponent.presenter
     }
 
@@ -319,6 +336,7 @@ class CheckoutController @Inject internal constructor(
      */
     fun destroy() {
         viewModelScope.cancel()
+        passiveChallengeWarmer.unregister()
         checkoutStateLoader.clear()
         savedState.clear()
     }

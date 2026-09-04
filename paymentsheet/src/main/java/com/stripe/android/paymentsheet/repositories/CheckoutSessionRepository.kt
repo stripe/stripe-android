@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -26,6 +27,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val hCaptchaService: HCaptchaService,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) {
@@ -120,13 +122,21 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun applyPromotionCode(
         sessionId: String,
         promotionCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "promotion_code" to promotionCode,
-            "elements_session_client[is_aggregation_expected]" to "true",
-        ),
-    )
+    ): Result<CheckoutSessionResponse> {
+        val passiveCaptchaResult = hCaptchaService.passiveCaptchaToken(Int.MAX_VALUE)
+        val passiveCaptchaToken = when (passiveCaptchaResult) {
+            is HCaptchaService.Result.Failure -> null
+            is HCaptchaService.Result.Success -> passiveCaptchaResult.token
+        }
+        return executePost(
+            url = updateUrl(sessionId),
+            params = mapOf(
+                "promotion_code" to promotionCode,
+                "elements_session_client[is_aggregation_expected]" to "true",
+                "passive_captcha_token" to passiveCaptchaToken
+            ),
+        )
+    }
 
     suspend fun updateTaxRegion(
         sessionId: String,

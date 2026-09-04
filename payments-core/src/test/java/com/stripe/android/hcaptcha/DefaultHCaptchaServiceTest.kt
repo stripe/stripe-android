@@ -3,6 +3,7 @@ package com.stripe.android.hcaptcha
 import android.os.Handler
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.DefaultHCaptchaServiceTest.FakeHCaptchaProvider.HCaptchaHandler
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
@@ -14,8 +15,11 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -413,6 +417,135 @@ internal class DefaultHCaptchaServiceTest {
         )
     }
 
+    @Test
+    fun `passiveCaptchaToken returns cached token without starting another verification`() = runTest {
+        TestContext.test {
+            val expectedToken = "warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(expectedToken)
+
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            hCaptchaProvider.awaitCall()
+            captchaEventsReporter.awaitSuccessfulWarmUp()
+
+            val result = service.passiveCaptchaToken(tokenTimeoutSeconds = null)
+
+            assertThat(result).isEqualTo(HCaptchaService.Result.Success(expectedToken))
+            hCaptchaProvider.ensureAllEventsConsumed()
+            captchaEventsReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `passiveCaptchaToken waits for an in-flight warmUp`() = runTest {
+        TestContext.test {
+            val expectedToken = "warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
+
+            val warmUp = launch {
+                service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            }
+            val hCaptcha = hCaptchaProvider.awaitCall()
+            val token = async {
+                service.passiveCaptchaToken(tokenTimeoutSeconds = null)
+            }
+            yield()
+            assertThat(token.isActive).isTrue()
+
+            val successCaptor = argumentCaptor<OnSuccessListener<HCaptchaTokenResponse>>()
+            verify(hCaptcha).addOnSuccessListener(successCaptor.capture())
+            successCaptor.firstValue.onSuccess(createHCaptchaTokenResponse(expectedToken))
+
+            assertThat(token.await()).isEqualTo(HCaptchaService.Result.Success(expectedToken))
+            warmUp.join()
+            captchaEventsReporter.awaitSuccessfulWarmUp()
+            hCaptchaProvider.ensureAllEventsConsumed()
+            captchaEventsReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `passiveCaptchaToken timeout does not clear an in-flight warmUp`() = runTest {
+        TestContext.test {
+            val expectedToken = "warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
+
+            val warmUp = launch {
+                service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            }
+            val hCaptcha = hCaptchaProvider.awaitCall()
+
+            val result = service.passiveCaptchaToken(tokenTimeoutSeconds = null)
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            assertThat((result as HCaptchaService.Result.Failure).error)
+                .isInstanceOf(TimeoutCancellationException::class.java)
+
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            hCaptchaProvider.ensureAllEventsConsumed()
+
+            val successCaptor = argumentCaptor<OnSuccessListener<HCaptchaTokenResponse>>()
+            verify(hCaptcha).addOnSuccessListener(successCaptor.capture())
+            successCaptor.firstValue.onSuccess(createHCaptchaTokenResponse(expectedToken))
+            warmUp.join()
+
+            captchaEventsReporter.awaitSuccessfulWarmUp()
+            captchaEventsReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `passiveCaptchaToken clears cache after returning token`() = runTest {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("first-token")
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            hCaptchaProvider.awaitCall()
+            captchaEventsReporter.awaitSuccessfulWarmUp()
+
+            service.passiveCaptchaToken(tokenTimeoutSeconds = null)
+
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("second-token")
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            hCaptchaProvider.awaitCall()
+            captchaEventsReporter.awaitSuccessfulWarmUp()
+            hCaptchaProvider.ensureAllEventsConsumed()
+            captchaEventsReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `cacheState expires cached token after its remaining lifetime`() = runTest {
+        val activity = mock<FragmentActivity>()
+        val hCaptchaProvider = FakeHCaptchaProvider().apply {
+            hCaptchaHandler = SetupSuccessfulHCaptcha("first-token")
+        }
+        val captchaEventsReporter = FakeCaptchaEventsReporter()
+        val service = DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
+
+        service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+        hCaptchaProvider.awaitCall()
+        captchaEventsReporter.awaitSuccessfulWarmUp()
+        ShadowSystemClock.advanceBy(10, TimeUnit.SECONDS)
+
+        service.cacheState(timeoutSeconds = 30).test {
+            assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.Cached)
+
+            testScheduler.advanceTimeBy(19_999)
+            expectNoEvents()
+            testScheduler.advanceTimeBy(1)
+            testScheduler.runCurrent()
+
+            assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.NeedsRefresh)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("second-token")
+        service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+        hCaptchaProvider.awaitCall()
+        captchaEventsReporter.awaitSuccessfulWarmUp()
+        hCaptchaProvider.ensureAllEventsConsumed()
+        captchaEventsReporter.ensureAllEventsConsumed()
+    }
+
     private suspend fun testTokenExpiration(
         elapsedSeconds: Long,
         tokenTimeoutSeconds: Int,
@@ -477,6 +610,33 @@ internal class DefaultHCaptchaServiceTest {
 
             firstWarmUpJob.cancel()
             firstWarmUpJob.join()
+        }
+    }
+
+    @Test
+    fun `warmUp allows execution after previous warmUp is cancelled`() = runTest {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
+            val firstWarmUp = launch {
+                service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            }
+            hCaptchaProvider.awaitCall()
+
+            firstWarmUp.cancel()
+            firstWarmUp.join()
+
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+
+            hCaptchaProvider.awaitCall()
+            captchaEventsReporter.awaitSuccessfulWarmUp()
+            hCaptchaProvider.ensureAllEventsConsumed()
+            captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -548,10 +708,6 @@ internal class DefaultHCaptchaServiceTest {
                 successCaptor.firstValue.onSuccess(createHCaptchaTokenResponse(token))
                 hCaptcha
             }
-        }
-
-        private fun createHCaptchaTokenResponse(token: String): HCaptchaTokenResponse {
-            return HCaptchaTokenResponse(token, mock<Handler>())
         }
     }
 
@@ -660,6 +816,12 @@ internal class DefaultHCaptchaServiceTest {
 
         suspend fun awaitCall(): Call = calls.awaitItem()
 
+        suspend fun awaitSuccessfulWarmUp() {
+            assertThat(awaitCall()).isEqualTo(Call.Init(TEST_SITE_KEY))
+            assertThat(awaitCall()).isEqualTo(Call.Execute(TEST_SITE_KEY))
+            assertThat(awaitCall()).isEqualTo(Call.Success(TEST_SITE_KEY))
+        }
+
         fun ensureAllEventsConsumed() {
             calls.ensureAllEventsConsumed()
         }
@@ -687,5 +849,9 @@ internal class DefaultHCaptchaServiceTest {
     companion object {
         private const val TEST_SITE_KEY = "test-site-key"
         private const val TEST_RQ_DATA = "test-rq-data"
+
+        private fun createHCaptchaTokenResponse(token: String): HCaptchaTokenResponse {
+            return HCaptchaTokenResponse(token, mock<Handler>())
+        }
     }
 }
