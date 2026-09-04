@@ -225,7 +225,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 fallbackRedirectUrl,
                 returnUrl = null,
                 enableLogging = args.enableLogging,
-                apiConfiguration = args.apiConfiguration,
+                apiConfiguration = args.apiConfiguration.copy(stripeAccountId = args.requestOptions.stripeAccount),
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true,
                 statusBarColor = args.statusBarColor,
