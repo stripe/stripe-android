@@ -21,15 +21,12 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
-import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkExpressMode
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.effectiveLinkBrand
-import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
@@ -99,7 +96,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: FlowControllerConfirmationHandler,
-    private val linkGateFactory: LinkGate.Factory,
+    private val linkPaymentMethodSelectionLauncher: LinkPaymentMethodSelectionLauncher,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
@@ -297,43 +294,20 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLink = linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
-                paymentSelection = paymentSelection,
+            val didPresentLink = linkPaymentMethodSelectionLauncher.launchIfEligible(
+                launcher = flowControllerLinkLauncher,
+                selection = paymentSelection,
+                configuration = linkConfiguration,
+                paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
                 linkAccountInfo = linkAccountInfo,
-                linkConfiguration = linkConfiguration
+                hasUserDeclinedVerification = viewModel.state?.declinedLink2FA == true,
+                statusBarColor = viewModel.statusBarColor,
             )
 
-            if (shouldPresentLink) {
-                val paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata
-                flowControllerLinkLauncher.present(
-                    configuration = linkConfiguration,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    linkAccountInfo = linkAccountInfo,
-                    linkExpressMode = LinkExpressMode.ENABLED,
-                    launchMode = LinkLaunchMode.PaymentMethodSelection(
-                        selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
-                    ),
-                    statusBarColor = viewModel.statusBarColor,
-                )
-            } else {
+            if (!didPresentLink) {
                 showPaymentOptionList(state, paymentSelection)
             }
         }
-    }
-
-    private fun shouldPresentLinkInsteadOfPaymentOptions(
-        paymentSelection: PaymentSelection?,
-        linkAccountInfo: LinkAccountUpdate.Value,
-        linkConfiguration: LinkConfiguration
-    ): Boolean {
-        // If the user has declined to use Link in the past, do not show it again.
-        return viewModel.state?.declinedLink2FA != true &&
-            // The current payment selection is Link
-            paymentSelection is Link &&
-            // The current user has a Link account (not necessarily logged in)
-            linkAccountInfo.account != null &&
-            // feature flag and other conditions are met
-            linkGateFactory.create(linkConfiguration).showRuxInFlowController
     }
 
     private fun showPaymentOptionList(
