@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -13,7 +14,7 @@ class PassiveChallengeWarmerContract :
     override fun createIntent(context: Context, input: Args): Intent {
         return PassiveChallengeWarmerActivity.createIntent(
             context,
-            PassiveChallengeWarmerArgs(input.passiveCaptchaParams, input.publishableKey, input.productUsage.toList())
+            PassiveChallengeWarmerArgs(input.passiveCaptchaParams, input.apiConfiguration, input.productUsage.toList())
         )
     }
 
@@ -22,7 +23,7 @@ class PassiveChallengeWarmerContract :
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args(
         val passiveCaptchaParams: PassiveCaptchaParams,
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val productUsage: Set<String>
     )
 

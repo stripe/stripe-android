@@ -54,7 +54,7 @@ internal class PaymentAuthWebViewActivityViewModel(
             return PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = Uri.parse(args.url).lastPathSegment.orEmpty(),
-                stripeAccountId = args.stripeAccountId
+                stripeAccountId = args.apiConfiguration.stripeAccountId
             )
         }
 
@@ -133,8 +133,8 @@ internal class PaymentAuthWebViewActivityViewModel(
                 args,
                 DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
                 PaymentAnalyticsRequestFactory(
-                    application,
-                    args.publishableKey,
+                    context = application,
+                    publishableKeyProvider = { args.apiConfiguration.publishableKey },
                     defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
                 )
             ) as T

@@ -2,6 +2,7 @@ package com.stripe.android.challenge.confirmation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
@@ -15,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultConfirmationChallengeBridgeHandlerTest {
 
     private val testArgs = IntentConfirmationChallengeArgs(
-        publishableKey = "pk_test_123",
+        apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
         productUsage = listOf("PaymentSheet"),
         captchaVendorName = "hcaptcha",

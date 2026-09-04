@@ -225,11 +225,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 fallbackRedirectUrl,
                 returnUrl = null,
                 enableLogging = args.enableLogging,
-                stripeAccountId = args.requestOptions.stripeAccount,
+                apiConfiguration = args.apiConfiguration.copy(stripeAccountId = args.requestOptions.stripeAccount),
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true,
                 statusBarColor = args.statusBarColor,
-                publishableKey = threeDS2RequestOptions.apiKey,
                 isInstantApp = isInstantApp,
                 toolbarCustomization = StripeToolbarCustomization().apply {
                     setButtonText(context.getString(R.string.stripe_cancel))
@@ -318,7 +317,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .create(
                 context = application,
                 enableLogging = args.enableLogging,
-                publishableKeyProvider = { args.publishableKey },
+                apiConfiguration = args.apiConfiguration,
                 productUsage = args.productUsage,
                 isInstantApp = InstantApps.isInstantApp(application),
             )

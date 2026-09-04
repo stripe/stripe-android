@@ -23,7 +23,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
     @JavascriptInterface
     override fun getInitParams(): String {
         val initParams = JSONObject().apply {
-            put("publishableKey", args.publishableKey)
+            put("publishableKey", args.apiConfiguration.publishableKey)
             put("clientSecret", args.intent.clientSecret)
         }
         return initParams.toString()
