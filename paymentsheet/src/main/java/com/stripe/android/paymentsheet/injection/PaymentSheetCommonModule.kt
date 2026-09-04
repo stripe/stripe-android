@@ -59,11 +59,13 @@ import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
+import com.stripe.android.paymentsheet.state.DefaultGetGooglePayState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.DefaultTapToAddAvailabilityFactory
+import com.stripe.android.paymentsheet.state.GetGooglePayState
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
@@ -150,6 +152,11 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsCreateLinkState(
         impl: DefaultCreateLinkState,
     ): CreateLinkState
+
+    @Binds
+    abstract fun bindsGetGooglePayState(
+        impl: DefaultGetGooglePayState,
+    ): GetGooglePayState
 
     @Binds
     abstract fun bindsPaymentSheetUpdater(

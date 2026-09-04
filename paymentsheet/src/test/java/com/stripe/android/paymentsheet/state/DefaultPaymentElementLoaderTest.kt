@@ -400,25 +400,29 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `google pay is disabled for automatic tax billing without default billing details`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
-        val loader = createPaymentElementLoader(userFacingLogger = userFacingLogger)
+        val getGooglePayState = createGetGooglePayState(
+            isGooglePayReady = true,
+            userFacingLogger = userFacingLogger,
+            errorReporter = FakeErrorReporter(),
+            durationProvider = FakeDurationProvider(),
+        )
         val checkoutSessionResponse = createCheckoutSessionResponse(
             canDetachPaymentMethod = true,
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
 
-        val isGooglePayReady = loader.isGooglePayReady(
+        val isGooglePayReady = getGooglePayState(
             configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                 .defaultBillingDetails(null)
                 .build()
                 .asCommonConfiguration(),
-            elementsSession = requireNotNull(checkoutSessionResponse.elementsSession),
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
-            isGooglePaySupportedByConfiguration = CompletableDeferred(true),
-        )
+            elementsSession = CompletableDeferred(requireNotNull(checkoutSessionResponse.elementsSession)),
+        ).isGooglePayReady
 
         assertThat(isGooglePayReady).isFalse()
         assertThat(userFacingLogger.getLoggedMessages())
@@ -5021,20 +5025,17 @@ internal class DefaultPaymentElementLoaderTest {
 
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
-            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
-                override fun invoke(
-                    environment: GooglePayEnvironment,
-                    cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
-                ): GooglePayRepository {
-                    return GooglePayRepository { flowOf(isGooglePayReady) }
-                }
-            },
             logger = Logger.noop(),
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = testDispatcher,
             createLinkState = createLinkState,
+            getGooglePayState = createGetGooglePayState(
+                isGooglePayReady = isGooglePayReady,
+                userFacingLogger = userFacingLogger,
+                errorReporter = errorReporter,
+                durationProvider = durationProvider,
+            ),
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             logFcLiteExperiment = logFcLiteExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
@@ -5058,6 +5059,28 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
+        )
+    }
+
+    private fun createGetGooglePayState(
+        isGooglePayReady: Boolean,
+        userFacingLogger: FakeUserFacingLogger,
+        errorReporter: ErrorReporter,
+        durationProvider: DurationProvider,
+    ): DefaultGetGooglePayState {
+        return DefaultGetGooglePayState(
+            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+                override fun invoke(
+                    environment: GooglePayEnvironment,
+                    cardFundingFilter: CardFundingFilter,
+                    cardBrandFilter: CardBrandFilter
+                ): GooglePayRepository {
+                    return GooglePayRepository { flowOf(isGooglePayReady) }
+                }
+            },
+            userFacingLogger = userFacingLogger,
+            errorReporter = errorReporter,
+            durationProvider = durationProvider,
         )
     }
 
