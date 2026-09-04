@@ -182,6 +182,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
         processingState = PrimaryButtonProcessingState.Idle(null),
         isProcessing = false,
         shouldDisplayLockIcon = true,
+        pendingPaymentMethodId = null,
     )
 
     private class FakeSoftwareKeyboardController : SoftwareKeyboardController {

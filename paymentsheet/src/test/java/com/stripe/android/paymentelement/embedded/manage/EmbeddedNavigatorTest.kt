@@ -306,6 +306,9 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -325,6 +328,9 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -334,9 +340,15 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `ManageAll isPerformingNetworkOperation returns false`() {
-        val screen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
+    fun `ManageAll isPerformingNetworkOperation maps processing state`() {
+        val interactor = FakeManageScreenInteractor()
+        val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
+
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+
+        interactor.updateState { it.copy(isProcessing = true) }
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test
@@ -493,6 +505,7 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},
@@ -673,6 +686,7 @@ internal class EmbeddedNavigatorTest {
                 processingState = PrimaryButtonProcessingState.Processing,
                 isProcessing = true,
                 shouldDisplayLockIcon = true,
+                pendingPaymentMethodId = null,
             )
         )
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen(
@@ -839,6 +853,7 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},
@@ -860,6 +875,7 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},

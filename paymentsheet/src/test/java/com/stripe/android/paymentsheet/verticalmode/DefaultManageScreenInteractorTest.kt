@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -350,6 +351,24 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `selection does not navigate back when completion is externally coordinated`() {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        var navigatedBack = false
+        runScenario(
+            initialPaymentMethods = listOf(paymentMethod),
+            currentSelection = null,
+            navigateBackAfterSelection = false,
+            handleBackPressed = { navigatedBack = true },
+        ) {
+            val displayable = interactor.state.value.paymentMethods.single()
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+
+            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
+            assertThat(navigatedBack).isFalse()
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -359,6 +378,7 @@ class DefaultManageScreenInteractorTest {
         isEditing: Boolean = false,
         configuredLinkBrand: LinkBrand = LinkBrand.Link,
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
+        navigateBackAfterSelection: Boolean = true,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
@@ -393,6 +413,10 @@ class DefaultManageScreenInteractorTest {
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
             linkAccount = linkAccount,
+            processing = stateFlowOf(false),
+            pendingPaymentMethodId = stateFlowOf(null),
+            error = stateFlowOf(null),
+            navigateBackAfterSelection = navigateBackAfterSelection,
             dispatcher = dispatcher
         )
         closeInteractorRule.track(interactor)

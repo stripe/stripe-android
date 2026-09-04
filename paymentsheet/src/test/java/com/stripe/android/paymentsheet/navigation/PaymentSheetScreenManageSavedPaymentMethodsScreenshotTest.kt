@@ -94,6 +94,9 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 isEditing = isEditing,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)

@@ -47,6 +47,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 @Suppress("LargeClass")
@@ -56,6 +60,65 @@ internal class DefaultSheetActivityStateHolderTest {
 
     @get:Rule
     val closeFormInteractorRule = CleanupTestRule(VerticalModeFormInteractor::close)
+
+    @Test
+    fun `saved payment method selection stays pending until tax update succeeds`() {
+        val updater = mock<SheetTaxRegionUpdater>()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val response = com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.create()
+        val releaseUpdate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        whenever(updater.prepareUpdate(any(), eq(selection))).thenReturn {
+            releaseUpdate.await()
+            Result.success(response)
+        }
+
+        testScenario(
+            launchMode = EmbeddedLaunchMode.Manage,
+            sheetTaxRegionUpdaterProvider = Provider { updater },
+        ) {
+            stateHolder.result.test {
+                stateHolder.selectSavedPaymentMethod(selection)
+                assertThat(stateHolder.state.value.isProcessing).isTrue()
+                assertThat(stateHolder.state.value.pendingPaymentMethodId).isEqualTo(selection.paymentMethod.id)
+                assertThat(selectionHolder.selection.value).isNull()
+                expectNoEvents()
+
+                releaseUpdate.complete(Unit)
+
+                val result = awaitItem() as EmbeddedActivityResult.Complete
+                assertThat(result.selection).isEqualTo(selection)
+                assertThat(result.checkoutSessionResponse).isEqualTo(response)
+                assertThat(result.shouldInvokeSelectionCallback).isTrue()
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+            }
+        }
+    }
+
+    @Test
+    fun `failed saved payment method selection keeps prior selection and sheet open`() {
+        val updater = mock<SheetTaxRegionUpdater>()
+        val priorSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val nextSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+        whenever(updater.prepareUpdate(any(), eq(nextSelection))).thenReturn {
+            Result.failure(IllegalStateException("update failed"))
+        }
+
+        testScenario(
+            launchMode = EmbeddedLaunchMode.Manage,
+            sheetTaxRegionUpdaterProvider = Provider { updater },
+        ) {
+            selectionHolder.setSelection(priorSelection)
+            stateHolder.result.test {
+                stateHolder.selectSavedPaymentMethod(nextSelection)
+
+                expectNoEvents()
+                assertThat(selectionHolder.selection.value).isEqualTo(priorSelection)
+                assertThat(stateHolder.state.value.isProcessing).isFalse()
+                assertThat(stateHolder.state.value.pendingPaymentMethodId).isNull()
+                assertThat(stateHolder.state.value.error).isNotNull()
+            }
+        }
+    }
 
     @Test
     fun `state initializes correctly`() = testScenario {
@@ -632,6 +695,7 @@ internal class DefaultSheetActivityStateHolderTest {
         initialBackStack: List<EmbeddedNavigator.Screen> = listOf(initialScreen),
         savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory =
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
+        sheetTaxRegionUpdaterProvider: Provider<SheetTaxRegionUpdater> = Provider { error("Not expected") },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
@@ -658,6 +722,7 @@ internal class DefaultSheetActivityStateHolderTest {
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
+            sheetTaxRegionUpdaterProvider = sheetTaxRegionUpdaterProvider,
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
@@ -744,6 +809,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},
@@ -761,6 +827,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},
