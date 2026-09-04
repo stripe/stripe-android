@@ -27,6 +27,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
+import com.stripe.android.link.LinkPaymentMethodSelectionResultHandler
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
@@ -2524,6 +2525,7 @@ internal class DefaultFlowControllerTest {
             linkPaymentMethodSelectionLauncher = LinkPaymentMethodSelectionLauncher(
                 FakeLinkGate.Factory(linkGate)
             ),
+            linkPaymentMethodSelectionResultHandler = LinkPaymentMethodSelectionResultHandler(),
             confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 listOf(KLARNA_PROMOTION)
