@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.test.runTest
@@ -12,7 +11,9 @@ import org.junit.Test
 internal class ImmediateVerticalPaymentSelectionHandlerTest {
 
     @Test
-    fun `saved selection updates with user input before completion`() = runScenario {
+    fun `updates selection before invoking supplied completion`() = runScenario(
+        completion = { events -> events.add(Event.SelectionCompleted) },
+    ) {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         handler.select(selection, true)
@@ -22,24 +23,17 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
     }
 
     @Test
-    fun `Google Pay selection updates without user input before completion`() = runScenario {
+    fun `updates selection when completion action is absent`() = runScenario(
+        completion = null,
+    ) {
         handler.select(PaymentSelection.GooglePay, false)
 
         assertThat(events.awaitItem()).isEqualTo(Event.SelectionUpdated(PaymentSelection.GooglePay, false))
-        assertThat(events.awaitItem()).isEqualTo(Event.SelectionCompleted)
-    }
-
-    @Test
-    fun `Link selection updates without user input before completion`() = runScenario {
-        val selection = PaymentSelection.Link(brand = LinkBrand.Link)
-
-        handler.select(selection, false)
-
-        assertThat(events.awaitItem()).isEqualTo(Event.SelectionUpdated(selection, false))
-        assertThat(events.awaitItem()).isEqualTo(Event.SelectionCompleted)
+        events.expectNoEvents()
     }
 
     private fun runScenario(
+        completion: ((Turbine<Event>) -> Unit)?,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val events = Turbine<Event>()
@@ -47,7 +41,7 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
             updateSelection = { selection, isUserInput ->
                 events.add(Event.SelectionUpdated(selection, isUserInput))
             },
-            onSelectionComplete = { events.add(Event.SelectionCompleted) },
+            onSelectionComplete = completion?.let { completion -> { completion(events) } },
         )
 
         Scenario(
