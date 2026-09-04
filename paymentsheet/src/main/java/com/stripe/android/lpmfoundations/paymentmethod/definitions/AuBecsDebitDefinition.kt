@@ -15,7 +15,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AuBankAccountNumberConfig
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
 import com.stripe.android.ui.core.elements.BsbElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -41,8 +41,8 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
 }
 
 private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    private val bsbNumberIdentifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
-    private val accountNumberIdentifier = IdentifierSpec.Generic("au_becs_debit[account_number]")
+    private val bsbNumberIdentifier = FormFieldId.Generic("au_becs_debit[bsb_number]")
+    private val accountNumberIdentifier = FormFieldId.Generic("au_becs_debit[account_number]")
 
     override fun createSupportedPaymentMethod(
         metadata: PaymentMethodMetadata,
@@ -66,7 +66,7 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 type = ContactInformationCollectionMode.Name,
                 formElement = SectionElement.wrap(
                     SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 label = StripeR.string.stripe_au_becs_account_name.resolvableString,
@@ -74,7 +74,7 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                                 keyboard = KeyboardType.Text,
                                 optional = false,
                             ),
-                            initialValue = arguments.initialValues[IdentifierSpec.Name],
+                            initialValue = arguments.initialValues[FormFieldId.Name],
                         ),
                     ),
                 ),
@@ -84,7 +84,7 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .element(
                 BsbElement(
-                    identifierSpec = bsbNumberIdentifier,
+                    formFieldId = bsbNumberIdentifier,
                     initialValue = arguments.initialValues[bsbNumberIdentifier],
                 )
             )
@@ -103,7 +103,7 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 if (metadata.mandateAllowed(AuBecsDebitDefinition.type)) {
                     footer(
                         AuBecsDebitMandateTextElement(
-                            identifier = IdentifierSpec.Generic("au_becs_mandate"),
+                            identifier = FormFieldId.Generic("au_becs_mandate"),
                             merchantName = arguments.merchantName,
                         )
                     )

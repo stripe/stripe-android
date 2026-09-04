@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import org.junit.Test
 
 class CheckoutPlaygroundSettingsTest {
@@ -168,12 +170,12 @@ class CheckoutPlaygroundSettingsTest {
 
     @Test
     fun `new customer is saved as returning customer`() = runScenario {
-        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.New)
 
         settings.saveReturningCustomer("cus_123")
 
         assertThat(settings.returningCustomerId).isEqualTo("cus_123")
-        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo("returning")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
     }
 
@@ -186,7 +188,66 @@ class CheckoutPlaygroundSettingsTest {
 
         assertThat(settings.returningCustomerId).isEqualTo("cus_123")
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
-        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo("guest")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Guest)
+    }
+
+    @Test
+    fun `preset atomically replaces settings and persists once`() {
+        val persisted = mutableListOf<Map<String, String>>()
+        val settings = CheckoutPlaygroundSettings.createInMemory(persist = persisted::add)
+        settings.update(CheckoutPlaygroundDefinitions.session.currency, Currency.GBP)
+        persisted.clear()
+        val preset = checkoutPlaygroundPreset {
+            set(CheckoutPlaygroundDefinitions.session.currency, Currency.EUR)
+            set(CheckoutPlaygroundDefinitions.session.merchant, Merchant.FR)
+        }
+
+        settings.applyPreset(preset)
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.currency]).isEqualTo(Currency.EUR)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.FR)
+        assertThat(persisted).hasSize(1)
+    }
+
+    @Test
+    fun `preset restores values not overridden to defaults`() = runScenario {
+        val save = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        settings.update(save, false)
+
+        settings.applyPreset(
+            checkoutPlaygroundPreset {
+                set(CheckoutPlaygroundDefinitions.session.currency, Currency.EUR)
+            }
+        )
+
+        assertThat(settings[save]).isTrue()
+    }
+
+    @Test
+    fun `returning customer preset preserves stored customer ID`() = runScenario {
+        settings.saveReturningCustomer("cus_123")
+
+        settings.applyPreset(
+            checkoutPlaygroundPreset {
+                set(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.Returning)
+            }
+        )
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
+    }
+
+    @Test
+    fun `legacy JSON without new settings uses defaults`() {
+        val settings = CheckoutPlaygroundSettings.createInMemory(
+            json = """{"session.customer":"returning","session.currency":"eur"}""",
+        )
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.paymentMethodRemove]).isTrue()
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.US)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.adaptivePricingCountry])
+            .isEqualTo(AdaptivePricingCountry.None)
     }
 
     private fun runScenario(

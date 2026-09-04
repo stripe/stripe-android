@@ -15,6 +15,18 @@ internal fun CheckoutController.Address.State.asPaymentSheet(): PaymentSheet.Add
 )
 
 @OptIn(CheckoutSessionPreview::class)
+internal fun PaymentSheet.Address.toCheckoutAddress(): CheckoutController.Address.State? {
+    return CheckoutController.Address.State(
+        city = city,
+        country = country?.takeIf { it.isNotBlank() } ?: return null,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
 internal fun Address.toCheckoutAddress(): CheckoutController.Address.State? {
     return CheckoutController.Address.State(
         city = city,

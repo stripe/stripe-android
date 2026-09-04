@@ -7,29 +7,87 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 
+@OptIn(CheckoutSessionPreview::class)
+internal fun interface CommitShippingAddress {
+    suspend operator fun invoke(
+        name: String?,
+        address: CheckoutController.Address.State,
+    ): Result<Unit>
+}
+
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ShippingAddressElement @Inject internal constructor(
+class ShippingAddressElement internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
+    private val commitShippingAddress: CommitShippingAddress,
     private val stateHolder: CheckoutControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
 ) {
+    @Inject
+    internal constructor(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+        paymentConfiguration: Provider<PaymentConfiguration>,
+        @ViewModelScope coroutineScope: CoroutineScope,
+        checkoutController: CheckoutController,
+        stateHolder: CheckoutControllerStateHolder,
+        shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
+        errorReporter: ErrorReporter,
+    ) : this(
+        activityResultCaller = activityResultCaller,
+        lifecycleOwner = lifecycleOwner,
+        paymentConfiguration = paymentConfiguration,
+        coroutineScope = coroutineScope,
+        commitShippingAddress = CommitShippingAddress(checkoutController::commitShippingAddress),
+        stateHolder = stateHolder,
+        shippingAddressElementStateHolder = shippingAddressElementStateHolder,
+        errorReporter = errorReporter,
+    )
+
     private val activityLauncher: ActivityResultLauncher<AddressElementActivityContract.Args> =
-        activityResultCaller.registerForActivityResult(AddressElementActivityContract) {
-            shippingAddressElementStateHolder.isPresenting = false
+        activityResultCaller.registerForActivityResult(AddressElementActivityContract) { result ->
+            when (result) {
+                is AddressLauncherResult.Succeeded -> {
+                    val address = result.address.address?.toCheckoutAddress()
+                    if (address == null) {
+                        shippingAddressElementStateHolder.isPresenting = false
+                    } else {
+                        coroutineScope.launch {
+                            try {
+                                commitShippingAddress(
+                                    result.address.name,
+                                    address,
+                                )
+                            } finally {
+                                shippingAddressElementStateHolder.isPresenting = false
+                            }
+                        }
+                    }
+                }
+                is AddressLauncherResult.Canceled -> {
+                    shippingAddressElementStateHolder.isPresenting = false
+                }
+            }
         }
 
     init {

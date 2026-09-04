@@ -27,7 +27,7 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -56,7 +56,7 @@ internal fun IDNumberSection(
             )
         )
     }
-    val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }
+    val countryElement = remember { CountryElement(FormFieldId.Country, controller) }
     val usElement = remember {
         SimpleTextElement(
             identifier = US_SPEC,
@@ -313,13 +313,13 @@ private object BRVisualTransformation : VisualTransformation {
 }
 
 internal const val US_CODE = "US"
-internal val US_SPEC = IdentifierSpec.Generic("USSpec")
+internal val US_SPEC = FormFieldId.Generic("USSpec")
 internal const val US_ID_PLACEHOLDER = "***-**-1234"
 internal const val US_ID_PLACEHOLDER_PREFIX = "***-**-"
 internal const val SINGAPORE_CODE = "SG"
 internal const val BRAZIL_ID_PLACEHOLDER = "000.000.000-00"
 internal const val BRAZIL_CODE = "BR"
-internal val BRAZIL_SPEC = IdentifierSpec.Generic("BRSpec")
+internal val BRAZIL_SPEC = FormFieldId.Generic("BRSpec")
 internal const val SINGAPORE_ID_PLACEHOLDER = "S1234567A"
-internal val SINGAPORE_SPEC = IdentifierSpec.Generic("SingaporeSpec")
+internal val SINGAPORE_SPEC = FormFieldId.Generic("SingaporeSpec")
 internal const val ID_NUMBER_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"

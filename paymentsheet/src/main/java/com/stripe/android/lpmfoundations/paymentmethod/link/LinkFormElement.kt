@@ -12,7 +12,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.LocalSectionSpacing
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -26,17 +26,17 @@ internal class LinkFormElement(
     private val previousLinkSignupCheckboxSelection: Boolean?,
 ) : RenderableFormElement(
     allowsUserInteraction = true,
-    identifier = IdentifierSpec.Generic("link_form")
+    identifier = FormFieldId.Generic("link_form")
 ) {
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
         return stateFlowOf(listOf())
     }
 
     @Composable
     override fun ComposeUI(
         enabled: Boolean,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         val modifier = Modifier.run {
             if (LocalSectionSpacing.current == null) {

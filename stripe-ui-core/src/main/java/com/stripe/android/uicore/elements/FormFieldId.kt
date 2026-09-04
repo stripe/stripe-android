@@ -22,15 +22,15 @@ sealed interface ParameterDestination : Parcelable {
 }
 
 /**
- * This uniquely identifies a element in the form.  The vals here are for identifier
- * specs that need to be found when pre-populating fields, or when extracting data.
+ * Uniquely identifies an element in a form. The predefined IDs are used when pre-populating
+ * fields and extracting their values.
  * @param ignoreField set this to true to ensure that the field does not get put in the params list
  * when making a Stripe request. Used in [FieldValuesToParamsMapConverter.kt]
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 @Parcelize
-data class IdentifierSpec(
+data class FormFieldId(
     val v1: String,
     val ignoreField: Boolean = false,
     val destination: ParameterDestination = ParameterDestination.Api.Params,
@@ -39,83 +39,83 @@ data class IdentifierSpec(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun Generic(_value: String) = IdentifierSpec(_value)
+        fun Generic(_value: String) = FormFieldId(_value)
 
         // Needed to pre-populate forms
-        val Name = IdentifierSpec("billing_details[name]")
+        val Name = FormFieldId("billing_details[name]")
 
-        val CardBrand = IdentifierSpec("card[brand]")
+        val CardBrand = FormFieldId("card[brand]")
 
-        val PreferredCardBrand = IdentifierSpec("card[networks][preferred]")
+        val PreferredCardBrand = FormFieldId("card[networks][preferred]")
 
-        val CardNumber = IdentifierSpec("card[number]")
+        val CardNumber = FormFieldId("card[number]")
 
-        val CardCvc = IdentifierSpec("card[cvc]")
+        val CardCvc = FormFieldId("card[cvc]")
 
-        val CardExpMonth = IdentifierSpec("card[exp_month]")
+        val CardExpMonth = FormFieldId("card[exp_month]")
 
-        val CardExpYear = IdentifierSpec("card[exp_year]")
+        val CardExpYear = FormFieldId("card[exp_year]")
 
-        val BillingAddress = IdentifierSpec("billing_details[address]")
+        val BillingAddress = FormFieldId("billing_details[address]")
 
-        val Email = IdentifierSpec("billing_details[email]")
+        val Email = FormFieldId("billing_details[email]")
 
-        val Phone = IdentifierSpec("billing_details[phone]")
+        val Phone = FormFieldId("billing_details[phone]")
 
-        val Line1 = IdentifierSpec("billing_details[address][line1]")
+        val Line1 = FormFieldId("billing_details[address][line1]")
 
-        val Line2 = IdentifierSpec("billing_details[address][line2]")
+        val Line2 = FormFieldId("billing_details[address][line2]")
 
-        val City = IdentifierSpec("billing_details[address][city]")
+        val City = FormFieldId("billing_details[address][city]")
 
         // FieldValuesToParamsMapConverter will ignore this in the parameter list
-        val DependentLocality = IdentifierSpec("")
+        val DependentLocality = FormFieldId("")
 
-        val PostalCode = IdentifierSpec("billing_details[address][postal_code]")
+        val PostalCode = FormFieldId("billing_details[address][postal_code]")
 
-        val SortingCode = IdentifierSpec("")
+        val SortingCode = FormFieldId("")
 
-        val State = IdentifierSpec("billing_details[address][state]")
+        val State = FormFieldId("billing_details[address][state]")
 
-        val Country = IdentifierSpec("billing_details[address][country]")
+        val Country = FormFieldId("billing_details[address][country]")
 
         // Unique extracting functionality
-        val SaveForFutureUse = IdentifierSpec("save_for_future_use")
-        val OneLineAddress = IdentifierSpec("address")
-        val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
+        val SaveForFutureUse = FormFieldId("save_for_future_use")
+        val OneLineAddress = FormFieldId("address")
+        val SameAsShipping = FormFieldId("same_as_shipping", ignoreField = true)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val SetAsDefaultPaymentMethod = IdentifierSpec(
+        val SetAsDefaultPaymentMethod = FormFieldId(
             v1 = "set_as_default_payment_method",
             destination = ParameterDestination.Local.Extras
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val Blik = IdentifierSpec("blik", destination = ParameterDestination.Api.Options)
+        val Blik = FormFieldId("blik", destination = ParameterDestination.Api.Options)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val BlikCode = IdentifierSpec("blik[code]", destination = ParameterDestination.Api.Options)
+        val BlikCode = FormFieldId("blik[code]", destination = ParameterDestination.Api.Options)
 
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val KonbiniConfirmationNumber = IdentifierSpec(
+        val KonbiniConfirmationNumber = FormFieldId(
             v1 = "konbini[confirmation_number]",
             destination = ParameterDestination.Api.Options
         )
 
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val BacsDebitConfirmed = IdentifierSpec(
+        val BacsDebitConfirmed = FormFieldId(
             "bacs_debit[confirmed]",
             destination = ParameterDestination.Local.Extras
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val PhoneNumberCountry = IdentifierSpec(
+        val PhoneNumberCountry = FormFieldId(
             v1 = "phone_number_country",
             destination = ParameterDestination.Local.Extras
         )
 
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val CardValidatedScan = IdentifierSpec(
+        val CardValidatedScan = FormFieldId(
             "card[validated_scan]",
             destination = ParameterDestination.Local.Extras
         )

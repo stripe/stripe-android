@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -30,7 +29,6 @@ import javax.inject.Singleton
         GooglePayPaymentDataUpdateNoOpModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentSheetViewModelModule::class,

@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CleanupTestRule
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -93,7 +93,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
 
     private suspend fun createFormParamsFromFormValues(
         config: LpmBillingAddressTestConfiguration,
-        rawValues: Map<IdentifierSpec, String?>,
+        rawValues: Map<FormFieldId, String?>,
     ): LpmBillingAddressFormParams {
         val metadata = config.metadata()
         val formViewModel = createFormViewModel(
@@ -111,7 +111,7 @@ internal class LpmBillingAddressFormValuesToParamsTest {
     private fun createFormViewModel(
         paymentMethodType: PaymentMethod.Type,
         metadata: PaymentMethodMetadata,
-        initialValues: Map<IdentifierSpec, String?>,
+        initialValues: Map<FormFieldId, String?>,
     ): FormViewModel {
         val formElements = requireNotNull(
             metadata.formElementsForCode(
@@ -168,7 +168,7 @@ private val specializedFlowDefinitions: Set<PaymentMethodDefinition> = setOf(
 internal data class LpmBillingAddressFormValuesToParamsTestCase(
     val name: String,
     val config: LpmBillingAddressTestConfiguration,
-    val rawValues: Map<IdentifierSpec, String?>,
+    val rawValues: Map<FormFieldId, String?>,
     val expectedParams: LpmBillingAddressFormParams,
 ) {
     override fun toString(): String = name
@@ -181,46 +181,46 @@ internal data class LpmBillingAddressFormParams(
 )
 
 internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
+    addAll(affirmTestCases)
     addAll(afterpayClearpayTestCases)
+    addAll(alipayTestCases)
+    addAll(almaTestCases)
     addAll(amazonPayTestCases)
-    addAll(bancontactTestCases)
-    addAll(boletoTestCases)
-    addAll(sepaDebitTestCases)
-    addAll(weroTestCases)
-    addAll(klarnaTestCases)
-    addAll(bacsDebitTestCases)
-    addAll(oxxoTestCases)
     addAll(auBecsDebitTestCases)
+    addAll(bacsDebitTestCases)
+    addAll(bancontactTestCases)
+    addAll(billieTestCases)
     addAll(blikTestCases)
-    addAll(p24TestCases)
+    addAll(boletoTestCases)
+    addAll(cashAppPayTestCases)
+    addAll(cryptoTestCases)
     addAll(epsTestCases)
     addAll(fpxTestCases)
+    addAll(grabPayTestCases)
+    addAll(idealFormParamsTestCases)
+    addAll(klarnaTestCases)
     addAll(konbiniTestCases)
     addAll(krCardTestCases)
     addAll(mobilePayTestCases)
     addAll(multibancoTestCases)
     addAll(naverPayTestCases)
-    addAll(promptPayTestCases)
-    addAll(idealFormParamsTestCases)
-    addAll(affirmTestCases)
-    addAll(alipayTestCases)
-    addAll(almaTestCases)
-    addAll(billieTestCases)
-    addAll(cashAppPayTestCases)
-    addAll(cryptoTestCases)
-    addAll(grabPayTestCases)
+    addAll(oxxoTestCases)
+    addAll(p24TestCases)
     addAll(payByBankTestCases)
     addAll(paycoTestCases)
     addAll(payNowTestCases)
-    addAll(payPayTestCases)
     addAll(payPalTestCases)
+    addAll(payPayTestCases)
+    addAll(promptPayTestCases)
     addAll(revolutPayTestCases)
     addAll(satispayTestCases)
+    addAll(sepaDebitTestCases)
     addAll(sequraTestCases)
     addAll(sunbitTestCases)
     addAll(swishTestCases)
     addAll(twintTestCases)
     addAll(weChatPayTestCases)
+    addAll(weroTestCases)
     addAll(zipTestCases)
 }
 

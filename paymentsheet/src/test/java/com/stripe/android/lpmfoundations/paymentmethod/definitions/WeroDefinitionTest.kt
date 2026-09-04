@@ -9,7 +9,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +25,7 @@ class WeroDefinitionTest {
                     paymentMethodTypes = listOf("wero")
                 )
             ),
-            initialValues = mapOf(IdentifierSpec.Country to "BE"),
+            initialValues = mapOf(FormFieldId.Country to "BE"),
         )
 
         assertThat(formElements).hasSize(1)
@@ -72,7 +72,7 @@ class WeroDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
             ),
-            initialValues = mapOf(IdentifierSpec.Country to "DE"),
+            initialValues = mapOf(FormFieldId.Country to "DE"),
         )
 
         assertThat(formElements).hasSize(4)

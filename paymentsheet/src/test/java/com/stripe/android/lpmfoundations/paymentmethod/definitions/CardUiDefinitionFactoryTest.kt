@@ -23,7 +23,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.ScannedCardDetails
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -228,7 +228,7 @@ class CardUiDefinitionFactoryTest {
         )
 
         val saveForFutureUseElement = formElements.first {
-            it.identifier == IdentifierSpec.SaveForFutureUse
+            it.identifier == FormFieldId.SaveForFutureUse
         } as SaveForFutureUseElement
 
         saveForFutureUseElement.controller.onValueChange(true)
@@ -388,7 +388,7 @@ class CardUiDefinitionFactoryTest {
                             "exp_year" to "2050",
                             "cvc" to "123",
                         ),
-                        "billing_details" to emptyMap<IdentifierSpec, String?>(),
+                        "billing_details" to emptyMap<FormFieldId, String?>(),
                     ),
                     productUsage = emptySet(),
                     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,

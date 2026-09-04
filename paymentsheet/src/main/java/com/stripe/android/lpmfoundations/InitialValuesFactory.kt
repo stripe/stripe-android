@@ -4,7 +4,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.ParameterDestination
 
 internal object InitialValuesFactory {
@@ -12,7 +12,7 @@ internal object InitialValuesFactory {
         defaultBillingDetails: PaymentSheet.BillingDetails?,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?
-    ): Map<IdentifierSpec, String?> {
+    ): Map<FormFieldId, String?> {
         val initialValues = paymentMethodCreateParams?.let {
             convertToFormValuesMap(it.toParamMap())
         } ?: emptyMap()
@@ -24,15 +24,15 @@ internal object InitialValuesFactory {
         } ?: emptyMap()
 
         return mapOf(
-            IdentifierSpec.Name to defaultBillingDetails?.name,
-            IdentifierSpec.Email to defaultBillingDetails?.email,
-            IdentifierSpec.Phone to defaultBillingDetails?.phone,
-            IdentifierSpec.Line1 to defaultBillingDetails?.address?.line1,
-            IdentifierSpec.Line2 to defaultBillingDetails?.address?.line2,
-            IdentifierSpec.City to defaultBillingDetails?.address?.city,
-            IdentifierSpec.State to defaultBillingDetails?.address?.state,
-            IdentifierSpec.Country to defaultBillingDetails?.address?.country,
-            IdentifierSpec.PostalCode to defaultBillingDetails?.address?.postalCode
+            FormFieldId.Name to defaultBillingDetails?.name,
+            FormFieldId.Email to defaultBillingDetails?.email,
+            FormFieldId.Phone to defaultBillingDetails?.phone,
+            FormFieldId.Line1 to defaultBillingDetails?.address?.line1,
+            FormFieldId.Line2 to defaultBillingDetails?.address?.line2,
+            FormFieldId.City to defaultBillingDetails?.address?.city,
+            FormFieldId.State to defaultBillingDetails?.address?.state,
+            FormFieldId.Country to defaultBillingDetails?.address?.country,
+            FormFieldId.PostalCode to defaultBillingDetails?.address?.postalCode
         ).plus(initialValues).plus(initialExtras)
     }
 }

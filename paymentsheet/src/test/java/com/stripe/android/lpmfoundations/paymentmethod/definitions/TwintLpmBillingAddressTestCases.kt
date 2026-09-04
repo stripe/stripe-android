@@ -5,14 +5,14 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val twintRawValues = mapOf(
-    IdentifierSpec.Line1 to "Bahnhofstrasse 1",
-    IdentifierSpec.Line2 to "2. Stock",
-    IdentifierSpec.City to "Zürich",
-    IdentifierSpec.PostalCode to "8001",
-    IdentifierSpec.Country to "CH",
+    FormFieldId.Line1 to "Bahnhofstrasse 1",
+    FormFieldId.Line2 to "2. Stock",
+    FormFieldId.City to "Zürich",
+    FormFieldId.PostalCode to "8001",
+    FormFieldId.Country to "CH",
 )
 private val twintTypeOnlyExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(

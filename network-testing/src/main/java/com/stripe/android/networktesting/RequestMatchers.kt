@@ -151,6 +151,12 @@ object RequestMatchers {
         }
     }
 
+    fun doesNotContainBodyPartsWithPrefix(prefix: String): RequestMatcher {
+        return ToStringRequestMatcher("doesNotContainBodyPartsWithPrefix($prefix)") { request ->
+            request.bodyParams.keys.none { it.startsWith(prefix) }
+        }
+    }
+
     fun bodyPart(name: String, value: String): RequestMatcher {
         return ToStringRequestMatcher("bodyPart($name, $value)") { request ->
             request.bodyParams[name] == value ||

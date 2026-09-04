@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.AdaptivePricingCountry
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.Controller
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -22,22 +25,23 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("customer", "guest")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
+                put("merchant_country_code", "US")
                 put("automatic_payment_methods", true)
                 put("automatic_tax", false)
                 put("shipping_address_collection", false)
                 put("billing_address_collection", false)
             }
         )
-        assertThat(request.body).doesNotContainKey("merchant_country_code")
     }
 
     @Test
     fun `new customer enables payment method saving`() = runScenario {
         settings.update(session.customerId, "cus_ignored")
-        settings.update(session.customer, "new")
+        settings.update(session.customer, CheckoutCustomer.New)
         settings.update(session.customerEmail, "another@example.com")
         settings.update(session.currency, Currency.EUR)
         settings.update(session.automaticTax, true)
+        settings.update(session.merchant, Merchant.US_TAX)
         settings.update(session.shippingAddressCollection, true)
         settings.update(session.billingAddressCollection, true)
 
@@ -60,7 +64,7 @@ class CheckoutControllerExampleRequestFactoryTest {
 
     @Test
     fun `new customer can disable payment method saving`() = runScenario {
-        settings.update(session.customer, "new")
+        settings.update(session.customer, CheckoutCustomer.New)
         settings.update(session.paymentMethodSave, false)
 
         val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
@@ -71,6 +75,7 @@ class CheckoutControllerExampleRequestFactoryTest {
                 put("checkout_session_payment_method_save", "disabled")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
+                put("merchant_country_code", "US")
                 put("automatic_payment_methods", true)
                 put("automatic_tax", false)
                 put("shipping_address_collection", false)
@@ -81,7 +86,7 @@ class CheckoutControllerExampleRequestFactoryTest {
 
     @Test
     fun `returning customer with arbitrary ID enables payment method saving`() = runScenario {
-        settings.update(session.customer, "returning")
+        settings.update(session.customer, CheckoutCustomer.Returning)
         settings.update(session.customerId, "cus_custom")
 
         val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
@@ -90,8 +95,10 @@ class CheckoutControllerExampleRequestFactoryTest {
             buildJsonObject {
                 put("customer", "cus_custom")
                 put("checkout_session_payment_method_save", "enabled")
+                put("checkout_session_payment_method_remove", "enabled")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
+                put("merchant_country_code", "US")
                 put("automatic_payment_methods", true)
                 put("automatic_tax", false)
                 put("shipping_address_collection", false)
@@ -102,7 +109,7 @@ class CheckoutControllerExampleRequestFactoryTest {
 
     @Test
     fun `returning customer without saved ID uses fixture and enables payment method saving`() = runScenario {
-        settings.update(session.customer, "returning")
+        settings.update(session.customer, CheckoutCustomer.Returning)
 
         val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
 
@@ -110,8 +117,10 @@ class CheckoutControllerExampleRequestFactoryTest {
             buildJsonObject {
                 put("customer", "returning")
                 put("checkout_session_payment_method_save", "enabled")
+                put("checkout_session_payment_method_remove", "enabled")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
+                put("merchant_country_code", "US")
                 put("automatic_payment_methods", true)
                 put("automatic_tax", false)
                 put("shipping_address_collection", false)
@@ -132,6 +141,16 @@ class CheckoutControllerExampleRequestFactoryTest {
             JsonArray(listOf(JsonPrimitive("card"), JsonPrimitive("klarna"))),
         )
         assertThat(request.body).containsEntry("automatic_payment_methods", JsonPrimitive(false))
+    }
+
+    @Test
+    fun `adaptive pricing country generates location test email`() = runScenario {
+        settings.update(session.adaptivePricingCountry, AdaptivePricingCountry.Japan)
+
+        val request = CheckoutControllerExampleRequestFactory.create(settings = settings.snapshot())
+
+        assertThat(request.body).containsEntry("adaptive_pricing", JsonPrimitive(true))
+        assertThat(request.body).containsEntry("customer_email", JsonPrimitive("test+location_JP@example.com"))
     }
 
     @Test

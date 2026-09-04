@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.combine
  * the list of form elements into a [FormFieldValues].
  */
 internal class CompleteFormFieldValueFilter(
-    private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
-    private val hiddenIdentifiers: Flow<Set<IdentifierSpec>>,
+    private val currentFieldValueMap: Flow<Map<FormFieldId, FormFieldEntry>>,
+    private val hiddenIdentifiers: Flow<Set<FormFieldId>>,
     private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>,
-    private val defaultValues: Map<IdentifierSpec, String>,
+    private val defaultValues: Map<FormFieldId, String>,
 ) {
     /**
      * This flow does not emit any value until all form field values are complete, then it emits an
@@ -35,10 +35,10 @@ internal class CompleteFormFieldValueFilter(
     }
 
     private fun filterFlow(
-        idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
-        hiddenIdentifiers: Set<IdentifierSpec>,
+        idFieldSnapshotMap: Map<FormFieldId, FormFieldEntry>,
+        hiddenIdentifiers: Set<FormFieldId>,
         userRequestedReuse: PaymentSelection.CustomerRequestedSave,
-        defaultValues: Map<IdentifierSpec, String>,
+        defaultValues: Map<FormFieldId, String>,
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing

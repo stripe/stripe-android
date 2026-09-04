@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 internal data class FormArguments(
@@ -24,18 +24,18 @@ internal data class FormArguments(
         PaymentSheet.BillingDetailsCollectionConfiguration(),
 ) {
     val defaultFormValues by lazy {
-        mutableMapOf<IdentifierSpec, String>().apply {
+        mutableMapOf<FormFieldId, String>().apply {
             if (billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
                 billingDetails?.let { billingDetails ->
-                    billingDetails.name?.let { this[IdentifierSpec.Name] = it }
-                    billingDetails.email?.let { this[IdentifierSpec.Email] = it }
-                    billingDetails.phone?.let { this[IdentifierSpec.Phone] = it }
-                    billingDetails.address?.line1?.let { this[IdentifierSpec.Companion.Line1] = it }
-                    billingDetails.address?.line2?.let { this[IdentifierSpec.Companion.Line2] = it }
-                    billingDetails.address?.city?.let { this[IdentifierSpec.Companion.City] = it }
-                    billingDetails.address?.state?.let { this[IdentifierSpec.Companion.State] = it }
-                    billingDetails.address?.postalCode?.let { this[IdentifierSpec.Companion.PostalCode] = it }
-                    billingDetails.address?.country?.let { this[IdentifierSpec.Companion.Country] = it }
+                    billingDetails.name?.let { this[FormFieldId.Name] = it }
+                    billingDetails.email?.let { this[FormFieldId.Email] = it }
+                    billingDetails.phone?.let { this[FormFieldId.Phone] = it }
+                    billingDetails.address?.line1?.let { this[FormFieldId.Companion.Line1] = it }
+                    billingDetails.address?.line2?.let { this[FormFieldId.Companion.Line2] = it }
+                    billingDetails.address?.city?.let { this[FormFieldId.Companion.City] = it }
+                    billingDetails.address?.state?.let { this[FormFieldId.Companion.State] = it }
+                    billingDetails.address?.postalCode?.let { this[FormFieldId.Companion.PostalCode] = it }
+                    billingDetails.address?.country?.let { this[FormFieldId.Companion.Country] = it }
                 }
             }
         }.toMap()

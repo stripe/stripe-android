@@ -9,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object WeroDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Wero
@@ -45,7 +45,7 @@ private object WeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder
             .requireCountry(
                 allowedCountryCodes = setOf("DE", "BE", "FR"),
-                initialValue = arguments.initialValues[IdentifierSpec.Country],
+                initialValue = arguments.initialValues[FormFieldId.Country],
             )
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)

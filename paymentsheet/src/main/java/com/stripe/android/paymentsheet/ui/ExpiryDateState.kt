@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.ui.core.elements.CardDetailsUtil
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.elements.canAcceptInput
@@ -36,14 +36,14 @@ internal data class ExpiryDateState(
 
     val expiryMonth: Int?
         get() = formFieldValues?.toIntOrNull(
-            key = IdentifierSpec.CardExpMonth,
+            key = FormFieldId.CardExpMonth,
             min = JANUARY,
             max = DECEMBER,
         )
 
     val expiryYear: Int?
         get() = formFieldValues?.toIntOrNull(
-            key = IdentifierSpec.CardExpYear,
+            key = FormFieldId.CardExpYear,
             min = YEAR_2000,
             max = YEAR_2100,
         )
@@ -71,8 +71,8 @@ internal data class ExpiryDateState(
         return copy(text = proposedValue)
     }
 
-    private fun Map<IdentifierSpec, FormFieldEntry>.toIntOrNull(
-        key: IdentifierSpec,
+    private fun Map<FormFieldId, FormFieldEntry>.toIntOrNull(
+        key: FormFieldId,
         min: Int,
         max: Int
     ): Int? {

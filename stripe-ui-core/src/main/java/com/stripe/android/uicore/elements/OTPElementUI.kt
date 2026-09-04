@@ -65,7 +65,7 @@ internal fun OTPElementUIPreview() {
         OTPElementUI(
             enabled = true,
             element = OTPElement(
-                identifier = IdentifierSpec.Generic("otp"),
+                identifier = FormFieldId.Generic("otp"),
                 controller = OTPController()
             )
         )
@@ -79,7 +79,7 @@ internal fun OTPElementUIDisabledPreview() {
         OTPElementUI(
             enabled = false,
             element = OTPElement(
-                identifier = IdentifierSpec.Generic("otp"),
+                identifier = FormFieldId.Generic("otp"),
                 controller = OTPController()
             )
         )
