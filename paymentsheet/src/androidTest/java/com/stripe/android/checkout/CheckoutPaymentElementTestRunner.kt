@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.MainActivity
@@ -23,8 +24,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementTestRunnerContext(
-    private val presenter: CheckoutPresenter,
+    private var presenter: CheckoutPresenter,
     private val countDownLatch: CountDownLatch,
+    private val scenario: ActivityScenario<MainActivity>,
+    private val controller: CheckoutController,
 ) {
     fun presentPaymentOptions() {
         presenter.paymentElement().present()
@@ -32,6 +35,16 @@ internal class CheckoutPaymentElementTestRunnerContext(
 
     fun confirm() {
         presenter.confirm()
+    }
+
+    fun recreateHost() {
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.recreate()
+        scenario.onActivity { activity ->
+            presenter = controller.createPresenter(activity)
+            activity.setCheckoutContent(presenter)
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
     }
 
     /**
@@ -45,6 +58,7 @@ internal class CheckoutPaymentElementTestRunnerContext(
 
 internal fun runCheckoutPaymentElementTest(
     networkRule: NetworkRule,
+    rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
         error("Override + validate if expected.")
     },
@@ -72,7 +86,8 @@ internal fun runCheckoutPaymentElementTest(
         ).resultCallback { result ->
             resultCallback.onResult(result)
             countDownLatch.countDown()
-        }.build()
+        }.rowSelectionBehavior(rowSelectionBehavior)
+            .build()
 
         runBlocking {
             setup(controller)
@@ -81,12 +96,7 @@ internal fun runCheckoutPaymentElementTest(
         lateinit var presenter: CheckoutPresenter
         scenario.onActivity { activity ->
             presenter = controller.createPresenter(activity)
-            val paymentElement = presenter.paymentElement()
-            activity.setContent {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    paymentElement.Content()
-                }
-            }
+            activity.setCheckoutContent(presenter)
         }
 
         scenario.moveToState(Lifecycle.State.RESUMED)
@@ -95,6 +105,8 @@ internal fun runCheckoutPaymentElementTest(
             CheckoutPaymentElementTestRunnerContext(
                 presenter = presenter,
                 countDownLatch = countDownLatch,
+                scenario = scenario,
+                controller = controller,
             )
         )
 
@@ -103,6 +115,15 @@ internal fun runCheckoutPaymentElementTest(
         assertThat(didCompleteSuccessfully).isTrue()
         scenario.onActivity {
             controller.destroy()
+        }
+    }
+}
+
+private fun MainActivity.setCheckoutContent(presenter: CheckoutPresenter) {
+    val paymentElement = presenter.paymentElement()
+    setContent {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            paymentElement.Content()
         }
     }
 }
