@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 // Neutral
 internal val Neutral0 = Color(0xFFFFFFFF)
-internal val Neutral0Dark = Color(0xFF14171D)
+internal val Neutral0Dark = Color(0xFF171717)
 internal val Neutral25 = Color(0xFFF5F6F8)
 internal val Neutral25Dark = Color(0xFF1B1E25)
 internal val Neutral50 = Color(0xFFF6F8FA)

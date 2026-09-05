@@ -57,6 +57,7 @@ dependencies {
     kspDebug libs.showkaseProcessor
 
     testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
