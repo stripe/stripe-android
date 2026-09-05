@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">اكتمل التنزيل</string>
+  <string name="stripe_downloading_file">تنزيل الملف</string>
+  <string name="stripe_failed_to_open_url">فشل فتح عنوان URL:‏ %s</string>
+  <string name="stripe_not_yet_built">لم يتم البناء بعد…</string>
+  <string name="stripe_unable_to_download_file">تعذَّر تنزيل الملف</string>
+</resources>

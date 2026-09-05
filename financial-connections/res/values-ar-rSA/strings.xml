@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">ربط الحسابات</string>
+  <string name="stripe_account_picker_cta_link_singular">ربط الحساب</string>
+  <string name="stripe_account_picker_error_no_account_available_title">حدثت مشكلة أثناء الوصول إلى حسابك على %1$s</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">عثرنا على %1$s من حسابات %2$s ولكن لا يمكنك سوى ربط حسابات جارية أو حسابات توفير بـ %3$s. يُرجى محاولة تحديد بنك آخر.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">عثرنا على حساب %1$s %2$s ولكن لا يمكنك سوى ربط حسابات جارية أو حسابات توفير بـ %3$s. يُرجى محاولة تحديد بنك آخر.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">لا تتوفر حسابات دفع</string>
+  <string name="stripe_account_picker_multiselect_account">تحديد الحسابات</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">جارٍ استرداد الحسابات...</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">حدد حسابًا</string>
+  <string name="stripe_accounts_error_desc_manualentry">يُرجى إدخال التفاصيل المصرفية الخاصة بك يدويًا أو تحديد بنك آخر.</string>
+  <string name="stripe_accounts_error_desc_no_retry">يُرجى تحديد بنك آخر.</string>
+  <string name="stripe_accounts_error_desc_retry">يُرجى تحديد بنك آخر أو المحاولة مرة أخرى.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">يُرجى إدخال تفاصيل حسابك البنكي يدويًا</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">يُرجى إدخال التفاصيل المصرفية الخاصة بك يدويًا أو تحديد بنك آخر.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">تعذّر الوصول إلى رقم حسابك في الوقت الحالي</string>
+  <string name="stripe_close_dialog_networking_desc">إذا قمت بالإلغاء الآن، فسيتم ربط حسابك بـ %1$s لكنه لن يُحفظ في Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">إذا قمت بالإلغاء الآن، فسيتم ربط حسابك بهذا النشاط التجاري لكنه لن يُحفظ في Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">إذا قمت بالإلغاء الآن، فسيتم ربط حسابك بهذا النشاط التجاري لكنه لن يُحفظ في %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">إذا قمت بالإلغاء الآن، فسيتم ربط حسابك بـ %1$s لكنه لن يُحفظ في %2$s.</string>
+  <string name="stripe_error_cta_close">إغلاق</string>
+  <string name="stripe_error_cta_manual_entry">إدخال تفاصيل البنك يدويًا</string>
+  <string name="stripe_error_cta_retry">حاول مرة أخرى</string>
+  <string name="stripe_error_cta_select_another_bank">تحديد بنك آخر</string>
+  <string name="stripe_error_generic_desc">لا يمكن ربط حسابك في هذا الوقت. يُرجى المحاولة مرة أخرى لاحقًا.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">حدث خطأ ما</string>
+  <string name="stripe_error_planned_downtime_desc">من المقرر أن تنتهي الصيانة في %1$s. يُرجى تحديد بنك آخر أو المحاولة مرة أخرى لاحقًا.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s يخضع للصيانة</string>
+  <string name="stripe_error_unplanned_downtime_desc">يُرجى تحديد بنك آخر أو المحاولة مرة أخرى لاحقًا.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s غير متاح حاليًا</string>
+  <string name="stripe_exit_modal_cta_accept">نعم، المغادرة</string>
+  <string name="stripe_exit_modal_cta_cancel">إلغاء</string>
+  <string name="stripe_exit_modal_desc">لن يتم ربط حسابك البنكي بـ %1$s وسيتم فقدان كل التقدم.</string>
+  <string name="stripe_exit_modal_desc_no_business">لن يتم ربط حسابك البنكي بهذه الشركة وسيتم فقدان كل التقدم.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">هل تريد الخروج بدون اتصال؟</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">أدخل رقمي حسابك والتوجيه</string>
+  <string name="stripe_institutionpicker_manual_entry_title">ألا يمكنك رؤية البنك الذي تتعامل معه؟</string>
+  <string name="stripe_institutionpicker_pane_error_desc">حاول البحث في بنك آخر</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">حاول البحث عن بنك آخر أو </string>
+  <string name="stripe_institutionpicker_pane_error_title">لا توجد نتائج</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">حدد البنك</string>
+  <string name="stripe_institutionpicker_search_more_title">البحث عن المزيد من البنوك</string>
+  <string name="stripe_link_stepup_verification_desc">أدخل الرمز المُرسل إلى %1$s. نطلب هذه الخطوة الإضافية بصفة دورية للحفاظ على أمان حسابك.</string>
+  <string name="stripe_link_stepup_verification_resend_code">إعادة إرسال الرمز</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">تحقق من بريدك الإلكتروني</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">يُرجى الانتظار قليلاً، فقد اقتربنا من الانتهاء</string>
+  <string name="stripe_manualentry_account">رقم الحساب</string>
+  <string name="stripe_manualentry_accountconfirm">تأكيد رقم الحساب</string>
+  <string name="stripe_manualentry_cta">إرسال</string>
+  <string name="stripe_manualentry_microdeposits_desc">سيتم التحقق من معلومات البنك الذي تتعامل معه من خلال عمليات إيداع صغيرة في حسابك، في غضون يوم إلى يومي عمل عادةً. ويتم دعم الحسابات الجارية فقط.</string>
+  <string name="stripe_manualentry_routing">رقم التوجيه</string>
+  <string name="stripe_manualentry_test_banner">استخدام حساب تجريبي</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">إدخال التفاصيل البنكية</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">إلغاء</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">متابعة مع Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">المتابعة باستخدام %1$s</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">ليس الآن</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">استخدم المعلومات التي حفظتها مسبقًا في حسابك على Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">استخدم المعلومات التي حفظتها مسبقًا في حسابك على %1$s.</string>
+  <string name="stripe_networking_link_login_warmup_title">متابعة مع Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">المتابعة باستخدام %1$s</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">ليس الآن</string>
+  <string name="stripe_networking_save_to_link_verification_title">يُرجى تأكيد هويتك</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">عنوان البريد الإلكتروني</string>
+  <string name="stripe_networking_verification_desc">أدخل الرمز المرسل إلى %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">يُرجى تأكيد هويتك</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">إلغاء</string>
+  <string name="stripe_prepane_choose_different_bank_cta">اختر بنكًا مختلفًا</string>
+  <string name="stripe_search">بحث</string>
+  <string name="stripe_success_pane_desc_link_error_plural">تم ربط حساباتك ولكن تعذَّر حفظها في Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">تم ربط حساباتك ولكن تعذَّر حفظها في %1$s.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">تم ربط حسابك ولكن تعذَّر حفظه في Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">تم ربط حسابك ولكن تعذَّر حفظه في %1$s.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">تم ربط حساباتك وحفظها في Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">تم ربط حساباتك وحفظها في %1$s.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">تم ربط حسابك وحفظه في Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">تم ربط حسابك وحفظه في %1$s.</string>
+  <string name="stripe_success_pane_desc_microdeposits">يمكنك توقّع إيداعات صغيرة إلى الحساب ••••%1$s خلال يوم واحد أو يومين وبريد إلكتروني يتضمّن إرشادات إضافية.</string>
+  <string name="stripe_success_pane_desc_plural">تم ربط حساباتك</string>
+  <string name="stripe_success_pane_desc_singular">تم ربط حسابك</string>
+  <string name="stripe_success_pane_done">تم</string>
+  <string name="stripe_success_pane_done_with_merchant">الرجوع إلى %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">النجاح</string>
+  <string name="stripe_success_pane_title_microdeposits">أوشكنا أن ننتهي</string>
+  <string name="stripe_validation_account_confirm_mismatch">رقم حسابك غير متطابق.</string>
+  <string name="stripe_validation_account_required">رقم الحساب مطلوب.</string>
+  <string name="stripe_validation_account_too_long">رقم الحساب البنكي غير صالح: يجب ألا يتجاوز 17 رقمًا.</string>
+  <string name="stripe_validation_no_us_routing">رقم التوجيه غير صالح.</string>
+  <string name="stripe_validation_routing_required">رقم التوجيه مطلوب.</string>
+  <string name="stripe_validation_routing_too_short">يُرجى إدخال 9 أرقام لرقم التوجيه الخاص بك.</string>
+  <string name="stripe_verification.codeExpiredEmail">يبدو أن رمز التحقق الذي قدمته لم يعد صالحًا. انقر على \"إعادة إرسال الرمز\" وحاول مرة أخرى، أو </string>
+  <string name="stripe_verification.codeExpiredSms">يبدو أن رمز التحقق الذي قدمته لم يعد صالحًا. حاول مرة أخرى، أو </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">عذرًا، لم ينجح هذا الرمز. تحقّق منه وحاول مرة أخرى.</string>
+  <string name="stripe_verification.inTestMode">أنت في وضع الاختبار.</string>
+  <string name="stripe_verification.useTestCode">استخدام رمز تجريبي</string>
+</resources>
