@@ -126,6 +126,23 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() = runAutomaticTaxTest(
+        paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+        checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+            INITIAL_TOTAL,
+            TAX_STATUS_REQUIRES_LOCATION,
+        ),
+    ) { context, controller ->
+        enqueueTaxUpdate(automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+
+        contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+        waitForSessionTotal(controller, UPDATED_TOTAL)
+        contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+        context.markTestSucceeded()
+    }
+
+    @Test
     fun testBillingTaxUpdateFailureCanRetryFromPaymentOptions() = runAutomaticTaxTest { context, controller ->
         enqueueTaxUpdate { response ->
             response.setResponseCode(400)
@@ -444,10 +461,65 @@ internal class CheckoutPaymentElementTest {
         billingAddressCollection = "auto",
     )
 
+    private fun automaticTaxResponseWithSavedPaymentMethod(
+        total: Long,
+        taxStatus: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        billingAddressCollection = "auto",
+        jsonModifier = { json ->
+            json.put("account_settings", JSONObject("""{"country":"US"}"""))
+            json.put(
+                "customer",
+                JSONObject(
+                    """
+                    {
+                        "id": "cus_123",
+                        "payment_methods": [{
+                            "id": "$SAVED_PAYMENT_METHOD_ID",
+                            "object": "payment_method",
+                            "type": "card",
+                            "billing_details": {
+                                "address": {
+                                    "line1": "$BILLING_ADDRESS_LINE_ONE",
+                                    "city": "$BILLING_ADDRESS_CITY",
+                                    "state": "$BILLING_ADDRESS_STATE",
+                                    "country": "US",
+                                    "postal_code": "$BILLING_ADDRESS_ZIP"
+                                }
+                            },
+                            "card": {
+                                "brand": "visa",
+                                "exp_month": 12,
+                                "exp_year": 2034,
+                                "last4": "4242"
+                            }
+                        }],
+                        "can_detach_payment_method": true
+                    }
+                    """.trimIndent()
+                )
+            )
+        },
+    )
+
     private fun automaticTaxResponse(
         total: Long,
         taxStatus: String,
         billingAddressCollection: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        billingAddressCollection = billingAddressCollection,
+        jsonModifier = {},
+    )
+
+    private fun automaticTaxResponse(
+        total: Long,
+        taxStatus: String,
+        billingAddressCollection: String,
+        jsonModifier: (JSONObject) -> Unit,
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -475,6 +547,7 @@ internal class CheckoutPaymentElementTest {
             json.getJSONObject("server_built_elements_session_params")
                 .getJSONObject("deferred_intent")
                 .put("amount", total)
+            jsonModifier(json)
         }
     }
 
@@ -482,6 +555,7 @@ internal class CheckoutPaymentElementTest {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INITIAL_TOTAL = 5_099L
         const val UPDATED_TOTAL = 5_399L
+        const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
         const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
         const val BILLING_ADDRESS_CITY = "San Francisco"
         const val BILLING_ADDRESS_STATE = "CA"
