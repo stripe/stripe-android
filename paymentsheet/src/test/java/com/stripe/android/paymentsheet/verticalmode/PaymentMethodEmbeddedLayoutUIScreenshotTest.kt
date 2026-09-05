@@ -133,6 +133,27 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testSavedPaymentMethodLoading() {
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                pendingSavedPaymentMethodId = savedPaymentMethod.paymentMethod.id,
+                selectionError = null,
+                linkBrand = LinkBrand.Link,
+                isEnabled = false,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = mock(),
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+    }
+
+    @Test
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
@@ -220,6 +241,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            pendingSavedPaymentMethodId = null,
+            selectionError = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -244,6 +267,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = selection,
+            pendingSavedPaymentMethodId = null,
+            selectionError = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -267,6 +292,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction = action,
                 selection = null,
+                pendingSavedPaymentMethodId = null,
+                selectionError = null,
                 linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
