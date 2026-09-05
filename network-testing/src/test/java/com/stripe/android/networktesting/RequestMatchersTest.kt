@@ -12,6 +12,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -25,6 +26,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -48,6 +50,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -61,6 +64,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -75,6 +79,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -89,6 +94,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -102,6 +108,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -117,6 +124,7 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.EPHEMERAL}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
@@ -132,10 +140,38 @@ class RequestMatchersTest {
             headers = mapOf(
                 "original-host" to "api.stripe.com",
                 "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to "acct_123",
             ),
         )
 
         assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey rejects missing Stripe account for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects incorrect Stripe account for API request`() {
+        val request = createRequest(
+            path = "/v1/payment_intents/pi_123",
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to "acct_456",
+            ),
+        )
+
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test

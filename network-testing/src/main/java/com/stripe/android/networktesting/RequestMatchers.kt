@@ -42,17 +42,19 @@ object RequestMatchers {
     fun stripeApiKey(
         publishableKey: String = TestApiKeys.PUBLISHABLE,
         ephemeralKey: String = TestApiKeys.EPHEMERAL,
+        accountId: String = TEST_STRIPE_ACCOUNT
     ): RequestMatcher {
         return ToStringRequestMatcher("stripeApiKey") { request ->
             when (request.headers[ORIGINAL_HOST_HEADER]) {
                 API_HOST -> {
                     val authorization = request.headers[AUTHORIZATION_HEADER]
-                    if (request.requiresEphemeralKey()) {
+                    val matchesApiKey = if (request.requiresEphemeralKey()) {
                         authorization == "Bearer $ephemeralKey"
                     } else {
                         authorization == "Bearer $publishableKey" ||
                             authorization == "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}"
                     }
+                    matchesApiKey && request.headers[STRIPE_ACCOUNT_HEADER] == accountId
                 }
                 ANALYTICS_HOST -> {
                     request.headers[AUTHORIZATION_HEADER] == null &&
@@ -197,6 +199,8 @@ object RequestMatchers {
 
     private const val ORIGINAL_HOST_HEADER = "original-host"
     private const val AUTHORIZATION_HEADER = "Authorization"
+    private const val STRIPE_ACCOUNT_HEADER = "Stripe-Account"
+    private const val TEST_STRIPE_ACCOUNT = "acct_123"
     private const val API_HOST = "api.stripe.com"
     private const val ANALYTICS_HOST = "q.stripe.com"
     private const val PUBLISHABLE_KEY_QUERY = "publishable_key"
