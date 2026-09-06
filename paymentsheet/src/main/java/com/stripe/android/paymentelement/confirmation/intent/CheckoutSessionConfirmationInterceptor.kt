@@ -13,6 +13,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -64,27 +65,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        return stripeRepository.createPaymentMethod(
+        val params = createConfirmParams(
+            intent = intent,
             paymentMethodCreateParams = confirmationOption.createParams,
-            options = requestOptions,
-        ).fold(
-            onSuccess = { paymentMethod ->
-                val params = createConfirmParams(
-                    intent = intent,
-                    paymentMethod = paymentMethod,
-                    savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-                    shipping = shippingValues.toCheckoutSessionShipping(),
-                )
-                confirmCheckoutSession(params)
-            },
-            onFailure = { error ->
-                ConfirmationDefinition.Action.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
+            savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
+            shipping = shippingValues.toCheckoutSessionShipping(),
         )
+        return confirmCheckoutSession(params)
     }
 
     override suspend fun intercept(
@@ -157,12 +144,38 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
+            paymentMethodCreateParams = null,
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
             shipping = shipping,
+            paymentMethodCreateParams = null
+        )
+    }
+
+    private fun createConfirmParams(
+        intent: StripeIntent,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        savePaymentMethod: Boolean?,
+        shipping: ConfirmCheckoutSessionParams.Shipping?,
+    ): ConfirmCheckoutSessionParams = when (intent) {
+        is PaymentIntent -> ConfirmCheckoutSessionParams(
+            paymentMethodId = null,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+            expectedAmount = intent.amount,
+            savePaymentMethod = savePaymentMethod,
+            shipping = shipping,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+        )
+        else -> ConfirmCheckoutSessionParams(
+            paymentMethodId = null,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+            shipping = shipping,
+            paymentMethodCreateParams = paymentMethodCreateParams
         )
     }
 
