@@ -583,7 +583,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 publishableKey = "pk_test_123",
             ),
             publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
+            stripeAccountIdProvider = { "acct_123" },
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
@@ -603,7 +603,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-            requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
+            requestOptions = ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123"),
         )
 
         runTest {
