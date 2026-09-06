@@ -14,7 +14,7 @@ internal sealed class ApiConfigurationTestType(
             PaymentConfiguration::class.java.canonicalName,
             Context.MODE_PRIVATE,
         ).edit().clear().commit()
-        PaymentConfiguration.init(context, paymentConfigurationPublishableKey, "acct_123")
+        PaymentConfiguration.init(context, paymentConfigurationPublishableKey, TestApiKeys.ACCOUNT)
     }
 
     fun withPublishableKey(publishableKey: String): ApiConfigurationTestType {

@@ -7,10 +7,11 @@ import org.junit.runner.Description
 
 class PaymentConfigurationTestRule(
     private val context: Context,
-    private val publishableKey: String = PUBLISHABLE_KEY
+    private val publishableKey: String = PUBLISHABLE_KEY,
+    private val stripeAccountId: String? = null,
 ) : TestWatcher() {
     override fun starting(description: Description) {
-        PaymentConfiguration.init(context, publishableKey)
+        PaymentConfiguration.init(context, publishableKey, stripeAccountId)
         super.starting(description)
     }
 
