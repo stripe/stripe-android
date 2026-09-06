@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
@@ -13,34 +11,36 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import com.stripe.android.paymentsheet.utils.replaceText
+import com.stripe.android.paymentsheet.utils.waitForNode
+import com.stripe.android.paymentsheet.utils.waitForText
 import kotlin.time.Duration.Companion.seconds
 
 internal class AddressElementPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
-        waitForText("Address")
-        waitForText("Save address")
+        composeTestRule.waitForText("Shipping Address")
+        composeTestRule.waitForText("Save address")
     }
 
     fun fillCompleteAddress() {
-        replaceText("Full name", "Real Name")
-        replaceText("Address line 1", "1234 Main St")
-        replaceText("City", "Boston")
-        replaceText("ZIP Code", "12345")
+        composeTestRule.replaceText("Full name", "Real Name")
+        composeTestRule.replaceText("Address line 1", "1234 Main St")
+        composeTestRule.replaceText("City", "Boston")
+        composeTestRule.replaceText("ZIP Code", "12345")
         composeTestRule.onNodeWithText("State").performScrollTo().performClick()
         composeTestRule.onNodeWithText("Massachusetts").performScrollTo().performClick()
     }
 
     fun clickSave() {
-        waitForNode(hasText("Save address").and(isEnabled()))
+        composeTestRule.waitForNode(hasText("Save address").and(isEnabled()))
         composeTestRule.onNodeWithText("Save address").performScrollTo().performClick()
     }
 
     fun clickDisabledSave() {
-        waitForNode(hasText("Save address").and(isNotEnabled()))
+        composeTestRule.waitForNode(hasText("Save address").and(isNotEnabled()))
         composeTestRule.onNodeWithText("Save address")
             .performScrollTo()
             .performTouchInput { click() }
@@ -64,26 +64,5 @@ internal class AddressElementPage(
 
     fun clickClose() {
         composeTestRule.onNodeWithContentDescription("Close").performClick()
-    }
-
-    private fun replaceText(label: String, text: String) {
-        val matcher = hasText(label).and(hasSetTextAction())
-        waitForNode(matcher)
-        composeTestRule.onNode(matcher).performScrollTo().performTextReplacement(text)
-    }
-
-    private fun waitForText(text: String) {
-        waitForNode(hasText(text))
-    }
-
-    private fun waitForNode(matcher: SemanticsMatcher) {
-        composeTestRule.waitUntil(
-            conditionDescription = "node matching $matcher to appear",
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
-        ) {
-            composeTestRule.onAllNodes(matcher)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
     }
 }

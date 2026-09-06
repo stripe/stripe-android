@@ -5,6 +5,7 @@ import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
 import com.stripe.android.paymentsheet.MainActivity
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.seconds
@@ -22,8 +23,11 @@ internal class AddressElementTestRunnerContext(
             addressLauncher.present(
                 publishableKey = "pk_test_123",
                 configuration = AddressLauncher.Configuration(
+                    address = AddressDetails(
+                        address = PaymentSheet.Address(country = "US"),
+                    ),
                     allowedCountries = setOf("US"),
-                    autocompleteCountries = emptySet(),
+                    autocompleteCountries = setOf("CA"),
                 ),
             )
         }

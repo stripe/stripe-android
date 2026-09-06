@@ -63,11 +63,11 @@ internal class AddressElementTest {
                     city = "Boston",
                     country = "US",
                     line1 = "1234 Main St",
-                    line2 = null,
+                    line2 = "",
                     postalCode = "12345",
                     state = "MA",
                 ),
-                phoneNumber = null,
+                phoneNumber = "+1",
                 isCheckboxSelected = false,
             )
         )
