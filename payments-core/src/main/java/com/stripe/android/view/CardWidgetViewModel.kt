@@ -16,10 +16,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.BuildConfig.DEBUG
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -75,13 +75,7 @@ internal class CardWidgetViewModel(
     class Factory(val context: Context) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val apiConfigProvider: Provider<ApiConfiguration.State> = Provider {
-                val config = PaymentConfiguration.getInstance(context)
-                ApiConfiguration.State(
-                    publishableKey = config.publishableKey,
-                    stripeAccountId = config.stripeAccountId,
-                )
-            }
+            val apiConfigProvider = ApiConfigProviderFromPaymentConfig.get(context)
             val stripeRepository = StripeApiRepository(
                 context = context,
                 publishableKeyProvider = { apiConfigProvider.get().publishableKey },

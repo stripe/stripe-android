@@ -26,6 +26,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -89,9 +90,7 @@ class GooglePayLauncher internal constructor(
                 apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    apiConfigurationProvider = {
-                        PaymentConfiguration.getInstance(context).toApiConfiguration()
-                    },
+                    apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -137,9 +136,7 @@ class GooglePayLauncher internal constructor(
                 apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    apiConfigurationProvider = {
-                        PaymentConfiguration.getInstance(context).toApiConfiguration()
-                    },
+                    apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 cardFundingFilter = DefaultCardFundingFilter
@@ -189,9 +186,7 @@ class GooglePayLauncher internal constructor(
                 apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    apiConfigurationProvider = {
-                        PaymentConfiguration.getInstance(context).toApiConfiguration()
-                    },
+                    apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -432,9 +427,7 @@ fun rememberGooglePayLauncher(
                     apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
-                        apiConfigurationProvider = {
-                            PaymentConfiguration.getInstance(context).toApiConfiguration()
-                        },
+                        apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE),
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,

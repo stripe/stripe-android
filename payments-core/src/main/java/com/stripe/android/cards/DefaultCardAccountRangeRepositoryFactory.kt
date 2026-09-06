@@ -16,6 +16,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Named
@@ -74,13 +75,7 @@ class DefaultCardAccountRangeRepositoryFactory internal constructor(
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-        apiConfigProvider = {
-            val paymentConfiguration = PaymentConfiguration.getInstance(context)
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
-            )
-        }
+        apiConfigProvider = ApiConfigProviderFromPaymentConfig.get(context)
     )
 
     @Throws(IllegalStateException::class)

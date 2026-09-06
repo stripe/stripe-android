@@ -20,7 +20,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -33,6 +32,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -105,7 +105,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
         readyCallback,
         DefaultCardBrandFilter,
         DefaultCardFundingFilter,
-        paymentConfigurationApiConfigurationProvider(activity),
+        ApiConfigProviderFromPaymentConfig.get(activity),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -130,7 +130,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
         readyCallback,
         DefaultCardBrandFilter,
         DefaultCardFundingFilter,
-        paymentConfigurationApiConfigurationProvider(activity),
+        ApiConfigProviderFromPaymentConfig.get(activity),
     )
 
     /**
@@ -161,7 +161,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
         readyCallback,
         DefaultCardBrandFilter,
         DefaultCardFundingFilter,
-        paymentConfigurationApiConfigurationProvider(fragment.requireContext()),
+        ApiConfigProviderFromPaymentConfig.get(fragment.requireContext()),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -479,17 +479,7 @@ fun rememberGooglePayPaymentMethodLauncher(
             },
             cardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter = DefaultCardFundingFilter,
-            apiConfigurationProvider = paymentConfigurationApiConfigurationProvider(context),
+            apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
         )
     }
-}
-
-private fun paymentConfigurationApiConfigurationProvider(
-    context: Context,
-): Provider<ApiConfiguration.State> = Provider {
-    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-    ApiConfiguration.State(
-        publishableKey = paymentConfiguration.publishableKey,
-        stripeAccountId = paymentConfiguration.stripeAccountId,
-    )
 }

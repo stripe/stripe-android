@@ -35,7 +35,6 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
@@ -46,6 +45,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -1080,13 +1080,7 @@ internal class CardNumberEditTextTest {
         val repository = FakeCardElementConfigRepository()
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            apiConfigProvider = {
-                val config = PaymentConfiguration.getInstance(context)
-                ApiConfiguration.State(
-                    publishableKey = config.publishableKey,
-                    stripeAccountId = config.stripeAccountId,
-                )
-            },
+            apiConfigProvider = ApiConfigProviderFromPaymentConfig.get(context),
             stripeRepository = repository,
             dispatcher = dispatcher
         ).also { viewModelStoreRule.track(it) }

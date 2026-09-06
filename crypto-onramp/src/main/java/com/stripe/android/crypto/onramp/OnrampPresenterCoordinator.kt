@@ -9,7 +9,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
@@ -44,11 +43,11 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -97,13 +96,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             readyCallback = ::handleGooglePayIsReady,
             cardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter = DefaultCardFundingFilter,
-            apiConfigurationProvider = {
-                val paymentConfiguration = PaymentConfiguration.getInstance(activity)
-                ApiConfiguration.State(
-                    publishableKey = paymentConfiguration.publishableKey,
-                    stripeAccountId = paymentConfiguration.stripeAccountId,
-                )
-            },
+            apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(activity),
         )
     }
 

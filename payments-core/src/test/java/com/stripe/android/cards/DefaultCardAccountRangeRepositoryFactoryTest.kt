@@ -5,9 +5,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -22,13 +22,7 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
         productUsageTokens = setOf("SomeProduct"),
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = { analyticsRequests.add(it) },
-        apiConfigProvider = {
-            val paymentConfiguration = PaymentConfiguration.getInstance(context)
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
-            )
-        }
+        apiConfigProvider = ApiConfigProviderFromPaymentConfig.get(context)
     )
 
     @BeforeTest

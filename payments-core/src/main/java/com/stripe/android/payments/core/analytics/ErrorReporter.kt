@@ -3,7 +3,6 @@ package com.stripe.android.payments.core.analytics
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -16,6 +15,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import com.stripe.android.utils.filterNotNullValues
 import dagger.Binds
 import dagger.BindsInstance
@@ -51,13 +51,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ): ErrorReporter {
             return createFallbackInstance(
                 context = context,
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
+                apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
                 productUsage = productUsage,
             )
         }

@@ -16,10 +16,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
@@ -35,6 +33,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -281,9 +280,9 @@ internal class GooglePayLauncherViewModel(
             val googlePayEnvironment = args.config.environment
             val logger = Logger.getInstance(enableLogging)
 
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
+            val apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(application)
+            val apiConfiguration = apiConfigurationProvider.get()
+            val publishableKey = apiConfiguration.publishableKey
             val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
 
             val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -304,9 +303,7 @@ internal class GooglePayLauncherViewModel(
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,
-                apiConfigurationProvider = {
-                    ApiConfiguration.State(publishableKey, stripeAccountId)
-                },
+                apiConfigurationProvider = apiConfigurationProvider,
                 productUsage = productUsageTokens,
             )
 
@@ -316,10 +313,7 @@ internal class GooglePayLauncherViewModel(
                 billingAddressParameters = args.config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
-                apiConfiguration = ApiConfiguration.State(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
-                ),
+                apiConfiguration = apiConfiguration,
                 errorReporter = errorReporter,
                 logger = logger,
                 cardFundingFilter = DefaultCardFundingFilter,
@@ -330,7 +324,7 @@ internal class GooglePayLauncherViewModel(
                 paymentsClient = DefaultPaymentsClientFactory(context = application).create(googlePayEnvironment),
                 requestOptions = ApiRequest.Options(
                     publishableKey,
-                    stripeAccountId
+                    apiConfiguration.stripeAccountId
                 ),
                 args = args,
                 stripeRepository = stripeRepository,
@@ -342,7 +336,7 @@ internal class GooglePayLauncherViewModel(
                     workContext = workContext
                 ),
                 googlePayJsonFactory = GooglePayJsonFactory(
-                    googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
+                    googlePayConfig = GooglePayConfig(publishableKey, apiConfiguration.stripeAccountId),
                     isJcbEnabled = args.config.isJcbEnabled,
                     additionalEnabledNetworks = args.config.additionalEnabledNetworks
                 ),
