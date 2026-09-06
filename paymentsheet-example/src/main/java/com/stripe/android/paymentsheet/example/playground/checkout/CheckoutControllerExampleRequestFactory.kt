@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.example.playground.checkout.settings.Chec
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.values
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 internal data class CheckoutControllerExampleRequest(
     val endpoint: String,
@@ -24,6 +25,8 @@ internal object CheckoutControllerExampleRequestFactory {
                             settings = settings,
                         )
                     }
+                put("mode", "unified")
+                put("use_one_time_price", true)
             },
         )
     }

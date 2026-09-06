@@ -22,6 +22,8 @@ class CheckoutControllerExampleRequestFactoryTest {
         assertThat(request.endpoint).isEqualTo("checkout_session")
         assertThat(request.body).isEqualTo(
             buildJsonObject {
+                put("mode", "unified")
+                put("use_one_time_price", true)
                 put("customer", "guest")
                 put("customer_email", "email@example.com")
                 put("currency", "usd")
@@ -49,6 +51,8 @@ class CheckoutControllerExampleRequestFactoryTest {
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
+                put("mode", "unified")
+                put("use_one_time_price", true)
                 put("customer", "new")
                 put("checkout_session_payment_method_save", "enabled")
                 put("customer_email", "another@example.com")
@@ -71,6 +75,8 @@ class CheckoutControllerExampleRequestFactoryTest {
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
+                put("mode", "unified")
+                put("use_one_time_price", true)
                 put("customer", "new")
                 put("checkout_session_payment_method_save", "disabled")
                 put("customer_email", "email@example.com")
@@ -93,6 +99,8 @@ class CheckoutControllerExampleRequestFactoryTest {
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
+                put("mode", "unified")
+                put("use_one_time_price", true)
                 put("customer", "cus_custom")
                 put("checkout_session_payment_method_save", "enabled")
                 put("checkout_session_payment_method_remove", "enabled")
@@ -115,6 +123,8 @@ class CheckoutControllerExampleRequestFactoryTest {
 
         assertThat(request.body).isEqualTo(
             buildJsonObject {
+                put("mode", "unified")
+                put("use_one_time_price", true)
                 put("customer", "returning")
                 put("checkout_session_payment_method_save", "enabled")
                 put("checkout_session_payment_method_remove", "enabled")

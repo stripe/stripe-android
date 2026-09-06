@@ -31,7 +31,7 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
         checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
             configuration.googlePayConfiguration.asPaymentSheet(
                 merchantCountry = merchantCountry,
-                liveMode = checkoutSessionResponse.liveMode,
+                liveMode = checkoutSessionResponse.livemode,
                 isDebugBuild = BuildConfig.DEBUG,
             )
         }
@@ -44,7 +44,7 @@ internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayCon
     checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
         paymentElementConfiguration.googlePayConfiguration.asPaymentSheet(
             merchantCountry = merchantCountry,
-            liveMode = checkoutSessionResponse.liveMode,
+            liveMode = checkoutSessionResponse.livemode,
             isDebugBuild = BuildConfig.DEBUG,
         )
     }

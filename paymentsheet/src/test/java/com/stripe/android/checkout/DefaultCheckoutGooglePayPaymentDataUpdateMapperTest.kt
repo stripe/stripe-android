@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -88,10 +87,9 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     }
 
     @Test
-    fun `toResponse uses total summary total amount due over checkout session amount when present`() {
+    fun `toResponse uses unified item total`() {
         val response = CheckoutSessionResponseFactory.create(
-            amount = 1000L,
-            totalSummary = totalSummary(totalAmountDue = 2500L),
+            amount = 2500L,
         )
 
         val result = mapper.toResponse(
@@ -104,12 +102,11 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     }
 
     @Test
-    fun `toResponse uses checkout session amount when total summary is absent`() {
+    fun `toResponse uses checkout session aggregate amount`() {
         val result = mapper.toResponse(
             countryCode = "US",
             response = CheckoutSessionResponseFactory.create(
                 amount = 1000L,
-                totalSummary = null,
             ),
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
@@ -150,7 +147,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     @Test
     fun `toResponse uses display items built from response`() {
         val response = CheckoutSessionResponseFactory.create(
-            totalSummary = totalSummary(totalAmountDue = 2500L),
+            amount = 2500L,
         )
 
         val result = mapper.toResponse(
@@ -162,18 +159,6 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         assertThat(result.newTransactionInfo?.displayItems)
             .isEqualTo(GooglePayDisplayItemsFactory.create(response, context))
     }
-
-    private fun totalSummary(
-        totalAmountDue: Long,
-    ) = CheckoutSessionResponse.TotalSummaryResponse(
-        subtotal = 1000L,
-        totalDueToday = totalAmountDue,
-        totalAmountDue = totalAmountDue,
-        discountAmounts = emptyList(),
-        taxAmounts = emptyList(),
-        shippingRate = null,
-        appliedBalance = null,
-    )
 
     private companion object {
         val PAYMENT_DATA_UPDATE = GooglePayPaymentDataUpdate(
