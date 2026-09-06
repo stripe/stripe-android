@@ -82,7 +82,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             isElements = true,
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = null,
+                stripeAccountId = ACCOUNT_ID,
             ),
             displayItems = emptyList(),
             billingEmailOverride = null,
@@ -100,8 +100,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
                 cardFundingFilter = DefaultCardFundingFilter,
                 clientAttributionMetadata = null,
                 isElements = true,
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = null,
+                apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ACCOUNT_ID),
                 displayItems = emptyList(),
                 billingEmailOverride = null,
                 shippingAddressParameters = null,
@@ -134,7 +133,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             isElements = true,
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = null,
+                stripeAccountId = ACCOUNT_ID,
             ),
             displayItems = emptyList(),
             billingEmailOverride = null,
@@ -166,6 +165,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
     }
 
     private companion object {
+        const val ACCOUNT_ID = "acct_123"
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             environment = GooglePayEnvironment.Test,
             merchantCountryCode = "US",

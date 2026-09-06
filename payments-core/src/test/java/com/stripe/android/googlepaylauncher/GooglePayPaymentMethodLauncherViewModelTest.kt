@@ -20,6 +20,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
@@ -216,7 +217,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     ),
                     currencyCode = "usd",
                     amount = 0,
-                    publishableKey = "pk_123",
+                    apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
                     shippingAddressParameters = null,
                 )
             )
@@ -246,7 +247,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     ),
                     currencyCode = "usd",
                     amount = 0,
-                    publishableKey = "pk_123",
+                    apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
                     shippingAddressParameters = null,
                 )
             )
@@ -348,7 +349,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
-                    publishableKey = "pk_123",
+                    apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
                     shippingAddressParameters = null,
                 )
             )
@@ -420,7 +421,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = null,
             ),
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             shippingAddressParameters = null,
         )
         val REQUEST_OPTIONS = ApiRequest.Options(

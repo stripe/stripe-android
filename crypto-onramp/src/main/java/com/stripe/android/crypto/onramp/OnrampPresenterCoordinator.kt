@@ -97,7 +97,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             readyCallback = ::handleGooglePayIsReady,
             cardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter = DefaultCardFundingFilter,
-            apiConfigurationProvider = Provider {
+            apiConfigurationProvider = {
                 val paymentConfiguration = PaymentConfiguration.getInstance(activity)
                 ApiConfiguration.State(
                     publishableKey = paymentConfiguration.publishableKey,

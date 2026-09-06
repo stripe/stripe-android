@@ -11,6 +11,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
@@ -57,8 +58,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         internal val clientAttributionMetadata: ClientAttributionMetadata? = null,
         internal val isElements: Boolean = false,
-        internal val publishableKey: String,
-        internal val stripeAccountId: String? = null,
+        internal val apiConfiguration: ApiConfiguration.State,
         internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
         internal val billingEmailOverride: String? = null,
         internal val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
