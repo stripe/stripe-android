@@ -4,6 +4,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataStore
@@ -37,7 +38,9 @@ fun DefaultFraudDetectionDataRepository(
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
         errorReporter = ErrorReporter.createFallbackInstance(
             context,
-            publishableKeyProvider = publishableKeyProvider,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(publishableKeyProvider(), null)
+            },
             productUsage = emptySet(),
         ),
         workContext = workContext,

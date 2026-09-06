@@ -304,7 +304,9 @@ internal class GooglePayLauncherViewModel(
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,
-                publishableKeyProvider = { publishableKey },
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(publishableKey, stripeAccountId)
+                },
                 productUsage = productUsageTokens,
             )
 

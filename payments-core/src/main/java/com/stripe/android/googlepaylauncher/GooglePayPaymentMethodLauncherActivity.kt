@@ -11,6 +11,7 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.uicore.utils.fadeOut
@@ -40,7 +41,9 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val errorReporter: ErrorReporter by lazy {
         ErrorReporter.createFallbackInstance(
             context = this,
-            publishableKeyProvider = { args.publishableKey.orEmpty() },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(args.publishableKey, args.stripeAccountId)
+            },
         )
     }
 

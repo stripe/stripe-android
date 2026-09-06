@@ -89,7 +89,9 @@ class GooglePayLauncher internal constructor(
                 apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                    apiConfigurationProvider = {
+                        PaymentConfiguration.getInstance(context).toApiConfiguration()
+                    },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -135,7 +137,9 @@ class GooglePayLauncher internal constructor(
                 apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                    apiConfigurationProvider = {
+                        PaymentConfiguration.getInstance(context).toApiConfiguration()
+                    },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 cardFundingFilter = DefaultCardFundingFilter
@@ -185,7 +189,9 @@ class GooglePayLauncher internal constructor(
                 apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                    apiConfigurationProvider = {
+                        PaymentConfiguration.getInstance(context).toApiConfiguration()
+                    },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -426,7 +432,9 @@ fun rememberGooglePayLauncher(
                     apiConfiguration = PaymentConfiguration.getInstance(context).toApiConfiguration(),
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
-                        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                        apiConfigurationProvider = {
+                            PaymentConfiguration.getInstance(context).toApiConfiguration()
+                        },
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE),
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,

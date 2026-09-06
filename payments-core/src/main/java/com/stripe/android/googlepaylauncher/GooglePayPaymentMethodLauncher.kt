@@ -197,7 +197,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     apiConfiguration = apiConfiguration,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
-                        publishableKeyProvider = { apiConfiguration.publishableKey },
+                        apiConfigurationProvider = { apiConfiguration },
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
                     ),
                     cardFundingFilter = cardFundingFilter,
