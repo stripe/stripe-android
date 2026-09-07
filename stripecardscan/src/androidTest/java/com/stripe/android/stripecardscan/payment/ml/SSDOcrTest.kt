@@ -4,18 +4,19 @@ import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.android.gms.tasks.Tasks
-import com.google.android.gms.tflite.java.TfLite
 import com.stripe.android.camera.framework.image.scale
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.toRect
+import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
+import com.stripe.android.mlcore.base.InterpreterWrapper
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
 import com.stripe.android.stripecardscan.test.R
 import com.stripe.android.testing.RetryRule
 import kotlinx.coroutines.runBlocking
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.tensorflow.lite.Interpreter
+import java.nio.ByteBuffer
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -26,11 +27,6 @@ class SSDOcrTest {
 
     @get:Rule
     val retryRule = RetryRule(3)
-
-    @Before
-    fun initializeTfLite() {
-        Tasks.await(TfLite.initialize(appContext))
-    }
 
     /**
      * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
@@ -52,7 +48,8 @@ class SSDOcrTest {
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false)
+            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            interpreterFactory = ::createBundledInterpreter,
         ).newInstance()
         assertNotNull(model)
 
@@ -89,7 +86,8 @@ class SSDOcrTest {
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false)
+            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            interpreterFactory = ::createBundledInterpreter,
         ).newInstance()
         assertNotNull(model)
 
@@ -126,7 +124,8 @@ class SSDOcrTest {
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false)
+            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            interpreterFactory = ::createBundledInterpreter,
         ).newInstance()
         assertNotNull(model)
 
@@ -140,5 +139,30 @@ class SSDOcrTest {
         )
 
         assertEquals("4242424242424242", prediction.pan)
+    }
+
+    private fun createBundledInterpreter(
+        model: ByteBuffer,
+        options: InterpreterOptionsWrapper,
+    ): InterpreterWrapper = object : InterpreterWrapper {
+        private val interpreter = Interpreter(
+            model,
+            Interpreter.Options().apply {
+                options.useNNAPI?.let(::setUseNNAPI)
+                options.numThreads?.let(::setNumThreads)
+            },
+        )
+
+        override fun runForMultipleInputsOutputs(inputs: Array<Any>, outputs: Map<Int, Any>) {
+            interpreter.runForMultipleInputsOutputs(inputs, outputs)
+        }
+
+        override fun run(input: Any, output: Any) {
+            interpreter.run(input, output)
+        }
+
+        override fun close() {
+            interpreter.close()
+        }
     }
 }
