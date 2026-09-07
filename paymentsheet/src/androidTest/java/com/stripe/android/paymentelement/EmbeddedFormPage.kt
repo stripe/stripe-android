@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
-import com.stripe.android.testing.ScrollBehavior
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
 import kotlin.time.Duration.Companion.seconds
@@ -32,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class EmbeddedFormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    val cardNumberText: SemanticsNodeInteraction = nodeWithLabel("Card number")
+    val cardNumberText: SemanticsNodeInteraction = composeTestRule.onNode(hasText("Card number"))
 
     fun fillOutCardDetails(
         newCardNumber: String = "4242424242424242",
@@ -40,45 +39,20 @@ internal class EmbeddedFormPage(
     ) {
         waitUntilVisible()
         if (fillOutCardNumber) {
-            composeTestRule.replaceText(
-                node = cardNumberText,
-                text = newCardNumber,
-                scrollBehavior = ScrollBehavior.Never,
-                settleAfterReplacement = false,
-            )
+            composeTestRule.replaceText(cardNumberText, newCardNumber)
         }
-        fillExpirationDate("12/34")
-        replaceText("CVC", "123")
-        replaceText("ZIP Code", "12345")
-    }
-
-    private fun replaceText(label: String, text: String) {
-        composeTestRule.replaceText(
-            matcher = hasText(label),
-            text = text,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
-        )
-    }
-
-    private fun fillExpirationDate(text: String) {
         composeTestRule.replaceText(
             matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = text,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
+            text = "12/34",
         )
-    }
-
-    private fun nodeWithLabel(label: String): SemanticsNodeInteraction {
-        return composeTestRule.onNode(hasText(label))
-    }
-
-    fun isVisible(): Boolean {
-        return composeTestRule
-            .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-            .fetchSemanticsNodes(atLeastOneRootRequired = false)
-            .isNotEmpty()
+        composeTestRule.replaceText(
+            matcher = hasText("CVC"),
+            text = "123",
+        )
+        composeTestRule.replaceText(
+            matcher = hasText("ZIP Code"),
+            text = "12345",
+        )
     }
 
     fun waitUntilVisible() {

@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
-import com.stripe.android.testing.ScrollBehavior
 import com.stripe.android.testing.isPlaced
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
@@ -52,30 +51,42 @@ internal class CustomerSheetPage(
     }
 
     fun fillOutFullBillingAddress() {
-        replaceText("Address line 1", ADDRESS_LINE_ONE)
-        replaceText("Address line 2 (optional)", ADDRESS_LINE_TWO)
-        replaceText("City", CITY)
+        waitForText("Address line 1")
+        composeTestRule.replaceText("Address line 1", ADDRESS_LINE_ONE)
+        waitForText("Address line 2 (optional)")
+        composeTestRule.replaceText("Address line 2 (optional)", ADDRESS_LINE_TWO)
+        waitForText("City")
+        composeTestRule.replaceText("City", CITY)
 
         click(hasText("State"))
         click(hasText(STATE_NAME))
     }
 
     fun fillOutContactInformation() {
-        replaceText("Email", EMAIL)
-        replaceText("Phone number", PHONE_NUMBER)
+        waitForText("Email")
+        composeTestRule.replaceText("Email", EMAIL)
+        waitForText("Phone number")
+        composeTestRule.replaceText("Phone number", PHONE_NUMBER)
     }
 
     fun fillOutName() {
-        replaceText("Name on card", NAME)
+        waitForText("Name on card")
+        composeTestRule.replaceText("Name on card", NAME)
     }
 
     fun fillOutCardDetails(
         cardNumber: String = CARD_NUMBER,
     ) {
-        replaceText("Card number", cardNumber)
-        fillExpirationDate("$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
-        replaceText("CVC", CVC)
-        replaceText("ZIP Code", ZIP_CODE)
+        waitForText("Card number")
+        composeTestRule.replaceText("Card number", cardNumber)
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}",
+        )
+        waitForText("CVC")
+        composeTestRule.replaceText("CVC", CVC)
+        waitForText("ZIP Code")
+        composeTestRule.replaceText("ZIP Code", ZIP_CODE)
     }
 
     fun changeCardBrandChoice() {
@@ -178,26 +189,6 @@ internal class CustomerSheetPage(
         }
 
         clickableNode.performClick()
-    }
-
-    private fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
-        waitForText(label, substring = isLabelSubstring)
-
-        composeTestRule.replaceText(
-            matcher = hasText(label, substring = isLabelSubstring),
-            text = text,
-            scrollBehavior = ScrollBehavior.Required,
-            settleAfterReplacement = false,
-        )
-    }
-
-    private fun fillExpirationDate(text: String) {
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = text,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
-        )
     }
 
     private fun clickDropdownMenu() {

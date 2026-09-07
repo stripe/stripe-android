@@ -62,12 +62,15 @@ internal class PaymentSheetPage(
     fun fillOutCardDetailsWithCardNumber(cardNumber: String, fillOutZipCode: Boolean = true) {
         waitForCardForm()
 
-        replaceText("Card number", cardNumber)
-        fillExpirationDate("12/34")
-        replaceText("CVC", "123")
+        composeTestRule.replaceText("Card number", cardNumber)
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = "12/34",
+        )
+        composeTestRule.replaceText("CVC", "123")
 
         if (fillOutZipCode) {
-            replaceText("ZIP Code", "12345")
+            composeTestRule.replaceText("ZIP Code", "12345")
         }
     }
 
@@ -80,19 +83,19 @@ internal class PaymentSheetPage(
         zipCode: String = "12345"
     ) {
         waitForText("Full name")
-        replaceText("Full name", name)
+        composeTestRule.replaceText("Full name", name)
 
         waitForText("Email")
-        replaceText("Email", email)
+        composeTestRule.replaceText("Email", email)
 
         waitForText("Phone number")
-        replaceText("Phone number", phone)
+        composeTestRule.replaceText("Phone number", phone)
 
         waitForText("Address line 1")
-        replaceText("Address line 1", addressLineOne)
+        composeTestRule.replaceText("Address line 1", addressLineOne)
 
         waitForText("City")
-        replaceText("City", city)
+        composeTestRule.replaceText("City", city)
 
         waitForText("State")
         clickViewWithText("State")
@@ -101,18 +104,18 @@ internal class PaymentSheetPage(
         clickViewWithText("California")
 
         waitForText("ZIP Code")
-        replaceText("ZIP Code", zipCode)
+        composeTestRule.replaceText("ZIP Code", zipCode)
     }
 
     fun clearCard() {
         waitForText("4242 4242 4242 4242")
 
-        replaceText("4242 4242 4242 4242", "")
+        composeTestRule.replaceText("4242 4242 4242 4242", "")
     }
 
     fun fillCard() {
         waitForText("Card number")
-        replaceText("Card number", "4242424242424242")
+        composeTestRule.replaceText("Card number", "4242424242424242")
     }
 
     fun fillOutLink() {
@@ -122,7 +125,7 @@ internal class PaymentSheetPage(
 
     fun fillOutFieldWithLabel(label: String, text: String) {
         waitForText(label)
-        replaceText(label, text)
+        composeTestRule.replaceText(label, text)
     }
 
     fun clickAndFillField(label: String, text: String) {
@@ -181,7 +184,7 @@ internal class PaymentSheetPage(
         val label = if (optionalLabel) "Email (optional)" else "Email"
 
         waitForText(label)
-        replaceText(label, "email@email.com")
+        composeTestRule.replaceText(label, "email@email.com")
     }
 
     fun selectPhoneNumberCountry(country: String) {
@@ -192,41 +195,47 @@ internal class PaymentSheetPage(
 
     fun fillOutLinkPhone(phoneNumber: String = "+12113526421") {
         waitForText("Phone number", true)
-        replaceText("Phone number", phoneNumber, true)
+        composeTestRule.replaceText("Phone number", phoneNumber, substring = true)
     }
 
     fun fillOutLinkName() {
         waitForText("Full name")
-        replaceText("Full name", "John Doe")
+        composeTestRule.replaceText("Full name", "John Doe")
     }
 
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
         waitForText("Card number")
 
-        replaceText("Card number", "4000002500001001")
-        fillExpirationDate("12/34")
-        replaceText("CVC", "123")
+        composeTestRule.replaceText("Card number", "4000002500001001")
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = "12/34",
+        )
+        composeTestRule.replaceText("CVC", "123")
 
         clickDropdownMenu()
         waitForText("Select card brand (optional)")
         clickViewWithText("Cartes Bancaires")
 
         if (fillOutZipCode) {
-            replaceText("ZIP Code", "12345")
+            composeTestRule.replaceText("ZIP Code", "12345")
         }
     }
 
     fun fillOutCardDetailsWithCardBrandChoiceSelector(fillOutZipCode: Boolean = true) {
         waitForText("Card number")
 
-        replaceText("Card number", "4000002500001001")
-        fillExpirationDate("12/34")
-        replaceText("CVC", "123")
+        composeTestRule.replaceText("Card number", "4000002500001001")
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = "12/34",
+        )
+        composeTestRule.replaceText("CVC", "123")
 
         clickViewWithContentDescription("Cartes Bancaires")
 
         if (fillOutZipCode) {
-            replaceText("ZIP Code", "12345")
+            composeTestRule.replaceText("ZIP Code", "12345")
         }
     }
 
@@ -329,24 +338,6 @@ internal class PaymentSheetPage(
 
         composeTestRule.onNode(hasTestTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"))
             .performClick()
-    }
-
-    fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
-        composeTestRule.replaceText(
-            matcher = hasText(label, substring = isLabelSubstring),
-            text = text,
-            scrollBehavior = ScrollBehavior.Required,
-            settleAfterReplacement = false,
-        )
-    }
-
-    fun fillExpirationDate(text: String) {
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = text,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
-        )
     }
 
     private fun clickDropdownMenu() {
@@ -523,9 +514,9 @@ internal class PaymentSheetPage(
     }
 
     fun fillOutKonbini(fullName: String, email: String, phone: String) {
-        replaceText("Full name", fullName)
-        replaceText("Email", email)
-        replaceText("Phone (optional)", phone)
+        composeTestRule.replaceText("Full name", fullName)
+        composeTestRule.replaceText("Email", email)
+        composeTestRule.replaceText("Phone (optional)", phone)
     }
 
     fun assertGooglePayIsDisplayed() {

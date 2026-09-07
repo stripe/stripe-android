@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.hasContentDescription
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import com.stripe.android.testing.replaceText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,8 +91,8 @@ internal class PaymentSheetBillingConfigurationTest(
         }
 
         page.waitForText("Email")
-        page.replaceText("Email", "mail@mail.com")
-        page.replaceText("Name on card", "Jane Doe")
+        composeTestRule.replaceText("Email", "mail@mail.com")
+        composeTestRule.replaceText("Name on card", "Jane Doe")
         page.fillOutCardDetails(fillOutZipCode = false)
 
         networkRule.enqueue(
@@ -217,8 +219,11 @@ internal class PaymentSheetBillingConfigurationTest(
         }
 
         page.assertIsOnFormPage()
-        page.replaceText("123 Main Street", "123 Main Road")
-        page.fillExpirationDate("12/34")
+        composeTestRule.replaceText("123 Main Street", "123 Main Road")
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = "12/34",
+        )
 
         // Check that line 1 was not reset to default value
         page.waitForText("123 Main Road")

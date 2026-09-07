@@ -20,7 +20,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
@@ -131,8 +130,20 @@ internal class OnrampE2EPage(
 
     fun loginAndAuthenticateWithOtp(email: String, password: String) {
         waitForTag(LOGIN_EMAIL_TAG)
-        replaceTag(LOGIN_EMAIL_TAG, email)
-        replaceTag(LOGIN_PASSWORD_TAG, password)
+        composeRule.replaceText(
+            matcher = hasTestTag(LOGIN_EMAIL_TAG),
+            text = email,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(LOGIN_PASSWORD_TAG),
+            text = password,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         hideKeyboard()
 
         clickTag(LOGIN_LOGIN_BUTTON_TAG)
@@ -146,14 +157,44 @@ internal class OnrampE2EPage(
         val user = FreshOnrampUser.create(country)
 
         waitForTag(LOGIN_EMAIL_TAG)
-        replaceTag(LOGIN_EMAIL_TAG, user.email)
-        replaceTag(LOGIN_PASSWORD_TAG, user.password)
+        composeRule.replaceText(
+            matcher = hasTestTag(LOGIN_EMAIL_TAG),
+            text = user.email,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(LOGIN_PASSWORD_TAG),
+            text = user.password,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         hideKeyboard()
         clickTag(LOGIN_REGISTER_BUTTON_TAG)
 
-        replaceTag(REGISTRATION_PHONE_TAG, user.phone)
-        replaceTag(REGISTRATION_COUNTRY_TAG, user.country)
-        replaceTag(REGISTRATION_FULL_NAME_TAG, user.name)
+        composeRule.replaceText(
+            matcher = hasTestTag(REGISTRATION_PHONE_TAG),
+            text = user.phone,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(REGISTRATION_COUNTRY_TAG),
+            text = user.country,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(REGISTRATION_FULL_NAME_TAG),
+            text = user.name,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         assertEditableText(REGISTRATION_PHONE_TAG, user.phone)
         assertEditableText(REGISTRATION_COUNTRY_TAG, user.country)
         assertEditableText(REGISTRATION_FULL_NAME_TAG, user.name)
@@ -184,18 +225,78 @@ internal class OnrampE2EPage(
             clickTag(KYC_RESIDENCE_DROPDOWN_TAG)
             clickText(residence)
         }
-        replaceTag(KYC_FIRST_NAME_TAG, TEST_KYC_FIRST_NAME)
-        replaceTag(KYC_LAST_NAME_TAG, TEST_KYC_LAST_NAME)
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_FIRST_NAME_TAG),
+            text = TEST_KYC_FIRST_NAME,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_LAST_NAME_TAG),
+            text = TEST_KYC_LAST_NAME,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         if (residence == "European Union") {
-            replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
-            replaceTag(KYC_BIRTH_CITY_TAG, address.city)
-            replaceTag(KYC_NATIONALITIES_TAG, user.country)
+            composeRule.replaceText(
+                matcher = hasTestTag(KYC_BIRTH_COUNTRY_TAG),
+                text = user.country,
+                timeoutMillis = defaultTimeout.inWholeMilliseconds,
+                scrollBehavior = ScrollBehavior.BestEffort,
+                settleAfterReplacement = true,
+            )
+            composeRule.replaceText(
+                matcher = hasTestTag(KYC_BIRTH_CITY_TAG),
+                text = address.city,
+                timeoutMillis = defaultTimeout.inWholeMilliseconds,
+                scrollBehavior = ScrollBehavior.BestEffort,
+                settleAfterReplacement = true,
+            )
+            composeRule.replaceText(
+                matcher = hasTestTag(KYC_NATIONALITIES_TAG),
+                text = user.country,
+                timeoutMillis = defaultTimeout.inWholeMilliseconds,
+                scrollBehavior = ScrollBehavior.BestEffort,
+                settleAfterReplacement = true,
+            )
         }
-        replaceTag(KYC_ADDRESS_LINE_1_TAG, TEST_KYC_ADDRESS_LINE_1)
-        replaceTag(KYC_ADDRESS_CITY_TAG, address.city)
-        replaceTag(KYC_ADDRESS_STATE_TAG, address.state)
-        replaceTag(KYC_ADDRESS_COUNTRY_TAG, address.country)
-        replaceTag(KYC_ADDRESS_POSTAL_CODE_TAG, address.postalCode)
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_ADDRESS_LINE_1_TAG),
+            text = TEST_KYC_ADDRESS_LINE_1,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_ADDRESS_CITY_TAG),
+            text = address.city,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_ADDRESS_STATE_TAG),
+            text = address.state,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_ADDRESS_COUNTRY_TAG),
+            text = address.country,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag(KYC_ADDRESS_POSTAL_CODE_TAG),
+            text = address.postalCode,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         hideKeyboard()
 
         clickTag(COLLECT_KYC_BUTTON_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
@@ -279,8 +380,20 @@ internal class OnrampE2EPage(
     }
 
     fun submitMaltaTaxIdentifier() {
-        replaceTag("$IDENTIFIER_TYPE_TAG-0", "mt_nic")
-        replaceTag("$IDENTIFIER_VALUE_TAG-0", TEST_MALTA_NATIONAL_ID)
+        composeRule.replaceText(
+            matcher = hasTestTag("$IDENTIFIER_TYPE_TAG-0"),
+            text = "mt_nic",
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasTestTag("$IDENTIFIER_VALUE_TAG-0"),
+            text = TEST_MALTA_NATIONAL_ID,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         hideKeyboard()
         clickTag(SUBMIT_IDENTIFIERS_BUTTON_TAG)
         waitForSnackbar("Identifiers submitted", timeoutMs = 30.seconds.inWholeMilliseconds)
@@ -311,7 +424,13 @@ internal class OnrampE2EPage(
     fun registerSolanaWallet() {
         clickTag(WALLET_NETWORK_DROPDOWN_TAG)
         clickText("Solana")
-        replaceTag(WALLET_ADDRESS_TAG, TEST_SOLANA_WALLET_ADDRESS)
+        composeRule.replaceText(
+            matcher = hasTestTag(WALLET_ADDRESS_TAG),
+            text = TEST_SOLANA_WALLET_ADDRESS,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
         hideKeyboard()
         clickTag(REGISTER_WALLET_BUTTON_TAG)
         waitForSnackbar("Wallet address registered successfully!")
@@ -332,9 +451,11 @@ internal class OnrampE2EPage(
 
         val cvcMatcher = hasText("CVC").and(hasSetTextAction())
         if (waitForOptionalNode(cvcMatcher, timeoutMs = 5.seconds.inWholeMilliseconds)) {
-            composeRule.onNode(cvcMatcher)
-                .performScrollTo()
-                .performTextReplacement(TEST_CARD_CVC)
+            composeRule.replaceText(
+                matcher = cvcMatcher,
+                text = TEST_CARD_CVC,
+                scrollBehavior = ScrollBehavior.Required,
+            )
         }
 
         clickTag(LINK_PRIMARY_BUTTON_TAG)
@@ -343,15 +464,35 @@ internal class OnrampE2EPage(
 
     fun collectNewCard() {
         clickTag(COLLECT_CARD_BUTTON_TAG)
-        replaceText(CARD_NUMBER_LABEL, TEST_CARD_NUMBER)
-        replaceContentDescription(EXPIRATION_DATE_DESCRIPTION, TEST_CARD_EXPIRATION)
-        replaceText(CARD_CVC_LABEL, TEST_NEW_CARD_CVC)
+        composeRule.replaceText(
+            matcher = hasText(CARD_NUMBER_LABEL).and(hasSetTextAction()),
+            text = TEST_CARD_NUMBER,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasContentDescription(EXPIRATION_DATE_DESCRIPTION, substring = true).and(hasSetTextAction()),
+            text = TEST_CARD_EXPIRATION,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = true,
+        )
+        composeRule.replaceText(
+            matcher = hasText(CARD_CVC_LABEL).and(hasSetTextAction()),
+            text = TEST_NEW_CARD_CVC,
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = true,
+        )
 
         val postalCodeMatcher = hasText(CARD_POSTAL_CODE_LABEL).and(hasSetTextAction())
         if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 3.seconds.inWholeMilliseconds)) {
-            composeRule.onNode(postalCodeMatcher)
-                .performScrollTo()
-                .performTextReplacement(TEST_CARD_POSTAL_CODE)
+            composeRule.replaceText(
+                matcher = postalCodeMatcher,
+                text = TEST_CARD_POSTAL_CODE,
+                scrollBehavior = ScrollBehavior.Required,
+            )
         }
 
         hideKeyboard()
@@ -463,38 +604,6 @@ internal class OnrampE2EPage(
         val matcher = hasText(text, substring = false, ignoreCase = true)
         composeRule.waitForExactlyOneNode(matcher, timeoutMs)
         composeRule.onNode(matcher).performClick()
-    }
-
-    private fun replaceTag(tag: String, text: String) {
-        waitForTag(tag)
-        composeRule.replaceText(
-            matcher = hasTestTag(tag),
-            text = text,
-            scrollBehavior = ScrollBehavior.BestEffort,
-            settleAfterReplacement = true,
-        )
-    }
-
-    private fun replaceText(label: String, text: String) {
-        val matcher = hasText(label).and(hasSetTextAction())
-        composeRule.waitForExactlyOneNode(matcher, defaultTimeout.inWholeMilliseconds)
-        composeRule.replaceText(
-            matcher = matcher,
-            text = text,
-            scrollBehavior = ScrollBehavior.Required,
-            settleAfterReplacement = true,
-        )
-    }
-
-    private fun replaceContentDescription(description: String, text: String) {
-        val matcher = hasContentDescription(description, substring = true).and(hasSetTextAction())
-        composeRule.waitForExactlyOneNode(matcher, defaultTimeout.inWholeMilliseconds)
-        composeRule.replaceText(
-            matcher = matcher,
-            text = text,
-            scrollBehavior = ScrollBehavior.Required,
-            settleAfterReplacement = true,
-        )
     }
 
     private fun assertEditableText(tag: String, text: String) {

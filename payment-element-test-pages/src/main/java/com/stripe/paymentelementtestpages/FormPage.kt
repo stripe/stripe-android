@@ -13,7 +13,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
-import com.stripe.android.testing.ScrollBehavior
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
 
@@ -21,7 +20,7 @@ import com.stripe.android.testing.waitForNode
 class FormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    val cardNumber: SemanticsNodeInteraction = nodeWithLabel("Card number")
+    val cardNumber: SemanticsNodeInteraction = composeTestRule.onNode(hasText("Card number"))
     val expirationDate: SemanticsNodeInteraction = composeTestRule.onNode(
         hasContentDescription(value = "Expiration date", substring = true)
     )
@@ -31,38 +30,20 @@ class FormPage(
     fun fillOutCardDetails(fillOutCardNumber: Boolean = true) {
         waitUntilVisible()
         if (fillOutCardNumber) {
-            composeTestRule.replaceText(
-                node = cardNumber,
-                text = "4242424242424242",
-                scrollBehavior = ScrollBehavior.Never,
-                settleAfterReplacement = false,
-            )
+            composeTestRule.replaceText(cardNumber, "4242424242424242")
         }
-        fillExpirationDate("12/34")
-        replaceText("CVC", "123")
-        replaceText("ZIP Code", "12345")
-    }
-
-    private fun replaceText(label: String, text: String) {
-        composeTestRule.replaceText(
-            matcher = hasText(label),
-            text = text,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
-        )
-    }
-
-    private fun fillExpirationDate(text: String) {
         composeTestRule.replaceText(
             matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = text,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
+            text = "12/34",
         )
-    }
-
-    private fun nodeWithLabel(label: String): SemanticsNodeInteraction {
-        return composeTestRule.onNode(hasText(label))
+        composeTestRule.replaceText(
+            matcher = hasText("CVC"),
+            text = "123",
+        )
+        composeTestRule.replaceText(
+            matcher = hasText("ZIP Code"),
+            text = "12345",
+        )
     }
 
     fun waitUntilVisible() {
@@ -84,20 +65,21 @@ class FormPage(
 
     fun fillCardNumber(number: String) {
         waitUntilVisible()
-        composeTestRule.replaceText(
-            node = cardNumber,
-            text = number,
-            scrollBehavior = ScrollBehavior.Never,
-            settleAfterReplacement = false,
-        )
+        composeTestRule.replaceText(cardNumber, number)
     }
 
     fun fillOutName() {
-        replaceText("Full name", "Jane Doe")
+        composeTestRule.replaceText(
+            matcher = hasText("Full name"),
+            text = "Jane Doe",
+        )
     }
 
     fun fillOutEmail() {
-        replaceText("Email", "janedoe@example.com")
+        composeTestRule.replaceText(
+            matcher = hasText("Email"),
+            text = "janedoe@example.com",
+        )
     }
 }
 

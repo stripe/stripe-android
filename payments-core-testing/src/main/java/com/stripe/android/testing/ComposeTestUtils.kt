@@ -70,10 +70,42 @@ fun ComposeTestRule.waitForText(
 }
 
 fun ComposeTestRule.replaceText(
+    targetText: String,
+    text: String,
+    substring: Boolean = false,
+) {
+    replaceText(
+        matcher = hasText(targetText, substring = substring),
+        text = text,
+        scrollBehavior = ScrollBehavior.Required,
+        settleAfterReplacement = false,
+    )
+}
+
+fun ComposeTestRule.replaceText(
     matcher: SemanticsMatcher,
     text: String,
+    timeoutMillis: Long,
     scrollBehavior: ScrollBehavior,
     settleAfterReplacement: Boolean,
+) {
+    waitForExactlyOneNode(
+        matcher = matcher,
+        timeoutMillis = timeoutMillis,
+    )
+    replaceText(
+        matcher = matcher,
+        text = text,
+        scrollBehavior = scrollBehavior,
+        settleAfterReplacement = settleAfterReplacement,
+    )
+}
+
+fun ComposeTestRule.replaceText(
+    matcher: SemanticsMatcher,
+    text: String,
+    scrollBehavior: ScrollBehavior = ScrollBehavior.Never,
+    settleAfterReplacement: Boolean = false,
 ) {
     replaceText(
         node = onNode(matcher),
@@ -86,8 +118,8 @@ fun ComposeTestRule.replaceText(
 fun ComposeTestRule.replaceText(
     node: SemanticsNodeInteraction,
     text: String,
-    scrollBehavior: ScrollBehavior,
-    settleAfterReplacement: Boolean,
+    scrollBehavior: ScrollBehavior = ScrollBehavior.Never,
+    settleAfterReplacement: Boolean = false,
 ) {
     when (scrollBehavior) {
         ScrollBehavior.Never -> Unit
