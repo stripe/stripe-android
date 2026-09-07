@@ -18,6 +18,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -37,6 +38,7 @@ class InputAddressViewModelTest {
 
     private fun createViewModel(
         address: AddressDetails? = null,
+        dismissalCoordinator: AddressElementDismissalCoordinator = AddressElementDismissalCoordinator(),
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build()
@@ -48,6 +50,7 @@ class InputAddressViewModelTest {
             ),
             navigator,
             eventReporter,
+            dismissalCoordinator,
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
     }
@@ -55,8 +58,10 @@ class InputAddressViewModelTest {
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `onScreenShown fires onShow with initial country`() {
@@ -214,6 +219,205 @@ class InputAddressViewModelTest {
     fun `default checkbox should emit false to start by default`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         assertThat(viewModel.checkboxChecked.value).isFalse()
+    }
+
+    @Test
+    fun `empty form starts clean`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.isDirty.value).isFalse()
+    }
+
+    @Test
+    fun `prefilled form starts clean`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            address = AddressDetails(
+                name = "Jane Doe",
+                address = PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "123 Apple Street",
+                    postalCode = "94107",
+                    state = "CA",
+                ),
+            )
+        )
+
+        assertThat(viewModel.isDirty.value).isFalse()
+    }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `same as billing form starts clean`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            city = "San Francisco",
+                            country = "US",
+                            line1 = "123 Apple Street",
+                            postalCode = "94107",
+                            state = "CA",
+                        ),
+                    )
+                )
+                .build()
+        )
+
+        assertThat(viewModel.isDirty.value).isFalse()
+    }
+
+    @Test
+    fun `incomplete address edit makes form dirty and reverting clears it`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .allowedCountries(setOf("US"))
+                    .build()
+            )
+
+            viewModel.setRawValues(
+                mapOf(
+                    IdentifierSpec.Country to "US",
+                    IdentifierSpec.Line1 to "123 Main",
+                )
+            )
+            assertThat(viewModel.isDirty.value).isTrue()
+
+            viewModel.setRawValues(
+                mapOf(
+                    IdentifierSpec.Country to "US",
+                    IdentifierSpec.Line1 to "",
+                )
+            )
+            assertThat(viewModel.isDirty.value).isFalse()
+        }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `same as billing edit makes form dirty and reverting clears it`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .allowedCountries(setOf("US"))
+                    .billingAddress(
+                        PaymentSheet.BillingDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                city = "San Francisco",
+                                country = "US",
+                                line1 = "123 Apple Street",
+                                postalCode = "94107",
+                                state = "CA",
+                            ),
+                        )
+                    )
+                    .build()
+            )
+
+            viewModel.clickBillingSameAsShipping(newValue = false)
+            advanceUntilIdle()
+            assertThat(
+                viewModel.addressFormController.uncompletedFormValues.value[IdentifierSpec.Line1]?.value
+            ).isNotEqualTo("123 Apple Street")
+            assertThat(viewModel.isDirty.value).isTrue()
+
+            viewModel.clickBillingSameAsShipping(newValue = true)
+            advanceUntilIdle()
+            assertThat(viewModel.isDirty.value).isFalse()
+        }
+
+    @Test
+    fun `autocomplete edit makes form dirty`() = runTest(testDispatcher) {
+        val autocompleteEvents = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(null)
+        whenever(
+            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                AddressElementNavigator.AutocompleteEvent.KEY
+            )
+        ).thenReturn(autocompleteEvents)
+
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .build()
+        )
+
+        autocompleteEvents.value = AddressElementNavigator.AutocompleteEvent.OnBack(
+            PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "123 Apple Street",
+                postalCode = "94107",
+                state = "CA",
+            )
+        )
+        advanceUntilIdle()
+
+        assertThat(
+            viewModel.addressFormController.uncompletedFormValues.value[IdentifierSpec.Line1]?.value
+        ).isEqualTo("123 Apple Street")
+        assertThat(viewModel.isDirty.value).isTrue()
+
+        autocompleteEvents.value = AddressElementNavigator.AutocompleteEvent.OnBack(
+            PaymentSheet.Address(country = "US")
+        )
+        advanceUntilIdle()
+
+        assertThat(viewModel.isDirty.value).isFalse()
+    }
+
+    @Test
+    fun `additional checkbox edit makes form dirty and reverting clears it`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .additionalFields(
+                        AddressLauncher.AdditionalFieldsConfiguration(
+                            checkboxLabel = "Use this address",
+                        )
+                    )
+                    .build()
+            )
+
+            viewModel.clickCheckbox(true)
+            assertThat(viewModel.isDirty.value).isTrue()
+
+            viewModel.clickCheckbox(false)
+            assertThat(viewModel.isDirty.value).isFalse()
+        }
+
+    @Test
+    fun `successful save clears dirty state`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .build()
+        )
+        viewModel.setRawValues(
+            mapOf(
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.Line1 to "123 Main",
+            )
+        )
+        assertThat(viewModel.isDirty.value).isTrue()
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = mapOf(
+                IdentifierSpec.Name to FormFieldEntry("Jane Doe", isComplete = true),
+                IdentifierSpec.Line1 to FormFieldEntry("123 Main", isComplete = true),
+                IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+                IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+                IdentifierSpec.PostalCode to FormFieldEntry("94107", isComplete = true),
+                IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+            ),
+            checkboxChecked = false,
+        )
+
+        assertThat(viewModel.isDirty.value).isFalse()
+        verify(navigator).dismiss(any())
     }
 
     @Test
@@ -998,6 +1202,7 @@ class InputAddressViewModelTest {
             ),
             navigator,
             eventReporter,
+            AddressElementDismissalCoordinator(),
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),

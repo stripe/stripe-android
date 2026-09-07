@@ -22,6 +22,9 @@ NEXT_VERSION_BUMP: MINOR
 ### CryptoOnramp
 * [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
 
+### AddressElement
+* [CHANGED] Address Element now asks customers to confirm before discarding unsaved address changes.
+
 ## 23.17.0 - 2026-08-24
 
 ### PaymentSheet

@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
@@ -22,10 +24,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
 
@@ -66,7 +71,7 @@ internal class AddressElementActivity : ComponentActivity() {
             val bottomSheetState = rememberStripeBottomSheetState()
 
             BackHandler {
-                viewModel.navigator.onBack()
+                viewModel.onBack()
             }
 
             viewModel.navigator.onDismiss = { result ->
@@ -86,10 +91,12 @@ internal class AddressElementActivity : ComponentActivity() {
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
     ) {
+        val showDiscardConfirmation by viewModel.showDiscardConfirmation.collectAsState()
+
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = viewModel::dismiss,
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -97,7 +104,11 @@ internal class AddressElementActivity : ComponentActivity() {
                         startDestination = AddressElementScreen.InputAddress.route,
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
+                            InputAddressScreen(
+                                inputAddressViewModelSubcomponentFactoryProvider =
+                                viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                                onCloseClick = viewModel::dismiss,
+                            )
                         }
                         composable(
                             AddressElementScreen.Autocomplete.route,
@@ -121,6 +132,13 @@ internal class AddressElementActivity : ComponentActivity() {
                     }
                 }
             }
+
+            if (showDiscardConfirmation) {
+                AddressElementDismissalDialog(
+                    onDiscardChanges = viewModel::discardChanges,
+                    onKeepEditing = viewModel::keepEditing,
+                )
+            }
         }
     }
 
@@ -137,4 +155,20 @@ internal class AddressElementActivity : ComponentActivity() {
         super.finish()
         fadeOut()
     }
+}
+
+@Composable
+internal fun AddressElementDismissalDialog(
+    onDiscardChanges: () -> Unit,
+    onKeepEditing: () -> Unit,
+) {
+    SimpleDialogElementUI(
+        titleText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_title),
+        messageText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_body),
+        confirmText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_confirm),
+        dismissText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_dismiss),
+        destructive = true,
+        onConfirmListener = onDiscardChanges,
+        onDismissListener = onKeepEditing,
+    )
 }
