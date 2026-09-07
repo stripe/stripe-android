@@ -469,30 +469,32 @@ internal class OnrampE2EPage(
     }
 
     private fun replaceTag(tag: String, text: String) {
+        waitForTag(tag)
         composeRule.replaceText(
             matcher = hasTestTag(tag),
             text = text,
-            timeoutMillis = defaultTimeout.inWholeMilliseconds,
             scrollBehavior = ScrollBehavior.BestEffort,
             settleAfterReplacement = true,
         )
     }
 
     private fun replaceText(label: String, text: String) {
+        val matcher = hasText(label).and(hasSetTextAction())
+        composeRule.waitForExactlyOneNode(matcher, defaultTimeout.inWholeMilliseconds)
         composeRule.replaceText(
-            matcher = hasText(label).and(hasSetTextAction()),
+            matcher = matcher,
             text = text,
-            timeoutMillis = defaultTimeout.inWholeMilliseconds,
             scrollBehavior = ScrollBehavior.Required,
             settleAfterReplacement = true,
         )
     }
 
     private fun replaceContentDescription(description: String, text: String) {
+        val matcher = hasContentDescription(description, substring = true).and(hasSetTextAction())
+        composeRule.waitForExactlyOneNode(matcher, defaultTimeout.inWholeMilliseconds)
         composeRule.replaceText(
-            matcher = hasContentDescription(description, substring = true).and(hasSetTextAction()),
+            matcher = matcher,
             text = text,
-            timeoutMillis = defaultTimeout.inWholeMilliseconds,
             scrollBehavior = ScrollBehavior.Required,
             settleAfterReplacement = true,
         )

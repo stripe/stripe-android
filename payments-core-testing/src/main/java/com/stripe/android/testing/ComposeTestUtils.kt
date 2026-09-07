@@ -93,25 +93,6 @@ fun ComposeTestRule.fillExpirationDate(text: String) {
 fun ComposeTestRule.replaceText(
     matcher: SemanticsMatcher,
     text: String,
-    timeoutMillis: Long,
-    scrollBehavior: ScrollBehavior,
-    settleAfterReplacement: Boolean,
-) {
-    waitForExactlyOneNode(
-        matcher = matcher,
-        timeoutMillis = timeoutMillis,
-    )
-    replaceText(
-        matcher = matcher,
-        text = text,
-        scrollBehavior = scrollBehavior,
-        settleAfterReplacement = settleAfterReplacement,
-    )
-}
-
-fun ComposeTestRule.replaceText(
-    matcher: SemanticsMatcher,
-    text: String,
     scrollBehavior: ScrollBehavior = ScrollBehavior.Never,
     settleAfterReplacement: Boolean = false,
 ) {

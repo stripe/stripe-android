@@ -52,11 +52,8 @@ internal class CustomerSheetPage(
     }
 
     fun fillOutFullBillingAddress() {
-        waitForText("Address line 1")
         composeTestRule.replaceText("Address line 1", ADDRESS_LINE_ONE)
-        waitForText("Address line 2 (optional)")
         composeTestRule.replaceText("Address line 2 (optional)", ADDRESS_LINE_TWO)
-        waitForText("City")
         composeTestRule.replaceText("City", CITY)
 
         click(hasText("State"))
@@ -64,26 +61,20 @@ internal class CustomerSheetPage(
     }
 
     fun fillOutContactInformation() {
-        waitForText("Email")
         composeTestRule.replaceText("Email", EMAIL)
-        waitForText("Phone number")
         composeTestRule.replaceText("Phone number", PHONE_NUMBER)
     }
 
     fun fillOutName() {
-        waitForText("Name on card")
         composeTestRule.replaceText("Name on card", NAME)
     }
 
     fun fillOutCardDetails(
         cardNumber: String = CARD_NUMBER,
     ) {
-        waitForText("Card number")
         composeTestRule.replaceText("Card number", cardNumber)
         composeTestRule.fillExpirationDate("$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
-        waitForText("CVC")
         composeTestRule.replaceText("CVC", CVC)
-        waitForText("ZIP Code")
         composeTestRule.replaceText("ZIP Code", ZIP_CODE)
     }
 
