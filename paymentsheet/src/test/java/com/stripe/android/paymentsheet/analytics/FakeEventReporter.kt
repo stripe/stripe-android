@@ -143,6 +143,9 @@ internal class FakeEventReporter : EventReporter {
     override fun onDismiss() {
     }
 
+    override fun onInit() {
+    }
+
     override fun onShowExistingPaymentOptions() {
     }
 

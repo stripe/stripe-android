@@ -58,22 +58,57 @@ class DefaultEventReporterTest {
     )
 
     @Test
-    fun `onInit fires event`() = runScenario {
-        eventReporter.onInit("pk_test_123")
+    fun `onInit queues event`() = runScenario {
+        eventReporter.onInit()
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_complete_init")
-        assertThat(request.params).containsEntry("publishable_key", "pk_test_123")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     @Test
-    fun `onInit does not fire event a second time`() = runScenario {
-        eventReporter.onInit("pk_test_123")
-        eventReporter.onInit("pk_test_other")
+    fun `onInit fires when another event provides a publishable key`() = runScenario {
+        eventReporter.onInit()
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Loading,
+                reset = true,
+            )
+        )
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_complete_init")
-        assertThat(request.params).containsEntry("publishable_key", "pk_test_123")
+        eventReporter.onLoadStarted(initializedViaCompose = true, publishableKey = "pk_test_123")
+
+        val initRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(initRequest.params).containsEntry("event", "mc_complete_init")
+        assertThat(initRequest.params).containsEntry("publishable_key", "pk_test_123")
+
+        val loadStartedRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(loadStartedRequest.params).containsEntry("event", "mc_load_started")
+        assertThat(loadStartedRequest.params).containsEntry("publishable_key", "pk_test_123")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `event without publishable key does not flush init`() = runScenario {
+        eventReporter.onInit()
+        paymentMethodMetadataStack.push(null)
+
+        eventReporter.onDismiss()
+
+        val dismissRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(dismissRequest.params).containsEntry("event", "mc_dismiss")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Loading,
+                reset = true,
+            )
+        )
+        eventReporter.onLoadStarted(initializedViaCompose = false, publishableKey = "pk_test_123")
+
+        val initRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(initRequest.params).containsEntry("event", "mc_complete_init")
+        val loadStartedRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(loadStartedRequest.params).containsEntry("event", "mc_load_started")
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 

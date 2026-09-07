@@ -53,18 +53,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         clientId = CLIENT_ID,
         origin = ORIGIN,
     )
-    private val hasReportedInit = AtomicBoolean(false)
+    private val hasPendingInit = AtomicBoolean(false)
 
-    override fun onInit(publishableKey: String) {
-        if (hasReportedInit.compareAndSet(false, true)) {
-            fireEvent(
-                event = PaymentSheetEvent.Init(
-                    mode = mode,
-                ),
-                paymentMethodMetadata = null,
-                publishableKey = publishableKey,
-            )
-        }
+    override fun onInit() {
+        hasPendingInit.set(true)
     }
 
     override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
@@ -634,15 +626,30 @@ internal class DefaultEventReporter @Inject internal constructor(
         publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
-            val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
-                (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
-            analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = event,
-                    additionalParams = additionalParams,
+            if (shouldFireInit(publishableKey, paymentMethodMetadata)) {
+                executeEvent(
+                    event = PaymentSheetEvent.Init(mode),
+                    paymentMethodMetadata = null,
+                    publishableKey = publishableKey,
                 )
-            )
+            }
+            executeEvent(event, paymentMethodMetadata, publishableKey)
         }
+    }
+
+    private fun executeEvent(
+        event: PaymentSheetEvent,
+        paymentMethodMetadata: PaymentMethodMetadata?,
+        publishableKey: String?,
+    ) {
+        val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
+            (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = additionalParams,
+            )
+        )
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
@@ -681,6 +688,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         } else {
             null
         }
+    }
+
+    private fun shouldFireInit(publishableKey: String?, paymentMethodMetadata: PaymentMethodMetadata?): Boolean {
+        val resolvedPublishableKey = publishableKey ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
+        return resolvedPublishableKey != null && hasPendingInit.compareAndSet(true, false)
     }
 
     companion object {

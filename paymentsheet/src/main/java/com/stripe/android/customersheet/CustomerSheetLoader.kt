@@ -137,6 +137,12 @@ internal class DefaultCustomerSheetLoader(
         val cardFundingFilter = DefaultCardFundingFilter
         val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
+        val apiConfiguration = paymentConfiguration.get().let {
+            ApiConfiguration.State(
+                publishableKey = it.publishableKey,
+                stripeAccountId = it.stripeAccountId,
+            )
+        }
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
             environment = if (elementsSession.stripeIntent.isLiveMode) {
                 GooglePayEnvironment.Production
@@ -170,6 +176,7 @@ internal class DefaultCustomerSheetLoader(
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
             ),
+            apiConfiguration = apiConfiguration,
         )
     }
 

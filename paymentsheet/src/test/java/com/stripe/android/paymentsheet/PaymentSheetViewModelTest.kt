@@ -173,6 +173,13 @@ internal class PaymentSheetViewModelTest {
 
     private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
 
+    @Test
+    fun `init notifies event reporter`() {
+        createViewModel()
+
+        verify(eventReporter).onInit()
+    }
+
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
     private val viewModelStoreRule = ViewModelStoreTestRule()

@@ -318,7 +318,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return workContext.runCatching(
             onFailure = { error -> reportFailedLoad(error, apiConfiguration.publishableKey) }
         ) {
-            eventReporter.onInit(apiConfiguration.publishableKey)
             // Validate configuration before loading
             initializationMode.validate()
             configuration.validate(
@@ -420,6 +419,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -570,6 +570,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): PaymentMethodMetadata {
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
@@ -617,6 +618,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
             paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
 
         return paymentMethodMetadata
