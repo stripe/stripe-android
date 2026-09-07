@@ -84,6 +84,8 @@ import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
 
+private const val IS_SYSTEM_DARK = "isSystemDark"
+
 @Component(
     modules = [
         ElementsSessionClientParamsModule::class,
@@ -121,6 +123,9 @@ internal interface TapToAddViewModelComponent {
             @Named(STATUS_BAR_COLOR)
             @BindsInstance
             statusBarColor: Int?,
+            @Named(IS_SYSTEM_DARK)
+            @BindsInstance
+            isSystemDark: Boolean,
         ): TapToAddViewModelComponent
     }
 }
@@ -211,8 +216,14 @@ internal interface TapToAddViewModelModule {
 
         @Provides
         @Singleton
-        fun providesTapToAddUxConfiguration(): TapToPayUxConfiguration {
-            return createTapToAddUxConfiguration()
+        fun providesTapToAddUxConfiguration(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            @Named(IS_SYSTEM_DARK) isSystemDark: Boolean,
+        ): TapToPayUxConfiguration {
+            return createTapToAddUxConfiguration(
+                appearance = paymentMethodMetadata.appearance,
+                isSystemDark = isSystemDark,
+            )
         }
 
         @Provides

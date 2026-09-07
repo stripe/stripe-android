@@ -10,6 +10,7 @@ import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import kotlinx.coroutines.delay
@@ -30,7 +31,7 @@ class TapToAddLayoutScreenshotTest {
         paparazziRule.gif(
             end = 3500L
         ) {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 var screen by remember {
                     mutableStateOf<TapToAddNavigator.Screen>(
                         TapToAddNavigator.Screen.CardAdded(
@@ -60,7 +61,7 @@ class TapToAddLayoutScreenshotTest {
     @Test
     fun collecting() {
         paparazziRule.snapshot {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor()),
                 ) {}
@@ -71,7 +72,7 @@ class TapToAddLayoutScreenshotTest {
     @Test
     fun cardAdded() {
         paparazziRule.snapshot {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.CardAdded(FakeTapToAddCardAddedInteractor()),
                 ) {}
@@ -84,7 +85,7 @@ class TapToAddLayoutScreenshotTest {
         paparazziRule.gif(
             end = 4500L
         ) {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Error(
                         message = TapToAddErrorMessage(
@@ -174,7 +175,7 @@ class TapToAddLayoutScreenshotTest {
         error: ResolvableString? = null,
     ) {
         paparazziRule.snapshot {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Confirmation(
                         interactor = FakeTapToAddConfirmationInteractor(
