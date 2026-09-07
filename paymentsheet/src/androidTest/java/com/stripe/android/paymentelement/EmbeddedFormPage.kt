@@ -7,7 +7,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyDescendant
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -24,6 +23,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
+import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
 import kotlin.time.Duration.Companion.seconds
@@ -41,10 +41,7 @@ internal class EmbeddedFormPage(
         if (fillOutCardNumber) {
             composeTestRule.replaceText(cardNumberText, newCardNumber)
         }
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = "12/34",
-        )
+        composeTestRule.fillExpirationDate("12/34")
         composeTestRule.replaceText(
             matcher = hasText("CVC"),
             text = "123",

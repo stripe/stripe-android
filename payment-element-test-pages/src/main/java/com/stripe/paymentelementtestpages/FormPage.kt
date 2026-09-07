@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
+import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
 
@@ -32,10 +33,7 @@ class FormPage(
         if (fillOutCardNumber) {
             composeTestRule.replaceText(cardNumber, "4242424242424242")
         }
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = "12/34",
-        )
+        composeTestRule.fillExpirationDate("12/34")
         composeTestRule.replaceText(
             matcher = hasText("CVC"),
             text = "123",

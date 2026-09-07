@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
+import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.isPlaced
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
@@ -79,10 +80,7 @@ internal class CustomerSheetPage(
     ) {
         waitForText("Card number")
         composeTestRule.replaceText("Card number", cardNumber)
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}",
-        )
+        composeTestRule.fillExpirationDate("$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
         waitForText("CVC")
         composeTestRule.replaceText("CVC", CVC)
         waitForText("ZIP Code")

@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.ScrollBehavior
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
@@ -63,10 +64,7 @@ internal class PaymentSheetPage(
         waitForCardForm()
 
         composeTestRule.replaceText("Card number", cardNumber)
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = "12/34",
-        )
+        composeTestRule.fillExpirationDate("12/34")
         composeTestRule.replaceText("CVC", "123")
 
         if (fillOutZipCode) {
@@ -207,10 +205,7 @@ internal class PaymentSheetPage(
         waitForText("Card number")
 
         composeTestRule.replaceText("Card number", "4000002500001001")
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = "12/34",
-        )
+        composeTestRule.fillExpirationDate("12/34")
         composeTestRule.replaceText("CVC", "123")
 
         clickDropdownMenu()
@@ -226,10 +221,7 @@ internal class PaymentSheetPage(
         waitForText("Card number")
 
         composeTestRule.replaceText("Card number", "4000002500001001")
-        composeTestRule.replaceText(
-            matcher = hasContentDescription(value = "Expiration date", substring = true),
-            text = "12/34",
-        )
+        composeTestRule.fillExpirationDate("12/34")
         composeTestRule.replaceText("CVC", "123")
 
         clickViewWithContentDescription("Cartes Bancaires")

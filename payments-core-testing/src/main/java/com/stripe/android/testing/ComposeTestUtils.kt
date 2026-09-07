@@ -2,6 +2,7 @@ package com.stripe.android.testing
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performScrollTo
@@ -79,6 +80,13 @@ fun ComposeTestRule.replaceText(
         text = text,
         scrollBehavior = ScrollBehavior.Required,
         settleAfterReplacement = false,
+    )
+}
+
+fun ComposeTestRule.fillExpirationDate(text: String) {
+    replaceText(
+        matcher = hasContentDescription(value = "Expiration date", substring = true),
+        text = text,
     )
 }
 
