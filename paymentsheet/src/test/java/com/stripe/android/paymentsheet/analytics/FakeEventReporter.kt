@@ -140,10 +140,10 @@ internal class FakeEventReporter : EventReporter {
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
     }
 
-    override fun onDismiss() {
+    override fun onInit() {
     }
 
-    override fun onInit() {
+    override fun onDismiss() {
     }
 
     override fun onShowExistingPaymentOptions() {

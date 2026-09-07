@@ -60,6 +60,8 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -76,6 +78,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
@@ -173,13 +176,6 @@ internal class PaymentSheetViewModelTest {
 
     private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
 
-    @Test
-    fun `init notifies event reporter`() {
-        createViewModel()
-
-        verify(eventReporter).onInit()
-    }
-
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
     private val viewModelStoreRule = ViewModelStoreTestRule()
@@ -209,6 +205,7 @@ internal class PaymentSheetViewModelTest {
     fun `init should fire analytics event`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
+        verify(eventReporter).onInit()
 
         // Creating the view model should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -2059,6 +2056,51 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error.resolvableString)))
         }
+    }
+
+    @Test
+    fun `Sends correct analytics event when using normal intent`() = runTest {
+        createViewModel()
+
+        verify(eventReporter).onInit()
+    }
+
+    @Test
+    fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
+
+        createViewModelForDeferredIntent()
+
+        verify(eventReporter).onInit()
+    }
+
+    @Test
+    fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
+
+        createViewModelForDeferredIntent()
+
+        verify(eventReporter).onInit()
     }
 
     @Test
