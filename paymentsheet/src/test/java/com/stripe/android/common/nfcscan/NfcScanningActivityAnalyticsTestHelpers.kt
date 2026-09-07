@@ -5,8 +5,9 @@ import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 
-private const val ANALYTICS_HOST = "q.stripe.com"
+private const val ANALYTICS_HOST = "r.stripe.com"
 private const val EVENT_PREFIX = "mc_"
 
 internal fun NetworkRule.expectNfcScanStarted() {
@@ -61,6 +62,7 @@ private fun NetworkRule.expectAnalyticsEvent(
 ) {
     val matchers = buildList {
         add(host(ANALYTICS_HOST))
+        add(path("/0"))
         add(method("GET"))
         add(analyticsPayloadField("event", eventName))
         addAll(matchers)
