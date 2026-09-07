@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Ħlas aktar tard bil-Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Billi tikkonferma l-pagament tiegħek ma\' NICEPAY, int qed tħalli lil %s tiġbor il-ħlas minn dan il-metodu ta\' pagament għal pagamenti futuri skont ir-regoli tagħhom.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">L-isem fuq il-karta</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Agħżel kif trid tħallas:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->

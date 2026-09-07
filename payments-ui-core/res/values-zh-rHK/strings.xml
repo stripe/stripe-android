@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">用 Klarna 先買後付</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">電話</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">透過 NICEPAY 確認付款，即表示閣下允許 %s 據其條款，使用此付款方式扣取日後的款項。</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">持卡人姓名</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">選擇您想如何付款：</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->
