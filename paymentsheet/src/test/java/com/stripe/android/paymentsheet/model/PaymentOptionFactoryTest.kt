@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -297,6 +298,37 @@ class PaymentOptionFactoryTest {
     }
 
     @Test
+    @Config(qualifiers = "notnight")
+    fun `missing appearance uses light icon on light system`() = runIconScenario(
+        appearance = null,
+    ) {
+        assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `missing appearance uses dark icon on dark system`() = runIconScenario(
+        appearance = null,
+    ) {
+        assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `missing appearance uses dark icon for legacy custom dark theme`() {
+        val originalColors = StripeTheme.colorsLightMutable
+        try {
+            StripeTheme.colorsLightMutable = originalColors.copy(component = Color.Black)
+
+            runIconScenario(appearance = null) {
+                assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+            }
+        } finally {
+            StripeTheme.colorsLightMutable = originalColors
+        }
+    }
+
+    @Test
     fun `icon() returns card art drawable when loader provides one`() {
         val cardArtDrawable = ShapeDrawable()
         val factory = createFactory(
@@ -334,6 +366,18 @@ class PaymentOptionFactoryTest {
         lightComponent: Color,
         darkComponent: Color,
         block: IconScenario.() -> Unit,
+    ) = runIconScenario(
+        appearance = PaymentSheet.Appearance.Builder()
+            .colorsLight(PaymentSheet.Colors.Builder.light().component(lightComponent).build())
+            .colorsDark(PaymentSheet.Colors.Builder.dark().component(darkComponent).build())
+            .themeMode(themeMode)
+            .build(),
+        block = block,
+    )
+
+    private fun runIconScenario(
+        appearance: PaymentSheet.Appearance?,
+        block: IconScenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val imageLoader = FakeStripeImageLoader()
@@ -345,11 +389,6 @@ class PaymentOptionFactoryTest {
             cardArtDrawableLoader = { null },
             context = context,
         )
-        val appearance = PaymentSheet.Appearance.Builder()
-            .colorsLight(PaymentSheet.Colors.Builder.light().component(lightComponent).build())
-            .colorsDark(PaymentSheet.Colors.Builder.dark().component(darkComponent).build())
-            .themeMode(themeMode)
-            .build()
         val selection = PaymentSelection.CustomPaymentMethod(
             id = "cpm_123",
             billingDetails = null,

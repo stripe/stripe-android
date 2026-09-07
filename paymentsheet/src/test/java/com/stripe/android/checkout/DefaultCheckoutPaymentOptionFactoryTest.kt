@@ -1,11 +1,20 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -18,15 +27,28 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(CheckoutSessionPreview::class, ReactNativeSdkInternal::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultCheckoutPaymentOptionFactoryTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
     @Test
     fun `create returns null when there is no selection`() = runScenario {
         assertThat(factory.create(selection = null, paymentMethodMetadata = metadata)).isNull()
@@ -127,26 +149,43 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
-    fun `imageLoader returns the card art when the card art loader provides one`() = runScenario(
+    fun `iconPainter uses card art when the card art loader provides one`() = runScenario(
         cardArt = ColorDrawable(),
     ) {
         // Card art is only ever loaded for saved payment methods.
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val option = factory.create(
-            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            selection = selection,
             paymentMethodMetadata = metadata,
         )
 
-        assertThat(option?.imageLoader?.invoke()).isSameInstanceAs(cardArt)
+        renderIcon(requireNotNull(option), isSystemDarkTheme = false)
+
+        assertThat(cardArtLoadCalls.awaitItem()).isEqualTo(selection)
     }
 
     @Test
-    fun `imageLoader falls back to the icon loader when there is no card art`() = runScenario {
+    fun `loadIcon uses light icon on light system`() = runScenario {
         val option = factory.create(
-            selection = PaymentSelection.GooglePay,
+            selection = customPaymentMethod,
             paymentMethodMetadata = metadata,
         )
 
-        assertThat(option?.imageLoader?.invoke()).isNotNull()
+        requireNotNull(option).loadIcon(isSystemDarkTheme = false)
+
+        assertThat(imageLoader.awaitLoadCall().url).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    fun `loadIcon uses dark icon on dark system`() = runScenario {
+        val option = factory.create(
+            selection = customPaymentMethod,
+            paymentMethodMetadata = metadata,
+        )
+
+        requireNotNull(option).loadIcon(isSystemDarkTheme = true)
+
+        assertThat(imageLoader.awaitLoadCall().url).isEqualTo(DARK_ICON_URL)
     }
 
     @Test
@@ -174,26 +213,70 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
+        val imageLoader = FakeStripeImageLoader()
+        val cardArtLoadCalls = Turbine<PaymentSelection>()
         Scenario(
             factory = DefaultCheckoutPaymentOptionDisplayDataFactory(
                 iconLoader = PaymentSelection.IconLoader(
                     resources = context.resources,
-                    imageLoader = FakeStripeImageLoader(),
+                    imageLoader = imageLoader,
                 ),
-                cardArtDrawableLoader = { cardArt },
+                cardArtDrawableLoader = { selection ->
+                    if (cardArt != null) {
+                        cardArtLoadCalls.add(selection)
+                    }
+                    cardArt
+                },
                 context = context,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply {
                     set(LinkAccountUpdate.Value(linkAccount))
                 },
             ),
             metadata = metadata,
-            cardArt = cardArt,
-        ).block()
+            cardArtLoadCalls = cardArtLoadCalls,
+            imageLoader = imageLoader,
+        ).apply { block() }
+        cardArtLoadCalls.ensureAllEventsConsumed()
+        imageLoader.ensureAllEventsConsumed()
+    }
+
+    private fun renderIcon(
+        option: PaymentOptionDisplayData,
+        isSystemDarkTheme: Boolean,
+    ) {
+        composeRule.setContent {
+            val configuration = Configuration(LocalConfiguration.current).apply {
+                val nightMode = if (isSystemDarkTheme) {
+                    Configuration.UI_MODE_NIGHT_YES
+                } else {
+                    Configuration.UI_MODE_NIGHT_NO
+                }
+                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
+            }
+            CompositionLocalProvider(LocalConfiguration provides configuration) {
+                option.iconPainter
+            }
+        }
+        composeRule.waitForIdle()
     }
 
     private class Scenario(
         val factory: DefaultCheckoutPaymentOptionDisplayDataFactory,
         val metadata: PaymentMethodMetadata,
-        val cardArt: Drawable?,
+        val cardArtLoadCalls: ReceiveTurbine<PaymentSelection>,
+        val imageLoader: FakeStripeImageLoader,
     )
+
+    private companion object {
+        const val LIGHT_ICON_URL = "light_icon_url"
+        const val DARK_ICON_URL = "dark_icon_url"
+
+        val customPaymentMethod = PaymentSelection.CustomPaymentMethod(
+            id = "cpm_123",
+            billingDetails = null,
+            label = "Custom".resolvableString,
+            lightThemeIconUrl = LIGHT_ICON_URL,
+            darkThemeIconUrl = DARK_ICON_URL,
+        )
+    }
 }
