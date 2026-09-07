@@ -69,7 +69,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         val fraudDetectionDataRepository =
-            DefaultFraudDetectionDataRepository(application, { apiConfiguration.publishableKey }, workContext)
+            DefaultFraudDetectionDataRepository(application, { apiConfiguration }, workContext)
         fraudDetectionDataRepository.refresh()
 
         val params = initializationMode.toElementsSessionParams(
