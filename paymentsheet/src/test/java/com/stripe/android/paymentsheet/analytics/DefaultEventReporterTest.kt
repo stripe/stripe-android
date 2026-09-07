@@ -59,10 +59,22 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onInit fires event`() = runScenario {
-        eventReporter.onInit()
+        eventReporter.onInit("pk_test_123")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_init")
+        assertThat(request.params).containsEntry("publishable_key", "pk_test_123")
+    }
+
+    @Test
+    fun `onInit does not fire event a second time`() = runScenario {
+        eventReporter.onInit("pk_test_123")
+        eventReporter.onInit("pk_test_other")
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_init")
+        assertThat(request.params).containsEntry("publishable_key", "pk_test_123")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     @Test
@@ -103,7 +115,7 @@ class DefaultEventReporterTest {
                 reset = true,
             )
         )
-        eventReporter.onLoadStarted(initializedViaCompose = true)
+        eventReporter.onLoadStarted(initializedViaCompose = true, publishableKey = "pk_test_123")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_started")
@@ -189,7 +201,7 @@ class DefaultEventReporterTest {
             )
         )
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error)
+        eventReporter.onLoadFailed(error = error, publishableKey = "pk_test_123")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -267,7 +279,7 @@ class DefaultEventReporterTest {
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.milliseconds
 
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error)
+        eventReporter.onLoadFailed(error = error, publishableKey = "pk_test_123")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -288,7 +300,7 @@ class DefaultEventReporterTest {
             )
         )
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error)
+        eventReporter.onLoadFailed(error = error, publishableKey = "pk_test_123")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")

@@ -6,6 +6,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class FakeLoadingEventReporter : LoadingEventReporter {
+    private val _initTurbine = Turbine<String>()
+    val initTurbine: ReceiveTurbine<String> = _initTurbine
+
     private val _loadStartedTurbine = Turbine<LoadStartedCall>()
     val loadStartedTurbine: ReceiveTurbine<LoadStartedCall> = _loadStartedTurbine
 
@@ -20,13 +23,18 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         _elementsSessionLoadFailedTurbine
 
     fun validate() {
+        _initTurbine.ensureAllEventsConsumed()
         _loadStartedTurbine.ensureAllEventsConsumed()
         _loadSucceededTurbine.ensureAllEventsConsumed()
         _loadFailedTurbine.ensureAllEventsConsumed()
         _elementsSessionLoadFailedTurbine.ensureAllEventsConsumed()
     }
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onInit(publishableKey: String) {
+        _initTurbine.add(publishableKey)
+    }
+
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         _loadStartedTurbine.add(
             LoadStartedCall(
                 initializedViaCompose = initializedViaCompose,
@@ -46,7 +54,7 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         )
     }
 
-    override fun onLoadFailed(error: Throwable) {
+    override fun onLoadFailed(error: Throwable, publishableKey: String) {
         _loadFailedTurbine.add(
             LoadFailedCall(
                 error = error,
