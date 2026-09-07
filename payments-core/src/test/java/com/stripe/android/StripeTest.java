@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
+import com.stripe.android.core.ApiConfiguration;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -91,7 +92,9 @@ public class StripeTest {
     private final Context context = ApplicationProvider.getApplicationContext();
     @NonNull
     private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
-            DefaultFraudDetectionDataRepository(context, () -> ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+            DefaultFraudDetectionDataRepository(
+                    context,
+                    () -> new ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null));
     @NonNull
     private final Stripe defaultStripe = createStripe();
 

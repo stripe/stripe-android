@@ -137,7 +137,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(context, publishableKeyProvider, workContext),
+        DefaultFraudDetectionDataRepository(
+            context,
+            { ApiConfiguration.State(publishableKeyProvider(), null) },
+            workContext,
+        ),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
         DefaultCardAccountRangeRepositoryFactory(
             context,

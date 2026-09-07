@@ -10,7 +10,9 @@ import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRequestFa
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataStore
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -20,7 +22,7 @@ fun DefaultFraudDetectionDataRepository(
 ): DefaultFraudDetectionDataRepository {
     return DefaultFraudDetectionDataRepository(
         context = context,
-        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+        apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
         workContext = workContext,
     )
 }
@@ -29,7 +31,7 @@ fun DefaultFraudDetectionDataRepository(
 @JvmOverloads
 fun DefaultFraudDetectionDataRepository(
     context: Context,
-    publishableKeyProvider: () -> String,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
     workContext: CoroutineContext = Dispatchers.IO,
 ): DefaultFraudDetectionDataRepository {
     return DefaultFraudDetectionDataRepository(
@@ -38,9 +40,7 @@ fun DefaultFraudDetectionDataRepository(
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
         errorReporter = ErrorReporter.createFallbackInstance(
             context,
-            apiConfigurationProvider = {
-                ApiConfiguration.State(publishableKeyProvider(), null)
-            },
+            apiConfigurationProvider = apiConfigurationProvider,
             productUsage = emptySet(),
         ),
         workContext = workContext,
