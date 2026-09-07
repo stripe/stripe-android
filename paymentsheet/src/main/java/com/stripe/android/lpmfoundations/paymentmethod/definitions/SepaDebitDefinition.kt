@@ -22,8 +22,6 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 internal object SepaDebitDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.SepaDebit
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(

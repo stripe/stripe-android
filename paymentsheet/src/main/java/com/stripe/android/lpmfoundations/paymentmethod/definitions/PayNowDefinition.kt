@@ -11,8 +11,6 @@ import com.stripe.android.ui.core.R
 internal object PayNowDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.PayNow
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
-
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> {

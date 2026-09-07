@@ -11,8 +11,6 @@ import com.stripe.android.ui.core.R
 internal object GrabPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.GrabPay
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(

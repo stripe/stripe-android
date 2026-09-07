@@ -8,8 +8,6 @@ internal interface PaymentMethodDefinition {
      */
     val type: PaymentMethod.Type
 
-    val supportedAsSavedPaymentMethod: Boolean
-
     fun requiresMandate(metadata: PaymentMethodMetadata): Boolean
 
     /**
