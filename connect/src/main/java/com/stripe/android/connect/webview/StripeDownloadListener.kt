@@ -1,6 +1,5 @@
 package com.stripe.android.connect.webview
 
-import android.annotation.SuppressLint
 import android.app.DownloadManager.STATUS_PAUSED
 import android.app.DownloadManager.STATUS_PENDING
 import android.app.DownloadManager.STATUS_RUNNING
@@ -9,16 +8,14 @@ import android.webkit.DownloadListener
 import com.stripe.android.connect.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("TestResourceCleanup")
 internal class StripeDownloadListener(
     private val context: Context,
-    private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
-    private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(),
-    private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+    private val stripeDownloadManager: StripeDownloadManager,
+    private val stripeToastManager: StripeToastManager,
+    private val coroutineScope: CoroutineScope,
 ) : DownloadListener {
 
     override fun onDownloadStart(
@@ -33,7 +30,7 @@ internal class StripeDownloadListener(
             return
         }
 
-        ioScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             val downloadId = stripeDownloadManager.enqueueDownload(url, contentDisposition, mimetype)
             if (downloadId == null) {
                 showErrorToast()
