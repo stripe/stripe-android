@@ -17,7 +17,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
@@ -25,6 +24,9 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
 import kotlin.time.Duration.Companion.seconds
 
 internal class EmbeddedFormPage(
@@ -38,7 +40,12 @@ internal class EmbeddedFormPage(
     ) {
         waitUntilVisible()
         if (fillOutCardNumber) {
-            replaceText(cardNumberText, newCardNumber)
+            composeTestRule.replaceText(
+                node = cardNumberText,
+                text = newCardNumber,
+                scrollBehavior = ScrollBehavior.Never,
+                settleAfterReplacement = false,
+            )
         }
         fillExpirationDate("12/34")
         replaceText("CVC", "123")
@@ -46,17 +53,21 @@ internal class EmbeddedFormPage(
     }
 
     private fun replaceText(label: String, text: String) {
-        composeTestRule.onNode(hasText(label))
-            .performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasText(label),
+            text = text,
+            scrollBehavior = ScrollBehavior.Never,
+            settleAfterReplacement = false,
+        )
     }
 
     private fun fillExpirationDate(text: String) {
-        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
-            .performTextReplacement(text)
-    }
-
-    private fun replaceText(node: SemanticsNodeInteraction, text: String) {
-        node.performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = text,
+            scrollBehavior = ScrollBehavior.Never,
+            settleAfterReplacement = false,
+        )
     }
 
     private fun nodeWithLabel(label: String): SemanticsNodeInteraction {
@@ -71,9 +82,10 @@ internal class EmbeddedFormPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            isVisible()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
+            timeoutMillis = 1_000,
+        )
     }
 
     fun waitUntilMissing() {
@@ -197,11 +209,10 @@ internal class EmbeddedFormPage(
     }
 
     private fun waitUntilPrimaryButtonIsEnabled() {
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
+            timeoutMillis = 1_000,
+        )
     }
 
     private fun primaryButton(): SemanticsNodeInteraction {

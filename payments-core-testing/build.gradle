@@ -13,6 +13,8 @@ android {
 dependencies {
     implementation project(":payments-core")
 
+    api testLibs.androidx.composeUi
+
     implementation libs.androidx.activity
     implementation libs.androidx.viewModel
     implementation libs.kotlin.coroutines

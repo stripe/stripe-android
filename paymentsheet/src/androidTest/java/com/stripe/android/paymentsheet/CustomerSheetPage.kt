@@ -11,7 +11,6 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -20,7 +19,10 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
-import com.stripe.android.paymentsheet.utils.isPlaced
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.isPlaced
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
@@ -162,11 +164,10 @@ internal class CustomerSheetPage(
     fun waitUntil(matcher: SemanticsMatcher) {
         waitForIdle()
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(matcher.and(isEnabled()))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = matcher.and(isEnabled()),
+            timeoutMillis = 5_000,
+        )
     }
 
     private fun click(matcher: SemanticsMatcher, canScroll: Boolean = true) {
@@ -182,14 +183,21 @@ internal class CustomerSheetPage(
     private fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
         waitForText(label, substring = isLabelSubstring)
 
-        composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
-            .performScrollTo()
-            .performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasText(label, substring = isLabelSubstring),
+            text = text,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = false,
+        )
     }
 
     private fun fillExpirationDate(text: String) {
-        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
-            .performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = text,
+            scrollBehavior = ScrollBehavior.Never,
+            settleAfterReplacement = false,
+        )
     }
 
     private fun clickDropdownMenu() {

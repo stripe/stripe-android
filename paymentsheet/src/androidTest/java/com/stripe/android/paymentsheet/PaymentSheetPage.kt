@@ -24,7 +24,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
@@ -40,6 +39,10 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
+import com.stripe.android.testing.waitForText
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.ui.core.elements.SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
@@ -128,8 +131,12 @@ internal class PaymentSheetPage(
             .performScrollTo()
             .performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNode(hasText(label))
-            .performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasText(label),
+            text = text,
+            scrollBehavior = ScrollBehavior.Never,
+            settleAfterReplacement = false,
+        )
     }
 
     fun clickSavedCard(last4: String) {
@@ -289,29 +296,26 @@ internal class PaymentSheetPage(
     }
 
     fun waitForTag(testTag: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitForText(text: String, substring: Boolean = false) {
-        composeTestRule.waitUntil(timeoutMillis = 15_000) {
-            composeTestRule
-                .onAllNodes(hasText(text, substring = substring))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForText(
+            text = text,
+            timeoutMillis = 15_000,
+            substring = substring,
+        )
     }
 
     fun waitForContentDescription(description: String) {
-        composeTestRule.waitUntil(timeoutMillis = 15_000) {
-            composeTestRule
-                .onAllNodes(hasContentDescription(description))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasContentDescription(description),
+            timeoutMillis = 15_000,
+        )
     }
 
     fun assertNoText(text: String, substring: Boolean = false) {
@@ -328,14 +332,21 @@ internal class PaymentSheetPage(
     }
 
     fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
-        composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
-            .performScrollTo()
-            .performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasText(label, substring = isLabelSubstring),
+            text = text,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = false,
+        )
     }
 
     fun fillExpirationDate(text: String) {
-        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
-            .performTextReplacement(text)
+        composeTestRule.replaceText(
+            matcher = hasContentDescription(value = "Expiration date", substring = true),
+            text = text,
+            scrollBehavior = ScrollBehavior.Never,
+            settleAfterReplacement = false,
+        )
     }
 
     private fun clickDropdownMenu() {
@@ -426,12 +437,10 @@ internal class PaymentSheetPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(5000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+            timeoutMillis = 5_000,
+        )
     }
 
     fun waitUntilMissing() {
