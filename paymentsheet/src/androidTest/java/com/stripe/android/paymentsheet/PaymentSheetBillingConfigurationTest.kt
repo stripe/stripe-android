@@ -90,7 +90,6 @@ internal class PaymentSheetBillingConfigurationTest(
             )
         }
 
-        page.waitForText("Email")
         composeTestRule.replaceText("Email", "mail@mail.com")
         composeTestRule.replaceText("Name on card", "Jane Doe")
         page.fillOutCardDetails(fillOutZipCode = false)

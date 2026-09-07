@@ -307,7 +307,7 @@ internal class PaymentSheetPage(
     fun waitForText(text: String, substring: Boolean = false) {
         composeTestRule.waitForText(
             text = text,
-            timeoutMillis = 15_000,
+            timeoutMillis = 10_000,
             substring = substring,
         )
     }
@@ -315,7 +315,7 @@ internal class PaymentSheetPage(
     fun waitForContentDescription(description: String) {
         composeTestRule.waitForNode(
             matcher = hasContentDescription(description),
-            timeoutMillis = 15_000,
+            timeoutMillis = 10_000,
         )
     }
 

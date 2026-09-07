@@ -17,56 +17,20 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
-import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
-import com.stripe.android.testing.fillExpirationDate
-import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
+import com.stripe.paymentelementtestpages.FormPage
 import kotlin.time.Duration.Companion.seconds
 
 internal class EmbeddedFormPage(
-    private val composeTestRule: ComposeTestRule,
-) {
-    val cardNumberText: SemanticsNodeInteraction = composeTestRule.onNode(hasText("Card number"))
-
-    fun fillOutCardDetails(
-        newCardNumber: String = "4242424242424242",
-        fillOutCardNumber: Boolean = true
-    ) {
-        waitUntilVisible()
-        if (fillOutCardNumber) {
-            composeTestRule.replaceText(cardNumberText, newCardNumber)
-        }
-        composeTestRule.fillExpirationDate("12/34")
-        composeTestRule.replaceText(
-            matcher = hasText("CVC"),
-            text = "123",
-        )
-        composeTestRule.replaceText(
-            matcher = hasText("ZIP Code"),
-            text = "12345",
-        )
-    }
-
-    fun waitUntilVisible() {
-        composeTestRule.waitForNode(
-            matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
-            timeoutMillis = 1_000,
-        )
-    }
-
-    fun waitUntilMissing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
-    }
+    composeTestRule: ComposeTestRule,
+) : FormPage(composeTestRule) {
+    val cardNumberText: SemanticsNodeInteraction
+        get() = cardNumber
 
     fun clickPrimaryButton() {
         clickPrimaryButtonWithoutWaitingForDismissal()

@@ -18,8 +18,8 @@ import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FormPage(
-    private val composeTestRule: ComposeTestRule,
+open class FormPage(
+    protected val composeTestRule: ComposeTestRule,
 ) {
     val cardNumber: SemanticsNodeInteraction = composeTestRule.onNode(hasText("Card number"))
     val expirationDate: SemanticsNodeInteraction = composeTestRule.onNode(
@@ -29,9 +29,19 @@ class FormPage(
     val headerIcon: SemanticsNodeInteraction = composeTestRule.onNodeWithTag(TEST_TAG_ICON_FROM_RES)
 
     fun fillOutCardDetails(fillOutCardNumber: Boolean = true) {
+        fillOutCardDetails(
+            newCardNumber = DEFAULT_CARD_NUMBER,
+            fillOutCardNumber = fillOutCardNumber,
+        )
+    }
+
+    fun fillOutCardDetails(
+        newCardNumber: String,
+        fillOutCardNumber: Boolean = true,
+    ) {
         waitUntilVisible()
         if (fillOutCardNumber) {
-            composeTestRule.replaceText(cardNumber, "4242424242424242")
+            composeTestRule.replaceText(cardNumber, newCardNumber)
         }
         composeTestRule.fillExpirationDate("12/34")
         composeTestRule.replaceText(
@@ -49,6 +59,15 @@ class FormPage(
             matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
             timeoutMillis = 1_000,
         )
+    }
+
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
     }
 
     fun assertIsNotDisplayed() {
@@ -78,6 +97,10 @@ class FormPage(
             matcher = hasText("Email"),
             text = "janedoe@example.com",
         )
+    }
+
+    private companion object {
+        const val DEFAULT_CARD_NUMBER = "4242424242424242"
     }
 }
 
