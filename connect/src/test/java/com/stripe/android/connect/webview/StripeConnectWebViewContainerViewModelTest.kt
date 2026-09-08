@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.webkit.PermissionRequest
+import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.ComponentEvent
@@ -29,9 +30,11 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.testing.ViewModelStoreTestRule
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -106,13 +109,41 @@ class StripeConnectWebViewContainerViewModelTest {
             embeddedComponent = embeddedComponent,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
-            createWebView = { _, _, _ -> webView }
+            createWebView = { _, _, _, _ -> webView }
         ).also { viewModelStoreRule.track(it) }
     }
 
     @After
     fun cleanup() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `WebView coroutine scope is cancelled when ViewModel is cleared`() {
+        lateinit var coroutineScope: CoroutineScope
+        val viewModel = StripeConnectWebViewContainerViewModel(
+            application = RuntimeEnvironment.getApplication(),
+            clock = androidClock,
+            embeddedComponentManager = embeddedComponentManager,
+            embeddedComponent = embeddedComponent,
+            analyticsService = analyticsService,
+            logger = mockLogger,
+            createWebView = { _, _, _, scope ->
+                coroutineScope = scope
+                webView
+            },
+        )
+        val viewModelStore = ViewModelStore()
+
+        try {
+            @Suppress("RestrictedApi")
+            viewModelStore.put("viewModel", viewModel)
+            assertThat(coroutineScope.isActive).isTrue()
+        } finally {
+            viewModelStore.clear()
+        }
+
+        assertThat(coroutineScope.isActive).isFalse()
     }
 
     @Test
