@@ -176,7 +176,7 @@ internal class SheetTaxRegionUpdaterTest {
                 publishableKey = "pk_test_123",
             ),
             publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
+            stripeAccountIdProvider = { "acct_123" },
         )
 
         return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
