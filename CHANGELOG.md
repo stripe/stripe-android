@@ -9,6 +9,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Added support for Korean cards.
 * [ADDED] Added support for Naver Pay.
 * [ADDED] Added support for Kakao Pay.
+* [ADDED] Added support for Scalapay.
 
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.
