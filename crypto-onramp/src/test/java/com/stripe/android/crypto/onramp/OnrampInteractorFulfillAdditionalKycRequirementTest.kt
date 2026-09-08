@@ -253,7 +253,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
                 liquidityProvider = "swapped",
                 documents = null,
                 questionnaire = null,
-                submittedAt = 1_786_998_400,
+                status = "pending_verification",
+                created = 1_786_998_400,
             )
         }
 

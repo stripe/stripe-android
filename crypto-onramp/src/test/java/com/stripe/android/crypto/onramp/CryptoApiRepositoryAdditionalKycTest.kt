@@ -139,10 +139,12 @@ class CryptoApiRepositoryAdditionalKycTest {
         assertThat(document.documentType).isEqualTo("source_of_funds")
         assertThat(document.documentSubtype).isEqualTo("bank_statement")
         assertThat(document.fileIds).containsExactly("file_1", "file_2").inOrder()
+        assertThat(document.status).isEqualTo("pending_verification")
         val questionnaire = requireNotNull(response.questionnaire)
         assertThat(questionnaire.answers.single().questionId).isEqualTo("purchase_purpose")
         assertThat(questionnaire.answers.single().value).isEqualTo("Personal investment")
-        assertThat(response.submittedAt).isEqualTo(1_723_264_800L)
+        assertThat(response.status).isEqualTo("pending_verification")
+        assertThat(response.created).isEqualTo(1_723_264_800L)
     }
 
     private fun runScenario(
@@ -193,11 +195,13 @@ class CryptoApiRepositoryAdditionalKycTest {
                   "id": "cks_123",
                   "object": "crypto.kyc_submission",
                   "liquidity_provider": "swapped",
+                  "status": "pending_verification",
                   "documents": [
                     {
                       "document_type": "source_of_funds",
                       "document_subtype": "bank_statement",
-                      "file_ids": ["file_1", "file_2"]
+                      "file_ids": ["file_1", "file_2"],
+                      "status": "pending_verification"
                     }
                   ],
                   "questionnaire": {
@@ -208,7 +212,7 @@ class CryptoApiRepositoryAdditionalKycTest {
                       }
                     ]
                   },
-                  "submitted_at": 1723264800
+                  "created": 1723264800
                 }
             """.trimIndent()
 
@@ -218,13 +222,15 @@ class CryptoApiRepositoryAdditionalKycTest {
                   "id": "cks_125",
                   "object": "crypto.kyc_submission",
                   "liquidity_provider": "swapped",
+                  "status": "pending_verification",
                   "documents": [
                     {
                       "document_type": "proof_of_address",
-                      "file_ids": ["file_1"]
+                      "file_ids": ["file_1"],
+                      "status": "pending_verification"
                     }
                   ],
-                  "submitted_at": 1723264802
+                  "created": 1723264802
                 }
             """.trimIndent()
 

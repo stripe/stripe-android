@@ -12,8 +12,8 @@ internal data class AdditionalKycSubmissionResponse(
     val liquidityProvider: String,
     val documents: List<AdditionalKycDocumentSubmissionResponse>? = null,
     val questionnaire: AdditionalKycQuestionnaireSubmissionResponse? = null,
-    @SerialName("submitted_at")
-    val submittedAt: Long,
+    val status: String,
+    val created: Long,
 )
 
 @Serializable
@@ -24,6 +24,7 @@ internal data class AdditionalKycDocumentSubmissionResponse(
     val documentSubtype: String? = null,
     @SerialName("file_ids")
     val fileIds: List<String>,
+    val status: String,
 )
 
 @Serializable
