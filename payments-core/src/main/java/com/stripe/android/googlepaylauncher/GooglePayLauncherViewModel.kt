@@ -19,6 +19,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
@@ -312,6 +313,7 @@ internal class GooglePayLauncherViewModel(
                 billingAddressParameters = args.config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
+                apiConfiguration = ApiConfiguration.State(publishableKey, stripeAccountId),
                 errorReporter = errorReporter,
                 logger = logger,
                 cardFundingFilter = DefaultCardFundingFilter,

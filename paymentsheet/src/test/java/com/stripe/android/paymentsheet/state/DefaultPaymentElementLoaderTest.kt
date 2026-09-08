@@ -5039,7 +5039,8 @@ internal class DefaultPaymentElementLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    apiConfiguration: ApiConfiguration.State,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
