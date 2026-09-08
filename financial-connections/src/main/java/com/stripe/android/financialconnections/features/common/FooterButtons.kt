@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 
 /** Gap between the two buttons in the Link DS 3.0 side-by-side layout. */
 private val SideBySideSpacing = 8.dp
@@ -56,16 +56,17 @@ internal fun FooterButtons(
 ) {
     val sideBySide = preferSideBySide &&
         secondary != null &&
-        FinancialConnectionsTheme.theme.isLinkDs3
+        FinancialConnectionsTheme.theme.isLink
 
-    if (sideBySide && secondary != null) {
+    if (sideBySide) {
+        val secondaryButton = requireNotNull(secondary)
         Row(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(SideBySideSpacing),
         ) {
             // The outlined pill only exists in the side-by-side layout.
             FooterButton(
-                button = secondary,
+                button = secondaryButton,
                 type = Type.SecondaryOutlined,
                 modifier = Modifier.weight(1f),
             )

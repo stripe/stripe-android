@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavBackStackEntry
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.GenericBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -100,6 +102,19 @@ internal fun NoticeSheetPreview(
     FinancialConnectionsPreview {
         NoticeSheetContent(
             content = content,
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+            onViewEffectLaunched = {},
+        )
+    }
+}
+
+@Composable
+@Preview(name = "Link legal", group = "Notice Sheet")
+internal fun NoticeSheetLinkLegalPreview() {
+    FinancialConnectionsPreview(theme = Theme.Link(ThemeMode.Automatic)) {
+        NoticeSheetContent(
+            content = NoticeSheetPreviewParameterProvider().legal(),
             onClickableTextClick = {},
             onConfirmModalClick = {},
             onViewEffectLaunched = {},

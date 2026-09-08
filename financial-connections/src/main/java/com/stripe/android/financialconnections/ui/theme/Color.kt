@@ -50,9 +50,7 @@ internal val Brand600 = Color(0xFF533AFD)
 
 // Link
 internal val LinkGreen50 = Color(0xFFE6FFED)
-internal val LinkGreen50Dark = Color(0xFF16211F)
 internal val LinkGreen200 = Color(0xFF00D66F)
-internal val LinkGreen500 = Color(0xFF008545)
 internal val LinkGreen900 = Color(0xFF011E0F)
 
 // Link DS 3.0. Unlike the palette above, these are a pure grey ramp rather than FC's
@@ -61,6 +59,7 @@ internal val LinkGreen900 = Color(0xFF011E0F)
 internal val LinkNeutral0 = Color(0xFFFFFFFF)
 internal val LinkNeutral100 = Color(0xFFF5F5F5)
 internal val LinkNeutral200 = Color(0xFFE5E5E5)
+internal val LinkNeutral600 = Color(0xFF707070)
 internal val LinkNeutral700 = Color(0xFF404040)
 internal val LinkNeutral800 = Color(0xFF262626)
 internal val LinkNeutral900 = Color(0xFF171717)
@@ -100,6 +99,11 @@ internal data class FinancialConnectionsColors(
     val border: Color,
     val successIconBackground: Color,
     val successIconForeground: Color,
+    val textPrimary: Color,
+    val textTertiary: Color,
+    val iconSecondary: Color,
+    val borderOnCard: Color,
+    val dividerOnCard: Color,
 )
 
 @Preview(group = "Components", name = "Colors")
@@ -132,6 +136,11 @@ internal fun ColorsPreview() {
             ColorPreview("border", colors.border)
             ColorPreview("successIconBackground", colors.successIconBackground)
             ColorPreview("successIconForeground", colors.successIconForeground)
+            ColorPreview("textPrimary", colors.textPrimary)
+            ColorPreview("textTertiary", colors.textTertiary)
+            ColorPreview("iconSecondary", colors.iconSecondary)
+            ColorPreview("borderOnCard", colors.borderOnCard)
+            ColorPreview("dividerOnCard", colors.dividerOnCard)
         }
     }
 }

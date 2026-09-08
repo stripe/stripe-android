@@ -142,7 +142,9 @@ private fun IconWrapperBox(
 }
 
 internal enum class IconSize(val size: Dp, val paddedSize: Dp) {
+    ExtraLarge(72.dp, 36.dp),
     Large(64.dp, 32.dp),
     Medium(56.dp, 20.dp),
+    Compact(44.dp, 20.dp),
     Small(24.dp, 12.dp)
 }

@@ -19,7 +19,7 @@ internal class NoticeSheetPreviewParameterProvider :
         dataAccessWithConnectedAccounts(),
     )
 
-    private fun legal() = NoticeSheetState.NoticeSheetContent.Legal(
+    internal fun legal() = NoticeSheetState.NoticeSheetContent.Legal(
         legalDetails = legalDetails(),
     )
 

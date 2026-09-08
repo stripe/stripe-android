@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,7 +48,9 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.LocalImageLoader
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.isLink
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
@@ -230,7 +233,13 @@ private fun Logo(imageBitmap: ImageBitmap) {
     Box(
         modifier = Modifier
             .size(LogoSize)
-            .shadow(8.dp, shape)
+            .then(
+                if (FinancialConnectionsTheme.theme.isLink) {
+                    Modifier.border(0.5.dp, colors.borderOnCard, shape)
+                } else {
+                    Modifier.shadow(8.dp, shape)
+                }
+            )
             .clip(shape)
             .background(color = colors.backgroundSecondary, shape = shape)
     ) {

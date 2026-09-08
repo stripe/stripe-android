@@ -40,8 +40,10 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.clickableSingle
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
@@ -103,7 +105,7 @@ internal fun AccountItem(
             }
             Icon(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(if (FinancialConnectionsTheme.theme.isLink) 16.dp else 24.dp)
                     .alpha(if (selected) 1f else 0f),
                 painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                 tint = colors.primary,
@@ -124,8 +126,10 @@ private fun accountItemSurface(groupPosition: GroupPosition?, selected: Boolean)
         return Modifier.groupedCardSurface(
             isFirst = groupPosition.isFirst,
             isLast = groupPosition.isLast,
-            // Account rows have no leading icon here, so the separator spans the full width.
-            separatorInset = 0.dp,
+            separatorInset = groupPosition.separatorInset,
+            cornerRadius = groupPosition.cornerRadius,
+            backgroundColor = colors.iconBackground,
+            separatorColor = groupPosition.separatorColor,
         )
     }
     val shape = remember { RoundedCornerShape(12.dp) }
@@ -185,7 +189,11 @@ private fun AccountSubtitle(
                     style = typography.labelSmall,
                     modifier = Modifier
                         .background(
-                            color = colors.backgroundSecondary,
+                            color = if (FinancialConnectionsTheme.theme.isLink) {
+                                colors.borderNeutral
+                            } else {
+                                colors.backgroundSecondary
+                            },
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 6.dp, vertical = 4.dp)

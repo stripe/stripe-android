@@ -51,7 +51,7 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Pr
         )
     )
 
-    private fun canonical() = PreviewState(
+    internal fun canonical() = PreviewState(
         state = ManualEntryState(
             payload = Success(
                 ManualEntryState.Payload(
