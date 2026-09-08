@@ -228,7 +228,6 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
                 .disallowFundingSourceCreation(this[Controller.express.link.disallowedFunding].toSet())
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
-        .shippingAddressRequired(this[Controller.express.shippingRequired])
         .appearance(
             ExpressCheckoutElement.Configuration.Appearance()
                 .buttonTheme(this[Controller.express.appearance.theme])
