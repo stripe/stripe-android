@@ -25,17 +25,21 @@ internal object GooglePayPaymentDataCallbackHandler {
     ) {
         val selection = GooglePayPaymentDataUpdateCallbackRegistry.get()
 
-        val hasNoRequest = request == null
-
-        if (hasNoRequest || selection == null) {
-            val event = if (hasNoRequest) {
-                ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST
-            } else {
-                ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK
-            }
-
+        if (request == null) {
             handleUnexpectedError(
-                event = event,
+                event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST,
+                throwable = null,
+                callbackTrigger = null,
+                googlePayJsonFactory = googlePayJsonFactory,
+                errorReporter = errorReporter,
+                stringResolver = stringResolver,
+                onCompleteListener = onCompleteListener,
+            )
+
+            return
+        } else if (selection == null) {
+            handleUnexpectedError(
+                event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK,
                 throwable = null,
                 callbackTrigger = null,
                 googlePayJsonFactory = googlePayJsonFactory,
