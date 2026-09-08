@@ -319,7 +319,8 @@ constructor(
 
         return params.plus(
             allowRedisplay?.let {
-                mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
+//                mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
+                mapOf<String, Any>()
             }.orEmpty()
         ).plus(
             radarOptions?.let {
