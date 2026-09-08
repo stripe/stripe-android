@@ -52,6 +52,19 @@ internal class StripeBottomSheetStateTest {
     }
 
     private fun runScenario(block: Scenario.() -> Unit) {
+        try {
+            runScenarioWithPausedChoreographer(block)
+        } finally {
+            // Robolectric resets Choreographer state only between test methods. A frame left
+            // pending on the paused Choreographer would block every frame in a repeated run of
+            // this test, so flush it before restoring the defaults.
+            ShadowChoreographer.setPaused(false)
+            advanceFrames(1)
+            ShadowChoreographer.reset()
+        }
+    }
+
+    private fun runScenarioWithPausedChoreographer(block: Scenario.() -> Unit) {
         ShadowChoreographer.setFrameDelay(Duration.ofMillis(FRAME_MILLIS))
         val contentHeight = mutableStateOf(INITIAL_CONTENT_HEIGHT)
         val isSheetComposed = mutableStateOf(false)
