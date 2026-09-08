@@ -69,6 +69,7 @@ internal data class PaymentMethodMetadata(
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
+    val googlePayBlockedIssuerCountryCodes: List<String>,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkMode: LinkMode?,
     private val linkBrand: LinkBrand,
@@ -413,6 +414,7 @@ internal data class PaymentMethodMetadata(
                 linkStateResult = linkStateResult,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
+                googlePayBlockedIssuerCountryCodes = elementsSession.googlePayBlockedIssuerCountryCodes,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = PaymentSheetCardFundingFilter(
@@ -475,6 +477,7 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
                 isGooglePayReady = isGooglePayReady,
+                googlePayBlockedIssuerCountryCodes = emptyList(),
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkBrand = elementsSession.linkBrand,

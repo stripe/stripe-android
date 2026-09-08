@@ -79,6 +79,7 @@ internal object PaymentMethodMetadataFactory {
         disableSsdOcrCardScan: Boolean = false,
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
+        googlePayBlockedIssuerCountryCodes: List<String> = emptyList(),
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -123,6 +124,7 @@ internal object PaymentMethodMetadataFactory {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
+            googlePayBlockedIssuerCountryCodes = googlePayBlockedIssuerCountryCodes,
             linkConfiguration = linkConfiguration,
             linkMode = linkMode,
             linkBrand = linkBrand,

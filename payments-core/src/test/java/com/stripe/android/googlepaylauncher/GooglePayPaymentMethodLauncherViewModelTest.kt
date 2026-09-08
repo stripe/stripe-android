@@ -217,6 +217,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     currencyCode = "usd",
                     amount = 0,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             )
             assertThat(transactionInfo)
@@ -246,6 +247,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     currencyCode = "usd",
                     amount = 0,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             )
             assertThat(transactionInfo)
@@ -307,6 +309,22 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentDataRequest() should include blocked issuer country codes`() {
+        val viewModel = createViewModel(
+            args = ARGS.copy(blockedIssuerCountryCodes = listOf("IN")),
+        )
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        val parameters = paymentDataRequest
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+        val blockedIssuerCountryCodes = parameters.getJSONArray("blockedIssuerCountryCodes")
+        assertThat(blockedIssuerCountryCodes.getString(0)).isEqualTo("IN")
+    }
+
+    @Test
     fun `createPaymentDataRequest() should include shipping address parameters`() {
         val viewModel = createViewModel(
             args = ARGS.copy(
@@ -347,6 +365,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     label = null,
                     transactionId = null,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             )
 
@@ -418,6 +437,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 checkoutSessionId = null,
             ),
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

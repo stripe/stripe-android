@@ -95,6 +95,7 @@ class GooglePayConfirmationFlowTest {
                     displayItems = emptyList(),
                     billingEmailOverride = null,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             }
         }

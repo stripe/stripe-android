@@ -359,6 +359,43 @@ class ElementsSessionTest {
     }
 
     @Test
+    fun `googlePayBlockedIssuerCountryCodes contains IN for Indian merchant when flag is enabled`() {
+        val session = createElementsSession(
+            merchantCountry = "IN",
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS to true),
+        )
+
+        assertThat(session.googlePayBlockedIssuerCountryCodes).containsExactly("IN")
+    }
+
+    @Test
+    fun `googlePayBlockedIssuerCountryCodes is empty for non-Indian merchant when flag is enabled`() {
+        val session = createElementsSession(
+            merchantCountry = "US",
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS to true),
+        )
+
+        assertThat(session.googlePayBlockedIssuerCountryCodes).isEmpty()
+    }
+
+    @Test
+    fun `googlePayBlockedIssuerCountryCodes is empty for Indian merchant when flag is disabled`() {
+        val session = createElementsSession(
+            merchantCountry = "IN",
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS to false),
+        )
+
+        assertThat(session.googlePayBlockedIssuerCountryCodes).isEmpty()
+    }
+
+    @Test
+    fun `googlePayBlockedIssuerCountryCodes is empty for Indian merchant when flag is missing`() {
+        val session = createElementsSession(merchantCountry = "IN")
+
+        assertThat(session.googlePayBlockedIssuerCountryCodes).isEmpty()
+    }
+
+    @Test
     fun `OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS flag has correct value`() {
         assertThat(
             ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS.flagValue
@@ -399,6 +436,7 @@ class ElementsSessionTest {
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams? = null,
         flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
+        merchantCountry: String? = null,
         accountId: String? = "acct_1SGP1sPvdtoA7EjP",
         merchantId: String? = "acct_1SGP1sPvdtoA7EjP",
     ): ElementsSession {
@@ -410,7 +448,7 @@ class ElementsSessionTest {
             flags = flags,
             experimentsData = null,
             customer = null,
-            merchantCountry = null,
+            merchantCountry = merchantCountry,
             merchantLogoUrl = null,
             cardBrandChoice = null,
             isGooglePayEnabled = false,

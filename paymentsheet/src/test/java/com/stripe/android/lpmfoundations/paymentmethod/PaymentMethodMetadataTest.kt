@@ -1083,6 +1083,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = false,
+            googlePayBlockedIssuerCountryCodes = emptyList(),
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             linkMode = null,
             linkBrand = LinkBrand.Link,
@@ -1236,6 +1237,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
+            googlePayBlockedIssuerCountryCodes = emptyList(),
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
@@ -1286,6 +1288,7 @@ internal class PaymentMethodMetadataTest {
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null,
         passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
         experimentsData: ElementsSession.ExperimentsData? = null,
+        merchantCountry: String? = null,
         flags: Map<ElementsSession.Flag, Boolean> = mapOf(
             ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
             ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
@@ -1294,7 +1297,7 @@ internal class PaymentMethodMetadataTest {
         return ElementsSession(
             stripeIntent = intent,
             cardBrandChoice = cardBrandChoice,
-            merchantCountry = null,
+            merchantCountry = merchantCountry,
             isGooglePayEnabled = false,
             customer = mobilePaymentElementComponent?.let { component ->
                 ElementsSession.Customer(
@@ -1997,6 +2000,18 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement carries Google Pay blocked issuer countries from elements session`() {
+        val elementsSession = createElementsSession(
+            merchantCountry = "IN",
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS to true),
+        )
+
+        val metadata = createPaymentElementMetadata(elementsSession = elementsSession)
+
+        assertThat(metadata.googlePayBlockedIssuerCountryCodes).containsExactly("IN")
+    }
+
+    @Test
     fun `createForPaymentElement reads attestOnIntentConfirmation from elements session when true`() {
         val metadata = createPaymentElementMetadata(attestOnIntentConfirmationFlag = true)
         assertThat(metadata.attestOnIntentConfirmation).isTrue()
@@ -2222,18 +2237,17 @@ internal class PaymentMethodMetadataTest {
             PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         integrationMetadata: IntegrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
     ): PaymentMethodMetadata {
-        val elementsSession = (
-            elementsSession
-                ?: createElementsSession(
-                    intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                )
-            ).copy(
+        val baseElementsSession = elementsSession
+            ?: createElementsSession(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            )
+        val elementsSession = baseElementsSession.copy(
             flags = if (attestOnIntentConfirmationFlag != null) {
                 mapOf(
                     ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
                 )
             } else {
-                emptyMap()
+                baseElementsSession.flags
             }
         )
 
