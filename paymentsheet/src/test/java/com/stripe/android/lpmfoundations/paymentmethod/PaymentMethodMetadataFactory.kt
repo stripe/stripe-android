@@ -83,7 +83,7 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         apiConfiguration: ApiConfiguration.State = ApiConfiguration.State(
             publishableKey = "pk_test_123",
-            stripeAccountId = null,
+            stripeAccountId = "acct_123",
         ),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(

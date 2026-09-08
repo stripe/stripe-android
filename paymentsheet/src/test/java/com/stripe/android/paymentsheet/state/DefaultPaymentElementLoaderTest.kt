@@ -211,6 +211,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.exceptionOrNull()?.message).isEqualTo(
             "When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string."
         )
+
         assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
@@ -230,6 +231,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.exceptionOrNull()?.message).isEqualTo(
             "The PaymentIntent client_secret cannot be an empty string."
         )
+
         assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
@@ -255,6 +257,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.exceptionOrNull()?.message).isEqualTo(
             "When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string."
         )
+
         assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
@@ -281,6 +284,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.exceptionOrNull()?.message).isEqualTo(
             "Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType"
         )
+
         assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
@@ -308,6 +312,7 @@ internal class DefaultPaymentElementLoaderTest {
             "configuration.customer must not be set when using CheckoutSession initialization mode. " +
                 "Customer information is provided by the checkout session."
         )
+
         assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
@@ -3894,7 +3899,6 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Vertical)
-
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -3905,7 +3909,6 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
             .isEqualTo(PaymentMethodOrientation.Horizontal)
-
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -3922,7 +3925,6 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Horizontal)
-
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -3939,7 +3941,6 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Vertical)
-
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -3966,7 +3967,6 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Vertical)
-
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -4332,7 +4332,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(helper.calls.awaitItem()).isNotNull()
         val exposure = reporter.experimentExposureCalls.awaitItem()
         assertThat(exposure.experiment.group).isEqualTo("treatment")
-
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4373,7 +4372,6 @@ internal class DefaultPaymentElementLoaderTest {
         helper.calls.expectNoEvents()
         val exposure = reporter.experimentExposureCalls.awaitItem()
         assertThat(exposure.experiment.group).isEqualTo("control")
-
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4410,7 +4408,6 @@ internal class DefaultPaymentElementLoaderTest {
         )
         helper.calls.expectNoEvents()
         reporter.experimentExposureCalls.expectNoEvents()
-
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
