@@ -1593,6 +1593,7 @@ class DefaultEventReporterTest {
             workContext = testDispatcher,
             logger = logger,
             paymentMethodMetadataProvider = { paymentMethodMetadataStack.pop() },
+            initEventHelper = InitEventHelper(),
         )
 
         val scenario = Scenario(

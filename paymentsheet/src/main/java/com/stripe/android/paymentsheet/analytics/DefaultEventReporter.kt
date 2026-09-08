@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -46,6 +45,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     @IOContext private val workContext: CoroutineContext,
     private val logger: UserFacingLogger,
     private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
+    private val initEventHelper: InitEventHelper,
 ) : EventReporter, LoadingEventReporter {
 
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
@@ -53,10 +53,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         clientId = CLIENT_ID,
         origin = ORIGIN,
     )
-    private val hasPendingInit = AtomicBoolean(false)
 
     override fun onInit() {
-        hasPendingInit.set(true)
+        initEventHelper.onInit()
     }
 
     override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
@@ -626,11 +625,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
-            if (shouldFireInit(publishableKey, paymentMethodMetadata)) {
+            initEventHelper.publishableKeyForInit(publishableKey, paymentMethodMetadata)?.let {
                 executeEvent(
                     event = PaymentSheetEvent.Init(mode),
                     paymentMethodMetadata = null,
-                    publishableKey = publishableKey,
+                    publishableKey = it,
                 )
             }
             executeEvent(event, paymentMethodMetadata, publishableKey)
@@ -688,11 +687,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         } else {
             null
         }
-    }
-
-    private fun shouldFireInit(publishableKey: String?, paymentMethodMetadata: PaymentMethodMetadata?): Boolean {
-        val resolvedPublishableKey = publishableKey ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
-        return resolvedPublishableKey != null && hasPendingInit.compareAndSet(true, false)
     }
 
     companion object {

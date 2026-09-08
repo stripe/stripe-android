@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
@@ -107,15 +109,19 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentElementLoaderTest {
 
     @AfterTest
     fun tearDown() {
         PaymentElementCallbackReferences.clear()
+        PaymentConfiguration.clearInstance()
     }
 
     @Test
@@ -5027,6 +5033,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkGateFactory = FakeLinkGate.Factory(linkGate),
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
         )
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PaymentConfiguration.init(
+            context = context,
+            publishableKey = if (isLiveMode) "pk_live" else "pk_test",
+        )
 
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -5053,9 +5064,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
-            apiConfigurationResolver = ApiConfigurationResolver {
-                PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test")
-            },
+            apiConfigurationResolver = ApiConfigurationResolver(context),
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
                 errorReporter = errorReporter,
