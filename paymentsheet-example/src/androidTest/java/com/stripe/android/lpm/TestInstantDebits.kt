@@ -21,7 +21,6 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,11 +35,8 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     )
 
     @Test
-    @Ignore("#ir-hybrid-telescope")
     fun testInstantDebitsSuccess() {
         val email = "email_${UUID.randomUUID()}@email.com"
-
-        testDriver.signUpForLink(makeSignUpTestParameters(email))
 
         testDriver.confirmLinkBankPayment(
             testParameters = makeLinkTestParameters(email),
@@ -59,8 +55,6 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     fun testInstantDebitsCancelAllowsUserToContinue() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        testDriver.signUpForLink(makeSignUpTestParameters(email))
-
         testDriver.confirmLinkBankPayment(
             testParameters = makeLinkTestParameters(email).copy(
                 authorizationAction = AuthorizeAction.Cancel,
@@ -69,24 +63,6 @@ internal class TestInstantDebits : BasePlaygroundTest() {
                 selectors.buyButton.waitProcessingComplete()
             }
         )
-    }
-
-    private fun makeSignUpTestParameters(email: String): TestParameters {
-        return TestParameters.create(
-            paymentMethodCode = "card",
-            authorizationAction = null,
-            saveForFutureUseCheckboxVisible = true,
-        ) { settings ->
-            settings[MerchantSettingsDefinition] = Merchant.US
-            settings[CurrencySettingsDefinition] = Currency.USD
-            settings[AutomaticPaymentMethodsSettingsDefinition] = false
-            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
-            settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
-            settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
-                PaymentMethod.Type.Card,
-                PaymentMethod.Type.Link
-            ).joinToString(",")
-        }
     }
 
     private fun makeLinkTestParameters(email: String): TestParameters {

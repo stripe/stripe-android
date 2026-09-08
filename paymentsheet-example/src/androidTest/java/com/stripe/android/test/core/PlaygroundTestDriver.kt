@@ -22,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
@@ -68,6 +69,7 @@ import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
 import com.stripe.android.utils.awaitWindowFocus
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
@@ -1526,7 +1528,7 @@ internal class PlaygroundTestDriver(
         if (authAction == AuthorizeAction.Cancel) {
             cancelInstantDebitsFlowOnLaunch()
         } else {
-            executeEntireInstantDebitsFlow()
+            executeNewConsumerInstantDebitsFlow()
         }
     }
 
@@ -1605,7 +1607,7 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("done_button")
     }
 
-    private fun executeEntireInstantDebitsFlow() {
+    private fun executeNewConsumerInstantDebitsFlow() {
         awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(
@@ -1619,14 +1621,27 @@ internal class PlaygroundTestDriver(
         }
 
         clickButtonWithTag("consent_cta")
-        clickButtonWithTag("existing_email-button")
-        clickButtonWithTag("test_mode_fill_button")
+        waitUntilTag(PHONE_NUMBER_TEXT_FIELD_TAG)
+        composeTestRule.onNodeWithTag(PHONE_NUMBER_TEXT_FIELD_TAG)
+            .performTextReplacement(INSTANT_DEBITS_TEST_PHONE_NUMBER)
+        clickButtonWithText("Continue with Link")
 
         waitUntilTag("loaded_picker_title")
-        scrollToAndClick("Success")
+        composeTestRule.onNode(hasScrollToNodeAction())
+            .performScrollToNode(hasTestTag(PAYMENT_SUCCESS_INSTITUTION_ID))
+        clickButtonWithTag(PAYMENT_SUCCESS_INSTITUTION_ID)
 
-        clickButtonWithTag("link_account_picker_cta")
-        return clickButtonWithTag("done_button")
+        selectors.awaitBrowserAndDismissFirstRun(
+            getBrowser(BrowserUI.convert(testParameters.useBrowser))
+        )
+        UiAutomatorText(
+            label = "Success",
+            labelMatchesExactly = true,
+            device = device,
+        ).click()
+        clickButtonWithTag("connect_account_button", composeCanDetach = true)
+
+        clickButtonWithTag("done_button", composeCanDetach = true)
     }
 
     private fun doUSBankAccountAuthorization(authAction: AuthorizeAction?) {
@@ -1692,7 +1707,8 @@ internal class PlaygroundTestDriver(
     private fun scrollToAndClick(text: String) {
         composeTestRule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasText(text))
-        composeTestRule.onNodeWithText(text)
+        composeTestRule.onAllNodesWithText(text)
+            .onFirst()
             .performClick()
     }
 
@@ -1705,6 +1721,21 @@ internal class PlaygroundTestDriver(
             composeTestRule
                 .onAllNodes(matcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(matcher).performClick()
+    }
+
+    private fun clickButtonWithText(text: String) {
+        val matcher = hasText(text).and(isEnabled()).and(hasClickAction())
+        composeTestRule.waitUntil(
+            conditionDescription = "enabled button with text '$text' to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
+            composeTestRule
+                .onAllNodes(matcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
@@ -1820,6 +1851,8 @@ internal class PlaygroundTestDriver(
             "agree-button",
         )
         const val ACTIVITY_POLL_INTERVAL_MS = 250L
+        const val INSTANT_DEBITS_TEST_PHONE_NUMBER = "6223115555"
+        const val PAYMENT_SUCCESS_INSTITUTION_ID = "bcinst_QsDedeogZ5PA7V"
 
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
