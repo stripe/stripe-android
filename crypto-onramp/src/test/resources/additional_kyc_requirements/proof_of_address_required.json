@@ -6,7 +6,6 @@
         "requested_by": "swapped",
         "awaiting_action_from": "user",
         "errors": [],
-        "submission_type": "document",
         "document": {
           "accepted_subtypes": [
             {

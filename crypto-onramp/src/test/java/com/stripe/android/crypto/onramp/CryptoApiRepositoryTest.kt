@@ -124,7 +124,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun `retrieve crypto customer includes additional KYC requirements`() = runTest {
+    fun `retrieve additional KYC requirements uses dedicated endpoint`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             """
@@ -136,7 +136,6 @@ class CryptoApiRepositoryTest {
                                 "requested_by": "swapped",
                                 "awaiting_action_from": "user",
                                 "errors": [],
-                                "submission_type": "document",
                                 "document": {
                                     "accepted_subtypes": [
                                         {
@@ -157,19 +156,19 @@ class CryptoApiRepositoryTest {
         )
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
 
-        val result = cryptoApiRepository.retrieveCryptoCustomer(
+        val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
             consumerSessionClientSecret = "test-secret",
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
-        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/internal/customer")
+        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
         assertThat(apiRequest.params).isEqualTo(
             mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret"))
         )
-        val customer = result.getOrThrow()
-        assertThat(customer.requirements.entries.single().description)
+        val response = result.getOrThrow()
+        assertThat(response.requirements.entries.single().description)
             .isEqualTo("proof_of_address")
     }
 

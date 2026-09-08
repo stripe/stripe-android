@@ -451,11 +451,11 @@ internal class OnrampInteractor @Inject constructor(
             return Result.failure(error)
         }
 
-        return cryptoApiRepository.retrieveCryptoCustomer(
+        return cryptoApiRepository.retrieveAdditionalKycRequirements(
             consumerSessionClientSecret = secret,
         ).fold(
-            onSuccess = { customer ->
-                Result.success(customer.requirements.toAdditionalKycRequirements())
+            onSuccess = { response ->
+                Result.success(response.requirements.toAdditionalKycRequirements())
             },
             onFailure = { error ->
                 val mappedError = mapError(Operation.RetrieveAdditionalKycRequirements, error)
@@ -487,7 +487,6 @@ internal class OnrampInteractor @Inject constructor(
 
         return cryptoApiRepository.fulfillAdditionalKycRequirement(
             liquidityProvider = submission.liquidityProvider,
-            submissionType = submission.submissionType,
             documents = documents,
             questionnaire = questionnaire,
             consumerSessionClientSecret = secret,
@@ -498,12 +497,8 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     private suspend fun uploadAdditionalKycDocuments(
-        documents: List<AdditionalKycDocumentSubmission>?,
-    ): Result<List<AdditionalKycDocumentSubmissionRequest>?> {
-        if (documents == null) {
-            return Result.success(null)
-        }
-
+        documents: List<AdditionalKycDocumentSubmission>,
+    ): Result<List<AdditionalKycDocumentSubmissionRequest>> {
         val requests = mutableListOf<AdditionalKycDocumentSubmissionRequest>()
         for (document in documents) {
             val fileIds = mutableListOf<String>()

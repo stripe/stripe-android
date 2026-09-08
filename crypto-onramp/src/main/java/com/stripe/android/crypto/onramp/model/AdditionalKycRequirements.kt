@@ -12,14 +12,13 @@ internal data class AdditionalKycRequirement(
     val requestedBy: String,
     val awaitingActionFrom: String,
     val errors: List<AdditionalKycRequirementError>,
-    val submissionType: String,
     val document: AdditionalKycDocumentRequirement?,
     val questionnaire: AdditionalKycQuestionnaire?,
 )
 
 internal data class AdditionalKycRequirementError(
     val code: String,
-    val message: String,
+    val developerMessage: String,
 )
 
 internal data class AdditionalKycDocumentRequirement(

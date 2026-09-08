@@ -8,9 +8,7 @@ internal data class FulfillAdditionalKycRequirementRequest(
     val credentials: CryptoCustomerRequestParams.Credentials,
     @SerialName("liquidity_provider")
     val liquidityProvider: String,
-    @SerialName("submission_type")
-    val submissionType: String,
-    val documents: List<AdditionalKycDocumentSubmissionRequest>? = null,
+    val documents: List<AdditionalKycDocumentSubmissionRequest>,
     val questionnaire: AdditionalKycQuestionnaireSubmissionRequest? = null,
 )
 

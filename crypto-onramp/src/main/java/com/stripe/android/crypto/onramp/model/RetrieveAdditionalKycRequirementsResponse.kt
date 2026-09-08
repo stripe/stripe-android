@@ -1,14 +1,26 @@
 package com.stripe.android.crypto.onramp.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-internal data class RetrieveCryptoCustomerResponse(
+internal data class RetrieveAdditionalKycRequirementsResponse(
     val requirements: AdditionalKycRequirementsResponse,
 )
 
@@ -44,10 +56,8 @@ internal data class AdditionalKycRequirementResponse(
     @SerialName("awaiting_action_from")
     val awaitingActionFrom: String,
     val errors: List<AdditionalKycRequirementErrorResponse>,
-    @SerialName("submission_type")
-    val submissionType: String,
+    @Serializable(with = EmptyArrayAsNullDocumentRequirementSerializer::class)
     val document: AdditionalKycDocumentRequirementResponse? = null,
-    val questionnaire: AdditionalKycQuestionnaireResponse? = null,
 )
 
 @Serializable
@@ -66,6 +76,7 @@ internal data class AdditionalKycDocumentRequirementResponse(
     val minDocuments: Int,
     val instructions: List<String>,
     @SerialName("additional_requirements")
+    @Serializable(with = EmptyArrayAsNullCollectionRequirementsSerializer::class)
     val additionalRequirements: AdditionalKycCollectionRequirementsResponse? = null,
 )
 
@@ -77,6 +88,7 @@ internal data class AdditionalKycDocumentSubtypeResponse(
 
 @Serializable
 internal data class AdditionalKycCollectionRequirementsResponse(
+    @Serializable(with = EmptyArrayAsNullQuestionnaireSerializer::class)
     val questionnaire: AdditionalKycQuestionnaireResponse? = null,
 )
 
@@ -95,8 +107,6 @@ internal data class AdditionalKycQuestionResponse(
 )
 
 private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): AdditionalKycRequirement {
-    val normalizedQuestionnaire = questionnaire ?: document?.additionalRequirements?.questionnaire
-
     return AdditionalKycRequirement(
         description = description,
         requestedBy = requestedBy,
@@ -104,12 +114,11 @@ private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): Addit
         errors = errors.map { error ->
             AdditionalKycRequirementError(
                 code = error.code,
-                message = error.message,
+                developerMessage = error.message,
             )
         },
-        submissionType = submissionType,
         document = document?.toAdditionalKycDocumentRequirement(),
-        questionnaire = normalizedQuestionnaire?.toAdditionalKycQuestionnaire(),
+        questionnaire = document?.additionalRequirements?.questionnaire?.toAdditionalKycQuestionnaire(),
     )
 }
 
@@ -139,4 +148,51 @@ private fun AdditionalKycQuestionnaireResponse.toAdditionalKycQuestionnaire(): A
             )
         }
     )
+}
+
+internal object EmptyArrayAsNullDocumentRequirementSerializer :
+    EmptyArrayAsNullSerializer<AdditionalKycDocumentRequirementResponse>(
+        AdditionalKycDocumentRequirementResponse.serializer()
+    )
+
+internal object EmptyArrayAsNullCollectionRequirementsSerializer :
+    EmptyArrayAsNullSerializer<AdditionalKycCollectionRequirementsResponse>(
+        AdditionalKycCollectionRequirementsResponse.serializer()
+    )
+
+internal object EmptyArrayAsNullQuestionnaireSerializer :
+    EmptyArrayAsNullSerializer<AdditionalKycQuestionnaireResponse>(
+        AdditionalKycQuestionnaireResponse.serializer()
+    )
+
+internal abstract class EmptyArrayAsNullSerializer<T>(
+    private val valueSerializer: KSerializer<T>,
+) : KSerializer<T?> {
+    override val descriptor: SerialDescriptor = JsonElement.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): T? {
+        val jsonDecoder = decoder as? JsonDecoder
+            ?: throw SerializationException("This serializer can be used only with JSON")
+
+        return when (val element = jsonDecoder.decodeJsonElement()) {
+            JsonNull -> null
+            is JsonArray -> {
+                if (element.isEmpty()) {
+                    null
+                } else {
+                    throw SerializationException("Expected an object, null, or an empty array")
+                }
+            }
+            else -> jsonDecoder.json.decodeFromJsonElement(valueSerializer, element)
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: T?) {
+        val jsonEncoder = encoder as? JsonEncoder
+            ?: throw SerializationException("This serializer can be used only with JSON")
+        val element = value?.let {
+            jsonEncoder.json.encodeToJsonElement(valueSerializer, it)
+        } ?: JsonNull
+        jsonEncoder.encodeJsonElement(element)
+    }
 }

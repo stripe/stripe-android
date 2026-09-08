@@ -45,29 +45,11 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     @Test
-    fun `top-level questionnaire is normalized`() = runScenario(
-        entries = listOf(
-            requirement(
-                description = "screening_questions",
-                awaitingActionFrom = "user",
-                submissionType = "questionnaire",
-                questionnaire = questionnaire(questionId = "top_level_question"),
-            )
-        )
-    ) {
-        val requirement = requirements.userActionRequired.single()
-
-        assertThat(requirement.questionnaire?.questions?.single()?.id)
-            .isEqualTo("top_level_question")
-    }
-
-    @Test
     fun `document questionnaire is normalized`() = runScenario(
         entries = listOf(
             requirement(
                 description = "source_of_funds",
                 awaitingActionFrom = "user",
-                submissionType = "document",
                 document = document(
                     questionnaire = questionnaire(questionId = "document_question"),
                 ),
@@ -81,43 +63,24 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     @Test
-    fun `top-level questionnaire takes precedence when both locations exist`() = runScenario(
+    fun `requirement error message is modeled as developer-facing`() = runScenario(
         entries = listOf(
             requirement(
-                description = "source_of_funds",
+                description = "proof_of_address",
                 awaitingActionFrom = "user",
-                submissionType = "document",
-                document = document(
-                    questionnaire = questionnaire(questionId = "document_question"),
+                errors = listOf(
+                    AdditionalKycRequirementErrorResponse(
+                        code = "document_unreadable",
+                        message = "Raw verification detail",
+                    )
                 ),
-                questionnaire = questionnaire(questionId = "top_level_question"),
             )
         )
     ) {
-        val requirement = requirements.userActionRequired.single()
+        val error = requirements.userActionRequired.single().errors.single()
 
-        assertThat(requirement.questionnaire?.questions?.single()?.id)
-            .isEqualTo("top_level_question")
-    }
-
-    @Test
-    fun `top-level questionnaire takes precedence independent of submission type`() = runScenario(
-        entries = listOf(
-            requirement(
-                description = "screening_questions",
-                awaitingActionFrom = "user",
-                submissionType = "questionnaire",
-                document = document(
-                    questionnaire = questionnaire(questionId = "document_question"),
-                ),
-                questionnaire = questionnaire(questionId = "top_level_question"),
-            )
-        )
-    ) {
-        val requirement = requirements.userActionRequired.single()
-
-        assertThat(requirement.questionnaire?.questions?.single()?.id)
-            .isEqualTo("top_level_question")
+        assertThat(error.code).isEqualTo("document_unreadable")
+        assertThat(error.developerMessage).isEqualTo("Raw verification detail")
     }
 
     private fun runScenario(
@@ -137,18 +100,15 @@ class AdditionalKycRequirementsResponseTest {
         fun requirement(
             description: String,
             awaitingActionFrom: String,
-            submissionType: String = "document",
             document: AdditionalKycDocumentRequirementResponse? = null,
-            questionnaire: AdditionalKycQuestionnaireResponse? = null,
+            errors: List<AdditionalKycRequirementErrorResponse> = emptyList(),
         ): AdditionalKycRequirementResponse {
             return AdditionalKycRequirementResponse(
                 description = description,
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
-                errors = emptyList(),
-                submissionType = submissionType,
+                errors = errors,
                 document = document,
-                questionnaire = questionnaire,
             )
         }
 
