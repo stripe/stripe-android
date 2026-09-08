@@ -525,6 +525,14 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        Scalapay(
+            "scalapay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
         PayByBank(
             "pay_by_bank",
             isReusable = false,
