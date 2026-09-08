@@ -1219,7 +1219,10 @@ class TapToAddCollectionHandlerTest {
         val DEFAULT_CALLBACK = CreateCardPresentSetupIntentCallback {
             CreateIntentResult.Success("si_123_secret")
         }
-        val TEST_API_CONFIGURATION = ApiConfiguration.State(publishableKey = "pk_test", stripeAccountId = null)
+        val TEST_API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "pk_test",
+            stripeAccountId = "acct_123",
+        )
         val DEFAULT_BILLING_DETAILS = PaymentSheet.BillingDetails(
             name = "Jane Doe",
             email = "jane@example.com",
