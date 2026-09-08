@@ -36,6 +36,7 @@ internal interface CreateLinkState {
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        stripeAccountId: String?,
     ): LinkStateResult
 }
 
@@ -80,6 +81,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        stripeAccountId: String?,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
@@ -98,6 +100,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = clientAttributionMetadata,
+            stripeAccountId = stripeAccountId,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
@@ -224,6 +227,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        stripeAccountId: String?,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
             elementsSession = elementsSession,
@@ -236,6 +240,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration,
             customerMetadata,
             customerEmail = elementsSession.customer?.email,
+            stripeAccountId = stripeAccountId,
         )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,

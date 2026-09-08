@@ -60,6 +60,7 @@ internal open class FakeCustomerRepository(
     override suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String,
+        stripeAccountId: String?,
     ): Customer? {
         _retrieveCustomerRequests.add(
             RetrieveCustomerRequest(
@@ -76,6 +77,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        stripeAccountId: String?,
     ): Result<List<PaymentMethod>> {
         _getPaymentMethodsRequests.add(
             GetPaymentMethodsRequest(
@@ -93,6 +95,7 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
@@ -110,6 +113,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
@@ -127,6 +131,7 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> = onAttachPaymentMethod()
 
     override suspend fun updatePaymentMethod(
@@ -134,6 +139,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> {
         _updateRequests.add(
             UpdateRequest(
@@ -151,6 +157,7 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String?,
+        stripeAccountId: String?,
     ): Result<Customer> {
         _setDefaultPaymentMethodRequests.add(
             SetDefaultRequest(
@@ -167,6 +174,7 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
+        stripeAccountId: String?,
     ): Result<PaymentMethod> = onRetrievePaymentMethod(paymentMethodId)
 
     data class RetrieveCustomerRequest(
