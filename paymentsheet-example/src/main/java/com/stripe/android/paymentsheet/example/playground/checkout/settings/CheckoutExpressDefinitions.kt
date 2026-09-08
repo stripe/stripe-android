@@ -8,7 +8,6 @@ internal object CheckoutExpressDefinitions {
     val shouldSetConfiguration = boolean(
         key = "controller.express_checkout.should_set_configuration",
         displayName = "Set configuration",
-        defaultValue = false,
     )
 
     val link = LinkDefinitions()
@@ -38,9 +37,7 @@ internal object CheckoutExpressDefinitions {
     val googlePay = CheckoutGooglePayDefinitions(
         key = "express.google_pay",
         displayName = "Google Pay",
-        defaultDisplay = ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Automatic,
         displayOptions = ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.entries,
-        defaultButtonType = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.Pay,
         buttonTypeOptions = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.entries,
     )
     val appearance = AppearanceDefinitions()

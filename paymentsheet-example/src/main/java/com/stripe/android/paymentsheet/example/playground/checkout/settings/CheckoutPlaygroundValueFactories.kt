@@ -10,7 +10,7 @@ internal val optionalEmail: (String) -> String? = { value ->
 internal fun text(
     key: String,
     displayName: String,
-    defaultValue: String,
+    defaultValue: String = "",
     updateRequest: CheckoutPlaygroundRequestUpdater<String> = {},
     validate: (String) -> String? = { null },
 ): CheckoutPlaygroundSettingDefinition.Value<String> {
@@ -29,29 +29,15 @@ internal fun text(
 internal fun optionalText(
     key: String,
     displayName: String,
+    defaultValue: String? = null,
     updateRequest: CheckoutPlaygroundRequestUpdater<String?> = {},
     validate: (String) -> String? = { null },
-): CheckoutPlaygroundSettingDefinition.Value<String?> {
-    return optionalText(
-        key = key,
-        displayName = displayName,
-        updateRequest = updateRequest,
-        validate = validate,
-        isApplicable = { true },
-    )
-}
-
-internal fun optionalText(
-    key: String,
-    displayName: String,
-    updateRequest: CheckoutPlaygroundRequestUpdater<String?> = {},
-    validate: (String) -> String?,
-    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
+    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
 ): CheckoutPlaygroundSettingDefinition.Value<String?> {
     return value(
         key = key,
         displayName = displayName,
-        defaultValue = null,
+        defaultValue = defaultValue,
         isApplicable = isApplicable,
         updateRequest = updateRequest,
         encode = { it.orEmpty() },
@@ -64,13 +50,14 @@ internal fun optionalText(
 internal fun optionalInt(
     key: String,
     displayName: String,
+    defaultValue: Int? = null,
+    minimum: Int = 1,
     updateRequest: CheckoutPlaygroundRequestUpdater<Int?> = {},
 ): CheckoutPlaygroundSettingDefinition.Value<Int?> {
-    val minimum = 1
     return value(
         key = key,
         displayName = displayName,
-        defaultValue = null,
+        defaultValue = defaultValue,
         input = CheckoutPlaygroundSettingDefinition.Value.Input.Integer,
         updateRequest = updateRequest,
         encode = { it?.toString().orEmpty() },
@@ -88,8 +75,8 @@ internal fun optionalInt(
 internal fun decimal(
     key: String,
     displayName: String,
-    defaultValue: Float,
-    minimum: Float,
+    defaultValue: Float = 0f,
+    minimum: Float = 0f,
     minimumExclusive: Boolean = false,
     updateRequest: CheckoutPlaygroundRequestUpdater<Float> = {},
 ): CheckoutPlaygroundSettingDefinition.Value<Float> {
@@ -113,14 +100,15 @@ internal fun decimal(
 internal fun optionalFloat(
     key: String,
     displayName: String,
-    minimum: Float,
+    defaultValue: Float? = null,
+    minimum: Float = 0f,
     minimumExclusive: Boolean = false,
     updateRequest: CheckoutPlaygroundRequestUpdater<Float?> = {},
 ): CheckoutPlaygroundSettingDefinition.Value<Float?> {
     return value(
         key = key,
         displayName = displayName,
-        defaultValue = null,
+        defaultValue = defaultValue,
         input = CheckoutPlaygroundSettingDefinition.Value.Input.Decimal,
         updateRequest = updateRequest,
         encode = { it?.let(::formatFloat).orEmpty() },
@@ -138,24 +126,11 @@ internal fun optionalFloat(
     )
 }
 
-internal fun optionalColor(
-    key: String,
-    displayName: String,
-    updateRequest: CheckoutPlaygroundRequestUpdater<Color?> = {},
-): CheckoutPlaygroundSettingDefinition.Value<Color?> {
-    return optionalColor(
-        key = key,
-        displayName = displayName,
-        defaultValue = null,
-        updateRequest = updateRequest
-    )
-}
-
 @Suppress("MagicNumber")
 internal fun optionalColor(
     key: String,
     displayName: String,
-    defaultValue: Color?,
+    defaultValue: Color? = null,
     updateRequest: CheckoutPlaygroundRequestUpdater<Color?> = {},
 ): CheckoutPlaygroundSettingDefinition.Value<Color?> {
     return value(
@@ -208,6 +183,7 @@ internal fun stringCsv(
 internal fun <T> csv(
     key: String,
     displayName: String,
+    defaultValue: List<T> = emptyList(),
     updateRequest: CheckoutPlaygroundRequestUpdater<List<T>> = {},
     decodeItem: (String) -> Result<T>,
     encodeItem: (T) -> String,
@@ -215,7 +191,7 @@ internal fun <T> csv(
     return value(
         key = key,
         displayName = displayName,
-        defaultValue = emptyList(),
+        defaultValue = defaultValue,
         updateRequest = updateRequest,
         encode = { values -> values.joinToString(", ", transform = encodeItem) },
         decode = { serialized ->

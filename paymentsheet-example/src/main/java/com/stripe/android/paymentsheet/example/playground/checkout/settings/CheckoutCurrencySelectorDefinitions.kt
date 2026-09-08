@@ -8,7 +8,6 @@ internal object CheckoutCurrencySelectorDefinitions {
     val shouldSetConfiguration = boolean(
         key = "controller.currency_selector.should_set_configuration",
         displayName = "Set configuration",
-        defaultValue = false,
     )
 
     val appearance = AppearanceDefinitions()
@@ -18,17 +17,14 @@ internal object CheckoutCurrencySelectorDefinitions {
             key = "currency.appearance.vertical_padding",
             displayName = "Vertical padding",
             defaultValue = 4f,
-            minimum = 0f,
         )
         val cornerRadius = optionalFloat(
             key = "currency.appearance.corner_radius",
             displayName = "Corner radius",
-            minimum = 0f,
         )
         val borderWidth = optionalFloat(
             key = "currency.appearance.border_width",
             displayName = "Border width",
-            minimum = 0f,
         )
         val borderColor = optionalColor(
             key = "currency.appearance.border_color",
@@ -63,7 +59,6 @@ internal object CheckoutCurrencySelectorDefinitions {
             key = "currency.appearance.scale",
             displayName = "Size scale factor",
             defaultValue = 1f,
-            minimum = 0f,
             minimumExclusive = true,
         )
         val label = enumChoice(
