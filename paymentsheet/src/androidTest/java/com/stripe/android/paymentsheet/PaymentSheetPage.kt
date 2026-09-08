@@ -42,7 +42,6 @@ import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForExactlyOneNode
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
-import com.stripe.android.testing.waitForText
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.ui.core.elements.SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
@@ -144,7 +143,6 @@ internal class PaymentSheetPage(
             .and(hasText(last4, substring = true))
         composeTestRule.waitForExactlyOneNode(
             matcher = savedCardTagMatcher,
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
         composeTestRule.onNode(savedCardTagMatcher).performClick()
@@ -155,7 +153,6 @@ internal class PaymentSheetPage(
             .and(hasAnyAncestor(hasText(last4, substring = true)))
         composeTestRule.waitForExactlyOneNode(
             matcher = badgeTagMatcher,
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
         composeTestRule.onNode(badgeTagMatcher).performClick()
@@ -241,7 +238,6 @@ internal class PaymentSheetPage(
     fun clickPrimaryButton() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
 
@@ -270,7 +266,6 @@ internal class PaymentSheetPage(
     fun assertErrorMessageShown() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_ERROR_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
 
@@ -305,16 +300,14 @@ internal class PaymentSheetPage(
     fun waitForTag(testTag: String) {
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
 
     fun waitForText(text: String, substring: Boolean = false) {
-        composeTestRule.waitForText(
-            text = text,
+        composeTestRule.waitForNode(
+            matcher = hasText(text, substring = substring),
             timeoutMillis = 10_000,
-            substring = substring,
         )
     }
 
@@ -348,7 +341,6 @@ internal class PaymentSheetPage(
     fun checkSaveForFuture() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG).and(isEnabled()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
         composeTestRule.onNode(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG))
@@ -360,7 +352,6 @@ internal class PaymentSheetPage(
     fun checkSetAsDefaultCheckbox() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled()),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = true,
         )
         composeTestRule.onNode(hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG))
@@ -379,7 +370,6 @@ internal class PaymentSheetPage(
         val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag).and(isToggleable()).and(isOff()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -388,7 +378,6 @@ internal class PaymentSheetPage(
         val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag).and(isToggleable()).and(isOn()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -402,7 +391,6 @@ internal class PaymentSheetPage(
         val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag).and(isToggleable()).and(isOff()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -411,7 +399,6 @@ internal class PaymentSheetPage(
         val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag).and(isToggleable()).and(isOn()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -419,7 +406,6 @@ internal class PaymentSheetPage(
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -427,7 +413,6 @@ internal class PaymentSheetPage(
     fun waitUntilMissing() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -439,7 +424,6 @@ internal class PaymentSheetPage(
         if (forVerticalMode) {
             composeTestRule.waitForNode(
                 matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
-                timeoutMillis = 1_000,
                 atLeastOneRootRequired = true,
             )
 
@@ -449,7 +433,6 @@ internal class PaymentSheetPage(
         } else {
             composeTestRule.waitForExactlyOneNode(
                 matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
-                timeoutMillis = 1_000,
                 atLeastOneRootRequired = false,
             )
 
@@ -477,7 +460,6 @@ internal class PaymentSheetPage(
 
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTagForLayout),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = true,
         )
         composeTestRule.onNodeWithTag(testTagForLayout).assertExists()
@@ -486,7 +468,6 @@ internal class PaymentSheetPage(
     fun assertIsOnFormPage() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -494,7 +475,6 @@ internal class PaymentSheetPage(
     fun assertLpmSelected(code: String) {
         composeTestRule.waitForNode(
             matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected()),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -532,7 +512,6 @@ internal class PaymentSheetPage(
         composeTestRule.waitForNode(
             matcher = hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
                 .and(isSelected()),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = true,
         )
     }

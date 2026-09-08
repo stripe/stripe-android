@@ -36,7 +36,6 @@ class VerticalModePage(
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -44,7 +43,6 @@ class VerticalModePage(
     fun waitUntilMissing() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
-            timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT,
             atLeastOneRootRequired = false,
         )
     }
@@ -141,7 +139,6 @@ class VerticalModePage(
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
         composeTestRule.waitForNode(
             matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
-            timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT,
             atLeastOneRootRequired = true,
         )
 
@@ -149,7 +146,6 @@ class VerticalModePage(
 
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
 

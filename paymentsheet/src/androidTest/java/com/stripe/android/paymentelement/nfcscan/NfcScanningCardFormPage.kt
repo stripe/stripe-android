@@ -19,7 +19,6 @@ internal class NfcScanningCardFormPage(
     fun clickOnNfcScan() {
         composeTestRule.waitForExactlyOneNode(
             matcher = hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG),
-            timeoutMillis = UI_TIMEOUT_MS,
             atLeastOneRootRequired = false,
         )
 
@@ -48,7 +47,6 @@ internal class NfcScanningCardFormPage(
     ) {
         composeTestRule.waitForNode(
             matcher = hasText("•••• $lastFourDigits"),
-            timeoutMillis = UI_TIMEOUT_MS,
             atLeastOneRootRequired = false,
         )
 
@@ -57,16 +55,14 @@ internal class NfcScanningCardFormPage(
     }
 
     fun assertCvcIsFocused() {
-        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
-            composeTestRule.waitForIdle()
-            composeTestRule.onAllNodes(hasText("CVC").and(isFocused()))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasText("CVC").and(isFocused()),
+            atLeastOneRootRequired = false,
+            waitForIdleBeforeEachCheck = true,
+        )
     }
 
     private companion object {
-        const val UI_TIMEOUT_MS = 5_000L
         const val CLEAR_SCANNED_CARD_CONTENT_DESCRIPTION = "Clear scanned card"
     }
 }

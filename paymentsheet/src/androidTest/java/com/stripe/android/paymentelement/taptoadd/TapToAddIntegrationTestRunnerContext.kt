@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
-import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val composeTestRule: ComposeTestRule,
@@ -154,7 +153,6 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
 
             composeTestRule.waitForNoNodes(
                 matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
-                timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT,
                 atLeastOneRootRequired = false,
             )
 

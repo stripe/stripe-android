@@ -26,7 +26,6 @@ class EditPage(
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(UPDATE_PM_SCREEN_TEST_TAG),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -34,7 +33,6 @@ class EditPage(
     fun waitUntilMissing() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(UPDATE_PM_SCREEN_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -74,7 +72,6 @@ class EditPage(
                 matcher = hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(
                     hasTestMetadata("isLoading=true")
                 ),
-                timeoutMillis = 5_000,
                 atLeastOneRootRequired = true,
             )
         }
@@ -89,7 +86,6 @@ class EditPage(
         composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(REMOVE_BUTTON_LOADING),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }

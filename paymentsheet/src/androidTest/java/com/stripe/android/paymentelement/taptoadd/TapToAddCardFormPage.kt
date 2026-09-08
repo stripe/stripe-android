@@ -14,7 +14,6 @@ class TapToAddCardFormPage(
 
         composeTestRule.waitForExactlyOneNode(
             matcher = buttonMatcher,
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
 

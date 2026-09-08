@@ -58,7 +58,6 @@ open class FormPage(
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -66,7 +65,6 @@ open class FormPage(
     fun waitUntilMissing() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }

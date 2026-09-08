@@ -30,7 +30,6 @@ internal class ExpressCheckoutElementPage(
         val button = hasTestTag(testTag) and isEnabled() and hasClickAction()
         composeTestRule.waitForNode(
             matcher = button,
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
             conditionDescription = "$name button is enabled and clickable",
         )

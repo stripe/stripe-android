@@ -24,7 +24,6 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -32,7 +31,6 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitForSavedPaymentMethodToBeRemoved(last4: String) {
         composeTestRule.waitForNoNodes(
             matcher = savedPaymentMethodMatcher(last4 = last4).and(isPlaced()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -58,14 +56,12 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun clickNewCardButton() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = true,
         )
         val testTag = PaymentOptionsItem.ViewType.AddCard.name
 
         composeTestRule.waitForNode(
             matcher = hasTestTag(testTag),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
 

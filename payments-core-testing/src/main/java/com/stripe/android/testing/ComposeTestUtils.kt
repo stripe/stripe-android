@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 
 private const val IS_PLACED = "is_placed_in_layout"
+private const val DEFAULT_COMPOSE_WAIT_TIMEOUT_MILLIS = 5_000L
 
 enum class ScrollBehavior {
     Never,
@@ -31,15 +32,20 @@ fun isPlaced() = SemanticsMatcher(IS_PLACED) { node ->
 
 fun ComposeTestRule.waitForNode(
     matcher: SemanticsMatcher,
-    timeoutMillis: Long,
+    timeoutMillis: Long = DEFAULT_COMPOSE_WAIT_TIMEOUT_MILLIS,
     atLeastOneRootRequired: Boolean = false,
     useUnmergedTree: Boolean = false,
     conditionDescription: String? = null,
+    waitForIdleBeforeEachCheck: Boolean = false,
 ) {
     waitUntil(
         conditionDescription = conditionDescription ?: "node matching $matcher to appear",
         timeoutMillis = timeoutMillis,
     ) {
+        if (waitForIdleBeforeEachCheck) {
+            waitForIdle()
+        }
+
         onAllNodes(matcher, useUnmergedTree = useUnmergedTree)
             .fetchSemanticsNodes(atLeastOneRootRequired = atLeastOneRootRequired)
             .isNotEmpty()
@@ -48,7 +54,7 @@ fun ComposeTestRule.waitForNode(
 
 fun ComposeTestRule.waitForExactlyOneNode(
     matcher: SemanticsMatcher,
-    timeoutMillis: Long,
+    timeoutMillis: Long = DEFAULT_COMPOSE_WAIT_TIMEOUT_MILLIS,
     atLeastOneRootRequired: Boolean = false,
     useUnmergedTree: Boolean = false,
     conditionDescription: String? = null,
@@ -65,31 +71,24 @@ fun ComposeTestRule.waitForExactlyOneNode(
 
 fun ComposeTestRule.waitForNoNodes(
     matcher: SemanticsMatcher,
-    timeoutMillis: Long,
+    timeoutMillis: Long = DEFAULT_COMPOSE_WAIT_TIMEOUT_MILLIS,
     atLeastOneRootRequired: Boolean = false,
     useUnmergedTree: Boolean = false,
     conditionDescription: String? = null,
+    waitForIdleBeforeEachCheck: Boolean = false,
 ) {
     waitUntil(
         conditionDescription = conditionDescription ?: "nodes matching $matcher to disappear",
         timeoutMillis = timeoutMillis,
     ) {
+        if (waitForIdleBeforeEachCheck) {
+            waitForIdle()
+        }
+
         onAllNodes(matcher, useUnmergedTree = useUnmergedTree)
             .fetchSemanticsNodes(atLeastOneRootRequired = atLeastOneRootRequired)
             .isEmpty()
     }
-}
-
-fun ComposeTestRule.waitForText(
-    text: String,
-    timeoutMillis: Long,
-    substring: Boolean = false,
-    ignoreCase: Boolean = false,
-) {
-    waitForNode(
-        matcher = hasText(text, substring = substring, ignoreCase = ignoreCase),
-        timeoutMillis = timeoutMillis,
-    )
 }
 
 fun ComposeTestRule.replaceText(

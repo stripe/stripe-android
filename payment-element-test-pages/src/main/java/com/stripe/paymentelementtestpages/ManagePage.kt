@@ -23,7 +23,6 @@ class ManagePage(
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -37,7 +36,6 @@ class ManagePage(
     fun waitUntilNotVisible() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -66,7 +64,6 @@ class ManagePage(
     fun waitUntilGone(paymentMethodId: String) {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag("${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_$paymentMethodId"),
-            timeoutMillis = 2_000,
             atLeastOneRootRequired = true,
             useUnmergedTree = true,
         )

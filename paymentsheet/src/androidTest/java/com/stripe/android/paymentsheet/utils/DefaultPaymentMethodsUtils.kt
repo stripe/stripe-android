@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitForNode
 import org.json.JSONArray
 
 internal object DefaultPaymentMethodsUtils {
@@ -72,11 +73,10 @@ internal object DefaultPaymentMethodsUtils {
         )
 
         if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
-                composeTestRule.onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                    .isNotEmpty()
-            }
+            composeTestRule.waitForNode(
+                matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+                atLeastOneRootRequired = false,
+            )
         }
     }
 }

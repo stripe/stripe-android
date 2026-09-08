@@ -371,7 +371,6 @@ internal class CheckoutPaymentElementTest {
         }
         testRules.compose.waitForNode(
             matcher = hasTestTag(layoutTag),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -379,7 +378,6 @@ internal class CheckoutPaymentElementTest {
     private fun clickPaymentOptionsPrimaryButton() {
         testRules.compose.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
         testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)

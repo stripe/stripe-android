@@ -39,7 +39,6 @@ internal class CustomerSheetPage(
 
         composeTestRule.waitForNoNodes(
             matcher = hasText(text, substring).and(isPlaced()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = true,
         )
     }
@@ -47,7 +46,6 @@ internal class CustomerSheetPage(
     fun waitUntilMissing() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }
@@ -167,7 +165,6 @@ internal class CustomerSheetPage(
 
         composeTestRule.waitForNode(
             matcher = matcher.and(isEnabled()),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
     }

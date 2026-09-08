@@ -23,7 +23,6 @@ internal class EmbeddedContentPage(
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }

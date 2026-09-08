@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.FormPage
-import kotlin.time.Duration.Companion.seconds
 
 internal class EmbeddedFormPage(
     composeTestRule: ComposeTestRule,
@@ -37,7 +36,6 @@ internal class EmbeddedFormPage(
 
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
             atLeastOneRootRequired = false,
         )
 
@@ -49,7 +47,6 @@ internal class EmbeddedFormPage(
 
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()),
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
             atLeastOneRootRequired = true,
             conditionDescription = "embedded form primary button to become disabled",
         )
@@ -66,7 +63,6 @@ internal class EmbeddedFormPage(
             matcher = hasText("Card number").and(
                 SemanticsMatcher.expectValue(SemanticsProperties.Error, errorMessage)
             ),
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
             atLeastOneRootRequired = true,
             conditionDescription = "card number field to show error '$errorMessage'",
         )
@@ -89,7 +85,6 @@ internal class EmbeddedFormPage(
     fun assertErrorIsShown(message: String) {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)),
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
         )
         composeTestRule.onNode(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)))
@@ -119,7 +114,6 @@ internal class EmbeddedFormPage(
         )
         composeTestRule.waitForNode(
             matcher = matcher,
-            timeoutMillis = 5_000,
             atLeastOneRootRequired = false,
             useUnmergedTree = true,
         )
@@ -132,7 +126,6 @@ internal class EmbeddedFormPage(
     fun waitUntilHeaderPromoBadgeIsMissing() {
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(TEST_TAG_HEADER_PROMO_BADGE),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
 
@@ -143,7 +136,6 @@ internal class EmbeddedFormPage(
     private fun waitUntilPrimaryButtonIsEnabled() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
-            timeoutMillis = 1_000,
             atLeastOneRootRequired = false,
         )
     }
