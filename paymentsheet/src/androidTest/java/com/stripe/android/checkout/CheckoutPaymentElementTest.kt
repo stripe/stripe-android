@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
@@ -30,6 +29,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import okhttp3.mockwebserver.MockResponse
@@ -368,19 +369,19 @@ internal class CheckoutPaymentElementTest {
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
         }
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            testRules.compose.onAllNodes(hasTestTag(layoutTag))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        testRules.compose.waitForNode(
+            matcher = hasTestTag(layoutTag),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     private fun clickPaymentOptionsPrimaryButton() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            testRules.compose.onAllNodes(
-                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
-            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
+        testRules.compose.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
         testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
             .performScrollTo()
             .performClick()
@@ -405,11 +406,20 @@ internal class CheckoutPaymentElementTest {
 
     private fun fillOutBillingDetails() {
         billingDetailsPage.country.assertTextContains("United States")
-        billingDetailsPage.line1.performTextReplacement(BILLING_ADDRESS_LINE_ONE)
-        billingDetailsPage.city.performTextReplacement(BILLING_ADDRESS_CITY)
+        testRules.compose.replaceText(
+            node = billingDetailsPage.line1,
+            text = BILLING_ADDRESS_LINE_ONE,
+        )
+        testRules.compose.replaceText(
+            node = billingDetailsPage.city,
+            text = BILLING_ADDRESS_CITY,
+        )
         billingDetailsPage.state.performScrollTo().performClick()
         testRules.compose.onNodeWithText("California").performClick()
-        billingDetailsPage.zipCode.performTextReplacement(BILLING_ADDRESS_ZIP)
+        testRules.compose.replaceText(
+            node = billingDetailsPage.zipCode,
+            text = BILLING_ADDRESS_ZIP,
+        )
     }
 
     private fun assertBillingDetailsArePopulated() {

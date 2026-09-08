@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.isPlaced
 import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -36,19 +37,19 @@ internal class CustomerSheetPage(
     fun waitUntilRemoved(text: String, substring: Boolean = false) {
         waitForIdle()
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasText(text, substring).and(isPlaced()))
-                .fetchSemanticsNodes().isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasText(text, substring).and(isPlaced()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(5000) {
-            composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes(
-                atLeastOneRootRequired = false
-            ).isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun fillOutFullBillingAddress() {
@@ -167,6 +168,7 @@ internal class CustomerSheetPage(
         composeTestRule.waitForNode(
             matcher = matcher.and(isEnabled()),
             timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
         )
     }
 

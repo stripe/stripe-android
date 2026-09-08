@@ -14,18 +14,18 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.hasTestMetadata
 
 internal class EmbeddedContentPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun clickOnLpm(code: String) {

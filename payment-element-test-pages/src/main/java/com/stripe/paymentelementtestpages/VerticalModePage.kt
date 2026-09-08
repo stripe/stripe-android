@@ -20,6 +20,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.waitForNode
 
 @SuppressWarnings("TooManyFunctions")
 class VerticalModePage(
@@ -32,21 +34,19 @@ class VerticalModePage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun clickOnNewLpm(paymentMethodCode: PaymentMethodCode) {
@@ -139,23 +139,19 @@ class VerticalModePage(
     }
 
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT,
+            atLeastOneRootRequired = true,
+        )
 
         val testTag = "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"
 
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule
-                .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
 
         composeTestRule.onNode(hasTestTag(testTag))
             .performClick()

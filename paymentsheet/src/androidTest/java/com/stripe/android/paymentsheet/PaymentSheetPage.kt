@@ -1,10 +1,7 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package com.stripe.android.paymentsheet
 
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasAnyAncestor
@@ -42,6 +39,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHO
 import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.ScrollBehavior
 import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForExactlyOneNode
+import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 import com.stripe.android.testing.waitForText
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
@@ -143,14 +142,22 @@ internal class PaymentSheetPage(
     fun clickSavedCard(last4: String) {
         val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText(last4, substring = true))
-        composeTestRule.waitUntilExactlyOneExists(savedCardTagMatcher)
+        composeTestRule.waitForExactlyOneNode(
+            matcher = savedCardTagMatcher,
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
         composeTestRule.onNode(savedCardTagMatcher).performClick()
     }
 
     fun clickSavedCardEditBadge(last4: String) {
         val badgeTagMatcher = hasTestTag(TEST_TAG_MODIFY_BADGE)
             .and(hasAnyAncestor(hasText(last4, substring = true)))
-        composeTestRule.waitUntilExactlyOneExists(badgeTagMatcher)
+        composeTestRule.waitForExactlyOneNode(
+            matcher = badgeTagMatcher,
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
         composeTestRule.onNode(badgeTagMatcher).performClick()
     }
 
@@ -232,11 +239,11 @@ internal class PaymentSheetPage(
     }
 
     fun clickPrimaryButton() {
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
 
         composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
@@ -261,12 +268,11 @@ internal class PaymentSheetPage(
     }
 
     fun assertErrorMessageShown() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodesWithTag(SHEET_ERROR_TEST_TAG)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_ERROR_TEST_TAG),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
 
         composeTestRule.onNodeWithTag(SHEET_ERROR_TEST_TAG).assertIsDisplayed()
     }
@@ -316,6 +322,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitForNode(
             matcher = hasContentDescription(description),
             timeoutMillis = 10_000,
+            atLeastOneRootRequired = false,
         )
     }
 
@@ -339,13 +346,11 @@ internal class PaymentSheetPage(
     }
 
     fun checkSaveForFuture() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000L) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG).and(isEnabled()))
-                .fetchSemanticsNodes(
-                    atLeastOneRootRequired = false
-                ).isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG).and(isEnabled()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
         composeTestRule.onNode(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG))
             .performScrollTo()
             .performClick()
@@ -353,11 +358,11 @@ internal class PaymentSheetPage(
     }
 
     fun checkSetAsDefaultCheckbox() {
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(
-                hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled())
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled()),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = true,
+        )
         composeTestRule.onNode(hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG))
             .performScrollTo()
             .performClick()
@@ -372,24 +377,20 @@ internal class PaymentSheetPage(
 
     fun assertSetAsDefaultCheckboxNotChecked() {
         val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule.onAllNodes(
-                hasTestTag(testTag).and(isToggleable()).and(isOff())
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag).and(isToggleable()).and(isOff()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun assertSetAsDefaultCheckboxChecked() {
         val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule.onAllNodes(
-                hasTestTag(testTag).and(isToggleable()).and(isOn())
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag).and(isToggleable()).and(isOn()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun assertNoSaveForFutureCheckbox() {
@@ -399,40 +400,36 @@ internal class PaymentSheetPage(
 
     fun assertSaveForFutureCheckboxNotChecked() {
         val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule.onAllNodes(
-                hasTestTag(testTag).and(isToggleable()).and(isOff())
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag).and(isToggleable()).and(isOff()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun assertSaveForFutureUseCheckboxChecked() {
         val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule.onAllNodes(
-                hasTestTag(testTag).and(isToggleable()).and(isOn())
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag).and(isToggleable()).and(isOn()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitUntilVisible() {
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
             timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
         )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(5000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
@@ -440,19 +437,20 @@ internal class PaymentSheetPage(
         waitUntilVisible()
 
         if (forVerticalMode) {
-            composeTestRule.waitUntil {
-                composeTestRule
-                    .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
+            composeTestRule.waitForNode(
+                matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+                timeoutMillis = 1_000,
+                atLeastOneRootRequired = true,
+            )
 
             composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
                 .performScrollTo()
                 .performClick()
         } else {
-            composeTestRule.waitUntilExactlyOneExists(
-                hasTestTag(FORM_ELEMENT_TEST_TAG)
+            composeTestRule.waitForExactlyOneNode(
+                matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
+                timeoutMillis = 1_000,
+                atLeastOneRootRequired = false,
             )
 
             val paymentMethodMatcher = hasTestTag(TEST_TAG_LIST + code)
@@ -477,32 +475,28 @@ internal class PaymentSheetPage(
             TEST_TAG_LIST
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(
-                hasTestTag(testTagForLayout)
-            )
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTagForLayout),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = true,
+        )
         composeTestRule.onNodeWithTag(testTagForLayout).assertExists()
     }
 
     fun assertIsOnFormPage() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun assertLpmSelected(code: String) {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected()))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected()),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun fillOutKonbini(fullName: String, email: String, phone: String) {
@@ -535,12 +529,11 @@ internal class PaymentSheetPage(
     fun assertSavedSelection(paymentMethodId: String) {
         waitUntilVisible()
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(
-                hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-                    .and(isSelected())
-            ).fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+                .and(isSelected()),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = true,
+        )
     }
 }

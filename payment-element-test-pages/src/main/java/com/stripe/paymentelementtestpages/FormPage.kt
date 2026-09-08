@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
 import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -58,16 +59,16 @@ open class FormPage(
         composeTestRule.waitForNode(
             matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
             timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
         )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun assertIsNotDisplayed() {

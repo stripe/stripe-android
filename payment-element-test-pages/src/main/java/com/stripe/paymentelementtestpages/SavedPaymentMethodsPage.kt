@@ -17,25 +17,24 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.isPlaced
+import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.waitForNode
 
 class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitForSavedPaymentMethodToBeRemoved(last4: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(
-                savedPaymentMethodMatcher(last4 = last4).and(isPlaced())
-            )
-                .fetchSemanticsNodes()
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = savedPaymentMethodMatcher(last4 = last4).and(isPlaced()),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun onSavedPaymentMethod(last4: String): SemanticsNodeInteraction {
@@ -57,22 +56,18 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     }
 
     fun clickNewCardButton() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = true,
+        )
         val testTag = PaymentOptionsItem.ViewType.AddCard.name
 
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule
-                .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
 
         composeTestRule.onNodeWithTag(testTag, true).performClick()
     }

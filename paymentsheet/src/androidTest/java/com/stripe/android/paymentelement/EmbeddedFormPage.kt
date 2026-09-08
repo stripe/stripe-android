@@ -12,7 +12,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -22,6 +21,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
+import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.FormPage
 import kotlin.time.Duration.Companion.seconds
@@ -35,11 +35,11 @@ internal class EmbeddedFormPage(
     fun clickPrimaryButton() {
         clickPrimaryButtonWithoutWaitingForDismissal()
 
-        composeTestRule.waitUntil(5.seconds.inWholeMilliseconds) {
-            composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+            timeoutMillis = 5.seconds.inWholeMilliseconds,
+            atLeastOneRootRequired = false,
+        )
 
         composeTestRule.waitForIdle()
     }
@@ -47,14 +47,12 @@ internal class EmbeddedFormPage(
     fun clickDisabledPrimaryButton() {
         waitUntilVisible()
 
-        composeTestRule.waitUntil(
-            conditionDescription = "embedded form primary button to become disabled",
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()),
             timeoutMillis = 5.seconds.inWholeMilliseconds,
-        ) {
-            composeTestRule.onAllNodes(
-                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled())
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+            atLeastOneRootRequired = true,
+            conditionDescription = "embedded form primary button to become disabled",
+        )
 
         composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
             .performScrollTo()
@@ -64,16 +62,14 @@ internal class EmbeddedFormPage(
     }
 
     fun assertCardNumberError(errorMessage: String) {
-        composeTestRule.waitUntil(
-            conditionDescription = "card number field to show error '$errorMessage'",
+        composeTestRule.waitForNode(
+            matcher = hasText("Card number").and(
+                SemanticsMatcher.expectValue(SemanticsProperties.Error, errorMessage)
+            ),
             timeoutMillis = 5.seconds.inWholeMilliseconds,
-        ) {
-            composeTestRule.onAllNodes(
-                hasText("Card number").and(
-                    SemanticsMatcher.expectValue(SemanticsProperties.Error, errorMessage)
-                )
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+            atLeastOneRootRequired = true,
+            conditionDescription = "card number field to show error '$errorMessage'",
+        )
     }
 
     fun clickPrimaryButtonWithoutWaitingForDismissal() {
@@ -91,11 +87,11 @@ internal class EmbeddedFormPage(
     }
 
     fun assertErrorIsShown(message: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
         composeTestRule.onNode(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)))
             .performScrollTo()
             .assertIsDisplayed()
@@ -121,11 +117,12 @@ internal class EmbeddedFormPage(
         val matcher = hasTestTag(TEST_TAG_HEADER_PROMO_BADGE).and(
             hasAnyDescendant(hasText(text, substring = true))
         )
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(matcher, useUnmergedTree = true)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = matcher,
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+            useUnmergedTree = true,
+        )
 
         composeTestRule.onNode(matcher, useUnmergedTree = true)
             .performScrollTo()
@@ -133,11 +130,11 @@ internal class EmbeddedFormPage(
     }
 
     fun waitUntilHeaderPromoBadgeIsMissing() {
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodesWithTag(TEST_TAG_HEADER_PROMO_BADGE)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(TEST_TAG_HEADER_PROMO_BADGE),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
 
         composeTestRule.onNodeWithTag(TEST_TAG_HEADER_PROMO_BADGE)
             .assertDoesNotExist()
@@ -147,6 +144,7 @@ internal class EmbeddedFormPage(
         composeTestRule.waitForNode(
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
             timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
         )
     }
 

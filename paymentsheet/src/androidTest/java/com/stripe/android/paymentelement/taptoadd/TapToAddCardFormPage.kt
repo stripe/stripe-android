@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
+import com.stripe.android.testing.waitForExactlyOneNode
 
 class TapToAddCardFormPage(
     val composeTestRule: ComposeTestRule
@@ -11,12 +12,11 @@ class TapToAddCardFormPage(
     fun clickOnTapToAdd() {
         val buttonMatcher = hasText(TAP_TO_ADD_BUTTON_TEXT)
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodes(buttonMatcher)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
-
-        }
+        composeTestRule.waitForExactlyOneNode(
+            matcher = buttonMatcher,
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
 
         composeTestRule.onNode(buttonMatcher)
             .assertIsEnabled()

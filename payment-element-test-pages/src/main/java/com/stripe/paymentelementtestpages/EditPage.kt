@@ -14,6 +14,8 @@ import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SCREEN_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
+import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.waitForNode
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.SELECTOR_ITEM_TEST_TAG
 
@@ -22,21 +24,19 @@ class EditPage(
     private val composeTestRule: ComposeTestRule
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(UPDATE_PM_SCREEN_TEST_TAG),
+            timeoutMillis = 1_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(UPDATE_PM_SCREEN_TEST_TAG),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun assertIsVisible() {
@@ -70,18 +70,13 @@ class EditPage(
         composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
             .performClick()
         if (waitUntilComplete) {
-            composeTestRule.waitUntil(timeoutMillis = 5_000L) {
-                composeTestRule
-                    .onAllNodes(
-                        hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(
-                            hasTestMetadata(
-                                "isLoading=true"
-                            )
-                        )
-                    )
-                    .fetchSemanticsNodes()
-                    .isEmpty()
-            }
+            composeTestRule.waitForNoNodes(
+                matcher = hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(
+                    hasTestMetadata("isLoading=true")
+                ),
+                timeoutMillis = 5_000,
+                atLeastOneRootRequired = true,
+            )
         }
     }
 
@@ -92,12 +87,11 @@ class EditPage(
     fun clickRemove() {
         onRemoveButton().performClick()
         composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
-        composeTestRule.waitUntil(timeoutMillis = 5_000L) {
-            composeTestRule
-                .onAllNodes(hasTestTag(REMOVE_BUTTON_LOADING))
-                .fetchSemanticsNodes()
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(REMOVE_BUTTON_LOADING),
+            timeoutMillis = 5_000,
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun onSetAsDefaultCheckbox(): SemanticsNodeInteraction {

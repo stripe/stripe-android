@@ -33,12 +33,14 @@ fun ComposeTestRule.waitForNode(
     matcher: SemanticsMatcher,
     timeoutMillis: Long,
     atLeastOneRootRequired: Boolean = false,
+    useUnmergedTree: Boolean = false,
+    conditionDescription: String? = null,
 ) {
     waitUntil(
-        conditionDescription = "node matching $matcher to appear",
+        conditionDescription = conditionDescription ?: "node matching $matcher to appear",
         timeoutMillis = timeoutMillis,
     ) {
-        onAllNodes(matcher)
+        onAllNodes(matcher, useUnmergedTree = useUnmergedTree)
             .fetchSemanticsNodes(atLeastOneRootRequired = atLeastOneRootRequired)
             .isNotEmpty()
     }
@@ -47,14 +49,34 @@ fun ComposeTestRule.waitForNode(
 fun ComposeTestRule.waitForExactlyOneNode(
     matcher: SemanticsMatcher,
     timeoutMillis: Long,
+    atLeastOneRootRequired: Boolean = false,
+    useUnmergedTree: Boolean = false,
+    conditionDescription: String? = null,
 ) {
     waitUntil(
-        conditionDescription = "exactly one node matching $matcher to appear",
+        conditionDescription = conditionDescription ?: "exactly one node matching $matcher to appear",
         timeoutMillis = timeoutMillis,
     ) {
-        onAllNodes(matcher)
-            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+        onAllNodes(matcher, useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes(atLeastOneRootRequired = atLeastOneRootRequired)
             .size == 1
+    }
+}
+
+fun ComposeTestRule.waitForNoNodes(
+    matcher: SemanticsMatcher,
+    timeoutMillis: Long,
+    atLeastOneRootRequired: Boolean = false,
+    useUnmergedTree: Boolean = false,
+    conditionDescription: String? = null,
+) {
+    waitUntil(
+        conditionDescription = conditionDescription ?: "nodes matching $matcher to disappear",
+        timeoutMillis = timeoutMillis,
+    ) {
+        onAllNodes(matcher, useUnmergedTree = useUnmergedTree)
+            .fetchSemanticsNodes(atLeastOneRootRequired = atLeastOneRootRequired)
+            .isEmpty()
     }
 }
 
