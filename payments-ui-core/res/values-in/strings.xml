@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Bayar nanti dengan Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telepon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Dengan mengonfirmasi pembayaran Anda dengan NICEPAY, Anda mengizinkan %s untuk men-charge metode pembayaran ini untuk pembayaran di masa mendatang sesuai dengan ketentuan mereka.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nama pada kartu</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Pilih cara Anda ingin membayar:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
