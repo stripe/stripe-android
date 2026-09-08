@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.uicore.utils.fadeOut
@@ -45,18 +46,22 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             }
         }.getOrElse {
             finishWithResult(InternalPaymentResult.Failed(it))
-            ErrorReporter.createFallbackInstance(applicationContext)
-                .report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
-                    stripeException = StripeException.create(it),
-                )
+            ErrorReporter.createFallbackInstanceWithoutPublishableKey(applicationContext).report(
+                errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
+                stripeException = StripeException.create(it),
+            )
             return
         }
 
         args.validate().onFailure {
             finishWithResult(InternalPaymentResult.Failed(it))
 
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(args.publishableKey, args.stripeAccountId)
+                },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS,
                     stripeException = StripeException.create(it),

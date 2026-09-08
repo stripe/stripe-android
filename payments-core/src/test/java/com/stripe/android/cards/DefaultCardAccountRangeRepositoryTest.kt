@@ -316,7 +316,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             ApiRequest.Options(publishableKey),
             store,
             { },
-            PaymentAnalyticsRequestFactory(application, publishableKey)
+            PaymentAnalyticsRequestFactory(context = application, publishableKeyProvider = { publishableKey })
         )
     }
 
