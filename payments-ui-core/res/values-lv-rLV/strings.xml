@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Maksāt vēlāk ar Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Tālrunis</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Apstiprinot jūsu maksājumu ar NICEPAY, jūs atļaujat %s ar šo maksājuma veidu iekasēt turpmākos maksājumus saskaņā ar viņu noteikumiem.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Uz kartes norādītais vārds</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Atlasiet, kā vēlaties maksāt:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 banka</string>
   <!-- Label of a button that initiates payment when tapped -->

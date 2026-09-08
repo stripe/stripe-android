@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Thanh toán sau bằng Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Điện thoại</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Bằng việc xác nhận thanh toán của bạn với NICEPAY, bạn cho phép %s tính phí phương thức thanh toán này cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Tên trên thẻ</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Chọn cách bạn muốn thanh toán:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Ngân hàng Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
