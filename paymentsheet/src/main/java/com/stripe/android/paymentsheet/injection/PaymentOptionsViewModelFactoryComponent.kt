@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.hcaptcha.HCaptchaModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -24,7 +25,8 @@ import javax.inject.Singleton
         ElementsSessionClientParamsModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        PaymentMethodMessagePromotionsExperimentHandlerModule::class
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        HCaptchaModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

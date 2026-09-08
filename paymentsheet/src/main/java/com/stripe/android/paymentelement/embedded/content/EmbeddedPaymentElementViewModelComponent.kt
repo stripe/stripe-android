@@ -11,6 +11,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.hcaptcha.HCaptchaModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -77,6 +78,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        HCaptchaModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

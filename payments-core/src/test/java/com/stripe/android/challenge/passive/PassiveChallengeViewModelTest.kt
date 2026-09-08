@@ -1,6 +1,5 @@
 package com.stripe.android.challenge.passive
 
-import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.FakeHCaptchaService
@@ -25,12 +24,11 @@ internal class PassiveChallengeViewModelTest {
     val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val fakeHCaptchaService = FakeHCaptchaService()
-    private val fakeActivity = object : FragmentActivity() {}
 
     private val testPassiveCaptchaParams = PassiveCaptchaParams(
         siteKey = "test_site_key",
         rqData = "test_rq_data",
-        tokenTimeoutSeconds = null
+        tokenTimeoutSeconds = 30
     )
 
     @Test
@@ -40,7 +38,7 @@ internal class PassiveChallengeViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.startPassiveChallenge(fakeActivity)
+        viewModel.startPassiveChallenge()
 
         viewModel.result.test {
             val result = awaitItem()
@@ -50,6 +48,9 @@ internal class PassiveChallengeViewModelTest {
 
             expectNoEvents()
         }
+
+        fakeHCaptchaService.awaitPassiveCaptchaTokenCall()
+        fakeHCaptchaService.ensureAllEventsConsumed()
     }
 
     @Test
@@ -59,7 +60,7 @@ internal class PassiveChallengeViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.startPassiveChallenge(fakeActivity)
+        viewModel.startPassiveChallenge()
 
         viewModel.result.test {
             val result = awaitItem()
@@ -69,6 +70,9 @@ internal class PassiveChallengeViewModelTest {
 
             expectNoEvents()
         }
+
+        fakeHCaptchaService.awaitPassiveCaptchaTokenCall()
+        fakeHCaptchaService.ensureAllEventsConsumed()
     }
 
     @Test
@@ -81,12 +85,11 @@ internal class PassiveChallengeViewModelTest {
             hCaptchaService = hCaptchaService
         )
 
-        viewModel.startPassiveChallenge(fakeActivity)
+        viewModel.startPassiveChallenge()
 
-        val passiveCaptcha = hCaptchaService.awaitPerformPassiveHCaptchaCall()
-        assertThat(passiveCaptcha.siteKey).isEqualTo(passiveCaptcha.siteKey)
-        assertThat(passiveCaptcha.rqData).isEqualTo(passiveCaptcha.rqData)
-        assertThat(passiveCaptcha.activity).isEqualTo(fakeActivity)
+        val passiveCaptcha = hCaptchaService.awaitPassiveCaptchaTokenCall()
+        assertThat(passiveCaptcha.timeoutSeconds).isEqualTo(testPassiveCaptchaParams.tokenTimeoutSeconds)
+        hCaptchaService.ensureAllEventsConsumed()
     }
 
     private fun createViewModel(

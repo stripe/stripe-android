@@ -3,6 +3,7 @@ package com.stripe.android.hcaptcha
 import android.os.Handler
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.DefaultHCaptchaServiceTest.FakeHCaptchaProvider.HCaptchaHandler
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
@@ -411,6 +412,40 @@ internal class DefaultHCaptchaServiceTest {
             tokenTimeoutSeconds = 30,
             shouldFetchNewToken = false
         )
+    }
+
+    @Test
+    fun `passiveCaptchaToken returns cached token without starting another verification`() = runTest {
+        TestContext.test {
+            val expectedToken = "warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(expectedToken)
+
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            hCaptchaProvider.awaitCall()
+
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+
+            val result = service.passiveCaptchaToken(tokenTimeoutSeconds = null)
+
+            assertThat(result).isEqualTo(HCaptchaService.Result.Success(expectedToken))
+            hCaptchaProvider.ensureAllEventsConsumed()
+            captchaEventsReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `cacheState returns NeedsRefresh`() = runTest {
+        TestContext.test {
+            service.cacheState(timeoutSeconds = 30).test {
+                assertThat(awaitItem()).isEqualTo(HCaptchaService.CacheState.Cached)
+                awaitComplete()
+            }
+        }
     }
 
     private suspend fun testTokenExpiration(

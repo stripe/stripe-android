@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -55,6 +56,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
+import org.mockito.kotlin.mock
 import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
@@ -161,6 +163,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                         context = ApplicationProvider.getApplicationContext(),
                         publishableKey = "pk",
                     ),
+                    hCaptchaService = mock<HCaptchaService>(),
                     publishableKeyProvider = { "pk" },
                     stripeAccountIdProvider = { null },
                 )
