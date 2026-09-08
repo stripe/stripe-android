@@ -176,7 +176,7 @@ internal class DefaultPaymentElementLoaderTest {
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
                     apiConfiguration = ApiConfiguration.State(
-                        publishableKey = "pk_test",
+                        publishableKey = "pk_test_123",
                         stripeAccountId = "acct_123",
                     ),
                 ),
@@ -5058,7 +5058,7 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             apiConfigurationResolver = FakeApiConfigurationResolver(
                 resolvedApiConfiguration = ApiConfiguration.State(
-                    publishableKey = if (isLiveMode) "pk_live" else "pk_test",
+                    publishableKey = if (isLiveMode) "pk_live" else "pk_test_123",
                     stripeAccountId = "acct_123",
                 ),
             ),
