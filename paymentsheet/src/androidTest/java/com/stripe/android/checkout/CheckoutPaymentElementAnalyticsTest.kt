@@ -43,10 +43,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
         networkRule = networkRule,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
-                eventName = "mc_embedded_init",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
                 productUsage = setOf("Checkout"),
             )
@@ -148,10 +144,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
         },
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
-                eventName = "mc_embedded_init",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
                 productUsage = setOf("Checkout"),
             )
@@ -184,10 +176,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             analyticsPayloadField("error_code", "checkout_session_total_changed"),
         )
         // The Checkout Session is refreshed after confirmation fails.
-        networkRule.validateAnalyticsRequest(
-            eventName = "mc_embedded_init",
-            productUsage = setOf("Checkout"),
-        )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_load_started",
             productUsage = setOf("Checkout"),
