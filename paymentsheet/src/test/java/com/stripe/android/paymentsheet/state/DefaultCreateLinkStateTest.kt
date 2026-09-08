@@ -47,9 +47,11 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            stripeAccountId = "acct_123",
         )
 
         assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
+        assertThat(retrieveCustomerEmail.invokedWith?.stripeAccountId).isEqualTo("acct_123")
     }
 
     @Test
@@ -105,6 +107,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            stripeAccountId = "acct_123",
         )
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
@@ -134,6 +137,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            stripeAccountId = "acct_123",
         )
 
         assertThat(result).isInstanceOf<LinkState>()
@@ -154,6 +158,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            stripeAccountId = "acct_123",
         )
 
         assertThat(linkStateResult).isInstanceOf<LinkState>()
@@ -191,6 +196,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            stripeAccountId = "acct_123",
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
@@ -271,11 +277,13 @@ internal class DefaultCreateLinkStateTest {
             configuration: CommonConfiguration,
             customerMetadata: CustomerMetadata?,
             customerEmail: String?,
+            stripeAccountId: String?,
         ): String? {
             invokedWith = Invocation(
                 configuration = configuration,
                 customerMetadata = customerMetadata,
                 customerEmail = customerEmail,
+                stripeAccountId = stripeAccountId,
             )
             return customerEmail
         }
@@ -284,6 +292,7 @@ internal class DefaultCreateLinkStateTest {
             val configuration: CommonConfiguration,
             val customerMetadata: CustomerMetadata?,
             val customerEmail: String?,
+            val stripeAccountId: String?,
         )
     }
 
