@@ -12,6 +12,7 @@ internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
         paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
+        requiresShippingAddress: Boolean,
     ): List<ExpressButtonType>
 }
 
@@ -20,6 +21,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
+        requiresShippingAddress: Boolean,
     ): List<ExpressButtonType> {
         expressCheckoutElementConfiguration ?: return emptyList()
         paymentMethodMetadata ?: return emptyList()
@@ -35,7 +37,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
                     expressCheckoutElementConfiguration.linkConfiguration.display ==
                         ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic &&
-                        !expressCheckoutElementConfiguration.shippingAddressRequired
+                        !requiresShippingAddress
                 }
             }
         }

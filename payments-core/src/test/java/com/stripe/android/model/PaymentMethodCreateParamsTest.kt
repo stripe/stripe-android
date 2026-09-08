@@ -142,6 +142,12 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createKakaoPay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createKakaoPay().toParamMap())
+            .isEqualTo(mapOf("type" to "kakao_pay"))
+    }
+
+    @Test
     fun `createKrCard() without billing details creates expected map`() {
         assertThat(PaymentMethodCreateParams.createKrCard().toParamMap())
             .isEqualTo(mapOf("type" to "kr_card"))

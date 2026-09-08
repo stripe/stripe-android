@@ -5,9 +5,12 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainHeader
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -106,7 +109,10 @@ internal class CardNumberControllerNetworkTest(
         // If this request is NOT made, the test will fail because we enqueued but didn't consume it
         networkRule.enqueue(
             method("GET"),
-            path("edge-internal/card-metadata")
+            path("edge-internal/card-metadata"),
+            header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+            doesNotContainHeader("Stripe-Account"),
+            applyDefaultAuthorization = false,
         ) { response ->
             // Return a CREDIT card response - this should trigger the warning
             response.testBodyFromFile("card-metadata-visa-credit.json")
@@ -155,7 +161,10 @@ internal class CardNumberControllerNetworkTest(
         // Enqueue card-metadata response for a DEBIT card
         networkRule.enqueue(
             method("GET"),
-            path("edge-internal/card-metadata")
+            path("edge-internal/card-metadata"),
+            header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+            doesNotContainHeader("Stripe-Account"),
+            applyDefaultAuthorization = false,
         ) { response ->
             response.testBodyFromFile("card-metadata-visa-debit.json")
         }

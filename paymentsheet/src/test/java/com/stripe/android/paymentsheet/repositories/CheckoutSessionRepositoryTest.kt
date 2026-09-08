@@ -40,7 +40,7 @@ class CheckoutSessionRepositoryTest {
             publishableKey = "pk_test_123",
         ),
         publishableKeyProvider = { "pk_test_123" },
-        stripeAccountIdProvider = { null },
+        stripeAccountIdProvider = { "acct_123" },
     )
 
     @Test

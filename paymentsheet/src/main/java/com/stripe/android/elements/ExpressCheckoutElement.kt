@@ -341,7 +341,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
-        private var shippingAddressRequired: Boolean = false
         private var emailRequired: Boolean = false
         private var paymentMethodOrder: List<String> = emptyList()
         private var appearance: Appearance = Appearance()
@@ -357,12 +356,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             googlePayConfiguration: GooglePayConfiguration
         ): Configuration = apply {
             this.googlePayConfiguration = googlePayConfiguration
-        }
-
-        fun shippingAddressRequired(
-            shippingAddressRequired: Boolean,
-        ): Configuration = apply {
-            this.shippingAddressRequired = shippingAddressRequired
         }
 
         /**
@@ -400,7 +393,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: CheckoutGooglePayConfiguration,
-            val shippingAddressRequired: Boolean,
             val emailRequired: Boolean,
             val paymentMethodOrder: List<PaymentMethodType>,
             val appearance: Appearance.State,
@@ -414,7 +406,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         internal fun build(): State = State(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
-            shippingAddressRequired = shippingAddressRequired,
             emailRequired = emailRequired,
             paymentMethodOrder = paymentMethodOrder.mapNotNull { paymentMethod ->
                 when (paymentMethod) {

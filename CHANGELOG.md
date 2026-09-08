@@ -8,6 +8,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Added support for PAYCO.
 * [ADDED] Added support for Korean cards.
 * [ADDED] Added support for Naver Pay.
+* [ADDED] Added support for Kakao Pay.
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
 ### AddressElement
