@@ -1,12 +1,18 @@
 package com.stripe.android.tta.testing
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON
 import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_LAYOUT_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickEnabledNode
+import com.stripe.android.testing.waitForExactlyOneNode
+import com.stripe.android.testing.waitForNoNodes
 
 class TapToAddCardAddedPage(
     private val composeTestRule: ComposeTestRule,
@@ -31,7 +37,10 @@ class TapToAddCardAddedPage(
     }
 
     fun clickCheckboxToSaveWithLink() {
-        linkHelper.checkbox().click()
+        composeTestRule.clickEnabledNode(
+            node = linkHelper.checkbox(),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun fillLinkInput() {
@@ -51,11 +60,17 @@ class TapToAddCardAddedPage(
     }
 
     fun clickContinue() {
-        assertHasContinueButton().click()
+        composeTestRule.clickEnabledNode(
+            node = assertHasContinueButton(),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickCloseButton() {
-        composeTestRule.retrieveCloseButton().click()
+        composeTestRule.clickEnabledNode(
+            node = composeTestRule.retrieveCloseButton(),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun advancePastScreen() {
@@ -63,19 +78,22 @@ class TapToAddCardAddedPage(
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing(TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON)
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON)
+                .or(hasTestTag(TAP_TO_ADD_LAYOUT_TEST_TAG)),
+            atLeastOneRootRequired = false,
+        )
     }
 
     private fun assertHasCardAddedText() {
         val matcher = hasText("Card added")
 
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodes(matcher)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
-        }
+        composeTestRule.waitForExactlyOneNode(
+            matcher = matcher,
+            atLeastOneRootRequired = false,
+        )
 
-        composeTestRule.onNode(matcher).isDisplayed()
+        composeTestRule.onNode(matcher).assertIsDisplayed()
     }
 
     private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")

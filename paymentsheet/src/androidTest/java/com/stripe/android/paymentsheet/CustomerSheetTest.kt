@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.hasText
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -16,6 +17,8 @@ import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
+import com.stripe.android.testing.waitForNoPlacedNodes
+import com.stripe.android.testing.waitForText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -145,7 +148,10 @@ internal class CustomerSheetTest {
         page.clickDeleteButton()
         page.clickDialogRemoveButton()
 
-        page.waitUntilRemoved(text = "4242", substring = true)
+        composeTestRule.waitForNoPlacedNodes(
+            matcher = hasText("4242", substring = true),
+            atLeastOneRootRequired = true,
+        )
 
         context.markTestSucceeded()
     }
@@ -291,7 +297,7 @@ internal class CustomerSheetTest {
 
         page.clickSaveButton()
 
-        page.waitForText("Your card's security code is invalid.")
+        composeTestRule.waitForText("Your card's security code is invalid.")
 
         context.markTestSucceeded()
     }

@@ -24,6 +24,9 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import com.stripe.android.testing.fillExpirationDate
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -88,9 +91,8 @@ internal class PaymentSheetBillingConfigurationTest(
             )
         }
 
-        page.waitForText("Email")
-        page.replaceText("Email", "mail@mail.com")
-        page.replaceText("Name on card", "Jane Doe")
+        composeTestRule.replaceText("Email", "mail@mail.com")
+        composeTestRule.replaceText("Name on card", "Jane Doe")
         page.fillOutCardDetails(fillOutZipCode = false)
 
         networkRule.enqueue(
@@ -217,11 +219,14 @@ internal class PaymentSheetBillingConfigurationTest(
         }
 
         page.assertIsOnFormPage()
-        page.replaceText("123 Main Street", "123 Main Road")
-        page.fillExpirationDate("12/34")
+        composeTestRule.replaceText("123 Main Street", "123 Main Road")
+        composeTestRule.fillExpirationDate("12/34")
 
         // Check that line 1 was not reset to default value
-        page.waitForText("123 Main Road")
+        composeTestRule.waitForText(
+            text = "123 Main Road",
+            timeoutMillis = 10_000,
+        )
 
         testContext.markTestSucceeded()
     }

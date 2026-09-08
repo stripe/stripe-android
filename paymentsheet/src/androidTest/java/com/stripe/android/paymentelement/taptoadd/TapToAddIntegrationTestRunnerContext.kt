@@ -1,10 +1,7 @@
 package com.stripe.android.paymentelement.taptoadd
 
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
@@ -15,9 +12,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
-import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val composeTestRule: ComposeTestRule,
@@ -147,13 +146,15 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         }
 
         override fun clickPrimaryButton() {
-            composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-                .performScrollTo()
-                .performClick()
+            composeTestRule.clickNode(
+                matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+                scrollBehavior = ScrollBehavior.Required,
+            )
 
-            composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
-                !hasPrimaryButton()
-            }
+            composeTestRule.waitForNoNodes(
+                matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+                atLeastOneRootRequired = false,
+            )
 
             composeTestRule.waitForIdle()
         }
@@ -172,12 +173,6 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             context.confirm()
 
             assertThat(context.paymentOptionTurbine.awaitItem()).isNull()
-        }
-
-        protected fun hasPrimaryButton(): Boolean {
-            return composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
         }
 
         class Continue(

@@ -9,36 +9,30 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForNoPlacedNodes
+import com.stripe.android.testing.waitForNode
 
 class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitForSavedPaymentMethodToBeRemoved(last4: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(
-                savedPaymentMethodMatcher(last4 = last4).and(
-                    SemanticsMatcher("is_placed_in_layout") { node ->
-                        node.layoutInfo.isPlaced
-                    }
-                )
-            )
-                .fetchSemanticsNodes()
-                .isEmpty()
-        }
+        composeTestRule.waitForNoPlacedNodes(
+            matcher = savedPaymentMethodMatcher(last4 = last4),
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun onSavedPaymentMethod(last4: String): SemanticsNodeInteraction {
@@ -56,28 +50,29 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     }
 
     fun clickRemoveButton() {
-        composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickNewCardButton() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+            atLeastOneRootRequired = true,
+        )
         val testTag = PaymentOptionsItem.ViewType.AddCard.name
 
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule
-                .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag),
+            atLeastOneRootRequired = true,
+        )
 
-        composeTestRule.onNodeWithTag(testTag, true).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(testTag),
+            scrollBehavior = ScrollBehavior.Never,
+            useUnmergedTree = true,
+        )
     }
 
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {

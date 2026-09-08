@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement
 
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -24,6 +23,8 @@ import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
@@ -433,10 +434,8 @@ internal class EmbeddedPaymentElementTest {
         embeddedContentPage.clickOnLpm("us_bank_account")
 
         formPage.waitUntilVisible()
-        testRules.compose.onNode(hasText("Full name"))
-            .performTextReplacement("Jane Doe")
-        testRules.compose.onNode(hasText("Email"))
-            .performTextReplacement("janedoe@example.com")
+        formPage.fillOutName()
+        formPage.fillOutEmail()
 
         formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
@@ -494,18 +493,21 @@ internal class EmbeddedPaymentElementTest {
         testRules.compose.onNode(hasText("Save my info for faster checkout with Link"))
             .performClick()
 
-        testRules.compose.onNode(hasText("Email"))
-            .performTextReplacement("email@email.com")
+        testRules.compose.replaceText(
+            matcher = hasText("Email"),
+            text = "email@email.com",
+        )
 
-        testRules.compose.waitUntil(timeoutMillis = 15_000) {
-            testRules.compose
-                .onAllNodes(hasText("Phone number"))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        testRules.compose.waitForNode(
+            matcher = hasText("Phone number"),
+            timeoutMillis = 15_000,
+            atLeastOneRootRequired = false,
+        )
 
-        testRules.compose.onNode(hasText("Phone number"))
-            .performTextReplacement("+12113526421")
+        testRules.compose.replaceText(
+            matcher = hasText("Phone number"),
+            text = "+12113526421",
+        )
 
         networkRule.enqueue(
             method("POST"),

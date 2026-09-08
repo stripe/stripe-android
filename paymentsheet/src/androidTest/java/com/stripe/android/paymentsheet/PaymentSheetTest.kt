@@ -30,6 +30,8 @@ import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForText
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.FormPage
 import okhttp3.mockwebserver.SocketPolicy
@@ -229,7 +231,10 @@ internal class PaymentSheetTest(
         }
 
         page.clickPrimaryButton()
-        page.waitForText("An error occurred. Check your connection and try again.")
+        composeTestRule.waitForText(
+            text = "An error occurred. Check your connection and try again.",
+            timeoutMillis = 10_000,
+        )
         page.assertNoText("IOException", substring = true)
         testContext.markTestSucceeded()
     }
@@ -263,7 +268,10 @@ internal class PaymentSheetTest(
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Your card has insufficient funds.")
+        composeTestRule.waitForText(
+            text = "Your card has insufficient funds.",
+            timeoutMillis = 10_000,
+        )
         page.assertNoText("StripeException", substring = true)
         testContext.markTestSucceeded()
     }
@@ -449,9 +457,11 @@ internal class PaymentSheetTest(
 
                 page.fillOutCardDetails()
                 page.clearCard()
-                page.fillCard()
+                page.waitForCardForm()
+                composeTestRule.replaceText("Card number", "4242424242424242")
                 page.clearCard()
-                page.fillCard()
+                page.waitForCardForm()
+                composeTestRule.replaceText("Card number", "4242424242424242")
 
                 networkRule.enqueue(
                     method("POST"),

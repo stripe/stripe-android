@@ -7,58 +7,65 @@ import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performClick
 import com.stripe.android.common.taptoadd.TAP_TO_BUTTON_UI_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForExactlyOneNode
+import com.stripe.android.testing.waitForNode
 
 internal class NfcScanningCardFormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun clickOnNfcScan() {
-        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
-            composeTestRule.onAllNodes(hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
-        }
+        composeTestRule.waitForExactlyOneNode(
+            matcher = hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG),
+            atLeastOneRootRequired = false,
+        )
 
-        composeTestRule.onNode(hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG))
-            .assertIsEnabled()
-            .performClick()
+        val tapToAddButton = composeTestRule.onNode(hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG))
+        tapToAddButton.assertIsEnabled()
+        composeTestRule.clickNode(
+            node = tapToAddButton,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun fillRemainingCardDetails(
         cvc: String = "123",
         zipCode: String = "12345",
     ) {
-        composeTestRule.onNode(hasText("CVC")).performTextReplacement(cvc)
-        composeTestRule.onNode(hasText("ZIP Code")).performTextReplacement(zipCode)
+        composeTestRule.replaceText(
+            matcher = hasText("CVC"),
+            text = cvc,
+        )
+        composeTestRule.replaceText(
+            matcher = hasText("ZIP Code"),
+            text = zipCode,
+        )
         composeTestRule.waitForIdle()
     }
 
     fun assertScannedCardShown(
         lastFourDigits: String,
     ) {
-        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
-            composeTestRule.onAllNodes(hasText("•••• $lastFourDigits"))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasText("•••• $lastFourDigits"),
+            atLeastOneRootRequired = false,
+        )
 
         composeTestRule.onNodeWithText("•••• $lastFourDigits").assertExists()
         composeTestRule.onNodeWithContentDescription(CLEAR_SCANNED_CARD_CONTENT_DESCRIPTION).assertExists()
     }
 
     fun assertCvcIsFocused() {
-        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
-            composeTestRule.waitForIdle()
-            composeTestRule.onAllNodes(hasText("CVC").and(isFocused()))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasText("CVC").and(isFocused()),
+            atLeastOneRootRequired = false,
+        )
     }
 
     private companion object {
-        const val UI_TIMEOUT_MS = 5_000L
         const val CLEAR_SCANNED_CARD_CONTENT_DESCRIPTION = "Clear scanned card"
     }
 }

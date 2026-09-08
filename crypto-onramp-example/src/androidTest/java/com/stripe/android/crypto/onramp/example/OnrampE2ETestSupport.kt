@@ -20,7 +20,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
@@ -40,6 +39,10 @@ import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeR
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForExactlyOneNode
+import com.stripe.android.testing.waitForNode
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
@@ -201,7 +204,10 @@ internal class OnrampE2EPage(
     fun cancelKycVerification() {
         clickTag(KYC_SECTION_TAG)
         clickTag(VERIFY_KYC_BUTTON_TAG)
-        waitForNode(hasText(KYC_CONFIRMATION_TITLE))
+        composeRule.waitForExactlyOneNode(
+            matcher = hasText(KYC_CONFIRMATION_TITLE),
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+        )
         device.pressBack()
         waitForSnackbar("KYC Verification Cancelled")
     }
@@ -250,7 +256,10 @@ internal class OnrampE2EPage(
 
     fun confirmUserAttestation() {
         clickTag(USER_ATTESTATION_BUTTON_TAG)
-        waitForNode(hasText(USER_ATTESTATION_ACCEPT_TEXT))
+        composeRule.waitForExactlyOneNode(
+            matcher = hasText(USER_ATTESTATION_ACCEPT_TEXT),
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+        )
         clickTag(LINK_PRIMARY_BUTTON_TAG)
         waitForSnackbar("User Attestation Confirmed", timeoutMs = 30.seconds.inWholeMilliseconds)
     }
@@ -309,7 +318,10 @@ internal class OnrampE2EPage(
 
     fun cancelCardCollection() {
         clickTag(COLLECT_CARD_BUTTON_TAG)
-        waitForNode(hasContentDescription(LINK_CLOSE_DESCRIPTION))
+        composeRule.waitForExactlyOneNode(
+            matcher = hasContentDescription(LINK_CLOSE_DESCRIPTION),
+            timeoutMillis = defaultTimeout.inWholeMilliseconds,
+        )
         composeRule.onNode(hasContentDescription(LINK_CLOSE_DESCRIPTION)).performClick()
         waitForSnackbar("Payment selection cancelled")
     }
@@ -319,9 +331,11 @@ internal class OnrampE2EPage(
 
         val cvcMatcher = hasText("CVC").and(hasSetTextAction())
         if (waitForOptionalNode(cvcMatcher, timeoutMs = 5.seconds.inWholeMilliseconds)) {
-            composeRule.onNode(cvcMatcher)
-                .performScrollTo()
-                .performTextReplacement(TEST_CARD_CVC)
+            composeRule.replaceText(
+                matcher = cvcMatcher,
+                text = TEST_CARD_CVC,
+                scrollBehavior = ScrollBehavior.Required,
+            )
         }
 
         clickTag(LINK_PRIMARY_BUTTON_TAG)
@@ -336,9 +350,11 @@ internal class OnrampE2EPage(
 
         val postalCodeMatcher = hasText(CARD_POSTAL_CODE_LABEL).and(hasSetTextAction())
         if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 3.seconds.inWholeMilliseconds)) {
-            composeRule.onNode(postalCodeMatcher)
-                .performScrollTo()
-                .performTextReplacement(TEST_CARD_POSTAL_CODE)
+            composeRule.replaceText(
+                matcher = postalCodeMatcher,
+                text = TEST_CARD_POSTAL_CODE,
+                scrollBehavior = ScrollBehavior.Required,
+            )
         }
 
         hideKeyboard()
@@ -429,14 +445,10 @@ internal class OnrampE2EPage(
     }
 
     private fun waitForSnackbar(message: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(SNACKBAR_TEXT_TAG).and(hasText(message, substring = true)),
-            timeoutMillis = timeoutMs
+        composeRule.waitForExactlyOneNode(
+            matcher = hasTestTag(SNACKBAR_TEXT_TAG).and(hasText(message, substring = true)),
+            timeoutMillis = timeoutMs,
         )
-    }
-
-    private fun waitForNode(matcher: SemanticsMatcher, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
-        composeRule.waitUntilExactlyOneExists(matcher, timeoutMillis = timeoutMs)
     }
 
     private fun waitForTaggedText(
@@ -444,42 +456,48 @@ internal class OnrampE2EPage(
         text: String,
         timeoutMs: Long = defaultTimeout.inWholeMilliseconds,
     ) {
-        waitForNode(
-            hasTestTag(tag).and(hasText(text, substring = true, ignoreCase = true)),
-            timeoutMs = timeoutMs
+        composeRule.waitForExactlyOneNode(
+            matcher = hasTestTag(tag).and(hasText(text, substring = true, ignoreCase = true)),
+            timeoutMillis = timeoutMs,
         )
     }
 
     private fun clickText(text: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
         val matcher = hasText(text, substring = false, ignoreCase = true)
-        waitForNode(matcher, timeoutMs)
+        composeRule.waitForExactlyOneNode(matcher, timeoutMs)
         composeRule.onNode(matcher).performClick()
     }
 
     private fun replaceTag(tag: String, text: String) {
         waitForTag(tag)
-        val node = composeRule.onNodeWithTag(tag)
-        runCatching { node.performScrollTo() }
-        node.performTextReplacement(text)
-        composeRule.waitForIdle()
+        composeRule.replaceText(
+            matcher = hasTestTag(tag),
+            text = text,
+            scrollBehavior = ScrollBehavior.BestEffort,
+            settleAfterReplacement = true,
+        )
     }
 
     private fun replaceText(label: String, text: String) {
         val matcher = hasText(label).and(hasSetTextAction())
-        waitForNode(matcher)
-        composeRule.onNode(matcher)
-            .performScrollTo()
-            .performTextReplacement(text)
-        composeRule.waitForIdle()
+        composeRule.waitForExactlyOneNode(matcher, defaultTimeout.inWholeMilliseconds)
+        composeRule.replaceText(
+            matcher = matcher,
+            text = text,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = true,
+        )
     }
 
     private fun replaceContentDescription(description: String, text: String) {
         val matcher = hasContentDescription(description, substring = true).and(hasSetTextAction())
-        waitForNode(matcher)
-        composeRule.onNode(matcher)
-            .performScrollTo()
-            .performTextReplacement(text)
-        composeRule.waitForIdle()
+        composeRule.waitForExactlyOneNode(matcher, defaultTimeout.inWholeMilliseconds)
+        composeRule.replaceText(
+            matcher = matcher,
+            text = text,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterReplacement = true,
+        )
     }
 
     private fun assertEditableText(tag: String, text: String) {
@@ -510,19 +528,17 @@ internal class OnrampE2EPage(
     }
 
     private fun waitForEnabledTag(tag: String, timeoutMs: Long) {
-        composeRule.waitUntilExactlyOneExists(
+        composeRule.waitForExactlyOneNode(
             matcher = hasTestTag(tag).and(isEnabled()),
             timeoutMillis = timeoutMs,
         )
     }
 
     private fun waitForTag(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
-        composeRule.waitUntil(timeoutMs) {
-            composeRule.onAllNodes(hasTestTag(tag))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
-        }
-        composeRule.waitUntilExactlyOneExists(hasTestTag(tag), timeoutMillis = timeoutMs)
+        composeRule.waitForExactlyOneNode(
+            matcher = hasTestTag(tag),
+            timeoutMillis = timeoutMs,
+        )
     }
 
     private fun waitForOptionalNode(
@@ -530,11 +546,7 @@ internal class OnrampE2EPage(
         timeoutMs: Long = defaultTimeout.inWholeMilliseconds,
     ): Boolean {
         return runCatching {
-            composeRule.waitUntil(timeoutMs) {
-                composeRule.onAllNodes(matcher)
-                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                    .isNotEmpty()
-            }
+            composeRule.waitForNode(matcher, timeoutMs)
             true
         }.getOrElse { false }
     }

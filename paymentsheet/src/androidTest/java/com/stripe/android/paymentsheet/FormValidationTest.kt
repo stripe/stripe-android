@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotEnabled
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.times
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
@@ -24,6 +22,9 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForNode
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -135,31 +136,29 @@ internal class FormValidationTest(
     }
 
     private fun clickPrimaryButton() {
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()),
+            atLeastOneRootRequired = true,
+        )
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
+        val disabledOverlayMatcher = hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
+        composeTestRule.waitForNode(
+            matcher = disabledOverlayMatcher,
+            atLeastOneRootRequired = true,
+        )
 
-        composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = disabledOverlayMatcher,
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
         composeTestRule.waitForIdle()
     }
 
     private fun assertFieldErrorsAreShown() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodes(hasText("This field cannot be blank."))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasText("This field cannot be blank."),
+            atLeastOneRootRequired = true,
+        )
     }
 }

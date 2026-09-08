@@ -5,35 +5,34 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_EDIT_SAVED_CARD
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.hasTestMetadata
 
 internal class EmbeddedContentPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun clickOnLpm(code: String) {
         waitUntilVisible()
 
-        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun assertHasSelectedLpm(code: String) {
@@ -68,20 +67,27 @@ internal class EmbeddedContentPage(
     fun clickOnSavedPM(paymentMethodId: String) {
         waitUntilVisible()
 
-        composeTestRule.onNode(hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickViewMore() {
         waitUntilVisible()
 
-        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(TEST_TAG_VIEW_MORE),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickEdit() {
         waitUntilVisible()
 
-        composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(TEST_TAG_EDIT_SAVED_CARD),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 }

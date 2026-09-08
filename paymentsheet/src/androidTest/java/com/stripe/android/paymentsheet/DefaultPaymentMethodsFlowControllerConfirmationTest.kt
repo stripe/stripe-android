@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitForNode
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -127,22 +128,16 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
             composeTestRule.waitForIdle()
 
             if (paymentMethodType is PaymentMethodType.UsBankAccount) {
-                composeTestRule.waitUntil(
-                    timeoutMillis = 5000L
-                ) {
-                    composeTestRule.onAllNodes(
-                        hasTestTag(TEST_TAG_BILLING_DETAILS)
-                    ).fetchSemanticsNodes().isNotEmpty()
-                }
+                composeTestRule.waitForNode(
+                    matcher = hasTestTag(TEST_TAG_BILLING_DETAILS),
+                    atLeastOneRootRequired = true,
+                )
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
 
-                composeTestRule.waitUntil(
-                    timeoutMillis = 5000L
-                ) {
-                    composeTestRule.onAllNodes(
-                        hasTestTag(TEST_TAG_ACCOUNT_DETAILS)
-                    ).fetchSemanticsNodes().isNotEmpty()
-                }
+                composeTestRule.waitForNode(
+                    matcher = hasTestTag(TEST_TAG_ACCOUNT_DETAILS),
+                    atLeastOneRootRequired = true,
+                )
             } else {
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
             }

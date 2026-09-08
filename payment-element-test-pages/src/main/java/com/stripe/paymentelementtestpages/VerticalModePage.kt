@@ -3,13 +3,9 @@ package com.stripe.paymentelementtestpages
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
@@ -20,6 +16,11 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForDisplayedNode
+import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.waitForNode
 
 @SuppressWarnings("TooManyFunctions")
 class VerticalModePage(
@@ -32,27 +33,24 @@ class VerticalModePage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            atLeastOneRootRequired = true,
+        )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isEmpty()
-        }
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun clickOnNewLpm(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun assertLpmIsSelected(paymentMethodCode: PaymentMethodCode) {
@@ -80,17 +78,18 @@ class VerticalModePage(
     }
 
     fun assertHasSavedPaymentMethods() {
-        composeTestRule.waitUntil {
-            composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).isDisplayed()
-        }
+        composeTestRule.waitForDisplayedNode(
+            matcher = hasTestTag(TEST_TAG_SAVED_TEXT),
+        )
         composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertExists()
     }
 
     fun assertDoesNotHaveSavedPaymentMethods() {
-        val savedText = composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT)
-
-        composeTestRule.waitUntil { savedText.isNotDisplayed() }
-        savedText.assertDoesNotExist()
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(TEST_TAG_SAVED_TEXT),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertDoesNotExist()
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
@@ -122,42 +121,47 @@ class VerticalModePage(
     }
 
     fun clickSavedPaymentMethod(paymentMethodId: String) {
-        val savedPaymentMethod = composeTestRule
-            .onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+        val matcher = hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+        val savedPaymentMethod = composeTestRule.onNode(matcher)
 
-        composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
-        savedPaymentMethod.performClick()
+        composeTestRule.waitForDisplayedNode(matcher = matcher)
+        composeTestRule.clickNode(
+            node = savedPaymentMethod,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickViewMore() {
         waitUntilVisible()
-        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(TEST_TAG_VIEW_MORE),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickEdit() {
-        composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(TEST_TAG_EDIT_SAVED_CARD),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            atLeastOneRootRequired = true,
+        )
 
         val testTag = "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"
 
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
-            composeTestRule
-                .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(testTag),
+            atLeastOneRootRequired = true,
+        )
 
-        composeTestRule.onNode(hasTestTag(testTag))
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(testTag),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 }

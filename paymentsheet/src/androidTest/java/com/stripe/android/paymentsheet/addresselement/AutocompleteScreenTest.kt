@@ -4,8 +4,8 @@ import android.app.Application
 import android.text.SpannableString
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
@@ -13,6 +13,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
+import com.stripe.android.testing.waitForExactlyOneNode
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -53,11 +54,10 @@ class AutocompleteScreenTest {
             )
         )
         onQueryField().performTextInput("Some text")
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodesWithText("primaryText")
-                .fetchSemanticsNodes().size == 1
-        }
+        composeTestRule.waitForExactlyOneNode(
+            matcher = hasText("primaryText"),
+            atLeastOneRootRequired = true,
+        )
     }
 
     private fun setContent(

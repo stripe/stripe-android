@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitForNode
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -247,15 +248,12 @@ internal class GooglePayTest(
     }
 
     private fun waitUntilLoaded() {
-        composeTestRule.waitUntil(UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(
-                    hasTestTag(PAYMENT_SHEET_FORM_TEST_TAG)
-                        .or(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                )
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(PAYMENT_SHEET_FORM_TEST_TAG)
+                .or(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)),
+            timeoutMillis = UI_TIMEOUT,
+            atLeastOneRootRequired = false,
+        )
     }
 
     private fun intendingGooglePayToBeLaunched(result: GooglePayPaymentMethodLauncher.Result) {

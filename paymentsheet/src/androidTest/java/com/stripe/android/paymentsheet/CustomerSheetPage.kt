@@ -8,10 +8,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -20,70 +16,61 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
-import com.stripe.android.paymentsheet.utils.isPlaced
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.fillCardDetails
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
-import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class CustomerSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    fun waitForText(text: String, substring: Boolean = false) {
-        waitUntil(hasText(text, substring = substring))
-    }
-
-    fun waitUntilRemoved(text: String, substring: Boolean = false) {
-        waitForIdle()
-
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(hasText(text, substring).and(isPlaced()))
-                .fetchSemanticsNodes().isEmpty()
-        }
-    }
-
-    fun waitUntilMissing() {
-        composeTestRule.waitUntil(5000) {
-            composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes(
-                atLeastOneRootRequired = false
-            ).isEmpty()
-        }
-    }
-
     fun fillOutFullBillingAddress() {
-        replaceText("Address line 1", ADDRESS_LINE_ONE)
-        replaceText("Address line 2 (optional)", ADDRESS_LINE_TWO)
-        replaceText("City", CITY)
+        composeTestRule.replaceText("Address line 1", ADDRESS_LINE_ONE)
+        composeTestRule.replaceText("Address line 2 (optional)", ADDRESS_LINE_TWO)
+        composeTestRule.replaceText("City", CITY)
 
-        click(hasText("State"))
-        click(hasText(STATE_NAME))
+        composeTestRule.clickNode(
+            matcher = hasText("State"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText(STATE_NAME),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun fillOutContactInformation() {
-        replaceText("Email", EMAIL)
-        replaceText("Phone number", PHONE_NUMBER)
+        composeTestRule.replaceText("Email", EMAIL)
+        composeTestRule.replaceText("Phone number", PHONE_NUMBER)
     }
 
     fun fillOutName() {
-        replaceText("Name on card", NAME)
+        composeTestRule.replaceText("Name on card", NAME)
     }
 
     fun fillOutCardDetails(
         cardNumber: String = CARD_NUMBER,
     ) {
-        replaceText("Card number", cardNumber)
-        fillExpirationDate("$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
-        replaceText("CVC", CVC)
-        replaceText("ZIP Code", ZIP_CODE)
-    }
-
-    fun changeCardBrandChoice() {
-        clickDropdownMenu()
-        clickOnCartesBancaires()
+        composeTestRule.fillCardDetails(
+            cardNumber = cardNumber,
+            expirationDate = "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}",
+            cvc = CVC,
+            zipCode = ZIP_CODE,
+            textFieldScrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun selectCartesBancaire() {
-        waitForIdle()
-        click(hasContentDescription("Cartes Bancaires"))
+        composeTestRule.waitForNode(
+            matcher = hasContentDescription("Cartes Bancaires").and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = hasContentDescription("Cartes Bancaires"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun closeKeyboard() {
@@ -101,46 +88,82 @@ internal class CustomerSheetPage(
     fun clickEditButton() {
         val editButtonMatcher = hasTestTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG)
 
-        waitUntil(editButtonMatcher)
-        click(editButtonMatcher, canScroll = false)
+        composeTestRule.waitForNode(
+            matcher = editButtonMatcher.and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = editButtonMatcher,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickModifyButton(forEndsWith: String) {
         val deleteBadgeForSavedPmMatcher = hasTestTag(TEST_TAG_MODIFY_BADGE)
             .and(hasContentDescription(forEndsWith.readNumbersAsIndividualDigits(), substring = true))
 
-        waitUntil(deleteBadgeForSavedPmMatcher)
-        click(deleteBadgeForSavedPmMatcher)
+        composeTestRule.waitForNode(
+            matcher = deleteBadgeForSavedPmMatcher.and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = deleteBadgeForSavedPmMatcher,
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickDeleteButton() {
         val removeButtonMatch = hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
 
-        waitUntil(removeButtonMatch)
-        click(removeButtonMatch)
+        composeTestRule.waitForNode(
+            matcher = removeButtonMatch.and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = removeButtonMatch,
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickDialogRemoveButton() {
         val dialogRemoveButtonMatcher = hasTestTag(TEST_TAG_DIALOG_CONFIRM_BUTTON)
 
-        waitUntil(dialogRemoveButtonMatcher)
-        click(dialogRemoveButtonMatcher, canScroll = false)
+        composeTestRule.waitForNode(
+            matcher = dialogRemoveButtonMatcher.and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = dialogRemoveButtonMatcher,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun onSavedPaymentMethod(endsWith: String): SemanticsNodeInteraction {
         val savedPaymentMethodMatcher = getSavedPaymentMethodMatcher(endsWith = endsWith)
 
-        waitUntil(savedPaymentMethodMatcher)
+        composeTestRule.waitForNode(
+            matcher = savedPaymentMethodMatcher,
+            atLeastOneRootRequired = false,
+        )
         return composeTestRule.onNode(savedPaymentMethodMatcher)
     }
 
     fun clickSavedPaymentMethod(endsWith: String) {
         val savedPaymentMethodMatcher = getSavedPaymentMethodMatcher(endsWith = endsWith)
 
-        waitUntil(savedPaymentMethodMatcher)
-        click(savedPaymentMethodMatcher)
+        composeTestRule.waitForNode(
+            matcher = savedPaymentMethodMatcher.and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = savedPaymentMethodMatcher,
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
-        waitUntil(savedPaymentMethodMatcher.and(isSelected()))
+        composeTestRule.waitForNode(
+            matcher = savedPaymentMethodMatcher.and(isSelected()),
+            atLeastOneRootRequired = false,
+        )
     }
 
     private fun getSavedPaymentMethodMatcher(endsWith: String): SemanticsMatcher {
@@ -149,60 +172,15 @@ internal class CustomerSheetPage(
     }
 
     private fun clickPrimaryButton(tag: String) {
-        waitUntil(hasTestTag(tag).and(isEnabled()))
-        click(hasTestTag(tag))
-        waitForIdle()
-    }
-
-    private fun waitForIdle() {
-        Espresso.onIdle()
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(tag).and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.clickNode(
+            matcher = hasTestTag(tag),
+            scrollBehavior = ScrollBehavior.Required,
+        )
         composeTestRule.waitForIdle()
-    }
-
-    fun waitUntil(matcher: SemanticsMatcher) {
-        waitForIdle()
-
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule
-                .onAllNodes(matcher.and(isEnabled()))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
-    }
-
-    private fun click(matcher: SemanticsMatcher, canScroll: Boolean = true) {
-        val clickableNode = composeTestRule.onNode(matcher)
-
-        if (canScroll) {
-            clickableNode.performScrollTo()
-        }
-
-        clickableNode.performClick()
-    }
-
-    private fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
-        waitForText(label, substring = isLabelSubstring)
-
-        composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
-            .performScrollTo()
-            .performTextReplacement(text)
-    }
-
-    private fun fillExpirationDate(text: String) {
-        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
-            .performTextReplacement(text)
-    }
-
-    private fun clickDropdownMenu() {
-        waitForIdle()
-
-        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
-            .performScrollTo()
-            .performClick()
-    }
-
-    private fun clickOnCartesBancaires() {
-        waitForText("Select card brand (optional)")
-        click(hasText("Cartes Bancaires"))
     }
 
     companion object {

@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.waitForText
 import org.hamcrest.Matchers.allOf
 import org.json.JSONObject
 import org.junit.Rule
@@ -60,10 +61,11 @@ internal class PaymentSheetNextActionTest(
         retrievedStatus = "requires_action",
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        page.waitForText(
-            "We are unable to authenticate your payment method. " +
+        testRules.compose.waitForText(
+            text = "We are unable to authenticate your payment method. " +
                 "Please choose a different payment method and try again.",
             substring = true,
+            timeoutMillis = 10_000,
         )
         testContext.markTestSucceeded()
     }

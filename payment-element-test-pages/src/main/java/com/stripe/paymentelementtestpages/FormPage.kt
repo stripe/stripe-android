@@ -10,16 +10,20 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performTextReplacement
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.fillCardDetails
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.waitForNode
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FormPage(
-    private val composeTestRule: ComposeTestRule,
+open class FormPage(
+    protected val composeTestRule: ComposeTestRule,
 ) {
-    val cardNumber: SemanticsNodeInteraction = nodeWithLabel("Card number")
+    val cardNumber: SemanticsNodeInteraction = composeTestRule.onNode(hasText("Card number"))
     val expirationDate: SemanticsNodeInteraction = composeTestRule.onNode(
         hasContentDescription(value = "Expiration date", substring = true)
     )
@@ -27,41 +31,38 @@ class FormPage(
     val headerIcon: SemanticsNodeInteraction = composeTestRule.onNodeWithTag(TEST_TAG_ICON_FROM_RES)
 
     fun fillOutCardDetails(fillOutCardNumber: Boolean = true) {
+        fillOutCardDetails(
+            newCardNumber = DEFAULT_CARD_NUMBER,
+            fillOutCardNumber = fillOutCardNumber,
+        )
+    }
+
+    fun fillOutCardDetails(
+        newCardNumber: String,
+        fillOutCardNumber: Boolean = true,
+    ) {
         waitUntilVisible()
-        if (fillOutCardNumber) {
-            replaceText(cardNumber, "4242424242424242")
-        }
-        fillExpirationDate("12/34")
-        replaceText("CVC", "123")
-        replaceText("ZIP Code", "12345")
-    }
-
-    private fun replaceText(label: String, text: String) {
-        composeTestRule.onNode(hasText(label))
-            .performTextReplacement(text)
-    }
-
-    private fun fillExpirationDate(text: String) {
-        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
-            .performTextReplacement(text)
-    }
-
-    private fun replaceText(node: SemanticsNodeInteraction, text: String) {
-        node
-            .performTextReplacement(text)
-    }
-
-    private fun nodeWithLabel(label: String): SemanticsNodeInteraction {
-        return composeTestRule.onNode(hasText(label))
+        composeTestRule.fillCardDetails(
+            cardNumber = newCardNumber.takeIf { fillOutCardNumber },
+            expirationDate = "12/34",
+            cvc = "123",
+            zipCode = "12345",
+            textFieldScrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
+            atLeastOneRootRequired = false,
+        )
+    }
+
+    fun waitUntilMissing() {
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun assertIsNotDisplayed() {
@@ -76,15 +77,25 @@ class FormPage(
 
     fun fillCardNumber(number: String) {
         waitUntilVisible()
-        replaceText(cardNumber, number)
+        composeTestRule.replaceText(cardNumber, number)
     }
 
     fun fillOutName() {
-        replaceText("Full name", "Jane Doe")
+        composeTestRule.replaceText(
+            matcher = hasText("Full name"),
+            text = "Jane Doe",
+        )
     }
 
     fun fillOutEmail() {
-        replaceText("Email", "janedoe@example.com")
+        composeTestRule.replaceText(
+            matcher = hasText("Email"),
+            text = "janedoe@example.com",
+        )
+    }
+
+    private companion object {
+        const val DEFAULT_CARD_NUMBER = "4242424242424242"
     }
 }
 

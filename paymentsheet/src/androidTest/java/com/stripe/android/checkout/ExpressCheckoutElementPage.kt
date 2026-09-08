@@ -4,9 +4,11 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.performClick
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForNode
 
 internal class ExpressCheckoutElementPage(
     private val composeTestRule: ComposeTestRule,
@@ -27,15 +29,15 @@ internal class ExpressCheckoutElementPage(
 
     private fun clickButton(testTag: String, name: String) {
         val button = hasTestTag(testTag) and isEnabled() and hasClickAction()
-        composeTestRule.waitUntil(
+        composeTestRule.waitForNode(
+            matcher = button,
+            atLeastOneRootRequired = false,
             conditionDescription = "$name button is enabled and clickable",
-            timeoutMillis = 5_000,
-        ) {
-            composeTestRule.onAllNodes(button)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        )
 
-        composeTestRule.onNode(button).performClick()
+        composeTestRule.clickNode(
+            matcher = button,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 }

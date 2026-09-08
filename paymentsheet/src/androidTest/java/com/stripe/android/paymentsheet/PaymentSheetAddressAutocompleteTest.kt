@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.text.SpannableString
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
@@ -16,6 +18,10 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.model.Address
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForContentDescription
+import com.stripe.android.testing.waitForText
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import org.junit.Rule
@@ -68,8 +74,14 @@ internal class PaymentSheetAddressAutocompleteTest(
 
         clickAndFillOutCard()
 
-        paymentSheetPage.waitForText(text = "Address")
-        paymentSheetPage.clickViewWithText(text = "Address")
+        composeTestRule.waitForText(
+            text = "Address",
+            timeoutMillis = 10_000,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText("Address"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
         fillOutAutocompletePage()
 
@@ -117,8 +129,14 @@ internal class PaymentSheetAddressAutocompleteTest(
 
         clickAndFillOutCard()
 
-        paymentSheetPage.waitForContentDescription(description = "Search")
-        paymentSheetPage.clickViewWithContentDescription(description = "Search")
+        composeTestRule.waitForContentDescription(
+            description = "Search",
+            timeoutMillis = 10_000,
+        )
+        composeTestRule.clickNode(
+            matcher = hasContentDescription("Search"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
         fillOutAutocompletePage()
 
@@ -203,8 +221,14 @@ internal class PaymentSheetAddressAutocompleteTest(
     private fun fillOutAutocompletePage() {
         paymentSheetPage.clickAndFillField(label = "Address", text = "Main Street")
 
-        paymentSheetPage.waitForText(SELECTING_ADDRESS_SECONDARY_TEXT)
-        paymentSheetPage.clickViewWithText(SELECTING_ADDRESS_SECONDARY_TEXT)
+        composeTestRule.waitForText(
+            text = SELECTING_ADDRESS_SECONDARY_TEXT,
+            timeoutMillis = 10_000,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText(SELECTING_ADDRESS_SECONDARY_TEXT),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     private companion object {

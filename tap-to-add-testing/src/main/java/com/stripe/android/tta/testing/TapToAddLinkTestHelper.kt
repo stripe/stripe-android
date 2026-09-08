@@ -2,17 +2,17 @@ package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHasClickAction
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextInput
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.inputText
+import com.stripe.android.testing.waitForNode
 
 class TapToAddLinkTestHelper(
     private val composeTestRule: ComposeTestRule,
@@ -59,20 +59,25 @@ class TapToAddLinkTestHelper(
     }
 
     fun checkbox(): SemanticsNodeInteraction {
-        return waitForText("Save my info for faster checkout with Link")
+        val matcher = hasText("Save my info for faster checkout with Link")
+        composeTestRule.waitForNode(
+            matcher = matcher,
+            atLeastOneRootRequired = false,
+        )
+        return composeTestRule.onNode(matcher)
             .assertHasClickAction()
     }
 
     fun fillEmail() {
-        return waitForText("Email").inputText(EMAIL)
+        fillText(label = "Email", text = EMAIL)
     }
 
     fun fillPhone() {
-        return waitForText("Phone number").inputText(PHONE_INPUT)
+        fillText(label = "Phone number", text = PHONE_INPUT)
     }
 
     fun fillName() {
-        return waitForText("Full name").inputText("John Doe")
+        fillText(label = "Full name", text = "John Doe")
     }
 
     fun input(): Input {
@@ -83,24 +88,18 @@ class TapToAddLinkTestHelper(
         )
     }
 
-    private fun waitForText(text: String): SemanticsNodeInteraction {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasText(text))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
-
-        return composeTestRule.onNode(hasText(text))
-    }
-
-    private fun SemanticsNodeInteraction.inputText(text: String) {
-        assertExists()
-            .performScrollTo()
-            .assertIsDisplayed()
-            .performTextInput(text)
-
-        composeTestRule.waitForIdle()
+    private fun fillText(label: String, text: String) {
+        val matcher = hasText(label)
+        composeTestRule.waitForNode(
+            matcher = matcher,
+            atLeastOneRootRequired = false,
+        )
+        composeTestRule.inputText(
+            matcher = matcher,
+            text = text,
+            scrollBehavior = ScrollBehavior.Required,
+            settleAfterInput = true,
+        )
     }
 
     data class Input(
@@ -110,8 +109,6 @@ class TapToAddLinkTestHelper(
     )
 
     private companion object {
-        const val DEFAULT_UI_TIMEOUT = 5000L
-
         const val EMAIL = "email@email.com"
         const val PHONE_INPUT = "2113526421"
         const val PHONE = "+1$PHONE_INPUT"

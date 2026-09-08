@@ -3,13 +3,12 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
@@ -30,6 +29,10 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import okhttp3.mockwebserver.MockResponse
@@ -368,22 +371,21 @@ internal class CheckoutPaymentElementTest {
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
         }
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            testRules.compose.onAllNodes(hasTestTag(layoutTag))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-        }
+        testRules.compose.waitForNode(
+            matcher = hasTestTag(layoutTag),
+            atLeastOneRootRequired = false,
+        )
     }
 
     private fun clickPaymentOptionsPrimaryButton() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            testRules.compose.onAllNodes(
-                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
-            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
-        testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-            .performScrollTo()
-            .performClick()
+        testRules.compose.waitForNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
+            atLeastOneRootRequired = false,
+        )
+        testRules.compose.clickNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     private fun enqueueTaxUpdate(responseFactory: (MockResponse) -> Unit) {
@@ -405,11 +407,26 @@ internal class CheckoutPaymentElementTest {
 
     private fun fillOutBillingDetails() {
         billingDetailsPage.country.assertTextContains("United States")
-        billingDetailsPage.line1.performTextReplacement(BILLING_ADDRESS_LINE_ONE)
-        billingDetailsPage.city.performTextReplacement(BILLING_ADDRESS_CITY)
-        billingDetailsPage.state.performScrollTo().performClick()
-        testRules.compose.onNodeWithText("California").performClick()
-        billingDetailsPage.zipCode.performTextReplacement(BILLING_ADDRESS_ZIP)
+        testRules.compose.replaceText(
+            node = billingDetailsPage.line1,
+            text = BILLING_ADDRESS_LINE_ONE,
+        )
+        testRules.compose.replaceText(
+            node = billingDetailsPage.city,
+            text = BILLING_ADDRESS_CITY,
+        )
+        testRules.compose.clickNode(
+            node = billingDetailsPage.state,
+            scrollBehavior = ScrollBehavior.Required,
+        )
+        testRules.compose.clickNode(
+            matcher = hasText("California"),
+            scrollBehavior = ScrollBehavior.Never,
+        )
+        testRules.compose.replaceText(
+            node = billingDetailsPage.zipCode,
+            text = BILLING_ADDRESS_ZIP,
+        )
     }
 
     private fun assertBillingDetailsArePopulated() {

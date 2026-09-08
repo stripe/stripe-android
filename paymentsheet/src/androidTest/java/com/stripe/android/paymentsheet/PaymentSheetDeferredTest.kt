@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runMultiplePaymentSheetInstancesTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.waitForText
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
@@ -515,7 +516,10 @@ internal class PaymentSheetDeferredTest(
 
         page.clickPrimaryButton()
 
-        page.waitForText("We don't accept visa")
+        composeTestRule.waitForText(
+            text = "We don't accept visa",
+            timeoutMillis = 10_000,
+        )
         testContext.markTestSucceeded()
     }
 
