@@ -476,7 +476,7 @@ fun rememberGooglePayPaymentMethodLauncher(
                 currentReadyCallback.onReady(it)
             },
             cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter,
+            cardFundingFilter = DefaultCardFundingFilter
         )
     }
 }
