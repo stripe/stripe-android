@@ -65,13 +65,28 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        val params = createConfirmParams(
-            intent = intent,
+        return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = confirmationOption.createParams,
-            savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-            shipping = shippingValues.toCheckoutSessionShipping(),
+            options = requestOptions,
+        ).fold(
+            onSuccess = { paymentMethod ->
+                val params = createConfirmParams(
+                    intent = intent,
+                    paymentMethod = paymentMethod,
+                    savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
+                    shipping = shippingValues.toCheckoutSessionShipping(),
+                    passiveCaptchaToken = "test", // confirmationOption.confirmationChallengeState.hCaptchaToken
+                )
+                confirmCheckoutSession(params)
+            },
+            onFailure = { error ->
+                ConfirmationDefinition.Action.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
         )
-        return confirmCheckoutSession(params)
     }
 
     override suspend fun intercept(
@@ -99,6 +114,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             // confirmation and otherwise retain the controller shipping.
             shipping = confirmationOption.shippingInformation.toCheckoutSessionShipping()
                 ?: shippingValues.toCheckoutSessionShipping(),
+            passiveCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken
         )
         return confirmCheckoutSession(params)
     }
@@ -136,6 +152,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
+        passiveCaptchaToken: String?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
@@ -145,13 +162,15 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
             paymentMethodCreateParams = null,
+            passiveCaptchaToken = passiveCaptchaToken
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
             shipping = shipping,
-            paymentMethodCreateParams = null
+            paymentMethodCreateParams = null,
+            passiveCaptchaToken = passiveCaptchaToken
         )
     }
 
@@ -160,6 +179,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethodCreateParams: PaymentMethodCreateParams,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
+        passiveCaptchaToken: String?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = null,
@@ -169,13 +189,15 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
             paymentMethodCreateParams = paymentMethodCreateParams,
+            passiveCaptchaToken = passiveCaptchaToken
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = null,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
             shipping = shipping,
-            paymentMethodCreateParams = paymentMethodCreateParams
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            passiveCaptchaToken = passiveCaptchaToken
         )
     }
 

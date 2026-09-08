@@ -19,6 +19,7 @@ internal data class ConfirmCheckoutSessionParams(
     private val expectedAmount: Long? = null,
     private val savePaymentMethod: Boolean? = null,
     private val shipping: Shipping?,
+    private val passiveCaptchaToken: String? = null,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -38,6 +39,9 @@ internal data class ConfirmCheckoutSessionParams(
             }
             if (shipping != null) {
                 put("shipping", shipping.toParamMap())
+            }
+            if (passiveCaptchaToken != null) {
+                put("passive_captcha_token", passiveCaptchaToken)
             }
         }
     }
