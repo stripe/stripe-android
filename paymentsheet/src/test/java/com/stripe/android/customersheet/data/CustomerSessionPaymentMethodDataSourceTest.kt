@@ -269,9 +269,6 @@ class CustomerSessionPaymentMethodDataSourceTest {
             errorReporter = errorReporter,
             apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", "acct_123") },
             workContext = coroutineContext,
-            apiConfigProvider = {
-                ApiConfiguration.State("pk_123", null)
-            }
         )
     }
 }

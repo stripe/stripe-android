@@ -2339,6 +2339,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
+            apiConfiguration = apiConfiguration,
         )
     }
 

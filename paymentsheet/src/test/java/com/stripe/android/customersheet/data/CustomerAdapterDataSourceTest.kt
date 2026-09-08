@@ -723,7 +723,7 @@ class CustomerAdapterDataSourceTest {
             elementsSessionRepository = elementsSessionRepository,
             errorReporter = errorReporter,
             apiConfigurationProvider = {
-                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+                ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
             },
             workContext = coroutineContext,
         )

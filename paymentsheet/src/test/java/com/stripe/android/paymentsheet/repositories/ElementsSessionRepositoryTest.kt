@@ -57,7 +57,7 @@ internal class ElementsSessionRepositoryTest {
                 customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = null,
                 countryOverride = null,
-                apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+                apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
             ).getOrThrow()
         }
 
@@ -91,7 +91,10 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
-                    apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = "pk_test_123",
+                        stripeAccountId = "acct_123",
+                    ),
                 ).getOrThrow()
             }
 
@@ -120,7 +123,10 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
-                    apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = "pk_test_123",
+                        stripeAccountId = "acct_123",
+                    ),
                 ).getOrThrow()
             }
 
@@ -150,7 +156,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -190,7 +196,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -212,7 +218,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -234,7 +240,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -269,7 +275,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -302,7 +308,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -337,7 +343,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -369,7 +375,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -417,7 +423,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -458,7 +464,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -509,7 +515,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -550,7 +556,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -598,7 +604,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -635,7 +641,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -664,7 +670,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
             linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
         )
 
@@ -689,7 +695,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -712,7 +718,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -740,7 +746,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -774,7 +780,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -805,7 +811,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -829,7 +835,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -853,7 +859,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -877,7 +883,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -906,7 +912,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -931,7 +937,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -955,7 +961,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "uk_12345", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "uk_12345", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -982,7 +988,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "uk_12345", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "uk_12345", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1015,7 +1021,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "uk_12345", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "uk_12345", stripeAccountId = "acct_123"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())

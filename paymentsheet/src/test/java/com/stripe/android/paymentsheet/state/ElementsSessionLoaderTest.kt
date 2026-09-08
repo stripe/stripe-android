@@ -21,7 +21,7 @@ internal class ElementsSessionLoaderTest {
             ),
             configuration = DEFAULT_CONFIG,
             savedPaymentMethodSelection = null,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         assertThat(result.stripeIntent)
@@ -38,7 +38,7 @@ internal class ElementsSessionLoaderTest {
             ),
             configuration = DEFAULT_CONFIG,
             savedPaymentMethodSelection = savedSelection,
-            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
         )
 
         assertThat(elementsSessionRepository.lastParams?.savedPaymentMethodSelectionId)

@@ -186,7 +186,7 @@ class LinkFormElementTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
         )
     }
 

@@ -82,7 +82,7 @@ internal interface CustomerSheetTestHelper {
         savedPaymentSelection: PaymentSelection? = null,
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
             publishableKey = "pk_test_123",
-            stripeAccountId = null,
+            stripeAccountId = "acct_123",
         ),
         apiConfiguration: ApiConfiguration.State = ApiConfiguration.State(
             publishableKey = paymentConfiguration.publishableKey,

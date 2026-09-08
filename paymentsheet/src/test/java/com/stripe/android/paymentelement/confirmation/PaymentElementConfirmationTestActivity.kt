@@ -211,7 +211,7 @@ internal interface PaymentElementConfirmationTestModule {
         @Provides
         fun providesPaymentConfiguration(): PaymentConfiguration = PaymentConfiguration(
             publishableKey = "pk_123",
-            stripeAccountId = null,
+            stripeAccountId = "acct_123",
         )
 
         @Provides

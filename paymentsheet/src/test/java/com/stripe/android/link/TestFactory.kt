@@ -307,7 +307,7 @@ internal object TestFactory {
         ),
         cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         linkBrand = LinkBrand.Link,
-        apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+        apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(

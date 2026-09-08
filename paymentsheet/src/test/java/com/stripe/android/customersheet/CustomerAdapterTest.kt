@@ -804,7 +804,7 @@ class CustomerAdapterTest {
         apiConfigurationProvider: Provider<ApiConfiguration.State> = Provider {
             ApiConfiguration.State(
                 publishableKey = "pk_123",
-                stripeAccountId = null,
+                stripeAccountId = "acct_123",
             )
         },
     ): StripeCustomerAdapter {

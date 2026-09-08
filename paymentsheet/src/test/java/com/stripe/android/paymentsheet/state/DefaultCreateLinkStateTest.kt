@@ -207,12 +207,6 @@ internal class DefaultCreateLinkStateTest {
         retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             FakeCustomerRepository(),
             FakeDurationProvider(),
-            {
-                ApiConfiguration.State(
-                    publishableKey = "pk_test_123",
-                    stripeAccountId = "acct_123",
-                )
-            },
         ),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
@@ -314,7 +308,7 @@ internal class DefaultCreateLinkStateTest {
 
         val DEFAULT_API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = "pk_test_123",
-            stripeAccountId = null,
+            stripeAccountId = "acct_123",
         )
     }
 }

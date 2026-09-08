@@ -91,7 +91,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                         application = extras.requireApplication(),
                         apiConfiguration = ApiConfiguration.State(
                             publishableKey = args.publishableKey,
-                            stripeAccountId = null,
+                            stripeAccountId = "acct_123",
                         ),
                         allowsManualConfirmation = args.allowsManualConfirmation,
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,

@@ -29,7 +29,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `fetchPromotionsAsync calls repository`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         val request = fakeRepository.calls.awaitItem()
@@ -43,7 +43,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `getPromotionIfAvailableForCode returns promotion if available and in treatment`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -60,7 +60,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `getPromotionIfAvailableForCode returns null if not available`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         val metadata = getMetadata("treatment")
@@ -76,7 +76,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `reportPromotionDisplayed fires event with true when promotion available`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -90,7 +90,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `reportPromotionDisplayed fires event with false when promotion not available`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         val metadata = getMetadata("treatment")
@@ -103,7 +103,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `reportPromotionDisplayed does not fire event when not in treatment`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -116,7 +116,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `reportPromotionDisplayed does not fire event for unsupported PM`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -129,7 +129,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `getPromotionIfAvailableForCode does not return promotion if variant is control`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -141,7 +141,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `getPromotionProvider returns null for control`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -153,7 +153,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `getPromotionProvider returns null for unsupported PMs`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -165,7 +165,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     fun `returns promotion provider for treatment group supported pm`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+            ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
         )
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()

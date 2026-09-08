@@ -164,7 +164,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     apiConfigurationProvider = {
                         ApiConfiguration.State(
                             publishableKey = "pk",
-                            stripeAccountId = null,
+                            stripeAccountId = "acct_123",
                         )
                     },
                 )
