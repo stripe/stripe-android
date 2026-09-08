@@ -1734,7 +1734,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
+                loginState = LinkState.LoginState.LoggedIn,
                 signupMode = null,
             ),
             linkConfiguration = PaymentSheet.LinkConfiguration(
@@ -1746,7 +1746,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `shouldShowLinkButton returns false when linkState is present and display is WalletButtonHidden`() {
+    fun `shouldShowLinkButton returns false for logged-out user when display is WalletButtonHidden`() {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
@@ -1759,6 +1759,38 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for user needing verification when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for logged-in user when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
     }
 
     @Test
