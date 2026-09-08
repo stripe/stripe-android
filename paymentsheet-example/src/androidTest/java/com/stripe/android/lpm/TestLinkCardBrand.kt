@@ -23,7 +23,6 @@ import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
 internal class TestLinkCardBrand : BasePlaygroundTest() {
@@ -35,10 +34,8 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
 
     @Test
     fun testLinkCardBrandSuccess() {
-        val email = "email_${UUID.randomUUID()}@email.com"
-
         testDriver.confirmLinkBankPayment(
-            testParameters = makeLinkTestParameters(email),
+            testParameters = makeLinkTestParameters(),
             afterAuthorization = { _, _ ->
                 rules.compose.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                     rules.compose
@@ -52,10 +49,8 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
 
     @Test
     fun testLinkCardBrandCancelAllowsUserToContinue() {
-        val email = "email_${UUID.randomUUID()}@email.com"
-
         testDriver.confirmLinkBankPayment(
-            testParameters = makeLinkTestParameters(email).copy(
+            testParameters = makeLinkTestParameters().copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = { selectors, _ ->
@@ -64,14 +59,14 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
         )
     }
 
-    private fun makeLinkTestParameters(email: String): TestParameters {
+    private fun makeLinkTestParameters(): TestParameters {
         return TestParameters.create(
             paymentMethodCode = "link",
         ) { settings ->
             settings[MerchantSettingsDefinition] = Merchant.US
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
-            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
             settings[SupportedPaymentMethodsSettingsDefinition] = "card"
         }

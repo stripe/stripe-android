@@ -9,6 +9,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -1179,7 +1180,11 @@ internal class PlaygroundTestDriver(
     }
 
     private fun awaitActivityClass(className: String) {
-        awaitActivity(description = className) { it?.javaClass?.name == className }
+        awaitActivityClass(className, ACTIVITY_TRANSITION_TIMEOUT)
+    }
+
+    private fun awaitActivityClass(className: String, timeout: Duration) {
+        awaitActivity(description = className, timeout = timeout) { it?.javaClass?.name == className }
     }
 
     /**
@@ -1538,7 +1543,8 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        Espresso.pressBack()
+        clickButtonWithContentDescription("Close icon")
+        confirmInstantDebitsExitIfRequired()
     }
 
     private fun executeUsBankAccountLiteFlow() {
@@ -1626,7 +1632,10 @@ internal class PlaygroundTestDriver(
             .performTextReplacement(INSTANT_DEBITS_TEST_PHONE_NUMBER)
         clickButtonWithText("Continue with Link")
 
-        waitUntilTag("loaded_picker_title")
+        waitUntilTag(
+            tag = "loaded_picker_title",
+            timeout = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT,
+        )
         composeTestRule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasTestTag(PAYMENT_SUCCESS_INSTITUTION_ID))
         clickButtonWithTag(PAYMENT_SUCCESS_INSTITUTION_ID)
@@ -1639,9 +1648,13 @@ internal class PlaygroundTestDriver(
             labelMatchesExactly = true,
             device = device,
         ).click()
-        clickButtonWithTag("connect_account_button", composeCanDetach = true)
+        awaitActivityClass(
+            className = FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY,
+            timeout = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT,
+        )
+        clickButtonWithTag("connect_account_button")
 
-        clickButtonWithTag("done_button", composeCanDetach = true)
+        clickButtonWithTag("done_button")
     }
 
     private fun doUSBankAccountAuthorization(authAction: AuthorizeAction?) {
@@ -1693,9 +1706,13 @@ internal class PlaygroundTestDriver(
     }
 
     private fun waitUntilTag(tag: String) {
+        waitUntilTag(tag, FINANCIAL_CONNECTIONS_UI_TIMEOUT)
+    }
+
+    private fun waitUntilTag(tag: String, timeout: Duration) {
         composeTestRule.waitUntil(
             conditionDescription = "node with test tag '$tag' to appear",
-            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+            timeoutMillis = timeout.inWholeMilliseconds,
         ) {
             composeTestRule
                 .onAllNodesWithTag(tag)
@@ -1740,6 +1757,40 @@ internal class PlaygroundTestDriver(
         }
 
         composeTestRule.onNode(matcher).performClick()
+    }
+
+    private fun clickButtonWithContentDescription(contentDescription: String) {
+        val matcher = hasContentDescription(contentDescription).and(isEnabled()).and(hasClickAction())
+        composeTestRule.waitUntil(
+            conditionDescription = "enabled button with content description '$contentDescription' to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
+            composeTestRule
+                .onAllNodes(matcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(matcher).performClick()
+    }
+
+    private fun confirmInstantDebitsExitIfRequired() {
+        val exitMatcher = hasText("Yes, exit").and(isEnabled()).and(hasClickAction())
+        var confirmationRequired = false
+        composeTestRule.waitUntil(
+            conditionDescription = "Financial Connections to close or show its exit confirmation",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
+            confirmationRequired = composeTestRule
+                .onAllNodes(exitMatcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+            confirmationRequired || currentActivity?.javaClass?.name !in FINANCIAL_CONNECTIONS_ACTIVITIES
+        }
+
+        if (confirmationRequired) {
+            composeTestRule.onNode(exitMatcher).performClick()
+        }
     }
 
     internal fun setup(testParameters: TestParameters) {
@@ -1857,8 +1908,14 @@ internal class PlaygroundTestDriver(
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+        const val FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY =
+            "com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
         const val FINANCIAL_CONNECTIONS_LITE_ACTIVITY =
             "com.stripe.android.financialconnections.lite.FinancialConnectionsSheetLiteActivity"
+        val FINANCIAL_CONNECTIONS_ACTIVITIES = setOf(
+            FINANCIAL_CONNECTIONS_ACTIVITY,
+            FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY,
+        )
     }
 }
 
