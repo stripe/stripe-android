@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.18.0 - 2026-09-08
 
 ### PaymentSheet
 * [ADDED] Added support for SeQura.
