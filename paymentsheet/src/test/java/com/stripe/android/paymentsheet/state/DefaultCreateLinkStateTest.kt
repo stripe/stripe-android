@@ -5,6 +5,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -201,6 +202,12 @@ internal class DefaultCreateLinkStateTest {
         retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
             FakeCustomerRepository(),
             FakeDurationProvider(),
+            {
+                ApiConfiguration.State(
+                    publishableKey = "pk_test_123",
+                    stripeAccountId = "acct_123",
+                )
+            },
         ),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(

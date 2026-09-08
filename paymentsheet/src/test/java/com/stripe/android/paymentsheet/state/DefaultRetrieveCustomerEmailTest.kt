@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -94,6 +95,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         val retrieveEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
             FakeDurationProvider(),
+            { ApiConfiguration.State("pk_test_123", "acct_123") },
         )
 
         val result = retrieveEmail(
@@ -127,6 +129,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         override suspend fun retrieveCustomer(
             customerId: String,
             ephemeralKeySecret: String,
+            stripeAccountId: String?,
         ) = null.also {
             retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
         }
