@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.stripe.android.testing
 
 import androidx.compose.ui.test.SemanticsMatcher

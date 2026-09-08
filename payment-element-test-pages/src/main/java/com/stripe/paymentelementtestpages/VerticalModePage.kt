@@ -18,8 +18,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 import com.stripe.android.testing.ScrollBehavior
 import com.stripe.android.testing.clickNode
-import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForDisplayedNode
+import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 
 @SuppressWarnings("TooManyFunctions")
