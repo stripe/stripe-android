@@ -161,7 +161,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
         config,
         readyCallback,
         DefaultCardBrandFilter,
-        DefaultCardFundingFilter,
+        DefaultCardFundingFilter
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
