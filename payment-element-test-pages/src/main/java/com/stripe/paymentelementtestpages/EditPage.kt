@@ -4,16 +4,17 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SCREEN_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -44,8 +45,10 @@ class EditPage(
     }
 
     fun setCardBrandWithSelector(cardBrand: String) {
-        composeTestRule.onNodeWithContentDescription(cardBrand)
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasContentDescription(cardBrand),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun assertInSelectorButDisabled(cardBrand: String) {
@@ -65,8 +68,10 @@ class EditPage(
     }
 
     fun update(waitUntilComplete: Boolean = true) {
-        composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Never,
+        )
         if (waitUntilComplete) {
             composeTestRule.waitForNoNodes(
                 matcher = hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(
@@ -82,8 +87,14 @@ class EditPage(
     }
 
     fun clickRemove() {
-        onRemoveButton().performClick()
-        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
+        composeTestRule.clickNode(
+            node = onRemoveButton(),
+            scrollBehavior = ScrollBehavior.Never,
+        )
+        composeTestRule.clickNode(
+            matcher = hasTestTag(TEST_TAG_DIALOG_CONFIRM_BUTTON),
+            scrollBehavior = ScrollBehavior.Never,
+        )
         composeTestRule.waitForNoNodes(
             matcher = hasTestTag(REMOVE_BUTTON_LOADING),
             atLeastOneRootRequired = true,
@@ -97,6 +108,9 @@ class EditPage(
     }
 
     fun clickSetAsDefaultCheckbox() {
-        onSetAsDefaultCheckbox().performClick()
+        composeTestRule.clickNode(
+            node = onSetAsDefaultCheckbox(),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 }

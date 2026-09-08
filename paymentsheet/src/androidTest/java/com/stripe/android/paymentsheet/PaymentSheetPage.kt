@@ -14,13 +14,9 @@ import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
@@ -36,22 +32,26 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
-import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.fillCardDetails
+import com.stripe.android.testing.inputText
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForExactlyOneNode
-import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
+import com.stripe.android.testing.waitForText
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.ui.core.elements.SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
-import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class PaymentSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitForCardForm() {
-        waitForText("Card number")
+        composeTestRule.waitForText(
+            text = "Card number",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
     }
 
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
@@ -61,13 +61,13 @@ internal class PaymentSheetPage(
     fun fillOutCardDetailsWithCardNumber(cardNumber: String, fillOutZipCode: Boolean = true) {
         waitForCardForm()
 
-        composeTestRule.replaceText("Card number", cardNumber)
-        composeTestRule.fillExpirationDate("12/34")
-        composeTestRule.replaceText("CVC", "123")
-
-        if (fillOutZipCode) {
-            composeTestRule.replaceText("ZIP Code", "12345")
-        }
+        composeTestRule.fillCardDetails(
+            cardNumber = cardNumber,
+            expirationDate = "12/34",
+            cvc = "123",
+            zipCode = "12345".takeIf { fillOutZipCode },
+            textFieldScrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun fillOutBillingCollectionDetails(
@@ -78,57 +78,79 @@ internal class PaymentSheetPage(
         city: String = "South San Francisco",
         zipCode: String = "12345"
     ) {
-        waitForText("Full name")
+        composeTestRule.waitForText(
+            text = "Full name",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("Full name", name)
 
-        waitForText("Email")
+        composeTestRule.waitForText(
+            text = "Email",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("Email", email)
 
-        waitForText("Phone number")
+        composeTestRule.waitForText(
+            text = "Phone number",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("Phone number", phone)
 
-        waitForText("Address line 1")
+        composeTestRule.waitForText(
+            text = "Address line 1",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("Address line 1", addressLineOne)
 
-        waitForText("City")
+        composeTestRule.waitForText(
+            text = "City",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("City", city)
 
-        waitForText("State")
-        clickViewWithText("State")
+        composeTestRule.waitForText(
+            text = "State",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText("State"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
-        waitForText("California")
-        clickViewWithText("California")
+        composeTestRule.waitForText(
+            text = "California",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText("California"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
-        waitForText("ZIP Code")
+        composeTestRule.waitForText(
+            text = "ZIP Code",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("ZIP Code", zipCode)
     }
 
     fun clearCard() {
-        waitForText("4242 4242 4242 4242")
+        composeTestRule.waitForText(
+            text = "4242 4242 4242 4242",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
 
         composeTestRule.replaceText("4242 4242 4242 4242", "")
     }
 
-    fun fillCard() {
-        waitForText("Card number")
-        composeTestRule.replaceText("Card number", "4242424242424242")
-    }
-
-    fun fillOutLink() {
-        waitForText("Save my info for faster checkout with Link")
-        clickViewWithText("Save my info for faster checkout with Link")
-    }
-
-    fun fillOutFieldWithLabel(label: String, text: String) {
-        waitForText(label)
-        composeTestRule.replaceText(label, text)
-    }
-
     fun clickAndFillField(label: String, text: String) {
-        waitForText(label)
-        composeTestRule.onNode(hasText(label))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.waitForText(
+            text = label,
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText(label),
+            scrollBehavior = ScrollBehavior.Required,
+        )
         composeTestRule.waitForIdle()
         composeTestRule.replaceText(
             matcher = hasText(label),
@@ -145,7 +167,10 @@ internal class PaymentSheetPage(
             matcher = savedCardTagMatcher,
             atLeastOneRootRequired = false,
         )
-        composeTestRule.onNode(savedCardTagMatcher).performClick()
+        composeTestRule.clickNode(
+            matcher = savedCardTagMatcher,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickSavedCardEditBadge(last4: String) {
@@ -155,80 +180,113 @@ internal class PaymentSheetPage(
             matcher = badgeTagMatcher,
             atLeastOneRootRequired = false,
         )
-        composeTestRule.onNode(badgeTagMatcher).performClick()
+        composeTestRule.clickNode(
+            matcher = badgeTagMatcher,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickEditButton() {
-        waitForText("EDIT")
-        composeTestRule
-            .onNodeWithText("EDIT")
-            .performClick()
+        composeTestRule.waitForText(
+            text = "EDIT",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText("EDIT"),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickDoneButton() {
-        waitForText("DONE")
-        composeTestRule
-            .onNodeWithText("DONE")
-            .performClick()
+        composeTestRule.waitForText(
+            text = "DONE",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText("DONE"),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickOnSaveForFutureUsage() {
-        waitForTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
-        clickViewWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG),
+            atLeastOneRootRequired = true,
+        )
+        composeTestRule.clickNode(
+            matcher = hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickOnLinkCheckbox() {
-        waitForText("Save my info for faster checkout with Link")
-        clickViewWithText("Save my info for faster checkout with Link")
+        composeTestRule.waitForText(
+            text = "Save my info for faster checkout with Link",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText("Save my info for faster checkout with Link"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun fillOutLinkEmail(optionalLabel: Boolean = false) {
         val label = if (optionalLabel) "Email (optional)" else "Email"
 
-        waitForText(label)
+        composeTestRule.waitForText(
+            text = label,
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText(label, "email@email.com")
     }
 
     fun selectPhoneNumberCountry(country: String) {
-        waitForText("Phone number")
-        composeTestRule.onNode(hasTestTag("DropDown:tiny")).performClick()
-        composeTestRule.onNode(hasText(country, substring = true)).performClick()
+        composeTestRule.waitForText(
+            text = "Phone number",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
+        composeTestRule.clickNode(
+            matcher = hasTestTag("DropDown:tiny"),
+            scrollBehavior = ScrollBehavior.Never,
+        )
+        composeTestRule.clickNode(
+            matcher = hasText(country, substring = true),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun fillOutLinkPhone(phoneNumber: String = "+12113526421") {
-        waitForText("Phone number", true)
+        composeTestRule.waitForText(
+            text = "Phone number",
+            substring = true,
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("Phone number", phoneNumber, substring = true)
     }
 
     fun fillOutLinkName() {
-        waitForText("Full name")
+        composeTestRule.waitForText(
+            text = "Full name",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
         composeTestRule.replaceText("Full name", "John Doe")
     }
 
-    fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
-        waitForText("Card number")
-
-        composeTestRule.replaceText("Card number", "4000002500001001")
-        composeTestRule.fillExpirationDate("12/34")
-        composeTestRule.replaceText("CVC", "123")
-
-        clickDropdownMenu()
-        waitForText("Select card brand (optional)")
-        clickViewWithText("Cartes Bancaires")
-
-        if (fillOutZipCode) {
-            composeTestRule.replaceText("ZIP Code", "12345")
-        }
-    }
-
     fun fillOutCardDetailsWithCardBrandChoiceSelector(fillOutZipCode: Boolean = true) {
-        waitForText("Card number")
+        waitForCardForm()
 
-        composeTestRule.replaceText("Card number", "4000002500001001")
-        composeTestRule.fillExpirationDate("12/34")
-        composeTestRule.replaceText("CVC", "123")
+        composeTestRule.fillCardDetails(
+            cardNumber = "4000002500001001",
+            expirationDate = "12/34",
+            cvc = "123",
+            zipCode = null,
+            textFieldScrollBehavior = ScrollBehavior.Required,
+        )
 
-        clickViewWithContentDescription("Cartes Bancaires")
+        composeTestRule.clickNode(
+            matcher = hasContentDescription("Cartes Bancaires"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
         if (fillOutZipCode) {
             composeTestRule.replaceText("ZIP Code", "12345")
@@ -241,9 +299,10 @@ internal class PaymentSheetPage(
             atLeastOneRootRequired = true,
         )
 
-        composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Required,
+        )
 
         composeTestRule.waitForIdle()
     }
@@ -273,69 +332,33 @@ internal class PaymentSheetPage(
     }
 
     fun fillCvcRecollection(cvc: String) {
-        waitForText("Confirm your CVC")
-        composeTestRule
-            .onNodeWithText("CVC")
-            .performTextInput(cvc)
-    }
-
-    fun clickViewWithText(text: String) {
-        composeTestRule.onNode(hasText(text))
-            .performScrollTo()
-            .performClick()
-    }
-
-    fun clickViewWithTag(testTag: String) {
-        composeTestRule.onNode(hasTestTag(testTag))
-            .performScrollTo()
-            .performClick()
-    }
-
-    fun clickViewWithContentDescription(description: String) {
-        composeTestRule.onNode(hasContentDescription(description))
-            .performScrollTo()
-            .performClick()
-    }
-
-    fun waitForTag(testTag: String) {
-        composeTestRule.waitForNode(
-            matcher = hasTestTag(testTag),
-            atLeastOneRootRequired = true,
+        composeTestRule.waitForText(
+            text = "Confirm your CVC",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
         )
-    }
-
-    fun waitForText(text: String, substring: Boolean = false) {
-        composeTestRule.waitForNode(
-            matcher = hasText(text, substring = substring),
-            timeoutMillis = 10_000,
-        )
-    }
-
-    fun waitForContentDescription(description: String) {
-        composeTestRule.waitForNode(
-            matcher = hasContentDescription(description),
-            timeoutMillis = 10_000,
-            atLeastOneRootRequired = false,
+        composeTestRule.inputText(
+            matcher = hasText("CVC"),
+            text = cvc,
+            scrollBehavior = ScrollBehavior.Never,
         )
     }
 
     fun assertNoText(text: String, substring: Boolean = false) {
         composeTestRule
-            .onAllNodes(hasText(text, substring = substring))
-            .fetchSemanticsNodes().isEmpty()
+            .onNode(hasText(text, substring = substring))
+            .assertDoesNotExist()
     }
 
     fun addPaymentMethod() {
-        waitForText("+ Add")
+        composeTestRule.waitForText(
+            text = "+ Add",
+            timeoutMillis = PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS,
+        )
 
-        composeTestRule.onNode(hasTestTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"))
-            .performClick()
-    }
-
-    private fun clickDropdownMenu() {
-        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun checkSaveForFuture() {
@@ -343,9 +366,10 @@ internal class PaymentSheetPage(
             matcher = hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG).and(isEnabled()),
             atLeastOneRootRequired = false,
         )
-        composeTestRule.onNode(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Required,
+        )
         composeTestRule.waitForIdle()
     }
 
@@ -354,16 +378,16 @@ internal class PaymentSheetPage(
             matcher = hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled()),
             atLeastOneRootRequired = true,
         )
-        composeTestRule.onNode(hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Required,
+        )
         composeTestRule.waitForIdle()
     }
 
     fun assertNoSetAsDefaultCheckbox() {
-        composeTestRule.onAllNodesWithTag(
-            SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
-        ).fetchSemanticsNodes().isEmpty()
+        composeTestRule.onNodeWithTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG)
+            .assertDoesNotExist()
     }
 
     fun assertSetAsDefaultCheckboxNotChecked() {
@@ -380,11 +404,6 @@ internal class PaymentSheetPage(
             matcher = hasTestTag(testTag).and(isToggleable()).and(isOn()),
             atLeastOneRootRequired = true,
         )
-    }
-
-    fun assertNoSaveForFutureCheckbox() {
-        composeTestRule.onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
-            .assertDoesNotExist()
     }
 
     fun assertSaveForFutureCheckboxNotChecked() {
@@ -410,13 +429,6 @@ internal class PaymentSheetPage(
         )
     }
 
-    fun waitUntilMissing() {
-        composeTestRule.waitForNoNodes(
-            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
-            atLeastOneRootRequired = false,
-        )
-    }
-
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
         composeTestRule.waitForIdle()
         waitUntilVisible()
@@ -427,9 +439,10 @@ internal class PaymentSheetPage(
                 atLeastOneRootRequired = true,
             )
 
-            composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
-                .performScrollTo()
-                .performClick()
+            composeTestRule.clickNode(
+                matcher = hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"),
+                scrollBehavior = ScrollBehavior.Required,
+            )
         } else {
             composeTestRule.waitForExactlyOneNode(
                 matcher = hasTestTag(FORM_ELEMENT_TEST_TAG),
@@ -449,20 +462,6 @@ internal class PaymentSheetPage(
         }
 
         composeTestRule.waitForIdle()
-    }
-
-    fun assertLayout(isVerticalMode: Boolean) {
-        val testTagForLayout = if (isVerticalMode) {
-            TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
-        } else {
-            TEST_TAG_LIST
-        }
-
-        composeTestRule.waitForNode(
-            matcher = hasTestTag(testTagForLayout),
-            atLeastOneRootRequired = true,
-        )
-        composeTestRule.onNodeWithTag(testTagForLayout).assertExists()
     }
 
     fun assertIsOnFormPage() {
@@ -514,5 +513,9 @@ internal class PaymentSheetPage(
                 .and(isSelected()),
             atLeastOneRootRequired = true,
         )
+    }
+
+    private companion object {
+        const val PAYMENT_SHEET_TEXT_WAIT_TIMEOUT_MILLIS = 10_000L
     }
 }

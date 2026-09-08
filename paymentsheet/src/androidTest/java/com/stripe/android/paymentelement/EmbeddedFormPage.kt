@@ -13,7 +13,6 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
@@ -21,6 +20,8 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.FormPage
@@ -72,9 +73,10 @@ internal class EmbeddedFormPage(
         waitUntilVisible()
         waitUntilPrimaryButtonIsEnabled()
 
-        primaryButton()
-            .performScrollTo()
-            .performClick()
+        composeTestRule.clickNode(
+            node = primaryButton(),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun assertPrimaryButtonIsEnabled() {

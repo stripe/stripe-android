@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.fillExpirationDate
 import com.stripe.android.testing.replaceText
+import com.stripe.android.testing.waitForText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -222,7 +223,10 @@ internal class PaymentSheetBillingConfigurationTest(
         composeTestRule.fillExpirationDate("12/34")
 
         // Check that line 1 was not reset to default value
-        page.waitForText("123 Main Road")
+        composeTestRule.waitForText(
+            text = "123 Main Road",
+            timeoutMillis = 10_000,
+        )
 
         testContext.markTestSucceeded()
     }

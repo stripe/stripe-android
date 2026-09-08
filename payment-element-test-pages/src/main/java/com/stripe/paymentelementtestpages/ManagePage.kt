@@ -4,15 +4,14 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
 
@@ -41,24 +40,32 @@ class ManagePage(
     }
 
     fun selectPaymentMethod(paymentMethodId: String) {
-        composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-        ).performScrollTo().performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickEdit() {
-        composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickDone() {
-        composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickEdit(paymentMethodId: String) {
-        composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_$paymentMethodId"),
+        composeTestRule.clickNode(
+            matcher = hasTestTag("${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_$paymentMethodId"),
+            scrollBehavior = ScrollBehavior.Required,
             useUnmergedTree = true,
-        ).performScrollTo().performClick()
+        )
     }
 
     fun waitUntilGone(paymentMethodId: String) {

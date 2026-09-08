@@ -9,15 +9,15 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
-import com.stripe.android.testing.isPlaced
-import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
+import com.stripe.android.testing.waitForNoPlacedNodes
 import com.stripe.android.testing.waitForNode
 
 class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
@@ -29,8 +29,8 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     }
 
     fun waitForSavedPaymentMethodToBeRemoved(last4: String) {
-        composeTestRule.waitForNoNodes(
-            matcher = savedPaymentMethodMatcher(last4 = last4).and(isPlaced()),
+        composeTestRule.waitForNoPlacedNodes(
+            matcher = savedPaymentMethodMatcher(last4 = last4),
             atLeastOneRootRequired = true,
         )
     }
@@ -50,7 +50,10 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     }
 
     fun clickRemoveButton() {
-        composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun clickNewCardButton() {
@@ -65,7 +68,11 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
             atLeastOneRootRequired = true,
         )
 
-        composeTestRule.onNodeWithTag(testTag, true).performClick()
+        composeTestRule.clickNode(
+            matcher = hasTestTag(testTag),
+            scrollBehavior = ScrollBehavior.Never,
+            useUnmergedTree = true,
+        )
     }
 
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {

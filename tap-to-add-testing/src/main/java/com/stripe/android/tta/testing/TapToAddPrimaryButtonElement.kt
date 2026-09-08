@@ -1,14 +1,10 @@
 package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.waitForExactlyOneNode
 
@@ -37,11 +33,4 @@ class TapToAddPrimaryButtonElement(
         composeTestRule.onNode(hasTestTag(PRIMARY_BUTTON_TEST_TAG))
             .assertDoesNotExist()
     }
-}
-
-internal fun SemanticsNodeInteraction.click() {
-    assertIsEnabled()
-        .performScrollTo()
-        .assertIsDisplayed()
-        .performClick()
 }

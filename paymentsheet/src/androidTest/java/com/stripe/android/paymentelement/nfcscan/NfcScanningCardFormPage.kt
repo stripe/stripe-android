@@ -7,8 +7,9 @@ import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import com.stripe.android.common.taptoadd.TAP_TO_BUTTON_UI_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForExactlyOneNode
 import com.stripe.android.testing.waitForNode
@@ -22,9 +23,12 @@ internal class NfcScanningCardFormPage(
             atLeastOneRootRequired = false,
         )
 
-        composeTestRule.onNode(hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG))
-            .assertIsEnabled()
-            .performClick()
+        val tapToAddButton = composeTestRule.onNode(hasTestTag(TAP_TO_BUTTON_UI_TEST_TAG))
+        tapToAddButton.assertIsEnabled()
+        composeTestRule.clickNode(
+            node = tapToAddButton,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 
     fun fillRemainingCardDetails(
@@ -58,7 +62,6 @@ internal class NfcScanningCardFormPage(
         composeTestRule.waitForNode(
             matcher = hasText("CVC").and(isFocused()),
             atLeastOneRootRequired = false,
-            waitForIdleBeforeEachCheck = true,
         )
     }
 

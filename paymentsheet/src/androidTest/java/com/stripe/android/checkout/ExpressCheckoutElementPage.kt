@@ -4,9 +4,10 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.performClick
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.waitForNode
 
 internal class ExpressCheckoutElementPage(
@@ -34,6 +35,9 @@ internal class ExpressCheckoutElementPage(
             conditionDescription = "$name button is enabled and clickable",
         )
 
-        composeTestRule.onNode(button).performClick()
+        composeTestRule.clickNode(
+            matcher = button,
+            scrollBehavior = ScrollBehavior.Never,
+        )
     }
 }

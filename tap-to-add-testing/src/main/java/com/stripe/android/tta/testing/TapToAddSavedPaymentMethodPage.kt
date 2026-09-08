@@ -1,8 +1,10 @@
 package com.stripe.android.tta.testing
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickEnabledNode
 import com.stripe.android.testing.waitForExactlyOneNode
 import com.stripe.android.testing.waitForNoNodes
 
@@ -19,12 +21,14 @@ class TapToAddSavedPaymentMethodPage(
         composeTestRule.waitForNoNodes(
             matcher = hasText(TITLE),
             atLeastOneRootRequired = false,
-            waitForIdleBeforeEachCheck = true,
         )
     }
 
     fun fillLink() {
-        linkHelper.checkbox().click()
+        composeTestRule.clickEnabledNode(
+            node = linkHelper.checkbox(),
+            scrollBehavior = ScrollBehavior.Required,
+        )
         linkHelper.fillEmail()
         linkHelper.fillPhone()
     }
@@ -37,7 +41,7 @@ class TapToAddSavedPaymentMethodPage(
             atLeastOneRootRequired = false,
         )
 
-        composeTestRule.onNode(matcher).isDisplayed()
+        composeTestRule.onNode(matcher).assertIsDisplayed()
     }
 
     private companion object {

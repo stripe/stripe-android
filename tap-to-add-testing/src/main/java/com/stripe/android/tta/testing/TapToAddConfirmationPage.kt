@@ -4,11 +4,15 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextInput
 import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_LAYOUT_TEST_TAG
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickEnabledNode
+import com.stripe.android.testing.inputText
+import com.stripe.android.testing.waitForNoNodes
 
 class TapToAddConfirmationPage(
     private val composeTestRule: ComposeTestRule,
@@ -36,21 +40,33 @@ class TapToAddConfirmationPage(
     }
 
     fun fillCvc(cvc: String) {
-        retrieveCvcField()
-            .performScrollTo()
-            .performTextInput(cvc)
+        composeTestRule.inputText(
+            node = retrieveCvcField(),
+            text = cvc,
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun clickPrimaryButton() {
-        primaryButtonElement.assert(null).click()
+        composeTestRule.clickEnabledNode(
+            node = primaryButtonElement.assert(null),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing(TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON)
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON)
+                .or(hasTestTag(TAP_TO_ADD_LAYOUT_TEST_TAG)),
+            atLeastOneRootRequired = false,
+        )
     }
 
     fun clickCloseButton() {
-        composeTestRule.retrieveCloseButton().click()
+        composeTestRule.clickEnabledNode(
+            node = composeTestRule.retrieveCloseButton(),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     private fun retrieveCvcField(): SemanticsNodeInteraction {

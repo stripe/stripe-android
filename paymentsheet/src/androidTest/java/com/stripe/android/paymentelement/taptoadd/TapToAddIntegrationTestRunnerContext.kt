@@ -2,9 +2,6 @@ package com.stripe.android.paymentelement.taptoadd
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
@@ -15,6 +12,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
@@ -147,9 +146,10 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         }
 
         override fun clickPrimaryButton() {
-            composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-                .performScrollTo()
-                .performClick()
+            composeTestRule.clickNode(
+                matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+                scrollBehavior = ScrollBehavior.Required,
+            )
 
             composeTestRule.waitForNoNodes(
                 matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),

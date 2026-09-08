@@ -13,7 +13,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
-import com.stripe.android.testing.fillExpirationDate
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.fillCardDetails
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNoNodes
 import com.stripe.android.testing.waitForNode
@@ -41,17 +42,12 @@ open class FormPage(
         fillOutCardNumber: Boolean = true,
     ) {
         waitUntilVisible()
-        if (fillOutCardNumber) {
-            composeTestRule.replaceText(cardNumber, newCardNumber)
-        }
-        composeTestRule.fillExpirationDate("12/34")
-        composeTestRule.replaceText(
-            matcher = hasText("CVC"),
-            text = "123",
-        )
-        composeTestRule.replaceText(
-            matcher = hasText("ZIP Code"),
-            text = "12345",
+        composeTestRule.fillCardDetails(
+            cardNumber = newCardNumber.takeIf { fillOutCardNumber },
+            expirationDate = "12/34",
+            cvc = "123",
+            zipCode = "12345",
+            textFieldScrollBehavior = ScrollBehavior.Never,
         )
     }
 

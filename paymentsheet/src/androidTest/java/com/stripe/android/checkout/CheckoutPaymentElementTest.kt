@@ -3,9 +3,9 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.testing.ScrollBehavior
+import com.stripe.android.testing.clickNode
 import com.stripe.android.testing.replaceText
 import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementtestpages.BillingDetailsPage
@@ -380,9 +382,10 @@ internal class CheckoutPaymentElementTest {
             matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()),
             atLeastOneRootRequired = false,
         )
-        testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-            .performScrollTo()
-            .performClick()
+        testRules.compose.clickNode(
+            matcher = hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG),
+            scrollBehavior = ScrollBehavior.Required,
+        )
     }
 
     private fun enqueueTaxUpdate(responseFactory: (MockResponse) -> Unit) {
@@ -412,8 +415,14 @@ internal class CheckoutPaymentElementTest {
             node = billingDetailsPage.city,
             text = BILLING_ADDRESS_CITY,
         )
-        billingDetailsPage.state.performScrollTo().performClick()
-        testRules.compose.onNodeWithText("California").performClick()
+        testRules.compose.clickNode(
+            node = billingDetailsPage.state,
+            scrollBehavior = ScrollBehavior.Required,
+        )
+        testRules.compose.clickNode(
+            matcher = hasText("California"),
+            scrollBehavior = ScrollBehavior.Never,
+        )
         testRules.compose.replaceText(
             node = billingDetailsPage.zipCode,
             text = BILLING_ADDRESS_ZIP,

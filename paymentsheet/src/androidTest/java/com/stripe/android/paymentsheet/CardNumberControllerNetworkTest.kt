@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.waitForText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -116,7 +117,10 @@ internal class CardNumberControllerNetworkTest(
         page.fillOutCardDetails()
 
         // Assert that the warning message is shown because credit cards are not allowed
-        page.waitForText("Only debit cards are accepted")
+        composeTestRule.waitForText(
+            text = "Only debit cards are accepted",
+            timeoutMillis = 10_000,
+        )
 
         networkRule.enqueue(
             method("POST"),

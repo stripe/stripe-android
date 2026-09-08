@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.waitForNoNodes
+import com.stripe.android.testing.waitForNode
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
@@ -239,14 +241,20 @@ internal class CustomerSessionCustomerSheetTest {
         enqueueSetDefaultPaymentMethodRequest()
 
         page.clickConfirmButton()
-        page.waitUntilMissing()
+        composeTestRule.waitForNoNodes(
+            matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG),
+            atLeastOneRootRequired = false,
+        )
     }
 
     private fun assertOnlySavedCardIsDisplayed() {
         val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText("4242", substring = true))
 
-        page.waitUntil(savedPaymentMethodMatcher)
+        composeTestRule.waitForNode(
+            matcher = savedPaymentMethodMatcher,
+            atLeastOneRootRequired = false,
+        )
         assertThat(
             composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes().size
         ).isEqualTo(1)

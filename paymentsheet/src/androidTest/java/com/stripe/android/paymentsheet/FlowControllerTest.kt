@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.waitForNode
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
@@ -1004,20 +1005,16 @@ internal class FlowControllerTest(
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+            atLeastOneRootRequired = true,
+        )
         composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
 
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeTestRule.waitForNode(
+            matcher = hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
+            atLeastOneRootRequired = true,
+        )
         composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_pm_67890").performClick()
 
         testContext.configureCallbackTurbine.expectNoEvents()
