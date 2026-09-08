@@ -13,9 +13,9 @@ import kotlinx.coroutines.launch
 
 internal class StripeDownloadListener(
     private val context: Context,
-    private val stripeDownloadManager: StripeDownloadManager,
-    private val stripeToastManager: StripeToastManager,
     private val coroutineScope: CoroutineScope,
+    private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
+    private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(),
 ) : DownloadListener {
 
     override fun onDownloadStart(

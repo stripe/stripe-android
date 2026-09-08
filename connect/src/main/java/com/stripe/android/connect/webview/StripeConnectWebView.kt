@@ -120,8 +120,6 @@ internal class StripeConnectWebView private constructor(
         setDownloadListener(
             StripeDownloadListener(
                 context = context,
-                stripeDownloadManager = StripeDownloadManagerImpl(context),
-                stripeToastManager = StripeToastManagerImpl(),
                 coroutineScope = coroutineScope,
             )
         )
