@@ -70,13 +70,13 @@ private fun ExitModalContent(
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
             style = typography.headingLarge,
-            color = colors.textDefault,
+            color = colors.textPrimary,
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = description.toText().toString(),
             style = typography.bodyMedium,
-            color = colors.textDefault,
+            color = colors.textTertiary,
         )
         Spacer(modifier = Modifier.size(24.dp))
         FooterButtons(
@@ -103,8 +103,8 @@ private fun ExitModalContent(
 
 @Composable
 @Preview(name = "Link DS 3.0")
-internal fun ExitModalLinkDs3Preview() {
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+internal fun ExitModalLinkPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         Surface(color = colors.background) {
             ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),

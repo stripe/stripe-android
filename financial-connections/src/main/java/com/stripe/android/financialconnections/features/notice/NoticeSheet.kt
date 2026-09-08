@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -100,6 +101,19 @@ internal fun NoticeSheetPreview(
     FinancialConnectionsPreview {
         NoticeSheetContent(
             content = content,
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+            onViewEffectLaunched = {},
+        )
+    }
+}
+
+@Composable
+@Preview(name = "Link legal", group = "Notice Sheet")
+internal fun NoticeSheetLinkLegalPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        NoticeSheetContent(
+            content = NoticeSheetPreviewParameterProvider().legal(),
             onClickableTextClick = {},
             onConfirmModalClick = {},
             onViewEffectLaunched = {},

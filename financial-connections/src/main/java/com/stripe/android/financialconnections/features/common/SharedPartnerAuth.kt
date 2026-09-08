@@ -59,10 +59,12 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -261,7 +263,8 @@ private fun PrePaneContent(
             item {
                 PrepaneHeader(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    content = content
+                    content = content,
+                    showInModal = showInModal,
                 )
             }
             items(content.body.entries) { bodyItem ->
@@ -273,7 +276,8 @@ private fun PrePaneContent(
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = onClickableTextClick,
                         defaultStyle = typography.bodyMedium.copy(
-                            color = colors.textDefault,
+                            color = colors.textTertiary,
+                            textAlign = linkTextAlign(showInModal),
                         ),
                     )
                 }
@@ -421,33 +425,56 @@ private fun PrepaneFooter(
 @Composable
 private fun PrepaneHeader(
     content: OauthPrepane,
-    modifier: Modifier = Modifier
+    showInModal: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val title = remember(content.title) { TextResource.Text(fromHtml(content.title)) }
     val subtitle = remember(content.subtitle) { TextResource.Text(fromHtml(content.subtitle)) }
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalAlignment = if (shouldCenterLinkContent(showInModal)) {
+            Alignment.CenterHorizontally
+        } else {
+            Alignment.Start
+        },
     ) {
         content.institutionIcon?.default?.let {
             InstitutionIcon(institutionIcon = it)
+            Spacer(modifier = Modifier.size(16.dp))
         }
         AnnotatedText(
             text = title,
             onClickableTextClick = { },
-            defaultStyle = typography.headingLarge.copy(
-                color = colors.textDefault
+            defaultStyle = (if (showInModal) typography.headingLarge else typography.headingXLarge).copy(
+                color = colors.textPrimary,
+                textAlign = linkTextAlign(showInModal),
             ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(
+            modifier = Modifier.size(
+                if (FinancialConnectionsTheme.theme.isLink) 4.dp else 16.dp
+            )
         )
         AnnotatedText(
             text = subtitle,
             onClickableTextClick = { },
             defaultStyle = typography.bodyMedium.copy(
-                color = colors.textDefault
+                color = colors.textTertiary,
+                textAlign = linkTextAlign(showInModal),
             ),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
+
+@Composable
+private fun shouldCenterLinkContent(showInModal: Boolean): Boolean =
+    FinancialConnectionsTheme.theme.isLink && showInModal.not()
+
+@Composable
+private fun linkTextAlign(showInModal: Boolean): TextAlign =
+    if (shouldCenterLinkContent(showInModal)) TextAlign.Center else TextAlign.Start
 
 @Composable
 private fun GifWebView(
@@ -536,11 +563,11 @@ internal fun PartnerAuthDrawerPreview(
     name = "Link DS 3.0"
 )
 @Composable
-internal fun PartnerAuthDrawerLinkDs3Preview(
+internal fun PartnerAuthDrawerLinkPreview(
     @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
     state: SharedPartnerAuthState
 ) {
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         Box(modifier = Modifier.background(colors.background)) {
             SharedPartnerAuthContent(
                 state = state,

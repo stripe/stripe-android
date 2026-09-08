@@ -4,8 +4,11 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.R
 import android.view.HapticFeedbackConstants.CONFIRM
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -47,6 +51,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
@@ -62,7 +67,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 
 private val DefaultSpinnerHeight = 24.dp
 
@@ -72,11 +77,11 @@ private val DefaultSpinnerHeight = 24.dp
  * [Modifier.shadow]'s ambient/spot colors are only honored on API 28+; below that the platform
  * falls back to a neutral shadow.
  */
-private val LinkDs3ShadowColor = Color(0xFF30313D)
-private val LinkDs3ShadowElevation = 2.dp
+private val LinkShadowColor = Color(0xFF30313D)
+private val LinkShadowElevation = 2.dp
 
 /** Cosmetic sheen drawn over the primary button background in Link DS 3.0. */
-private val LinkDs3SheenBrush = Brush.verticalGradient(
+private val LinkSheenBrush = Brush.verticalGradient(
     listOf(Color.White.copy(alpha = 0.08f), Color.Transparent)
 )
 
@@ -93,9 +98,11 @@ internal fun FinancialConnectionsButton(
     val view = LocalView.current
     val density = LocalDensity.current
     val colors = FinancialConnectionsTheme.colors
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val isLink = FinancialConnectionsTheme.theme.isLink
 
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     var spinnerHeight by remember { mutableStateOf(DefaultSpinnerHeight) }
 
     val loadingIndicatorAlpha by animateFloatAsState(
@@ -114,7 +121,12 @@ internal fun FinancialConnectionsButton(
     }
 
     val shape = type.shape()
-    val showSheen = isLinkDs3 && type == Primary
+    val showSheen = isLink && type == Primary
+    val pressedScale by animateFloatAsState(
+        targetValue = if (isLink && type != Primary && isPressed) 0.97f else 1f,
+        animationSpec = tween(durationMillis = if (isPressed) 100 else 200),
+        label = "LinkSecondaryButtonPressedScale",
+    )
 
     CompositionLocalProvider(LocalRippleConfiguration provides type.rippleConfiguration()) {
         Button(
@@ -126,7 +138,10 @@ internal fun FinancialConnectionsButton(
                     }
                 }
             },
-            modifier = modifier.then(type.shadow(shape)),
+            modifier = modifier
+                .then(if (pressedScale < 1f) Modifier.scale(pressedScale) else Modifier)
+                .then(type.shadow(shape)),
+            interactionSource = interactionSource,
             elevation = type.elevation(),
             enabled = enabled,
             shape = shape,
@@ -152,7 +167,7 @@ internal fun FinancialConnectionsButton(
                             Spacer(
                                 modifier = Modifier
                                     .matchParentSize()
-                                    .background(brush = LinkDs3SheenBrush, shape = shape)
+                                    .background(brush = LinkSheenBrush, shape = shape)
                             )
                         }
 
@@ -185,7 +200,7 @@ internal fun FinancialConnectionsButton(
 @Composable
 private fun Type.rippleConfiguration(): RippleConfiguration? {
     // Link DS 3.0 secondary buttons have no pressed highlight at all.
-    if (FinancialConnectionsTheme.theme.isLinkDs3 && this != Primary) {
+    if (FinancialConnectionsTheme.theme.isLink && this != Primary) {
         return null
     }
     return RippleConfiguration(
@@ -239,7 +254,7 @@ internal object FinancialConnectionsButton {
             override fun rippleColor(): Color = Brand400
 
             @Composable
-            override fun shape(): Shape = if (FinancialConnectionsTheme.theme.isLinkDs3) {
+            override fun shape(): Shape = if (FinancialConnectionsTheme.theme.isLink) {
                 // A percentage rather than `height / 2` keeps the pill correct if the label wraps
                 // or the user scales text up.
                 RoundedCornerShape(percent = 50)
@@ -249,7 +264,7 @@ internal object FinancialConnectionsButton {
 
             @Composable
             override fun elevation(): ButtonElevation =
-                if (FinancialConnectionsTheme.theme.isLinkDs3) {
+                if (FinancialConnectionsTheme.theme.isLink) {
                     // DS 3.0 draws its own shadow in [shadow] so it can control the color.
                     ButtonDefaults.elevation(
                         defaultElevation = 0.dp,
@@ -264,12 +279,12 @@ internal object FinancialConnectionsButton {
 
             @Composable
             override fun shadow(shape: Shape): Modifier =
-                if (FinancialConnectionsTheme.theme.isLinkDs3) {
+                if (FinancialConnectionsTheme.theme.isLink) {
                     Modifier.shadow(
-                        elevation = LinkDs3ShadowElevation,
+                        elevation = LinkShadowElevation,
                         shape = shape,
-                        ambientColor = LinkDs3ShadowColor,
-                        spotColor = LinkDs3ShadowColor,
+                        ambientColor = LinkShadowColor,
+                        spotColor = LinkShadowColor,
                     )
                 } else {
                     Modifier
@@ -280,7 +295,7 @@ internal object FinancialConnectionsButton {
             @Composable
             override fun buttonColors(): ButtonColors {
                 // DS 3.0 secondary buttons have no fill at all.
-                val background = if (FinancialConnectionsTheme.theme.isLinkDs3) {
+                val background = if (FinancialConnectionsTheme.theme.isLink) {
                     Color.Transparent
                 } else {
                     colors.backgroundSecondary
@@ -329,7 +344,7 @@ internal object FinancialConnectionsButton {
 
             @Composable
             override fun border(): BorderStroke = BorderStroke(
-                width = 0.5.dp,
+                width = Dp.Hairline,
                 color = colors.border,
             )
 
@@ -353,7 +368,7 @@ internal object FinancialConnectionsButton {
 
             @Composable
             override fun paddingValues(): PaddingValues =
-                if (FinancialConnectionsTheme.theme.isLinkDs3) {
+                if (FinancialConnectionsTheme.theme.isLink) {
                     // 14 + 24sp line height + 14 ≈ 52.dp, versus 56.dp elsewhere. Expressed as
                     // padding rather than a fixed height so the button can still grow when the
                     // user scales text up.

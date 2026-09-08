@@ -57,9 +57,12 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Neutral900
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.delay
 
@@ -74,14 +77,22 @@ private const val SlideDurationMillis = 600
 internal fun LoadingShimmerEffect(
     content: @Composable (Brush) -> Unit
 ) {
+    LoadingShimmerEffect(baseColor = colors.backgroundSecondary, content = content)
+}
+
+@Composable
+internal fun LoadingShimmerEffect(
+    baseColor: Color,
+    content: @Composable (Brush) -> Unit,
+) {
     val screenWidthDp = with(LocalConfiguration.current) { screenWidthDp.dp }
     val screenWidth = with(LocalDensity.current) { screenWidthDp.toPx() }
     val shimmerWidth = screenWidth * SHIMMER_SIZE_MULTIPLIER
 
     val gradient = listOf(
-        colors.backgroundSecondary,
-        colors.backgroundSecondary.copy(alpha = SHIMMER_GRADIENT_ALPHA),
-        colors.backgroundSecondary,
+        baseColor,
+        baseColor.copy(alpha = SHIMMER_GRADIENT_ALPHA),
+        baseColor,
     )
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
     val translateAnimation = transition.animateFloat(
@@ -112,7 +123,17 @@ internal fun LoadingShimmerEffect(
 @Composable
 internal fun FullScreenGenericLoading() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        LoadingSpinner(Modifier.size(52.dp))
+        LoadingSpinner(
+            Modifier.size(if (FinancialConnectionsTheme.theme.isLink) 24.dp else 52.dp)
+        )
+    }
+}
+
+@Preview(name = "Full screen loading - Link", group = "Components")
+@Composable
+internal fun FullScreenGenericLoadingLinkPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        FullScreenGenericLoading()
     }
 }
 
@@ -120,7 +141,12 @@ internal fun FullScreenGenericLoading() {
 internal fun LoadingSpinner(
     modifier: Modifier = Modifier,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
-    gradient: Brush = Brush.sweepGradient(listOf(colors.background, colors.border)),
+    gradient: Brush = Brush.sweepGradient(
+        listOf(
+            colors.background,
+            if (FinancialConnectionsTheme.theme.isLink) colors.spinner else colors.border,
+        )
+    ),
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")
     val angle by infiniteTransition.animateFloat(

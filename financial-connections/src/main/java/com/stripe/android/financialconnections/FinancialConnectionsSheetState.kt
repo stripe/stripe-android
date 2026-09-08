@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections
 
 import android.os.Bundle
 import androidx.annotation.StringRes
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
@@ -11,7 +10,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.ui.theme.Theme.DefaultLight
-import com.stripe.android.financialconnections.ui.theme.Theme.LinkDs3
 import com.stripe.android.financialconnections.ui.theme.Theme.LinkLight
 
 /**
@@ -29,11 +27,7 @@ internal data class FinancialConnectionsSheetState(
 
     val theme: Theme
         // We can't rely on the value coming from the `manifest` here, because its initial value will be null
-        get() = when {
-            isInstantDebits.not() -> DefaultLight
-            FeatureFlags.financialConnectionsLinkDs3.isEnabled -> LinkDs3
-            else -> LinkLight
-        }
+        get() = if (isInstantDebits) LinkLight else DefaultLight
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret

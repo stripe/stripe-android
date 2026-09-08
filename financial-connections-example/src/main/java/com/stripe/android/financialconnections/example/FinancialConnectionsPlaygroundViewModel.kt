@@ -27,7 +27,6 @@ import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.ForceOnelinkConsumerSetting
 import com.stripe.android.financialconnections.example.settings.ForceOnelinkSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
-import com.stripe.android.financialconnections.example.settings.LinkDs3Setting
 import com.stripe.android.financialconnections.example.settings.MerchantSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
@@ -452,16 +451,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     private fun syncDebugOverrides(playgroundSettings: PlaygroundSettings) {
-        // FC standalone flows read this setting from DebugConfiguration, but PaymentSheet-driven
-        // Link surfaces in this app still rely on the global feature flag override.
         FeatureFlags.forceOnelink.setEnabled(
             playgroundSettings.get<ForceOnelinkSetting>().selectedOption
         )
         FeatureFlags.forceOnelinkConsumer.setEnabled(
             playgroundSettings.get<ForceOnelinkConsumerSetting>().selectedOption
-        )
-        FeatureFlags.financialConnectionsLinkDs3.setEnabled(
-            playgroundSettings.get<LinkDs3Setting>().selectedOption
         )
     }
 

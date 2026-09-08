@@ -4,15 +4,11 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -50,7 +46,7 @@ import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.Attention300
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.KeyboardController
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -58,7 +54,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-private val LOGO_HEIGHT = 20.dp
+private val LogoHeight = 20.dp
+private val LinkLogoHeight = 24.dp
 private val PILL_HORIZONTAL_PADDING = 4.dp
 private val PILL_VERTICAL_PADDING = 2.dp
 private const val PILL_RADIUS = 8f
@@ -147,7 +144,6 @@ private fun BackButton(
     keyboardController: KeyboardController,
     localBackPressed: OnBackPressedDispatcher?
 ) {
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
     IconButton(
         onClick = {
             scope.launch {
@@ -156,39 +152,16 @@ private fun BackButton(
             }
         },
     ) {
-        // DS 3.0 sits the chevron inside a circular container. Kept inside the IconButton so the
-        // 48.dp touch target and the existing test tag are unaffected.
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = if (isLinkDs3) {
-                Modifier
-                    .size(BackButtonContainerSize)
-                    .background(
-                        color = FinancialConnectionsTheme.colors.iconBackground,
-                        shape = CircleShape,
-                    )
-            } else {
-                Modifier
-            },
-        ) {
-            Icon(
-                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_back),
-                contentDescription = "Back icon",
-                tint = if (isLinkDs3) {
-                    FinancialConnectionsTheme.colors.iconTint
-                } else {
-                    FinancialConnectionsTheme.colors.icon
-                },
-                modifier = Modifier
-                    .testTag("top-app-bar-back-button")
-                    .semantics { testTagsAsResourceId = true }
-            )
-        }
+        Icon(
+            painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_back),
+            contentDescription = "Back icon",
+            tint = FinancialConnectionsTheme.colors.icon,
+            modifier = Modifier
+                .testTag("top-app-bar-back-button")
+                .semantics { testTagsAsResourceId = true }
+        )
     }
 }
-
-/** Diameter of the Link DS 3.0 circular back button container, inside the 48.dp touch target. */
-private val BackButtonContainerSize = 36.dp
 
 @Composable
 private fun CloseButton(
@@ -225,10 +198,10 @@ private fun Title(
     ) {
         if (hideStripeLogo.not()) {
             Image(
-                modifier = Modifier.height(LOGO_HEIGHT),
+                modifier = Modifier.height(if (theme.isLink) LinkLogoHeight else LogoHeight),
                 contentScale = ContentScale.FillHeight,
                 painter = painterResource(id = theme.icon(linkBrand)),
-                colorFilter = if (isSystemInDarkTheme()) {
+                colorFilter = if (theme.isLink.not() && isSystemInDarkTheme()) {
                     ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
                 } else {
                     null
@@ -285,10 +258,25 @@ internal fun TopAppBarWithStripeLogoPreview() {
     }
 }
 
+@Preview(group = "Components", name = "TopAppBar - OneLink")
+@Composable
+internal fun TopAppBarWithOneLinkLogoPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        FinancialConnectionsTopAppBar(
+            state = TopAppBarState(
+                hideStripeLogo = false,
+                linkBrand = LinkBrand.Onelink,
+                theme = Theme.LinkLight,
+            ),
+            onCloseClick = {},
+        )
+    }
+}
+
 @Preview(group = "Components", name = "TopAppBar - Instant Debits")
 @Composable
 internal fun TopAppBarWithLinkLogoPreview() {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(
                 hideStripeLogo = false,

@@ -43,6 +43,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.TestModeBanner
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -137,29 +139,16 @@ private fun ManualEntryLoaded(
 ) {
     val loading = linkPaymentAccountStatus is Loading
     val scrollState = rememberScrollState()
+    val isLink = FinancialConnectionsTheme.theme.isLink
     Layout(
         scrollState = scrollState,
         body = {
-            Spacer(modifier = Modifier.size(8.dp))
-            Title()
-            Spacer(modifier = Modifier.size(16.dp))
-            if (payload.verifyWithMicrodeposits) {
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
-                    color = FinancialConnectionsTheme.colors.textDefault,
-                    style = FinancialConnectionsTheme.typography.bodyMedium
-                )
-            }
-            if (payload.testMode) {
-                Spacer(modifier = Modifier.size(8.dp))
-                TestModeBanner(
-                    enabled = loading.not(),
-                    buttonLabel = stringResource(id = R.string.stripe_manualentry_test_banner),
-                    onButtonClick = onTestFill
-                )
-            }
-            Spacer(modifier = Modifier.size(24.dp))
+            ManualEntryHeader(
+                payload = payload,
+                isLink = isLink,
+                enabled = loading.not(),
+                onTestFill = onTestFill,
+            )
             AccountForm(
                 enabled = loading.not(),
                 routing = routing,
@@ -188,6 +177,45 @@ private fun ManualEntryLoaded(
 }
 
 @Composable
+private fun ManualEntryHeader(
+    payload: Payload,
+    isLink: Boolean,
+    enabled: Boolean,
+    onTestFill: () -> Unit,
+) {
+    Spacer(modifier = Modifier.size(8.dp))
+    Title()
+    Spacer(
+        modifier = Modifier.size(
+            when {
+                isLink && payload.verifyWithMicrodeposits -> 4.dp
+                isLink -> 0.dp
+                else -> 16.dp
+            }
+        )
+    )
+    if (payload.verifyWithMicrodeposits) {
+        if (isLink.not()) Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
+            color = FinancialConnectionsTheme.colors.textTertiary,
+            style = FinancialConnectionsTheme.typography.bodyMedium,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
+        )
+    }
+    if (payload.testMode) {
+        Spacer(modifier = Modifier.size(8.dp))
+        TestModeBanner(
+            enabled = enabled,
+            buttonLabel = stringResource(id = R.string.stripe_manualentry_test_banner),
+            onButtonClick = onTestFill,
+        )
+    }
+    Spacer(modifier = Modifier.size(if (isLink) 16.dp else 24.dp))
+}
+
+@Composable
 private fun ErrorMessage(
     error: Throwable
 ) {
@@ -206,8 +234,9 @@ private fun Title() {
     Text(
         modifier = Modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_manualentry_title),
-        color = FinancialConnectionsTheme.colors.textDefault,
-        style = FinancialConnectionsTheme.typography.headingXLarge
+        color = FinancialConnectionsTheme.colors.textPrimary,
+        style = FinancialConnectionsTheme.typography.headingXLarge,
+        textAlign = if (FinancialConnectionsTheme.theme.isLink) TextAlign.Center else TextAlign.Start,
     )
 }
 
@@ -341,6 +370,31 @@ internal fun ManualEntryPreview(
             onTestFill = {},
             onSubmit = {},
             onCloseFromErrorClick = {}
+        )
+    }
+}
+
+@Preview(name = "Link", group = "Manual Entry Pane")
+@Composable
+internal fun ManualEntryLinkPreview() {
+    val previewState = ManualEntryPreviewParameterProvider().canonical()
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        ManualEntryContent(
+            routing = previewState.routing,
+            routingError = previewState.routingError,
+            account = previewState.account,
+            accountError = previewState.accountError,
+            accountConfirm = previewState.accountConfirm,
+            accountConfirmError = previewState.accountConfirmError,
+            isValidForm = true,
+            payload = previewState.state.payload,
+            linkPaymentAccountStatus = previewState.state.linkPaymentAccount,
+            onRoutingEntered = {},
+            onAccountEntered = {},
+            onAccountConfirmEntered = {},
+            onTestFill = {},
+            onSubmit = {},
+            onCloseFromErrorClick = {},
         )
     }
 }

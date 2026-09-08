@@ -59,7 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
+import com.stripe.android.financialconnections.features.common.GroupedCardCornerRadius
 import com.stripe.android.financialconnections.features.common.GroupedCardSeparatorInset
+import com.stripe.android.financialconnections.features.common.IconSize
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
@@ -85,7 +87,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
@@ -182,24 +184,28 @@ private fun LoadedContent(
     // DS 3.0 groups the rows into a grey card that runs edge to edge within the body inset, so the
     // per-row 8.dp padding moves out to `bodyPadding` and the title/search bar drop their own inset.
     // Both themes end up with everything 24.dp from the screen edge.
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
-    val contentInset = if (isLinkDs3) 0.dp else 8.dp
+    val isLink = FinancialConnectionsTheme.theme.isLink
+    val contentInset = if (isLink) 0.dp else 8.dp
 
     LazyLayout(
         lazyListState = listState,
-        bodyPadding = PaddingValues(horizontal = if (isLinkDs3) 24.dp else 16.dp),
+        bodyPadding = PaddingValues(horizontal = if (isLink) 24.dp else 16.dp),
     ) {
         item {
             SearchTitle(
                 modifier = Modifier
                     .semantics { testTagsAsResourceId = true }
                     .testTag("loaded_picker_title")
+                    .alpha(if (isLink && selectedInstitutionId != null) SELECTED_CONTENT_ALPHA else 1f)
                     .padding(horizontal = contentInset)
             )
         }
         item { Spacer(modifier = Modifier.height(24.dp)) }
         stickyHeader(key = "searchRow") {
             SearchRow(
+                modifier = Modifier.alpha(
+                    if (isLink && selectedInstitutionId != null) SELECTED_CONTENT_ALPHA else 1f
+                ),
                 horizontalPadding = contentInset,
                 focusRequester = searchInputFocusRequester,
                 query = input,
@@ -237,10 +243,18 @@ private fun LoadedContent(
 private fun Modifier.institutionRow(
     isFirst: Boolean,
     isLast: Boolean,
-    separatorInset: Dp = GroupedCardSeparatorInset,
-): Modifier = if (FinancialConnectionsTheme.theme.isLinkDs3) {
-    groupedCardSurface(isFirst = isFirst, isLast = isLast, separatorInset = separatorInset)
-        .padding(all = 16.dp)
+    highlighted: Boolean,
+    separatorInset: Dp,
+): Modifier = if (FinancialConnectionsTheme.theme.isLink) {
+    groupedCardSurface(
+        isFirst = isFirst,
+        isLast = isLast,
+        separatorInset = separatorInset,
+        cornerRadius = GroupedCardCornerRadius,
+        backgroundColor = if (highlighted) colors.backgroundHighlighted else colors.iconBackground,
+        separatorColor = colors.dividerOnCard,
+    )
+        .padding(horizontal = 16.dp, vertical = 8.dp)
 } else {
     padding(all = 8.dp)
 }
@@ -264,7 +278,12 @@ private fun LazyListScope.searchResults(
                 itemContent = { index, institution ->
                     InstitutionResultTile(
                         // The "search more" row below is always the last card row.
-                        modifier = Modifier.institutionRow(isFirst = index == 0, isLast = false),
+                        modifier = Modifier.institutionRow(
+                            isFirst = index == 0,
+                            isLast = false,
+                            highlighted = selectedInstitutionId == institution.id,
+                            separatorInset = GroupedCardSeparatorInset,
+                        ),
                         loading = selectedInstitutionId == institution.id,
                         enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                         institution = institution,
@@ -274,7 +293,12 @@ private fun LazyListScope.searchResults(
             )
             item(key = "search_more") {
                 SearchMoreRow(
-                    modifier = Modifier.institutionRow(isFirst = featured.isEmpty(), isLast = true),
+                    modifier = Modifier.institutionRow(
+                        isFirst = featured.isEmpty(),
+                        isLast = true,
+                        highlighted = false,
+                        separatorInset = GroupedCardSeparatorInset,
+                    ),
                     onClick = onSearchMoreClick,
                     enabled = selectedInstitutionId == null,
                 )
@@ -295,12 +319,13 @@ private fun LazyListScope.searchResults(
             // Loading: Display shimmer.
             is Uninitialized,
             is Loading -> {
-                val shimmerRows = (0..10).toList()
+                val shimmerRows = List(10) { it }
                 itemsIndexed(shimmerRows) { index, _ ->
                     InstitutionResultShimmer(
                         modifier = Modifier.institutionRow(
                             isFirst = index == 0,
                             isLast = index == shimmerRows.lastIndex,
+                            highlighted = false,
                             // The shimmer has no text to align a separator to.
                             separatorInset = Dp.Unspecified,
                         )
@@ -331,6 +356,8 @@ private fun LazyListScope.searchResults(
                                 isFirst = index == 0,
                                 // The manual entry row, when shown, takes the bottom corners.
                                 isLast = showManualEntry.not() && index == results.lastIndex,
+                                highlighted = selectedInstitutionId == institution.id,
+                                separatorInset = GroupedCardSeparatorInset,
                             ),
                             loading = selectedInstitutionId == institution.id,
                             enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
@@ -342,7 +369,12 @@ private fun LazyListScope.searchResults(
                 if (showManualEntry) {
                     item {
                         ManualEntryRow(
-                            modifier = Modifier.institutionRow(isFirst = false, isLast = true),
+                            modifier = Modifier.institutionRow(
+                                isFirst = false,
+                                isLast = true,
+                                highlighted = false,
+                                separatorInset = GroupedCardSeparatorInset,
+                            ),
                             enabled = selectedInstitutionId == null,
                             onManualEntryClick = onManualEntryClick
                         )
@@ -391,11 +423,13 @@ private fun NoResultsTile(
 
 @Composable
 private fun SearchTitle(modifier: Modifier = Modifier) {
+    val isLink = FinancialConnectionsTheme.theme.isLink
     Text(
         modifier = modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
         style = typography.headingXLarge,
-        color = colors.textDefault,
+        color = colors.textPrimary,
+        textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
     )
 }
 
@@ -462,13 +496,13 @@ private fun ClearSearchButton(
     // `stripe_ic_material_cancel` is a filled disc with the cross knocked out of it, so tinting it
     // only ever recolors the disc. DS 3.0's iconography is monochrome line art, so it uses a plain
     // cross tinted to match the magnifier on the leading side; other themes keep the filled circle.
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val isLink = FinancialConnectionsTheme.theme.isLink
     Box(
         Modifier
-            .size(if (isLinkDs3) ClearSearchGlyphSize else 16.dp)
+            .size(if (isLink) ClearSearchGlyphSize else 16.dp)
             .clickable(role = Role.Button) { onQueryChanged("") }
             .then(
-                if (isLinkDs3) {
+                if (isLink) {
                     Modifier
                 } else {
                     Modifier
@@ -479,13 +513,13 @@ private fun ClearSearchButton(
     ) {
         Icon(
             painter = painterResource(
-                if (isLinkDs3) {
+                if (isLink) {
                     StripeUiCoreR.drawable.stripe_ic_material_close
                 } else {
                     R.drawable.stripe_ic_material_cancel
                 }
             ),
-            tint = if (isLinkDs3) colors.icon else colors.background,
+            tint = if (isLink) colors.icon else colors.background,
             contentDescription = "Clear search",
         )
     }
@@ -511,9 +545,10 @@ private fun ManualEntryRow(
                 indication = null,
                 onClick = onManualEntryClick
             )
-            .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
+            .alpha(institutionRowAlpha(enabled))
     ) {
         ShapedIcon(
+            iconSize = if (FinancialConnectionsTheme.theme.isLink) IconSize.Compact else IconSize.Medium,
             backgroundShape = RoundedCornerShape(12.dp),
             // This row sits on the grouped card, so it needs the darker shade to stay visible.
             // Outside DS 3.0 this token is the same as `iconBackground`, so no branch is needed.
@@ -522,8 +557,8 @@ private fun ManualEntryRow(
             contentDescription = "Manually enter details"
         )
 
-        Spacer(modifier = Modifier.size(8.dp))
-        Column {
+        Spacer(modifier = Modifier.size(if (FinancialConnectionsTheme.theme.isLink) 12.dp else 8.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.stripe_institutionpicker_manual_entry_title),
                 color = colors.textDefault,
@@ -537,6 +572,7 @@ private fun ManualEntryRow(
                 overflow = TextOverflow.Ellipsis
             )
         }
+        LinkInstitutionChevron()
     }
 }
 
@@ -557,20 +593,23 @@ private fun SearchMoreRow(
                 indication = null,
                 onClick = onClick
             )
-            .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
+            .alpha(institutionRowAlpha(enabled))
     ) {
         ShapedIcon(
+            iconSize = if (FinancialConnectionsTheme.theme.isLink) IconSize.Compact else IconSize.Medium,
             backgroundShape = RoundedCornerShape(12.dp),
             backgroundColor = colors.iconBackgroundOnCard,
             painter = painterResource(id = R.drawable.stripe_ic_search),
             contentDescription = "Add icon"
         )
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(modifier = Modifier.size(if (FinancialConnectionsTheme.theme.isLink) 12.dp else 8.dp))
         Text(
+            modifier = Modifier.weight(1f),
             text = stringResource(R.string.stripe_institutionpicker_search_more_title),
             color = colors.textDefault,
             style = typography.labelLargeEmphasized,
         )
+        LinkInstitutionChevron()
     }
 }
 
@@ -599,10 +638,13 @@ private fun InstitutionResultTile(
                 focusManager.clearFocus()
                 onInstitutionSelected(institution)
             }
-            .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
+            .alpha(institutionRowAlpha(enabled))
     ) {
-        InstitutionIcon(institution.icon?.default)
-        Spacer(modifier = Modifier.size(8.dp))
+        InstitutionIcon(
+            institutionIcon = institution.icon?.default,
+            size = if (FinancialConnectionsTheme.theme.isLink) 44.dp else 56.dp,
+        )
+        Spacer(modifier = Modifier.size(if (FinancialConnectionsTheme.theme.isLink) 12.dp else 8.dp))
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -626,33 +668,51 @@ private fun InstitutionResultTile(
             Spacer(modifier = Modifier.size(8.dp))
             LoadingSpinner(modifier = Modifier.size(24.dp))
         }
-        if (FinancialConnectionsTheme.theme.isLinkDs3) {
-            // Drawn after the spinner so the chevron keeps its position while loading, matching iOS.
-            Spacer(modifier = Modifier.size(8.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.stripe_ic_chevron_right),
-                contentDescription = null,
-                tint = colors.textSubdued,
-                modifier = Modifier.size(ChevronSize),
-            )
-        }
+        // Drawn after the spinner so the chevron keeps its position while loading, matching iOS.
+        LinkInstitutionChevron()
     }
 }
 
 @Composable
+private fun LinkInstitutionChevron() {
+    if (FinancialConnectionsTheme.theme.isLink) {
+        Spacer(modifier = Modifier.size(8.dp))
+        Icon(
+            painter = painterResource(id = R.drawable.stripe_ic_chevron_right),
+            contentDescription = null,
+            tint = colors.textSubdued,
+            modifier = Modifier.size(ChevronSize),
+        )
+    }
+}
+
+@Composable
+private fun institutionRowAlpha(enabled: Boolean): Float = when {
+    enabled -> 1f
+    FinancialConnectionsTheme.theme.isLink -> SELECTED_CONTENT_ALPHA
+    else -> DISABLED_DEPTH_ALPHA
+}
+
+@Composable
 private fun InstitutionResultShimmer(modifier: Modifier) {
-    LoadingShimmerEffect { shimmer ->
+    LoadingShimmerEffect(
+        baseColor = if (FinancialConnectionsTheme.theme.isLink) {
+            colors.iconBackgroundOnCard
+        } else {
+            colors.backgroundSecondary
+        }
+    ) { shimmer ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(if (FinancialConnectionsTheme.theme.isLink) 44.dp else 56.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .background(shimmer)
             )
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(if (FinancialConnectionsTheme.theme.isLink) 12.dp else 8.dp))
             Column {
                 Box(
                     modifier = Modifier
@@ -675,16 +735,17 @@ private fun InstitutionResultShimmer(modifier: Modifier) {
 }
 
 private const val DISABLED_DEPTH_ALPHA = 0.3f
+private const val SELECTED_CONTENT_ALPHA = 0.4f
 
 /** Size of the Link DS 3.0 trailing disclosure chevron on each institution row. */
 private val ChevronSize = 14.dp
 
 @Preview(group = "Institution Picker Pane", name = "Link DS 3.0")
 @Composable
-internal fun InstitutionPickerLinkDs3Preview() {
+internal fun InstitutionPickerLinkPreview() {
     val previewState = InstitutionPickerPreviewParameterProvider().searchSuccess()
     val state = previewState.state
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         InstitutionPickerContent(
             listState = rememberLazyListState(),
             payload = state.payload,

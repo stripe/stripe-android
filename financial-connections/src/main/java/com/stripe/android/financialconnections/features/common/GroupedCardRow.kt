@@ -1,20 +1,16 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 
 /** Corner radius of the Link DS 3.0 grouped card. */
 internal val GroupedCardCornerRadius = 12.dp
@@ -26,46 +22,16 @@ internal val GroupedCardCornerRadius = 12.dp
 internal data class GroupPosition(
     val isFirst: Boolean,
     val isLast: Boolean,
+    val cornerRadius: Dp,
+    val separatorInset: Dp,
+    val separatorColor: Color,
 )
 
 /**
  * Leading inset of the separator between grouped card rows. Lines up with where row text starts:
- * 16.dp of row padding + a 56.dp [IconSize.Medium] icon + a 20.dp gap.
+ * 16.dp of row padding + a 44.dp compact icon + a 12.dp gap.
  */
-internal val GroupedCardSeparatorInset = 92.dp
-
-/**
- * The Link DS 3.0 loading state for a grouped list: [rowCount] shimmer rows sitting directly against
- * each other inside a single rounded card. The rows have no corner radius of their own — the card
- * clips them — and no spacing between them.
- *
- * Other themes show spaced rows with individual corners instead, so callers should only reach for
- * this in the Link DS 3.0 theme.
- */
-@Composable
-internal fun GroupedShimmerCard(
-    rowHeight: Dp,
-    modifier: Modifier = Modifier,
-    rowCount: Int = 2,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(GroupedCardCornerRadius))
-            .background(colors.iconBackground)
-    ) {
-        repeat(rowCount) {
-            LoadingShimmerEffect { shimmer ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(rowHeight)
-                        .background(shimmer)
-                )
-            }
-        }
-    }
-}
+internal val GroupedCardSeparatorInset = 72.dp
 
 /**
  * Applies one row of the Link DS 3.0 grouped card: a run of adjacent rows sharing a single grey
@@ -86,15 +52,17 @@ internal fun GroupedShimmerCard(
 internal fun Modifier.groupedCardSurface(
     isFirst: Boolean,
     isLast: Boolean,
-    separatorInset: Dp = GroupedCardSeparatorInset,
+    separatorInset: Dp,
+    cornerRadius: Dp,
+    backgroundColor: Color,
+    separatorColor: Color,
 ): Modifier {
-    val separatorColor = colors.borderNeutral
     // Only the outer corners are rounded, so adjacent rows butt together seamlessly.
     val shape: Shape = RoundedCornerShape(
-        topStart = if (isFirst) GroupedCardCornerRadius else 0.dp,
-        topEnd = if (isFirst) GroupedCardCornerRadius else 0.dp,
-        bottomStart = if (isLast) GroupedCardCornerRadius else 0.dp,
-        bottomEnd = if (isLast) GroupedCardCornerRadius else 0.dp,
+        topStart = if (isFirst) cornerRadius else 0.dp,
+        topEnd = if (isFirst) cornerRadius else 0.dp,
+        bottomStart = if (isLast) cornerRadius else 0.dp,
+        bottomEnd = if (isLast) cornerRadius else 0.dp,
     )
     // The separator sits on the row's top edge, so the first row never draws one.
     val drawSeparator = isFirst.not() && separatorInset != Dp.Unspecified
@@ -102,7 +70,7 @@ internal fun Modifier.groupedCardSurface(
         // Clip before the background so anything drawn further down the modifier chain — notably the
         // press ripple from the row's clickable — is bounded by the card's rounded corners too.
         .clip(shape)
-        .background(color = colors.iconBackground)
+        .background(color = backgroundColor)
         .then(
             if (drawSeparator) {
                 Modifier.drawWithContent {

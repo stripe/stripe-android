@@ -8,6 +8,7 @@ import FinancialConnectionsGenericInfoScreen.Header
 import Size
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,9 +44,12 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.image.StripeImage
 import androidx.compose.ui.Alignment as ComposeAlignment
 
@@ -58,6 +62,21 @@ internal fun GenericScreenPreview(
         Surface(color = colors.background) {
             GenericScreen(
                 state = state,
+                onClickableTextClick = {},
+                onSecondaryButtonClick = {},
+                onPrimaryButtonClick = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "Link", group = "Generic Screen")
+@Composable
+internal fun GenericScreenLinkPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        Surface(color = colors.background) {
+            GenericScreen(
+                state = GenericScreenPreviewParameterProvider().canonical(),
                 onClickableTextClick = {},
                 onSecondaryButtonClick = {},
                 onPrimaryButtonClick = {},
@@ -93,6 +112,7 @@ internal fun GenericScreen(
             state.screen.header?.let {
                 GenericHeader(
                     payload = it,
+                    inModal = state.inModal,
                     onClickableTextClick = onClickableTextClick,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
@@ -171,69 +191,49 @@ internal fun GenericBody(
 @Composable
 internal fun GenericHeader(
     payload: Header,
+    inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val centerLinkContent = FinancialConnectionsTheme.theme.isLink && inModal.not()
+    val alignment = if (centerLinkContent) Alignment.Center else payload.alignment
     val isBrandIcon: Boolean = remember(payload.icon?.default) {
         payload.icon?.default?.contains("BrandIcon") == true
     }
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        val iconShape = if (isBrandIcon) RoundedCornerShape(12.dp) else CircleShape
-
-        val iconModifier = if (isBrandIcon) {
-            Modifier
-                .shadow(8.dp, iconShape)
-                .clip(iconShape)
-                .background(color = colors.backgroundSecondary, shape = iconShape)
-        } else {
-            Modifier
-        }
-
         payload.icon?.default?.let { iconUrl ->
-            ShapedIcon(
-                modifier = iconModifier.align(payload.alignment.toComposeAlignment()),
-                backgroundShape = iconShape,
-                flushed = isBrandIcon,
-                url = iconUrl,
-                contentDescription = null,
-                // A brand icon is an institution's logo, so stand in for it with the institution
-                // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
-                // debug painter replaces the image itself, so it needs the full-bleed tile; the
-                // error painter is tinted and padded, so it takes the glyph.
-                debugPainter = painterResource(
-                    id = if (isBrandIcon) {
-                        R.drawable.stripe_ic_brandicon_institution
-                    } else {
-                        R.drawable.stripe_ic_person
-                    }
-                ),
-                errorPainter = R.drawable.stripe_ic_bank
-                    .takeIf { isBrandIcon }
-                    ?.let { painterResource(id = it) },
-                iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
+            GenericHeaderIcon(
+                iconUrl = iconUrl,
+                isBrandIcon = isBrandIcon,
+                alignment = alignment,
+                modifier = Modifier.align(alignment.toComposeAlignment()),
             )
         }
 
         if (payload.title != null) {
+            if (payload.icon?.default != null) Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
                 text = TextResource.Text(payload.title),
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.headingXLarge.copy(
-                    textAlign = payload.alignment.toComposeTextAlign(),
-                    color = colors.textDefault,
+                defaultStyle = (if (inModal) typography.headingLarge else typography.headingXLarge).copy(
+                    textAlign = alignment.toComposeTextAlign(),
+                    color = colors.textPrimary,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
         }
 
         if (payload.subtitle != null) {
+            val subtitleSpacing = if (FinancialConnectionsTheme.theme.isLink) 4.dp else 16.dp
+            if (payload.icon?.default != null || payload.title != null) {
+                Spacer(modifier = Modifier.size(subtitleSpacing))
+            }
             GenericSubtitle(
                 subtitle = payload.subtitle,
-                alignment = payload.alignment,
+                alignment = alignment,
                 onClickableTextClick = onClickableTextClick,
             )
         }
@@ -248,7 +248,7 @@ private fun GenericSubtitle(
 ) {
     val style = typography.bodyMedium.copy(
         textAlign = alignment.toComposeTextAlign(),
-        color = colors.textDefault,
+        color = colors.textTertiary,
     )
 
     AnnotatedText(
@@ -263,10 +263,62 @@ private fun GenericSubtitle(
                 .copy(textDecoration = TextDecoration.Underline),
             StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
                 textAlign = alignment.toComposeTextAlign(),
-                color = colors.textDefault,
+                color = colors.textTertiary,
             ).toSpanStyle(),
         ),
         modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun GenericHeaderIcon(
+    iconUrl: String,
+    isBrandIcon: Boolean,
+    alignment: Alignment?,
+    modifier: Modifier,
+) {
+    val iconShape = if (isBrandIcon) {
+        RoundedCornerShape(if (FinancialConnectionsTheme.theme.isLink) 18.dp else 12.dp)
+    } else {
+        CircleShape
+    }
+    val iconModifier = if (isBrandIcon) {
+        val treatment = if (FinancialConnectionsTheme.theme.isLink) {
+            Modifier.border(0.5.dp, colors.borderOnCard, iconShape)
+        } else {
+            Modifier.shadow(8.dp, iconShape)
+        }
+        treatment
+            .clip(iconShape)
+            .background(color = colors.backgroundSecondary, shape = iconShape)
+    } else {
+        Modifier
+    }
+    ShapedIcon(
+        modifier = modifier.then(iconModifier),
+        backgroundShape = iconShape,
+        flushed = isBrandIcon,
+        url = iconUrl,
+        contentDescription = null,
+        // A brand icon is an institution's logo, so stand in for it with the institution
+        // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
+        // debug painter replaces the image itself, so it needs the full-bleed tile; the
+        // error painter is tinted and padded, so it takes the glyph.
+        debugPainter = painterResource(
+            id = if (isBrandIcon) {
+                R.drawable.stripe_ic_brandicon_institution
+            } else {
+                R.drawable.stripe_ic_person
+            }
+        ),
+        errorPainter = R.drawable.stripe_ic_bank
+            .takeIf { isBrandIcon }
+            ?.let { painterResource(id = it) },
+        iconSize = when {
+            isBrandIcon -> IconSize.ExtraLarge
+            alignment == Alignment.Center -> IconSize.Large
+            else -> IconSize.Medium
+        },
     )
 }
 
@@ -288,7 +340,7 @@ internal fun GenericFooter(
                 text = TextResource.Text(fromHtml(disclaimer)),
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
-                    color = colors.textDefault,
+                    color = colors.textTertiary,
                     textAlign = TextAlign.Center,
                 ),
             )
@@ -316,7 +368,7 @@ internal fun GenericFooter(
                 text = TextResource.Text(fromHtml(belowCta)),
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
-                    color = colors.textDefault,
+                    color = colors.textTertiary,
                     textAlign = TextAlign.Center,
                 ),
             )

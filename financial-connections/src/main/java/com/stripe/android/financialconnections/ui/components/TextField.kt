@@ -28,7 +28,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.TextSelectionColors
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 
 @Composable
 internal fun FinancialConnectionsOutlinedTextField(
@@ -48,7 +48,7 @@ internal fun FinancialConnectionsOutlinedTextField(
 ) {
     val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
     val shape = RoundedCornerShape(12.dp)
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val isLink = FinancialConnectionsTheme.theme.isLink
 
     // `TextFieldColors.backgroundColor` isn't focus-aware, so DS 3.0's focus-dependent fill has to
     // be resolved here rather than inside `outlinedTextFieldColors`.
@@ -66,7 +66,7 @@ internal fun FinancialConnectionsOutlinedTextField(
                 .fillMaxWidth()
                 .alpha(contentAlpha)
                 // DS 3.0 has no shadow in either state.
-                .then(if (isLinkDs3) Modifier else Modifier.shadow(1.dp, shape)),
+                .then(if (isLink) Modifier else Modifier.shadow(1.dp, shape)),
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             placeholder = placeholder,
@@ -78,10 +78,10 @@ internal fun FinancialConnectionsOutlinedTextField(
             isError = isError,
             value = value,
             colors = outlinedTextFieldColors(
-                backgroundColor = textFieldBackgroundColor(isLinkDs3 = isLinkDs3, focused = focused),
-                focusedBorderColor = textFieldFocusedBorderColor(isLinkDs3 = isLinkDs3),
-                unfocusedBorderColor = textFieldRestingBorderColor(isLinkDs3 = isLinkDs3),
-                disabledBorderColor = textFieldRestingBorderColor(isLinkDs3 = isLinkDs3),
+                backgroundColor = textFieldBackgroundColor(isLink = isLink, focused = focused),
+                focusedBorderColor = textFieldFocusedBorderColor(isLink = isLink),
+                unfocusedBorderColor = textFieldRestingBorderColor(isLink = isLink),
+                disabledBorderColor = textFieldRestingBorderColor(isLink = isLink),
                 unfocusedLabelColor = FinancialConnectionsTheme.colors.textSubdued,
                 errorBorderColor = FinancialConnectionsTheme.colors.textCritical,
                 focusedLabelColor = FinancialConnectionsTheme.colors.textSubdued,
@@ -100,8 +100,8 @@ internal fun FinancialConnectionsOutlinedTextField(
 
 /** DS 3.0 fills the resting field and clears it on focus; other themes stay on the background. */
 @Composable
-private fun textFieldBackgroundColor(isLinkDs3: Boolean, focused: Boolean): Color = when {
-    isLinkDs3.not() || focused -> FinancialConnectionsTheme.colors.background
+private fun textFieldBackgroundColor(isLink: Boolean, focused: Boolean): Color = when {
+    isLink.not() || focused -> FinancialConnectionsTheme.colors.background
     else -> FinancialConnectionsTheme.colors.iconBackground
 }
 
@@ -111,14 +111,14 @@ private fun textFieldBackgroundColor(isLinkDs3: Boolean, focused: Boolean): Colo
  * that's needed to hide the border.
  */
 @Composable
-private fun textFieldRestingBorderColor(isLinkDs3: Boolean): Color = if (isLinkDs3) {
+private fun textFieldRestingBorderColor(isLink: Boolean): Color = if (isLink) {
     Color.Transparent
 } else {
     FinancialConnectionsTheme.colors.borderNeutral
 }
 
 @Composable
-private fun textFieldFocusedBorderColor(isLinkDs3: Boolean): Color = if (isLinkDs3) {
+private fun textFieldFocusedBorderColor(isLink: Boolean): Color = if (isLink) {
     FinancialConnectionsTheme.colors.textFieldFocused
 } else {
     FinancialConnectionsTheme.colors.border
@@ -126,10 +126,10 @@ private fun textFieldFocusedBorderColor(isLinkDs3: Boolean): Color = if (isLinkD
 
 @Preview(group = "Components", name = "TextField - Link DS 3.0 resting")
 @Composable
-internal fun FinancialConnectionsOutlinedTextFieldLinkDs3Preview() {
+internal fun FinancialConnectionsOutlinedTextFieldLinkPreview() {
     // Resting state only: a preview can't take focus, so the focused 2.dp border and white fill
     // have to be checked on device.
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         Column(
             Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

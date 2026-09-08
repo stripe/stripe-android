@@ -19,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
@@ -38,7 +39,6 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.GroupPosition
-import com.stripe.android.financialconnections.features.common.GroupedShimmerCard
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
@@ -63,7 +63,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -160,7 +160,7 @@ private fun AccountPickerLoaded(
     onSubmit: () -> Unit
 ) {
     val displayablePayload = payload()?.takeIf { it.shouldSkipPane.not() }
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val isLink = FinancialConnectionsTheme.theme.isLink
 
     LazyLayout(
         lazyListState = lazyListState,
@@ -173,7 +173,7 @@ private fun AccountPickerLoaded(
                 payload = displayablePayload,
                 selectedIds = state.selectedIds,
                 onAccountClicked = onAccountClicked,
-                isLinkDs3 = isLinkDs3,
+                isLink = isLink,
             )
         },
         footer = {
@@ -196,38 +196,14 @@ private fun LazyListScope.accountPickerContent(
     payload: AccountPickerState.Payload?,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
-    isLinkDs3: Boolean,
+    isLink: Boolean,
 ) {
     item("icon") {
-        InstitutionIcon(
-            institutionIcon = institution?.icon?.default,
-            modifier = Modifier.padding(top = 16.dp),
-            disablePlaceholder = true,
-        )
+        AccountPickerInstitutionIcon(institution = institution, isLink = isLink)
     }
 
     item("header") {
-        if (payload != null) {
-            Text(
-                modifier = Modifier
-                    .semantics { testTagsAsResourceId = true }
-                    .testTag("loaded_picker_title")
-                    .fillMaxWidth(),
-                text = stringResource(
-                    when (payload.selectionMode) {
-                        SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
-                        SelectionMode.Multiple -> R.string.stripe_account_picker_multiselect_account
-                    }
-                ),
-                style = FinancialConnectionsTheme.typography.headingXLarge
-            )
-        } else {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.stripe_account_picker_retrieving_accounts),
-                style = FinancialConnectionsTheme.typography.headingXLarge
-            )
-        }
+        AccountPickerTitle(payload = payload, isLink = isLink)
     }
 
     if (payload != null) {
@@ -235,20 +211,71 @@ private fun LazyListScope.accountPickerContent(
             accounts = payload.accounts,
             selectedIds = selectedIds,
             onAccountClicked = onAccountClicked,
-            isLinkDs3 = isLinkDs3,
+            isLink = isLink,
         )
     } else {
-        loadingRows(isLinkDs3 = isLinkDs3)
+        loadingRows(isLink = isLink)
     }
+}
+
+@Composable
+private fun AccountPickerInstitutionIcon(
+    institution: FinancialConnectionsInstitution?,
+    isLink: Boolean,
+) {
+    if (isLink) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            InstitutionIcon(
+                institutionIcon = institution?.icon?.default,
+                disablePlaceholder = true,
+                size = 72.dp,
+            )
+        }
+    } else {
+        InstitutionIcon(
+            institutionIcon = institution?.icon?.default,
+            modifier = Modifier.padding(top = 16.dp),
+            disablePlaceholder = true,
+        )
+    }
+}
+
+@Composable
+private fun AccountPickerTitle(payload: AccountPickerState.Payload?, isLink: Boolean) {
+    val title = if (payload == null) {
+        stringResource(R.string.stripe_account_picker_retrieving_accounts)
+    } else {
+        stringResource(
+            when (payload.selectionMode) {
+                SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
+                SelectionMode.Multiple -> R.string.stripe_account_picker_multiselect_account
+            }
+        )
+    }
+    Text(
+        modifier = Modifier
+            .semantics { testTagsAsResourceId = true }
+            .testTag("loaded_picker_title")
+            .fillMaxWidth(),
+        text = title,
+        style = FinancialConnectionsTheme.typography.headingXLarge,
+        color = FinancialConnectionsTheme.colors.textPrimary,
+        textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
+    )
 }
 
 private fun LazyListScope.accountRows(
     accounts: List<PartnerAccount>,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
-    isLinkDs3: Boolean,
+    isLink: Boolean,
 ) {
-    if (isLinkDs3) {
+    if (isLink) {
         // Emitted as a single item so the rows sit flush inside one card. The enclosing LazyLayout's
         // 16.dp arrangement then spaces the card from the header rather than the rows from each other.
         item("accounts") {
@@ -262,6 +289,9 @@ private fun LazyListScope.accountRows(
                         groupPosition = GroupPosition(
                             isFirst = index == 0,
                             isLast = index == accounts.lastIndex,
+                            cornerRadius = 12.dp,
+                            separatorInset = 0.dp,
+                            separatorColor = FinancialConnectionsTheme.colors.borderNeutral,
                         ),
                     )
                 }
@@ -280,12 +310,18 @@ private fun LazyListScope.accountRows(
     }
 }
 
-private fun LazyListScope.loadingRows(isLinkDs3: Boolean) {
-    if (isLinkDs3) {
-        // DS 3.0: two adjacent shimmer rows sharing one rounded card, rather than spaced rows with
-        // individual corners.
-        item("loading") {
-            GroupedShimmerCard(rowHeight = AccountRowShimmerHeight)
+private fun LazyListScope.loadingRows(isLink: Boolean) {
+    if (isLink) {
+        items(3) {
+            LoadingShimmerEffect {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(AccountRowShimmerHeight)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(it)
+                )
+            }
         }
     } else {
         items(3) {
@@ -351,7 +387,7 @@ private fun DataAccessDisclaimerText(
         text = TextResource.Text(fromHtml(text)),
         onClickableTextClick = onLearnMoreClick,
         defaultStyle = FinancialConnectionsTheme.typography.labelSmall.copy(
-            color = FinancialConnectionsTheme.colors.textDefault,
+            color = FinancialConnectionsTheme.colors.textTertiary,
             textAlign = TextAlign.Center,
         ),
     )
@@ -359,8 +395,8 @@ private fun DataAccessDisclaimerText(
 
 @Preview(showBackground = true, group = "Account Picker Pane", name = "Link DS 3.0")
 @Composable
-internal fun AccountPickerLinkDs3Preview() {
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+internal fun AccountPickerLinkPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         AccountPickerContent(
             state = AccountPickerPreviewParameterProvider().multiSelect(),
             onAccountClicked = {},
@@ -376,8 +412,8 @@ internal fun AccountPickerLinkDs3Preview() {
 
 @Preview(showBackground = true, group = "Account Picker Pane", name = "Link DS 3.0 - loading")
 @Composable
-internal fun AccountPickerLinkDs3LoadingPreview() {
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+internal fun AccountPickerLinkLoadingPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         AccountPickerContent(
             state = AccountPickerPreviewParameterProvider().loading(),
             onAccountClicked = {},

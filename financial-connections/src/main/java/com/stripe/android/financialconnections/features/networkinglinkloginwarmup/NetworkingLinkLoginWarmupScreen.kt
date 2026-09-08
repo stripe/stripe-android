@@ -48,7 +48,7 @@ import com.stripe.android.financialconnections.ui.theme.LinkBrand50
 import com.stripe.android.financialconnections.ui.theme.LinkGreen200
 import com.stripe.android.financialconnections.ui.theme.LinkGreen900
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.isLinkDs3
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -79,7 +79,9 @@ private fun NetworkingLinkLoginWarmupContent(
             .fillMaxWidth()
             .background(color = colors.background),
         inModal = true,
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(
+            if (FinancialConnectionsTheme.theme.isLink) 16.dp else 24.dp
+        ),
         lazyListState = lazyListState,
         body = {
             item { HeaderSection(linkBrand = state.linkBrand) }
@@ -100,10 +102,10 @@ private fun NetworkingLinkLoginWarmupContent(
 
 @Composable
 private fun HeaderSection(linkBrand: LinkBrand) {
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val isLink = FinancialConnectionsTheme.theme.isLink
     val title = when {
         // DS 3.0 uses a fixed greeting with no brand name.
-        isLinkDs3 -> stringResource(R.string.stripe_networking_link_login_warmup_title_welcome_back)
+        isLink -> stringResource(R.string.stripe_networking_link_login_warmup_title_welcome_back)
         linkBrand == LinkBrand.Link -> stringResource(R.string.stripe_networking_link_login_warmup_title)
         else -> stringResource(
             R.string.stripe_networking_link_login_warmup_title_with_brand,
@@ -116,9 +118,9 @@ private fun HeaderSection(linkBrand: LinkBrand) {
         stringResource(R.string.stripe_networking_link_login_warmup_description_with_brand, linkBrand.brandName())
     }
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(if (isLink) 4.dp else 16.dp),
     ) {
-        if (isLinkDs3.not()) {
+        if (isLink.not()) {
             // DS 3.0 removes the avatar above the title entirely.
             ShapedIcon(
                 painter = painterResource(id = R.drawable.stripe_ic_person),
@@ -128,12 +130,12 @@ private fun HeaderSection(linkBrand: LinkBrand) {
         Text(
             text = title,
             style = typography.headingLarge,
-            color = colors.textDefault,
+            color = colors.textPrimary,
         )
         Text(
             text = description,
             style = typography.bodyMedium,
-            color = colors.textDefault,
+            color = colors.textTertiary,
         )
     }
 }
@@ -151,7 +153,7 @@ private fun Footer(
     val enableButtons = !primaryButtonLoading && !secondaryButtonLoading
     val ctaContinue = when {
         // The side-by-side layout only has room for the short label.
-        FinancialConnectionsTheme.theme.isLinkDs3 ->
+        FinancialConnectionsTheme.theme.isLink ->
             stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue_short)
         linkBrand == LinkBrand.Link ->
             stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue)
@@ -186,7 +188,7 @@ private fun Footer(
 internal fun ExistingEmailSection(
     email: String
 ) {
-    val isLinkDs3 = FinancialConnectionsTheme.theme.isLinkDs3
+    val isLink = FinancialConnectionsTheme.theme.isLink
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -195,7 +197,7 @@ internal fun ExistingEmailSection(
             .clip(RoundedCornerShape(12.dp))
             // DS 3.0 replaces the outline with a green-tinted fill.
             .then(
-                if (isLinkDs3) {
+                if (isLink) {
                     Modifier.background(color = LinkBrand50, shape = RoundedCornerShape(12.dp))
                 } else {
                     Modifier.border(
@@ -215,7 +217,7 @@ internal fun ExistingEmailSection(
         ) {
             Text(
                 text = email.getOrElse(0) { '@' }.uppercaseChar().toString(),
-                style = typography.bodySmall,
+                style = typography.bodyMediumEmphasized,
                 color = LinkGreen900,
             )
         }
@@ -225,16 +227,16 @@ internal fun ExistingEmailSection(
             text = email,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = typography.bodySmall,
-            color = if (isLinkDs3) LinkGreen200 else colors.textDefault
+            style = typography.bodyMedium,
+            color = if (isLink) LinkGreen200 else colors.textDefault
         )
     }
 }
 
 @Composable
 @Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Link DS 3.0")
-internal fun NetworkingLinkLoginWarmupScreenLinkDs3Preview() {
-    FinancialConnectionsPreview(theme = Theme.LinkDs3) {
+internal fun NetworkingLinkLoginWarmupScreenLinkPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         NetworkingLinkLoginWarmupContent(
             state = NetworkingLinkLoginWarmupPreviewParameterProvider().instantDebits(),
             onContinueClick = {},

@@ -315,7 +315,7 @@ private fun SuccessBody(
                 text = it,
                 defaultStyle = typography.headingXLarge.copy(
                     textAlign = TextAlign.Center,
-                    color = colors.textDefault,
+                    color = colors.textPrimary,
                 ),
                 onClickableTextClick = {}
             )
@@ -326,7 +326,7 @@ private fun SuccessBody(
                 text = content,
                 defaultStyle = typography.bodyMedium.copy(
                     textAlign = TextAlign.Center,
-                    color = colors.textDefault,
+                    color = colors.textTertiary,
                 ),
                 annotationStyles = mapOf(
                     StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
