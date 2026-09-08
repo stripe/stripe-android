@@ -25,6 +25,7 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
         val availableExpressButtonTypes = DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = null,
             expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration().build(),
+            requiresShippingAddress = false,
         )
 
         assertThat(availableExpressButtonTypes).isEmpty()
@@ -149,8 +150,7 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     fun `create keeps google pay when shipping address is required`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
-            configuration = ExpressCheckoutElement.Configuration()
-                .shippingAddressRequired(true),
+            requiresShippingAddress = true,
         )
 
         assertThat(availableExpressButtonTypes).containsExactly(
@@ -162,8 +162,7 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     fun `create filters out link when shipping address is required`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.Link),
-            configuration = ExpressCheckoutElement.Configuration()
-                .shippingAddressRequired(true),
+            requiresShippingAddress = true,
         )
 
         assertThat(availableExpressButtonTypes).isEmpty()
@@ -172,12 +171,14 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     private fun create(
         availableWallets: List<WalletType>,
         configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
+        requiresShippingAddress: Boolean = false,
     ): List<ExpressButtonType> {
         return DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
             ),
             expressCheckoutElementConfiguration = configuration?.build(),
+            requiresShippingAddress = requiresShippingAddress,
         )
     }
 

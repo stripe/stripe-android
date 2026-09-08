@@ -1,6 +1,12 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
+import kotlin.time.Duration.Companion.seconds
 
 private const val IS_PLACED = "is_placed_in_layout"
 
@@ -15,4 +21,25 @@ private const val IS_PLACED = "is_placed_in_layout"
  */
 internal fun isPlaced() = SemanticsMatcher(IS_PLACED) { node ->
     node.layoutInfo.isPlaced
+}
+
+internal fun ComposeTestRule.replaceText(label: String, text: String) {
+    val matcher = hasText(label).and(hasSetTextAction())
+    waitForNode(matcher)
+    onNode(matcher).performScrollTo().performTextReplacement(text)
+}
+
+internal fun ComposeTestRule.waitForText(text: String) {
+    waitForNode(hasText(text))
+}
+
+internal fun ComposeTestRule.waitForNode(matcher: SemanticsMatcher) {
+    waitUntil(
+        conditionDescription = "node matching $matcher to appear",
+        timeoutMillis = 5.seconds.inWholeMilliseconds,
+    ) {
+        onAllNodes(matcher)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .isNotEmpty()
+    }
 }
