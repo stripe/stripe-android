@@ -1097,6 +1097,25 @@ constructor(
             )
         }
 
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Bizum] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createBizum(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Bizum,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
         @JvmStatic
         @JvmOverloads
         fun createWeChatPay(

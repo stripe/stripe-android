@@ -31,9 +31,17 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
             StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
             StripeIntent.NextActionType.SwishRedirect -> SwishRedirectParser()
+            StripeIntent.NextActionType.AwaitAuthorization -> AwaitAuthorizationParser()
             null -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
+    }
+
+    private class AwaitAuthorizationParser :
+        ModelJsonParser<StripeIntent.NextActionData.AwaitAuthorization> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.AwaitAuthorization {
+            return StripeIntent.NextActionData.AwaitAuthorization
+        }
     }
 
     private class DisplayOxxoDetailsJsonParser :

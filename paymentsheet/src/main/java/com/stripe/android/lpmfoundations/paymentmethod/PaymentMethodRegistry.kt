@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AuBecsDebitDe
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BacsDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BancontactDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BillieDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.BizumDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BoletoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -57,6 +58,7 @@ internal object PaymentMethodRegistry {
         BacsDebitDefinition,
         BancontactDefinition,
         BillieDefinition,
+        BizumDefinition,
         BlikDefinition,
         BoletoDefinition,
         CardDefinition,

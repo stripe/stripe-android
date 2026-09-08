@@ -130,6 +130,19 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createBizum() with billing details creates expected map`() {
+        val billingDetails = PaymentMethod.BillingDetails(phone = "+34600000001")
+
+        assertThat(PaymentMethodCreateParams.createBizum(billingDetails).toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "type" to "bizum",
+                    "billing_details" to mapOf("phone" to "+34600000001"),
+                )
+            )
+    }
+
+    @Test
     fun `createP24() without billing details creates expected map`() {
         assertThat(PaymentMethodCreateParams.createP24().toParamMap())
             .isEqualTo(mapOf("type" to "p24"))
