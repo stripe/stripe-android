@@ -28,8 +28,6 @@ internal object GooglePayPaymentDataCallbackHandler {
         if (request == null) {
             handleUnexpectedError(
                 event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST,
-                throwable = null,
-                callbackTrigger = null,
                 googlePayJsonFactory = googlePayJsonFactory,
                 errorReporter = errorReporter,
                 stringResolver = stringResolver,
@@ -40,8 +38,6 @@ internal object GooglePayPaymentDataCallbackHandler {
         } else if (selection == null) {
             handleUnexpectedError(
                 event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK,
-                throwable = null,
-                callbackTrigger = null,
                 googlePayJsonFactory = googlePayJsonFactory,
                 errorReporter = errorReporter,
                 stringResolver = stringResolver,
@@ -58,7 +54,6 @@ internal object GooglePayPaymentDataCallbackHandler {
                 handleUnexpectedError(
                     event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE,
                     throwable = error,
-                    callbackTrigger = null,
                     googlePayJsonFactory = googlePayJsonFactory,
                     errorReporter = errorReporter,
                     stringResolver = stringResolver,
@@ -111,8 +106,8 @@ internal object GooglePayPaymentDataCallbackHandler {
 
     private fun handleUnexpectedError(
         event: ErrorReporter.UnexpectedErrorEvent,
-        throwable: Throwable?,
-        callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger?,
+        throwable: Throwable? = null,
+        callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger? = null,
         onCompleteListener: OnCompleteListener<PaymentDataRequestUpdate>,
         googlePayJsonFactory: GooglePayJsonFactory,
         errorReporter: ErrorReporter,
