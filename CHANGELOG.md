@@ -12,6 +12,7 @@ NEXT_VERSION_BUMP: PATCH
 * [ADDED] Added support for Naver Pay.
 * [ADDED] Added support for Kakao Pay.
 * [ADDED] Added support for Scalapay.
+* [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.
