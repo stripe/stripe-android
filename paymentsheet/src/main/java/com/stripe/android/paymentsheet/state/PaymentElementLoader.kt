@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -61,6 +62,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -276,6 +278,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val apiConfigurationResolver: ApiConfigurationResolver,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
@@ -311,6 +314,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
         val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
+        val paymentConfiguration = paymentConfiguration.get()
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
@@ -318,16 +322,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isLiveMode = apiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
             isTapToAddSupported = tapToAddConnectionStarter.isSupported(
-                apiConfiguration.publishableKey,
-                apiConfiguration.isLiveMode(),
+                paymentConfiguration.publishableKey,
+                paymentConfiguration.isLiveMode(),
             ),
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(
             configuration,
-            apiConfiguration.publishableKey,
-            apiConfiguration.isLiveMode(),
+            paymentConfiguration.publishableKey,
+            paymentConfiguration.isLiveMode(),
         )
 
         // Give immediately available results a chance to complete before later load work checks isCompleted.
@@ -420,6 +424,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     apiConfiguration = apiConfiguration,
+                    tapToAddPublishableKey = paymentConfiguration.publishableKey,
+                    tapToAddIsLiveMode = paymentConfiguration.isLiveMode(),
                 )
             }
         }
@@ -570,6 +576,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
+        tapToAddPublishableKey: String,
+        tapToAddIsLiveMode: Boolean,
     ): PaymentMethodMetadata {
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
@@ -589,8 +597,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(
             elementsSession,
             customerMetadata,
-            apiConfiguration.publishableKey,
-            apiConfiguration.isLiveMode(),
+            tapToAddPublishableKey,
+            tapToAddIsLiveMode,
         )
 
         val analyticsMetadata = analyticsMetadataFactory.create(

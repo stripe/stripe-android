@@ -5,6 +5,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
@@ -5052,6 +5053,9 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
+            paymentConfiguration = {
+                PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test")
+            },
             apiConfigurationResolver = FakeApiConfigurationResolver(
                 resolvedApiConfiguration = if (isLiveMode) {
                     DEFAULT_API_CONFIG.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)
