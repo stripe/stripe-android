@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
@@ -55,12 +54,6 @@ internal data class LinkConfiguration(
     val linkBrand: LinkBrand,
     val apiConfiguration: ApiConfiguration.State,
 ) : Parcelable {
-
-    val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = apiConfiguration.publishableKey,
-            stripeAccount = apiConfiguration.stripeAccountId,
-        )
 
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null

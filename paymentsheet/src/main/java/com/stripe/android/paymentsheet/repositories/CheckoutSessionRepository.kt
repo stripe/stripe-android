@@ -35,17 +35,16 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = apiConfigurationProvider.get().publishableKey,
-            stripeAccount = apiConfigurationProvider.get().stripeAccountId,
-        )
+    private fun createOptions(): ApiRequest.Options = ApiRequest.Options(
+        apiKey = apiConfigurationProvider.get().publishableKey,
+        stripeAccount = apiConfigurationProvider.get().stripeAccountId,
+    )
 
     private suspend fun executePost(
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
-        val options = requestOptions
+        val options = createOptions()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

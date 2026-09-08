@@ -18,7 +18,7 @@ import javax.inject.Singleton
         PollingViewModelModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
-        CoreCommonModule::class,
+        CoreCommonModule::class
     ]
 )
 internal interface PollingComponent {
