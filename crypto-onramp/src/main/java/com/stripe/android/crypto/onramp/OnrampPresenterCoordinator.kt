@@ -93,7 +93,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             config = it,
             readyCallback = ::handleGooglePayIsReady,
             cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter,
+            cardFundingFilter = DefaultCardFundingFilter
         )
     }
 
@@ -230,7 +230,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                 clientAttributionMetadata = null,
                                 transactionId = selection.transactionId,
                                 label = selection.label,
-                                publishableKey = it,
+                                publishableKey = it
                             )
                         },
                         onFailure = { error ->
