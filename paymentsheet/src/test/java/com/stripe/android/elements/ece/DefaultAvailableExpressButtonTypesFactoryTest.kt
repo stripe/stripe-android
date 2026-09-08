@@ -2,11 +2,15 @@
 package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.LinkState
 import org.junit.Test
 
 class DefaultAvailableExpressButtonTypesFactoryTest {
@@ -72,7 +76,7 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create filters out Link when its wallet button is hidden`() {
+    fun `create filters out Link for logged-out user when its wallet button is hidden`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.Link),
             configuration = ExpressCheckoutElement.Configuration()
@@ -83,6 +87,21 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
         )
 
         assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    @Test
+    fun `create returns Link for existing user when its wallet button is hidden`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link),
+            configuration = ExpressCheckoutElement.Configuration()
+                .linkConfiguration(
+                    ExpressCheckoutElement.Configuration.LinkConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
+                ),
+            linkLoginState = LinkState.LoginState.NeedsVerification,
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(ExpressButtonType.Link)
     }
 
     @Test
@@ -172,12 +191,21 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
         availableWallets: List<WalletType>,
         configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
         requiresShippingAddress: Boolean = false,
+        linkLoginState: LinkState.LoginState = LinkState.LoginState.LoggedOut,
     ): List<ExpressButtonType> {
+        val configurationState = configuration?.build()
         return DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
+                linkConfiguration = configurationState?.linkConfiguration?.asPaymentSheet()
+                    ?: PaymentSheet.LinkConfiguration(),
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = linkLoginState,
+                    signupMode = null,
+                ),
             ),
-            expressCheckoutElementConfiguration = configuration?.build(),
+            expressCheckoutElementConfiguration = configurationState,
             requiresShippingAddress = requiresShippingAddress,
         )
     }

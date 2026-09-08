@@ -152,6 +152,31 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `on init with Link Display WalletButtonHidden, existing user should have Link button`() = runTest {
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.Link),
+                linkEmail = null,
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                    signupMode = null,
+                ),
+                linkConfiguration = PaymentSheet.LinkConfiguration(
+                    display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+                ),
+            )
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            assertThat(state.walletButtons).hasSize(1)
+            assertThat(state.walletButtons.first()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+        }
+    }
+
+    @Test
     fun `on init with GPay & Link enabled in arguments, state should have both GPay & Link buttons`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(

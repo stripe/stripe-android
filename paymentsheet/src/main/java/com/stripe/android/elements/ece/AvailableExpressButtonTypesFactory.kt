@@ -35,8 +35,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                         CheckoutGooglePayConfiguration.Display.Automatic
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
-                    expressCheckoutElementConfiguration.linkConfiguration.display ==
-                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic &&
+                    paymentMethodMetadata.shouldShowLinkButton &&
                         !requiresShippingAddress
                 }
             }
