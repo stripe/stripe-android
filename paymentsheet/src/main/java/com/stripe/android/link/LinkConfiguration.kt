@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class LinkConfiguration constructor(
+internal data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val sellerBusinessName: String?,

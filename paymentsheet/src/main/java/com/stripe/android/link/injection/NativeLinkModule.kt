@@ -154,12 +154,6 @@ internal interface NativeLinkModule {
     companion object {
         @Provides
         @NativeLinkScope
-        fun providePaymentConfiguration(context: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(context)
-        }
-
-        @Provides
-        @NativeLinkScope
         fun providesLinkAccountHolder(
             savedStateHandle: SavedStateHandle,
             linkAccountInfo: LinkAccountUpdate.Value,
@@ -212,6 +206,12 @@ internal interface NativeLinkModule {
         @Named(ENABLE_LOGGING)
         @NativeLinkScope
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        @NativeLinkScope
+        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
+            return PaymentConfiguration.getInstance(appContext)
+        }
 
         @Provides
         fun provideApiConfiguration(

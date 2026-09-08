@@ -25,7 +25,6 @@ import kotlin.coroutines.CoroutineContext
     modules = [
         StripeCustomerAdapterModule::class,
         CustomerSheetDataCommonModule::class,
-        ApiConfigurationFromPaymentConfigurationModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
