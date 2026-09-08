@@ -45,6 +45,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -95,7 +96,10 @@ internal class CardNumberEditTextTest {
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
+        )
 
     private val cardNumberEditText = CardNumberEditText(
         context,
@@ -1076,7 +1080,7 @@ internal class CardNumberEditTextTest {
         val repository = FakeCardElementConfigRepository()
 
         val cardWidgetViewModel = CardWidgetViewModel(
-            paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
+            apiConfigProvider = ApiConfigProviderFromPaymentConfig.get(context),
             stripeRepository = repository,
             dispatcher = dispatcher
         ).also { viewModelStoreRule.track(it) }

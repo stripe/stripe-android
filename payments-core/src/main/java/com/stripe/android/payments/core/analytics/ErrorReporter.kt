@@ -3,7 +3,6 @@ package com.stripe.android.payments.core.analytics
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -13,9 +12,11 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import com.stripe.android.utils.filterNotNullValues
 import dagger.Binds
 import dagger.BindsInstance
@@ -45,19 +46,18 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component.
+         */
         fun createFallbackInstance(
             context: Context,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return createFallbackInstance(
                 context = context,
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
+                apiConfigurationProvider = ApiConfigProviderFromPaymentConfig.get(context),
                 productUsage = productUsage,
             )
         }
@@ -82,6 +82,25 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                     productUsage = productUsage,
                 )
                 .errorReporter
+        }
+
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if args are null when launching an activity so we have no way to access
+         * a publishable key.
+         */
+        fun createFallbackInstanceWithoutPublishableKey(
+            context: Context,
+            productUsage: Set<String> = emptySet()
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY, null)
+                },
+                productUsage = productUsage
+            )
         }
 
         fun getAdditionalParamsFromError(error: Throwable): Map<String, String> {

@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
@@ -66,10 +65,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
-            ErrorReporter.createFallbackInstance(
-                context = applicationContext,
-                apiConfigurationProvider = { ApiConfiguration.State("", null) },
-            )
+            ErrorReporter.createFallbackInstanceWithoutPublishableKey(context = applicationContext)
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
                 )
@@ -149,10 +145,6 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
                 applicationContext,
                 apiConfigurationProvider = { requireNotNull(_args).apiConfiguration },
             )
-                .report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
-                    stripeException = StripeException.create(error),
-                )
             viewModel.logError()
             setResult(
                 Activity.RESULT_OK,

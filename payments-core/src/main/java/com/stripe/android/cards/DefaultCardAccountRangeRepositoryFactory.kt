@@ -3,6 +3,8 @@ package com.stripe.android.cards
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -14,9 +16,11 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.ApiConfigProviderFromPaymentConfig
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
@@ -24,11 +28,12 @@ import javax.inject.Named
  * Will throw an exception if [PaymentConfiguration] has not been instantiated.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
+class DefaultCardAccountRangeRepositoryFactory internal constructor(
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
@@ -41,6 +46,26 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         )
     }
 
+    @Inject
+    constructor(
+        context: Context,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
+        requestSurface: RequestSurface,
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+    ) : this(
+        context = context,
+        productUsageTokens = productUsageTokens,
+        requestSurface = requestSurface,
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        apiConfigProvider = Provider {
+            ApiConfiguration.State(
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = null,
+            )
+        },
+    )
+
     @JvmOverloads
     constructor(
         context: Context,
@@ -50,6 +75,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        apiConfigProvider = ApiConfigProviderFromPaymentConfig.get(context)
     )
 
     @Throws(IllegalStateException::class)
@@ -71,7 +97,11 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                 ),
                 store,
                 DefaultAnalyticsRequestExecutor(),
-                PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
+                PaymentAnalyticsRequestFactory(
+                    context = appContext,
+                    publishableKeyProvider = { publishableKey },
+                    defaultProductUsageTokens = productUsageTokens
+                )
             ),
             staticSource = StaticCardAccountRangeSource(),
             store = store
@@ -82,9 +112,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         store: CardAccountRangeStore
     ): CardAccountRangeSource {
         return runCatching {
-            PaymentConfiguration.getInstance(
-                appContext
-            ).publishableKey
+            apiConfigProvider.get().publishableKey
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
@@ -108,7 +136,11 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                     ),
                     store,
                     DefaultAnalyticsRequestExecutor(),
-                    PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
+                    PaymentAnalyticsRequestFactory(
+                        context = appContext,
+                        publishableKeyProvider = { publishableKey },
+                        defaultProductUsageTokens = productUsageTokens
+                    )
                 )
             },
             onFailure = {
@@ -123,9 +155,9 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     ) {
         analyticsRequestExecutor.executeAsync(
             PaymentAnalyticsRequestFactory(
-                appContext,
-                publishableKey,
-                productUsageTokens,
+                context = appContext,
+                publishableKeyProvider = { publishableKey },
+                defaultProductUsageTokens = productUsageTokens,
             ).createRequest(event)
         )
     }
