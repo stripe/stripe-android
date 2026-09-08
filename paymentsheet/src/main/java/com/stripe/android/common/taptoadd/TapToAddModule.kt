@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -21,7 +20,6 @@ internal class TapToAddModule {
         isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
         connectionManager: TapToAddConnectionManager,
         stripeRepository: StripeRepository,
-        apiConfigurationProvider: () -> ApiConfiguration.State,
         terminalWrapper: TerminalWrapper,
         tapToPayUxConfiguration: TapToPayUxConfiguration,
         userFacingLogger: UserFacingLogger,
@@ -33,7 +31,6 @@ internal class TapToAddModule {
             connectionManager = connectionManager,
             terminalWrapper = terminalWrapper,
             stripeRepository = stripeRepository,
-            apiConfigurationProvider = apiConfigurationProvider,
             tapToPayUxConfiguration = tapToPayUxConfiguration,
             errorReporter = errorReporter,
             userFacingLogger = userFacingLogger,

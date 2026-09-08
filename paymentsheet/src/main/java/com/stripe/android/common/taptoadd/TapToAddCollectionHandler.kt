@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
@@ -59,7 +58,6 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             stripeRepository: StripeRepository,
-            apiConfigurationProvider: () -> ApiConfiguration.State,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             userFacingLogger: UserFacingLogger,
