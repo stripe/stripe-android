@@ -89,6 +89,7 @@ internal fun ConsentScreen(
             verificationPage.biometricConsent,
             verificationPage.bottomSheet,
             visitedIndividualWelcomePage,
+            hideBrandingHeader = identityViewModel.verificationArgs.biometricConsent?.hideBrandingHeader == true,
             showStripeLogo = !verificationPage.isStripe,
             onConsentAgreed = {
                 coroutineScope.launch {
@@ -124,6 +125,7 @@ private fun SuccessUI(
     consentPage: VerificationPageStaticContentConsentPage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     visitedIndividualWelcomePage: Boolean,
+    hideBrandingHeader: Boolean,
     showStripeLogo: Boolean = true,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
@@ -152,7 +154,7 @@ private fun SuccessUI(
                 modifier = Modifier.testTag(CONSENT_HEADER_TAG),
                 merchantLogoUri = merchantLogoUri,
                 title = consentPage.title,
-                showLogos = visitedIndividualWelcomePage.not(),
+                showLogos = !hideBrandingHeader && !visitedIndividualWelcomePage,
                 showStripeLogo = showStripeLogo
             )
             ConsentLines(
@@ -263,6 +265,7 @@ internal fun ConsentPreview() {
                 )
             ),
             visitedIndividualWelcomePage = false,
+            hideBrandingHeader = false,
             bottomSheets = mapOf(),
             onConsentAgreed = {},
             onConsentDeclined = {}

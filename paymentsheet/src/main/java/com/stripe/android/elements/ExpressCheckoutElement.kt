@@ -32,10 +32,18 @@ class ExpressCheckoutElement @Inject internal constructor(
     abstract class PaymentMethod private constructor() {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class GooglePay internal constructor() : PaymentMethod()
+        class GooglePay internal constructor() : PaymentMethod() {
+            override fun equals(other: Any?): Boolean = other is GooglePay
+
+            override fun hashCode(): Int = GooglePay::class.java.hashCode()
+        }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Link internal constructor() : PaymentMethod()
+        class Link internal constructor() : PaymentMethod() {
+            override fun equals(other: Any?): Boolean = other is Link
+
+            override fun hashCode(): Int = Link::class.java.hashCode()
+        }
     }
 
     @CheckoutSessionPreview
@@ -335,7 +343,7 @@ class ExpressCheckoutElement @Inject internal constructor(
 
         private var shippingAddressRequired: Boolean = false
         private var emailRequired: Boolean = false
-        private var paymentMethodOrder: List<PaymentMethod> = emptyList()
+        private var paymentMethodOrder: List<String> = emptyList()
         private var appearance: Appearance = Appearance()
 
         /** Sets the configuration for Link. */
@@ -371,12 +379,14 @@ class ExpressCheckoutElement @Inject internal constructor(
         /**
          * Sets the order in which express payment methods are displayed.
          *
+         * Supported values are `"google_pay"` and `"link"`.
+         *
          * By default, the Express Checkout Element uses dynamic ordering. Payment methods omitted
          * from [paymentMethodOrder] are displayed after the specified payment methods. Payment
-         * methods that are unavailable are ignored.
+         * methods that are unavailable or invalid are ignored.
          */
         fun paymentMethodOrder(
-            paymentMethodOrder: List<PaymentMethod>,
+            paymentMethodOrder: List<String>,
         ): Configuration = apply {
             this.paymentMethodOrder = paymentMethodOrder
         }
@@ -406,11 +416,11 @@ class ExpressCheckoutElement @Inject internal constructor(
             googlePayConfiguration = googlePayConfiguration.build(),
             shippingAddressRequired = shippingAddressRequired,
             emailRequired = emailRequired,
-            paymentMethodOrder = paymentMethodOrder.map { paymentMethod ->
+            paymentMethodOrder = paymentMethodOrder.mapNotNull { paymentMethod ->
                 when (paymentMethod) {
-                    is PaymentMethod.GooglePay -> PaymentMethodType.GooglePay
-                    is PaymentMethod.Link -> PaymentMethodType.Link
-                    else -> error("Unsupported payment method: ${paymentMethod::class.java.name}")
+                    "google_pay" -> PaymentMethodType.GooglePay
+                    "link" -> PaymentMethodType.Link
+                    else -> null
                 }
             },
             appearance = appearance.build(),

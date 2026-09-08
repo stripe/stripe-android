@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">Sisestatud IBAN on kehtetu, \"%s\" ei ole toetatud riigikood.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEALi pank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Teie BLIK-kood on puudulik.</string>
   <!-- Error message when BLIK code is invalid -->

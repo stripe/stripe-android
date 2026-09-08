@@ -36,7 +36,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
                 updateShippingAddress(countryCode, currentState, paymentDataUpdate)
             }
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption,
-            GooglePayPaymentDataUpdate.CallbackTrigger.Offer -> {
+            GooglePayPaymentDataUpdate.CallbackTrigger.Offer,
+            null -> {
                 reportUnexpectedCallbackTrigger(
                     if (trigger == GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption) {
                         VALUE_SHIPPING_OPTION_TRIGGER

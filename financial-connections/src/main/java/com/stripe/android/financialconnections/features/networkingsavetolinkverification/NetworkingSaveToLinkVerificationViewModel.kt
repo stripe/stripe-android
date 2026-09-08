@@ -32,7 +32,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -78,7 +78,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
                 phoneNumber = consumerSession.phoneNumber,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 otpElement = OTPElement(
-                    IdentifierSpec.Generic("otp"),
+                    FormFieldId.Generic("otp"),
                     OTPController()
                 )
             )

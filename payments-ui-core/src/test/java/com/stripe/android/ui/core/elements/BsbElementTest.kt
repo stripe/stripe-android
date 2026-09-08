@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -11,7 +11,7 @@ class BsbElementTest {
     @Test
     fun `default banks include server bank prefixes`() = runTest {
         val element = BsbElement(
-            identifierSpec = IdentifierSpec.Generic("au_becs_debit[bsb_number]"),
+            formFieldId = FormFieldId.Generic("au_becs_debit[bsb_number]"),
             initialValue = null,
         )
 
@@ -25,7 +25,7 @@ class BsbElementTest {
     @Test
     fun `most specific bank prefix determines bank name`() = runTest {
         val element = BsbElement(
-            identifierSpec = IdentifierSpec.Generic("au_becs_debit[bsb_number]"),
+            formFieldId = FormFieldId.Generic("au_becs_debit[bsb_number]"),
             initialValue = null,
         )
 
@@ -38,9 +38,9 @@ class BsbElementTest {
 
     @Test
     fun `controller updates bank name and complete form entry`() = runTest {
-        val identifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
+        val identifier = FormFieldId.Generic("au_becs_debit[bsb_number]")
         val element = BsbElement(
-            identifierSpec = identifier,
+            formFieldId = identifier,
             initialValue = null,
         )
 

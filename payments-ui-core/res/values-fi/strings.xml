@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">Antamasi IBAN on virheellinen, \"%s\" ei ole tuettu maakoodi.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN-tilinumero alkaa kaksikirjaimisella maakoodilla.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL-pankki</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK-koodisi on puutteellinen.</string>
   <!-- Error message when BLIK code is invalid -->

@@ -5,13 +5,13 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val alipayRawValues = mapOf(
-    IdentifierSpec.Line1 to "10 Collyer Quay",
-    IdentifierSpec.Line2 to "#10-01",
-    IdentifierSpec.PostalCode to "049315",
-    IdentifierSpec.Country to "SG",
+    FormFieldId.Line1 to "10 Collyer Quay",
+    FormFieldId.Line2 to "#10-01",
+    FormFieldId.PostalCode to "049315",
+    FormFieldId.Country to "SG",
 )
 
 private val alipayNeverExpectedParams = LpmBillingAddressFormParams(

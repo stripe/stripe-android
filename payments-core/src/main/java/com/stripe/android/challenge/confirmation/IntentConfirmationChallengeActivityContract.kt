@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 
 internal class IntentConfirmationChallengeActivityContract :
@@ -20,7 +21,7 @@ internal class IntentConfirmationChallengeActivityContract :
         return IntentConfirmationChallengeActivity.createIntent(
             context,
             IntentConfirmationChallengeArgs(
-                input.publishableKey,
+                input.apiConfiguration,
                 input.productUsage.toList(),
                 input.intent,
                 captchaVendorName
@@ -43,7 +44,7 @@ internal class IntentConfirmationChallengeActivityContract :
     }
 
     data class Args(
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val productUsage: Set<String>,
         val intent: StripeIntent
     )

@@ -5,14 +5,14 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val mobilePayFullRawValues = mapOf(
-    IdentifierSpec.Line1 to "Kongens Nytorv 1",
-    IdentifierSpec.Line2 to "2. sal",
-    IdentifierSpec.City to "København",
-    IdentifierSpec.PostalCode to "1050",
-    IdentifierSpec.Country to "DK",
+    FormFieldId.Line1 to "Kongens Nytorv 1",
+    FormFieldId.Line2 to "2. sal",
+    FormFieldId.City to "København",
+    FormFieldId.PostalCode to "1050",
+    FormFieldId.Country to "DK",
 )
 
 private val mobilePayNoBillingDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

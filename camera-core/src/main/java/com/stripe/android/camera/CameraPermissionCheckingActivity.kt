@@ -10,9 +10,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.storage.StorageFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -38,8 +37,6 @@ abstract class CameraPermissionCheckingActivity :
         StorageFactory.getStorageInstance(this, PERMISSION_STORAGE_NAME)
     }
 
-    private val mainScope = CoroutineScope(Dispatchers.Main)
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun ensureCameraPermission(
         onCameraReady: () -> Unit,
@@ -52,7 +49,7 @@ abstract class CameraPermissionCheckingActivity :
                 this,
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED -> {
-                mainScope.launch {
+                lifecycleScope.launch {
                     onCameraReady()
                 }
             }
@@ -82,7 +79,7 @@ abstract class CameraPermissionCheckingActivity :
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
-                    mainScope.launch {
+                    lifecycleScope.launch {
                         onCameraReady()
                     }
                 }

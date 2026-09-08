@@ -1,7 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -18,10 +22,15 @@ import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.junit.rules.RuleChain
 import kotlin.time.Duration.Companion.seconds
 
-internal class HCaptchaTokenTest {
+@RunWith(TestParameterInjector::class)
+internal class HCaptchaTokenTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
@@ -37,6 +46,7 @@ internal class HCaptchaTokenTest {
 
     @Test
     fun newPaymentMethod_withPassiveCaptchaEnabled_includesHCaptchaTokenInConfirmRequest() = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = ProductIntegrationType.PaymentSheet,
         resultCallback = ::assertCompleted,
@@ -47,6 +57,7 @@ internal class HCaptchaTokenTest {
     @Test
     fun paymentMethodCreation_withPassiveCaptchaEnabled_includesHCaptchaTokenInCreateRequest() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
@@ -62,6 +73,7 @@ internal class HCaptchaTokenTest {
     @Test
     fun linkPaymentMethodMode_withPassiveCaptchaEnabled_includesHCaptchaTokenInConfirmRequest() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
@@ -79,6 +91,7 @@ internal class HCaptchaTokenTest {
     @Test
     fun linkPassthroughMode_withPassiveCaptchaEnabled_includesHCaptchaTokenInConfirmRequest() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,

@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -12,8 +16,13 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class PaymentSheetCustomerSessionTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetCustomerSessionTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -24,6 +33,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsUnspecifiedWhenNotSavingWithPaymentIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -40,6 +50,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsAlwaysWhenSavingWithPaymentIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -57,6 +68,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsLimitedWhenNotSavingWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -73,6 +85,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsAlwaysWhenSavingWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -90,6 +103,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsUnspecifiedWhenSaveIsDisabledWithPaymentIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -108,6 +122,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsLimitedWhenSaveIsDisabledWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -126,6 +141,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsUnspecifiedWhenOverrideIsUnspecifiedWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -145,6 +161,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsAlwaysWhenOverrideIsAlwaysWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->

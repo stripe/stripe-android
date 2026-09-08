@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -17,12 +17,12 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StaticTextElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     val text: ResolvableString,
     override val controller: InputController? = null
 ) : FormElement {
     constructor(
-        identifier: IdentifierSpec,
+        identifier: FormFieldId,
         stringResId: Int,
         controller: InputController? = null
     ) : this(
@@ -34,6 +34,6 @@ data class StaticTextElement(
     override val allowsUserInteraction: Boolean = false
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 }

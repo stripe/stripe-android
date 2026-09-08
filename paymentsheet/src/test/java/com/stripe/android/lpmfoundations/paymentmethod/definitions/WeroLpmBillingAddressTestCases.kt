@@ -5,17 +5,17 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val weroCountryOnlyRawValues = mapOf(
-    IdentifierSpec.Country to "DE",
+    FormFieldId.Country to "DE",
 )
 
 private val weroWithBillingAddressRawValues = weroCountryOnlyRawValues + mapOf(
-    IdentifierSpec.Line1 to "Unter den Linden 1",
-    IdentifierSpec.Line2 to "Wohnung 2",
-    IdentifierSpec.City to "Berlin",
-    IdentifierSpec.PostalCode to "10117",
+    FormFieldId.Line1 to "Unter den Linden 1",
+    FormFieldId.Line2 to "Wohnung 2",
+    FormFieldId.City to "Berlin",
+    FormFieldId.PostalCode to "10117",
 )
 
 private val weroCountryOnlyExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

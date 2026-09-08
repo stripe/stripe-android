@@ -1,11 +1,11 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun convertToFormValuesMap(paramMap: Map<String, Any?>): Map<IdentifierSpec, String?> {
-    val mutableMap = mutableMapOf<IdentifierSpec, String?>()
+fun convertToFormValuesMap(paramMap: Map<String, Any?>): Map<FormFieldId, String?> {
+    val mutableMap = mutableMapOf<FormFieldId, String?>()
     addPath(paramMap, "", mutableMap)
     return mutableMap
 }
@@ -14,15 +14,15 @@ fun convertToFormValuesMap(paramMap: Map<String, Any?>): Map<IdentifierSpec, Str
 private fun addPath(
     paramMap: Map<String, Any?>,
     path: String,
-    output: MutableMap<IdentifierSpec, String?>
+    output: MutableMap<FormFieldId, String?>
 ) {
     for (entry in paramMap.entries) {
         when (entry.value) {
             null -> {
-                output[IdentifierSpec.get(addPathKey(path, entry.key))] = null
+                output[FormFieldId.get(addPathKey(path, entry.key))] = null
             }
             is String -> {
-                output[IdentifierSpec.get(addPathKey(path, entry.key))] = entry.value as String
+                output[FormFieldId.get(addPathKey(path, entry.key))] = entry.value as String
             }
             is Map<*, *> -> {
                 addPath(entry.value as Map<String, Any>, addPathKey(path, entry.key), output)

@@ -73,7 +73,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-                    shippingInformation = null,
+                    shipping = shippingValues.toCheckoutSessionShipping(),
                 )
                 confirmCheckoutSession(params)
             },
@@ -107,7 +107,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
-            shippingInformation = confirmationOption.shippingInformation,
+            // ECE Google Pay returns the buyer's final shipping address after confirmation starts.
+            // It cannot be reconciled with the earlier shippingValues snapshot, so use it for this
+            // confirmation and otherwise retain the controller shipping.
+            shipping = confirmationOption.shippingInformation.toCheckoutSessionShipping()
+                ?: shippingValues.toCheckoutSessionShipping(),
         )
         return confirmCheckoutSession(params)
     }
@@ -144,7 +148,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
-        shippingInformation: ShippingInformation?,
+        shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
@@ -152,13 +156,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             returnUrl = returnUrl,
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
-            shipping = shippingInformation.toCheckoutSessionShipping(),
+            shipping = shipping,
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
-            shipping = shippingInformation.toCheckoutSessionShipping(),
+            shipping = shipping,
         )
     }
 
@@ -237,10 +241,19 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
-    return this?.let {
+    return this?.takeIf { it.address?.toParamMap()?.isNotEmpty() == true }?.let {
         ConfirmCheckoutSessionParams.Shipping(
             name = it.name,
             address = it.address,
+        )
+    }
+}
+
+private fun ConfirmPaymentIntentParams.Shipping?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
+    return this?.takeIf { it.getAddress().toParamMap().isNotEmpty() }?.let {
+        ConfirmCheckoutSessionParams.Shipping(
+            name = it.getName(),
+            address = it.getAddress(),
         )
     }
 }

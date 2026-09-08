@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
@@ -278,7 +279,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val launchCall = launcher.calls.awaitItem()
 
         assertThat(launchCall.input.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
-        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchCall.input.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -448,7 +449,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val startCall = fakePassiveChallengeWarmer.awaitStartCall()
 
         assertThat(startCall.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
-        assertThat(startCall.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(startCall.apiConfiguration).isEqualTo(
+            launcherArgs.apiConfiguration
+        )
         assertThat(startCall.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -605,14 +608,14 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     private fun createPassiveChallengeConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
         passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
-        publishableKey: String = launcherArgs.publishableKey,
+        apiConfiguration: ApiConfiguration.State = launcherArgs.apiConfiguration,
         productUsage: Set<String> = launcherArgs.productUsage,
         isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
             FakeIsEligibleForConfirmationChallenge()
     ): PassiveChallengeConfirmationDefinition {
         return PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            publishableKeyProvider = { publishableKey },
+            apiConfigurationProvider = { apiConfiguration },
             productUsage = productUsage,
             passiveChallengeWarmer = passiveChallengeWarmer,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge
@@ -642,7 +645,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         private val launcherArgs = PassiveChallengeActivityContract.Args(
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = setOf("PaymentSheet")
         )
     }

@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
 import org.junit.Rule
@@ -22,6 +23,7 @@ import org.junit.Test
 internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )

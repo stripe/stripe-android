@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.content.Context
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
@@ -24,8 +28,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@RunWith(AndroidJUnit4::class)
-class CustomPaymentMethodsAnalyticsTest {
+@RunWith(TestParameterInjector::class)
+internal class CustomPaymentMethodsAnalyticsTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
@@ -42,6 +49,7 @@ class CustomPaymentMethodsAnalyticsTest {
 
     @Test
     fun testSuccessful() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = IntegrationType.Compose,
         builder = {

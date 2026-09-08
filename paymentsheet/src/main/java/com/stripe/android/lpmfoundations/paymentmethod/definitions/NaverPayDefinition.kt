@@ -1,8 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SimpleDropdownConfig
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 
 internal object NaverPayDefinition : PaymentMethodDefinition {
@@ -36,7 +36,7 @@ internal object NaverPayDefinition : PaymentMethodDefinition {
 }
 
 private object NaverPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    private val fundingIdentifier = IdentifierSpec.Generic("naver_pay[funding]")
+    private val fundingIdentifier = FormFieldId.Generic("naver_pay[funding]")
 
     override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = NaverPayDefinition,

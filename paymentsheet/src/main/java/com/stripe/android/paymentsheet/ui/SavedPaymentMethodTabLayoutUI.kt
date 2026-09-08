@@ -60,7 +60,7 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionValidationMessage
 import com.stripe.android.uicore.getOuterFormInsets
@@ -618,7 +618,7 @@ internal fun CvcRecollectionField(
     val controller by cvcControllerFlow.collectAsState()
     val validationMessage by controller.validationMessage.collectAsState()
     val element = CvcElement(
-        IdentifierSpec(),
+        FormFieldId(),
         controller
     )
     val focusRequester = remember { FocusRequester() }

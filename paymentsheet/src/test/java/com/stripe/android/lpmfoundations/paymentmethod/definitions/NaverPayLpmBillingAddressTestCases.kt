@@ -5,16 +5,16 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val naverPayRawValues = mapOf(
-    IdentifierSpec.Generic("naver_pay[funding]") to "card",
-    IdentifierSpec.Line1 to "510 Townsend St",
-    IdentifierSpec.Line2 to "Floor 2",
-    IdentifierSpec.City to "San Francisco",
-    IdentifierSpec.State to "CA",
-    IdentifierSpec.PostalCode to "94103",
-    IdentifierSpec.Country to "US",
+    FormFieldId.Generic("naver_pay[funding]") to "card",
+    FormFieldId.Line1 to "510 Townsend St",
+    FormFieldId.Line2 to "Floor 2",
+    FormFieldId.City to "San Francisco",
+    FormFieldId.State to "CA",
+    FormFieldId.PostalCode to "94103",
+    FormFieldId.Country to "US",
 )
 
 private val naverPayExpectedParams = PaymentMethodCreateParams.createWithOverride(

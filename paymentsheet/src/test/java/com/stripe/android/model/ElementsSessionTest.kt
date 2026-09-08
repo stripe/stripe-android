@@ -404,7 +404,6 @@ class ElementsSessionTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
-            paymentMethodSpecs = null,
             externalPaymentMethodData = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             orderedPaymentMethodTypesAndWallets = emptyList(),

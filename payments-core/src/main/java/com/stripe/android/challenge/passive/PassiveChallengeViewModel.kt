@@ -53,7 +53,7 @@ internal class PassiveChallengeViewModel @Inject constructor(
                 DaggerPassiveChallengeComponent.factory()
                     .create(
                         context = app,
-                        publishableKeyProvider = { args.publishableKey },
+                        apiConfiguration = args.apiConfiguration,
                         productUsage = args.productUsage.toSet(),
                         passiveCaptchaParams = args.passiveCaptchaParams,
                     )

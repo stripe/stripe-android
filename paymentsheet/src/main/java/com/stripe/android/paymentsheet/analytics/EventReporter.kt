@@ -36,11 +36,6 @@ internal interface LoadingEventReporter {
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
      */
     fun onElementsSessionLoadFailed(error: Throwable)
-
-    /**
-     * The client was unable to parse the response from LUXE.
-     */
-    fun onLpmSpecFailure(errorMessage: String?)
 }
 
 @Suppress("TooManyFunctions")

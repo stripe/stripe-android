@@ -28,7 +28,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.OTPViewModel
 import com.stripe.android.identity.viewmodel.OTPViewState
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,7 +102,7 @@ class OTPScreenTest {
     private val mockOtpViewModel = mock<OTPViewModel> {
         on { viewState } doReturn otpViewState
         on { otpElement } doReturn OTPElement(
-            identifier = IdentifierSpec.Generic(OTPViewModel.OTP),
+            identifier = FormFieldId.Generic(OTPViewModel.OTP),
             controller = OTPController()
         )
     }

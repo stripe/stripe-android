@@ -222,7 +222,7 @@ private fun <T> ValueRow(
         ColorValue(definition, value, enabled, onValueChanged)
     } else if (definition.options.isEmpty()) {
         TextValue(definition, value, enabled, onValueChanged)
-    } else if (definition.options.size <= MaxInlineOptions) {
+    } else if (definition.options.size < MaxInlineOptions) {
         RadioValue(definition, value, enabled, onValueChanged)
     } else {
         DropdownValue(definition, value, enabled, onValueChanged)
