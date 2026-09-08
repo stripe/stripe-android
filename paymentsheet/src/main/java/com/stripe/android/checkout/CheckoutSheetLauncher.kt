@@ -91,13 +91,34 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                applyCompleteResult(result)
-                if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                    rowSelectionImmediateActionHandler.invoke()
+                val response = result.checkoutSessionResponse
+                if (response == null) {
+                    applyManageResult(result)
+                } else {
+                    coroutineScope.launch {
+                        operationCoordinator.runMutation {
+                            runCatching {
+                                sessionRefresher.refresh(response, result.selection)
+                                applyManageResult(result)
+                            }
+                        }.onFailure {
+                            logger.error(
+                                "Failed to refresh the checkout session after selecting a saved payment method.",
+                                it,
+                            )
+                        }
+                    }
                 }
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    private fun applyManageResult(result: EmbeddedActivityResult.Complete) {
+        applyCompleteResult(result)
+        if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
+            rowSelectionImmediateActionHandler.invoke()
         }
     }
 

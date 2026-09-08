@@ -5,12 +5,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -27,6 +29,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val launchMode: EmbeddedLaunchMode,
+    private val sheetActivityStateHolder: SheetActivityStateHolder,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
         return DefaultManageScreenInteractor(
@@ -38,8 +41,8 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
             onSelectPaymentMethod = {
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                selectionHolder.setSelection(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
+                sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
@@ -52,6 +55,12 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+            pendingPaymentMethodId = sheetActivityStateHolder.state.mapAsStateFlow {
+                it.pendingPaymentMethodId
+            },
+            error = sheetActivityStateHolder.state.mapAsStateFlow { it.error },
+            navigateBackAfterSelection = false,
         )
     }
 }

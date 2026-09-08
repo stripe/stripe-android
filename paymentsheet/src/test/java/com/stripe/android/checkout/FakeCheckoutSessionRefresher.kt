@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import app.cash.turbine.Turbine
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal class FakeCheckoutSessionRefresher : CheckoutSessionRefresher {
@@ -19,6 +20,10 @@ internal class FakeCheckoutSessionRefresher : CheckoutSessionRefresher {
         record(Call.Commit(response))
     }
 
+    override suspend fun refresh(response: CheckoutSessionResponse, selection: PaymentSelection?) {
+        record(Call.CommitWithSelection(response, selection))
+    }
+
     fun ensureAllEventsConsumed() {
         calls.ensureAllEventsConsumed()
         refreshActions.ensureAllEventsConsumed()
@@ -32,5 +37,9 @@ internal class FakeCheckoutSessionRefresher : CheckoutSessionRefresher {
     sealed interface Call {
         data object Fetch : Call
         data class Commit(val response: CheckoutSessionResponse) : Call
+        data class CommitWithSelection(
+            val response: CheckoutSessionResponse,
+            val selection: PaymentSelection?,
+        ) : Call
     }
 }
