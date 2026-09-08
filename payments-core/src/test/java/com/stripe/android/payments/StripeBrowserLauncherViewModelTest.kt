@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.browser.BrowserCapabilities
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -30,8 +31,8 @@ class StripeBrowserLauncherViewModelTest {
         analyticsRequests.add(it)
     }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        application,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = application,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val savedStateHandle = SavedStateHandle()
@@ -79,7 +80,8 @@ class StripeBrowserLauncherViewModelTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
                     canCancelSource = true,
-                    sourceId = ""
+                    sourceId = "",
+                    stripeAccountId = "acct_123",
                 )
             )
     }
@@ -118,7 +120,7 @@ class StripeBrowserLauncherViewModelTest {
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
             url = "https://bank.com",
             statusBarColor = Color.RED,
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             isInstantApp = false
         )
     }

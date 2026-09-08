@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
@@ -23,6 +24,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -43,6 +45,23 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
+                productUsage = productUsage,
+            )
+        }
+
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -50,12 +69,16 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
+                    apiConfigurationProvider = {
+                        apiConfigurationProvider.get()
+                    },
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -446,6 +469,8 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
         ): DefaultErrorReporterComponent
@@ -483,8 +508,8 @@ internal interface DefaultErrorReporterModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
-            return { PaymentConfiguration.getInstance(context).publishableKey }
-        }
+        fun providePublishableKeyProvider(
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+        ): () -> String = { apiConfigurationProvider().publishableKey }
     }
 }
