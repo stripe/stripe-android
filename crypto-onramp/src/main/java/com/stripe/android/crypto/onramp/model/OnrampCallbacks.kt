@@ -20,7 +20,6 @@ class OnrampCallbacks {
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var userAttestationCallback: OnrampUserAttestationCallback? = null
-    private var additionalKycCallback: OnrampAdditionalKycCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
     private var samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null
@@ -68,13 +67,6 @@ class OnrampCallbacks {
     }
 
     /**
-     * Callback invoked when the additional KYC collection flow completes.
-     */
-    fun additionalKycCallback(callback: OnrampAdditionalKycCallback) = apply {
-        this.additionalKycCallback = callback
-    }
-
-    /**
      * An async closure that calls your backend to perform a checkout.
      *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
      *     The closure should return the onramp session client secret on success, or throw an Error on failure.
@@ -114,7 +106,6 @@ class OnrampCallbacks {
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
         val userAttestationCallback: OnrampUserAttestationCallback?,
-        val additionalKycCallback: OnrampAdditionalKycCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
         val googlePayIsReadyCallback: ((Boolean) -> Unit)?,
         val samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)?,
@@ -138,7 +129,6 @@ class OnrampCallbacks {
                 "checkoutCallback must not be null"
             },
             userAttestationCallback = userAttestationCallback,
-            additionalKycCallback = additionalKycCallback,
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },
