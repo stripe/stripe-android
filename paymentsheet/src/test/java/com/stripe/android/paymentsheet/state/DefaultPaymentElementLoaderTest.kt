@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
@@ -14,6 +14,7 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -76,6 +77,7 @@ import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -173,6 +175,10 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+                    ),
                 ),
             )
         )
@@ -5043,7 +5049,16 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
-            paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
+            apiConfigurationResolver = FakeApiConfigurationResolver(
+                resolvedApiConfiguration = ApiConfiguration.State(
+                    publishableKey = if (isLiveMode) {
+                        ApiKeyFixtures.FAKE_LIVE_KEY
+                    } else {
+                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    },
+                    stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+                ),
+            ),
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
                 errorReporter = errorReporter,

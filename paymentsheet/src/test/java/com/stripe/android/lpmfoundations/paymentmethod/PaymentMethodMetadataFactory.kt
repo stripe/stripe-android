@@ -1,10 +1,12 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkBrand
@@ -80,6 +82,10 @@ internal object PaymentMethodMetadataFactory {
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        apiConfiguration: ApiConfiguration.State = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        ),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -152,6 +158,7 @@ internal object PaymentMethodMetadataFactory {
             cardArts = cardArts,
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
     }
 
