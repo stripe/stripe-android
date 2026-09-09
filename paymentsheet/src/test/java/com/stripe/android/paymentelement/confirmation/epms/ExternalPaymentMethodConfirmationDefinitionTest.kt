@@ -202,6 +202,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val launchAction = action.asLaunch()
 
         assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
+        assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 
     @Test
