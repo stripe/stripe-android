@@ -25,6 +25,28 @@ internal interface EmbeddedSheetPresentation {
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation
     }
+
+    companion object : EmbeddedSheetPresentationFactory {
+        override fun create(
+            activity: EmbeddedSheetActivity,
+            args: EmbeddedActivityArgs,
+            activityResultCaller: ActivityResultCaller,
+        ): EmbeddedSheetPresentation {
+            return EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
+                activity = activity,
+                args = args,
+                activityResultCaller = activityResultCaller,
+            )
+        }
+    }
+}
+
+internal interface EmbeddedSheetPresentationFactory {
+    fun create(
+        activity: EmbeddedSheetActivity,
+        args: EmbeddedActivityArgs,
+        activityResultCaller: ActivityResultCaller,
+    ): EmbeddedSheetPresentation
 }
 
 internal fun EmbeddedSheetActivity.finishWithResult(result: EmbeddedActivityResult) {
