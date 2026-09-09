@@ -403,7 +403,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
-                    stripeAccountId = apiConfiguration.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }

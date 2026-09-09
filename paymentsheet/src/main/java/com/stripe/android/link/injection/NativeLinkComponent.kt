@@ -6,8 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
@@ -29,6 +27,8 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -50,6 +50,8 @@ internal annotation class NativeLinkScope
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
+        ApiRequestOptionsModule::class,
+        ApiConfigurationToNamedModule::class,
     ]
 )
 internal interface NativeLinkComponent {
@@ -81,12 +83,6 @@ internal interface NativeLinkComponent {
             configuration: LinkConfiguration,
             @BindsInstance
             paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
-            @BindsInstance
-            @Named(STRIPE_ACCOUNT_ID)
-            stripeAccountIdProvider: () -> String?,
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
