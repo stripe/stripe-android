@@ -40,6 +40,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -838,6 +839,13 @@ internal class DefaultCustomerSheetLoaderTest {
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
+        val apiConfigurationResolver = mock<ApiConfigurationResolver>()
+        whenever(apiConfigurationResolver.resolve(apiConfiguration = null)).thenReturn(
+            ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            )
+        )
         return DefaultCustomerSheetLoader(
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(
@@ -858,7 +866,8 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            apiConfigurationResolver = apiConfigurationResolver,
         )
     }
 
