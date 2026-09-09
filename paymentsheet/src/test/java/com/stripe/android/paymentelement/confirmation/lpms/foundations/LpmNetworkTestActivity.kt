@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -132,6 +133,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 @Component(
     modules = [
         ElementsSessionClientParamsModule::class,
+        ApiConfigurationFromNamedModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         DefaultConfirmationModule::class,
