@@ -340,7 +340,7 @@ class CardUiDefinitionFactoryTest {
                     overrideParamMap = mapOf(
                         "type" to "card",
                         "card" to mapOf(
-                            "number" to "4242424242424242",
+                            "number" to "4252325512413252",
                             "exp_month" to "07",
                             "exp_year" to "2050",
                             "cvc" to "123",

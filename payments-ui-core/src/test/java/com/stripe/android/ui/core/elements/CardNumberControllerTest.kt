@@ -9,7 +9,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -859,10 +858,10 @@ internal class CardNumberControllerTest {
     }
 
     @Test
-    fun `Controller should always have an Ltr layout`() = runTest {
+    fun `Controller should enforce Ltr text direction`() = runTest {
         val cardNumberController = createController()
 
-        assertThat(cardNumberController.layoutDirection).isEqualTo(LayoutDirection.Ltr)
+        assertThat(cardNumberController.enforceLeftToRightTextDirection).isTrue()
     }
 
     @Test
