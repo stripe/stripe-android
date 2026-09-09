@@ -31,12 +31,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Provider
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
@@ -72,6 +74,28 @@ class CustomerAdapterTest {
             context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider
+        )
+
+        assertThat(adapter).isNotNull()
+    }
+
+    @Test
+    fun `CustomerAdapter can be created before PaymentConfiguration is initialized`() {
+        PaymentConfiguration.clearInstance()
+
+        val adapter = CustomerAdapter.create(
+            context = application,
+            customerEphemeralKeyProvider = {
+                CustomerAdapter.Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123",
+                    )
+                )
+            },
+            setupIntentClientSecretProvider = {
+                CustomerAdapter.Result.success("seti_123")
+            },
         )
 
         assertThat(adapter).isNotNull()
@@ -192,12 +216,18 @@ class CustomerAdapterTest {
     fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
-        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), any()))
+        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), eq("acct_123")))
             .thenReturn(Result.success(emptyList()))
 
         val adapter = createAdapter(
             customerRepository = customerRepository,
             paymentMethodTypes = listOf("card"),
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = "pk_123",
+                    stripeAccountId = "acct_123",
+                )
+            },
         )
         adapter.retrievePaymentMethods()
         verify(customerRepository).getPaymentMethods(
@@ -261,7 +291,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
-            stripeAccountId = eq("acct_123"),
+            stripeAccountId = isNull(),
         )
     }
 
@@ -771,6 +801,12 @@ class CustomerAdapterTest {
             FakePrefsRepository()
         },
         paymentMethodTypes: List<String>? = null,
+        apiConfigurationProvider: Provider<ApiConfiguration.State> = Provider {
+            ApiConfiguration.State(
+                publishableKey = "pk_123",
+                stripeAccountId = "acct_123",
+            )
+        },
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = application,
@@ -780,8 +816,8 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
-            apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", "acct_123") },
-            workContext = testDispatcher
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = testDispatcher,
         )
     }
 }

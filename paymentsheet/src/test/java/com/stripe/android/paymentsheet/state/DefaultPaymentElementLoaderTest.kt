@@ -107,10 +107,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentElementLoaderTest {
 
     @AfterTest
@@ -3900,6 +3903,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Vertical)
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -3910,6 +3914,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
             .isEqualTo(PaymentMethodOrientation.Horizontal)
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -3926,6 +3931,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Horizontal)
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -3942,6 +3948,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Vertical)
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -3968,6 +3975,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
                 .isEqualTo(PaymentMethodOrientation.Vertical)
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -4333,6 +4341,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(helper.calls.awaitItem()).isNotNull()
         val exposure = reporter.experimentExposureCalls.awaitItem()
         assertThat(exposure.experiment.group).isEqualTo("treatment")
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4373,6 +4382,7 @@ internal class DefaultPaymentElementLoaderTest {
         helper.calls.expectNoEvents()
         val exposure = reporter.experimentExposureCalls.awaitItem()
         assertThat(exposure.experiment.group).isEqualTo("control")
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4409,6 +4419,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
         helper.calls.expectNoEvents()
         reporter.experimentExposureCalls.expectNoEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -5023,12 +5034,6 @@ internal class DefaultPaymentElementLoaderTest {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
             durationProvider,
-            apiConfigurationProvider = {
-                ApiConfiguration.State(
-                    publishableKey = if (isLiveMode) "pk_live" else "pk_test_123",
-                    stripeAccountId = "acct_123",
-                )
-            },
         )
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
@@ -5037,7 +5042,6 @@ internal class DefaultPaymentElementLoaderTest {
             linkGateFactory = FakeLinkGate.Factory(linkGate),
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
         )
-
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
