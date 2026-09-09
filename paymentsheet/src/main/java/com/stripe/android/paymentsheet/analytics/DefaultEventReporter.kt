@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
@@ -44,6 +45,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     @IOContext private val workContext: CoroutineContext,
     private val logger: UserFacingLogger,
     private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
+    private val initEventHelper: InitEventHelper,
 ) : EventReporter, LoadingEventReporter {
 
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
@@ -53,21 +55,17 @@ internal class DefaultEventReporter @Inject internal constructor(
     )
 
     override fun onInit() {
-        fireEvent(
-            event = PaymentSheetEvent.Init(
-                mode = mode,
-            ),
-            paymentMethodMetadata = null, // We won't have a value on init, and using null prevents a stack overflow.
-        )
+        initEventHelper.onInit()
     }
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
             event = PaymentSheetEvent.LoadStarted(
                 initializedViaCompose = initializedViaCompose
             ),
             paymentMethodMetadata = null, // We don't have these details until load is complete.
+            publishableKey = publishableKey,
         )
     }
 
@@ -93,6 +91,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadFailed(
         error: Throwable,
+        publishableKey: String,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
         fireEvent(
@@ -102,6 +101,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
+            publishableKey = publishableKey,
         )
     }
 
@@ -622,15 +622,33 @@ internal class DefaultEventReporter @Inject internal constructor(
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
+        publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
-            analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = event,
-                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+            initEventHelper.publishableKeyForInit(publishableKey, paymentMethodMetadata)?.let {
+                executeEvent(
+                    event = PaymentSheetEvent.Init(mode),
+                    paymentMethodMetadata = null,
+                    publishableKey = it,
                 )
-            )
+            }
+            executeEvent(event, paymentMethodMetadata, publishableKey)
         }
+    }
+
+    private fun executeEvent(
+        event: PaymentSheetEvent,
+        paymentMethodMetadata: PaymentMethodMetadata?,
+        publishableKey: String?,
+    ) {
+        val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
+            (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = additionalParams,
+            )
+        )
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
