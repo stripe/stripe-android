@@ -838,7 +838,6 @@ internal class DefaultCustomerSheetLoaderTest {
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
-        val apiConfigurationResolver = FakeApiConfigurationResolver()
         return DefaultCustomerSheetLoader(
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(
@@ -859,7 +858,7 @@ internal class DefaultCustomerSheetLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
-            apiConfigurationResolver = apiConfigurationResolver,
+            apiConfigurationResolver = FakeApiConfigurationResolver(),
         )
     }
 
