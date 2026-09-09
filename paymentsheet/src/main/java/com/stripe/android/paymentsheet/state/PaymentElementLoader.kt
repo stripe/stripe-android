@@ -361,7 +361,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        fetchPaymentMethodMessaging(elementsSession)
+        fetchPaymentMethodMessaging(elementsSession, apiConfiguration)
 
         val isGooglePayReady = isGooglePayReady(
             configuration = configuration,
@@ -944,13 +944,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private fun fetchPaymentMethodMessaging(elementsSession: ElementsSession) {
+    private fun fetchPaymentMethodMessaging(
+        elementsSession: ElementsSession,
+        apiConfiguration: ApiConfiguration.State,
+    ) {
         val variant = elementsSession.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
         ] ?: return
 
         if (variant == "treatment") {
-            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent, apiConfiguration)
         }
     }
 
