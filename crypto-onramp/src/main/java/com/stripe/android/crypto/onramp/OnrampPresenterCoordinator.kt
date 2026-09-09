@@ -15,7 +15,6 @@ import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
@@ -160,7 +159,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         )
                     } ?: run {
                         onrampCallbacksState.verifyIdentityCallback.onResult(
-                            OnrampVerifyIdentityResult.Failed(APIException(message = "No ephemeral key found."))
+                            interactor.handleIdentityVerificationResult(
+                                IdentityVerificationSheet.VerificationFlowResult.Failed(
+                                    APIException(message = "No ephemeral key found.")
+                                )
+                            )
                         )
                     }
                 }
@@ -235,7 +238,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         },
                         onFailure = { error ->
                             onrampCallbacksState.collectPaymentCallback.onResult(
-                                OnrampCollectPaymentMethodResult.Failed(error)
+                                interactor.collectPaymentMethodFailure(error)
                             )
                         }
                     )

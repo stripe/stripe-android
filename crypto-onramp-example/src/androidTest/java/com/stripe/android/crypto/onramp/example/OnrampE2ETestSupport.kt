@@ -221,7 +221,7 @@ internal class OnrampE2EPage(
             IDENTITY_FAILED_BUTTON_TAG,
             timeoutMs = 30.seconds.inWholeMilliseconds,
         )
-        waitForSnackbar("Identity Verification failed: Failure from test mode")
+        waitForSnackbar("Identity Verification failed: Something went wrong. Please try again later.")
         waitForTag(LOGIN_EMAIL_TAG)
     }
 

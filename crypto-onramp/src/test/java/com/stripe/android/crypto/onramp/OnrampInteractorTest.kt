@@ -25,6 +25,7 @@ import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.SamsungPayException
 import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.UncategorizedException
+import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.exception.UnsupportedNetworkException
 import com.stripe.android.crypto.onramp.exception.WalletNotFoundException
 import com.stripe.android.crypto.onramp.exception.WalletOwnershipChallengeExpiredException
@@ -304,8 +305,9 @@ class OnrampInteractorTest {
         val result = interactor.deleteWalletAddress(walletId = "ccw_12345")
 
         assertThat(result).isInstanceOf(OnrampDeleteWalletAddressResult.Failed::class.java)
-        assertThat((result as OnrampDeleteWalletAddressResult.Failed).error)
-            .isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(
+            (result as OnrampDeleteWalletAddressResult.Failed).error
+        )
     }
 
     @Test
@@ -1380,11 +1382,30 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
         val failed = result as OnrampCollectPaymentMethodResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingPaymentMethodException::class.java)
+        assertUnexpectedError<MissingPaymentMethodException>(failed.error)
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.ErrorOccurred(
                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
                 error = failed.error
+            )
+        )
+    }
+
+    @Test
+    fun testCollectPaymentMethodFailureMapsError() = runTest {
+        val underlyingError = IllegalStateException("Platform key unavailable")
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState())
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.collectPaymentMethodFailure(underlyingError)
+
+        val error = assertUnexpectedError<IllegalStateException>(result.error)
+        assertThat(error.underlyingError).isSameInstanceAs(underlyingError)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                error = error,
             )
         )
     }
@@ -1408,18 +1429,21 @@ class OnrampInteractorTest {
 
         interactor.onHandleNextActionError(error)
 
-        testAnalyticsService.assertContainsEvent(
-            OnrampAnalyticsEvent.ErrorOccurred(
-                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
-                error = error
-            )
-        )
-
         val completedStatus = interactor.state.value.checkoutState?.status
         assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
         val result = (completedStatus as CheckoutState.Status.Completed).result
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
-        assertThat((result as OnrampCheckoutResult.Failed).error).isSameInstanceAs(error)
+        val unexpectedError = assertUnexpectedError<RuntimeException>(
+            (result as OnrampCheckoutResult.Failed).error
+        )
+        assertThat(unexpectedError.underlyingError).isSameInstanceAs(error)
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = unexpectedError
+            )
+        )
 
         interactor.startCheckout("cos_retry_session_id")
 
@@ -1581,7 +1605,7 @@ class OnrampInteractorTest {
         val result = (checkoutStatus as CheckoutState.Status.Completed).result
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         val error = (result as OnrampCheckoutResult.Failed).error
-        assertThat(error).isInstanceOf(PaymentFailedException::class.java)
+        assertUnexpectedError<PaymentFailedException>(error)
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.ErrorOccurred(
                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
@@ -1636,7 +1660,7 @@ class OnrampInteractorTest {
         val result = (checkoutStatus as CheckoutState.Status.Completed).result
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         val error = (result as OnrampCheckoutResult.Failed).error
-        assertThat(error).isInstanceOf(PaymentFailedException::class.java)
+        assertUnexpectedError<PaymentFailedException>(error)
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.ErrorOccurred(
                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
@@ -1665,7 +1689,7 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampAttachKycInfoResult.Failed::class.java)
         val failed = result as OnrampAttachKycInfoResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(failed.error)
     }
 
     @Test
@@ -1683,7 +1707,7 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampRegisterWalletAddressResult.Failed::class.java)
         val failed = result as OnrampRegisterWalletAddressResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(failed.error)
     }
 
     @Test
@@ -1701,7 +1725,7 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampGetWalletOwnershipChallengeResult.Failed::class.java)
         val failed = result as OnrampGetWalletOwnershipChallengeResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(failed.error)
     }
 
     @Test
@@ -1719,7 +1743,7 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
         val failed = result as OnrampSubmitWalletOwnershipSignatureResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(failed.error)
     }
 
     @Test
@@ -1807,7 +1831,8 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Failed::class.java)
         val failed = result as OnrampVerifyKycInfoResult.Failed
-        assertThat(failed.error.message).contains("refresh failed")
+        val unexpectedError = assertUnexpectedError<RuntimeException>(failed.error)
+        assertThat(unexpectedError.underlyingError).isSameInstanceAs(error)
     }
 
     @Test
@@ -1835,7 +1860,7 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Failed::class.java)
         val failed = result as OnrampVerifyKycInfoResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(failed.error)
     }
 
     @Test
@@ -1873,7 +1898,7 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
         val failed = result as OnrampCreateCryptoPaymentTokenResult.Failed
-        assertThat(failed.error).isInstanceOf(MissingCryptoCustomerException::class.java)
+        assertUnexpectedError<MissingCryptoCustomerException>(failed.error)
     }
 
     private fun mockLinkStateWithAccount(
@@ -1885,6 +1910,13 @@ class OnrampInteractorTest {
         createdPaymentMethod = null,
         elementsSessionId = "test-elements-session-id"
     )
+
+    private inline fun <reified T : Throwable> assertUnexpectedError(error: Throwable?): UnexpectedException {
+        assertThat(error).isInstanceOf(UnexpectedException::class.java)
+        return (error as UnexpectedException).also {
+            assertThat(it.underlyingError).isInstanceOf(T::class.java)
+        }
+    }
 
     private fun mockLinkStateWithSelectedPaymentPreview(
         account: LinkController.LinkAccount = mockLinkAccount()
