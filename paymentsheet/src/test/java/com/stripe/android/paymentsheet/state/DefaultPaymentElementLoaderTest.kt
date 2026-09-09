@@ -14,7 +14,6 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -37,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -175,10 +175,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                        stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
-                    ),
+                    apiConfiguration = DEFAULT_API_CONFIG,
                 ),
             )
         )
@@ -5050,14 +5047,11 @@ internal class DefaultPaymentElementLoaderTest {
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             apiConfigurationResolver = FakeApiConfigurationResolver(
-                resolvedApiConfiguration = ApiConfiguration.State(
-                    publishableKey = if (isLiveMode) {
-                        ApiKeyFixtures.FAKE_LIVE_KEY
-                    } else {
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-                    },
-                    stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
-                ),
+                resolvedApiConfiguration = if (isLiveMode) {
+                    DEFAULT_API_CONFIG.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)
+                } else {
+                    DEFAULT_API_CONFIG
+                },
             ),
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
