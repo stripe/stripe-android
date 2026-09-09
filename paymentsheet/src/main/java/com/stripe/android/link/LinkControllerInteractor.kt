@@ -7,7 +7,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
@@ -73,7 +72,8 @@ internal class LinkControllerInteractor @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) {
 
-    private var configuration: LinkController.Configuration.State? = null
+    internal var configuration: LinkController.Configuration.State? = null
+        private set
 
     private val tag = "LinkControllerViewInteractor"
 
@@ -185,11 +185,6 @@ internal class LinkControllerInteractor @Inject constructor(
         val config = configuration.build()
         this.configuration = config
         updateState { State() }
-        PaymentConfiguration.init(
-            context = application,
-            publishableKey = config.publishableKey,
-            stripeAccountId = config.stripeAccountId,
-        )
         return linkConfigurationLoader.load(config)
             .flatMapCatching { linkMetadata ->
                 val component = linkComponentFactoryProvider.get()

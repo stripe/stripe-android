@@ -68,7 +68,7 @@ class DefaultLinkEventsReporterTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = application,
-                publishableKey = "pk_1234"
+                publishableKey = "pk_1234",
             ),
             errorReporter = FakeErrorReporter(),
             workContext = testScope.coroutineContext,

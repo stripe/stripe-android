@@ -4,8 +4,10 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHol
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.ProvidedDefaultValues
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
@@ -48,7 +50,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val mode: EventReporter.Mode,
-    private val logger: Logger
+    private val logger: Logger,
 ) : LogLinkHoldbackExperiment {
 
     override operator fun invoke(
@@ -93,7 +95,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             }
             else -> {
                 // Link is disabled — perform the lookup for experiment logging.
-                isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
+                isReturningUser(
+                    email = customerEmail,
+                    sessionId = elementsSession.elementsSessionId,
+                    apiConfiguration = state.paymentMethodMetadata.apiConfiguration,
+                )
             }
         }
 
@@ -149,9 +155,15 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun isReturningUser(
         email: String,
         sessionId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Boolean {
+        val requestOptions = ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(
+                requestOptions = requestOptions,
                 email = email,
                 sessionId = sessionId,
             )

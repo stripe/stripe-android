@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.model.ClientAttributionMetadata
@@ -33,6 +34,7 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
+        requestOptions: ApiRequest.Options,
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
@@ -46,6 +48,7 @@ internal interface LinkRepository {
      * Link global holdback to look up consumers in the event Link is disabled.
      */
     suspend fun lookupConsumerWithoutBackendLoggingForExposure(
+        requestOptions: ApiRequest.Options,
         email: String,
         sessionId: String,
     ): Result<ConsumerSessionLookup>
@@ -57,6 +60,7 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
+        requestOptions: ApiRequest.Options,
         email: String?,
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
@@ -72,6 +76,7 @@ internal interface LinkRepository {
      * Refresh the mobile consumer session.
      */
     suspend fun refreshConsumer(
+        requestOptions: ApiRequest.Options,
         appId: String,
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?,
@@ -81,6 +86,7 @@ internal interface LinkRepository {
      * Sign up for a new Link account.
      */
     suspend fun consumerSignUp(
+        requestOptions: ApiRequest.Options,
         email: String,
         phone: String?,
         country: String?,
@@ -90,6 +96,7 @@ internal interface LinkRepository {
     ): Result<ConsumerSessionSignup>
 
     suspend fun mobileSignUp(
+        requestOptions: ApiRequest.Options,
         name: String?,
         email: String,
         phoneNumber: String?,
@@ -107,6 +114,7 @@ internal interface LinkRepository {
      * Create a new card payment method in the consumer account.
      */
     suspend fun createCardPaymentDetails(
+        requestOptions: ApiRequest.Options,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent,
@@ -115,6 +123,7 @@ internal interface LinkRepository {
     ): Result<LinkPaymentDetails.New>
 
     suspend fun createPaymentDetailsFromPaymentMethod(
+        requestOptions: ApiRequest.Options,
         paymentMethod: PaymentMethod,
         userEmail: String,
         stripeIntent: StripeIntent,
@@ -124,6 +133,7 @@ internal interface LinkRepository {
     ): Result<LinkPaymentDetails.Saved>
 
     suspend fun createBankAccountPaymentDetails(
+        requestOptions: ApiRequest.Options,
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
@@ -131,6 +141,7 @@ internal interface LinkRepository {
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
+        requestOptions: ApiRequest.Options,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
@@ -138,6 +149,7 @@ internal interface LinkRepository {
     ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String?,
@@ -149,12 +161,14 @@ internal interface LinkRepository {
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         paymentMethod: LinkPaymentMethod,
         clientAttributionMetadata: ClientAttributionMetadata
     ): Result<PaymentMethod>
 
     suspend fun logOut(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
     ): Result<ConsumerSession>
@@ -163,6 +177,7 @@ internal interface LinkRepository {
      * Start an SMS verification.
      */
     suspend fun startVerification(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         isResendSmsCode: Boolean = false
     ): Result<ConsumerSession>
@@ -171,6 +186,7 @@ internal interface LinkRepository {
      * Confirm an SMS verification code.
      */
     suspend fun confirmVerification(
+        requestOptions: ApiRequest.Options,
         verificationCode: String,
         consumerSessionClientSecret: String,
         consentGranted: Boolean?,
@@ -180,6 +196,7 @@ internal interface LinkRepository {
      * Update consent status for the signed in consumer.
      */
     suspend fun postConsentUpdate(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
     ): Result<Unit>
@@ -188,6 +205,7 @@ internal interface LinkRepository {
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(
+        requestOptions: ApiRequest.Options,
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
     ): Result<ConsumerPaymentDetails>
@@ -196,6 +214,7 @@ internal interface LinkRepository {
      * Fetch all shipping addresses for the signed in consumer.
      */
     suspend fun listShippingAddresses(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
     ): Result<ConsumerShippingAddresses>
 
@@ -203,6 +222,7 @@ internal interface LinkRepository {
      * Delete the payment method from the consumer account.
      */
     suspend fun deletePaymentDetails(
+        requestOptions: ApiRequest.Options,
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
     ): Result<Unit>
@@ -211,11 +231,13 @@ internal interface LinkRepository {
      * Update an existing payment method in the consumer account.
      */
     suspend fun updatePaymentDetails(
+        requestOptions: ApiRequest.Options,
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
     ): Result<ConsumerPaymentDetails>
 
     suspend fun createLinkAccountSession(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
@@ -225,6 +247,7 @@ internal interface LinkRepository {
      * Update the phone number for the signed in consumer.
      */
     suspend fun updatePhoneNumber(
+        requestOptions: ApiRequest.Options,
         consumerSessionClientSecret: String,
         phoneNumber: String,
     ): Result<ConsumerSession>
