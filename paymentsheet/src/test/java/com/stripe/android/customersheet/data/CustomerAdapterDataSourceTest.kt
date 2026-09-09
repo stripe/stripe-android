@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
@@ -721,6 +722,9 @@ class CustomerAdapterDataSourceTest {
             customerAdapter = adapter,
             elementsSessionRepository = elementsSessionRepository,
             errorReporter = errorReporter,
+            paymentConfigurationProvider = {
+                PaymentConfiguration(publishableKey = "pk_test_123", stripeAccountId = "acct_123")
+            },
             workContext = coroutineContext,
         )
     }
