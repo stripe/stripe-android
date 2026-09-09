@@ -43,9 +43,6 @@ internal open class FakeCustomerRepository(
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
-    private val _attachRequests = Turbine<AttachRequest>()
-    val attachRequests: ReceiveTurbine<AttachRequest> = _attachRequests
-
     private val _updateRequests = Turbine<UpdateRequest>()
     val updateRequests: ReceiveTurbine<UpdateRequest> = _updateRequests
 
@@ -59,7 +56,6 @@ internal open class FakeCustomerRepository(
         _retrieveCustomerRequests.ensureAllEventsConsumed()
         _getPaymentMethodsRequests.ensureAllEventsConsumed()
         _detachRequests.ensureAllEventsConsumed()
-        _attachRequests.ensureAllEventsConsumed()
         _updateRequests.ensureAllEventsConsumed()
         _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
         _retrievePaymentMethodRequests.ensureAllEventsConsumed()
@@ -144,18 +140,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         paymentMethodId: String,
         stripeAccountId: String?,
-    ): Result<PaymentMethod> {
-        _attachRequests.add(
-            AttachRequest(
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                paymentMethodId = paymentMethodId,
-                stripeAccountId = stripeAccountId,
-            )
-        )
-
-        return onAttachPaymentMethod()
-    }
+    ): Result<PaymentMethod> = onAttachPaymentMethod()
 
     override suspend fun updatePaymentMethod(
         customerId: String,
@@ -232,13 +217,6 @@ internal open class FakeCustomerRepository(
         val customerId: String,
         val ephemeralKeySecret: String,
         val customerSessionClientSecret: String? = null,
-        val stripeAccountId: String?,
-    )
-
-    data class AttachRequest(
-        val customerId: String,
-        val ephemeralKeySecret: String,
-        val paymentMethodId: String,
         val stripeAccountId: String?,
     )
 
