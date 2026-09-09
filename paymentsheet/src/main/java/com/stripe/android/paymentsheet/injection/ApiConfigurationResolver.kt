@@ -9,6 +9,10 @@ internal interface ApiConfigurationResolver {
     fun resolve(apiConfiguration: ApiConfiguration.State?): ApiConfiguration.State
 }
 
+/**
+ * Used to resolve an ApiConfiguration.State passed from public APIs, if not provided, falls back to
+ * PaymentConfiguration.
+ */
 internal class DefaultApiConfigurationResolver @Inject constructor(
     private val context: Context,
 ) : ApiConfigurationResolver {
