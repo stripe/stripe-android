@@ -9,6 +9,7 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultApiConfigurationResolverTest {
@@ -52,5 +53,27 @@ internal class DefaultApiConfigurationResolverTest {
                 stripeAccountId = "acct_from_payment_configuration",
             )
         )
+    }
+
+    @Test
+    fun `resolve does not require PaymentConfiguration when API configuration is provided`() {
+        PaymentConfiguration.clearInstance()
+        val apiConfiguration = ApiConfiguration.State(
+            publishableKey = "pk_test_from_api_configuration",
+            stripeAccountId = "acct_from_api_configuration",
+        )
+
+        val resolvedApiConfiguration = DefaultApiConfigurationResolver(context).resolve(apiConfiguration)
+
+        assertThat(resolvedApiConfiguration).isEqualTo(apiConfiguration)
+    }
+
+    @Test
+    fun `resolve throws when API configuration is null and PaymentConfiguration is not initialized`() {
+        PaymentConfiguration.clearInstance()
+
+        assertFailsWith<IllegalStateException> {
+            DefaultApiConfigurationResolver(context).resolve(apiConfiguration = null)
+        }
     }
 }
