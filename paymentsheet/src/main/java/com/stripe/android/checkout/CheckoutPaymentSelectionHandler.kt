@@ -3,17 +3,19 @@ package com.stripe.android.checkout
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedVerticalProcessing
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
-    private val checkoutController: CheckoutController,
+    private val savedPaymentMethodSelector: CheckoutSavedPaymentMethodSelector,
+    @EmbeddedVerticalProcessing private val processing: StateFlow<Boolean>,
     selectionHolder: EmbeddedSelectionHolder,
     immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
@@ -35,10 +37,10 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
-        if (checkoutController.isUpdating.value) return
+        if (processing.value) return
 
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            checkoutController.selectSavedPaymentMethod(selection).onSuccess {
+            savedPaymentMethodSelector.select(selection).onSuccess {
                 onSelectionComplete()
             }
         }
