@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Mokėkite vėliau naudodami \"Klarna\".</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefonas</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Patvirtindami savo mokėjimą naudojant „NICEPAY“, suteikiate leidimą %s periodiškai nurašyti lėšas iš jūsų sąskaitos pagal jų nustatytas sąlygas.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Ant kortelės nurodytas vardas ir pavardė</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Pasirinkite, kaip norite mokėti:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->

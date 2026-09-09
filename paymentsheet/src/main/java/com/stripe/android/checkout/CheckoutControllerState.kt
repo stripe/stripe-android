@@ -40,6 +40,7 @@ internal data class CheckoutControllerState(
             availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
                 paymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
                 expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+                requiresShippingAddress = checkoutSessionResponse.requiresShippingAddress,
             )
         )
     }

@@ -73,15 +73,6 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun `configuration builds shipping address required`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .shippingAddressRequired(true)
-            .build()
-
-        assertThat(state.shippingAddressRequired).isTrue()
-    }
-
-    @Test
     fun `configuration builds payment method order`() {
         val state = ExpressCheckoutElement.Configuration()
             .paymentMethodOrder(

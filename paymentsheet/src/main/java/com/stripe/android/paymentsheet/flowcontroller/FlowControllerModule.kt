@@ -7,7 +7,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -75,6 +78,22 @@ internal object FlowControllerModule {
         linkActivityContract,
         linkStore,
     )
+
+    @Provides
+    @Singleton
+    fun provideLinkPaymentMethodSelectionLauncher(
+        @Named(FLOW_CONTROLLER_LINK_LAUNCHER) launcher: LinkPaymentLauncher,
+        linkGateFactory: LinkGate.Factory,
+        linkAccountHolder: LinkAccountHolder,
+        viewModel: FlowControllerViewModel,
+    ): LinkPaymentMethodSelectionLauncher {
+        return LinkPaymentMethodSelectionLauncher(
+            launcher = launcher,
+            linkGateFactory = linkGateFactory,
+            linkAccountHolder = linkAccountHolder,
+            statusBarColor = viewModel.statusBarColor,
+        )
+    }
 
     @Provides
     @Singleton
