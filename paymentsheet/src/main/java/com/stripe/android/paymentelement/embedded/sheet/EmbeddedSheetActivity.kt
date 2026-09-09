@@ -17,15 +17,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         EmbeddedActivityArgs.fromIntent(intent)
     }
 
-    private val presentationDelegate = lazy {
-        val args = requireNotNull(args)
-        EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
-            activity = this,
-            args = args,
-            activityResultCaller = this,
-        )
-    }
-    private val presentation by presentationDelegate
+    private var coordinator: EmbeddedSheetActivityCoordinator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,17 +28,23 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
 
         renderEdgeToEdge()
-        presentation.register()
+        val coordinator = EmbeddedSheetActivityCoordinator(
+            activity = this,
+            args = activityArgs,
+            presentationFactory = EmbeddedSheetPresentation,
+        )
+        this.coordinator = coordinator
+        coordinator.register()
         setContent {
             PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
                 val bottomSheetState = rememberStripeBottomSheetState(
-                    confirmValueChange = { presentation.canDismiss() },
+                    confirmValueChange = { coordinator.canDismiss() },
                 )
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onDismissed = presentation::onDismissed,
+                    onDismissed = coordinator::onDismissed,
                 ) {
-                    presentation.Content()
+                    coordinator.Content()
                 }
             }
         }
@@ -59,8 +57,6 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (presentationDelegate.isInitialized()) {
-            presentation.onDestroy()
-        }
+        coordinator?.onDestroy()
     }
 }
