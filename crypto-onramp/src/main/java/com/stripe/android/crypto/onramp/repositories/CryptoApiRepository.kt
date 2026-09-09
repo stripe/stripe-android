@@ -519,6 +519,25 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
+    private suspend fun <Response> executeConsumerAuthenticatedGet(
+        url: String,
+        consumerSessionClientSecret: String,
+        responseSerializer: KSerializer<Response>,
+    ): Result<Response> {
+        val request = ConsumerAuthenticatedGetRequest(
+            request = apiRequestFactory.createGet(
+                url = url,
+                options = buildRequestOptions(),
+            ),
+            consumerSessionClientSecret = consumerSessionClientSecret,
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = responseSerializer,
+        )
+    }
+
     private suspend fun <Response> executeDelete(
         url: String,
         paramsJson: JsonObject,
