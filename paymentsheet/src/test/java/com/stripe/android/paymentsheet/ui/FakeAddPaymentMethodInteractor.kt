@@ -5,6 +5,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -41,6 +43,8 @@ internal class FakeAddPaymentMethodInteractor(
             ),
             paymentMethodCode: PaymentMethodCode = metadata.supportedPaymentMethodTypes().first(),
             isValidating: Boolean = false,
+            previousPaymentMethodCreateParams: PaymentMethodCreateParams? = null,
+            previousPaymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ): AddPaymentMethodInteractor.State {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
@@ -53,6 +57,8 @@ internal class FakeAddPaymentMethodInteractor(
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,
                 linkInlineHandler = null,
+                paymentMethodCreateParams = previousPaymentMethodCreateParams,
+                paymentMethodExtraParams = previousPaymentMethodExtraParams,
             )
 
             return AddPaymentMethodInteractor.State(
