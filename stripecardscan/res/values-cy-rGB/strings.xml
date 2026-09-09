@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Rhowch fynediad i\'r camera yn eich gosodiadau i sganio eich cerdyn</string>
+  <string name="stripe_card_scan_instructions">Sganiwch Eich Cerdyn</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Rydyn ni\'n defnyddio Stripe i ddilysu\'ch manylion cerdyn. Gall Stripe ddefnyddio a storio\'ch data yn unol â\'i bolisi preifatrwydd. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Dysgu mwy</u></a>]]></string>
+  <string name="stripe_card_scan_title">Gosodwch eich cerdyn yng nghanol yr hirsgwar i sganio</string>
+  <string name="stripe_close_button_description">Cau</string>
+  <string name="stripe_swap_camera_button_description">Newid Camera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Tortsh</string>
+</resources>
