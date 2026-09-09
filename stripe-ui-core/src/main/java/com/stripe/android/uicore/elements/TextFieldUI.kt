@@ -21,6 +21,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -49,7 +50,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,10 +61,10 @@ import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
@@ -77,6 +77,7 @@ import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.withLtrDirectionEnforcedIfNeeded
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -146,6 +147,7 @@ fun TextField(
     val contentDescription by textFieldController.contentDescription.collectAsState()
     val visualTransformation by textFieldController.visualTransformation.collectAsState()
     val placeHolder by textFieldController.placeHolder.collectAsState()
+    val textStyle = LocalTextStyle.current.withLtrDirectionEnforcedIfNeeded(textFieldController)
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
 
@@ -227,7 +229,7 @@ fun TextField(
         shouldShowValidationMessage = shouldShowValidationMessage,
         validationMessage = error,
         visualTransformation = visualTransformation,
-        layoutDirection = textFieldController.layoutDirection,
+        textStyle = textStyle,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
@@ -259,7 +261,7 @@ internal fun TextFieldUi(
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    layoutDirection: LayoutDirection? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
@@ -279,47 +281,44 @@ internal fun TextFieldUi(
     val colors = TextFieldColors(displayState)
     val textFieldInsets = LocalTextFieldInsets.current
 
-    val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
-
-    CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
-        CompatTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = modifier.fillMaxWidth(),
-            enabled = enabled,
-            label = {
-                FormLabel(
-                    text = if (showOptionalLabel) {
-                        stringResource(
-                            R.string.stripe_form_label_optional,
-                            label,
-                        )
-                    } else {
-                        label
-                    },
-                    modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
-                )
-            },
-            placeholder = placeholder?.let {
-                {
-                    Placeholder(text = it)
-                }
-            },
-            trailingIcon = trailingIcon?.let { icon ->
-                {
-                    icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
-                }
-            },
-            isError = shouldShowValidationMessage,
-            errorMessage = validationMessage?.resolvable?.resolve(),
-            visualTransformation = visualTransformation,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = true,
-            colors = colors,
-            contentPadding = textFieldInsets.asPaddingValues(),
-        )
-    }
+    CompatTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        label = {
+            FormLabel(
+                text = if (showOptionalLabel) {
+                    stringResource(
+                        R.string.stripe_form_label_optional,
+                        label,
+                    )
+                } else {
+                    label
+                },
+                modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
+            )
+        },
+        placeholder = placeholder?.let {
+            {
+                Placeholder(text = it)
+            }
+        },
+        trailingIcon = trailingIcon?.let { icon ->
+            {
+                icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
+            }
+        },
+        isError = shouldShowValidationMessage,
+        errorMessage = validationMessage?.resolvable?.resolve(),
+        visualTransformation = visualTransformation,
+        textStyle = textStyle,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = true,
+        colors = colors,
+        contentPadding = textFieldInsets.asPaddingValues(),
+    )
 }
 
 @Composable
