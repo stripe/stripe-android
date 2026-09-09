@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.util.Log
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
@@ -32,6 +33,9 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
 
     @Suppress("LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
+        Log.d("TOLUWANI", json.toString(4))
+        val status = parseStatus(json.optString(FIELD_STATUS))
+        Log.d("TOLUWANI", "status => $status")
         val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
         val uiMode = json.optString(FIELD_UI_MODE)
         require(uiMode == UI_MODE_CUSTOM) {
@@ -42,7 +46,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             StripeJsonUtils.optCountryCode(it, FIELD_ACCOUNT_SETTINGS_COUNTRY)
         }
         val mode = parseMode(json.optString(FIELD_MODE))
-        val status = parseStatus(json.optString(FIELD_STATUS)) ?: return null
+        status ?: return null
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
         val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
         val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false

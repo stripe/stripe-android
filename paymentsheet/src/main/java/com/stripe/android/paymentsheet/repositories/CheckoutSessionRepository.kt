@@ -81,7 +81,8 @@ internal class CheckoutSessionRepository @Inject constructor(
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> = executePost(
         url = confirmUrl(id),
-        params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
+        params = params.toParamMap()
+            .plus("locale" to "en-US"),
     )
 
     suspend fun detachPaymentMethod(
@@ -176,7 +177,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
 
         private fun confirmUrl(checkoutSessionId: String): String =
-            "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
+            "${ApiRequest.API_HOST}/v1/checkout_client/$checkoutSessionId/confirm"
 
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"

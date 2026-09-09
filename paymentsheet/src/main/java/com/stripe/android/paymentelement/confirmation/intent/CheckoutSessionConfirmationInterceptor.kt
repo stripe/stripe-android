@@ -13,6 +13,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -64,27 +65,14 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        return stripeRepository.createPaymentMethod(
+        val params = createConfirmParams(
+            intent = intent,
             paymentMethodCreateParams = confirmationOption.createParams,
-            options = requestOptions,
-        ).fold(
-            onSuccess = { paymentMethod ->
-                val params = createConfirmParams(
-                    intent = intent,
-                    paymentMethod = paymentMethod,
-                    savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-                    shipping = shippingValues.toCheckoutSessionShipping(),
-                )
-                confirmCheckoutSession(params)
-            },
-            onFailure = { error ->
-                ConfirmationDefinition.Action.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
+            savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
+            shipping = shippingValues.toCheckoutSessionShipping(),
+            passiveCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken
         )
+        return confirmCheckoutSession(params)
     }
 
     override suspend fun intercept(
@@ -112,6 +100,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             // confirmation and otherwise retain the controller shipping.
             shipping = confirmationOption.shippingInformation.toCheckoutSessionShipping()
                 ?: shippingValues.toCheckoutSessionShipping(),
+            passiveCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken
         )
         return confirmCheckoutSession(params)
     }
@@ -149,6 +138,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
+        passiveCaptchaToken: String?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
@@ -157,12 +147,43 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
+            paymentMethodCreateParams = null,
+            passiveCaptchaToken = passiveCaptchaToken
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
             shipping = shipping,
+            paymentMethodCreateParams = null,
+            passiveCaptchaToken = passiveCaptchaToken
+        )
+    }
+
+    private fun createConfirmParams(
+        intent: StripeIntent,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        savePaymentMethod: Boolean?,
+        shipping: ConfirmCheckoutSessionParams.Shipping?,
+        passiveCaptchaToken: String?,
+    ): ConfirmCheckoutSessionParams = when (intent) {
+        is PaymentIntent -> ConfirmCheckoutSessionParams(
+            paymentMethodId = null,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+            expectedAmount = intent.amount,
+            savePaymentMethod = savePaymentMethod,
+            shipping = shipping,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            passiveCaptchaToken = passiveCaptchaToken
+        )
+        else -> ConfirmCheckoutSessionParams(
+            paymentMethodId = null,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+            shipping = shipping,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            passiveCaptchaToken = passiveCaptchaToken
         )
     }
 

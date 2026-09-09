@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PaymentMethodCreateParams
 
 /**
  * Parameters for confirming a checkout session via the confirm API
@@ -11,16 +12,23 @@ import com.stripe.android.model.ClientAttributionMetadata
  * and should be null for setup mode.
  */
 internal data class ConfirmCheckoutSessionParams(
-    private val paymentMethodId: String,
+    private val paymentMethodId: String?,
+    private val paymentMethodCreateParams: PaymentMethodCreateParams?,
     private val clientAttributionMetadata: ClientAttributionMetadata,
     private val returnUrl: String,
     private val expectedAmount: Long? = null,
     private val savePaymentMethod: Boolean? = null,
     private val shipping: Shipping?,
+    private val passiveCaptchaToken: String? = null,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
-            put("payment_method", paymentMethodId)
+            paymentMethodId?.let {
+                put("payment_method", paymentMethodId)
+            }
+            paymentMethodCreateParams?.let {
+                put("payment_method_data", paymentMethodCreateParams.toParamMap())
+            }
             put("client_attribution_metadata", clientAttributionMetadata.toParamMap())
             put("return_url", returnUrl)
             if (expectedAmount != null) {
@@ -31,6 +39,9 @@ internal data class ConfirmCheckoutSessionParams(
             }
             if (shipping != null) {
                 put("shipping", shipping.toParamMap())
+            }
+            if (passiveCaptchaToken != null) {
+                put("passive_captcha_token", passiveCaptchaToken)
             }
         }
     }
