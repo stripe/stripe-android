@@ -13,8 +13,10 @@ import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
+import com.stripe.android.checkout.CheckoutSavedPaymentMethodSelector
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.DefaultCheckoutSavedPaymentMethodSelector
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
@@ -236,6 +238,11 @@ internal interface CheckoutControllerModule {
 
     @Binds
     fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
+
+    @Binds
+    fun bindsCheckoutSavedPaymentMethodSelector(
+        impl: DefaultCheckoutSavedPaymentMethodSelector,
+    ): CheckoutSavedPaymentMethodSelector
 
     companion object {
         @Provides
