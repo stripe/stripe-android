@@ -1053,6 +1053,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `load() with customer should allow sepa`() = runScenario {
         var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
+        var requestStripeAccountId: String? = null
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
@@ -1063,6 +1064,7 @@ internal class DefaultPaymentElementLoaderTest {
                     stripeAccountId: String?,
                 ): Result<List<PaymentMethod>> {
                     requestPaymentMethodTypes = types
+                    requestStripeAccountId = stripeAccountId
                     return Result.success(
                         listOf(
                             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1097,6 +1099,7 @@ internal class DefaultPaymentElementLoaderTest {
                 PaymentMethod.Type.SepaDebit,
                 PaymentMethod.Type.USBankAccount,
             )
+        assertThat(requestStripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()

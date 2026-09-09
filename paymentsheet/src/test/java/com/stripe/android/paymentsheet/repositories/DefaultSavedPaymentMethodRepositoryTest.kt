@@ -67,6 +67,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val detachRequest = customerRepository.detachRequests.awaitItem()
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
         assertThat(detachRequest.customerSessionClientSecret).isEqualTo("css_456")
+        assertThat(detachRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -83,6 +84,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val detachRequest = customerRepository.detachRequests.awaitItem()
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
         assertThat(detachRequest.customerSessionClientSecret).isNull()
+        assertThat(detachRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -99,6 +101,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val updateRequest = customerRepository.updateRequests.awaitItem()
         assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(updateRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -191,6 +194,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val updateRequest = customerRepository.updateRequests.awaitItem()
         assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(updateRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -206,6 +210,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
         assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(setDefaultRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -234,6 +239,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
         assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(setDefaultRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -250,6 +256,9 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+
+        val retrieveRequest = customerRepository.retrievePaymentMethodRequests.awaitItem()
+        assertThat(retrieveRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -266,6 +275,9 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id).isEqualTo("pm_456")
+
+        val retrieveRequest = customerRepository.retrievePaymentMethodRequests.awaitItem()
+        assertThat(retrieveRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test

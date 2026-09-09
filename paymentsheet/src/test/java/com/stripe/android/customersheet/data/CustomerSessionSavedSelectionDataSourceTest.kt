@@ -116,6 +116,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
         val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
         assertThat(setDefaultRequest.paymentMethodId).isEqualTo(expectedNewDefaultPaymentMethodId)
+        assertThat(setDefaultRequest.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test

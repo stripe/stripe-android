@@ -34,6 +34,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         val call = customerRepository.retrieveCalls.awaitItem()
         assertThat(call.customerId).isEqualTo("cus_123")
         assertThat(call.ephemeralKeySecret).isEqualTo(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY)
+        assertThat(call.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
     }
 
     @Test
@@ -122,7 +123,11 @@ internal class DefaultRetrieveCustomerEmailTest {
      * Returns null for all calls (Customer has an internal constructor in payments-core).
      */
     private class CallTrackingCustomerRepository : FakeCustomerRepository() {
-        data class RetrieveCall(val customerId: String, val ephemeralKeySecret: String)
+        data class RetrieveCall(
+            val customerId: String,
+            val ephemeralKeySecret: String,
+            val stripeAccountId: String?,
+        )
 
         val retrieveCalls = Turbine<RetrieveCall>()
 
@@ -131,7 +136,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             ephemeralKeySecret: String,
             stripeAccountId: String?,
         ) = null.also {
-            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
+            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret, stripeAccountId))
         }
 
         override fun ensureAllEventsConsumed() {

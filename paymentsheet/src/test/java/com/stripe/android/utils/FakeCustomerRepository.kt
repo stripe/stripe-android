@@ -43,18 +43,26 @@ internal open class FakeCustomerRepository(
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
+    private val _attachRequests = Turbine<AttachRequest>()
+    val attachRequests: ReceiveTurbine<AttachRequest> = _attachRequests
+
     private val _updateRequests = Turbine<UpdateRequest>()
     val updateRequests: ReceiveTurbine<UpdateRequest> = _updateRequests
 
     private val _setDefaultPaymentMethodRequests = Turbine<SetDefaultRequest>()
     val setDefaultPaymentMethodRequests: ReceiveTurbine<SetDefaultRequest> = _setDefaultPaymentMethodRequests
 
+    private val _retrievePaymentMethodRequests = Turbine<RetrievePaymentMethodRequest>()
+    val retrievePaymentMethodRequests: ReceiveTurbine<RetrievePaymentMethodRequest> = _retrievePaymentMethodRequests
+
     open fun ensureAllEventsConsumed() {
         _retrieveCustomerRequests.ensureAllEventsConsumed()
         _getPaymentMethodsRequests.ensureAllEventsConsumed()
         _detachRequests.ensureAllEventsConsumed()
+        _attachRequests.ensureAllEventsConsumed()
         _updateRequests.ensureAllEventsConsumed()
         _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
+        _retrievePaymentMethodRequests.ensureAllEventsConsumed()
     }
 
     override suspend fun retrieveCustomer(
@@ -66,6 +74,7 @@ internal open class FakeCustomerRepository(
             RetrieveCustomerRequest(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
             )
         )
 
@@ -85,6 +94,7 @@ internal open class FakeCustomerRepository(
                 ephemeralKeySecret = ephemeralKeySecret,
                 types = types,
                 silentlyFail = silentlyFail,
+                stripeAccountId = stripeAccountId,
             )
         )
 
@@ -102,6 +112,7 @@ internal open class FakeCustomerRepository(
                 paymentMethodId = paymentMethodId,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
             )
         )
 
@@ -121,6 +132,7 @@ internal open class FakeCustomerRepository(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
                 customerSessionClientSecret = customerSessionClientSecret,
+                stripeAccountId = stripeAccountId,
             )
         )
 
@@ -132,7 +144,18 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         paymentMethodId: String,
         stripeAccountId: String?,
-    ): Result<PaymentMethod> = onAttachPaymentMethod()
+    ): Result<PaymentMethod> {
+        _attachRequests.add(
+            AttachRequest(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+                stripeAccountId = stripeAccountId,
+            )
+        )
+
+        return onAttachPaymentMethod()
+    }
 
     override suspend fun updatePaymentMethod(
         customerId: String,
@@ -147,6 +170,7 @@ internal open class FakeCustomerRepository(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
                 params = params,
+                stripeAccountId = stripeAccountId,
             )
         )
 
@@ -164,6 +188,7 @@ internal open class FakeCustomerRepository(
                 paymentMethodId = paymentMethodId,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
             )
         )
 
@@ -175,11 +200,23 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         paymentMethodId: String,
         stripeAccountId: String?,
-    ): Result<PaymentMethod> = onRetrievePaymentMethod(paymentMethodId)
+    ): Result<PaymentMethod> {
+        _retrievePaymentMethodRequests.add(
+            RetrievePaymentMethodRequest(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+                stripeAccountId = stripeAccountId,
+            )
+        )
+
+        return onRetrievePaymentMethod(paymentMethodId)
+    }
 
     data class RetrieveCustomerRequest(
         val customerId: String,
         val ephemeralKeySecret: String,
+        val stripeAccountId: String?,
     )
 
     data class GetPaymentMethodsRequest(
@@ -187,6 +224,7 @@ internal open class FakeCustomerRepository(
         val ephemeralKeySecret: String,
         val types: List<PaymentMethod.Type>,
         val silentlyFail: Boolean,
+        val stripeAccountId: String?,
     )
 
     data class DetachRequest(
@@ -194,6 +232,14 @@ internal open class FakeCustomerRepository(
         val customerId: String,
         val ephemeralKeySecret: String,
         val customerSessionClientSecret: String? = null,
+        val stripeAccountId: String?,
+    )
+
+    data class AttachRequest(
+        val customerId: String,
+        val ephemeralKeySecret: String,
+        val paymentMethodId: String,
+        val stripeAccountId: String?,
     )
 
     data class UpdateRequest(
@@ -201,11 +247,20 @@ internal open class FakeCustomerRepository(
         val customerId: String,
         val ephemeralKeySecret: String,
         val params: PaymentMethodUpdateParams,
+        val stripeAccountId: String?,
     )
 
     data class SetDefaultRequest(
         val paymentMethodId: String?,
         val customerId: String,
         val ephemeralKeySecret: String,
+        val stripeAccountId: String?,
+    )
+
+    data class RetrievePaymentMethodRequest(
+        val customerId: String,
+        val ephemeralKeySecret: String,
+        val paymentMethodId: String,
+        val stripeAccountId: String?,
     )
 }
