@@ -30,16 +30,18 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import javax.inject.Named
+import javax.inject.Provider
 
 internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentCallback,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
 ) : IntentConfirmationInterceptor {
-    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper =
+        ConfirmActionHelper(requestOptionsProvider.get().apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,
@@ -80,7 +82,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = confirmationOption.createParams,
-            options = requestOptions,
+            options = requestOptionsProvider.get(),
         ).fold(
             onSuccess = { paymentMethod ->
                 handleDeferredIntentCreationFromPaymentMethod(
@@ -192,7 +194,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = requestOptions,
+            options = requestOptionsProvider.get(),
         ).mapCatching { intent ->
             when {
                 intent.isConfirmed -> handleConfirmedIntent(intent, confirmationOption)
@@ -291,7 +293,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         // However, we don't have good end-to-end test coverage of this for now, so if we made a change to start
         // sending the set as default flag as false more frequently, we could accidentally start failing here more
         // often as well.
-        if (paymentMethodOption.shouldSaveAsDefault() && !requestOptions.apiKeyIsLiveMode) {
+        if (paymentMethodOption.shouldSaveAsDefault() && !requestOptionsProvider.get().apiKeyIsLiveMode) {
             throw IllegalStateException(
                 "(Test-mode only error) The default payment methods feature is not yet supported with deferred " +
                     "server-side confirmation. Please contact us if you'd like to use this feature via a Github " +
