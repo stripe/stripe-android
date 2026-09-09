@@ -4,6 +4,7 @@
     <string name="stripe_paymentsheet_bank_account_last_4">\u2066····%1$s\u2069</string>
 
     <string name="stripe_paymentsheet_payment_method_item_card_number">\u2066···· %1$s\u2069</string>
+    <string name="stripe_paymentsheet_update_card_number">\u2066•••• •••• •••• %1$s\u2069</string>
 
     <!-- Label indicating the payment intent is in testmode -->
     <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>
