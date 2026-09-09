@@ -9,6 +9,7 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
@@ -34,10 +35,19 @@ internal class DefaultGooglePayRepositoryFactoryTest {
     )
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = "pk_test_api_configuration",
+        stripeAccountId = "acct_api_configuration",
+    )
     private var capturedRequest: IsReadyToPayRequest? = null
 
     @Before
     fun setup() {
+        PaymentConfiguration.init(
+            context = context,
+            publishableKey = "pk_test_payment_configuration",
+            stripeAccountId = "acct_payment_configuration",
+        )
         GooglePayRepository.googlePayAvailabilityClientFactory =
             object : GooglePayAvailabilityClient.Factory {
                 override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
@@ -53,24 +63,36 @@ internal class DefaultGooglePayRepositoryFactoryTest {
 
     @After
     fun tearDown() {
+        PaymentConfiguration.clearInstance()
         GooglePayRepository.resetFactory()
         capturedRequest = null
     }
 
     @Test
     fun `when allowNoExistingPaymentMethodForGooglePay is disabled, existingPaymentMethodRequired should be true`() =
-        runScenario(allowNoExistingPaymentMethodForGooglePay = false) {
+        runScenario(allowNoExistingPaymentMethodForGooglePay = false, apiConfiguration = apiConfiguration) {
             assertThat(existingPaymentMethodRequired()).isTrue()
+            assertThat(tokenizationPublishableKey())
+                .isEqualTo("pk_test_api_configuration/acct_api_configuration")
         }
 
     @Test
     fun `when allowNoExistingPaymentMethodForGooglePay is enabled, existingPaymentMethodRequired should be false`() =
-        runScenario(allowNoExistingPaymentMethodForGooglePay = true) {
+        runScenario(allowNoExistingPaymentMethodForGooglePay = true, apiConfiguration = apiConfiguration) {
             assertThat(existingPaymentMethodRequired()).isFalse()
+        }
+
+    @Test
+    fun `when API configuration is null, PaymentConfiguration is used`() =
+        runScenario(allowNoExistingPaymentMethodForGooglePay = false, apiConfiguration = null) {
+            assertThat(existingPaymentMethodRequired()).isTrue()
+            assertThat(tokenizationPublishableKey())
+                .isEqualTo("pk_test_payment_configuration/acct_payment_configuration")
         }
 
     private fun runScenario(
         allowNoExistingPaymentMethodForGooglePay: Boolean,
+        apiConfiguration: ApiConfiguration.State?,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         allowNoExistingPaymentMethodForGooglePayRule.setEnabled(allowNoExistingPaymentMethodForGooglePay)
@@ -84,10 +106,7 @@ internal class DefaultGooglePayRepositoryFactoryTest {
             environment = GooglePayEnvironment.Test,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
-            apiConfiguration = ApiConfiguration.State(
-                publishableKey = "pk_123",
-                stripeAccountId = "acct_123",
-            ),
+            apiConfiguration = apiConfiguration,
         )
 
         Scenario(
@@ -107,6 +126,15 @@ internal class DefaultGooglePayRepositoryFactoryTest {
             assertThat(capturedRequest).isNotNull()
             return JSONObject(capturedRequest!!.toJson())
                 .getBoolean("existingPaymentMethodRequired")
+        }
+
+        fun tokenizationPublishableKey(): String {
+            return JSONObject(requireNotNull(capturedRequest).toJson())
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("tokenizationSpecification")
+                .getJSONObject("parameters")
+                .getString("stripe:publishableKey")
         }
     }
 }

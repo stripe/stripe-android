@@ -53,7 +53,7 @@ internal class DefaultGooglePayRepository(
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
-    private val apiConfiguration: ApiConfiguration.State,
+    private val apiConfiguration: ApiConfiguration.State?,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
@@ -87,7 +87,9 @@ internal class DefaultGooglePayRepository(
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        GooglePayConfig(apiConfiguration.publishableKey, apiConfiguration.stripeAccountId),
+        apiConfiguration?.let {
+            GooglePayConfig(it.publishableKey, it.stripeAccountId)
+        } ?: GooglePayConfig(context),
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks
