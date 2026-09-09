@@ -48,6 +48,7 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
@@ -261,20 +262,45 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() = runAutomaticTaxTest(
-        paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
-        checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
-            INITIAL_TOTAL,
-            TAX_STATUS_REQUIRES_LOCATION,
-        ),
-    ) {
-        enqueueTaxUpdate(automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
+        val callbackCount = AtomicInteger()
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbackCount.incrementAndGet()
+            },
+        ) {
+            val requestReceived = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            val requestCount = AtomicInteger()
+            enqueueTaxUpdate { response ->
+                requestCount.incrementAndGet()
+                requestReceived.countDown()
+                check(releaseResponse.await(10, TimeUnit.SECONDS))
+                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+            }
 
-        contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-        waitForSessionTotal(controller, UPDATED_TOTAL)
-        contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
-        markTestSucceeded()
+            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
+            contentPage.assertLpmIsEnabled("card", false)
+            assertThat(requestCount.get()).isEqualTo(1)
+            assertThat(callbackCount.get()).isEqualTo(0)
+            releaseResponse.countDown()
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+            contentPage.assertLpmIsEnabled("card", true)
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+            testRules.compose.waitUntil(timeoutMillis = 5_000) { callbackCount.get() == 1 }
+            assertThat(requestCount.get()).isEqualTo(1)
+            assertThat(callbackCount.get()).isEqualTo(1)
+            markTestSucceeded()
+        }
     }
 
     @Test
