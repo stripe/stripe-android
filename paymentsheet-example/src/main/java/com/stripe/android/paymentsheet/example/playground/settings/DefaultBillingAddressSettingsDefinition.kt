@@ -23,9 +23,7 @@ internal object DefaultBillingAddressSettingsDefinition :
             "on" -> DefaultBillingAddress.On
             "on_with_random_email" -> DefaultBillingAddress.OnWithRandomEmail
             "off" -> DefaultBillingAddress.Off
-            else -> if (value.startsWith(WITH_EMAIL_PREFIX)) {
-                DefaultBillingAddress.WithEmail(value.removePrefix(WITH_EMAIL_PREFIX))
-            } else if (value.startsWith(WITH_EMAIL_WITHOUT_PHONE_PREFIX)) {
+            else -> if (value.startsWith(WITH_EMAIL_WITHOUT_PHONE_PREFIX)) {
                 DefaultBillingAddress.WithEmailAndNoPhone(
                     value.removePrefix(WITH_EMAIL_WITHOUT_PHONE_PREFIX)
                 )
@@ -37,7 +35,6 @@ internal object DefaultBillingAddressSettingsDefinition :
 
     override fun convertToString(value: DefaultBillingAddress): String {
         return when (value) {
-            is DefaultBillingAddress.WithEmail -> WITH_EMAIL_PREFIX + value.email
             is DefaultBillingAddress.WithEmailAndNoPhone -> WITH_EMAIL_WITHOUT_PHONE_PREFIX + value.email
             else -> value.value
         }
@@ -135,7 +132,6 @@ internal object DefaultBillingAddressSettingsDefinition :
         }
     }
 
-    private const val WITH_EMAIL_PREFIX = "with_email:"
     private const val WITH_EMAIL_WITHOUT_PHONE_PREFIX = "with_email_without_phone:"
 }
 

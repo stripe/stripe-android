@@ -5,16 +5,6 @@ import org.junit.Test
 
 internal class DefaultBillingAddressSettingsDefinitionTest {
     @Test
-    fun `custom email survives serialization`() {
-        val billingAddress = DefaultBillingAddress.WithEmail("email_123@email.com")
-
-        val serialized = DefaultBillingAddressSettingsDefinition.convertToString(billingAddress)
-        val restored = DefaultBillingAddressSettingsDefinition.convertToValue(serialized)
-
-        assertThat(restored).isEqualTo(billingAddress)
-    }
-
-    @Test
     fun `custom email without phone survives serialization`() {
         val billingAddress = DefaultBillingAddress.WithEmailAndNoPhone("email_123@example.com")
 
