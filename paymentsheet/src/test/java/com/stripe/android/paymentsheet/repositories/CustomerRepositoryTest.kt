@@ -40,7 +40,12 @@ internal class CustomerRepositoryTest {
 
     private val repository = CustomerApiRepository(
         stripeRepository,
-        { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
+        {
+            PaymentConfiguration(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            )
+        },
         Logger.getInstance(false),
         workContext = testDispatcher,
         errorReporter = errorReporter
@@ -49,6 +54,28 @@ internal class CustomerRepositoryTest {
     @Before
     fun clearErrorReporter() {
         errorReporter.clear()
+    }
+
+    @Test
+    fun `retrieveCustomer() should use PaymentConfiguration stripe account ID`() = runTest {
+        whenever(
+            stripeRepository.retrieveCustomer(
+                customerId = any(),
+                productUsageTokens = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success(mock()))
+
+        repository.retrieveCustomer(
+            customerId = "customer_id",
+            ephemeralKeySecret = "ephemeral_key",
+        )
+
+        verify(stripeRepository).retrieveCustomer(
+            customerId = eq("customer_id"),
+            productUsageTokens = any(),
+            requestOptions = eq(expectedRequestOptions()),
+        )
     }
 
     @Test
@@ -74,7 +101,7 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
-                requestOptions = any()
+                requestOptions = eq(expectedRequestOptions())
             )
         }
 
@@ -348,6 +375,11 @@ internal class CustomerRepositoryTest {
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            verify(stripeRepository).detachPaymentMethod(
+                productUsageTokens = any(),
+                paymentMethodId = eq("payment_method_id"),
+                requestOptions = eq(expectedRequestOptions()),
+            )
         }
 
     @Test
@@ -386,6 +418,12 @@ internal class CustomerRepositoryTest {
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            verify(stripeRepository).detachPaymentMethod(
+                customerSessionClientSecret = eq("cuss_123"),
+                productUsageTokens = any(),
+                paymentMethodId = eq("payment_method_id"),
+                requestOptions = eq(expectedRequestOptions()),
+            )
         }
 
     @Test
@@ -521,6 +559,12 @@ internal class CustomerRepositoryTest {
             assertThat(result).isEqualTo(
                 Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
+            verify(stripeRepository).attachPaymentMethod(
+                customerId = eq("customer_id"),
+                productUsageTokens = any(),
+                paymentMethodId = eq("payment_method_id"),
+                requestOptions = eq(expectedRequestOptions()),
+            )
         }
 
     @Test
@@ -552,7 +596,60 @@ internal class CustomerRepositoryTest {
             )
 
             assertThat(result).isEqualTo(success)
+            verify(stripeRepository).updatePaymentMethod(
+                paymentMethodId = eq("payment_method_id"),
+                paymentMethodUpdateParams = any(),
+                options = eq(expectedRequestOptions()),
+            )
         }
+
+    @Test
+    fun `setDefaultPaymentMethod() should use PaymentConfiguration stripe account ID`() = runTest {
+        whenever(
+            stripeRepository.setDefaultPaymentMethod(
+                customerId = any(),
+                paymentMethodId = any(),
+                options = any(),
+            )
+        ).thenReturn(Result.success(mock()))
+
+        repository.setDefaultPaymentMethod(
+            customerId = "customer_id",
+            ephemeralKeySecret = "ephemeral_key",
+            paymentMethodId = "payment_method_id",
+        )
+
+        verify(stripeRepository).setDefaultPaymentMethod(
+            customerId = eq("customer_id"),
+            paymentMethodId = eq("payment_method_id"),
+            options = eq(expectedRequestOptions()),
+        )
+    }
+
+    @Test
+    fun `retrievePaymentMethod() should use PaymentConfiguration stripe account ID`() = runTest {
+        whenever(
+            stripeRepository.retrieveCustomerPaymentMethod(
+                customerId = any(),
+                paymentMethodId = any(),
+                productUsageTokens = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+
+        repository.retrievePaymentMethod(
+            customerId = "customer_id",
+            ephemeralKeySecret = "ephemeral_key",
+            paymentMethodId = "payment_method_id",
+        )
+
+        verify(stripeRepository).retrieveCustomerPaymentMethod(
+            customerId = eq("customer_id"),
+            paymentMethodId = eq("payment_method_id"),
+            productUsageTokens = any(),
+            requestOptions = eq(expectedRequestOptions()),
+        )
+    }
 
     @Test
     fun `updatePaymentMethod() should return failure`() =
@@ -581,6 +678,11 @@ internal class CustomerRepositoryTest {
             logger = Logger.getInstance(false),
         )
     }
+
+    private fun expectedRequestOptions() = ApiRequest.Options(
+        apiKey = "ephemeral_key",
+        stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+    )
 
     private suspend fun failsOnceStripeRepository(): StripeRepository {
         val repository = mock<StripeRepository>()
