@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,9 +34,13 @@ internal class CheckoutPaymentSelectionHandlerTest {
 
         scenario.handler.select(selection, true)
 
+        assertThat(scenario.handler.state.value).isEqualTo(
+            VerticalPaymentSelectionHandler.State.Selecting(selection)
+        )
         scenario.completions.expectNoEvents()
         runCurrent()
 
+        assertThat(scenario.handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
         assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
         scenario.selectionHolder.selectionCalls.expectNoEvents()
         verify(controller).selectSavedPaymentMethod(selection)
@@ -54,6 +59,9 @@ internal class CheckoutPaymentSelectionHandlerTest {
         val scenario = createScenario(controller, this)
 
         scenario.handler.select(firstSelection, true)
+        assertThat(scenario.handler.state.value).isEqualTo(
+            VerticalPaymentSelectionHandler.State.Selecting(firstSelection)
+        )
         scenario.handler.select(secondSelection, true)
         runCurrent()
 
@@ -78,12 +86,14 @@ internal class CheckoutPaymentSelectionHandlerTest {
         scenario.handler.select(selection, true)
         runCurrent()
 
+        assertThat(scenario.handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
         scenario.completions.expectNoEvents()
 
         scenario.handler.select(selection, true)
         runCurrent()
 
         assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
+        assertThat(scenario.handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
         scenario.selectionHolder.selectionCalls.expectNoEvents()
         verify(controller, times(2)).selectSavedPaymentMethod(selection)
         verifyNoMoreInteractions(controller)

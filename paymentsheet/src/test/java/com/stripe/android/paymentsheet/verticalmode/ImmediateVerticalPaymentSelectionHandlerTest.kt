@@ -23,6 +23,16 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
     }
 
     @Test
+    fun `state remains idle`() = runScenario(completion = null) {
+        assertThat(handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
+
+        handler.select(PaymentSelection.GooglePay, false)
+
+        assertThat(handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
+        events.awaitItem()
+    }
+
+    @Test
     fun `invokes supplied completion without updating selection`() = runScenario(
         completion = { events -> events.add(Event.SelectionCompleted) },
     ) {
