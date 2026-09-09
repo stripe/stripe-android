@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -29,6 +30,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isTrue()
     }
@@ -47,6 +49,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isFalse()
     }
@@ -65,6 +68,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isFalse()
     }
@@ -83,6 +87,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isFalse()
     }
