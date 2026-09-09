@@ -1,49 +1,28 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.serialization.json.Json
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import org.junit.Test
 
 class CheckoutControllerExampleBackendRepositoryTest {
     @Test
-    fun `checkout session URL uses default backend URL`() {
-        val result = checkoutSessionUrl(
-            defaultBackendUrl = "https://default.example/",
-            customBackendUrl = null,
-            endpoint = "checkout_session",
-        )
+    fun `selected merchant is used`() {
+        val settings = CheckoutPlaygroundSettings.createInMemory().apply {
+            update(session.merchant, Merchant.JP)
+        }
 
-        assertThat(result).isEqualTo("https://default.example/checkout_session")
+        assertThat(settings.snapshot().backendMerchant()).isEqualTo(Merchant.JP)
     }
 
     @Test
-    fun `checkout session URL uses custom backend URL`() {
-        val result = checkoutSessionUrl(
-            defaultBackendUrl = "https://default.example/",
-            customBackendUrl = "https://custom.example/",
-            endpoint = "checkout_session",
-        )
+    fun `automatic tax uses tax merchant`() {
+        val settings = CheckoutPlaygroundSettings.createInMemory().apply {
+            update(session.merchant, Merchant.JP)
+            update(session.automaticTax, true)
+        }
 
-        assertThat(result).isEqualTo("https://custom.example/checkout_session")
-    }
-
-    @Test
-    fun `backend error message is preserved`() {
-        val result = parseCheckoutSessionError(
-            json = Json,
-            errorData = """{"error":"Invalid customer"}""".encodeToByteArray(),
-        )
-
-        assertThat(result).isEqualTo("Invalid customer")
-    }
-
-    @Test
-    fun `malformed backend error has no message`() {
-        val result = parseCheckoutSessionError(
-            json = Json,
-            errorData = "Not JSON".encodeToByteArray(),
-        )
-
-        assertThat(result).isNull()
+        assertThat(settings.snapshot().backendMerchant()).isEqualTo(Merchant.US_TAX)
     }
 }
