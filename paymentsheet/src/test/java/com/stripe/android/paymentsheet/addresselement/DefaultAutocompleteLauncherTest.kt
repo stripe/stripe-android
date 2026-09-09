@@ -46,7 +46,11 @@ class DefaultAutocompleteLauncherTest {
     fun `launch does nothing when not registered`() = runTest {
         val launcher = createLauncher()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             error("Should not be called!")
         }
     }
@@ -60,7 +64,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             error("Should not be called!")
         }
 
@@ -86,11 +94,19 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             error("Should not be called!")
         }
 
-        launcher.launch(country = "CA", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "CA",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             error("Should not be called!")
         }
 
@@ -131,7 +147,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             error("Should not be called!")
         }
 
@@ -154,7 +174,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             error("Should not be called!")
         }
 
@@ -181,7 +205,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             capturedResult = it
         }
 
@@ -218,7 +246,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             capturedResult = it
         }
 
@@ -254,7 +286,11 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             callbackCalledCount++
         }
 
@@ -326,11 +362,19 @@ class DefaultAutocompleteLauncherTest {
         assertThat(registerCall.contract).isEqualTo(AutocompleteContract)
         assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "US",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             firstReceivedResult = it
         }
 
-        launcher.launch(country = "CA", googlePlacesApiKey = "test-api-key") {
+        launcher.launch(
+            country = "CA",
+            googlePlacesApiKey = "test-api-key",
+            apiConfiguration = TEST_API_CONFIGURATION,
+        ) {
             secondReceivedResult = it
         }
 
