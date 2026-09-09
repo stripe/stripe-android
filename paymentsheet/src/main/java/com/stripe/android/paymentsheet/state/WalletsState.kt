@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
 import com.stripe.android.link.ui.LinkButtonState
@@ -72,6 +73,7 @@ internal data class WalletsState(
     ) : Wallet
 
     data class GooglePay(
+        val apiConfiguration: ApiConfiguration.State,
         val buttonType: GooglePayButtonType,
         val allowCreditCards: Boolean,
         val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
@@ -85,6 +87,7 @@ internal data class WalletsState(
             linkEmail: String?,
             isGooglePayReady: Boolean,
             googlePayButtonType: GooglePayButtonType,
+            apiConfiguration: ApiConfiguration.State?,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
@@ -112,6 +115,7 @@ internal data class WalletsState(
 
             val googlePay = createGooglePay(
                 isGooglePayReady = isGooglePayReady,
+                apiConfiguration = apiConfiguration,
                 googlePayButtonType = googlePayButtonType,
                 googlePayLauncherConfig = googlePayLauncherConfig
             )
@@ -158,10 +162,14 @@ internal data class WalletsState(
 
         private fun createGooglePay(
             isGooglePayReady: Boolean,
+            apiConfiguration: ApiConfiguration.State?,
             googlePayButtonType: GooglePayButtonType,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?
         ): GooglePay? {
+            if (!isGooglePayReady) return null
+
             return GooglePay(
+                apiConfiguration = requireNotNull(apiConfiguration),
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
                 buttonType = googlePayButtonType,
                 additionalEnabledNetworks = googlePayLauncherConfig?.additionalEnabledNetworks.orEmpty(),
@@ -179,7 +187,7 @@ internal data class WalletsState(
                         isPhoneNumberRequired = it.billingAddressConfig.isPhoneNumberRequired,
                     )
                 },
-            ).takeIf { isGooglePayReady }
+            )
         }
 
         @StringRes
