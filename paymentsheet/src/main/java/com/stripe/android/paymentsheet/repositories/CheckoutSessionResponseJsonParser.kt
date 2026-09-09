@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -14,155 +15,211 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Parser for checkout session API responses:
- * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns elements_session
- * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns payment_intent or setup_intent
- *
- * The init response contains checkout session metadata (`id`, `amount`, `currency`) and an
- * embedded `elements_session` object. The confirm response contains a `payment_intent` or
- * `setup_intent` object.
- *
- * Confirm responses may also contain an `elements_session` (when
- * `elements_session_client[is_aggregation_expected]` is set). In that case, the
- * `elements_session` will have a deferred intent stub as its `stripeIntent`. This parser
- * replaces that deferred intent with the actual confirmed intent from the top-level
- * `payment_intent` or `setup_intent` field.
+ * Strict parser for the modeless, unified Payment Pages response.
  */
 internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSessionResponse> {
-
-    @Suppress("LongMethod")
-    override fun parse(json: JSONObject): CheckoutSessionResponse? {
-        val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
-        val uiMode = json.optString(FIELD_UI_MODE)
-        require(uiMode == UI_MODE_CUSTOM) {
-            "Expected ui_mode to be \"$UI_MODE_CUSTOM\" but was \"$uiMode\""
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
+    override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
+        require(json.requiredString("ui_mode") == "custom")
+        require(json.requiredString("mode") == "modeless")
+        val id = json.requiredString("session_id")
+        val currency = json.requiredString("currency")
+        val paymentStatus = when (json.requiredString("payment_status")) {
+            "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
+            "unpaid" -> CheckoutSessionResponse.PaymentStatus.UNPAID
+            "no_payment_required" -> CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED
+            else -> error("Unsupported payment_status")
         }
-        val accountSettings = json.optJSONObject(FIELD_ACCOUNT_SETTINGS)
-        val merchantCountry = accountSettings?.let {
-            StripeJsonUtils.optCountryCode(it, FIELD_ACCOUNT_SETTINGS_COUNTRY)
-        }
-        val mode = parseMode(json.optString(FIELD_MODE))
-        val status = parseStatus(json.optString(FIELD_STATUS)) ?: return null
-        val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
-        val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
-        val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
-        val taxAddressSource = parseTaxAddressSource(taxContext)
-        val taxStatus = parseTaxStatusFromMeta(
-            taxMeta = json.optJSONObject(FIELD_TAX_META),
-            taxAddressSource = taxAddressSource,
-        )
-        val amount = extractDueAmount(json) ?: return null
-        val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
-        val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
-        val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
-            PaymentIntentJsonParser().parse(it)
-        }
-        val setupIntent = json.optJSONObject(FIELD_SETUP_INTENT)?.let {
-            SetupIntentJsonParser().parse(it)
-        }
-
-        val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION)
-        val businessName = elementsSessionJson?.let { StripeJsonUtils.optString(it, FIELD_BUSINESS_NAME) }
-        val parsedElementsSession = parseElementsSession(
-            serverBuiltElementsSessionParams = json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
-            elementsSessionJson = elementsSessionJson,
-            liveMode = liveMode,
-        )
-        val elementsSession = if (parsedElementsSession != null) {
-            val confirmedIntent = paymentIntent ?: setupIntent
-            if (confirmedIntent != null) {
-                parsedElementsSession.copy(stripeIntent = confirmedIntent)
-            } else {
-                parsedElementsSession
-            }
-        } else {
-            null
-        }
-        val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
-        val savedPaymentMethodsOfferSave = parseSavedPaymentMethodsOfferSave(
-            json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)
-        )
-        val totalSummary = parseTotalSummaryResponse(json)
-        val lineItems = parseLineItems(json.optJSONObject(FIELD_LINE_ITEM_GROUP))
-        val shippingOptions = parseShippingOptions(json)
-        val adaptivePricingInfo = parseAdaptivePricingInfo(
-            json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
-        )
-        val allowedShippingCountries = parseAllowedShippingCountries(json)
-        val requiresShippingAddress = json.has(FIELD_SHIPPING_ADDRESS_COLLECTION)
-        val requiresBillingAddress = json.optString(FIELD_BILLING_ADDRESS_COLLECTION) == "required"
-
-        return CheckoutSessionResponse(
-            id = sessionId,
-            amount = amount,
-            currency = currency,
-            mode = mode,
-            status = status,
-            liveMode = liveMode,
-            taxStatus = taxStatus,
-            customerEmail = customerEmail,
-            elementsSession = elementsSession,
-            paymentIntent = paymentIntent,
-            setupIntent = setupIntent,
-            customer = customer,
-            savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
-            totalSummary = totalSummary,
-            lineItems = lineItems,
-            shippingOptions = shippingOptions,
-            adaptivePricingInfo = adaptivePricingInfo,
-            automaticTaxEnabled = automaticTaxEnabled,
-            taxAddressSource = taxAddressSource,
-            allowedShippingCountries = allowedShippingCountries,
-            requiresShippingAddress = requiresShippingAddress,
-            requiresBillingAddress = requiresBillingAddress,
-            merchantCountry = merchantCountry,
-            businessName = businessName,
-        )
-    }
-
-    private fun parseMode(modeString: String): CheckoutSessionResponse.Mode {
-        return when (modeString) {
-            "payment" -> CheckoutSessionResponse.Mode.PAYMENT
-            "setup" -> CheckoutSessionResponse.Mode.SETUP
-            else -> CheckoutSessionResponse.Mode.UNKNOWN
-        }
-    }
-
-    private fun parseStatus(statusString: String): CheckoutSessionResponse.Status? {
-        return when (statusString) {
+        val status = when (json.requiredString("status")) {
             "open" -> CheckoutSessionResponse.Status.OPEN
             "complete" -> CheckoutSessionResponse.Status.COMPLETE
             "expired" -> CheckoutSessionResponse.Status.EXPIRED
-            else -> null
+            else -> error("Unsupported status")
         }
-    }
 
-    private fun parseTaxStatusFromMeta(
-        taxMeta: JSONObject?,
-        taxAddressSource: CheckoutSessionResponse.TaxAddressSource?,
-    ): CheckoutSessionResponse.TaxStatus {
-        if (taxMeta == null) return CheckoutSessionResponse.TaxStatus.UNKNOWN
-        val metaStatus = taxMeta.optString(FIELD_STATUS)
-        if (metaStatus == "requires_location_inputs") {
-            return if (taxAddressSource == CheckoutSessionResponse.TaxAddressSource.SHIPPING) {
-                CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
-            } else {
-                CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+        val checkoutItems = json.requiredArray("checkout_items").objects().map(::parseCheckoutItem)
+        require(checkoutItems.isNotEmpty())
+        require(
+            checkoutItems.all { group ->
+                group.oneTimePrice.items.all { it.price.currency == currency }
             }
-        }
-        if (metaStatus == "complete") {
-            return CheckoutSessionResponse.TaxStatus.READY
-        }
-        return CheckoutSessionResponse.TaxStatus.UNKNOWN
+        )
+
+        val livemode = json.requiredBoolean("livemode")
+        val elementsJson = json.requiredObject("elements_session")
+        val elementsSession = parseElementsSession(
+            serverBuiltElementsSessionParams = json.requiredObject("server_built_elements_session_params"),
+            elementsSessionJson = elementsJson,
+            livemode = livemode,
+            noPaymentRequired = paymentStatus == CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED,
+        ) ?: error("Invalid Elements Session")
+        val merchantCountry = elementsSession.merchantCountry ?: error("Missing merchant country")
+        val taxContext = json.optionalObject("tax_context")
+
+        val paymentIntent = json.optionalObject("payment_intent")?.let { PaymentIntentJsonParser().parse(it) }
+        val setupIntent = json.optionalObject("setup_intent")?.let { SetupIntentJsonParser().parse(it) }
+        val confirmedIntent = paymentIntent ?: setupIntent
+
+        CheckoutSessionResponse(
+            id = id,
+            currency = currency,
+            paymentStatus = paymentStatus,
+            status = status,
+            livemode = livemode,
+            customerEmail = StripeJsonUtils.optString(json, "customer_email"),
+            elementsSession = if (confirmedIntent == null) {
+                elementsSession
+            } else {
+                elementsSession.copy(stripeIntent = confirmedIntent)
+            },
+            paymentIntent = paymentIntent,
+            setupIntent = setupIntent,
+            customer = json.optionalObject("customer")?.let(::parseCustomer),
+            savedPaymentMethodsOfferSave = json.optionalObject(
+                "customer_managed_saved_payment_methods_offer_save"
+            )?.let(::parseSavedPaymentMethodsOfferSave),
+            checkoutItems = checkoutItems,
+            recurringDetails = json.optionalObject("recurring_details")?.let(::parseRecurringDetails),
+            adaptivePricingInfo = json.optionalObject("adaptive_pricing_info")?.let(::parseAdaptivePricingInfo),
+            taxMeta = json.optionalObject("tax_meta")?.let(::parseTaxMeta),
+            automaticTaxEnabled = taxContext?.optionalBoolean("automatic_tax_enabled") ?: false,
+            taxAddressSource = parseTaxAddressSource(taxContext),
+            allowedShippingCountries = json.optionalObject("shipping_address_collection")
+                ?.requiredArray("allowed_countries")?.strings(),
+            requiresShippingAddress = json.has("shipping_address_collection"),
+            requiresBillingAddress = json.optString("billing_address_collection") == "required",
+            merchantCountry = merchantCountry,
+            businessName = StripeJsonUtils.optString(elementsJson, "business_name"),
+        )
+    }.getOrNull()
+
+    private fun parseCheckoutItem(json: JSONObject): CheckoutSessionResponse.CheckoutItem {
+        require(json.requiredString("type") == "one_time_price")
+        return CheckoutSessionResponse.CheckoutItem(
+            key = json.requiredString("key"),
+            oneTimePrice = CheckoutSessionResponse.OneTimePrice(
+                items = json.requiredObject("one_time_price").requiredArray("items").objects().map(::parsePriceItem)
+            ),
+        ).also { require(it.oneTimePrice.items.isNotEmpty()) }
     }
 
-    private fun parseTaxAddressSource(
-        taxContext: JSONObject?,
-    ): CheckoutSessionResponse.TaxAddressSource? {
-        val raw = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE)
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { if (it.startsWith("session.")) it.removePrefix("session.") else it }
-            ?: return null
+    @Suppress("CyclomaticComplexMethod")
+    private fun parsePriceItem(json: JSONObject): CheckoutSessionResponse.OneTimePriceItem {
+        val priceJson = json.requiredObject("price")
+        val price = CheckoutSessionResponse.Price(
+            id = priceJson.requiredString("id"),
+            currency = priceJson.requiredString("currency"),
+            unitAmount = priceJson.optionalLong("unit_amount")?.also { require(it >= 0) },
+            product = priceJson.requiredObject("product").let { product ->
+                CheckoutSessionResponse.Product(
+                    name = product.requiredString("name"),
+                    images = product.requiredArray("images").strings(),
+                )
+            },
+        )
+        val unitAmount = json.optionalLong("unit_amount")?.also { require(it >= 0) }
+        val unitAmountDecimal = json.optionalString("unit_amount_decimal")?.toDoubleOrNull()?.also {
+            require(it.isFinite() && it >= 0)
+        }
+        require(unitAmount != null || price.unitAmount != null || unitAmountDecimal != null)
+        val adjustableQuantity = json.optionalObject("adjustable_quantity")?.let { adjustable ->
+            val enabled = adjustable.requiredBoolean("enabled")
+            val maximum = adjustable.optionalInt("maximum")
+            val minimum = adjustable.optionalInt("minimum")
+            if (enabled) require(maximum != null && minimum != null)
+            CheckoutSessionResponse.AdjustableQuantity(enabled, maximum, minimum)
+        }
+        return CheckoutSessionResponse.OneTimePriceItem(
+            innerItemKey = json.requiredString("inner_item_key"),
+            price = price,
+            quantity = json.requiredInt("quantity").also { require(it >= 0) },
+            subtotal = json.requiredLong("subtotal").also { require(it >= 0) },
+            total = json.requiredLong("total").also { require(it >= 0) },
+            unitAmount = unitAmount,
+            unitAmountDecimal = unitAmountDecimal,
+            unitLabel = json.optionalString("unit_label"),
+            taxAmounts = json.requiredArray("tax_amounts").objects().map(::parseTaxAmount),
+            taxInclusive = json.requiredLong("tax_inclusive").also { require(it >= 0) },
+            taxExclusive = json.requiredLong("tax_exclusive").also { require(it >= 0) },
+            adjustableQuantity = adjustableQuantity,
+        )
+    }
+
+    private fun parseRecurringDetails(json: JSONObject) = CheckoutSessionResponse.RecurringDetails(
+        totalDiscountAmounts = json.requiredArray("total_discount_amounts").objects().map(::parseDiscountAmount),
+        totalTaxAmounts = json.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
+    )
+
+    private fun parseDiscountAmount(json: JSONObject): CheckoutSessionResponse.DiscountAmount {
+        val coupon = json.requiredObject("coupon")
+        return CheckoutSessionResponse.DiscountAmount(
+            amount = json.requiredLong("amount").also { require(it >= 0) },
+            displayName = json.optionalString("display_name"),
+            coupon = CheckoutSessionResponse.Coupon(
+                code = coupon.requiredString("code"),
+                name = coupon.optionalString("name"),
+                percentOff = coupon.optionalFiniteDouble("percent_off"),
+            ),
+            promotionCode = json.optionalObject("promotion_code")?.let {
+                CheckoutSessionResponse.PromotionCode(it.optionalString("code"))
+            },
+        )
+    }
+
+    private fun parseTaxAmount(json: JSONObject): CheckoutSessionResponse.TaxAmount {
+        val taxRate = json.requiredObject("tax_rate")
+        val rateType = when (val value = taxRate.optionalString("rate_type")) {
+            null -> null
+            "flat_amount" -> CheckoutSessionResponse.TaxRateType.FLAT_AMOUNT
+            "percentage" -> CheckoutSessionResponse.TaxRateType.PERCENTAGE
+            else -> error("Unsupported tax rate type: $value")
+        }
+        return CheckoutSessionResponse.TaxAmount(
+            amount = json.requiredLong("amount").also { require(it >= 0) },
+            inclusive = json.requiredBoolean("inclusive"),
+            taxRate = CheckoutSessionResponse.TaxRate(
+                displayName = taxRate.requiredString("display_name"),
+                percentage = taxRate.requiredFiniteDouble("percentage"),
+                rateType = rateType,
+            ),
+        )
+    }
+
+    private fun parseTaxMeta(json: JSONObject): CheckoutSessionResponse.TaxMeta {
+        val computationType = when (json.requiredString("computation_type")) {
+            "Off" -> CheckoutSessionResponse.TaxComputationType.OFF
+            "automatic" -> CheckoutSessionResponse.TaxComputationType.AUTOMATIC
+            "extension_defined" -> CheckoutSessionResponse.TaxComputationType.EXTENSION_DEFINED
+            "manual" -> CheckoutSessionResponse.TaxComputationType.MANUAL
+            "user_defined" -> CheckoutSessionResponse.TaxComputationType.USER_DEFINED
+            else -> error("Unsupported tax computation type")
+        }
+        val status = when (val value = json.optionalString("status")) {
+            null -> null
+            "complete" -> CheckoutSessionResponse.TaxStatus.COMPLETE
+            "failed" -> CheckoutSessionResponse.TaxStatus.FAILED
+            "requires_location_inputs" -> CheckoutSessionResponse.TaxStatus.REQUIRES_LOCATION_INPUTS
+            else -> error("Unsupported tax status: $value")
+        }
+        return CheckoutSessionResponse.TaxMeta(computationType, status)
+    }
+
+    private fun parseAdaptivePricingInfo(json: JSONObject) = CheckoutSessionResponse.AdaptivePricingInfo(
+        activePresentmentCurrency = json.requiredString("active_presentment_currency"),
+        integrationAmount = json.requiredLong("integration_amount").also { require(it >= 0) },
+        integrationCurrency = json.requiredString("integration_currency"),
+        localCurrencyOptions = json.requiredArray("local_currency_options").objects().map { option ->
+            CheckoutSessionResponse.LocalCurrencyOption(
+                amount = option.requiredLong("amount").also { require(it >= 0) },
+                conversionMarkupBps = option.optionalInt("conversion_markup_bps"),
+                currency = option.requiredString("currency"),
+                presentmentExchangeRate = option.requiredString("presentment_exchange_rate"),
+            )
+        },
+    )
+
+    private fun parseTaxAddressSource(json: JSONObject?): CheckoutSessionResponse.TaxAddressSource? {
+        val raw = json?.optionalString("automatic_tax_address_source")?.removePrefix("session.")
         return when (raw) {
             "shipping" -> CheckoutSessionResponse.TaxAddressSource.SHIPPING
             "billing" -> CheckoutSessionResponse.TaxAddressSource.BILLING
@@ -170,432 +227,84 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         }
     }
 
-    private fun parseElementsSessionParams(
-        serverBuiltElementsSessionParams: JSONObject,
-    ): ElementsSessionParams? {
-        return when (serverBuiltElementsSessionParams.optString("type")) {
-            "deferred_intent" -> {
-                val deferredIntentJson = serverBuiltElementsSessionParams.optJSONObject("deferred_intent")
-                    ?: return null
-                ElementsSessionParams.DeferredIntentType(
-                    locale = serverBuiltElementsSessionParams.optString("locale"),
-                    deferredIntentParams = DeferredIntentParams(
-                        mode = DeferredIntentParams.parseModeFromJson(deferredIntentJson)
-                            ?: return null,
-                        paymentMethodTypes = jsonArrayToList(
-                            deferredIntentJson.optJSONArray("payment_method_types")
-                        ),
-                        paymentMethodConfigurationId = deferredIntentJson
-                            .optString("payment_method_configuration"),
-                        onBehalfOf = deferredIntentJson.optString("on_behalf_of")
-                    ),
-                    customPaymentMethods = jsonArrayToList(
-                        serverBuiltElementsSessionParams.optJSONArray("custom_payment_methods")
-                    ),
-                    externalPaymentMethods = jsonArrayToList(
-                        serverBuiltElementsSessionParams.optJSONArray("external_payment_methods")
-                    ),
-                    savedPaymentMethodSelectionId = serverBuiltElementsSessionParams
-                        .optString("client_default_payment_method"),
-                    mobileSessionId = serverBuiltElementsSessionParams.optString("mobile_session_id"),
-                    appId = serverBuiltElementsSessionParams.optString("mobile_app_id"),
-                    countryOverride = serverBuiltElementsSessionParams.optString("country_override")
-                )
-            }
-            else -> {
-                // This function is only used for parsing elements session params when init payment_pages
-                // The params is always deferred intent type.
-                null
-            }
-        }
-    }
-
-    /**
-     * Parses the elements_session object if present.
-     */
-    private fun parseElementsSession(
-        serverBuiltElementsSessionParams: JSONObject?,
-        elementsSessionJson: JSONObject?,
-        liveMode: Boolean,
-    ): ElementsSession? {
-        val serverBuiltElementsSessionParams = serverBuiltElementsSessionParams?.let {
-            parseElementsSessionParams(it)
-        } ?: return null
-        val elementsSessionJson = elementsSessionJson ?: return null
-
-        return ElementsSessionJsonParser(
-            serverBuiltElementsSessionParams,
-            isLiveMode = liveMode,
-        ).parse(elementsSessionJson)
-    }
-
-    /**
-     * Extracts amount from `total_summary.due` or `line_item_group.due` in response JSON.
-     */
-    private fun extractDueAmount(json: JSONObject): Long? {
-        val totalSummary = json.optJSONObject(FIELD_TOTAL_SUMMARY)
-        if (totalSummary != null) {
-            val due = totalSummary.optLong(FIELD_DUE, -1)
-            if (due >= 0) return due
-        }
-        val lineItemGroup = json.optJSONObject(FIELD_LINE_ITEM_GROUP)
-        if (lineItemGroup != null) {
-            val due = lineItemGroup.optLong(FIELD_DUE, -1)
-            if (due >= 0) return due
-        }
-        return null
-    }
-
-    /**
-     * Parses the top-level customer object from checkout session init response.
-     * Customer is associated server-side when the checkout session is created,
-     * so we get customer data directly in the init response.
-     *
-     * Expected JSON structure:
-     * ```json
-     * {
-     *   "customer": {
-     *     "id": "cus_xxx",
-     *     "payment_methods": [...],
-     *     "can_detach_payment_method": true
-     *   }
-     * }
-     * ```
-     */
-    private fun parseCustomer(json: JSONObject?): CheckoutSessionResponse.Customer? {
-        if (json == null) {
-            return null
-        }
-
-        val customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER_ID) ?: return null
-        val paymentMethodsJson = json.optJSONArray(FIELD_PAYMENT_METHODS)
-        val paymentMethods = paymentMethodsJson?.let { pmsJson ->
-            (0 until pmsJson.length()).mapNotNull { index ->
-                PaymentMethodJsonParser().parse(pmsJson.optJSONObject(index))
-            }
-        } ?: emptyList()
-        val canDetachPaymentMethod = json.optBoolean(FIELD_CAN_DETACH_PAYMENT_METHOD, false)
-
+    private fun parseCustomer(json: JSONObject): CheckoutSessionResponse.Customer {
         return CheckoutSessionResponse.Customer(
-            id = customerId,
-            paymentMethods = paymentMethods,
-            canDetachPaymentMethod = canDetachPaymentMethod,
+            id = json.requiredString("id"),
+            paymentMethods = json.requiredArray("payment_methods").objects().map { paymentMethod ->
+                PaymentMethodJsonParser().parse(paymentMethod) ?: error("Invalid payment method")
+            },
+            canDetachPaymentMethod = json.optionalBoolean("can_detach_payment_method") ?: false,
         )
     }
 
-    /**
-     * Parses `customer_managed_saved_payment_methods_offer_save` from the init response.
-     *
-     * Expected JSON structure:
-     * ```json
-     * {
-     *   "customer_managed_saved_payment_methods_offer_save": {
-     *     "enabled": true,
-     *     "status": "not_accepted"
-     *   }
-     * }
-     * ```
-     */
-    private fun parseSavedPaymentMethodsOfferSave(
-        json: JSONObject?,
-    ): CheckoutSessionResponse.SavedPaymentMethodsOfferSave? {
-        if (json == null) return null
-
-        val enabled = json.optBoolean(FIELD_OFFER_SAVE_ENABLED, false)
-        val statusString = json.optString(FIELD_OFFER_SAVE_STATUS)
-        val status = when (statusString) {
-            "accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
-            else -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
-        }
-
-        return CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
-            enabled = enabled,
-            status = status,
-        )
-    }
-
-    /**
-     * Parses the total summary from the response JSON.
-     *
-     * Reads subtotal/due/total from `total_summary` (preferred) or `line_item_group` (fallback).
-     * Parses discount_amounts, tax_amounts, and shipping_rate from `line_item_group`.
-     * Reads applied_balance from `total_summary`.
-     */
-    private fun parseTotalSummaryResponse(json: JSONObject): CheckoutSessionResponse.TotalSummaryResponse? {
-        val totalSummary = json.optJSONObject(FIELD_TOTAL_SUMMARY)
-        val lineItemGroup = json.optJSONObject(FIELD_LINE_ITEM_GROUP)
-
-        // Need at least one source for amounts
-        if (totalSummary == null && lineItemGroup == null) return null
-
-        val subtotal = totalSummary?.optLong(FIELD_SUBTOTAL, -1)?.takeIf { it >= 0 }
-            ?: lineItemGroup?.optLong(FIELD_SUBTOTAL, -1)?.takeIf { it >= 0 }
-            ?: return null
-
-        val totalDueToday = totalSummary?.optLong(FIELD_DUE, -1)?.takeIf { it >= 0 }
-            ?: lineItemGroup?.optLong(FIELD_DUE, -1)?.takeIf { it >= 0 }
-            ?: return null
-
-        val totalAmountDue = totalSummary?.optLong(FIELD_TOTAL, -1)?.takeIf { it >= 0 }
-            ?: lineItemGroup?.optLong(FIELD_TOTAL, -1)?.takeIf { it >= 0 }
-            ?: return null
-
-        val discountAmounts = parseDiscountAmounts(lineItemGroup)
-        val taxAmounts = parseTaxAmounts(lineItemGroup)
-        val shippingRate = parseShippingRate(lineItemGroup, json)
-        val appliedBalance = totalSummary?.let {
-            if (it.has(FIELD_APPLIED_BALANCE)) it.optLong(FIELD_APPLIED_BALANCE) else null
-        }
-
-        return CheckoutSessionResponse.TotalSummaryResponse(
-            subtotal = subtotal,
-            totalDueToday = totalDueToday,
-            totalAmountDue = totalAmountDue,
-            discountAmounts = discountAmounts,
-            taxAmounts = taxAmounts,
-            shippingRate = shippingRate,
-            appliedBalance = appliedBalance,
-        )
-    }
-
-    private fun parseDiscountAmounts(
-        lineItemGroup: JSONObject?,
-    ): List<CheckoutSessionResponse.DiscountAmount> {
-        val array = lineItemGroup?.optJSONArray(FIELD_DISCOUNT_AMOUNTS) ?: return emptyList()
-        return (0 until array.length()).mapNotNull { i ->
-            val obj = array.optJSONObject(i) ?: return@mapNotNull null
-            val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val displayName = obj.optJSONObject(FIELD_COUPON)?.optString(FIELD_NAME)
-                ?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-            CheckoutSessionResponse.DiscountAmount(amount = amount, displayName = displayName)
-        }
-    }
-
-    private fun parseTaxAmounts(
-        lineItemGroup: JSONObject?,
-    ): List<CheckoutSessionResponse.TaxAmount> {
-        val array = lineItemGroup?.optJSONArray(FIELD_TAX_AMOUNTS) ?: return emptyList()
-        return (0 until array.length()).mapNotNull { i ->
-            val obj = array.optJSONObject(i) ?: return@mapNotNull null
-            val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val inclusive = obj.optBoolean(FIELD_INCLUSIVE, false)
-            val taxRate = obj.optJSONObject(FIELD_TAX_RATE) ?: return@mapNotNull null
-            val displayName = taxRate.optString(FIELD_DISPLAY_NAME).takeIf { it.isNotEmpty() }
-                ?: return@mapNotNull null
-            val percentage = taxRate.optDouble(FIELD_PERCENTAGE, Double.NaN)
-            if (percentage.isNaN()) return@mapNotNull null
-            CheckoutSessionResponse.TaxAmount(
-                amount = amount,
-                inclusive = inclusive,
-                displayName = displayName,
-                percentage = percentage,
-            )
-        }
-    }
-
-    private fun parseShippingRate(
-        lineItemGroup: JSONObject?,
-        rootJson: JSONObject,
-    ): CheckoutSessionResponse.ShippingRate? {
-        // Primary: line_item_group.shipping_rate
-        val shippingRateJson = lineItemGroup?.optJSONObject(FIELD_SHIPPING_RATE)
-        if (shippingRateJson != null) {
-            return parseShippingRateFromJson(shippingRateJson)
-        }
-        // Fallback: shipping.shipping_option
-        val shippingOption = rootJson.optJSONObject(FIELD_SHIPPING)
-            ?.optJSONObject(FIELD_SHIPPING_OPTION)
-        if (shippingOption != null) {
-            return parseShippingRateFromJson(shippingOption)
-        }
-        return null
-    }
-
-    private fun parseShippingRateFromJson(json: JSONObject): CheckoutSessionResponse.ShippingRate? {
-        val id = json.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return null
-        val amount = json.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return null
-        val displayName = json.optString(FIELD_DISPLAY_NAME).takeIf { it.isNotEmpty() } ?: return null
-        val deliveryEstimate = parseDeliveryEstimate(json)
-        return CheckoutSessionResponse.ShippingRate(
-            id = id,
-            amount = amount,
-            displayName = displayName,
-            deliveryEstimate = deliveryEstimate,
-        )
-    }
-
-    private fun parseShippingOptions(json: JSONObject): List<CheckoutSessionResponse.ShippingRate> {
-        val array = json.optJSONArray(FIELD_SHIPPING_OPTIONS) ?: return emptyList()
-        return (0 until array.length()).mapNotNull { i ->
-            val obj = array.optJSONObject(i) ?: return@mapNotNull null
-            val shippingRateJson = obj.optJSONObject(FIELD_SHIPPING_RATE) ?: return@mapNotNull null
-            parseShippingRateFromJson(shippingRateJson)
-        }
-    }
-
-    private fun parseDeliveryEstimate(json: JSONObject): String? {
-        if (!json.has(FIELD_DELIVERY_ESTIMATE)) return null
-        // If it's a string, use directly
-        val stringValue = json.optString(FIELD_DELIVERY_ESTIMATE).takeIf { it.isNotEmpty() }
-        if (stringValue != null && !json.optJSONObject(FIELD_DELIVERY_ESTIMATE).let { it != null }) {
-            return stringValue
-        }
-        // If it's an object with minimum/maximum, format as "N-M business days"
-        val estimateObj = json.optJSONObject(FIELD_DELIVERY_ESTIMATE) ?: return null
-        val minimum = estimateObj.optJSONObject("minimum")
-        val maximum = estimateObj.optJSONObject("maximum")
-        val minValue = minimum?.optInt("value", -1)?.takeIf { it >= 0 }
-        val maxValue = maximum?.optInt("value", -1)?.takeIf { it >= 0 }
-        val unit = minimum?.optString("unit")
-            ?: maximum?.optString("unit")
-            ?: "business_day"
-        val unitDisplay = unit.replace("_", " ") + "s"
-        return when {
-            minValue != null && maxValue != null -> "$minValue-$maxValue $unitDisplay"
-            minValue != null -> "$minValue+ $unitDisplay"
-            maxValue != null -> "Up to $maxValue $unitDisplay"
-            else -> null
-        }
-    }
-
-    private fun parseLineItems(
-        lineItemGroup: JSONObject?,
-    ): List<CheckoutSessionResponse.LineItem> {
-        val array = lineItemGroup?.optJSONArray(FIELD_LINE_ITEMS) ?: return emptyList()
-        return (0 until array.length()).mapNotNull { i ->
-            val obj = array.optJSONObject(i) ?: return@mapNotNull null
-            val id = obj.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-            val name = obj.optString(FIELD_NAME).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-            val quantity = obj.optInt(FIELD_QUANTITY, -1).takeIf { it > 0 } ?: return@mapNotNull null
-            val subtotal = obj.optLong(FIELD_SUBTOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val total = obj.optLong(FIELD_TOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val unitAmount = obj.optLong(FIELD_UNIT_AMOUNT_OVERRIDE, -1).takeIf { it >= 0 }
-                ?: obj.optJSONObject(FIELD_PRICE)
-                    ?.optLong(FIELD_UNIT_AMOUNT, -1)
-                    ?.takeIf { it >= 0 }
-            CheckoutSessionResponse.LineItem(
-                id = id,
-                name = name,
-                quantity = quantity,
-                unitAmount = unitAmount,
-                subtotal = subtotal,
-                total = total,
-            )
-        }
-    }
-
-    private fun parseAdaptivePricingInfo(
-        json: JSONObject?,
-    ): CheckoutSessionResponse.AdaptivePricingInfo? {
-        if (json == null) return null
-
-        val activePresentmentCurrency = json.optString(FIELD_ACTIVE_PRESENTMENT_CURRENCY)
-            .takeIf { it.isNotEmpty() } ?: return null
-        val integrationAmount = json.optLong(FIELD_INTEGRATION_AMOUNT, -1)
-            .takeIf { it >= 0 } ?: return null
-        val integrationCurrency = json.optString(FIELD_INTEGRATION_CURRENCY)
-            .takeIf { it.isNotEmpty() } ?: return null
-        val localCurrencyOptions = parseLocalCurrencyOptions(
-            json.optJSONArray(FIELD_LOCAL_CURRENCY_OPTIONS)
+    private fun parseSavedPaymentMethodsOfferSave(json: JSONObject) =
+        CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
+            enabled = json.requiredBoolean("enabled"),
+            status = when (json.requiredString("status")) {
+                "accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
+                "not_accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
+                else -> error("Unsupported saved-payment-method status")
+            },
         )
 
-        return CheckoutSessionResponse.AdaptivePricingInfo(
-            activePresentmentCurrency = activePresentmentCurrency,
-            integrationAmount = integrationAmount,
-            integrationCurrency = integrationCurrency,
-            localCurrencyOptions = localCurrencyOptions,
+    private fun parseElementsSession(
+        serverBuiltElementsSessionParams: JSONObject,
+        elementsSessionJson: JSONObject,
+        livemode: Boolean,
+        noPaymentRequired: Boolean,
+    ): ElementsSession? {
+        if (serverBuiltElementsSessionParams.optString("type") != "deferred_intent") return null
+        val deferred = serverBuiltElementsSessionParams.optJSONObject("deferred_intent") ?: return null
+        val params = ElementsSessionParams.DeferredIntentType(
+            locale = serverBuiltElementsSessionParams.optString("locale"),
+            deferredIntentParams = DeferredIntentParams(
+                mode = if (noPaymentRequired) {
+                    DeferredIntentParams.Mode.Setup(
+                        currency = deferred.optString("currency").takeIf { it.isNotEmpty() },
+                        setupFutureUsage = deferred.optString("setup_future_usage").let { code ->
+                            StripeIntent.Usage.entries.firstOrNull { it.code == code }
+                        } ?: StripeIntent.Usage.OffSession,
+                    )
+                } else {
+                    DeferredIntentParams.parseModeFromJson(deferred) ?: return null
+                },
+                paymentMethodTypes = jsonArrayToList(deferred.optJSONArray("payment_method_types")),
+                paymentMethodConfigurationId = deferred.optString("payment_method_configuration"),
+                onBehalfOf = deferred.optString("on_behalf_of"),
+            ),
+            customPaymentMethods = jsonArrayToList(
+                serverBuiltElementsSessionParams.optJSONArray("custom_payment_methods")
+            ),
+            externalPaymentMethods = jsonArrayToList(
+                serverBuiltElementsSessionParams.optJSONArray("external_payment_methods")
+            ),
+            savedPaymentMethodSelectionId = serverBuiltElementsSessionParams.optString("client_default_payment_method"),
+            mobileSessionId = serverBuiltElementsSessionParams.optString("mobile_session_id"),
+            appId = serverBuiltElementsSessionParams.optString("mobile_app_id"),
+            countryOverride = serverBuiltElementsSessionParams.optString("country_override"),
         )
+        return ElementsSessionJsonParser(params, isLiveMode = livemode).parse(elementsSessionJson)
     }
 
-    private fun parseLocalCurrencyOptions(
-        array: JSONArray?,
-    ): List<CheckoutSessionResponse.LocalCurrencyOption> {
-        if (array == null) return emptyList()
-        return (0 until array.length()).mapNotNull { i ->
-            val obj = array.optJSONObject(i) ?: return@mapNotNull null
-            val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val conversionMarkupBps = obj.optInt(FIELD_CONVERSION_MARKUP_BPS, -1)
-                .takeIf { it >= 0 } ?: return@mapNotNull null
-            val currency = obj.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() }
-                ?: return@mapNotNull null
-            val presentmentExchangeRate = obj.optString(FIELD_PRESENTMENT_EXCHANGE_RATE)
-                .takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-            CheckoutSessionResponse.LocalCurrencyOption(
-                amount = amount,
-                conversionMarkupBps = conversionMarkupBps,
-                currency = currency,
-                presentmentExchangeRate = presentmentExchangeRate,
-            )
-        }
-    }
-
-    private fun parseAllowedShippingCountries(json: JSONObject): List<String>? {
-        val shippingCollection = json.optJSONObject(FIELD_SHIPPING_ADDRESS_COLLECTION) ?: return null
-        val countries = shippingCollection.optJSONArray(FIELD_ALLOWED_COUNTRIES) ?: return null
-        return jsonArrayToList(countries)
-    }
-
-    private const val FIELD_SESSION_ID = "session_id"
-    private const val FIELD_ACCOUNT_SETTINGS = "account_settings"
-    private const val FIELD_ACCOUNT_SETTINGS_COUNTRY = "country"
-    private const val FIELD_UI_MODE = "ui_mode"
-    private const val UI_MODE_CUSTOM = "custom"
-    private const val FIELD_MODE = "mode"
-    private const val FIELD_STATUS = "status"
-    private const val FIELD_LIVE_MODE = "livemode"
-    private const val FIELD_TAX_META = "tax_meta"
-    private const val FIELD_TAX_CONTEXT = "tax_context"
-    private const val FIELD_AUTOMATIC_TAX_ENABLED = "automatic_tax_enabled"
-    private const val FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE = "automatic_tax_address_source"
-    private const val FIELD_CURRENCY = "currency"
-    private const val FIELD_CUSTOMER_EMAIL = "customer_email"
-    private const val FIELD_ELEMENTS_SESSION = "elements_session"
-    private const val FIELD_BUSINESS_NAME = "business_name"
-    private const val FIELD_TOTAL_SUMMARY = "total_summary"
-    private const val FIELD_DUE = "due"
-    private const val FIELD_PAYMENT_INTENT = "payment_intent"
-    private const val FIELD_SETUP_INTENT = "setup_intent"
-    private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
-    private const val FIELD_CUSTOMER = "customer"
-    private const val FIELD_CUSTOMER_ID = "id"
-    private const val FIELD_PAYMENT_METHODS = "payment_methods"
-    private const val FIELD_CAN_DETACH_PAYMENT_METHOD = "can_detach_payment_method"
-    private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
-        "customer_managed_saved_payment_methods_offer_save"
-    private const val FIELD_OFFER_SAVE_ENABLED = "enabled"
-    private const val FIELD_OFFER_SAVE_STATUS = "status"
-    private const val FIELD_LINE_ITEM_GROUP = "line_item_group"
-    private const val FIELD_SUBTOTAL = "subtotal"
-    private const val FIELD_TOTAL = "total"
-    private const val FIELD_AMOUNT = "amount"
-    private const val FIELD_APPLIED_BALANCE = "applied_balance"
-    private const val FIELD_DISCOUNT_AMOUNTS = "discount_amounts"
-    private const val FIELD_COUPON = "coupon"
-    private const val FIELD_NAME = "name"
-    private const val FIELD_TAX_AMOUNTS = "tax_amounts"
-    private const val FIELD_INCLUSIVE = "inclusive"
-    private const val FIELD_TAX_RATE = "tax_rate"
-    private const val FIELD_DISPLAY_NAME = "display_name"
-    private const val FIELD_PERCENTAGE = "percentage"
-    private const val FIELD_SHIPPING_RATE = "shipping_rate"
-    private const val FIELD_SHIPPING = "shipping"
-    private const val FIELD_SHIPPING_OPTION = "shipping_option"
-    private const val FIELD_SHIPPING_OPTIONS = "shipping_options"
-    private const val FIELD_DELIVERY_ESTIMATE = "delivery_estimate"
-    private const val FIELD_LINE_ITEMS = "line_items"
-    private const val FIELD_ID = "id"
-    private const val FIELD_QUANTITY = "quantity"
-    private const val FIELD_PRICE = "price"
-    private const val FIELD_UNIT_AMOUNT = "unit_amount"
-    private const val FIELD_UNIT_AMOUNT_OVERRIDE = "unit_amount_override"
-    private const val FIELD_ADAPTIVE_PRICING_INFO = "adaptive_pricing_info"
-    private const val FIELD_ACTIVE_PRESENTMENT_CURRENCY = "active_presentment_currency"
-    private const val FIELD_INTEGRATION_AMOUNT = "integration_amount"
-    private const val FIELD_INTEGRATION_CURRENCY = "integration_currency"
-    private const val FIELD_LOCAL_CURRENCY_OPTIONS = "local_currency_options"
-    private const val FIELD_CONVERSION_MARKUP_BPS = "conversion_markup_bps"
-    private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
-    private const val FIELD_SHIPPING_ADDRESS_COLLECTION = "shipping_address_collection"
-    private const val FIELD_ALLOWED_COUNTRIES = "allowed_countries"
-    private const val FIELD_BILLING_ADDRESS_COLLECTION = "billing_address_collection"
+    private fun JSONObject.requiredString(name: String): String = getString(name).also { require(it.isNotEmpty()) }
+    private fun JSONObject.optionalString(name: String): String? =
+        if (!has(name) || isNull(name)) null else getString(name)
+    private fun JSONObject.requiredObject(name: String): JSONObject = getJSONObject(name)
+    private fun JSONObject.optionalObject(name: String): JSONObject? =
+        if (!has(name) || isNull(name)) null else getJSONObject(name)
+    private fun JSONObject.requiredArray(name: String): JSONArray = getJSONArray(name)
+    private fun JSONObject.requiredBoolean(name: String): Boolean = getBoolean(name)
+    private fun JSONObject.optionalBoolean(name: String): Boolean? =
+        if (!has(name) || isNull(name)) null else getBoolean(name)
+    private fun JSONObject.requiredLong(name: String): Long = getLong(name)
+    private fun JSONObject.optionalLong(name: String): Long? =
+        if (!has(name) || isNull(name)) null else getLong(name)
+    private fun JSONObject.requiredInt(name: String): Int = getInt(name)
+    private fun JSONObject.optionalInt(name: String): Int? =
+        if (!has(name) || isNull(name)) null else getInt(name)
+    private fun JSONObject.requiredFiniteDouble(name: String): Double = getDouble(name).also { require(it.isFinite()) }
+    private fun JSONObject.optionalFiniteDouble(name: String): Double? =
+        if (!has(name) || isNull(name)) null else requiredFiniteDouble(name)
+    private fun JSONArray.objects(): List<JSONObject> = (0 until length()).map(::getJSONObject)
+    private fun JSONArray.strings(): List<String> = (0 until length()).map(::getString)
 }

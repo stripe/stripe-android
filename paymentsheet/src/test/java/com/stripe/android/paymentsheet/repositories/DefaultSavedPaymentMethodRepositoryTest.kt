@@ -18,6 +18,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -379,16 +380,17 @@ class DefaultSavedPaymentMethodRepositoryTest {
         )
 
         private fun checkoutSessionUpdateResponse(): String {
-            return """
-                {
-                  "session_id": "cs_123",
-                  "ui_mode": "custom",
-                  "status": "open",
-                  "currency": "usd",
-                  "total_summary": {
-                    "due": 5099
-                  },
-                  "customer": {
+            val resource = requireNotNull(
+                requireNotNull(DefaultSavedPaymentMethodRepositoryTest::class.java.classLoader)
+                    .getResource("checkout-session-init.json")
+            )
+            return JSONObject(resource.readText())
+                .put("session_id", "cs_123")
+                .put(
+                    "customer",
+                    JSONObject(
+                        """
+                        {
                     "id": "cus_123",
                     "can_detach_payment_method": true,
                     "payment_methods": [
@@ -415,9 +417,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
                         "type": "card"
                       }
                     ]
-                  }
-                }
-            """.trimIndent()
+                        }
+                        """.trimIndent()
+                    )
+                ).toString()
         }
     }
 }

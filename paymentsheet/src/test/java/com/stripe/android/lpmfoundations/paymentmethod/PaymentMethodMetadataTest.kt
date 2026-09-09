@@ -2150,7 +2150,6 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `createForPaymentElement requires automatic tax billing address when tax status requires it`() {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
@@ -2172,7 +2171,6 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `createForPaymentElement requires automatic tax billing address when tax status is ready`() {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            taxStatus = CheckoutSessionResponse.TaxStatus.READY,
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )

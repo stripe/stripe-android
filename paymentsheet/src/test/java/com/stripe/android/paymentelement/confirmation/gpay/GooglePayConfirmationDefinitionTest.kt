@@ -43,7 +43,6 @@ import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
@@ -545,16 +544,15 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `On 'launch', should create display items from payment method metadata`() = runTest {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            lineItems = listOf(
-                CheckoutSessionResponse.LineItem(
-                    id = "li_1",
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(
                     name = "Widget",
                     quantity = 2,
                     unitAmount = 1000L,
                     subtotal = 2000L,
                     total = 2000L,
-                ),
-            ),
+                )
+            )
         )
         val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
         val definition = createGooglePayConfirmationDefinition()
@@ -590,12 +588,9 @@ class GooglePayConfirmationDefinitionTest {
             label = null,
             isElements = true,
             publishableKey = null,
-            displayItems = listOf(
-                GooglePayJsonFactory.DisplayItem(
-                    label = "Widget x2",
-                    type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                    price = 1000L,
-                ),
+            displayItems = GooglePayDisplayItemsFactory.create(
+                checkoutSessionResponse,
+                ApplicationProvider.getApplicationContext(),
             ),
             billingEmailOverride = null,
             shippingAddressParameters = null,
