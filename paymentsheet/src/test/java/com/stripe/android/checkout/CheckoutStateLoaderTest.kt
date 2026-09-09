@@ -144,59 +144,29 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial seeds collected details with the defaults billing address`() = runScenario {
-        val address = CheckoutController.Address()
-            .city(" San Francisco ")
-            .country(" US ")
-            .line1(" 510 Townsend St ")
-            .postalCode(" 94103 ")
-            .state(" CA ")
-
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .defaults(
-                    CheckoutController.Configuration.Defaults()
-                        .billingDetails(
-                            CheckoutController.Configuration.Defaults.ContactDetails().address(address),
-                        ),
-                )
-                .build(),
-            checkoutSessionResponse = response(),
-        )
-
-        val billingAddress = requireNotNull(stateHolder.state?.collectedDetails?.billingAddress)
-        assertThat(billingAddress.city).isEqualTo("San Francisco")
-        assertThat(billingAddress.country).isEqualTo("US")
-        assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
-        assertThat(billingAddress.postalCode).isEqualTo("94103")
-        assertThat(billingAddress.state).isEqualTo("CA")
-        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
-            .isEqualTo("94103")
-    }
-
-    @Test
-    fun `loadInitial seeds collected details from configuration defaults`() = runScenario {
+    fun `loadInitial keeps only mutable configuration defaults in collected details`() = runScenario {
         val configuration = CheckoutController.Configuration()
             .defaults(
                 CheckoutController.Configuration.Defaults()
-                    .billingDetails(
-                        CheckoutController.Configuration.Defaults.ContactDetails()
-                            .name("Jane Billing")
-                            .address(CheckoutController.Address().country("US").city("Denver")),
-                    )
                     .shippingDetails(
-                        CheckoutController.Configuration.Defaults.ContactDetails().name("John Shipping"),
-                    ),
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("John Shipping")
+                            .address(CheckoutController.Address().country("US").city("Seattle")),
+                    )
+                    .email("prefill@example.com"),
             )
             .build()
 
         loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
 
         val collected = requireNotNull(stateHolder.state).collectedDetails
-        assertThat(collected.billingName).isEqualTo("Jane Billing")
-        assertThat(collected.billingAddress?.country).isEqualTo("US")
-        assertThat(collected.billingAddress?.city).isEqualTo("Denver")
-        assertThat(collected.shippingName).isEqualTo("John Shipping")
+        assertThat(collected).isEqualTo(
+            CheckoutCollectedDetails(
+                email = "prefill@example.com",
+                shippingName = "John Shipping",
+                shippingAddress = CheckoutController.Address().country("US").city("Seattle").build(),
+            ),
+        )
     }
 
     @Test
@@ -352,6 +322,13 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `reload preserves eager Link suppression`() = runScenario {
+        loader.reload(committedState(linkEagerPresentationSuppressed = true))
+
+        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isTrue()
+    }
+
+    @Test
     fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
         // A prior state carries a temporary selection and a stashed new payment method; a fresh
         // configuration load must start from a clean slate rather than carrying them forward.
@@ -366,6 +343,15 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.temporarySelection).isNull()
         assertThat(stateHolder.getPreviousNewSelection("cashapp")).isNull()
+    }
+
+    @Test
+    fun `loadInitial resets eager Link suppression for a newly configured session`() = runScenario {
+        stateHolder.state = committedState(linkEagerPresentationSuppressed = true)
+
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
     }
 
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
@@ -386,6 +372,7 @@ internal class CheckoutStateLoaderTest {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
@@ -397,6 +384,7 @@ internal class CheckoutStateLoaderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.

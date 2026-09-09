@@ -16,6 +16,13 @@ import org.robolectric.annotation.Config
 internal class PhoneNumberControllerTest {
 
     @Test
+    fun `Controller should enforce Ltr text direction`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController()
+
+        assertThat(phoneNumberController.enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
     fun `when new country is selected then phoneNumberFormatter is updated`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",

@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertComplete
 import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
@@ -83,6 +84,24 @@ internal class CvcRecollectionConfirmationActivityTest {
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
             assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
+        }
+    }
+
+    @Test
+    fun `On CVC recollection canceled, should complete with cancellation`() = test {
+        intendingCvcRecollectionToBeLaunched(CvcRecollectionResult.Cancelled)
+
+        confirmationHandler.state.test {
+            awaitItem().assertIdle()
+
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
+
+            assertThat(awaitItem().assertConfirming().option).isEqualTo(CONFIRMATION_OPTION)
+            intendedCvcRecollectionToBeLaunched()
+
+            val canceledResult = awaitItem().assertComplete().result.assertCanceled()
+            assertThat(canceledResult.action)
+                .isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
         }
     }
 

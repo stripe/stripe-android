@@ -5,10 +5,8 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleRequestFactory
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
-import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Test
 
 class CheckoutPlaygroundScenariosTest {
@@ -73,10 +71,8 @@ class CheckoutPlaygroundScenariosTest {
             .single { it.key == "save_remove" }
 
         settings.applyPreset(saveAndRemove.preset)
-        val request = CheckoutControllerExampleRequestFactory.create(settings.snapshot())
-
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isNull()
-        assertThat(request.body).containsEntry("customer", JsonPrimitive("returning"))
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
     }
 
     @Test

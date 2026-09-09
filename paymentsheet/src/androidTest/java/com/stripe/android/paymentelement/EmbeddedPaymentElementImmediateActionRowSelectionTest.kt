@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
@@ -482,7 +483,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     }
 
     private fun getCardLabel(last4: String): String {
-        return "···· $last4"
+        return "···· $last4".withLtrIsolate()
     }
 
     private fun enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage: Boolean = false) {

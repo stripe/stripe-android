@@ -18,7 +18,7 @@ class AddressElementViewModelModuleTest {
     fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
-            args = AddressElementActivityContract.Args(
+            args = AddressElementActivityContract.Args.Standalone(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration(),
             ),
@@ -35,7 +35,7 @@ class AddressElementViewModelModuleTest {
     fun `provideGooglePlacesClient returns null without google api key`() {
         val placesClient = module.provideGooglePlacesClient(
             context = mock<Context>(),
-            args = AddressElementActivityContract.Args(
+            args = AddressElementActivityContract.Args.Standalone(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),

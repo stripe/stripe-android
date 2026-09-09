@@ -1042,6 +1042,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1115,6 +1116,7 @@ internal class PaymentMethodMetadataTest {
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1175,6 +1177,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1213,6 +1216,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1271,6 +1275,7 @@ internal class PaymentMethodMetadataTest {
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2021,6 +2026,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.availableWallets)
@@ -2090,6 +2096,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2114,6 +2121,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2142,6 +2150,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2280,6 +2289,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 
@@ -2306,6 +2316,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 
@@ -2369,6 +2380,7 @@ internal class PaymentMethodMetadataTest {
     fun `paymentMethodOrientation returns Horizontal when layout is Horizontal`() {
         val metadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)

@@ -212,24 +212,36 @@ internal class InputAddressViewModel @Inject constructor(
             return
         }
         _formEnabled.value = false
+        val addressDetails = AddressDetails(
+            name = completedFormValues[FormFieldId.Name]?.value,
+            address = PaymentSheet.Address(
+                city = completedFormValues[FormFieldId.City]?.value,
+                country = completedFormValues[FormFieldId.Country]?.value,
+                line1 = completedFormValues[FormFieldId.Line1]?.value,
+                line2 = completedFormValues[FormFieldId.Line2]?.value,
+                postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
+                state = completedFormValues[FormFieldId.State]?.value
+            ),
+            phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
+            isCheckboxSelected = checkboxChecked
+        )
         completeWithAddress(
-            AddressDetails(
-                name = completedFormValues[FormFieldId.Name]?.value,
-                address = PaymentSheet.Address(
-                    city = completedFormValues[FormFieldId.City]?.value,
-                    country = completedFormValues[FormFieldId.Country]?.value,
-                    line1 = completedFormValues[FormFieldId.Line1]?.value,
-                    line2 = completedFormValues[FormFieldId.Line2]?.value,
-                    postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
-                    state = completedFormValues[FormFieldId.State]?.value
-                ),
-                phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
-                isCheckboxSelected = checkboxChecked
-            )
+            addressDetails = addressDetails,
+            result = when (args) {
+                is AddressElementActivityContract.Args.Standalone -> {
+                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+                }
+                is AddressElementActivityContract.Args.CheckoutShipping -> {
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+                }
+            },
         )
     }
 
-    private fun completeWithAddress(addressDetails: AddressDetails) {
+    private fun completeWithAddress(
+        addressDetails: AddressDetails,
+        result: AddressElementActivityContract.Result,
+    ) {
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
@@ -237,7 +249,7 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        resultStateHolder.setResult(AddressLauncherResult.Succeeded(addressDetails))
+        resultStateHolder.setResult(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {
