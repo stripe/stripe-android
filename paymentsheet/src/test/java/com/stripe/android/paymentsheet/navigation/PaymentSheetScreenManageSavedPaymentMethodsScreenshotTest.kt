@@ -53,6 +53,11 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             )
         }
 
+    private val displayableBankAccount = DisplayableSavedPaymentMethod.create(
+        displayName = US_BANK_ACCOUNT.usBankAccount!!.last4!!.resolvableString,
+        paymentMethod = US_BANK_ACCOUNT,
+    )
+
     @Test
     fun displaysSelectMode() {
         screenshotTest(
@@ -79,6 +84,15 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
     @Test
     fun displaysEditModeWithCardsOnly() {
         screenshotTest(paymentMethods = displayableCards, isEditing = true)
+    }
+
+    @Test
+    fun displaysSelectModeWithBankAccountOnly() {
+        screenshotTest(
+            paymentMethods = listOf(displayableBankAccount),
+            selection = displayableBankAccount,
+            isEditing = false,
+        )
     }
 
     private fun screenshotTest(

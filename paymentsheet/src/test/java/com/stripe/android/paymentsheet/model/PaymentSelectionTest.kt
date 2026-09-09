@@ -119,7 +119,7 @@ class PaymentSelectionTest {
         val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
         val label = pm.getLabel(linkBrand = LinkBrand.Onelink, canShowSublabel = false)?.resolve(context)
 
-        assertThat(label).isEqualTo("···· 4242")
+        assertThat(label).isEqualTo("\u2066···· 4242\u2069")
     }
 
     @Test
