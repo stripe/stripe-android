@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
+import com.stripe.android.core.ApiConfiguration
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -12,6 +13,10 @@ import org.junit.Test
 internal class TapToAddConnectionStarterTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_123",
+    )
 
     @Test
     fun `isSupported delegates to manager`() = runTest(testDispatcher) {
@@ -22,7 +27,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported("pk_test_123", false)).isTrue()
+        assertThat(starter.isSupported(apiConfiguration)).isTrue()
     }
 
     @Test
@@ -34,7 +39,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported("pk_test_123", false)).isFalse()
+        assertThat(starter.isSupported(apiConfiguration)).isFalse()
     }
 
     @Test
@@ -50,15 +55,14 @@ internal class TapToAddConnectionStarterTest {
             merchantDisplayName = "Books & Things",
         )
 
-        starter.start(commonConfiguration, "pk_test_123", false)
+        starter.start(commonConfiguration, apiConfiguration)
         advanceUntilIdle()
 
         assertThat(manager.connectCalls.awaitItem()).isEqualTo(
             FakeTapToAddConnectionManager.ConnectCall(
                 config = TapToAddConnectionManager.ConnectionConfig(
                     merchantDisplayName = "Books & Things",
-                    publishableKey = "pk_test_123",
-                    isLiveMode = false,
+                    apiConfiguration = apiConfiguration,
                 ),
             )
         )

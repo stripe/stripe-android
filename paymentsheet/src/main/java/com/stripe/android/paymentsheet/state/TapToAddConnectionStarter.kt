@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import dagger.Binds
@@ -12,9 +13,9 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionStarter {
-    fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean
+    fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean
 
-    fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean)
+    fun start(config: CommonConfiguration, apiConfiguration: ApiConfiguration.State)
 }
 
 internal class DefaultTapToAddConnectionStarter @Inject constructor(
@@ -22,18 +23,17 @@ internal class DefaultTapToAddConnectionStarter @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val coroutineContext: CoroutineContext,
 ) : TapToAddConnectionStarter {
-    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean {
-        return tapToAddConnectionManager.isSupported(publishableKey, isLiveMode)
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean {
+        return tapToAddConnectionManager.isSupported(apiConfiguration)
     }
 
-    override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
+    override fun start(config: CommonConfiguration, apiConfiguration: ApiConfiguration.State) {
         viewModelScope.launch(coroutineContext) {
             runCatching {
                 tapToAddConnectionManager.connect(
                     config = TapToAddConnectionManager.ConnectionConfig(
                         merchantDisplayName = config.merchantDisplayName,
-                        publishableKey = publishableKey,
-                        isLiveMode = isLiveMode,
+                        apiConfiguration = apiConfiguration,
                     )
                 )
             }
@@ -42,9 +42,9 @@ internal class DefaultTapToAddConnectionStarter @Inject constructor(
 }
 
 internal class NoOpTapToAddConnectionStarter @Inject constructor() : TapToAddConnectionStarter {
-    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean = false
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean = false
 
-    override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
+    override fun start(config: CommonConfiguration, apiConfiguration: ApiConfiguration.State) {
         // No-op
     }
 }

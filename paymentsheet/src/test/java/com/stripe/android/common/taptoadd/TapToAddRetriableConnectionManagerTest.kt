@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.RetryDelaySupplier
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -10,21 +11,24 @@ import kotlin.test.assertFailsWith
 import kotlin.time.Duration
 
 internal class TapToAddRetriableConnectionManagerTest {
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_123",
+    )
     private val testConnectionConfig =
         TapToAddConnectionManager.ConnectionConfig(
             merchantDisplayName = "Test Merchant",
-            publishableKey = "pk_test_123",
-            isLiveMode = false,
+            apiConfiguration = apiConfiguration,
         )
 
     @Test
     fun `isSupported is true when inner manager's isSupported is true`() = runScenario(isSupported = true) {
-        assertThat(retryConnectionManager.isSupported("pk_test_123", false)).isTrue()
+        assertThat(retryConnectionManager.isSupported(apiConfiguration)).isTrue()
     }
 
     @Test
     fun `isSupported is false when inner manager's isSupported is false`() = runScenario(isSupported = false) {
-        assertThat(retryConnectionManager.isSupported("pk_test_123", false)).isFalse()
+        assertThat(retryConnectionManager.isSupported(apiConfiguration)).isFalse()
     }
 
     @Test

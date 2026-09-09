@@ -317,17 +317,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             isLiveMode = apiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
-            isTapToAddSupported = tapToAddConnectionStarter.isSupported(
-                apiConfiguration.publishableKey,
-                apiConfiguration.isLiveMode(),
-            ),
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported(apiConfiguration),
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(
             configuration,
-            apiConfiguration.publishableKey,
-            apiConfiguration.isLiveMode(),
+            apiConfiguration,
         )
 
         // Give immediately available results a chance to complete before later load work checks isCompleted.
@@ -589,8 +585,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(
             elementsSession,
             customerMetadata,
-            apiConfiguration.publishableKey,
-            apiConfiguration.isLiveMode(),
+            apiConfiguration,
         )
 
         val analyticsMetadata = analyticsMetadataFactory.create(

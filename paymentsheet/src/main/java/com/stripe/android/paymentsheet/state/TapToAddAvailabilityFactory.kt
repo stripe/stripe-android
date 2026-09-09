@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -10,8 +11,7 @@ internal interface TapToAddAvailabilityFactory {
     fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
-        publishableKey: String,
-        isLiveMode: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Boolean
 }
 
@@ -22,10 +22,9 @@ internal class DefaultTapToAddAvailabilityFactory @Inject constructor(
     override fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
-        publishableKey: String,
-        isLiveMode: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Boolean {
-        return connectionManager.isSupported(publishableKey, isLiveMode) &&
+        return connectionManager.isSupported(apiConfiguration) &&
             elementsSession.isTapToAddEnabled &&
             customerMetadata != null
     }
@@ -35,7 +34,6 @@ internal class TapToAddAvailabilityFactoryForCustomerSheet @Inject constructor()
     override fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
-        publishableKey: String,
-        isLiveMode: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ) = false
 }

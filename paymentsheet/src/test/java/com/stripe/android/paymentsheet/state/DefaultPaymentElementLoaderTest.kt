@@ -707,7 +707,10 @@ internal class DefaultPaymentElementLoaderTest {
                 assertThat(startCalls.awaitItem()).isEqualTo(
                     FakeTapToAddConnectionStarter.StartCall(
                         config = config.asCommonConfiguration(),
-                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                            stripeAccountId = "acct_123",
+                        ),
                     )
                 )
 
@@ -757,7 +760,10 @@ internal class DefaultPaymentElementLoaderTest {
                 assertThat(startCalls.awaitItem()).isEqualTo(
                     FakeTapToAddConnectionStarter.StartCall(
                         config = config.asCommonConfiguration(),
-                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                            stripeAccountId = "acct_123",
+                        ),
                     )
                 )
 

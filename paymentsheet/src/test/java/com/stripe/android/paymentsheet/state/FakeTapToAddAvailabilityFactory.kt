@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 
@@ -9,7 +10,6 @@ internal class FakeTapToAddAvailabilityFactory(
     override fun isAvailable(
         elementsSession: ElementsSession,
         customerMetadata: CustomerMetadata?,
-        publishableKey: String,
-        isLiveMode: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Boolean = isAvailableResult
 }

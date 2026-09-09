@@ -2,6 +2,7 @@ package com.stripe.android.common.taptoadd
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
@@ -35,7 +36,7 @@ internal interface TapToAddConnectionManager {
     /**
      * Indicates if the device has the support required to use the on-device NFC reader
      */
-    fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean
+    fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean
 
     /**
      * Connects to the NFC reader. Successful completion of this function indicates a successful connection while
@@ -47,8 +48,7 @@ internal interface TapToAddConnectionManager {
 
     data class ConnectionConfig(
         val merchantDisplayName: String?,
-        val publishableKey: String,
-        val isLiveMode: Boolean,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     companion object {
@@ -97,33 +97,35 @@ internal class DefaultTapToAddConnectionManager(
 
     private val connectionTaskLock = Mutex()
 
-    private fun discoveryConfiguration(isLiveMode: Boolean): DiscoveryConfiguration.TapToPayDiscoveryConfiguration {
-        return DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulatedProvider.get(isLiveMode))
+    private fun discoveryConfiguration(
+        apiConfiguration: ApiConfiguration.State
+    ): DiscoveryConfiguration.TapToPayDiscoveryConfiguration {
+        return DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulatedProvider.get(apiConfiguration))
     }
 
-    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean {
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean {
         if (!hasCreateCardPresentSetupIntentCallback()) {
             return false
         }
 
-        initializeIfNeeded(publishableKey)
+        initializeIfNeeded(apiConfiguration.publishableKey)
 
         return terminal().supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
-            discoveryConfiguration = discoveryConfiguration(isLiveMode),
+            discoveryConfiguration = discoveryConfiguration(apiConfiguration),
         ).isSupported
     }
 
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) = withContext(workContext) {
         runCatching {
-            when (val connectSetupResult = setup(config.publishableKey, config.isLiveMode)) {
+            when (val connectSetupResult = setup(config.apiConfiguration)) {
                 is ConnectSetupResult.AlreadyConnected -> Unit
                 is ConnectSetupResult.ExistingTask -> connectSetupResult.task.await()
                 is ConnectSetupResult.NotSupported -> {
                     throw IllegalStateException("Tap to Add is not supported by this device!")
                 }
                 is ConnectSetupResult.CanStart -> {
-                    val discoverReadersResult = discoverReaders(config.isLiveMode)
+                    val discoverReadersResult = discoverReaders(config.apiConfiguration)
 
                     if (discoverReadersResult is DiscoverCallResult.CollectedReaders) {
                         connectReader(discoverReadersResult.readers, config)
@@ -148,13 +150,13 @@ internal class DefaultTapToAddConnectionManager(
         )
     }
 
-    private suspend fun setup(publishableKey: String, isLiveMode: Boolean): ConnectSetupResult {
+    private suspend fun setup(apiConfiguration: ApiConfiguration.State): ConnectSetupResult {
         return connectionTaskLock.withLock {
             connectionTask?.let {
                 return@withLock ConnectSetupResult.ExistingTask(it)
             }
 
-            if (!isSupported(publishableKey, isLiveMode)) {
+            if (!isSupported(apiConfiguration)) {
                 return@withLock ConnectSetupResult.NotSupported
             }
 
@@ -169,10 +171,12 @@ internal class DefaultTapToAddConnectionManager(
     }
 
     @SuppressLint("MissingPermission")
-    private suspend fun discoverReaders(isLiveMode: Boolean) = suspendCancellableCoroutine { continuation ->
+    private suspend fun discoverReaders(
+        apiConfiguration: ApiConfiguration.State
+    ) = suspendCancellableCoroutine { continuation ->
         try {
             val cancellable = terminal().discoverReaders(
-                config = discoveryConfiguration(isLiveMode),
+                config = discoveryConfiguration(apiConfiguration),
                 discoveryListener = object : DiscoveryListener {
                     override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
                         continuation.resumeWith(Result.success(DiscoverCallResult.CollectedReaders(readers)))
@@ -340,7 +344,7 @@ internal class DefaultTapToAddConnectionManager(
 }
 
 internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager {
-    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean = false
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean = false
 
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         // No-op
@@ -352,8 +356,8 @@ internal class TapToAddRetriableConnectionManager(
     private val fatalErrorChecker: TapToAddFatalErrorChecker,
     private val retryDelaySupplier: RetryDelaySupplier,
 ) : TapToAddConnectionManager {
-    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean {
-        return tapToAddConnectionManager.isSupported(publishableKey, isLiveMode)
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean {
+        return tapToAddConnectionManager.isSupported(apiConfiguration)
     }
 
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {

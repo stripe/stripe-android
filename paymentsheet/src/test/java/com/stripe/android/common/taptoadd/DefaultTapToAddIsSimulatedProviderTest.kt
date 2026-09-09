@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -15,7 +16,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
             applicationContext = context(debuggable = true),
         )
 
-        assertThat(provider.get(isLiveMode = false)).isTrue()
+        assertThat(provider.get(apiConfiguration(isLiveMode = false))).isTrue()
     }
 
     @Test
@@ -24,7 +25,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
             applicationContext = context(debuggable = true),
         )
 
-        assertThat(provider.get(isLiveMode = true)).isFalse()
+        assertThat(provider.get(apiConfiguration(isLiveMode = true))).isFalse()
     }
 
     @Test
@@ -33,7 +34,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
             applicationContext = context(debuggable = false),
         )
 
-        assertThat(provider.get(isLiveMode = false)).isFalse()
+        assertThat(provider.get(apiConfiguration(isLiveMode = false))).isFalse()
     }
 
     @Test
@@ -42,7 +43,14 @@ class DefaultTapToAddIsSimulatedProviderTest {
             applicationContext = context(debuggable = false),
         )
 
-        assertThat(provider.get(isLiveMode = true)).isFalse()
+        assertThat(provider.get(apiConfiguration(isLiveMode = true))).isFalse()
+    }
+
+    private fun apiConfiguration(isLiveMode: Boolean): ApiConfiguration.State {
+        return ApiConfiguration.State(
+            publishableKey = if (isLiveMode) "pk_live_123" else "pk_test_123",
+            stripeAccountId = "acct_123",
+        )
     }
 
     private fun context(debuggable: Boolean): Context {

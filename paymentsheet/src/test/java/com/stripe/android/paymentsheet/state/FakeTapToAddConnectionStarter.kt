@@ -3,16 +3,17 @@ package com.stripe.android.paymentsheet.state
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 
 internal class FakeTapToAddConnectionStarter private constructor(
     private val isSupportedValue: Boolean = false,
 ) : TapToAddConnectionStarter {
     private val startCalls: Turbine<StartCall> = Turbine()
 
-    override fun isSupported(publishableKey: String, isLiveMode: Boolean): Boolean = isSupportedValue
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean = isSupportedValue
 
-    override fun start(config: CommonConfiguration, publishableKey: String, isLiveMode: Boolean) {
-        startCalls.add(StartCall(config, publishableKey))
+    override fun start(config: CommonConfiguration, apiConfiguration: ApiConfiguration.State) {
+        startCalls.add(StartCall(config, apiConfiguration))
     }
 
     fun ensureAllEventsConsumed() {
@@ -21,7 +22,7 @@ internal class FakeTapToAddConnectionStarter private constructor(
 
     data class StartCall(
         val config: CommonConfiguration,
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     class Scenario(

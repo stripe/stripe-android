@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -51,12 +52,15 @@ class DefaultTapToAddConnectionManagerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_123",
+    )
 
     private val testConnectionConfig =
         TapToAddConnectionManager.ConnectionConfig(
             merchantDisplayName = "Test Merchant",
-            publishableKey = "pk_test_123",
-            isLiveMode = false,
+            apiConfiguration = apiConfiguration,
         )
 
     @Test
@@ -65,7 +69,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported("pk_test_123", false)).isTrue()
+        assertThat(manager.isSupported(apiConfiguration)).isTrue()
     }
 
     @Test
@@ -75,7 +79,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported("pk_test_123", false)).isTrue()
+        assertThat(manager.isSupported(apiConfiguration)).isTrue()
 
         verify(terminalInstance).supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -90,7 +94,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported("pk_test_123", false)).isTrue()
+        assertThat(manager.isSupported(apiConfiguration)).isTrue()
 
         verify(terminalInstance).supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -104,7 +108,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.NotSupported(IllegalStateException("Not supported!")))
         }
     ) {
-        assertThat(manager.isSupported("pk_test_123", false)).isFalse()
+        assertThat(manager.isSupported(apiConfiguration)).isFalse()
     }
 
     @Test
@@ -115,7 +119,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported("pk_test_123", false)).isFalse()
+        assertThat(manager.isSupported(apiConfiguration)).isFalse()
 
         wrapperScenario.isInitializedCalls.expectNoEvents()
     }
@@ -709,7 +713,7 @@ class DefaultTapToAddConnectionManagerTest {
                         errorReporter = errorReporter,
                         logger = logger,
                         isSimulatedProvider = object : TapToAddIsSimulatedProvider {
-                            override fun get(isLiveMode: Boolean): Boolean = isSimulated
+                            override fun get(apiConfiguration: ApiConfiguration.State): Boolean = isSimulated
                         },
                         hasCreateCardPresentSetupIntentCallback = callbackRetriever::hasCallback,
                     ),

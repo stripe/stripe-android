@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -15,6 +16,11 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultTapToAddAvailabilityFactoryTest {
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_123",
+    )
+
     @Test
     fun `isAvailable is true when supported by connection manager, session flag on, and customer metadata present`() {
         val factory = DefaultTapToAddAvailabilityFactory(
@@ -29,8 +35,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
+                apiConfiguration = apiConfiguration,
             )
         ).isTrue()
     }
@@ -49,8 +54,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
+                apiConfiguration = apiConfiguration,
             )
         ).isFalse()
     }
@@ -69,8 +73,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
+                apiConfiguration = apiConfiguration,
             )
         ).isFalse()
     }
@@ -89,8 +92,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = null,
-                publishableKey = "pk_test_123",
-                isLiveMode = false,
+                apiConfiguration = apiConfiguration,
             )
         ).isFalse()
     }
