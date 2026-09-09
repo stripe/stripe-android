@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import app.cash.turbine.Turbine
+import app.cash.turbine.withTurbineTimeout
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
@@ -46,7 +48,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
@@ -137,7 +139,7 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
-        val callbackCount = AtomicInteger()
+        val callbacks = Turbine<Unit>()
         runAutomaticTaxTest(
             paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
             checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
@@ -145,34 +147,35 @@ internal class CheckoutPaymentElementTest {
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
-                callbackCount.incrementAndGet()
+                callbacks.add(Unit)
             },
         ) {
-            val requestReceived = CountDownLatch(1)
+            val updateRequests = Turbine<Unit>()
             val releaseResponse = CountDownLatch(1)
-            val requestCount = AtomicInteger()
             enqueueTaxUpdate { response ->
-                requestCount.incrementAndGet()
-                requestReceived.countDown()
+                updateRequests.add(Unit)
                 check(releaseResponse.await(10, TimeUnit.SECONDS))
                 automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
             }
 
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+            withTurbineTimeout(10.seconds) {
+                updateRequests.awaitItem()
+            }
             contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
             contentPage.assertLpmIsEnabled("card", false)
-            assertThat(requestCount.get()).isEqualTo(1)
-            assertThat(callbackCount.get()).isEqualTo(0)
+            callbacks.expectNoEvents()
             releaseResponse.countDown()
             waitForSessionTotal(controller, UPDATED_TOTAL)
             contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
             contentPage.assertLpmIsEnabled("card", true)
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
-            testRules.compose.waitUntil(timeoutMillis = 5_000) { callbackCount.get() == 1 }
-            assertThat(requestCount.get()).isEqualTo(1)
-            assertThat(callbackCount.get()).isEqualTo(1)
+            withTurbineTimeout(5.seconds) {
+                callbacks.awaitItem()
+            }
+            updateRequests.ensureAllEventsConsumed()
+            callbacks.ensureAllEventsConsumed()
             markTestSucceeded()
         }
     }
