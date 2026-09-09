@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.foundation.layout.Box
@@ -47,22 +48,22 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     fun `register delegates to presentation`() = runScenario {
         coordinator.register()
 
-        assertThat(presentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(initialPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
     fun `canDismiss delegates to presentation`() = runScenario {
-        presentation.canDismissResult = false
+        initialPresentation.canDismissResult = false
 
         assertThat(coordinator.canDismiss()).isFalse()
-        assertThat(presentation.canDismissCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(initialPresentation.canDismissCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
     fun `onDismissed delegates to presentation`() = runScenario {
         coordinator.onDismissed()
 
-        assertThat(presentation.onDismissedCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(initialPresentation.onDismissedCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -78,43 +79,134 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     fun `onDestroy delegates to presentation`() = runScenario {
         coordinator.onDestroy()
 
-        assertThat(presentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
     }
 
-    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+    @Test
+    fun `valid loading to ready transition replaces and registers presentation`() = runScenario {
+        val readyArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            callbackIdentifier = "updated_callback_identifier",
+        )
+        val readyIntent = createIntent(readyArgs)
+
+        coordinator.handleNewIntent(readyIntent)
+
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        val createCall = presentationFactory.createCalls.awaitItem()
+        assertThat(createCall.activity).isSameInstanceAs(activity)
+        assertThat(createCall.args).isEqualTo(readyArgs)
+        assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
+        assertThat(readyPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(activity.intent).isSameInstanceAs(readyIntent)
+
+        coordinator.onDestroy()
+        assertThat(readyPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `intent without args is ignored`() = runScenario {
+        assertTransitionIgnored(Intent())
+    }
+
+    @Test
+    fun `loading intent is ignored`() = runScenario {
+        assertTransitionIgnored(
+            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Loading))
+        )
+    }
+
+    @Test
+    fun `ready manage intent is ignored`() = runScenario {
+        assertTransitionIgnored(
+            createIntent(
+                createArgs(
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    launchMode = EmbeddedLaunchMode.Manage,
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `ready coordinator ignores later ready intent`() = runScenario(
+        initialArgs = createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready),
+    ) {
+        assertTransitionIgnored(
+            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready))
+        )
+    }
+
+    @Test
+    fun `finishing activity ignores ready intent`() = runScenario {
+        activity.finish()
+
+        assertTransitionIgnored(
+            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready))
+        )
+    }
+
+    private fun runScenario(
+        initialArgs: EmbeddedActivityArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+        ),
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val activity = Robolectric.buildActivity(EmbeddedSheetActivity::class.java).get()
-        val args = createArgs()
-        val presentation = FakeEmbeddedSheetPresentation()
-        val presentationFactory = FakeEmbeddedSheetPresentationFactory(presentation)
+        val initialPresentation = FakeEmbeddedSheetPresentation()
+        val readyPresentation = FakeEmbeddedSheetPresentation()
+        val presentationFactory = FakeEmbeddedSheetPresentationFactory(
+            initialPresentation = initialPresentation,
+            readyPresentation = readyPresentation,
+        )
         val coordinator = EmbeddedSheetActivityCoordinator(
             activity = activity,
-            args = args,
+            initialArgs = initialArgs,
             presentationFactory = presentationFactory,
         )
         val createCall = presentationFactory.createCalls.awaitItem()
 
         Scenario(
             activity = activity,
-            args = args,
+            args = initialArgs,
             coordinator = coordinator,
-            presentation = presentation,
+            initialPresentation = initialPresentation,
+            readyPresentation = readyPresentation,
+            presentationFactory = presentationFactory,
             createCall = createCall,
         ).block()
 
         presentationFactory.ensureAllEventsConsumed()
-        presentation.ensureAllEventsConsumed()
+        initialPresentation.ensureAllEventsConsumed()
+        readyPresentation.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val activity: EmbeddedSheetActivity,
         val args: EmbeddedActivityArgs,
         val coordinator: EmbeddedSheetActivityCoordinator,
-        val presentation: FakeEmbeddedSheetPresentation,
+        val initialPresentation: FakeEmbeddedSheetPresentation,
+        val readyPresentation: FakeEmbeddedSheetPresentation,
+        val presentationFactory: FakeEmbeddedSheetPresentationFactory,
         val createCall: FakeEmbeddedSheetPresentationFactory.CreateCall,
-    )
+    ) {
+        suspend fun assertTransitionIgnored(intent: Intent) {
+            val originalIntent = activity.intent
+
+            coordinator.handleNewIntent(intent)
+
+            assertThat(activity.intent).isSameInstanceAs(originalIntent)
+            presentationFactory.createCalls.expectNoEvents()
+            initialPresentation.registerCalls.expectNoEvents()
+            initialPresentation.onDestroyCalls.expectNoEvents()
+            readyPresentation.registerCalls.expectNoEvents()
+            readyPresentation.onDestroyCalls.expectNoEvents()
+        }
+    }
 
     private class FakeEmbeddedSheetPresentationFactory(
-        private val presentation: EmbeddedSheetPresentation,
+        private val initialPresentation: EmbeddedSheetPresentation,
+        private val readyPresentation: EmbeddedSheetPresentation,
     ) : EmbeddedSheetPresentationFactory {
         val createCalls = Turbine<CreateCall>()
 
@@ -124,7 +216,10 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
             createCalls.add(CreateCall(activity, args, activityResultCaller))
-            return presentation
+            return when (args.presentationState) {
+                EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
+                EmbeddedActivityArgs.PresentationState.Ready -> readyPresentation
+            }
         }
 
         fun ensureAllEventsConsumed() {
@@ -179,19 +274,28 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     private companion object {
         const val CONTENT_TEST_TAG = "coordinator_content"
 
-        fun createArgs(): EmbeddedActivityArgs {
+        fun createArgs(
+            presentationState: EmbeddedActivityArgs.PresentationState,
+            launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+            callbackIdentifier: String = "callback_identifier",
+        ): EmbeddedActivityArgs {
             return EmbeddedActivityArgs(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 productUsage = setOf("EmbeddedPaymentElement"),
-                paymentElementCallbackIdentifier = "callback_identifier",
+                paymentElementCallbackIdentifier = callbackIdentifier,
                 statusBarColor = null,
                 selection = null,
                 previousNewSelections = Bundle(),
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 promotions = emptyList(),
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
+                launchMode = launchMode,
+                presentationState = presentationState,
             )
+        }
+
+        fun createIntent(args: EmbeddedActivityArgs): Intent {
+            return Intent().putExtra(EmbeddedActivityArgs.EXTRA_ARGS, args)
         }
     }
 }

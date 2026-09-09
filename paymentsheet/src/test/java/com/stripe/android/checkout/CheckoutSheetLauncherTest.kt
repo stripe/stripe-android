@@ -81,6 +81,7 @@ internal class CheckoutSheetLauncherTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -372,6 +373,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         sheetLauncher.launchManage(
@@ -500,6 +502,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         sheetLauncher.launchPaymentOptions(

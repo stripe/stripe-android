@@ -276,6 +276,7 @@ internal class EmbeddedSheetActivityTest {
                     ),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Manage,
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 ),
             )
         ).use { scenario ->

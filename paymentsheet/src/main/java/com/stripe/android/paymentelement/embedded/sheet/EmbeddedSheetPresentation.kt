@@ -32,11 +32,19 @@ internal interface EmbeddedSheetPresentation {
             args: EmbeddedActivityArgs,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
-            return EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
-                activity = activity,
-                args = args,
-                activityResultCaller = activityResultCaller,
-            )
+            return when (args.presentationState) {
+                EmbeddedActivityArgs.PresentationState.Loading -> LoadingEmbeddedSheetPresentation.Factory.create(
+                    activity = activity,
+                    args = args,
+                    activityResultCaller = activityResultCaller,
+                )
+                EmbeddedActivityArgs.PresentationState.Ready ->
+                    EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
+                        activity = activity,
+                        args = args,
+                        activityResultCaller = activityResultCaller,
+                    )
+            }
         }
     }
 }
