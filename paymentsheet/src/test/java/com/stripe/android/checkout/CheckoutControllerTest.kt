@@ -662,6 +662,50 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `selectSavedPaymentMethod is updating until refreshed response and selection are committed`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            assertLoadingConsumed = true,
+        ) {
+            val selection = requireNotNull(committedState().paymentSelection) as PaymentSelection.Saved
+            val requestReceived = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate { response ->
+                requestReceived.countDown()
+                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the saved payment method tax response."
+                }
+                successResponseFactory(
+                    combine(
+                        automaticTaxFor("billing"),
+                        savedCustomerWithBillingAddress(),
+                        { json -> json.put("livemode", true) },
+                    )
+                ).invoke(response)
+            }
+
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+
+            val result = async { controller.selectSavedPaymentMethod(selection) }
+            testScheduler.advanceUntilIdle()
+
+            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+            assertThat(committedState().checkoutSessionResponse.liveMode).isFalse()
+
+            releaseResponse.countDown()
+            result.await().getOrThrow()
+
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            val state = committedState()
+            assertThat(state.checkoutSessionResponse.liveMode).isTrue()
+            assertThat(state.paymentSelection).isEqualTo(selection)
+        }
+
+    @Test
     fun `selectSavedPaymentMethod preserves prior state when tax update fails`() =
         runMutationScenario(
             initModifier = automaticTaxFor("billing"),

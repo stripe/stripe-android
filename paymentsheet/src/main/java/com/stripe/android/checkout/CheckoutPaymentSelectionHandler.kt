@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -12,24 +13,25 @@ import javax.inject.Inject
 @OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
     private val checkoutController: CheckoutController,
-    private val selectionHolder: EmbeddedSelectionHolder,
-    private val immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    selectionHolder: EmbeddedSelectionHolder,
+    immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {
     private var isSelectingSavedPaymentMethod = false
+    private val immediateHandler = ImmediateVerticalPaymentSelectionHandler(
+        updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+        completionAction = immediateActionHandler::invoke,
+    )
 
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
         when (selection) {
             is PaymentSelection.Saved -> selectSavedPaymentMethod(selection)
-            else -> {
-                selectionHolder.setSelection(selection)
-                onSelectionComplete()
-            }
+            else -> immediateHandler.select(selection, isUserInput)
         }
     }
 
     override fun onSelectionComplete() {
-        immediateActionHandler.invoke()
+        immediateHandler.onSelectionComplete()
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
