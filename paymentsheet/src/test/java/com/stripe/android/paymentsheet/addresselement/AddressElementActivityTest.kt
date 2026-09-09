@@ -2,17 +2,68 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Activity
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class AddressElementActivityTest {
+    @Test
+    fun `loading checkout activity does not create ready view model`() {
+        val args = AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
+        val intent = AddressElementActivityContract.CheckoutShipping.createIntent(
+            ApplicationProvider.getApplicationContext(),
+            args,
+        )
+        var viewModelCreateCalls = 0
+        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, intent)
+        controller.get().viewModelFactory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                viewModelCreateCalls += 1
+                error("Loading must not create Address Element dependencies")
+            }
+        }
+
+        controller.create().start().resume().visible()
+
+        assertThat(viewModelCreateCalls).isEqualTo(0)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `loading checkout activity is dismissible without creating ready dependencies`() {
+        val args = AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
+        val intent = AddressElementActivityContract.CheckoutShipping.createIntent(
+            ApplicationProvider.getApplicationContext(),
+            args,
+        )
+
+        ActivityScenario.launchActivityForResult<AddressElementActivity>(intent).use { scenario ->
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.RESUMED)
+
+            scenario.onActivity { activity ->
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(
+                AddressElementActivityContract.CheckoutShipping.parseResult(
+                    scenario.result.resultCode,
+                    scenario.result.resultData,
+                )
+            ).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        }
+    }
+
     @Test
     fun `when launched without args should finish with canceled result`() {
         ActivityScenario.launchActivityForResult(
@@ -42,11 +93,12 @@ internal class AddressElementActivityTest {
 
         assertThat(intent.component?.className).isEqualTo(AddressElementActivity::class.java.name)
         assertThat(AddressElementActivityContract.Args.fromIntent(intent)).isEqualTo(args)
+        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isEqualTo(0)
     }
 
     @Test
     fun `checkout shipping contract creates intent with checkout shipping args`() {
-        val args = AddressElementActivityContract.Args.CheckoutShipping(
+        val args = AddressElementActivityContract.Args.CheckoutShipping.Ready(
             publishableKey = "pk_test_123",
             config = null,
         )
@@ -58,6 +110,7 @@ internal class AddressElementActivityTest {
 
         assertThat(intent.component?.className).isEqualTo(AddressElementActivity::class.java.name)
         assertThat(AddressElementActivityContract.Args.fromIntent(intent)).isEqualTo(args)
+        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isNotEqualTo(0)
     }
 
     @Test

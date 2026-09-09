@@ -8,11 +8,11 @@ import javax.inject.Singleton
 internal class ShippingAddressElementStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) {
-    var isPresenting: Boolean
-        get() = savedStateHandle.get<Boolean>(IS_PRESENTING_KEY) == true
-        set(value) = savedStateHandle.set(IS_PRESENTING_KEY, value)
+    var isAwaitingReady: Boolean
+        get() = savedStateHandle.get<Boolean>(IS_AWAITING_READY_KEY) == true
+        set(value) = savedStateHandle.set(IS_AWAITING_READY_KEY, value)
 
     private companion object {
-        const val IS_PRESENTING_KEY = "ShippingAddressElementStateHolder_IS_PRESENTING_KEY"
+        const val IS_AWAITING_READY_KEY = "ShippingAddressElementStateHolder_IS_AWAITING_READY_KEY"
     }
 }

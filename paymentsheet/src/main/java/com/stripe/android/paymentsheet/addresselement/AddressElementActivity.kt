@@ -12,6 +12,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
@@ -33,6 +35,8 @@ import kotlinx.coroutines.flow.filterNotNull
 @OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
 
+    private var coordinator: AddressElementActivityCoordinator? = null
+
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         AddressElementViewModel.Factory(
@@ -42,44 +46,84 @@ internal class AddressElementActivity : ComponentActivity() {
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs by lazy {
-        AddressElementActivityContract.Args.fromIntent(intent)
-    }
+    private val starterArgs: AddressElementActivityContract.Args?
+        get() = coordinator?.args
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val starterArgs = starterArgs
+        val starterArgs = AddressElementActivityContract.Args.fromIntent(intent)
         if (starterArgs == null) {
             finish()
             return
         }
+        coordinator = AddressElementActivityCoordinator(starterArgs)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        starterArgs.config?.appearance?.parseAppearance()
+        if (starterArgs !is AddressElementActivityContract.Args.CheckoutShipping.Loading) {
+            starterArgs.config?.appearance?.parseAppearance()
+        }
 
-        setContent {
-            val navController = rememberNavController()
-            viewModel.navigator.navigationController = navController
+        setContent { AddressElementContent() }
+    }
 
-            val bottomSheetState = rememberStripeBottomSheetState()
-
-            LaunchedEffect(bottomSheetState) {
-                viewModel.resultStateHolder.result
-                    .filterNotNull()
-                    .collect { result ->
-                        bottomSheetState.hide()
-                        finishWithResult(result)
+    @Composable
+    private fun AddressElementContent() {
+        val bottomSheetState = rememberStripeBottomSheetState()
+        when (val args = requireNotNull(coordinator).args) {
+            is AddressElementActivityContract.Args.CheckoutShipping.Loading -> {
+                BackHandler {
+                    finishWithResult(AddressElementActivityContract.Result.Canceled)
+                }
+                val loadingModifier = remember(bottomSheetState) { Modifier }
+                StripeTheme {
+                    ElementsBottomSheetLayout(
+                        state = bottomSheetState,
+                        onDismissed = {
+                            finishWithResult(AddressElementActivityContract.Result.Canceled)
+                        },
+                    ) {
+                        BottomSheetLoadingIndicator(modifier = loadingModifier)
                     }
-            }
-
-            BackHandler {
-                if (!viewModel.navigator.onBack()) {
-                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
                 }
             }
+            is AddressElementActivityContract.Args.CheckoutShipping.Ready,
+            is AddressElementActivityContract.Args.Standalone -> {
+                val navController = rememberNavController()
+                viewModel.navigator.navigationController = navController
 
-            AddressElementUi(bottomSheetState, navController)
+                LaunchedEffect(bottomSheetState) {
+                    viewModel.resultStateHolder.result
+                        .filterNotNull()
+                        .collect { result ->
+                            bottomSheetState.hide()
+                            finishWithResult(result)
+                        }
+                }
+
+                BackHandler {
+                    if (!viewModel.navigator.onBack()) {
+                        viewModel.resultStateHolder.setResult(
+                            AddressElementActivityContract.Result.Canceled
+                        )
+                    }
+                }
+
+                AddressElementUi(bottomSheetState, navController)
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNewIntent(intent)
+    }
+
+    @VisibleForTesting
+    internal fun handleNewIntent(intent: Intent) {
+        if (coordinator?.handleNewIntent(intent, isFinishing) == true) {
+            this.intent = intent
+            requireNotNull(starterArgs).config?.appearance?.parseAppearance()
         }
     }
 
