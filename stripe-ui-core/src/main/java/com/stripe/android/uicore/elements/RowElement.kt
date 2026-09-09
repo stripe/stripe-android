@@ -8,27 +8,27 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RowElement(
-    _identifier: IdentifierSpec,
+    _identifier: FormFieldId,
     val fields: List<SectionSingleFieldElement>,
     val controller: RowController
 ) : SectionMultiFieldElement(_identifier) {
     override val allowsUserInteraction: Boolean = fields.any { it.allowsUserInteraction }
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()
         }
 
     override fun sectionFieldErrorController() = controller
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         fields.forEach {
             it.setRawValue(rawValuesMap)
         }
     }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         fields.map { it.getTextFieldIdentifiers() }.last()
 
     override fun onValidationStateChanged(isValidating: Boolean) {

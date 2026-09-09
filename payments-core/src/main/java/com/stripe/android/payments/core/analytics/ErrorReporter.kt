@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
@@ -23,6 +24,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -43,6 +45,23 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
+                productUsage = productUsage,
+            )
+        }
+
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -50,12 +69,16 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
+                    apiConfigurationProvider = {
+                        apiConfigurationProvider.get()
+                    },
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -200,6 +223,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_OPTION_CARD_ART_LOAD_FAILURE(
             eventName = "elements.payment_option.card_art.load_failure"
+        ),
+        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED(
+            eventName = "checkout.shipping_address_element.present.not_configured"
         )
     }
 
@@ -360,6 +386,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST(
+            partialEventName = "google_pay.dynamic_callbacks.missing_request"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK(
+            partialEventName = "google_pay.dynamic_callbacks.missing_callback"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE(
+            partialEventName = "google_pay.dynamic_callbacks.parsing_failure"
         );
 
         override val eventName: String
@@ -437,6 +472,8 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
         ): DefaultErrorReporterComponent
@@ -474,8 +511,8 @@ internal interface DefaultErrorReporterModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
-            return { PaymentConfiguration.getInstance(context).publishableKey }
-        }
+        fun providePublishableKeyProvider(
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+        ): () -> String = { apiConfigurationProvider().publishableKey }
     }
 }

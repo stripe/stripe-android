@@ -24,22 +24,22 @@ class AddressElementUiTest {
     @Test
     fun `On input updated, input is not reset in 'AddressElement' when observed`() {
         val element = AddressElement(
-            _identifier = IdentifierSpec.BillingAddress,
+            _identifier = FormFieldId.BillingAddress,
             rawValuesMap = mapOf(
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "456",
-                IdentifierSpec.City to "San Francisco",
-                IdentifierSpec.State to "CA",
-                IdentifierSpec.Country to "US",
-                IdentifierSpec.PostalCode to "94111",
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "456",
+                FormFieldId.City to "San Francisco",
+                FormFieldId.State to "CA",
+                FormFieldId.Country to "US",
+                FormFieldId.PostalCode to "94111",
             ),
             countryCodes = setOf("US"),
             sameAsShippingElement = SameAsShippingElement(
-                IdentifierSpec.SameAsShipping,
+                FormFieldId.SameAsShipping,
                 SameAsShippingController(false)
             ),
             shippingValuesMap = mapOf(
-                IdentifierSpec.Country to "US"
+                FormFieldId.Country to "US"
             ),
         )
 

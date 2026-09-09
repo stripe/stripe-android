@@ -10,18 +10,21 @@ import javax.inject.Inject
 
 internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
+        requiresShippingAddress: Boolean,
     ): List<ExpressButtonType>
 }
 
 internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constructor() :
     AvailableExpressButtonTypesFactory {
     override fun create(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
+        requiresShippingAddress: Boolean,
     ): List<ExpressButtonType> {
         expressCheckoutElementConfiguration ?: return emptyList()
+        paymentMethodMetadata ?: return emptyList()
 
         val availableExpressButtonTypes = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
             when (walletType) {
@@ -32,9 +35,8 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                         CheckoutGooglePayConfiguration.Display.Automatic
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
-                    expressCheckoutElementConfiguration.linkConfiguration.display ==
-                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic &&
-                        !expressCheckoutElementConfiguration.shippingAddressRequired
+                    paymentMethodMetadata.shouldShowLinkButton &&
+                        !requiresShippingAddress
                 }
             }
         }

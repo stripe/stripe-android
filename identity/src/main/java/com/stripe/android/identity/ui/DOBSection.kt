@@ -19,7 +19,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.DobParam
 import com.stripe.android.identity.networking.models.DobParam.Companion.toDob
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -56,7 +56,7 @@ internal fun DOBSection(
     val dobSectionElement = remember {
         SectionElement.wrap(
             sectionFieldElement = SimpleTextElement(
-                identifier = IdentifierSpec.Generic(DOB_SPEC),
+                identifier = FormFieldId.Generic(DOB_SPEC),
                 controller = dateController
             ),
             label = resolvableString(R.string.stripe_dob)

@@ -11,6 +11,8 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -37,8 +39,11 @@ internal class NfcScanningTest {
     fun success(
         @TestParameter(valuesProvider = NfcScanningIntegrationType.Provider::class)
         integrationType: NfcScanningIntegrationType,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runNfcScanningIntegrationTest(
         integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
         composeTestRule = composeTestRule,
         networkRule = networkRule,
     ) {

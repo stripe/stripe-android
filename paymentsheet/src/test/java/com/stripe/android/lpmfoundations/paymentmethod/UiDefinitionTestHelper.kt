@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CoroutineScope
 
 internal fun PaymentMethodDefinition.formElements(
@@ -19,7 +19,7 @@ internal fun PaymentMethodDefinition.formElements(
     paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    initialValues: Map<IdentifierSpec, String?>? = null,
+    initialValues: Map<FormFieldId, String?>? = null,
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     setAsDefaultMatchesSaveForFutureUse: Boolean = false,
@@ -53,7 +53,7 @@ internal fun PaymentMethodDefinition.formElements(
     paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    initialValues: Map<IdentifierSpec, String?>? = null,
+    initialValues: Map<FormFieldId, String?>? = null,
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     setAsDefaultMatchesSaveForFutureUse: Boolean = false,
@@ -87,7 +87,7 @@ private fun PaymentMethodDefinition.formElementsInternal(
     paymentMethodCreateParams: PaymentMethodCreateParams?,
     paymentMethodOptionsParams: PaymentMethodOptionsParams?,
     paymentMethodExtraParams: PaymentMethodExtraParams?,
-    initialValues: Map<IdentifierSpec, String?>?,
+    initialValues: Map<FormFieldId, String?>?,
     initialLinkUserInput: UserInput?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     setAsDefaultMatchesSaveForFutureUse: Boolean,

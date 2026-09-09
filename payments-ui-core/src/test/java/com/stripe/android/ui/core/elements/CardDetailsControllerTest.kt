@@ -29,7 +29,7 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FieldValidationMessageComparator
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldState
@@ -129,8 +129,8 @@ class CardDetailsControllerTest {
         runTest {
             val cardController = cardDetailsController(
                 initialValues = mapOf(
-                    IdentifierSpec.CardNumber to "4000002500001001",
-                    IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
+                    FormFieldId.CardNumber to "4000002500001001",
+                    FormFieldId.PreferredCardBrand to CardBrand.CartesBancaires.code
                 ),
                 cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
             )
@@ -172,10 +172,10 @@ class CardDetailsControllerTest {
     fun `When new card overwrites existing card, fields properly filled in`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpYear to "2042",
-                IdentifierSpec.CardExpMonth to "2",
-                IdentifierSpec.CardCvc to "123",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardExpYear to "2042",
+                FormFieldId.CardExpMonth to "2",
+                FormFieldId.CardCvc to "123",
             )
         )
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -207,10 +207,10 @@ class CardDetailsControllerTest {
     fun `When new card scanned with invalid expiry date, should not use invalid date`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpYear to "2042",
-                IdentifierSpec.CardExpMonth to "2",
-                IdentifierSpec.CardCvc to "123",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardExpYear to "2042",
+                FormFieldId.CardExpMonth to "2",
+                FormFieldId.CardCvc to "123",
             )
         )
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -258,10 +258,10 @@ class CardDetailsControllerTest {
     fun `When initialized with validated scan and card number, card pill is shown`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardValidatedScan to "true",
-                IdentifierSpec.CardExpMonth to "06",
-                IdentifierSpec.CardExpYear to "2030",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardValidatedScan to "true",
+                FormFieldId.CardExpMonth to "06",
+                FormFieldId.CardExpYear to "2030",
             )
         )
 
@@ -285,7 +285,7 @@ class CardDetailsControllerTest {
     fun `When initialized with validated scan but no card number, card pill is not shown`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardValidatedScan to "true",
+                FormFieldId.CardValidatedScan to "true",
             )
         )
         idleLooper()
@@ -308,8 +308,8 @@ class CardDetailsControllerTest {
     fun `When initialized with validated scan false, card pill is not shown`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardValidatedScan to "false",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardValidatedScan to "false",
             )
         )
         idleLooper()
@@ -420,10 +420,10 @@ class CardDetailsControllerTest {
     fun `When new card scanned with no expiry date, should clear date`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpYear to "2042",
-                IdentifierSpec.CardExpMonth to "2",
-                IdentifierSpec.CardCvc to "123",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardExpYear to "2042",
+                FormFieldId.CardExpMonth to "2",
+                FormFieldId.CardCvc to "123",
             )
         )
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -496,7 +496,7 @@ class CardDetailsControllerTest {
                     cardController.ComposeUI(
                         enabled = true,
                         field = CardDetailsElement(
-                            identifier = IdentifierSpec.Generic("card_details"),
+                            identifier = FormFieldId.Generic("card_details"),
                             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
                             initialValues = mapOf(),
                             coroutineScope = coroutineScope,
@@ -513,7 +513,7 @@ class CardDetailsControllerTest {
     }
 
     private fun cardDetailsController(
-        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        initialValues: Map<FormFieldId, String?> = emptyMap(),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(

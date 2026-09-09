@@ -18,8 +18,8 @@ import com.stripe.android.uicore.utils.collectAsState
 fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId>,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     if (!hiddenIdentifiers.contains(element.identifier)) {

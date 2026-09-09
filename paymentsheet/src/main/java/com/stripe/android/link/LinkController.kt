@@ -841,6 +841,7 @@ class LinkController @Inject internal constructor(
      * @param redactedPhoneNumber The phone number associated with the account, with sensitive digits redacted.
      * @param sessionState The current session state of the Link account.
      * @param consumerSessionClientSecret The client secret for the consumer session, if available.
+     * @param linkSessionKey The key for authenticating Link-scoped API requests, if available.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -850,6 +851,7 @@ class LinkController @Inject internal constructor(
         val redactedPhoneNumber: String,
         val sessionState: SessionState,
         val consumerSessionClientSecret: String?,
+        val linkSessionKey: String?,
     ) : Parcelable
 
     /**

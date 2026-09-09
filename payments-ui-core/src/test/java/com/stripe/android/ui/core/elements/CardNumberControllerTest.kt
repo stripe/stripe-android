@@ -34,7 +34,7 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -585,7 +585,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 resolvableString(value = "Card number")
@@ -620,7 +620,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 resolvableString(value = "Card number")
@@ -692,7 +692,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 label = "Card number".resolvableString
@@ -756,7 +756,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 resolvableString(value = "Card number")

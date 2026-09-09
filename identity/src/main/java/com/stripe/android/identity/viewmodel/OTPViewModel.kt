@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPageData
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,7 @@ internal class OTPViewModel(
 
     val otpElement =
         OTPElement(
-            identifier = IdentifierSpec.Generic(OTP),
+            identifier = FormFieldId.Generic(OTP),
             controller = OTPController()
         )
 

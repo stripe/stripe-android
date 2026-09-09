@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.utils.simulateProcessDeath
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -78,10 +79,6 @@ internal class CheckoutControllerSavedStateTest {
         return SavedStateHandle(
             mapOf(INTEGRATION_NAME to childHandle.savedStateProvider().saveState())
         )
-    }
-
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle {
-        return SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
     }
 
     private companion object {

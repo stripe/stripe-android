@@ -148,7 +148,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             configuration = CheckoutController.Configuration()
                 .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),
-            paymentMethodMetadata = paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
         )
         val reporter = DefaultExpressCheckoutElementEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,

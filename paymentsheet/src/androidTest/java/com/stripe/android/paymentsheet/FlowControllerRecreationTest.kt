@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
@@ -22,7 +23,13 @@ import kotlin.time.Duration.Companion.seconds
 class FlowControllerRecreationTest {
     @get:Rule
     val testRules = TestRules.create {
-        around(PaymentConfigurationTestRule(ApplicationProvider.getApplicationContext()))
+        around(
+            PaymentConfigurationTestRule(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = TestApiKeys.PUBLISHABLE,
+                stripeAccountId = TestApiKeys.ACCOUNT,
+            )
+        )
     }
 
     private val networkRule = testRules.networkRule

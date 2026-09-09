@@ -18,6 +18,8 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -46,7 +48,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class GooglePayTest {
+internal class GooglePayTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
@@ -195,6 +200,7 @@ internal class GooglePayTest {
         enqueueElementsSession(isGooglePayEnabledInElementsSession)
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = testRules.networkRule,
             integrationType = integrationType,
             resultCallback = paymentResultCallback,

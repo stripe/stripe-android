@@ -40,7 +40,7 @@ class SectionUIScreenshotTest {
 
             val sectionElement = SectionElement.wrap(
                 sectionFieldElement = SimpleTextElement(
-                    identifier = IdentifierSpec.Generic("zip"),
+                    identifier = FormFieldId.Generic("zip"),
                     controller = textFieldController
                 ),
                 label = "Billing Address".resolvableString
@@ -67,7 +67,7 @@ class SectionUIScreenshotTest {
 
             val sectionElement = SectionElement.wrap(
                 sectionFieldElement = SimpleTextElement(
-                    identifier = IdentifierSpec.Generic("zip"),
+                    identifier = FormFieldId.Generic("zip"),
                     controller = textFieldController
                 ),
                 label = "Billing Address".resolvableString
@@ -92,7 +92,7 @@ class SectionUIScreenshotTest {
 
             val sectionElement = SectionElement.wrap(
                 sectionFieldElement = SimpleTextElement(
-                    identifier = IdentifierSpec.Generic("zip"),
+                    identifier = FormFieldId.Generic("zip"),
                     controller = textFieldController
                 ),
                 label = "Billing Address".resolvableString

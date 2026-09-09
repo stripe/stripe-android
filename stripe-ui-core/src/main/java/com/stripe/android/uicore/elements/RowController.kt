@@ -21,8 +21,8 @@ class RowController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         RowElementUI(
             enabled,

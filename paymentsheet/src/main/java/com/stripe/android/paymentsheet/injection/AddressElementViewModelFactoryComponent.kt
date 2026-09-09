@@ -7,7 +7,6 @@ import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementViewModel
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -21,7 +20,6 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         CoreCommonModule::class,
         AddressElementViewModelModule::class,
-        ResourceRepositoryModule::class
     ]
 )
 internal interface AddressElementViewModelFactoryComponent {

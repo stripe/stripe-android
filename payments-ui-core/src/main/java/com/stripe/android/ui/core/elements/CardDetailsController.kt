@@ -16,7 +16,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.DefaultFieldValidationMessageComparator
 import com.stripe.android.uicore.elements.FieldValidationMessageComparator
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldComposable
@@ -36,7 +36,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class CardDetailsController(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    initialValues: Map<IdentifierSpec, String?>,
+    initialValues: Map<FormFieldId, String?>,
     coroutineScope: CoroutineScope,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -53,10 +53,10 @@ internal class CardDetailsController(
     dateConfig: TextFieldConfig = DateConfig(),
     private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
 ) : SectionFieldValidationController, SectionFieldComposable {
-    private val initialCardNumber = initialValues[IdentifierSpec.CardNumber]
+    private val initialCardNumber = initialValues[FormFieldId.CardNumber]
 
     val cardPillElement = MutableStateFlow(
-        if (initialValues[IdentifierSpec.CardValidatedScan].toBoolean() && initialCardNumber != null) {
+        if (initialValues[FormFieldId.CardValidatedScan].toBoolean() && initialCardNumber != null) {
             CardPillElement(
                 controller = CardPillController(
                     cardNumber = initialCardNumber,
@@ -76,9 +76,9 @@ internal class CardDetailsController(
                     capitalization = KeyboardCapitalization.Words,
                     keyboard = androidx.compose.ui.text.input.KeyboardType.Text
                 ),
-                initialValue = initialValues[IdentifierSpec.Name],
+                initialValue = initialValues[FormFieldId.Name],
             ),
-            identifier = IdentifierSpec.Name,
+            identifier = FormFieldId.Name,
         )
     } else {
         null
@@ -86,7 +86,7 @@ internal class CardDetailsController(
 
     val label: Int? = null
     val numberElement = CardNumberElement(
-        IdentifierSpec.CardNumber,
+        FormFieldId.CardNumber,
         DefaultCardNumberController(
             coroutineScope = coroutineScope,
             cardTextFieldConfig = cardDetailsTextFieldConfig,
@@ -98,7 +98,7 @@ internal class CardDetailsController(
                 is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(
                     preferredBrands = cbcEligibility.preferredNetworks,
                     initialBrand = initialValues[
-                        IdentifierSpec.PreferredCardBrand
+                        FormFieldId.PreferredCardBrand
                     ]?.let { value ->
                         CardBrand.fromCode(value)
                     }
@@ -111,20 +111,20 @@ internal class CardDetailsController(
     )
 
     val cvcElement = CvcElement(
-        IdentifierSpec.CardCvc,
+        FormFieldId.CardCvc,
         CvcController(
             cvcTextFieldConfig,
             numberElement.controller.cardBrandFlow,
-            initialValue = initialValues[IdentifierSpec.CardCvc]
+            initialValue = initialValues[FormFieldId.CardCvc]
         )
     )
 
     val expirationDateElement = SimpleTextElement(
-        IdentifierSpec.Generic("date"),
+        FormFieldId.Generic("date"),
         SimpleTextFieldController(
             textFieldConfig = dateConfig,
-            initialValue = initialValues[IdentifierSpec.CardExpMonth] +
-                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2),
+            initialValue = initialValues[FormFieldId.CardExpMonth] +
+                initialValues[FormFieldId.CardExpYear]?.takeLast(2),
             overrideContentDescriptionProvider = ::formatExpirationDateForAccessibility
         )
     )
@@ -185,7 +185,7 @@ internal class CardDetailsController(
 
                 add(
                     RowElement(
-                        IdentifierSpec.Generic("card_details_row"),
+                        FormFieldId.Generic("card_details_row"),
                         fields,
                         RowController(fields)
                     )
@@ -218,8 +218,8 @@ internal class CardDetailsController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         CardDetailsElementUI(
             enabled,

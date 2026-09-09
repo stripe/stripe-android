@@ -48,8 +48,8 @@ import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.H6Text
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.PhoneNumberElementUI
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -148,7 +148,7 @@ internal fun BankAccountForm(
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
     addressController: AddressController,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: FormFieldId?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
     setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement?,
@@ -215,7 +215,7 @@ private fun BillingDetailsForm(
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
     addressController: AddressController,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: FormFieldId?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
     Column(
@@ -271,7 +271,7 @@ private fun BillingDetailsForm(
                     TextField(
                         textFieldController = emailController,
                         enabled = enabled,
-                        imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
+                        imeAction = if (lastTextFieldIdentifier == FormFieldId.Email) {
                             ImeAction.Done
                         } else {
                             ImeAction.Next
@@ -284,7 +284,7 @@ private fun BillingDetailsForm(
             PhoneSection(
                 enabled = enabled,
                 phoneController = phoneController,
-                imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Phone) {
+                imeAction = if (lastTextFieldIdentifier == FormFieldId.Phone) {
                     ImeAction.Done
                 } else {
                     ImeAction.Next
@@ -337,7 +337,7 @@ private fun PhoneSection(
 private fun AddressSection(
     enabled: Boolean,
     addressController: AddressController,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: FormFieldId?,
     sameAsShippingElement: SameAsShippingElement?,
     modifier: Modifier = Modifier,
 ) {

@@ -26,6 +26,7 @@ internal class FlowControllerTestRunnerContext(
     val flowController: PaymentSheet.FlowController,
     val configureCallbackTurbine: Turbine<PaymentOption?>,
     private val countDownLatch: CountDownLatch,
+    val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
 
     fun configureFlowController(
@@ -62,6 +63,7 @@ internal class FlowControllerTestRunnerContext(
 @OptIn(WalletButtonsPreview::class)
 internal fun runFlowControllerTest(
     networkRule: NetworkRule,
+    apiConfigurationTestType: ApiConfigurationTestType,
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     showWalletButtons: Boolean = false,
@@ -86,7 +88,7 @@ internal fun runFlowControllerTest(
         scenario.moveToState(Lifecycle.State.CREATED)
 
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -120,6 +122,7 @@ internal fun runFlowControllerTest(
             ),
             configureCallbackTurbine = configureCallbackTurbine,
             countDownLatch = countDownLatch,
+            apiConfigurationTestType = apiConfigurationTestType,
         )
         runTest {
             block(testContext)
@@ -135,6 +138,7 @@ internal fun runFlowControllerTest(
 
 internal fun runMultipleFlowControllerInstancesTest(
     networkRule: NetworkRule,
+    apiConfigurationTestType: ApiConfigurationTestType,
     testType: MultipleInstancesTestType,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback,
@@ -198,7 +202,7 @@ internal fun runMultipleFlowControllerInstancesTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -225,6 +229,7 @@ internal fun runMultipleFlowControllerInstancesTest(
             flowController = flowController,
             configureCallbackTurbine = configureCallbackTurbine,
             countDownLatch = countDownLatch,
+            apiConfigurationTestType = apiConfigurationTestType,
         )
         runTest {
             block(testContext)

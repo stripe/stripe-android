@@ -5,15 +5,15 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val sequraFullRawValues = mapOf(
-    IdentifierSpec.Line1 to "Gran Vía 1",
-    IdentifierSpec.Line2 to "Piso 2",
-    IdentifierSpec.City to "Madrid",
-    IdentifierSpec.State to "Madrid",
-    IdentifierSpec.PostalCode to "28013",
-    IdentifierSpec.Country to "ES",
+    FormFieldId.Line1 to "Gran Vía 1",
+    FormFieldId.Line2 to "Piso 2",
+    FormFieldId.City to "Madrid",
+    FormFieldId.State to "Madrid",
+    FormFieldId.PostalCode to "28013",
+    FormFieldId.Country to "ES",
 )
 
 private val sequraNoBillingDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

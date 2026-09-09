@@ -44,7 +44,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -757,7 +757,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Email)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.Email)
         }
     }
 
@@ -780,7 +780,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Phone)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.Phone)
         }
     }
 
@@ -808,7 +808,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.PostalCode)
         }
     }
 
@@ -836,7 +836,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.PostalCode)
         }
     }
 
@@ -1910,7 +1910,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(expectMostRecentItem()).isEqualTo(IdentifierSpec.OneLineAddress)
+            assertThat(expectMostRecentItem()).isEqualTo(FormFieldId.OneLineAddress)
         }
     }
 

@@ -127,7 +127,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             var hasResult by remember { mutableStateOf(false) }
             if (!hasResult) {
                 Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                    ScreenContent(embeddedNavigator, screen)
+                    EmbeddedSheetScreenContent(embeddedNavigator, screen)
                 }
                 LaunchedEffect(Unit) {
                     embeddedNavigator.result.collect { result ->
@@ -147,54 +147,6 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    @Composable
-    private fun ScreenContent(
-        navigator: EmbeddedNavigator,
-        screen: EmbeddedNavigator.Screen
-    ) {
-        val density = LocalDensity.current
-        var contentHeight by remember { mutableStateOf(0.dp) }
-        val scrollState = rememberScrollState()
-        BottomSheetScaffold(
-            topBar = {
-                val topBarState by remember(screen) {
-                    screen.topBarState()
-                }.collectAsState()
-                val isPerformingNetworkOperation by remember(screen) {
-                    screen.isPerformingNetworkOperation()
-                }.collectAsState()
-                PaymentSheetTopBar(
-                    state = topBarState,
-                    canNavigateBack = navigator.canGoBack,
-                    isEnabled = !isPerformingNetworkOperation,
-                    handleBackPressed = { embeddedNavigator.performAction(EmbeddedNavigator.Action.Back) },
-                )
-            },
-            content = {
-                val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
-                val headerText by remember(screen) {
-                    screen.title()
-                }.collectAsState()
-                headerText?.let { text ->
-                    H4Text(
-                        text = text.resolve(),
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .padding(horizontalPadding),
-                    )
-                }
-
-                Column(modifier = Modifier.animateContentSize()) {
-                    screen.Content()
-                }
-            },
-            modifier = Modifier.onGloballyPositioned {
-                contentHeight = with(density) { it.size.height.toDp() }
-            },
-            scrollState = scrollState,
-        )
     }
 
     override fun finish() {
@@ -263,4 +215,52 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             EmbeddedActivityResult.toIntent(intent, result)
         )
     }
+}
+
+@Composable
+internal fun EmbeddedSheetScreenContent(
+    navigator: EmbeddedNavigator,
+    screen: EmbeddedNavigator.Screen,
+) {
+    val density = LocalDensity.current
+    var contentHeight by remember { mutableStateOf(0.dp) }
+    val scrollState = rememberScrollState()
+    BottomSheetScaffold(
+        topBar = {
+            val topBarState by remember(screen) {
+                screen.topBarState()
+            }.collectAsState()
+            val isPerformingNetworkOperation by remember(screen) {
+                screen.isPerformingNetworkOperation()
+            }.collectAsState()
+            PaymentSheetTopBar(
+                state = topBarState,
+                canNavigateBack = navigator.canGoBack,
+                isEnabled = !isPerformingNetworkOperation,
+                handleBackPressed = { navigator.performAction(EmbeddedNavigator.Action.Back) },
+            )
+        },
+        content = {
+            val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
+            val headerText by remember(screen) {
+                screen.title()
+            }.collectAsState()
+            headerText?.let { text ->
+                H4Text(
+                    text = text.resolve(),
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontalPadding),
+                )
+            }
+
+            Column(modifier = Modifier.animateContentSize()) {
+                screen.Content()
+            }
+        },
+        modifier = Modifier.onGloballyPositioned {
+            contentHeight = with(density) { it.size.height.toDp() }
+        },
+        scrollState = scrollState,
+    )
 }

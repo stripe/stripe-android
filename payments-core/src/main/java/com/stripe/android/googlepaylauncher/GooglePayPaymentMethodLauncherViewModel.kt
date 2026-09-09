@@ -95,6 +95,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
             shippingAddressParameters = args.shippingAddressParameters,
+            hasDynamicCallbacks = args.dynamicCallbackId != null,
             isEmailRequired = args.config.isEmailRequired,
             allowCreditCards = args.config.allowCreditCards
         )

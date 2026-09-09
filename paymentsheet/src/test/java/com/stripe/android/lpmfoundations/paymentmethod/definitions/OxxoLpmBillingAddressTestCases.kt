@@ -5,17 +5,17 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val oxxoFullRawValues = mapOf(
-    IdentifierSpec.Name to "Ana Garcia",
-    IdentifierSpec.Email to "ana.garcia@example.com",
-    IdentifierSpec.Line1 to "Paseo de la Reforma 222",
-    IdentifierSpec.Line2 to "Piso 3",
-    IdentifierSpec.City to "Ciudad de Mexico",
-    IdentifierSpec.State to "CDMX",
-    IdentifierSpec.PostalCode to "06600",
-    IdentifierSpec.Country to "MX",
+    FormFieldId.Name to "Ana Garcia",
+    FormFieldId.Email to "ana.garcia@example.com",
+    FormFieldId.Line1 to "Paseo de la Reforma 222",
+    FormFieldId.Line2 to "Piso 3",
+    FormFieldId.City to "Ciudad de Mexico",
+    FormFieldId.State to "CDMX",
+    FormFieldId.PostalCode to "06600",
+    FormFieldId.Country to "MX",
 )
 
 private val oxxoNoBillingDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

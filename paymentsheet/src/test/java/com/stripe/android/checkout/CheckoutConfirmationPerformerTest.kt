@@ -60,7 +60,8 @@ internal class CheckoutConfirmationPerformerTest {
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
-        assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+        assertThat(args.paymentMethodMetadata)
+            .isEqualTo(stateHolder.state?.paymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
     }
 

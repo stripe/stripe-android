@@ -32,7 +32,7 @@ import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -325,8 +325,8 @@ internal class DefaultCardNumberController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
         val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current

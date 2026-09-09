@@ -17,19 +17,19 @@ import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressElement(
-    _identifier: IdentifierSpec,
-    private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
+    _identifier: FormFieldId,
+    private var rawValuesMap: Map<FormFieldId, String?> = emptyMap(),
     val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
     countryCodes: Set<String> = emptySet(),
     override val countryElement: CountryElement = CountryElement(
-        IdentifierSpec.Country,
+        FormFieldId.Country,
         DropdownFieldController(
             CountryConfig(countryCodes),
-            rawValuesMap[IdentifierSpec.Country]
+            rawValuesMap[FormFieldId.Country]
         )
     ),
     sameAsShippingElement: SameAsShippingElement?,
-    shippingValuesMap: Map<IdentifierSpec, String?>?,
+    shippingValuesMap: Map<FormFieldId, String?>?,
     private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
@@ -40,23 +40,23 @@ class AddressElement(
 
     private val isValidating = MutableStateFlow(false)
     private val emailElement = EmailElement(
-        initialValue = rawValuesMap[IdentifierSpec.Email]
+        initialValue = rawValuesMap[FormFieldId.Email]
     )
 
     private val nameElement = SimpleTextElement(
-        IdentifierSpec.Name,
+        FormFieldId.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
                 label = resolvableString(CoreR.string.stripe_address_label_full_name),
                 optional = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
                 allowsEmojis = false,
             ),
-            initialValue = rawValuesMap[IdentifierSpec.Name]
+            initialValue = rawValuesMap[FormFieldId.Name]
         )
     )
 
     private val addressAutoCompleteElement = AddressTextFieldElement(
-        identifier = IdentifierSpec.OneLineAddress,
+        identifier = FormFieldId.OneLineAddress,
         label = resolvableString(R.string.stripe_address_label_address),
         addressInputMode = addressInputMode,
         inlineAutocompleteHandler = inlineAutocompleteHandler,
@@ -68,12 +68,12 @@ class AddressElement(
     private val expandedAutoCompleteElement: AddressTextFieldElement? =
         if (inlineAutocompleteHandler != null && addressInputMode is AddressInputMode.NoAutocomplete) {
             AddressTextFieldElement(
-                identifier = IdentifierSpec.Line1,
+                identifier = FormFieldId.Line1,
                 label = resolvableString(R.string.stripe_address_label_address),
                 addressInputMode = addressInputMode,
                 inlineAutocompleteHandler = inlineAutocompleteHandler,
                 reportsFormValue = true,
-                initialQuery = rawValuesMap[IdentifierSpec.Line1] ?: "",
+                initialQuery = rawValuesMap[FormFieldId.Line1] ?: "",
                 showEnterManually = false,
             )
         } else {
@@ -85,15 +85,15 @@ class AddressElement(
 
     @VisibleForTesting
     val phoneNumberElement = PhoneNumberElement(
-        IdentifierSpec.Phone,
+        FormFieldId.Phone,
         PhoneNumberController.createPhoneNumberController(
-            initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
+            initialValue = rawValuesMap[FormFieldId.Phone] ?: "",
             showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
             acceptAnyInput = addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
         )
     )
 
-    private val currentValuesMap = mutableMapOf<IdentifierSpec, String?>()
+    private val currentValuesMap = mutableMapOf<FormFieldId, String?>()
 
     private val elementsRegistry = AddressElementUiRegistry(AddressSchemaRegistry)
 
@@ -140,7 +140,7 @@ class AddressElement(
                 shippingValuesMap ?: emptyMap()
             } else {
                 currentValuesMap.mapValues {
-                    if (it.key == IdentifierSpec.Country) {
+                    if (it.key == FormFieldId.Country) {
                         it.value
                     } else {
                         rawValuesMap[it.key] ?: ""
@@ -170,7 +170,7 @@ class AddressElement(
             expandedAutoCompleteElement?.inlineQuery ?: stateFlowOf(""),
         ) { country, values, expandedLine1 ->
             country?.let {
-                currentValuesMap[IdentifierSpec.Country] = it
+                currentValuesMap[FormFieldId.Country] = it
             }
             currentValuesMap.putAll(
                 values.associate {
@@ -178,7 +178,7 @@ class AddressElement(
                 }
             )
             if (expandedAutoCompleteElement != null) {
-                currentValuesMap[IdentifierSpec.Line1] = expandedLine1
+                currentValuesMap[FormFieldId.Line1] = expandedLine1
             }
             val same = currentValuesMap.all {
                 (shippingValuesMap?.get(it.key) ?: "") == it.value
@@ -220,7 +220,7 @@ class AddressElement(
             }
             else -> {
                 val bodyFields = otherFields.map { field ->
-                    expandedAutoCompleteElement?.takeIf { field.identifier == IdentifierSpec.Line1 } ?: field
+                    expandedAutoCompleteElement?.takeIf { field.identifier == FormFieldId.Line1 } ?: field
                 }
                 headerElements.plus(bodyFields)
             }
@@ -254,7 +254,7 @@ class AddressElement(
         }
     }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> = fields.flatMapLatestAsStateFlow {
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> = fields.flatMapLatestAsStateFlow {
         combineAsStateFlow(
             it
                 .map {
@@ -265,13 +265,13 @@ class AddressElement(
         }
     }
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         this.rawValuesMap = rawValuesMap
         syncExpandedLine1(rawValuesMap)
     }
 
-    private fun syncExpandedLine1(values: Map<IdentifierSpec, String?>) {
-        expandedAutoCompleteElement?.controller?.onRawValueChange(values[IdentifierSpec.Line1] ?: "")
+    private fun syncExpandedLine1(values: Map<FormFieldId, String?>) {
+        expandedAutoCompleteElement?.controller?.onRawValueChange(values[FormFieldId.Line1] ?: "")
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
@@ -318,7 +318,7 @@ internal fun updateLine1WithAutocompleteAffordance(
     addressInputMode: AddressInputMode,
     isPlacesAvailable: Boolean,
 ) {
-    if (field.identifier == IdentifierSpec.Line1) {
+    if (field.identifier == FormFieldId.Line1) {
         val fieldController = (field as? SimpleTextElement)?.controller
         val config = (fieldController as? SimpleTextFieldController?)?.textFieldConfig
         val textConfig = config as? SimpleTextFieldConfig?

@@ -2086,13 +2086,15 @@ class OnrampInteractorTest {
         redactedPhoneNumber = "***-***-1234",
         sessionState = sessionState,
         consumerSessionClientSecret = consumerSessionClientSecret,
+        linkSessionKey = "lsk_123",
     )
 
     private fun mockLinkAccountWithoutSecret(): LinkController.LinkAccount = LinkController.LinkAccount(
         email = "test@email.com",
         redactedPhoneNumber = "***-***-1234",
         sessionState = LinkController.SessionState.LoggedIn,
-        consumerSessionClientSecret = null
+        consumerSessionClientSecret = null,
+        linkSessionKey = null,
     )
 
     private fun createConfigurationState(

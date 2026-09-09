@@ -175,6 +175,22 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    internal suspend fun commitShippingAddress(
+        name: String?,
+        address: Address.State,
+    ): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = name,
+                    shippingAddress = address,
+                ),
+            )
+        },
+    ) {
+        kotlin.Result.success(checkoutSessionResponse)
+    }
+
     /**
      * Updates the customer's email address.
      *
@@ -190,18 +206,6 @@ class CheckoutController @Inject internal constructor(
         ) {
             kotlin.Result.success(checkoutSessionResponse)
         }
-    }
-
-    internal suspend fun updateBillingAddress(
-        name: String?,
-        address: Address,
-    ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(
-            collectedDetails = collectedDetails.copy(
-                billingName = name,
-                billingAddress = it,
-            ),
-        )
     }
 
     /**
@@ -971,7 +975,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Builder for an address passed to [updateShippingAddress] and [updateBillingAddress].
+     * Builder for an address passed to [updateShippingAddress].
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

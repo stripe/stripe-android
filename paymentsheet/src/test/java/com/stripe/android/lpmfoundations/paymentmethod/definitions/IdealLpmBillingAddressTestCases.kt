@@ -5,19 +5,19 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val idealRawValues = mapOf(
-    IdentifierSpec.Name to "Sanne de Vries",
-    IdentifierSpec.Line1 to "Herengracht 1",
-    IdentifierSpec.Line2 to "Appartement 2",
-    IdentifierSpec.City to "Amsterdam",
-    IdentifierSpec.PostalCode to "1015 BA",
-    IdentifierSpec.Country to "NL",
+    FormFieldId.Name to "Sanne de Vries",
+    FormFieldId.Line1 to "Herengracht 1",
+    FormFieldId.Line2 to "Appartement 2",
+    FormFieldId.City to "Amsterdam",
+    FormFieldId.PostalCode to "1015 BA",
+    FormFieldId.Country to "NL",
 )
 
 private val idealSetupRawValues = idealRawValues + (
-    IdentifierSpec.Email to "sanne.devries@example.com"
+    FormFieldId.Email to "sanne.devries@example.com"
 )
 
 private val idealNeverExpectedParams = LpmBillingAddressFormParams(

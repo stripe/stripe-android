@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -31,7 +32,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         rqData = "test_rq_data",
         tokenTimeoutSeconds = null
     )
-    private val testPublishableKey = "pk_test_123"
+    private val testApiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123")
     private val testProductUsage = setOf("PaymentSheet")
 
     @Test
@@ -75,14 +76,14 @@ internal class DefaultPassiveChallengeWarmerTest {
 
         warmer.start(
             passiveCaptchaParams = testPassiveCaptchaParams,
-            publishableKey = testPublishableKey,
+            apiConfiguration = testApiConfiguration,
             productUsage = testProductUsage
         )
 
         verify(mockLauncher).launch(argsCaptor.capture())
         val capturedArgs = argsCaptor.firstValue
         assertThat(capturedArgs.passiveCaptchaParams).isEqualTo(testPassiveCaptchaParams)
-        assertThat(capturedArgs.publishableKey).isEqualTo(testPublishableKey)
+        assertThat(capturedArgs.apiConfiguration).isEqualTo(testApiConfiguration)
         assertThat(capturedArgs.productUsage).isEqualTo(testProductUsage)
     }
 
@@ -111,7 +112,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         // Starting after unregister should not launch
         warmer.start(
             passiveCaptchaParams = testPassiveCaptchaParams,
-            publishableKey = testPublishableKey,
+            apiConfiguration = testApiConfiguration,
             productUsage = testProductUsage
         )
 
@@ -146,7 +147,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         // Start should use the latest launcher
         warmer.start(
             passiveCaptchaParams = testPassiveCaptchaParams,
-            publishableKey = testPublishableKey,
+            apiConfiguration = testApiConfiguration,
             productUsage = testProductUsage
         )
 
