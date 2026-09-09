@@ -7,9 +7,13 @@ import com.stripe.android.testing.CleanupTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Rule
 import org.junit.Test
 import java.io.Closeable
@@ -197,6 +201,41 @@ internal class NavigationHandlerTest {
             assertThat(awaitItem()).isEqualTo(screenTwo)
             assertThat(navigationHandler.canGoBack).isTrue()
         }
+    }
+
+    @Test
+    fun `awaitTransition resumes after screen observers handle delayed transition`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler<TestScreen>(
+            coroutineScope = testScope,
+            initialScreen = LoadingScreen,
+        ) {}
+        val screenChangeHandled = MutableStateFlow(false)
+        val completion = Turbine<Boolean>()
+
+        testScope.launch {
+            navigationHandler.currentScreen.drop(1).collect {
+                yield()
+                screenChangeHandled.value = true
+            }
+        }
+        testScope.launch {
+            navigationHandler.awaitTransition()
+            completion.add(screenChangeHandled.value)
+        }
+
+        testScope.testScheduler.runCurrent()
+        navigationHandler.transitionToWithDelay(FakeScreen())
+        testScope.launch {
+            navigationHandler.awaitTransition()
+            completion.add(screenChangeHandled.value)
+        }
+
+        assertThat(completion.awaitItem()).isFalse()
+        completion.expectNoEvents()
+        testScope.testScheduler.advanceTimeBy(251.milliseconds)
+        assertThat(completion.awaitItem()).isTrue()
+        completion.ensureAllEventsConsumed()
     }
 
     @Test

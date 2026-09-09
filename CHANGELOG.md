@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+* [FIXED][14248](https://github.com/stripe/stripe-android/issues/14248) Deferred intent failures are now displayed after pending PaymentSheet navigation completes.
 
 ## 23.18.0 - 2026-09-08
 

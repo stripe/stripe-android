@@ -389,6 +389,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         }
                     }
                     is ConfirmationHandler.State.Complete -> {
+                        if (state.result is ConfirmationHandler.Result.Failed) {
+                            navigationHandler.awaitTransition()
+                        }
                         paymentMethodMetadata.value?.let {
                             initializeNavigationStateIfNeeded(metadata = it)
                         }

@@ -5,9 +5,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
@@ -39,6 +41,7 @@ internal class NavigationHandler<T : Any>(
     private val initialScreen = this.initialBackStack.first()
 
     private val isTransitioning = AtomicBoolean(false)
+    private val transitionCompleted = MutableStateFlow(true)
 
     // A screen queued by [transitionToWithDelay] whose transition has not been applied yet. Tracked
     // so it can still be closed if [closeScreens] runs (e.g. the activity is destroyed) before the
@@ -92,6 +95,10 @@ internal class NavigationHandler<T : Any>(
             // instead of leaking it, since it never enters the back stack.
             target.onClose()
         }
+    }
+
+    suspend fun awaitTransition() {
+        transitionCompleted.first { it }
     }
 
     private fun transitionToInternal(target: T) {
@@ -179,11 +186,18 @@ internal class NavigationHandler<T : Any>(
 
     private fun navigateWithDelay(action: () -> Unit): Boolean {
         return if (!isTransitioning.getAndSet(true)) {
+            transitionCompleted.value = false
             // Introduce a delay to show ripple.
             coroutineScope.launch {
-                delay(250.milliseconds)
-                action()
-                isTransitioning.set(false)
+                try {
+                    delay(250.milliseconds)
+                    action()
+                    // Let collectors react to the new screen before reporting that the transition is complete.
+                    yield()
+                } finally {
+                    isTransitioning.set(false)
+                    transitionCompleted.value = true
+                }
             }
             true
         } else {

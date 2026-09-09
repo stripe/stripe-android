@@ -519,6 +519,51 @@ internal class PaymentSheetDeferredTest(
         testContext.markTestSucceeded()
     }
 
+    @Test
+    fun testDeferredIntentFailedCardPayment_forSetup() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
+        networkRule = networkRule,
+        integrationType = integrationType,
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Failure(
+                    cause = IllegalStateException("Unsupported funding"),
+                    displayMessage = "This card can't be used. Please choose another."
+                )
+            }
+        },
+        resultCallback = ::expectNoResult,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                    )
+                ),
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        page.clickPrimaryButton()
+
+        page.waitForText("This card can't be used. Please choose another.")
+        testContext.markTestSucceeded()
+    }
+
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
