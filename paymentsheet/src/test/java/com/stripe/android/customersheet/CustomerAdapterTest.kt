@@ -282,15 +282,18 @@ class CustomerAdapterTest {
 
     @Test
     fun `attachPaymentMethod succeeds when the payment method is attached`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onAttachPaymentMethod = {
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        )
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onAttachPaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            )
+            customerRepository = customerRepository,
         )
         val result = adapter.attachPaymentMethod("pm_1234")
         assertThat(result.getOrNull()).isNotNull()
+        assertThat(customerRepository.attachRequests.awaitItem().stripeAccountId)
+            .isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -314,17 +317,20 @@ class CustomerAdapterTest {
 
     @Test
     fun `detachPaymentMethod succeeds when the payment method is detached`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onDetachPaymentMethod = {
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        )
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onDetachPaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            )
+            customerRepository = customerRepository,
         )
         val result = adapter.detachPaymentMethod("pm_1234")
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
+        assertThat(customerRepository.detachRequests.awaitItem().stripeAccountId)
+            .isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
@@ -348,12 +354,13 @@ class CustomerAdapterTest {
 
     @Test
     fun `updatePaymentMethod succeeds when the payment method is update`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onUpdatePaymentMethod = {
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        )
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onUpdatePaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            )
+            customerRepository = customerRepository,
         )
         val result = adapter.updatePaymentMethod(
             paymentMethodId = "pm_1234",
@@ -362,6 +369,8 @@ class CustomerAdapterTest {
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
+        assertThat(customerRepository.updateRequests.awaitItem().stripeAccountId)
+            .isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
