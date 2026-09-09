@@ -265,6 +265,7 @@ internal class EmbeddedSheetActivityTest {
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                     ),
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 ),
             )
         ).use { scenario ->
