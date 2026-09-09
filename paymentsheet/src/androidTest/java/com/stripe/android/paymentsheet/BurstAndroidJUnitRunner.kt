@@ -16,38 +16,61 @@ internal class BurstAndroidJUnitRunner : AndroidJUnitRunner() {
         if (containsKey(TESTS_REGEX_ARGUMENT)) return@with
 
         val classArgument = getString(CLASS_ARGUMENT) ?: return@with
-        val testsRegex = findBurstTests(classArgument) ?: return@with
+        val testsRegex = findTestsRegex(classArgument) ?: return@with
 
         remove(CLASS_ARGUMENT)
         putString(TESTS_REGEX_ARGUMENT, testsRegex)
     }
 
-    private fun findBurstTests(classArgument: String): String? {
-        if (',' in classArgument) {
-            return null
+    private fun findTestsRegex(classArgument: String): String? {
+        val selections = classArgument.split(',').map { selector ->
+            findTestSelection(selector) ?: return null
         }
 
-        val methodSeparatorIndex = classArgument.indexOf('#')
-        val className = classArgument.substringBefore('#')
-        if (!className.isBurstClass()) return null
+        if (selections.none(TestSelection::isBurst)) return null
 
-        return if (methodSeparatorIndex == -1) {
-            "^${Pattern.quote(className)}(?:_|#)"
-        } else {
-            val methodName = classArgument.substring(methodSeparatorIndex + 1)
-            if (methodName.isEmpty() || '#' in methodName) return null
-
-            "^${Pattern.quote(className)}(?:_[^#]+)?#${Pattern.quote(methodName)}(?:_|$)"
+        return selections.joinToString(prefix = "(?:", postfix = ")", separator = "|") {
+            it.regex
         }
     }
 
-    private fun String.isBurstClass(): Boolean {
+    private fun findTestSelection(selector: String): TestSelection? {
+        val methodSeparatorIndex = selector.indexOf('#')
+        val className = selector.substringBefore('#')
+        val isBurst = className.isBurstClass() ?: return null
+
+        val regex = if (methodSeparatorIndex == -1) {
+            if (isBurst) {
+                "^${Pattern.quote(className)}(?:_|#)"
+            } else {
+                "^${Pattern.quote(className)}#"
+            }
+        } else {
+            val methodName = selector.substring(methodSeparatorIndex + 1)
+            if (methodName.isEmpty() || '#' in methodName) return null
+
+            if (isBurst) {
+                "^${Pattern.quote(className)}(?:_[^#]+)?#${Pattern.quote(methodName)}(?:_|$)"
+            } else {
+                "^${Pattern.quote(className)}#${Pattern.quote(methodName)}$"
+            }
+        }
+
+        return TestSelection(regex = regex, isBurst = isBurst)
+    }
+
+    private fun String.isBurstClass(): Boolean? {
         return runCatching {
             Class
                 .forName(this, false, this@BurstAndroidJUnitRunner.javaClass.classLoader)
                 .isAnnotationPresent(Burst::class.java)
-        }.getOrDefault(false)
+        }.getOrNull()
     }
+
+    private data class TestSelection(
+        val regex: String,
+        val isBurst: Boolean,
+    )
 
     private companion object {
         const val CLASS_ARGUMENT = "class"
