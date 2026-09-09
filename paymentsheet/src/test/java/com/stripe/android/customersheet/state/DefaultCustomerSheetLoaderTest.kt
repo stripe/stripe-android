@@ -6,7 +6,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -839,12 +838,7 @@ internal class DefaultCustomerSheetLoaderTest {
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
-        val apiConfigurationResolver = FakeApiConfigurationResolver(
-            resolvedApiConfiguration = ApiConfiguration.State(
-                publishableKey = "pk_test_123",
-                stripeAccountId = "acct_123",
-            ),
-        )
+        val apiConfigurationResolver = FakeApiConfigurationResolver()
         return DefaultCustomerSheetLoader(
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(

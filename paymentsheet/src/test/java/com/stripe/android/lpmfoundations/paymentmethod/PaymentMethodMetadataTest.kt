@@ -62,10 +62,6 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
-    private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_123",
-        stripeAccountId = "acct_123",
-    )
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -2487,5 +2483,10 @@ internal class PaymentMethodMetadataTest {
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
         allowedCardFundingTypes = allowedCardFundingTypes
+    )
+
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_123",
     )
 }

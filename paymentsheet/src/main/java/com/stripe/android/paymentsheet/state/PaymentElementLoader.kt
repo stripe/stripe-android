@@ -693,9 +693,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     // Default filters are used here because this only determines the ready state,
     // not what's presented to Google Pay. This check runs async before we fetch the
     // elements session, so using merchant-defined filters would add latency.
-    private suspend fun isGooglePayReadyForEnvironment(
-        environment: GooglePayEnvironment,
-    ): Boolean {
+    private suspend fun isGooglePayReadyForEnvironment(environment: GooglePayEnvironment): Boolean {
         return googlePayRepositoryFactory(
             environment = environment,
             cardFundingFilter = DefaultCardFundingFilter,
