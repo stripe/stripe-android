@@ -123,14 +123,9 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun retrieveAdditionalKycRequirements(
         consumerSessionClientSecret: String,
     ): Result<RetrieveAdditionalKycRequirementsResponse> {
-        val request = apiRequestFactory.createGet(
+        return executeConsumerAuthenticatedGet(
             url = additionalKycRequirementsUrl,
-            options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
-        )
-
-        return execute(
-            request = request,
+            consumerSessionClientSecret = consumerSessionClientSecret,
             responseSerializer = RetrieveAdditionalKycRequirementsResponse.serializer(),
         )
     }

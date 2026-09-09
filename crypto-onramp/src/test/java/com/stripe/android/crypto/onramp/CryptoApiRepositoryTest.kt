@@ -155,19 +155,17 @@ class CryptoApiRepositoryTest {
             """.trimIndent(),
             emptyMap()
         )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>())).thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
             consumerSessionClientSecret = "test-secret",
         )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
         assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
-        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
-        assertThat(apiRequest.params).isEqualTo(
-            mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret"))
-        )
+        assertThat(apiRequest.url).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
         val response = result.getOrThrow()
         assertThat(response.requirements.entries.single().description)
             .isEqualTo("proof_of_address")
