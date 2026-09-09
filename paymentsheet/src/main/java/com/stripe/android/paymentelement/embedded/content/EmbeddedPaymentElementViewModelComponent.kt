@@ -28,6 +28,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -77,6 +78,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        ApiConfigurationResolverModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
