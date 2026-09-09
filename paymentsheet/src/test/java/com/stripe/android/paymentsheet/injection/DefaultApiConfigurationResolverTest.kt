@@ -63,17 +63,12 @@ internal class DefaultApiConfigurationResolverTest {
             stripeAccountId = "acct_from_api_configuration",
         )
 
+        assertFailsWith<IllegalStateException> {
+            PaymentConfiguration.getInstance(context)
+        }
+
         val resolvedApiConfiguration = DefaultApiConfigurationResolver(context).resolve(apiConfiguration)
 
         assertThat(resolvedApiConfiguration).isEqualTo(apiConfiguration)
-    }
-
-    @Test
-    fun `resolve throws when API configuration is null and PaymentConfiguration is not initialized`() {
-        PaymentConfiguration.clearInstance()
-
-        assertFailsWith<IllegalStateException> {
-            DefaultApiConfigurationResolver(context).resolve(apiConfiguration = null)
-        }
     }
 }
