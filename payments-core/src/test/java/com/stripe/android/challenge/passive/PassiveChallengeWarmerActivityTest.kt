@@ -24,6 +24,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -65,7 +66,7 @@ internal class PassiveChallengeWarmerActivityTest {
     fun `activity window should not accept focus or touch input while warming up`() = runTest {
         val hCaptchaService = FakeHCaptchaService().apply {
             warmUpResult = {
-                delay(5.seconds)
+                awaitCancellation()
             }
         }
 
