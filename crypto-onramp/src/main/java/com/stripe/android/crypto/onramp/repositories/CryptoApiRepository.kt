@@ -152,6 +152,7 @@ internal class CryptoApiRepository @Inject constructor(
         return executeConsumerAuthenticatedGet(
             url = identifierRequirementsUrl,
             consumerSessionClientSecret = consumerSessionClientSecret,
+            params = emptyMap<String, Any?>(),
             responseSerializer = ComplianceIdentifierRequirementsResponse.serializer()
         ).mapCatching { it.toComplianceIdentifierRequirements() }
     }
@@ -177,6 +178,7 @@ internal class CryptoApiRepository @Inject constructor(
         return executeConsumerAuthenticatedGet(
             url = userAttestationUrl,
             consumerSessionClientSecret = consumerSessionClientSecret,
+            params = emptyMap<String, Any?>(),
             responseSerializer = UserAttestationResponse.serializer()
         ).map { it.toUserAttestation() }
     }
@@ -484,7 +486,7 @@ internal class CryptoApiRepository @Inject constructor(
     private suspend fun <Response> executeConsumerAuthenticatedGet(
         url: String,
         consumerSessionClientSecret: String,
-        params: Map<String, *> = emptyMap<String, Any?>(),
+        params: Map<String, *>,
         responseSerializer: KSerializer<Response>,
     ): Result<Response> {
         val request = ConsumerAuthenticatedGetRequest(
@@ -516,25 +518,6 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = request,
             responseSerializer = responseSerializer
-        )
-    }
-
-    private suspend fun <Response> executeConsumerAuthenticatedGet(
-        url: String,
-        consumerSessionClientSecret: String,
-        responseSerializer: KSerializer<Response>,
-    ): Result<Response> {
-        val request = ConsumerAuthenticatedGetRequest(
-            request = apiRequestFactory.createGet(
-                url = url,
-                options = buildRequestOptions(),
-            ),
-            consumerSessionClientSecret = consumerSessionClientSecret,
-        )
-
-        return execute(
-            request = request,
-            responseSerializer = responseSerializer,
         )
     }
 
