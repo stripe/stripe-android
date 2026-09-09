@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
@@ -53,8 +54,8 @@ class DefaultTapToAddConnectionManagerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
     private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_123",
-        stripeAccountId = "acct_123",
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
     )
 
     private val testConnectionConfig =

@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -48,8 +49,8 @@ class DefaultTapToAddIsSimulatedProviderTest {
 
     private fun apiConfiguration(isLiveMode: Boolean): ApiConfiguration.State {
         return ApiConfiguration.State(
-            publishableKey = if (isLiveMode) "pk_live_123" else "pk_test_123",
-            stripeAccountId = "acct_123",
+            publishableKey = if (isLiveMode) ApiKeyFixtures.FAKE_LIVE_KEY else ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
     }
 
