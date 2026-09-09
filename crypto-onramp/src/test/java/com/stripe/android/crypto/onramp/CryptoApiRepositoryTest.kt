@@ -40,6 +40,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.ByteArrayOutputStream
 import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
@@ -567,7 +568,7 @@ class CryptoApiRepositoryTest {
             "{}",
             emptyMap()
         )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
             .thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.confirmPartnerTerms(
@@ -575,16 +576,18 @@ class CryptoApiRepositoryTest {
             declarationId = "copt_decl_123",
         )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-        assertThat(apiRequest.baseUrl)
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/partner_terms")
-        assertThat(apiRequest.params).isEqualTo(
-            mapOf(
-                "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
-                "declaration_id" to "copt_decl_123",
-            )
-        )
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
+        assertThat(apiRequest.headers["Authorization"])
+            .isEqualTo("Bearer pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        assertThat(apiRequest.postHeaders?.get("Content-Type"))
+            .isEqualTo("application/x-www-form-urlencoded; charset=UTF-8")
+        val body = ByteArrayOutputStream().also(apiRequest::writePostBody).toString("UTF-8")
+        assertThat(body).isEqualTo("declaration_id=copt_decl_123")
         assertThat(result.isSuccess).isTrue()
     }
 

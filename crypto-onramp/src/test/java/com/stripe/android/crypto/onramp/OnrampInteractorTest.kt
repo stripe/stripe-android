@@ -84,7 +84,6 @@ import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
-import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -1941,36 +1940,24 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleUserAttestationResultConfirmedSuccess() = runTest {
+    fun testConfirmUserAttestationSuccess() = runTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
         whenever(cryptoApiRepository.confirmUserAttestation(any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handleUserAttestationResult(
-            HTMLConfirmationResult.Confirmed
-        )
+        val result = interactor.confirmUserAttestation()
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Confirmed::class.java)
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.UserAttestationCompleted)
     }
 
     @Test
-    fun testHandleUserAttestationResultCancelled() = runTest {
-        val result = interactor.handleUserAttestationResult(
-            HTMLConfirmationResult.Cancelled
-        )
-
-        assertThat(result).isInstanceOf(OnrampUserAttestationResult.Cancelled::class.java)
-    }
-
-    @Test
-    fun testHandleTermsAndConditionsResultAcceptedSuccess() = runTest {
+    fun testConfirmTermsAndConditionsSuccess() = runTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
         whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handlePartnerTermsResult(
-            result = HTMLConfirmationResult.Confirmed,
+        val result = interactor.confirmPartnerTerms(
             declarationId = "copt_decl_123",
             declarationType = PartnerDeclarationType.TransactionTerms,
         )
@@ -1981,14 +1968,13 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleTermsAndConditionsResultFailsForUnverifiedLinkAccount() = runTest {
+    fun testConfirmTermsAndConditionsFailsForUnverifiedLinkAccount() = runTest {
         val unverifiedAccount = mockLinkAccount(
             sessionState = LinkController.SessionState.NeedsVerification,
         )
         interactor.onLinkControllerState(mockLinkStateWithAccount(unverifiedAccount))
 
-        val result = interactor.handlePartnerTermsResult(
-            result = HTMLConfirmationResult.Confirmed,
+        val result = interactor.confirmPartnerTerms(
             declarationId = "copt_decl_123",
             declarationType = PartnerDeclarationType.TransactionTerms,
         )
@@ -2000,25 +1986,12 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleTermsAndConditionsResultCancelled() = runTest {
-        val result = interactor.handlePartnerTermsResult(
-            result = HTMLConfirmationResult.Cancelled,
-            declarationId = null,
-            declarationType = PartnerDeclarationType.TransactionTerms,
-        )
-
-        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
-        verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
-    }
-
-    @Test
-    fun testHandleTermsOfServiceResultAcceptedSuccess() = runTest {
+    fun testConfirmTermsOfServiceSuccess() = runTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
         whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handlePartnerTermsResult(
-            result = HTMLConfirmationResult.Confirmed,
+        val result = interactor.confirmPartnerTerms(
             declarationId = "copt_decl_456",
             declarationType = PartnerDeclarationType.TermsOfService,
         )
@@ -2026,18 +1999,6 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Accepted::class.java)
         verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("copt_decl_456"))
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsOfServiceCompleted)
-    }
-
-    @Test
-    fun testHandleTermsOfServiceResultCancelled() = runTest {
-        val result = interactor.handlePartnerTermsResult(
-            result = HTMLConfirmationResult.Cancelled,
-            declarationId = null,
-            declarationType = PartnerDeclarationType.TermsOfService,
-        )
-
-        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
-        verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
     }
 
     @Test

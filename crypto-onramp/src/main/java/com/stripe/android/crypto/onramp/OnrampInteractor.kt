@@ -63,7 +63,6 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
-import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -1037,68 +1036,58 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun handleUserAttestationResult(
-        result: HTMLConfirmationResult,
-    ): OnrampUserAttestationResult = when (result) {
-        HTMLConfirmationResult.Cancelled -> OnrampUserAttestationResult.Cancelled()
-        HTMLConfirmationResult.Confirmed -> {
-            val secret = authenticatedConsumerSessionClientSecret()
-            if (secret == null) {
-                val error = mapError(
-                    operation = Operation.PresentUserAttestation,
-                    error = authenticatedLinkSessionError(),
-                )
-                trackError(Operation.PresentUserAttestation, error)
-                OnrampUserAttestationResult.Failed(error)
-            } else {
-                cryptoApiRepository.confirmUserAttestation(secret).fold(
-                    onSuccess = {
-                        analyticsService?.track(OnrampAnalyticsEvent.UserAttestationCompleted)
-                        OnrampUserAttestationResult.Confirmed()
-                    },
-                    onFailure = { error ->
-                        val mappedError = mapError(Operation.PresentUserAttestation, error)
-                        trackError(Operation.PresentUserAttestation, mappedError)
-                        OnrampUserAttestationResult.Failed(mappedError)
-                    }
-                )
-            }
+    suspend fun confirmUserAttestation(): OnrampUserAttestationResult {
+        val secret = authenticatedConsumerSessionClientSecret()
+        return if (secret == null) {
+            val error = mapError(
+                operation = Operation.PresentUserAttestation,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(Operation.PresentUserAttestation, error)
+            OnrampUserAttestationResult.Failed(error)
+        } else {
+            cryptoApiRepository.confirmUserAttestation(secret).fold(
+                onSuccess = {
+                    analyticsService?.track(OnrampAnalyticsEvent.UserAttestationCompleted)
+                    OnrampUserAttestationResult.Confirmed()
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.PresentUserAttestation, error)
+                    trackError(Operation.PresentUserAttestation, mappedError)
+                    OnrampUserAttestationResult.Failed(mappedError)
+                }
+            )
         }
     }
 
-    suspend fun handlePartnerTermsResult(
-        result: HTMLConfirmationResult,
-        declarationId: String?,
+    suspend fun confirmPartnerTerms(
+        declarationId: String,
         declarationType: PartnerDeclarationType,
-    ): OnrampPartnerTermsResult = when (result) {
-        HTMLConfirmationResult.Cancelled -> OnrampPartnerTermsResult.Cancelled()
-        HTMLConfirmationResult.Confirmed -> {
-            requireNotNull(declarationId) { "Missing partner terms declaration ID." }
-            val operation = declarationType.operation
-            val secret = authenticatedConsumerSessionClientSecret()
-            if (secret == null) {
-                val error = mapError(
-                    operation = operation,
-                    error = authenticatedLinkSessionError(),
-                )
-                trackError(operation, error)
-                OnrampPartnerTermsResult.Failed(error)
-            } else {
-                cryptoApiRepository.confirmPartnerTerms(
-                    secret,
-                    declarationId,
-                ).fold(
-                    onSuccess = {
-                        analyticsService?.track(declarationType.completedEvent)
-                        OnrampPartnerTermsResult.Accepted()
-                    },
-                    onFailure = { error ->
-                        val mappedError = mapError(operation, error)
-                        trackError(operation, mappedError)
-                        OnrampPartnerTermsResult.Failed(mappedError)
-                    }
-                )
-            }
+    ): OnrampPartnerTermsResult {
+        val operation = declarationType.operation
+        val secret = authenticatedConsumerSessionClientSecret()
+        return if (secret == null) {
+            val error = mapError(
+                operation = operation,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(operation, error)
+            OnrampPartnerTermsResult.Failed(error)
+        } else {
+            cryptoApiRepository.confirmPartnerTerms(
+                secret,
+                declarationId,
+            ).fold(
+                onSuccess = {
+                    analyticsService?.track(declarationType.completedEvent)
+                    OnrampPartnerTermsResult.Accepted()
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(operation, error)
+                    trackError(operation, mappedError)
+                    OnrampPartnerTermsResult.Failed(mappedError)
+                }
+            )
         }
     }
 

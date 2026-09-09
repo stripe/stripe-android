@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.BundleCompat
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.onramp.ui.HTMLConfirmationScreen
 import com.stripe.android.uicore.utils.fadeOut
@@ -32,8 +33,8 @@ internal class HTMLConfirmationActivity : ComponentActivity() {
                 confirmationButtonText = stringResource(args.confirmationButtonResId),
                 cancelButtonText = stringResource(args.cancelButtonResId),
                 appearance = args.appearance,
-                onClose = { finishWithResult(HTMLConfirmationResult.Cancelled, args.declarationId) },
-                onConfirm = { finishWithResult(HTMLConfirmationResult.Confirmed, args.declarationId) },
+                onClose = { finishWithResult(HTMLConfirmationResult.Cancelled) },
+                onConfirm = { finishWithResult(HTMLConfirmationResult.Confirmed(args.content)) },
             )
         }
     }
@@ -45,21 +46,15 @@ internal class HTMLConfirmationActivity : ComponentActivity() {
 
     private fun finishWithResult(
         result: HTMLConfirmationResult,
-        declarationId: String?,
     ) {
         setResult(
-            if (result == HTMLConfirmationResult.Confirmed) RESULT_OK else RESULT_CANCELED,
-            createResultIntent(
-                HTMLConfirmationActivityResult(
-                    result = result,
-                    declarationId = declarationId,
-                )
-            )
+            if (result is HTMLConfirmationResult.Confirmed) RESULT_OK else RESULT_CANCELED,
+            createResultIntent(result)
         )
         finish()
     }
 
-    private fun createResultIntent(result: HTMLConfirmationActivityResult): Intent {
+    private fun createResultIntent(result: HTMLConfirmationResult): Intent {
         return Intent().apply { putExtra(RESULT_ARG, result) }
     }
 
@@ -79,37 +74,44 @@ internal class HTMLConfirmationActivity : ComponentActivity() {
 
 internal data class HTMLConfirmationActivityArgs(
     val html: String,
-    val declarationId: String?,
+    val content: HTMLConfirmationContent,
     val linkAppearance: LinkAppearance?,
     val headingResId: Int,
     val confirmationButtonResId: Int,
     val cancelButtonResId: Int,
 )
 
+internal sealed interface HTMLConfirmationContent : Parcelable {
+    @Parcelize
+    data object UserAttestation : HTMLConfirmationContent
+
+    @Parcelize
+    data class PartnerTerms(
+        val declarationId: String,
+        val declarationType: PartnerDeclarationType,
+    ) : HTMLConfirmationContent
+}
+
 internal sealed interface HTMLConfirmationResult : Parcelable {
     @Parcelize
     data object Cancelled : HTMLConfirmationResult
 
     @Parcelize
-    data object Confirmed : HTMLConfirmationResult
+    data class Confirmed(
+        val content: HTMLConfirmationContent,
+    ) : HTMLConfirmationResult
 }
-
-@Parcelize
-internal data class HTMLConfirmationActivityResult(
-    val result: HTMLConfirmationResult,
-    val declarationId: String?,
-) : Parcelable
 
 internal class HTMLConfirmationActivityContract : ActivityResultContract<
     HTMLConfirmationActivityArgs,
-    HTMLConfirmationActivityResult
+    HTMLConfirmationResult
     >() {
     override fun createIntent(context: Context, input: HTMLConfirmationActivityArgs): Intent {
         return HTMLConfirmationActivity.createIntent(
             context = context,
             args = HTMLConfirmationArgs(
                 html = input.html,
-                declarationId = input.declarationId,
+                content = input.content,
                 appearance = input.linkAppearance?.build(),
                 headingResId = input.headingResId,
                 confirmationButtonResId = input.confirmationButtonResId,
@@ -118,24 +120,21 @@ internal class HTMLConfirmationActivityContract : ActivityResultContract<
         )
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): HTMLConfirmationActivityResult {
+    override fun parseResult(resultCode: Int, intent: Intent?): HTMLConfirmationResult {
         return intent?.extras?.let {
             BundleCompat.getParcelable(
                 it,
                 HTMLConfirmationActivity.RESULT_ARG,
-                HTMLConfirmationActivityResult::class.java
+                HTMLConfirmationResult::class.java
             )
-        } ?: HTMLConfirmationActivityResult(
-            result = HTMLConfirmationResult.Cancelled,
-            declarationId = null,
-        )
+        } ?: HTMLConfirmationResult.Cancelled
     }
 }
 
 @Parcelize
 internal data class HTMLConfirmationArgs(
     val html: String,
-    val declarationId: String?,
+    val content: HTMLConfirmationContent,
     val appearance: LinkAppearance.State?,
     val headingResId: Int,
     val confirmationButtonResId: Int,

@@ -37,7 +37,8 @@ import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityArgs
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityContract
-import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityResult
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
@@ -221,7 +222,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     presentHTMLConfirmation(
                         resultLauncher = userAttestationResultLauncher,
                         html = result.attestation.text,
-                        declarationId = null,
+                        content = HTMLConfirmationContent.UserAttestation,
                         appearance = result.appearance,
                         headingResId =
                             PaymentSheetR.string.stripe_link_onramp_carf_declaration_screen_title,
@@ -266,7 +267,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     presentHTMLConfirmation(
                         resultLauncher = resultLauncher,
                         html = result.terms.declaration.text,
-                        declarationId = result.terms.declaration.id,
+                        content = HTMLConfirmationContent.PartnerTerms(
+                            declarationId = result.terms.declaration.id,
+                            declarationType = declarationType,
+                        ),
                         appearance = result.appearance,
                         headingResId = headingResId,
                     )
@@ -284,14 +288,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun presentHTMLConfirmation(
         resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
         html: String,
-        declarationId: String?,
+        content: HTMLConfirmationContent,
         appearance: LinkAppearance?,
         @StringRes headingResId: Int,
     ) {
         resultLauncher.launch(
             HTMLConfirmationActivityArgs(
                 html = html,
-                declarationId = declarationId,
+                content = content,
                 linkAppearance = appearance,
                 headingResId = headingResId,
                 confirmationButtonResId =
@@ -466,41 +470,49 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleUserAttestationResult(result: HTMLConfirmationActivityResult) {
-        coroutineScope.launch {
-            val attestationResult = interactor.handleUserAttestationResult(result.result)
-            onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
+    private fun handleUserAttestationResult(result: HTMLConfirmationResult) {
+        handleHTMLConfirmationResult(result) {
+            onrampCallbacksState.userAttestationCallback?.onResult(OnrampUserAttestationResult.Cancelled())
         }
     }
 
-    private fun handleTermsAndConditionsResult(result: HTMLConfirmationActivityResult) {
-        handlePartnerTermsResult(
-            result = result,
-            declarationType = PartnerDeclarationType.TransactionTerms,
-            callback = onrampCallbacksState.termsAndConditionsCallback,
-        )
+    private fun handleTermsAndConditionsResult(result: HTMLConfirmationResult) {
+        handleHTMLConfirmationResult(result) {
+            onrampCallbacksState.termsAndConditionsCallback?.onResult(OnrampPartnerTermsResult.Cancelled())
+        }
     }
 
-    private fun handleTermsOfServiceResult(result: HTMLConfirmationActivityResult) {
-        handlePartnerTermsResult(
-            result = result,
-            declarationType = PartnerDeclarationType.TermsOfService,
-            callback = onrampCallbacksState.termsOfServiceCallback,
-        )
+    private fun handleTermsOfServiceResult(result: HTMLConfirmationResult) {
+        handleHTMLConfirmationResult(result) {
+            onrampCallbacksState.termsOfServiceCallback?.onResult(OnrampPartnerTermsResult.Cancelled())
+        }
     }
 
-    private fun handlePartnerTermsResult(
-        result: HTMLConfirmationActivityResult,
-        declarationType: PartnerDeclarationType,
-        callback: OnrampPartnerTermsCallback?,
+    private fun handleHTMLConfirmationResult(
+        result: HTMLConfirmationResult,
+        onCancelled: () -> Unit,
     ) {
         coroutineScope.launch {
-            val partnerTermsResult = interactor.handlePartnerTermsResult(
-                result = result.result,
-                declarationId = result.declarationId,
-                declarationType = declarationType,
-            )
-            callback?.onResult(partnerTermsResult)
+            when (result) {
+                HTMLConfirmationResult.Cancelled -> onCancelled()
+                is HTMLConfirmationResult.Confirmed -> when (val content = result.content) {
+                    HTMLConfirmationContent.UserAttestation -> {
+                        val attestationResult = interactor.confirmUserAttestation()
+                        onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
+                    }
+                    is HTMLConfirmationContent.PartnerTerms -> {
+                        val termsResult = interactor.confirmPartnerTerms(
+                            declarationId = content.declarationId,
+                            declarationType = content.declarationType,
+                        )
+                        val callback = when (content.declarationType) {
+                            PartnerDeclarationType.TransactionTerms -> onrampCallbacksState.termsAndConditionsCallback
+                            PartnerDeclarationType.TermsOfService -> onrampCallbacksState.termsOfServiceCallback
+                        }
+                        callback?.onResult(termsResult)
+                    }
+                }
+            }
         }
     }
 
