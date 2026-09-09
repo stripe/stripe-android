@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
-import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -13,10 +13,6 @@ import org.junit.Test
 internal class TapToAddConnectionStarterTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_123",
-        stripeAccountId = "acct_123",
-    )
 
     @Test
     fun `isSupported delegates to manager`() = runTest(testDispatcher) {
@@ -27,7 +23,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported(apiConfiguration)).isTrue()
+        assertThat(starter.isSupported(DEFAULT_API_CONFIG)).isTrue()
     }
 
     @Test
@@ -39,7 +35,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported(apiConfiguration)).isFalse()
+        assertThat(starter.isSupported(DEFAULT_API_CONFIG)).isFalse()
     }
 
     @Test
@@ -55,14 +51,14 @@ internal class TapToAddConnectionStarterTest {
             merchantDisplayName = "Books & Things",
         )
 
-        starter.start(commonConfiguration, apiConfiguration)
+        starter.start(commonConfiguration, DEFAULT_API_CONFIG)
         advanceUntilIdle()
 
         assertThat(manager.connectCalls.awaitItem()).isEqualTo(
             FakeTapToAddConnectionManager.ConnectCall(
                 config = TapToAddConnectionManager.ConnectionConfig(
                     merchantDisplayName = "Books & Things",
-                    apiConfiguration = apiConfiguration,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                 ),
             )
         )

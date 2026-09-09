@@ -108,7 +108,7 @@ internal class DefaultTapToAddConnectionManager(
             return false
         }
 
-        initializeIfNeeded(apiConfiguration.publishableKey)
+        initializeIfNeeded(apiConfiguration)
 
         return terminal().supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -290,13 +290,13 @@ internal class DefaultTapToAddConnectionManager(
         )
     }
 
-    private fun initializeIfNeeded(publishableKey: String) {
+    private fun initializeIfNeeded(apiConfiguration: ApiConfiguration.State) {
         if (!terminalWrapper.isInitialized()) {
             terminalWrapper.initTerminal(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        callback.onSuccess(publishableKey)
+                        callback.onSuccess(apiConfiguration.publishableKey)
                     }
                 },
                 listener = this,

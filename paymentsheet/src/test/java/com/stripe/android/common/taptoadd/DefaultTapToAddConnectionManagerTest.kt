@@ -53,12 +53,10 @@ class DefaultTapToAddConnectionManagerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
-    private val apiConfiguration = DEFAULT_API_CONFIG
-
     private val testConnectionConfig =
         TapToAddConnectionManager.ConnectionConfig(
             merchantDisplayName = "Test Merchant",
-            apiConfiguration = apiConfiguration,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
     @Test
@@ -67,7 +65,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported(apiConfiguration)).isTrue()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isTrue()
     }
 
     @Test
@@ -77,7 +75,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported(apiConfiguration)).isTrue()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isTrue()
 
         verify(terminalInstance).supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -92,7 +90,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported(apiConfiguration)).isTrue()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isTrue()
 
         verify(terminalInstance).supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -106,7 +104,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.NotSupported(IllegalStateException("Not supported!")))
         }
     ) {
-        assertThat(manager.isSupported(apiConfiguration)).isFalse()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isFalse()
     }
 
     @Test
@@ -117,7 +115,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported(apiConfiguration)).isFalse()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isFalse()
 
         wrapperScenario.isInitializedCalls.expectNoEvents()
     }
