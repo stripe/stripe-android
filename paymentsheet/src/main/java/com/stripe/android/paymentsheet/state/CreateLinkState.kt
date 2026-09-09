@@ -260,6 +260,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             cardBrandChoice = cardBrandChoice,
             shippingDetails = shippingDetails,
             clientAttributionMetadata = clientAttributionMetadata,
+            apiConfiguration = apiConfiguration,
         )
     }
 
@@ -272,6 +273,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         cardBrandChoice: LinkConfiguration.CardBrandChoice?,
         shippingDetails: AddressDetails?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ) = LinkConfiguration(
         stripeIntent = elementsSession.stripeIntent,
         merchantName = configuration.merchantDisplayName,
@@ -315,6 +317,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
+        apiConfiguration = apiConfiguration,
     )
 
     private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {
