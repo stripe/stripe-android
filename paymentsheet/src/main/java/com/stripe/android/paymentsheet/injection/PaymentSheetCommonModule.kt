@@ -89,6 +89,7 @@ import javax.inject.Singleton
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
+        ApiConfigurationResolverModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

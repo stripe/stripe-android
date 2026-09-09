@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -42,6 +41,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -61,7 +61,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -277,7 +276,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
@@ -311,11 +310,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
+        val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            isLiveMode = apiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
             isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
@@ -328,18 +328,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
             ) {
-                isGooglePaySupportedOnDevice()
+                isGooglePaySupportedOnDevice(apiConfiguration)
             }
         }
         val isGooglePaySupportedByConfiguration = async {
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
             ) {
-                configuration.isGooglePayReady()
+                configuration.isGooglePayReady(apiConfiguration)
             }
         }
 
-        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration, apiConfiguration)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
@@ -412,6 +412,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -484,6 +485,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
         configuration: CommonConfiguration,
+        apiConfiguration: ApiConfiguration.State,
     ): PrefetchedPaymentMethods? {
         val customer = configuration.customer ?: return null
         val accessType = customer.accessType
@@ -499,7 +501,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                    silentlyFail = apiConfiguration.isLiveMode(),
                 )
             }
         }
@@ -560,6 +562,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): PaymentMethodMetadata {
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
@@ -607,6 +610,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
             paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
 
         return paymentMethodMetadata
@@ -689,21 +693,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     // Default filters are used here because this only determines the ready state,
     // not what's presented to Google Pay. This check runs async before we fetch the
     // elements session, so using merchant-defined filters would add latency.
-    private suspend fun isGooglePayReadyForEnvironment(environment: GooglePayEnvironment): Boolean {
+    private suspend fun isGooglePayReadyForEnvironment(
+        environment: GooglePayEnvironment,
+        apiConfiguration: ApiConfiguration.State,
+    ): Boolean {
         return googlePayRepositoryFactory(
             environment = environment,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
-            apiConfiguration = paymentConfiguration.get().let {
-                ApiConfiguration.State(
-                    publishableKey = it.publishableKey,
-                    stripeAccountId = it.stripeAccountId,
-                )
-            },
+            apiConfiguration = apiConfiguration,
         ).isReady().first()
     }
 
-    private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
+    private suspend fun CommonConfiguration.isGooglePayReady(
+        apiConfiguration: ApiConfiguration.State,
+    ): Boolean {
         return googlePay?.environment?.let { environment ->
             isGooglePayReadyForEnvironment(
                 when (environment) {
@@ -711,13 +715,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         GooglePayEnvironment.Production
                     PaymentSheet.GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
-                }
+                },
+                apiConfiguration,
             )
         } ?: false
     }
 
-    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
-        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
+    private suspend fun isGooglePaySupportedOnDevice(apiConfiguration: ApiConfiguration.State): Boolean {
+        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production, apiConfiguration)
     }
 
     @Suppress("CyclomaticComplexMethod")

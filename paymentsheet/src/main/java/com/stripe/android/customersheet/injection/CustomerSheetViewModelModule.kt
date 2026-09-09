@@ -33,6 +33,7 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -51,6 +52,7 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
+        ApiConfigurationResolverModule::class,
     ]
 )
 internal interface CustomerSheetViewModelModule {
