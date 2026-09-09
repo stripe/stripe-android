@@ -176,8 +176,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         returnUrl: String?
     ): Result<StripeIntent> {
-        val decoratedParams = confirmStripeIntentParams.also {
-            it.returnUrl = returnUrl
+        val decoratedParams = when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> confirmStripeIntentParams.copy(returnUrl = returnUrl)
+            is ConfirmSetupIntentParams -> confirmStripeIntentParams.copy(returnUrl = returnUrl)
         }.withShouldUseStripeSdk(true)
 
         return when (decoratedParams) {

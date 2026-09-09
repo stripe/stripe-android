@@ -58,7 +58,7 @@ constructor(
      *
      * See [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url).
      */
-    override var returnUrl: String? = null,
+    override val returnUrl: String? = null,
     /**
      * If the PaymentIntent has a `payment_method` and a `customer` or if you’re attaching a payment
      * method to the PaymentIntent in this request, you can pass `save_payment_method=true` to save

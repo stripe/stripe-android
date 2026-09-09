@@ -1380,7 +1380,6 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/str
 	public final fun setMandateId (Ljava/lang/String;)V
 	public final fun setPaymentMethodOptions (Lcom/stripe/android/model/PaymentMethodOptionsParams;)V
 	public final fun setReceiptEmail (Ljava/lang/String;)V
-	public fun setReturnUrl (Ljava/lang/String;)V
 	public final fun setSavePaymentMethod (Ljava/lang/Boolean;)V
 	public final fun setSetupFutureUsage (Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)V
 	public final fun setShipping (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)V
@@ -1473,7 +1472,6 @@ public final class com/stripe/android/model/ConfirmSetupIntentParams : com/strip
 	public fun hashCode ()I
 	public final fun setMandateData (Lcom/stripe/android/model/MandateDataParams;)V
 	public final fun setMandateId (Ljava/lang/String;)V
-	public fun setReturnUrl (Ljava/lang/String;)V
 	public fun shouldUseStripeSdk ()Z
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
@@ -1499,7 +1497,6 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 	public static final field Companion Lcom/stripe/android/model/ConfirmStripeIntentParams$Companion;
 	public abstract fun getClientSecret ()Ljava/lang/String;
 	public abstract fun getReturnUrl ()Ljava/lang/String;
-	public abstract fun setReturnUrl (Ljava/lang/String;)V
 	public abstract fun shouldUseStripeSdk ()Z
 	public abstract fun withShouldUseStripeSdk (Z)Lcom/stripe/android/model/ConfirmStripeIntentParams;
 }

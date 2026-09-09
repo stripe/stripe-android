@@ -11,7 +11,7 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
 
     val clientSecret: String
 
-    var returnUrl: String?
+    val returnUrl: String?
 
     fun shouldUseStripeSdk(): Boolean
 

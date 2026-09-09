@@ -202,9 +202,7 @@ class PaymentLauncherViewModelTest {
             whenever(paymentIntent.requiresAction()).thenReturn(true)
 
             createViewModel().confirmStripeIntent(
-                confirmPaymentIntentParams.also {
-                    it.returnUrl = RETURN_URL
-                },
+                confirmPaymentIntentParams.copy(returnUrl = RETURN_URL),
                 authHost
             )
 
@@ -236,9 +234,7 @@ class PaymentLauncherViewModelTest {
 
             val viewModel = createViewModel()
             viewModel.confirmStripeIntent(
-                confirmPaymentIntentParams.also {
-                    it.returnUrl = RETURN_URL
-                },
+                confirmPaymentIntentParams.copy(returnUrl = RETURN_URL),
                 authHost
             )
 
@@ -300,9 +296,7 @@ class PaymentLauncherViewModelTest {
             whenever(setupIntent.requiresAction()).thenReturn(true)
 
             createViewModel().confirmStripeIntent(
-                confirmSetupIntentParams.also {
-                    it.returnUrl = RETURN_URL
-                },
+                confirmSetupIntentParams.copy(returnUrl = RETURN_URL),
                 authHost
             )
 
