@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -47,11 +48,12 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
-            stripeAccountId = "acct_123",
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
 
         assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
-        assertThat(retrieveCustomerEmail.invokedWith?.stripeAccountId).isEqualTo("acct_123")
+        assertThat(retrieveCustomerEmail.invokedWith?.stripeAccountId)
+            .isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
     }
 
     @Test
@@ -107,7 +109,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
-            stripeAccountId = "acct_123",
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
@@ -137,7 +139,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
-            stripeAccountId = "acct_123",
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
 
         assertThat(result).isInstanceOf<LinkState>()
@@ -158,7 +160,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
-            stripeAccountId = "acct_123",
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
 
         assertThat(linkStateResult).isInstanceOf<LinkState>()
@@ -196,7 +198,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
-            stripeAccountId = "acct_123",
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)

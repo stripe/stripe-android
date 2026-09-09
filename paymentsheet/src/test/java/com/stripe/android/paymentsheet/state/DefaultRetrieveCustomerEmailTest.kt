@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -100,7 +101,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
-            stripeAccountId = "acct_123",
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
 
         Scenario(

@@ -1,8 +1,8 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -242,7 +242,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             prefsRepositoryFactory = {
                 prefsRepository
             },
-            apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", "acct_123") },
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             workContext = coroutineContext
         )
     }

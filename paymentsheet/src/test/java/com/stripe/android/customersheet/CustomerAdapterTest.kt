@@ -3,13 +3,14 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -209,7 +210,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
-            stripeAccountId = eq("acct_123"),
+            stripeAccountId = eq(ApiKeyFixtures.FAKE_ACCOUNT_ID),
         )
     }
 
@@ -261,7 +262,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
-            stripeAccountId = eq("acct_123"),
+            stripeAccountId = eq(ApiKeyFixtures.FAKE_ACCOUNT_ID),
         )
     }
 
@@ -780,7 +781,7 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
-            apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", "acct_123") },
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             workContext = testDispatcher
         )
     }
