@@ -282,9 +282,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
+    private val isProcessing = combineAsStateFlow(
+        processing,
+        verticalPaymentSelectionHandler.state,
+    ) { isProcessing, selectionState ->
+        isProcessing || selectionState is VerticalPaymentSelectionHandler.State.Selecting
+    }
+
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
-        processing,
+        isProcessing,
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,

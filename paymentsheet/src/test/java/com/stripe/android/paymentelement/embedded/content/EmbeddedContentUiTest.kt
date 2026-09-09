@@ -23,6 +23,7 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -177,7 +178,7 @@ internal class EmbeddedContentUiTest {
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
             eventReporter = eventReporter,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
-            confirmationHandler = confirmationHandler,
+            processing = confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),

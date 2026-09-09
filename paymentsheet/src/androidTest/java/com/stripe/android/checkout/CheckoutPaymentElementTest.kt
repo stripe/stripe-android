@@ -38,6 +38,15 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
@@ -127,19 +136,72 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() = runAutomaticTaxTest(
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
+        val callbackCount = AtomicInteger()
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbackCount.incrementAndGet()
+            },
+        ) {
+            val requestReceived = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            enqueueTaxUpdate { response ->
+                requestReceived.countDown()
+                check(releaseResponse.await(10, TimeUnit.SECONDS))
+                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
+            contentPage.assertLpmIsEnabled("card", false)
+            assertThat(callbackCount.get()).isEqualTo(0)
+            releaseResponse.countDown()
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+            contentPage.assertLpmIsEnabled("card", true)
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+            testRules.compose.waitUntil(timeoutMillis = 5_000) { callbackCount.get() == 1 }
+            assertThat(callbackCount.get()).isEqualTo(1)
+            markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testControllerMutationDisablesVerticalPaymentMethods() = runAutomaticTaxTest(
         paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
         checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
             INITIAL_TOTAL,
             TAX_STATUS_REQUIRES_LOCATION,
         ),
     ) {
-        enqueueTaxUpdate(automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+        val requestReceived = CountDownLatch(1)
+        val releaseResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
+            requestReceived.countDown()
+            check(releaseResponse.await(10, TimeUnit.SECONDS))
+            automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+        }
+        val mutationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val mutation = mutationScope.async { controller.applyPromotionCode("10OFF") }
 
-        contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
-
-        waitForSessionTotal(controller, UPDATED_TOTAL)
-        contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+        try {
+            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
+            contentPage.assertLpmIsEnabled("card", false)
+        } finally {
+            releaseResponse.countDown()
+        }
+        runBlocking { mutation.await().getOrThrow() }
+        mutationScope.cancel()
+        contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+        contentPage.assertLpmIsEnabled("card", true)
         markTestSucceeded()
     }
 
@@ -314,22 +376,26 @@ internal class CheckoutPaymentElementTest {
     private fun runAutomaticTaxTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
         checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
+        rowSelectionBehavior = rowSelectionBehavior,
         block = block,
     )
 
     private fun runAutomaticTaxTest(
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         block: suspend Scenario.() -> Unit,
     ) {
         lateinit var controller: CheckoutController
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
+            rowSelectionBehavior = rowSelectionBehavior,
             setup = { configuredController ->
                 controller = configuredController
                 configuredController.configure(
