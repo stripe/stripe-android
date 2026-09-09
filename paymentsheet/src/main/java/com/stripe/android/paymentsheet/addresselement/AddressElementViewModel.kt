@@ -11,12 +11,10 @@ import javax.inject.Provider
 
 internal class AddressElementViewModel @Inject internal constructor(
     val navigator: NavHostAddressElementNavigator,
-    val resultStateHolder: AddressElementResultStateHolder,
+    val stateHolder: AddressElementActivityStateHolder,
     val inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
     val autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
 ) : ViewModel() {
-    val processingState = AddressElementActivityProcessingState()
-
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> AddressElementActivityContract.Args

@@ -716,7 +716,7 @@ internal class CheckoutControllerTest {
     fun `commitShippingAddress stores local details and reloads payment element state`() =
         runMutationScenario {
             val response = committedState().checkoutSessionResponse
-            val updatedResponse = response.copy(liveMode = true)
+            val updatedResponse = response.copy(livemode = true)
             val address = fullAddress.build()
 
             val result = controller.commitShippingAddress(

@@ -101,12 +101,10 @@ internal fun InputAddressScreen(
 @Composable
 internal fun InputAddressScreen(
     inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
-    processingState: AddressElementActivityProcessingState,
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
             inputAddressViewModelSubcomponentFactoryProvider,
-            processingState,
         )
     )
     LaunchedEffect(Unit) {
@@ -123,14 +121,14 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
-    val isProcessing by viewModel.isProcessing.collectAsState()
+    val activityState by viewModel.stateHolder.state.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
         primaryButtonEnabled = completeValues != null && formEnabled,
-        primaryButtonLoading = isProcessing,
+        primaryButtonLoading = activityState is AddressElementActivityStateHolder.State.Processing,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -145,11 +143,9 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        closeButtonEnabled = !isProcessing,
+        closeButtonEnabled = activityState is AddressElementActivityStateHolder.State.Idle,
         onCloseClick = {
-            if (!isProcessing) {
-                viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-            }
+            viewModel.stateHolder.tryCancel()
         },
         topContent = {
             val currentState = billingSameAsShippingState

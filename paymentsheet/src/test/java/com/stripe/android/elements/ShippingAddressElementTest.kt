@@ -139,7 +139,7 @@ internal class ShippingAddressElementTest {
                 state = "CA",
             ),
         )
-        val updatedResponse = stateHolder.state!!.checkoutSessionResponse.copy(liveMode = true)
+        val updatedResponse = stateHolder.state!!.checkoutSessionResponse.copy(livemode = true)
         registration.dispatch(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                 address = addressDetails,

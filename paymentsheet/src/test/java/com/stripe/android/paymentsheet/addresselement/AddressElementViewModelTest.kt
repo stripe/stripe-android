@@ -18,18 +18,20 @@ internal class AddressElementViewModelTest {
                 @Suppress("UNCHECKED_CAST")
                 return AddressElementViewModel(
                     navigator = mock(),
+                    stateHolder = AddressElementActivityStateHolder(),
                     inputAddressViewModelSubcomponentFactoryProvider = mock(),
                     autoCompleteViewModelSubcomponentFactoryProvider = mock(),
                 ) as T
             }
         }
         val original = ViewModelProvider(store, factory)[AddressElementViewModel::class.java]
-        original.processingState.tryStartProcessing()
+        original.stateHolder.tryStartProcessing()
 
         val recreated = ViewModelProvider(store, factory)[AddressElementViewModel::class.java]
 
         assertThat(recreated).isSameInstanceAs(original)
-        assertThat(recreated.processingState.isProcessing.value).isTrue()
+        assertThat(recreated.stateHolder.state.value)
+            .isEqualTo(AddressElementActivityStateHolder.State.Processing)
         assertThat(factoryCalls).isEqualTo(1)
     }
 }

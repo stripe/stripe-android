@@ -16,7 +16,7 @@ import kotlin.test.assertFailsWith
 internal class CheckoutShippingAddressProcessorTest {
     @Test
     fun `process validates converts and returns updated response`() = runTest {
-        val updatedResponse = CHECKOUT_SESSION_RESPONSE.copy(liveMode = true)
+        val updatedResponse = CHECKOUT_SESSION_RESPONSE.copy(livemode = true)
         val updater = FakeUpdateTaxRegion(Result.success(updatedResponse))
         val processor = CheckoutShippingAddressProcessor(updater::invoke)
 

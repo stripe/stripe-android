@@ -31,8 +31,7 @@ import javax.inject.Provider
 internal class InputAddressViewModel @Inject internal constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
-    val resultStateHolder: AddressElementResultStateHolder,
-    private val processingState: AddressElementActivityProcessingState,
+    val stateHolder: AddressElementActivityStateHolder,
     private val eventReporter: AddressLauncherEventReporter,
     private val checkoutShippingAddressProcessor: CheckoutShippingAddressProcessor,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
@@ -123,8 +122,6 @@ internal class InputAddressViewModel @Inject internal constructor(
 
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
-
-    val isProcessing: StateFlow<Boolean> = processingState.isProcessing
 
     private val _saveError = MutableStateFlow<ResolvableString?>(null)
     val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
@@ -240,16 +237,19 @@ internal class InputAddressViewModel @Inject internal constructor(
         when (val args = args) {
             is AddressElementActivityContract.Args.Standalone -> {
                 _formEnabled.value = false
-                completeWithAddress(
-                    addressDetails = addressDetails,
-                    result = AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails),
-                )
+                val result = AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+                if (stateHolder.complete(result)) {
+                    reportCompleted(addressDetails)
+                }
             }
             is AddressElementActivityContract.Args.CheckoutShipping.Ready -> {
                 saveCheckoutShippingAddress(
                     checkoutSessionResponse = args.checkoutSessionResponse,
                     addressDetails = addressDetails,
                 )
+            }
+            is AddressElementActivityContract.Args.CheckoutShipping.Loading -> {
+                error("Address Element ViewModel cannot be created for loading Checkout arguments")
             }
         }
     }
@@ -258,7 +258,7 @@ internal class InputAddressViewModel @Inject internal constructor(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressDetails: AddressDetails,
     ) {
-        if (!processingState.tryStartProcessing()) return
+        if (!stateHolder.tryStartProcessing()) return
 
         _saveError.value = null
         _formEnabled.value = false
@@ -267,16 +267,16 @@ internal class InputAddressViewModel @Inject internal constructor(
 
             result.fold(
                 onSuccess = { updatedResponse ->
-                    completeWithAddress(
-                        addressDetails = addressDetails,
-                        result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                            address = addressDetails,
-                            updatedResponse = updatedResponse,
-                        ),
+                    val completedResult = AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                        address = addressDetails,
+                        updatedResponse = updatedResponse,
                     )
+                    if (stateHolder.complete(completedResult)) {
+                        reportCompleted(addressDetails)
+                    }
                 },
                 onFailure = {
-                    processingState.finishProcessing()
+                    stateHolder.finishProcessing()
                     _saveError.value = R.string.stripe_something_went_wrong.resolvableString
                     _formEnabled.value = true
                 },
@@ -284,10 +284,7 @@ internal class InputAddressViewModel @Inject internal constructor(
         }
     }
 
-    private fun completeWithAddress(
-        addressDetails: AddressDetails,
-        result: AddressElementActivityContract.Result,
-    ) {
+    private fun reportCompleted(addressDetails: AddressDetails) {
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
@@ -295,7 +292,6 @@ internal class InputAddressViewModel @Inject internal constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        resultStateHolder.setResult(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {
@@ -411,13 +407,12 @@ internal class InputAddressViewModel @Inject internal constructor(
     internal class Factory(
         private val inputAddressViewModelSubcomponentFactoryProvider:
         Provider<InputAddressViewModelSubcomponent.Factory>,
-        private val processingState: AddressElementActivityProcessingState,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return inputAddressViewModelSubcomponentFactoryProvider.get()
-                .create(processingState).inputAddressViewModel as T
+                .create().inputAddressViewModel as T
         }
     }
 }
