@@ -58,7 +58,7 @@ internal fun runCheckoutPaymentElementTest(
     successTimeoutSeconds: Long = 5L,
     renderPaymentElementContent: Boolean = true,
     setup: suspend (CheckoutController) -> Unit,
-    block: (CheckoutPaymentElementTestRunnerContext) -> Unit,
+    block: suspend (CheckoutPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
@@ -99,12 +99,14 @@ internal fun runCheckoutPaymentElementTest(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        block(
-            CheckoutPaymentElementTestRunnerContext(
-                presenter = presenter,
-                countDownLatch = countDownLatch,
+        runBlocking {
+            block(
+                CheckoutPaymentElementTestRunnerContext(
+                    presenter = presenter,
+                    countDownLatch = countDownLatch,
+                )
             )
-        )
+        }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
