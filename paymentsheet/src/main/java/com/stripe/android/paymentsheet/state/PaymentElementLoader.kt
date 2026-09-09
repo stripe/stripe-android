@@ -308,9 +308,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
-    ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
-        val configuration = integrationConfiguration.commonConfiguration
-        val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
+    ): Result<PaymentElementLoader.State> = runWithApiConfiguration(
+        integrationConfiguration.commonConfiguration
+    ) { configuration, apiConfiguration ->
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
@@ -320,7 +320,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
 
-        eventReporter.onLoadStarted(metadata.initializedViaCompose)
+        eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
         tapToAddConnectionStarter.start(configuration)
 
         // Give immediately available results a chance to complete before later load work checks isCompleted.
@@ -478,9 +478,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
             paymentMethodMetadata = state.paymentMethodMetadata,
+            publishableKey = apiConfiguration.publishableKey,
         )
 
-        return@runCatching state
+        state
+    }
+
+    private suspend fun runWithApiConfiguration(
+        configuration: CommonConfiguration,
+        block: suspend CoroutineScope.(CommonConfiguration, ApiConfiguration.State) -> PaymentElementLoader.State,
+    ): Result<PaymentElementLoader.State> {
+        val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
+        return workContext.runCatching(
+            onFailure = { error -> reportFailedLoad(error, apiConfiguration.publishableKey) },
+            task = { block(configuration, apiConfiguration) },
+        )
     }
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
@@ -851,6 +863,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
+        publishableKey: String,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
@@ -859,7 +872,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
 
         if (state.validationError != null && treatValidationErrorAsFailure) {
-            eventReporter.onLoadFailed(state.validationError)
+            eventReporter.onLoadFailed(state.validationError, publishableKey)
         } else {
             eventReporter.onLoadSucceeded(
                 paymentSelection = state.paymentSelection,
@@ -870,9 +883,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun reportFailedLoad(
         error: Throwable,
+        publishableKey: String,
     ) {
         logger.error("Failure loading PaymentSheetState", error)
-        eventReporter.onLoadFailed(error)
+        eventReporter.onLoadFailed(error, publishableKey)
     }
 
     private fun logIfMissingExternalPaymentMethods(
