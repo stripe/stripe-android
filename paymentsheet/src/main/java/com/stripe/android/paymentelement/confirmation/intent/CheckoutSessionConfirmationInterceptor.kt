@@ -65,34 +65,12 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-//        return stripeRepository.createPaymentMethod(
-//            paymentMethodCreateParams = confirmationOption.createParams,
-//            options = requestOptions,
-//        ).fold(
-//            onSuccess = { paymentMethod ->
-//                val params = createConfirmParams(
-//                    intent = intent,
-//                    paymentMethod = paymentMethod,
-//                    savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-//                    shipping = shippingValues.toCheckoutSessionShipping(),
-//                    passiveCaptchaToken = "test", // confirmationOption.confirmationChallengeState.hCaptchaToken
-//                )
-//                confirmCheckoutSession(params)
-//            },
-//            onFailure = { error ->
-//                ConfirmationDefinition.Action.Fail(
-//                    cause = error,
-//                    message = error.stripeErrorMessage(),
-//                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-//                )
-//            }
-//        )
         val params = createConfirmParams(
             intent = intent,
             paymentMethodCreateParams = confirmationOption.createParams,
             savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
             shipping = shippingValues.toCheckoutSessionShipping(),
-            passiveCaptchaToken = "test", // confirmationOption.confirmationChallengeState.hCaptchaToken
+            passiveCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken
         )
         return confirmCheckoutSession(params)
     }
