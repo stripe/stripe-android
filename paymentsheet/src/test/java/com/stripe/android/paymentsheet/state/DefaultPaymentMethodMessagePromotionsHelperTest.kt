@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -40,8 +39,8 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         assertThat(request.locale).isEqualTo(Locale.getDefault().language)
         assertThat(request.options).isEqualTo(
             ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID
+                apiKey = DEFAULT_API_CONFIG.publishableKey,
+                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
             )
         )
     }
