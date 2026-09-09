@@ -445,7 +445,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             workContext = testDispatcher,
             paymentConfiguration = PaymentConfiguration(
                 publishableKey = "pk_test_123",
-                stripeAccountId = null,
+                stripeAccountId = "acct_123",
             )
         )
 
