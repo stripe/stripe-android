@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.injection
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetContract
 import com.stripe.android.customersheet.CustomerSheetIntegration
@@ -10,8 +11,7 @@ import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.injection.CustomerSheetConfirmationModule
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
+import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import dagger.BindsInstance
@@ -23,8 +23,7 @@ import dagger.Component
         ElementsSessionClientParamsModule::class,
         CustomerSheetConfirmationModule::class,
         CustomerSheetViewModelModule::class,
-        ApiConfigurationFromPaymentConfigurationModule::class,
-        ApiRequestOptionsModule::class,
+        ApiConfigurationToNamedModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         GooglePayLauncherModule::class,
@@ -47,6 +46,8 @@ internal interface CustomerSheetViewModelComponent {
             integrationType: CustomerSheetIntegration.Type,
             @BindsInstance
             savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            apiConfiguration: ApiConfiguration.State,
         ): CustomerSheetViewModelComponent
     }
 }
