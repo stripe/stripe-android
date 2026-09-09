@@ -4,6 +4,12 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.core.ApiConfiguration
+
+internal val TEST_API_CONFIGURATION = ApiConfiguration.State(
+    publishableKey = "pk_test_123",
+    stripeAccountId = "acct_123",
+)
 
 internal class TestAutocompleteLauncher private constructor() : AutocompleteActivityLauncher {
     private val launchCalls = Turbine<LaunchCall>()
@@ -21,12 +27,14 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteActi
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
+        apiConfiguration: ApiConfiguration.State,
         resultHandler: AutocompleteLauncherResultHandler,
     ) {
         launchCalls.add(
             LaunchCall(
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                apiConfiguration = apiConfiguration,
                 resultHandler = resultHandler,
             )
         )
@@ -35,6 +43,7 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteActi
     class LaunchCall(
         val country: String,
         val googlePlacesApiKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val resultHandler: AutocompleteLauncherResultHandler,
     )
 

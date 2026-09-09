@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
@@ -39,6 +40,12 @@ class AddressElementViewModelModuleTest {
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = "pk_123",
+                    stripeAccountId = "acct_123",
+                )
+            },
         )
 
         assertThat(placesClient).isNull()
