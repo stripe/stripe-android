@@ -222,10 +222,6 @@ internal class Selectors(
         }.getOrNull()
     }
 
-    fun isBrowserForeground(browser: BrowserUI): Boolean {
-        return currentTopActivity()?.contains(browser.packageName) == true
-    }
-
     private fun dismissChromeFirstRunWithInput() {
         val chrome = BrowserUI.Chrome.packageName
         repeat(CHROME_FIRST_RUN_MAX_SCREENS) {

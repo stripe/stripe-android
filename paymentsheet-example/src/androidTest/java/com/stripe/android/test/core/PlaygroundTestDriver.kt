@@ -9,7 +9,6 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -35,7 +34,10 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObjectNotFoundException
+import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
@@ -1180,11 +1182,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun awaitActivityClass(className: String) {
-        awaitActivityClass(className, ACTIVITY_TRANSITION_TIMEOUT)
-    }
-
-    private fun awaitActivityClass(className: String, timeout: Duration) {
-        awaitActivity(description = className, timeout = timeout) { it?.javaClass?.name == className }
+        awaitActivity(description = className) { it?.javaClass?.name == className }
     }
 
     /**
@@ -1543,8 +1541,7 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        clickButtonWithContentDescription("Close icon")
-        confirmInstantDebitsExitIfRequired()
+        Espresso.pressBack()
     }
 
     private fun executeUsBankAccountLiteFlow() {
@@ -1642,11 +1639,7 @@ internal class PlaygroundTestDriver(
 
         val browser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
         selectors.awaitBrowserAndDismissFirstRun(browser)
-        UiAutomatorText(
-            label = "Success",
-            labelMatchesExactly = true,
-            device = device,
-        ).click()
+        selectSuccessBankAccountInBrowser(browser)
         submitBrowserAccountSelectionIfRequired(browser)
         waitUntilTag(
             tag = "loaded_picker_title",
@@ -1724,8 +1717,7 @@ internal class PlaygroundTestDriver(
     private fun scrollToAndClick(text: String) {
         composeTestRule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasText(text))
-        composeTestRule.onAllNodesWithText(text)
-            .onFirst()
+        composeTestRule.onNodeWithText(text)
             .performClick()
     }
 
@@ -1760,64 +1752,71 @@ internal class PlaygroundTestDriver(
     }
 
     private fun submitBrowserAccountSelectionIfRequired(browser: BrowserUI) {
-        val connectButton = UiAutomatorText(
-            label = "Connect account",
-            labelMatchesExactly = true,
-            device = device,
-        )
+        val selector = browserTextSelector(browser, "Connect account")
         composeTestRule.waitUntil(
             conditionDescription = "${browser.name} to close or show its account selection button",
             timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
         ) {
-            val isBrowserForeground = selectors.isBrowserForeground(browser)
-            when {
-                isBrowserForeground && connectButton.exists() -> {
-                    connectButton.click()
-                    true
-                }
-                else -> !isBrowserForeground
-            }
+            !isBrowserOpen(browser) || device.findObject(selector).exists()
+        }
+        if (isBrowserOpen(browser)) {
+            clickBrowserObject(browser, selector)
         }
         composeTestRule.waitUntil(
             conditionDescription = "${browser.name} to close after account selection",
             timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
         ) {
-            !selectors.isBrowserForeground(browser)
+            !isBrowserOpen(browser)
         }
     }
 
-    private fun clickButtonWithContentDescription(contentDescription: String) {
-        val matcher = hasContentDescription(contentDescription).and(isEnabled()).and(hasClickAction())
-        composeTestRule.waitUntil(
-            conditionDescription = "enabled button with content description '$contentDescription' to appear",
-            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
-        ) {
-            composeTestRule
-                .onAllNodes(matcher)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
+    private fun selectSuccessBankAccountInBrowser(browser: BrowserUI) {
+        val selector = browserTextSelector(browser, "Success")
+        val account = device.findObject(selector)
+        if (!account.waitForExists(BROWSER_ACCOUNT_LOAD_WAIT.inWholeMilliseconds)) {
+            if (!isBrowserOpen(browser)) {
+                return
+            }
+            val scrollableSelector = UiSelector()
+                .scrollable(true)
+                .packageName(browser.packageName)
+            val accountFound = try {
+                UiScrollable(scrollableSelector).scrollIntoView(selector)
+            } catch (exception: UiObjectNotFoundException) {
+                if (isBrowserOpen(browser)) {
+                    throw exception
+                }
+                return
+            }
+            if (!accountFound && !isBrowserOpen(browser)) {
+                return
+            }
+            check(accountFound) {
+                "Could not find the Success bank account in ${browser.name}"
+            }
         }
 
-        composeTestRule.onNode(matcher).performClick()
+        clickBrowserObject(browser, selector)
     }
 
-    private fun confirmInstantDebitsExitIfRequired() {
-        val exitMatcher = hasText("Yes, exit").and(isEnabled()).and(hasClickAction())
-        var confirmationRequired = false
-        composeTestRule.waitUntil(
-            conditionDescription = "Financial Connections to close or show its exit confirmation",
-            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
-        ) {
-            confirmationRequired = composeTestRule
-                .onAllNodes(exitMatcher)
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
-            confirmationRequired || currentActivity?.javaClass?.name !in FINANCIAL_CONNECTIONS_ACTIVITIES
+    private fun clickBrowserObject(browser: BrowserUI, selector: UiSelector) {
+        try {
+            device.findObject(selector).click()
+        } catch (exception: UiObjectNotFoundException) {
+            if (isBrowserOpen(browser)) {
+                throw exception
+            }
         }
+    }
 
-        if (confirmationRequired) {
-            composeTestRule.onNode(exitMatcher).performClick()
-        }
+    private fun browserTextSelector(browser: BrowserUI, text: String): UiSelector {
+        return UiSelector()
+            .text(text)
+            .packageName(browser.packageName)
+    }
+
+    private fun isBrowserOpen(browser: BrowserUI): Boolean {
+        return device.hasObject(By.pkg(browser.packageName))
     }
 
     internal fun setup(testParameters: TestParameters) {
@@ -1922,6 +1921,7 @@ internal class PlaygroundTestDriver(
         // failure path). Kept well under the 90s per-test Timeout so a hang surfaces a clear message.
         val ACTIVITY_TRANSITION_TIMEOUT: Duration = 45.seconds
         val CHECKOUT_PREPARATION_TIMEOUT: Duration = 45.seconds
+        val BROWSER_ACCOUNT_LOAD_WAIT: Duration = 5.seconds
         val FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT: Duration = 60.seconds
         val FINANCIAL_CONNECTIONS_UI_TIMEOUT: Duration = 45.seconds
         val FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS = listOf(
@@ -1935,14 +1935,8 @@ internal class PlaygroundTestDriver(
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
-        const val FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY =
-            "com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
         const val FINANCIAL_CONNECTIONS_LITE_ACTIVITY =
             "com.stripe.android.financialconnections.lite.FinancialConnectionsSheetLiteActivity"
-        val FINANCIAL_CONNECTIONS_ACTIVITIES = setOf(
-            FINANCIAL_CONNECTIONS_ACTIVITY,
-            FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY,
-        )
     }
 }
 
