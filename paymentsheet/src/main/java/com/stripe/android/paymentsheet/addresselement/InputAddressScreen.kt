@@ -137,7 +137,7 @@ internal fun InputAddressScreen(
             )
         },
         onCloseClick = {
-            viewModel.resultStateHolder.setResult(AddressLauncherResult.Canceled())
+            viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
         },
         topContent = {
             val currentState = billingSameAsShippingState

@@ -6,11 +6,11 @@ import org.junit.Test
 internal class AddressElementResultStateHolderTest {
     @Test
     fun `first terminal result is retained`() {
-        val expectedResult = AddressLauncherResult.Succeeded(AddressDetails())
+        val expectedResult = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
         val resultStateHolder = AddressElementResultStateHolder()
 
         resultStateHolder.setResult(expectedResult)
-        resultStateHolder.setResult(AddressLauncherResult.Canceled())
+        resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
 
         assertThat(resultStateHolder.result.value).isEqualTo(expectedResult)
     }
