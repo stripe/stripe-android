@@ -25,12 +25,13 @@ internal object CleanupChromeRule : TestRule {
                 // prompts and Vulkan path. Keep GPU compositing enabled because --disable-gpu
                 // causes this Chrome image to abort before opening the authorization page.
                 configureChrome(instrumentation.uiAutomation)
-                stopChrome(instrumentation.uiAutomation, device)
 
                 try {
                     base.evaluate()
                 } finally {
-                    stopChrome(instrumentation.uiAutomation, device)
+                    val command = "am force-stop com.android.chrome"
+                    instrumentation.uiAutomation.executeShellCommand(command).close()
+                    device.wait(Until.gone(By.pkg("com.android.chrome")), CHROME_SHUTDOWN_TIMEOUT_MS)
 
                     // Force-stopping Chrome leaves no window focused; restore focus so the next
                     // test's Espresso RootViewPicker doesn't time out waiting for it.
@@ -57,11 +58,6 @@ internal object CleanupChromeRule : TestRule {
             writer.newLine()
         }
         ParcelFileDescriptor.AutoCloseInputStream(descriptors[0]).use { it.readBytes() }
-    }
-
-    private fun stopChrome(uiAutomation: UiAutomation, device: UiDevice) {
-        uiAutomation.executeShellCommand("am force-stop com.android.chrome").close()
-        device.wait(Until.gone(By.pkg("com.android.chrome")), CHROME_SHUTDOWN_TIMEOUT_MS)
     }
 
     private const val CHROME_SHUTDOWN_TIMEOUT_MS = 5_000L

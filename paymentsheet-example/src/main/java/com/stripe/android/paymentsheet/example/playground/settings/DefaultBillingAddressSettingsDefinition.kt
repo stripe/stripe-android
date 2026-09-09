@@ -23,6 +23,10 @@ internal object DefaultBillingAddressSettingsDefinition :
             return DefaultBillingAddress.WithEmail(value.removePrefix(CUSTOM_EMAIL_PREFIX))
         }
 
+        if (value.startsWith(CUSTOM_EMAIL_WITHOUT_PHONE_PREFIX)) {
+            return DefaultBillingAddress.WithEmailAndNoPhone(value.removePrefix(CUSTOM_EMAIL_WITHOUT_PHONE_PREFIX))
+        }
+
         return when (value) {
             "on" -> DefaultBillingAddress.On
             "on_with_random_email" -> DefaultBillingAddress.OnWithRandomEmail
@@ -35,6 +39,7 @@ internal object DefaultBillingAddressSettingsDefinition :
     override fun convertToString(value: DefaultBillingAddress): String {
         return when (value) {
             is DefaultBillingAddress.WithEmail -> CUSTOM_EMAIL_PREFIX + value.email
+            is DefaultBillingAddress.WithEmailAndNoPhone -> CUSTOM_EMAIL_WITHOUT_PHONE_PREFIX + value.email
             else -> value.value
         }
     }
@@ -133,6 +138,7 @@ internal object DefaultBillingAddressSettingsDefinition :
             DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
             DefaultBillingAddress.Off -> null
             is DefaultBillingAddress.WithEmail -> value.email
+            is DefaultBillingAddress.WithEmailAndNoPhone -> value.email
         }
 
         return email?.let {
@@ -147,7 +153,7 @@ internal object DefaultBillingAddressSettingsDefinition :
                 ),
                 email = email,
                 name = "Jenny Rosen",
-                phone = "+18008675309",
+                phone = if (value is DefaultBillingAddress.WithEmailAndNoPhone) null else "+18008675309",
             )
         }
     }
@@ -158,6 +164,8 @@ internal sealed class DefaultBillingAddress(val value: String) {
     data object OnWithRandomEmail : DefaultBillingAddress("on_with_random_email")
     data object Off : DefaultBillingAddress("off")
     data class WithEmail(val email: String) : DefaultBillingAddress("with_email")
+    data class WithEmailAndNoPhone(val email: String) : DefaultBillingAddress("with_email_without_phone")
 }
 
 private const val CUSTOM_EMAIL_PREFIX = "with_email:"
+private const val CUSTOM_EMAIL_WITHOUT_PHONE_PREFIX = "with_email_without_phone:"
