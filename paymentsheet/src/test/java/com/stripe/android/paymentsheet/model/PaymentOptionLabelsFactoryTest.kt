@@ -26,7 +26,7 @@ class PaymentOptionLabelsFactoryTest {
         )
 
         assertThat(labels.label).isEqualTo("Visa")
-        assertThat(labels.sublabel).isEqualTo("···· 4242")
+        assertThat(labels.sublabel).isEqualTo("\u2066···· 4242\u2069")
     }
 
     @Test
@@ -130,7 +130,7 @@ class PaymentOptionLabelsFactoryTest {
         )
 
         assertThat(labels.label).isEqualTo("Visa")
-        assertThat(labels.sublabel).isEqualTo("···· 4242")
+        assertThat(labels.sublabel).isEqualTo("\u2066···· 4242\u2069")
     }
 
     @Test
@@ -163,7 +163,7 @@ class PaymentOptionLabelsFactoryTest {
             linkBrand = null,
         )
 
-        assertThat(labels.label).isEqualTo("···· 4242")
+        assertThat(labels.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(labels.sublabel).isNull()
     }
 

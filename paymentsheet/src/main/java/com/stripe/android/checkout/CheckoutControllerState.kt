@@ -32,8 +32,10 @@ internal data class CheckoutControllerState(
     ): Session {
         return checkoutSessionResponse.asCheckoutSession(
             collectedEmail = collectedDetails.email,
+            collectedShippingName = collectedDetails.shippingName,
+            collectedShippingAddress = collectedDetails.shippingAddress,
             flagImages = flagImages,
-            paymentOptionDisplayData = paymentOptionFactory.create(
+            paymentOption = paymentOptionFactory.create(
                 selection = paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             ),

@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
-import com.stripe.android.paymentsheet.repositories.TotalSummaryResponseFactory
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -165,7 +164,9 @@ class CheckoutSessionConfirmationInterceptorTest {
         ) {
             networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONObject("total_summary").put("total", 5399)
+                    json.getJSONArray("checkout_items").getJSONObject(0)
+                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .put("total", 5399)
                 }
             }
 
@@ -657,7 +658,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private companion object {
         val AUTOMATIC_TAX_RESPONSE = CheckoutSessionResponseFactory.create(
-            totalSummary = TotalSummaryResponseFactory.create(totalAmountDue = 5099L),
+            amount = 5099L,
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )

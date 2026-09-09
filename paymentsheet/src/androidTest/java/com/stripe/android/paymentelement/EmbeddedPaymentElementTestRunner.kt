@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -50,7 +51,12 @@ internal class EmbeddedPaymentElementTestRunnerContext(
 
     suspend fun consumePaymentOptionEvent(paymentMethodType: String, label: String) {
         val paymentOption = paymentOptionTurbine.awaitItem()
-        assertThat(paymentOption?.label).endsWith(label)
+        val expectedLabel = if (paymentMethodType == "card") {
+            "···· $label".withLtrIsolate()
+        } else {
+            label
+        }
+        assertThat(paymentOption?.label).isEqualTo(expectedLabel)
         assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
     }
 

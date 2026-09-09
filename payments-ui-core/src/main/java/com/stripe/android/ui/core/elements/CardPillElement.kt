@@ -171,7 +171,7 @@ private fun RowScope.CardNumberText(
         cardBrand.displayName,
         lastFourDigits,
     )
-    val maskedPan = stringResource(R.string.stripe_scanned_card_pill_masked_last4, lastFourDigits)
+    val maskedPan = stringResource(R.string.stripe_scanned_card_masked_last4, lastFourDigits)
 
     Text(
         text = maskedPan,

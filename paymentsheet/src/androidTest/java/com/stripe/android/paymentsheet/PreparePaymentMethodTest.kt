@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Rule
 import org.junit.Test
@@ -160,7 +161,7 @@ internal class PreparePaymentMethodTest(
 
             val paymentOption = context.configureCallbackTurbine.awaitItem()
 
-            assertThat(paymentOption?.label).endsWith("4242")
+            assertThat(paymentOption?.label).isEqualTo("···· 4242".withLtrIsolate())
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
             composeTestRule.waitForIdle()

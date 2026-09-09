@@ -94,10 +94,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
         checkoutInitResponse = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.put("account_settings", JSONObject("""{"country":"US"}"""))
-                json.getJSONObject("total_summary").apply {
-                    put("subtotal", INITIAL_TOTAL)
-                    put("total", INITIAL_TOTAL)
-                }
+                json.getJSONArray("checkout_items").getJSONObject(0)
+                    .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                    .put("subtotal", INITIAL_TOTAL)
+                    .put("total", INITIAL_TOTAL)
                 json.put(
                     "tax_context",
                     JSONObject(
@@ -161,7 +161,9 @@ internal class CheckoutPaymentElementAnalyticsTest {
         contentPage.assertHasSelectedSavedPaymentMethod("pm_12345")
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                json.getJSONObject("total_summary").put("total", UPDATED_TOTAL)
+                json.getJSONArray("checkout_items").getJSONObject(0)
+                    .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                    .put("total", UPDATED_TOTAL)
             }
         }
         networkRule.checkoutInit { response ->

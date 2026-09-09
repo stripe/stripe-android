@@ -10,7 +10,12 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -78,6 +83,48 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState(isValidating = true))
         val initialScreen = AddFirstPaymentMethod(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun displaysScannedCardPill() {
+        val metadata = PaymentMethodMetadataFactory.create()
+
+        val state = createState(
+            metadata = metadata,
+            previousPaymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                code = "card",
+                billingDetails = null,
+                requiresMandate = false,
+                productUsage = emptySet(),
+                overrideParamMap = mapOf(
+                    "type" to "card",
+                    "card" to mapOf(
+                        "number" to "4242424242424242",
+                        "exp_month" to "07",
+                        "exp_year" to "2050",
+                    ),
+                ),
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+                    paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                    paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+                    checkoutSessionId = null,
+                )
+            ),
+            previousPaymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                fromValidatedScan = true,
+            )
+        )
+
+        val interactor = FakeAddPaymentMethodInteractor(initialState = state)
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {

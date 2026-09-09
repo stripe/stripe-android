@@ -45,6 +45,8 @@
     <string name="stripe_paymentsheet_payment_method_scalapay">Scalapay</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
+    <string name="stripe_scanned_card_masked_last4">\u2066•••• %1$s\u2069</string>
+
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
     <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>-->
 </resources>
