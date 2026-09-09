@@ -44,7 +44,7 @@ import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -184,7 +184,7 @@ internal class DefaultVerticalModeFormInteractorTest {
                 SectionElement.wrap(
                     listOf(
                         SimpleTextElement(
-                            IdentifierSpec.Name,
+                            FormFieldId.Name,
                             SimpleTextFieldController(
                                 textFieldConfig = SimpleTextFieldConfig(
                                     label = resolvableString("")
@@ -201,8 +201,8 @@ internal class DefaultVerticalModeFormInteractorTest {
 
                 val sectionElement = state.formUiElements[0] as SectionElement
 
-                sectionElement.fields.errorTest(identifierSpec = IdentifierSpec.Name, error = null)
-                sectionElement.fields.errorTest(identifierSpec = IdentifierSpec.Email, error = null)
+                sectionElement.fields.errorTest(formFieldId = FormFieldId.Name, error = null)
+                sectionElement.fields.errorTest(formFieldId = FormFieldId.Email, error = null)
 
                 validationRequestedSource.emit(Unit)
 
@@ -211,11 +211,11 @@ internal class DefaultVerticalModeFormInteractorTest {
                 val nextSectionElement = nextState.formUiElements[0] as SectionElement
 
                 nextSectionElement.fields.errorTest(
-                    identifierSpec = IdentifierSpec.Name,
+                    formFieldId = FormFieldId.Name,
                     error = FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required),
                 )
                 nextSectionElement.fields.errorTest(
-                    identifierSpec = IdentifierSpec.Email,
+                    formFieldId = FormFieldId.Email,
                     error = FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required),
                 )
             }
@@ -317,10 +317,10 @@ internal class DefaultVerticalModeFormInteractorTest {
         val formElements = interactor.state.value.formUiElements
 
         val saveForFutureUseElement = formElements.firstOrNull {
-            it.identifier == IdentifierSpec.SaveForFutureUse
+            it.identifier == FormFieldId.SaveForFutureUse
         } as? SaveForFutureUseElement
         val setAsDefaultElement = formElements.firstOrNull {
-            it.identifier == IdentifierSpec.SetAsDefaultPaymentMethod
+            it.identifier == FormFieldId.SetAsDefaultPaymentMethod
         } as? SetAsDefaultPaymentMethodElement
 
         block(saveForFutureUseElement, setAsDefaultElement)

@@ -63,11 +63,6 @@ private fun CheckoutPlaygroundSettings.Snapshot.contactDetails(
 private fun CheckoutPlaygroundSettings.Snapshot.paymentElementConfiguration(): PaymentElement.Configuration {
     return PaymentElement.Configuration()
         .embeddedViewDisplaysMandateText(this[Controller.payment.embeddedMandate])
-        .billingDetailsCollectionConfiguration(
-            PaymentElement.Configuration.BillingDetailsCollectionConfiguration()
-                .name(this[Controller.payment.billing.name])
-                .address(this[Controller.payment.billing.address])
-        )
         .paymentMethodLayout(this[Controller.payment.layout])
         .opensCardScannerAutomatically(this[Controller.payment.opensCardScanner])
         .preferredNetworks(this[Controller.payment.preferredNetworks])
@@ -233,13 +228,6 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
                 .disallowFundingSourceCreation(this[Controller.express.link.disallowedFunding].toSet())
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
-        .shippingAddressRequired(this[Controller.express.shippingRequired])
-        .billingDetailsCollectionConfiguration(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                .name(this[Controller.express.billing.name])
-                .email(this[Controller.express.billing.email])
-                .address(this[Controller.express.billing.address])
-        )
         .appearance(
             ExpressCheckoutElement.Configuration.Appearance()
                 .buttonTheme(this[Controller.express.appearance.theme])

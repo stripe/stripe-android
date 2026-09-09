@@ -11,7 +11,7 @@ class BsbConfigTest {
     private val banks: List<BecsDebitBanks.Bank> = listOf(
         BecsDebitBanks.Bank("00", "Stripe Test Bank")
     )
-    private val bsbConfig = BsbConfig(banks)
+    private val bsbConfig = BsbConfig(BecsDebitBanks(banks))
 
     @Test
     fun `visualTransformation formats entered value`() {

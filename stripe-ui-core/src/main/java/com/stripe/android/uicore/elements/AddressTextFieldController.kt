@@ -94,8 +94,8 @@ class AddressTextFieldController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         if (inlineAutocompleteHandler != null) {
             val predictionsState by inlineAutocompleteHandler.predictionsState.collectAsState()

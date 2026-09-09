@@ -7,9 +7,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -34,9 +31,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
             .paymentElement(
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(false)
-                    .billingDetailsCollectionConfiguration(
-                        BillingDetailsCollectionConfiguration().address(Full)
-                    )
             )
             .expressCheckoutElement(
                 ExpressCheckoutElement.Configuration().googlePayConfiguration(
@@ -192,30 +186,9 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `createForExpressCheckoutElement maps billing configuration from express checkout element configuration`() {
+    fun `createForExpressCheckoutElement uses automatic billing collection`() {
         val configuration = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
-                    BillingDetailsCollectionConfiguration().address(Automatic)
-                )
-            )
-            .expressCheckoutElement(
-                ExpressCheckoutElement.Configuration().billingDetailsCollectionConfiguration(
-                    ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                        .name(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .CollectionMode.Always
-                        )
-                        .email(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .CollectionMode.Never
-                        )
-                        .address(
-                            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                                .AddressCollectionMode.Full
-                        )
-                )
-            )
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
         val result = factory().createForExpressCheckoutElement(
@@ -225,11 +198,47 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result?.billingDetailsCollectionConfiguration?.name)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
+        assertThat(result?.billingDetailsCollectionConfiguration?.phone)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result?.billingDetailsCollectionConfiguration?.email)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result?.billingDetailsCollectionConfiguration?.address)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement collects full address when required by checkout session`() {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSFull)
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement always collects email when required`() {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().emailRequired(true)
+            )
+            .build()
+
+        val result = factory().createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result?.billingDetailsCollectionConfiguration?.email)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
@@ -247,9 +256,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
                             PaymentElement.Configuration.LinkConfiguration.Display.Never
                         )
                     )
-                    .billingDetailsCollectionConfiguration(
-                        BillingDetailsCollectionConfiguration().address(Full)
-                    )
             )
             .expressCheckoutElement(
                 ExpressCheckoutElement.Configuration()
@@ -262,9 +268,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
                         ExpressCheckoutElement.Configuration.LinkConfiguration().display(
                             ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic
                         )
-                    )
-                    .billingDetailsCollectionConfiguration(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
                     )
             )
             .build()
@@ -279,7 +282,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.googlePay?.label).isEqualTo("PE total")
         assertThat(result.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
         assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
+        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
     }
 
     @Test
@@ -391,7 +394,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `upgrades billing address collection to Full when the session requires a billing address`() {
         val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Automatic),
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
             collectedDetails = collectedDetails(),
         )
@@ -402,7 +405,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `leaves billing address collection Automatic when the session does not require a billing address`() {
         val result = factory().create(
-            configuration = controllerConfiguration(billingDetailsAddress = Automatic),
+            configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
             collectedDetails = collectedDetails(),
         )
@@ -444,7 +447,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
     private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
 
     private fun controllerConfiguration(
-        billingDetailsAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
         googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
@@ -452,9 +454,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
             .paymentElement(
                 PaymentElement.Configuration()
                     .appearance(appearance)
-                    .billingDetailsCollectionConfiguration(
-                        BillingDetailsCollectionConfiguration().address(billingDetailsAddress)
-                    )
             )
         val expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration()
         if (googlePayConfiguration != null) {

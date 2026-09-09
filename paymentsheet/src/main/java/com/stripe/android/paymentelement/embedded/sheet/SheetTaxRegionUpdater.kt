@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -13,11 +14,25 @@ import javax.inject.Inject
 internal typealias SheetTaxRegionUpdate = suspend () -> Result<CheckoutSessionResponse>
 
 @OptIn(CheckoutSessionPreview::class)
-internal class SheetTaxRegionUpdater @Inject constructor(
-    private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+internal typealias TaxRegionUpdate = suspend (
+    CheckoutSessionResponse,
+    CheckoutSessionResponse.TaxAddressSource,
+    CheckoutController.Address.State,
+) -> Result<CheckoutSessionResponse>
+
+@OptIn(CheckoutSessionPreview::class)
+internal class SheetTaxRegionUpdater internal constructor(
+    private val updateTaxRegion: TaxRegionUpdate,
 ) {
-    fun prepareUpdate(selection: PaymentSelection?): SheetTaxRegionUpdate? {
+    @Inject
+    constructor(taxRegionUpdater: CheckoutSessionTaxRegionUpdater) : this(
+        updateTaxRegion = taxRegionUpdater::updateServerStateIfNeeded,
+    )
+
+    fun prepareUpdate(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        selection: PaymentSelection?,
+    ): SheetTaxRegionUpdate? {
         val checkoutSessionResponse =
             (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
                 ?.checkoutSessionResponse
@@ -27,10 +42,10 @@ internal class SheetTaxRegionUpdater @Inject constructor(
             ?: return null
 
         return {
-            taxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address = address,
+            updateTaxRegion(
+                checkoutSessionResponse,
+                CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address,
             )
         }
     }

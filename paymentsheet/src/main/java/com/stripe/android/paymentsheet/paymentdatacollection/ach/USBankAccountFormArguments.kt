@@ -79,7 +79,7 @@ internal class USBankAccountFormArguments(
                 paymentMethodMetadata = paymentMethodMetadata,
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
                 hostedSurface = hostedSurface,
-                host = USBankAccountFormArgumentsFactory.Host(
+                integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                     isCompleteFlow = viewModel.isCompleteFlow,
                     shippingDetails = viewModel.config.shippingDetails,
                     draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
@@ -119,7 +119,7 @@ internal class USBankAccountFormArguments(
                 paymentMethodMetadata = paymentMethodMetadata,
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
                 hostedSurface = hostedSurface,
-                host = USBankAccountFormArgumentsFactory.Host(
+                integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                     isCompleteFlow = isCompleteFlow,
                     shippingDetails = paymentMethodMetadata.shippingDetails,
                     draftPaymentSelection = draftPaymentSelection,

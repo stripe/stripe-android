@@ -3,16 +3,16 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -51,7 +51,7 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         val confirmationNumberElement = SimpleTextElement(
-            identifier = IdentifierSpec.KonbiniConfirmationNumber,
+            identifier = FormFieldId.KonbiniConfirmationNumber,
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_konbini_confirmation_number_label),
@@ -59,7 +59,7 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     keyboard = KeyboardType.Phone,
                     optional = true,
                 ),
-                initialValue = arguments.initialValues[IdentifierSpec.KonbiniConfirmationNumber],
+                initialValue = arguments.initialValues[FormFieldId.KonbiniConfirmationNumber],
             ),
         )
         builder

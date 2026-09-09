@@ -30,15 +30,6 @@ internal class ExpressCheckoutElementTest {
             PaymentSheet.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
-        assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
-        )
-        assertThat(state.billingDetailsCollectionConfiguration.email).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
-        )
-        assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-        )
         assertThat(state.paymentMethodOrder).isEmpty()
         assertThat(state.appearance.buttonLayout.maxColumns).isNull()
         assertThat(state.appearance.buttonLayout.maxRows).isNull()
@@ -82,21 +73,12 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun `configuration builds shipping address required`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .shippingAddressRequired(true)
-            .build()
-
-        assertThat(state.shippingAddressRequired).isTrue()
-    }
-
-    @Test
     fun `configuration builds payment method order`() {
         val state = ExpressCheckoutElement.Configuration()
             .paymentMethodOrder(
                 listOf(
-                    ExpressCheckoutElement.PaymentMethod.Link(),
-                    ExpressCheckoutElement.PaymentMethod.GooglePay(),
+                    "link",
+                    "google_pay",
                 )
             )
             .build()
@@ -108,31 +90,13 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun `configuration builds requested billing details collection values`() {
+    fun `configuration ignores invalid payment methods in payment method order`() {
         val state = ExpressCheckoutElement.Configuration()
-            .billingDetailsCollectionConfiguration(
-                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                    .name(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                    )
-                    .email(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
-                    )
-                    .address(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                            .AddressCollectionMode.Full
-                    )
-            )
+            .paymentMethodOrder(listOf("invalid", "link"))
             .build()
 
-        assertThat(state.billingDetailsCollectionConfiguration.name).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
-        )
-        assertThat(state.billingDetailsCollectionConfiguration.email).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
-        )
-        assertThat(state.billingDetailsCollectionConfiguration.address).isEqualTo(
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        assertThat(state.paymentMethodOrder).containsExactly(
+            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
         )
     }
 

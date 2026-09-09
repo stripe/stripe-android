@@ -26,6 +26,7 @@ internal fun ConfirmationControls(
     displayMandate: Boolean,
     onClearPaymentMethod: () -> Unit,
     onSelectPaymentMethod: () -> Unit,
+    onSetShippingAddress: () -> Unit,
     onConfirm: () -> Unit,
 ) {
     PaymentOptionRow(paymentOption)
@@ -47,6 +48,10 @@ internal fun ConfirmationControls(
             modifier = Modifier.weight(1f),
         ) { Text("Select") }
     }
+    Button(
+        onClick = onSetShippingAddress,
+        modifier = Modifier.fillMaxWidth(),
+    ) { Text("Set shipping address (WIP)") }
     Button(
         onClick = onConfirm,
         enabled = !isUpdating,

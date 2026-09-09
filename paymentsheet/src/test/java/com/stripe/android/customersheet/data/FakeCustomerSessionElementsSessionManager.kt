@@ -46,7 +46,6 @@ internal class FakeCustomerSessionElementsSessionManager(
         CustomerSessionElementsSession(
             elementsSession = ElementsSession(
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 stripeIntent = intent,
                 orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
                 merchantCountry = null,

@@ -83,6 +83,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
+                dynamicCallbackId = instanceId.takeIf { onPaymentDataChangedCallback != null },
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,

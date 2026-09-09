@@ -16,6 +16,19 @@ Treat every `ShampooRule` swap or iteration-count edit as uncommittable diagnost
 3. Record the original exception, first relevant stack frame, execution task, device/API/browser when applicable, and whether the failure occurred before, during, or after the tested behavior. Distinguish a test failure from emulator boot, Gradle, network, or other infrastructure failures.
 4. Audit the boundaries that can vary between executions: wall versus virtual time, animation/frame time, process-global state, retained caches or selections, external activities, IME/browser state, asynchronous resource identity, and teardown completion.
 
+## Require failure evidence before permanent changes
+
+Do not implement or submit a permanent fix until the failure has qualifying evidence. Require one of:
+
+- A focused local reproduction with the original exception, relevant stack frame, and failure artifact.
+- An actionable original CI failure trace plus a deterministic regression test that fails for the same reason before the fix.
+
+A suspicious comment, theoretical race, code smell, or passing candidate soak is not causal evidence. Map the proposed fix to the observed failure state, not merely to a plausible source of nondeterminism.
+
+If the initial two-execution reproduction passes, run the focused 50-execution baseline before changing permanent code. If all 50 pass and there is no qualifying external evidence, restore all diagnostic edits and stop. Report the task as unable to reproduce, including the Gradle invocation and actual method-execution count. Do not change production code or permanent test expectations, and do not commit, push, or open a flake-fix pull request.
+
+A clean baseline establishes only that the failure was not reproduced. Keep baseline reproduction evidence separate from post-fix validation evidence.
+
 ## Choose the repetition mechanism
 
 Use one focused class or method and expose the first failure. Do not combine inner retries, outer command retries, and repetition; they destroy the failing iteration's evidence.

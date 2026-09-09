@@ -32,96 +32,23 @@ class ExpressCheckoutElement @Inject internal constructor(
     abstract class PaymentMethod private constructor() {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class GooglePay internal constructor() : PaymentMethod()
+        class GooglePay internal constructor() : PaymentMethod() {
+            override fun equals(other: Any?): Boolean = other is GooglePay
+
+            override fun hashCode(): Int = GooglePay::class.java.hashCode()
+        }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Link internal constructor() : PaymentMethod()
+        class Link internal constructor() : PaymentMethod() {
+            override fun equals(other: Any?): Boolean = other is Link
+
+            override fun hashCode(): Int = Link::class.java.hashCode()
+        }
     }
 
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-        /**
-         * Configuration for how billing details are collected during checkout.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class BillingDetailsCollectionConfiguration {
-            private var name: CollectionMode = CollectionMode.Automatic
-            private var email: CollectionMode = CollectionMode.Automatic
-            private var address: AddressCollectionMode = AddressCollectionMode.Automatic
-
-            /**
-             * Billing details fields collection options.
-             */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class CollectionMode {
-                /**
-                 * The field will be collected depending on the Payment Method's requirements.
-                 */
-                Automatic,
-
-                /**
-                 * The field will never be collected.
-                 * If this field is required by the Payment Method, you must provide it as part of
-                 * the default billing details.
-                 */
-                Never,
-
-                /**
-                 * The field will always be collected, even if it isn't required for the Payment
-                 * Method.
-                 */
-                Always,
-            }
-
-            /**
-             * Billing address collection options.
-             */
-            @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class AddressCollectionMode {
-                /**
-                 * Only the fields required by the Payment Method will be collected, this may be
-                 * none.
-                 */
-                Automatic,
-
-                /**
-                 * Collect the full billing address, regardless of the Payment Method requirements.
-                 */
-                Full,
-            }
-
-            /** How to collect the name field. */
-            fun name(name: CollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.name = name
-            }
-
-            /** How to collect the email field. */
-            fun email(email: CollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.email = email
-            }
-
-            /** How to collect the billing address. */
-            fun address(address: AddressCollectionMode): BillingDetailsCollectionConfiguration = apply {
-                this.address = address
-            }
-
-            @Parcelize
-            internal data class State(
-                val name: CollectionMode,
-                val email: CollectionMode,
-                val address: AddressCollectionMode,
-            ) : Parcelable
-
-            internal fun build(): State = State(
-                name = name,
-                email = email,
-                address = address,
-            )
-        }
-
         /**
          * Configuration related to Link.
          */
@@ -149,7 +76,8 @@ class ExpressCheckoutElement @Inject internal constructor(
                 Never,
 
                 /**
-                 * Link remains enabled but its button or row is hidden from the payment element UI.
+                 * Link remains enabled. Its button or row is shown when an existing Link user is
+                 * detected and hidden otherwise.
                  */
                 WalletButtonHidden,
             }
@@ -414,10 +342,8 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
-        private var shippingAddressRequired: Boolean = false
-        private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-            BillingDetailsCollectionConfiguration()
-        private var paymentMethodOrder: List<PaymentMethod> = emptyList()
+        private var emailRequired: Boolean = false
+        private var paymentMethodOrder: List<String> = emptyList()
         private var appearance: Appearance = Appearance()
 
         /** Sets the configuration for Link. */
@@ -433,28 +359,28 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.googlePayConfiguration = googlePayConfiguration
         }
 
-        fun shippingAddressRequired(
-            shippingAddressRequired: Boolean,
+        /**
+         * Sets whether an email address is required.
+         *
+         * @param emailRequired If true, the customer's email will be collected.
+         */
+        fun emailRequired(
+            emailRequired: Boolean,
         ): Configuration = apply {
-            this.shippingAddressRequired = shippingAddressRequired
-        }
-
-        /** Sets how billing details are collected when displaying payment methods. */
-        fun billingDetailsCollectionConfiguration(
-            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
-        ): Configuration = apply {
-            this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            this.emailRequired = emailRequired
         }
 
         /**
          * Sets the order in which express payment methods are displayed.
          *
+         * Supported values are `"google_pay"` and `"link"`.
+         *
          * By default, the Express Checkout Element uses dynamic ordering. Payment methods omitted
          * from [paymentMethodOrder] are displayed after the specified payment methods. Payment
-         * methods that are unavailable are ignored.
+         * methods that are unavailable or invalid are ignored.
          */
         fun paymentMethodOrder(
-            paymentMethodOrder: List<PaymentMethod>,
+            paymentMethodOrder: List<String>,
         ): Configuration = apply {
             this.paymentMethodOrder = paymentMethodOrder
         }
@@ -468,8 +394,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: CheckoutGooglePayConfiguration,
-            val shippingAddressRequired: Boolean,
-            val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
+            val emailRequired: Boolean,
             val paymentMethodOrder: List<PaymentMethodType>,
             val appearance: Appearance.State,
         ) : Parcelable
@@ -482,13 +407,12 @@ class ExpressCheckoutElement @Inject internal constructor(
         internal fun build(): State = State(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
-            shippingAddressRequired = shippingAddressRequired,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
-            paymentMethodOrder = paymentMethodOrder.map { paymentMethod ->
+            emailRequired = emailRequired,
+            paymentMethodOrder = paymentMethodOrder.mapNotNull { paymentMethod ->
                 when (paymentMethod) {
-                    is PaymentMethod.GooglePay -> PaymentMethodType.GooglePay
-                    is PaymentMethod.Link -> PaymentMethodType.Link
-                    else -> error("Unsupported payment method: ${paymentMethod::class.java.name}")
+                    "google_pay" -> PaymentMethodType.GooglePay
+                    "link" -> PaymentMethodType.Link
+                    else -> null
                 }
             },
             appearance = appearance.build(),

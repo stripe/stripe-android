@@ -107,11 +107,11 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val customerStateHolder = FakeCustomerStateHolder()
         val stateHolder = FakeSheetActivityStateHolder()
         val taxRegionUpdater = SheetTaxRegionUpdater(
-            paymentMethodMetadata = paymentMethodMetadata,
             taxRegionUpdater = checkoutSessionTaxRegionUpdater(),
         )
         val continueCoordinator = DefaultSheetActivityContinueCoordinator(
             taxRegionUpdater = taxRegionUpdater,
+            paymentMethodMetadata = paymentMethodMetadata,
             stateHolder = stateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
@@ -144,7 +144,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 publishableKey = "pk_test_123",
             ),
             publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
+            stripeAccountIdProvider = { "acct_123" },
         )
 
         return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)

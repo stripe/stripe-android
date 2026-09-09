@@ -12,7 +12,7 @@ class CheckboxFieldElementTest {
     fun `when controller checked state is false, form value should indicate incomplete`() = runTest {
         val controller = CheckboxFieldController()
         val element = CheckboxFieldElement(
-            identifier = IdentifierSpec.Generic("test_checkbox"),
+            identifier = FormFieldId.Generic("test_checkbox"),
             controller = controller
         )
 
@@ -27,7 +27,7 @@ class CheckboxFieldElementTest {
     fun `when controller checked state is true, form value should indicate complete`() = runTest {
         val controller = CheckboxFieldController(initialValue = true)
         val element = CheckboxFieldElement(
-            identifier = IdentifierSpec.Generic("test_checkbox"),
+            identifier = FormFieldId.Generic("test_checkbox"),
             controller = controller
         )
 

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface FormElement {
-    val identifier: IdentifierSpec
+    val identifier: FormFieldId
     val controller: Controller?
 
     /**
@@ -29,8 +29,8 @@ interface FormElement {
      */
     val mandateText: ResolvableString?
 
-    fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
-    fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>>
+    fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         stateFlowOf(emptyList())
     fun onValidationStateChanged(isValidating: Boolean) {}
 }

@@ -3,6 +3,7 @@ package com.stripe.android.utils
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.Turbine
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
 
 class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
@@ -12,7 +13,7 @@ class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
 
     data class StartCall(
         val passiveCaptchaParams: PassiveCaptchaParams,
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val productUsage: Set<String>
     )
 
@@ -26,10 +27,10 @@ class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
 
     override fun start(
         passiveCaptchaParams: PassiveCaptchaParams,
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         productUsage: Set<String>
     ) {
-        startCalls.add(StartCall(passiveCaptchaParams, publishableKey, productUsage))
+        startCalls.add(StartCall(passiveCaptchaParams, apiConfiguration, productUsage))
     }
 
     override fun unregister() {

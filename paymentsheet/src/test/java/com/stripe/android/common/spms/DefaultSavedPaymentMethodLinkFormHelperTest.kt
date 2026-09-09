@@ -17,7 +17,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.flow.StateFlow
@@ -277,7 +277,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
         )
 
         object FakeElement : FormElement {
-            override val identifier: IdentifierSpec
+            override val identifier: FormFieldId
                 get() = throw IllegalStateException("Should not be retrieved!")
 
             override val controller: Controller
@@ -289,7 +289,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
             override val mandateText: ResolvableString
                 get() = throw IllegalStateException("Should not be retrieved!")
 
-            override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+            override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
                 throw IllegalStateException("Should not be called!")
             }
         }

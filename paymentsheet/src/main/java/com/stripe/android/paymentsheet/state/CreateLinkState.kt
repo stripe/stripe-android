@@ -10,7 +10,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
@@ -107,8 +107,8 @@ internal class DefaultCreateLinkState @Inject constructor(
             signupModeResult = getLinkSignupMode(
                 accountStatus = accountStatus,
                 elementsSession = elementsSession,
-                configuration = configuration,
                 linkConfiguration = linkConfiguration,
+                customerMetadata = customerMetadata,
             )
         )
     }
@@ -176,8 +176,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     private fun getLinkSignupMode(
         accountStatus: AccountStatus,
         elementsSession: ElementsSession,
-        configuration: CommonConfiguration,
         linkConfiguration: LinkConfiguration,
+        customerMetadata: CustomerMetadata?,
     ): LinkSignupModeResult {
         if (accountStatus != AccountStatus.SignedOut) {
             return LinkSignupModeResult.AlreadyRegistered
@@ -195,8 +195,8 @@ internal class DefaultCreateLinkState @Inject constructor(
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
             intent = elementsSession.stripeIntent,
-            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
-            hasCustomerConfiguration = configuration.customer != null,
+            paymentMethodSaveConsentBehavior = customerMetadata?.saveConsent,
+            hasCustomerConfiguration = customerMetadata != null,
         )
         val signupMode = when {
             // If signup toggle enabled, we show a future usage + link combined toggle

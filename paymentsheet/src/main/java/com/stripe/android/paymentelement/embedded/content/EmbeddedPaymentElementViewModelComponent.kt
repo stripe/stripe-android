@@ -177,6 +177,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     @Binds
+    fun bindsEmbeddedPaymentOptionsPresenter(
+        presenter: DefaultEmbeddedPaymentOptionsPresenter,
+    ): EmbeddedPaymentOptionsPresenter
+
+    @Binds
     fun bindsEmbeddedContentHelperStateHolder(
         stateHolder: DefaultEmbeddedContentHelperStateHolder
     ): EmbeddedContentHelperStateHolder

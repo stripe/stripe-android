@@ -335,15 +335,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onLpmSpecFailure(errorMessage: String?) {
-        fireEvent(
-            event = PaymentSheetEvent.LpmSerializeFailureEvent(
-                errorMessage = errorMessage
-            ),
-            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
-        )
-    }
-
     override fun onAutofill(
         type: String,
     ) {
@@ -643,13 +634,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
+        val executor = analyticsRequestV2Executor
         val request = analyticsRequestV2Factory.createRequest(
             eventName = event.eventName,
             additionalParams = defaultParams(paymentMethodMetadataProvider.get()) + event.params,
         )
 
         CoroutineScope(workContext).launch {
-            analyticsRequestV2Executor.enqueue(request)
+            executor.enqueue(request)
         }
     }
 

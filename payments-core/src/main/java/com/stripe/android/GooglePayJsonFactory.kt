@@ -200,6 +200,7 @@ class GooglePayJsonFactory internal constructor(
         merchantInfo: MerchantInfo,
         billingAddressParameters: BillingAddressParameters? = null,
         shippingAddressParameters: ShippingAddressParameters? = null,
+        hasDynamicCallbacks: Boolean = false,
         isEmailRequired: Boolean = false,
         allowCreditCards: Boolean? = null,
     ): JSONObject {
@@ -227,6 +228,19 @@ class GooglePayJsonFactory internal constructor(
                     )
                 }
 
+                if (hasDynamicCallbacks) {
+                    val intents = listOfNotNull(
+                        "SHIPPING_ADDRESS".takeIf { shippingAddressParameters?.isRequired == true },
+                    )
+
+                    if (intents.isNotEmpty()) {
+                        put(
+                            "callbackIntents",
+                            JSONArray(intents)
+                        )
+                    }
+                }
+
                 put(
                     "merchantInfo",
                     JSONObject().apply {
@@ -245,7 +259,7 @@ class GooglePayJsonFactory internal constructor(
             }
     }
 
-    private fun createTransactionInfo(
+    internal fun createTransactionInfo(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()

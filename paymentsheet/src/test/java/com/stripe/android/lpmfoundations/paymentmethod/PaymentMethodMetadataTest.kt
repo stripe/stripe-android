@@ -10,8 +10,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.countryElements
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.countryElements
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
@@ -42,11 +42,10 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -132,25 +131,11 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "bacs_debit")
-            ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-        )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
-        assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
-    }
-
-    @Test
     fun `filterSupportedPaymentMethods returns expected items`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
@@ -166,7 +151,6 @@ internal class PaymentMethodMetadataTest {
                 unactivatedPaymentMethods = listOf("klarna"),
                 isLiveMode = true,
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(1)
@@ -181,7 +165,6 @@ internal class PaymentMethodMetadataTest {
                 unactivatedPaymentMethods = listOf("klarna"),
                 isLiveMode = false,
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
@@ -195,20 +178,8 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("klarna")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
-    }
-
-    @Test
-    fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("bacs_debit")
-            ),
-            sharedDataSpecs = emptyList(),
-        )
-        assertThat(metadata.supportedPaymentMethodForCode("bacs_debit")).isNull()
     }
 
     @Test
@@ -217,7 +188,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
     }
@@ -228,7 +198,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("klarna")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.displayNameForCode("klarna"))
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_klarna.resolvableString)
@@ -240,7 +209,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
         assertThat(metadata.displayNameForCode("klarna")).isEqualTo("".resolvableString)
     }
@@ -251,7 +219,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
         assertThat(metadata.displayNameForCode(null)).isEqualTo("".resolvableString)
     }
@@ -263,11 +230,6 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card", "affirm", "klarna"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-                SharedDataSpec("klarna"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -283,35 +245,12 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("affirm", "klarna", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-                SharedDataSpec("klarna"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
-    }
-
-    @Test
-    fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "bacs_debit", "card"),
-            ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-            ),
-        )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-        assertThat(sortedSupportedPaymentMethods).hasSize(2)
-        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
-        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
     }
 
     @Test
@@ -323,11 +262,6 @@ internal class PaymentMethodMetadataTest {
                 isLiveMode = true,
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("klarna"),
-                SharedDataSpec("card"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
@@ -336,14 +270,11 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `sortedSupportedPaymentMethods keeps us_bank_account without a sharedDataSpec`() {
+    fun `sortedSupportedPaymentMethods keeps registered us_bank_account`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "us_bank_account"),
                 paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}""",
-            ),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("card"),
             ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -360,11 +291,6 @@ internal class PaymentMethodMetadataTest {
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             paymentMethodOrder = listOf("klarna", "affirm", "card", "ignored"),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("klarna"),
-                SharedDataSpec("card"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -381,11 +307,6 @@ internal class PaymentMethodMetadataTest {
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             paymentMethodOrder = listOf("card"),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("klarna"),
-                SharedDataSpec("card"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -400,10 +321,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card"),
             ),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("card"),
-                SharedDataSpec("sepa_debit"),
-            ),
         )
         assertThat(metadata.supportedSavedPaymentMethodTypes())
             .containsExactly(PaymentMethod.Type.Card)
@@ -415,11 +332,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm", "sepa_debit"),
-            ),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("card"),
-                SharedDataSpec("affirm"),
-                SharedDataSpec("sepa_debit"),
             ),
         )
         assertThat(metadata.supportedSavedPaymentMethodTypes())
@@ -516,7 +428,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test
@@ -606,7 +518,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test
@@ -671,7 +583,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryCustom`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(
             code = "card",
@@ -682,7 +594,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryRequiresSharedDataSpec`() = runTest {
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple with icon`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
@@ -726,11 +638,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
             )
             val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -749,11 +656,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
             )
@@ -773,11 +675,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm")
             )
@@ -911,11 +808,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
             )
@@ -936,11 +828,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
                 paymentMethodOrder = listOf("affirm", "cpmt_paypal", "external_paypal")
@@ -962,11 +849,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
@@ -1141,13 +1023,11 @@ internal class PaymentMethodMetadataTest {
             )
         )
 
-        val sharedDataSpecs = listOf(SharedDataSpec("card"))
         val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
-            sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
             linkStateResult = LinkState(
@@ -1182,7 +1062,6 @@ internal class PaymentMethodMetadataTest {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            sharedDataSpecs = sharedDataSpecs,
             displayableCustomPaymentMethods = listOf(
                 DisplayableCustomPaymentMethod(
                     id = "cpmt_123",
@@ -1277,13 +1156,11 @@ internal class PaymentMethodMetadataTest {
             )
         )
 
-        val sharedDataSpecs = listOf(SharedDataSpec("card"))
         val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
-            sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
             linkStateResult = LinkState(
@@ -1333,7 +1210,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
@@ -1354,7 +1230,6 @@ internal class PaymentMethodMetadataTest {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = null,
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
             displayableCustomPaymentMethods = emptyList(),
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = getDefaultCustomerMetadata(
@@ -1442,7 +1317,6 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = null,
-            paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = flags,
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
@@ -1860,7 +1734,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
+                loginState = LinkState.LoginState.LoggedIn,
                 signupMode = null,
             ),
             linkConfiguration = PaymentSheet.LinkConfiguration(
@@ -1872,7 +1746,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `shouldShowLinkButton returns false when linkState is present and display is WalletButtonHidden`() {
+    fun `shouldShowLinkButton returns false for logged-out user when display is WalletButtonHidden`() {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
@@ -1885,6 +1759,38 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for user needing verification when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for logged-in user when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
     }
 
     @Test
@@ -2097,7 +2003,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = isGooglePayReady,
             linkStateResult = if (hasLinkState) {
@@ -2175,7 +2080,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
             linkStateResult = null,
@@ -2200,7 +2104,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
             linkStateResult = null,
@@ -2229,7 +2132,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
             linkStateResult = null,
@@ -2370,7 +2272,6 @@ internal class PaymentMethodMetadataTest {
         return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
             linkStateResult = null,
@@ -2404,7 +2305,6 @@ internal class PaymentMethodMetadataTest {
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = emptyList(),
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,

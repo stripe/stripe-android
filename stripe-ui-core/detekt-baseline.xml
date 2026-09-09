@@ -2,15 +2,15 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ConstructorParameterNaming:AddressElement.kt:AddressElement$_identifier: IdentifierSpec</ID>
-    <ID>ConstructorParameterNaming:RowElement.kt:RowElement$_identifier: IdentifierSpec</ID>
+    <ID>ConstructorParameterNaming:AddressElement.kt:AddressElement$_identifier: FormFieldId</ID>
+    <ID>ConstructorParameterNaming:RowElement.kt:RowElement$_identifier: FormFieldId</ID>
     <ID>CyclomaticComplexMethod:ContentTypeUtils.kt:internal fun ContentType.toReadableString: String</ID>
     <ID>CyclomaticComplexMethod:Html.kt:@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource: AnnotatedString</ID>
-    <ID>CyclomaticComplexMethod:IdentifierSpec.kt:IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get</ID>
+    <ID>CyclomaticComplexMethod:FormFieldId.kt:FormFieldId.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get</ID>
     <ID>CyclomaticComplexMethod:StripeTheme.kt:@Composable @ReadOnlyComposable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StripeTypography.toComposeTypography: Typography</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt:EmptyPainter${}</ID>
     <ID>ForEachOnRange:OTPController.kt:OTPController$0 until inputLength</ID>
-    <ID>FunctionParameterNaming:IdentifierSpec.kt:IdentifierSpec.Companion$_value: String</ID>
+    <ID>FunctionParameterNaming:FormFieldId.kt:FormFieldId.Companion$_value: String</ID>
     <ID>LargeClass:AutocompleteAddressControllerTest.kt:AutocompleteAddressControllerTest</ID>
     <ID>LongMethod:Html.kt:@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource: AnnotatedString</ID>
     <ID>LongMethod:OTPElementUI.kt:@OptIn(ExperimentalComposeUiApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI</ID>

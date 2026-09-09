@@ -81,7 +81,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
             performer.confirm(expressButton)
@@ -90,7 +90,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
-            assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+            assertThat(args.paymentMethodMetadata)
+                .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
         }
     }
 
@@ -103,7 +104,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
                 shippingAddressRequired = true,
             ),
         ) {
@@ -121,26 +122,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm uses ECE billing details collection configuration`() {
-        val state = createState(
-            eceBillingDetailsCollectionConfiguration =
-                ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration()
-                    .name(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                    )
-                    .email(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration.CollectionMode.Never
-                    )
-                    .address(
-                        ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                            .AddressCollectionMode.Full
-                    )
-        )
+    fun `confirm uses automatic billing details collection configuration`() {
+        val state = createState()
 
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
             performer.confirm(expressButton)
@@ -149,16 +137,16 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             val option = args.confirmationOption as GooglePayConfirmationOption
             val billingDetails = option.config.billingDetailsCollectionConfiguration
             assertThat(billingDetails.name).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.phone).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.email).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.address).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             )
             assertThat(billingDetails.attachDefaultsToPaymentMethod).isTrue()
         }
@@ -171,7 +159,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = createGooglePayExpressButton(
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
             performer.confirm(expressButton)
@@ -187,7 +175,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     @Test
     fun `confirm starts confirmation with a Link option`() {
         val state = CheckoutControllerStateFactory.create(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),
                     loginState = LinkState.LoginState.NeedsVerification,
@@ -199,7 +187,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         runScenario(
             state = state,
             expressButton = ExpressButton.Link.create(
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 buttonTheme = ButtonTheme.Automatic,
             ),
@@ -208,24 +196,18 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
-            assertThat(args.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+            assertThat(args.paymentMethodMetadata)
+                .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
         }
     }
 
     private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
-        eceBillingDetailsCollectionConfiguration:
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration =
-            ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration(),
     ): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(
-                    ExpressCheckoutElement.Configuration().billingDetailsCollectionConfiguration(
-                        eceBillingDetailsCollectionConfiguration
-                    )
-                )
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "US",

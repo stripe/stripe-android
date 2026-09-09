@@ -5,14 +5,14 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val cryptoRawValues = mapOf(
-    IdentifierSpec.Line1 to "221B Baker Street",
-    IdentifierSpec.Line2 to "Flat B",
-    IdentifierSpec.City to "London",
-    IdentifierSpec.PostalCode to "NW16XE",
-    IdentifierSpec.Country to "GB",
+    FormFieldId.Line1 to "221B Baker Street",
+    FormFieldId.Line2 to "Flat B",
+    FormFieldId.City to "London",
+    FormFieldId.PostalCode to "NW16XE",
+    FormFieldId.Country to "GB",
 )
 
 private val cryptoNeverExpectedParams = LpmBillingAddressFormParams(

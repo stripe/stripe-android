@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -51,8 +52,13 @@ internal class IntentConfirmationModule {
             intentConfirmationInterceptorFactory = interceptorFactory,
             paymentLauncherFactory = { hostActivityLauncher, statusBarColor ->
                 stripePaymentLauncherAssistedFactory.create(
-                    publishableKey = { paymentConfigurationProvider.get().publishableKey },
-                    stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
+                    apiConfigurationProvider = {
+                        val configuration = paymentConfigurationProvider.get()
+                        ApiConfiguration.State(
+                            publishableKey = configuration.publishableKey,
+                            stripeAccountId = configuration.stripeAccountId,
+                        )
+                    },
                     hostActivityLauncher = hostActivityLauncher,
                     statusBarColor = statusBarColor,
                     includePaymentSheetNextHandlers = true,

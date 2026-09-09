@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
     integrationType: ProductIntegrationType,
+    apiConfigurationTestType: ApiConfigurationTestType,
     builder: ProductIntegrationBuilder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
     block: suspend (ProductIntegrationTestRunnerContext) -> Unit,
@@ -22,6 +23,7 @@ internal fun runProductIntegrationTest(
         ProductIntegrationType.PaymentSheet -> {
             runPaymentSheetTest(
                 networkRule = networkRule,
+                apiConfigurationTestType = apiConfigurationTestType,
                 integrationType = IntegrationType.Compose,
                 builder = {
                     integrationBuilder.applyToPaymentSheetBuilder(this)
@@ -35,6 +37,7 @@ internal fun runProductIntegrationTest(
         ProductIntegrationType.FlowController -> {
             runFlowControllerTest(
                 networkRule = networkRule,
+                apiConfigurationTestType = apiConfigurationTestType,
                 integrationType = IntegrationType.Compose,
                 builder = {
                     integrationBuilder.applyToFlowControllerBuilder(this)

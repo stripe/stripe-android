@@ -28,7 +28,6 @@ import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageSc
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
-import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
@@ -36,8 +35,8 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityCont
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
-import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
@@ -145,22 +144,14 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideEmbeddedNavigator(
-            launchMode: EmbeddedLaunchMode,
-            formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
-            initialManageScreenFactory: InitialManageScreenFactory,
-            initialPaymentOptionsScreenFactory: InitialPaymentOptionsScreenFactory,
+            initialScreenFactory: EmbeddedInitialScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
-            val initialBackStack = when (launchMode) {
-                is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
-                is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
-                is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
-            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialBackStack = initialBackStack,
+                initialBackStack = initialScreenFactory.create(),
             )
         }
 

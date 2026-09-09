@@ -18,7 +18,7 @@ import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import org.junit.Test
@@ -73,10 +73,10 @@ class KlarnaDefinitionTest {
 
         val countrySection = formElements[2] as SectionElement
         assertThat(countrySection.identifier).isEqualTo(
-            IdentifierSpec.Generic("billing_details[address][country]_section"),
+            FormFieldId.Generic("billing_details[address][country]_section"),
         )
         val countryElement = countrySection.fields.single() as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+        assertThat(countryElement.identifier).isEqualTo(FormFieldId.Country)
         assertThat(countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
             "🇩🇪 Germany",
@@ -87,7 +87,7 @@ class KlarnaDefinitionTest {
                 .flatMap { it.fields }
                 .filterIsInstance<CountryElement>(),
         ).hasSize(1)
-        assertThat(countrySection.fields.map { it.identifier }).containsExactly(IdentifierSpec.Country)
+        assertThat(countrySection.fields.map { it.identifier }).containsExactly(FormFieldId.Country)
     }
 
     @Test

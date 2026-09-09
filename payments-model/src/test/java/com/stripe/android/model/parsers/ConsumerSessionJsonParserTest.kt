@@ -204,4 +204,33 @@ class ConsumerSessionJsonParserTest {
         val result = ConsumerSessionJsonParser().parse(json)
         assertThat(result?.supportedPaymentDetailsTypes).isEmpty()
     }
+
+    @Test
+    fun `Parse consumer with link_session_key`() {
+        val json = JSONObject(
+            """
+                {
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "link_session_key": "lsk_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = ConsumerSessionJsonParser().parse(json)
+
+        assertThat(result?.linkSessionKey).isEqualTo("lsk_123")
+    }
+
+    @Test
+    fun `Parse consumer without link_session_key returns null`() {
+        val result = ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFIED_JSON)
+
+        assertThat(result?.linkSessionKey).isNull()
+    }
 }

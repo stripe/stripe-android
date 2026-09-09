@@ -182,7 +182,7 @@ internal class PaymentSheetActivityTest {
     }
 
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), any(), any(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), any(), any()) } doReturn paymentLauncher
     }
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()

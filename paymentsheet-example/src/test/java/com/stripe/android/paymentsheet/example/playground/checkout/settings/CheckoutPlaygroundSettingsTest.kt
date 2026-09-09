@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import org.junit.Test
 
 class CheckoutPlaygroundSettingsTest {
@@ -12,7 +14,7 @@ class CheckoutPlaygroundSettingsTest {
             defaultBackendUrl = "https://default.example/",
         )
 
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.session.backendUrl))
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.backendUrl])
             .isEqualTo("https://default.example/")
     }
 
@@ -27,7 +29,7 @@ class CheckoutPlaygroundSettingsTest {
 
         settings.reset()
 
-        assertThat(settings.value(definition)).isEqualTo("https://default.example/")
+        assertThat(settings[definition]).isEqualTo("https://default.example/")
     }
 
     @Test
@@ -36,15 +38,35 @@ class CheckoutPlaygroundSettingsTest {
 
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
-        assertThat(restored.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale))
+        assertThat(restored[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
             .isEqualTo(1.25f)
+    }
+
+    @Test
+    fun `payment method saving survives JSON round trip`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        settings.update(definition, false)
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[definition]).isFalse()
+    }
+
+    @Test
+    fun `customer ID survives JSON round trip`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.customerId
+        settings.update(definition, "cus_custom")
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[definition]).isEqualTo("cus_custom")
     }
 
     @Test
     fun `unknown and invalid persisted values fall back to defaults`() = runScenario(
         json = """{"unknown":"value","currency.appearance.scale":"not-a-number"}"""
     ) {
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale))
+        assertThat(settings[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
             .isEqualTo(1f)
     }
 
@@ -55,14 +77,14 @@ class CheckoutPlaygroundSettingsTest {
 
         settings.reset()
 
-        assertThat(settings.value(definition)).isTrue()
+        assertThat(settings[definition]).isTrue()
     }
 
     @Test
     fun `terms display defaults to automatic`() = runScenario {
         val definitions = CheckoutPlaygroundDefinitions.Controller.payment.terms.values.values
 
-        assertThat(definitions.map(settings::value).distinct())
+        assertThat(definitions.map { settings[it] }.distinct())
             .containsExactly(CheckoutTermsDisplay.Automatic)
     }
 
@@ -93,28 +115,139 @@ class CheckoutPlaygroundSettingsTest {
 
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
-        assertThat(restored.value(definition)).isEqualTo(Color(0xFF112233))
+        assertThat(restored[definition]).isEqualTo(Color(0xFF112233))
+    }
+
+    @Test
+    fun `import replaces current settings`() = runScenario {
+        val currency = CheckoutPlaygroundDefinitions.session.currency
+        val paymentMethodSave = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        settings.updateSerialized(currency, "eur")
+        settings.update(paymentMethodSave, false)
+        val exportedJson = settings.asJsonString()
+        settings.updateSerialized(currency, "usd")
+        settings.update(paymentMethodSave, true)
+
+        val result = settings.importJson(exportedJson)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(settings.serializedValue(currency)).isEqualTo("eur")
+        assertThat(settings[paymentMethodSave]).isFalse()
+    }
+
+    @Test
+    fun `malformed import does not change current settings`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.currency
+        settings.updateSerialized(definition, "eur")
+
+        val result = settings.importJson("not json")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(settings.serializedValue(definition)).isEqualTo("eur")
+    }
+
+    @Test
+    fun `import ignores unknown setting`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.session.currency
+        settings.updateSerialized(definition, "usd")
+
+        val result = settings.importJson("""{"unknown":"value","session.currency":"eur"}""")
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(settings.serializedValue(definition)).isEqualTo("eur")
+    }
+
+    @Test
+    fun `import with invalid setting does not change current settings`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale
+        settings.update(definition, 1.25f)
+
+        val result = settings.importJson("""{"currency.appearance.scale":"not-a-number"}""")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(settings[definition]).isEqualTo(1.25f)
     }
 
     @Test
     fun `new customer is saved as returning customer`() = runScenario {
-        settings.update(CheckoutPlaygroundDefinitions.session.customer, "new")
+        settings.update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.New)
 
         settings.saveReturningCustomer("cus_123")
 
         assertThat(settings.returningCustomerId).isEqualTo("cus_123")
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.session.customer)).isEqualTo("returning")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
     }
 
     @Test
-    fun `reset clears returning customer`() = runScenario {
+    fun `reset preserves returning customer ID as default`() = runScenario {
         settings.saveReturningCustomer("cus_123")
-        assertThat(settings.returningCustomerId).isEqualTo("cus_123")
+        settings.update(CheckoutPlaygroundDefinitions.session.customerId, "cus_custom")
 
         settings.reset()
 
-        assertThat(settings.returningCustomerId).isNull()
-        assertThat(settings.value(CheckoutPlaygroundDefinitions.session.customer)).isEqualTo("guest")
+        assertThat(settings.returningCustomerId).isEqualTo("cus_123")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Guest)
+    }
+
+    @Test
+    fun `preset atomically replaces settings and persists once`() {
+        val persisted = mutableListOf<Map<String, String>>()
+        val settings = CheckoutPlaygroundSettings.createInMemory(persist = persisted::add)
+        settings.update(CheckoutPlaygroundDefinitions.session.currency, Currency.GBP)
+        persisted.clear()
+        val preset = checkoutPlaygroundPreset {
+            set(CheckoutPlaygroundDefinitions.session.currency, Currency.EUR)
+            set(CheckoutPlaygroundDefinitions.session.merchant, Merchant.FR)
+        }
+
+        settings.applyPreset(preset)
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.currency]).isEqualTo(Currency.EUR)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.FR)
+        assertThat(persisted).hasSize(1)
+    }
+
+    @Test
+    fun `preset restores values not overridden to defaults`() = runScenario {
+        val save = CheckoutPlaygroundDefinitions.session.paymentMethodSave
+        settings.update(save, false)
+
+        settings.applyPreset(
+            checkoutPlaygroundPreset {
+                set(CheckoutPlaygroundDefinitions.session.currency, Currency.EUR)
+            }
+        )
+
+        assertThat(settings[save]).isTrue()
+    }
+
+    @Test
+    fun `returning customer preset preserves stored customer ID`() = runScenario {
+        settings.saveReturningCustomer("cus_123")
+
+        settings.applyPreset(
+            checkoutPlaygroundPreset {
+                set(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.Returning)
+            }
+        )
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isEqualTo("cus_123")
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
+    }
+
+    @Test
+    fun `legacy JSON without new settings uses defaults`() {
+        val settings = CheckoutPlaygroundSettings.createInMemory(
+            json = """{"session.customer":"returning","session.currency":"eur"}""",
+        )
+
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.paymentMethodRemove]).isTrue()
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.US)
+        assertThat(settings[CheckoutPlaygroundDefinitions.session.adaptivePricingCountry])
+            .isEqualTo(AdaptivePricingCountry.None)
     }
 
     private fun runScenario(

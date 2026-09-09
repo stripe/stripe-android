@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -546,10 +545,6 @@ class PaymentSelectionUpdaterTest {
                 stripeIntent = intent.copy(
                     paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
                 ),
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("card"),
-                    SharedDataSpec("paypal"),
-                ),
                 linkState = LinkState(
                     configuration = mock(),
                     loginState = LinkState.LoginState.LoggedOut,
@@ -657,9 +652,6 @@ class PaymentSelectionUpdaterTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent.copy(
                     setupFutureUsage = setupFutureUsage,
-                ),
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("card"),
                 ),
                 isGooglePayReady = true,
                 termsDisplay = termsDisplay,

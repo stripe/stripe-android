@@ -48,7 +48,6 @@ dependencies {
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
-    testImplementation testLibs.json
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit

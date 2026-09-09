@@ -14,7 +14,7 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
     defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
-    private val banks = BecsDebitBanks(context)
+    private val banks = BecsDebitBanks()
 
     var onBankChangedCallback: (BecsDebitBanks.Bank?) -> Unit = {}
     var onCompletedCallback: () -> Unit = {}

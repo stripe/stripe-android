@@ -97,6 +97,7 @@ internal class StripeIdentityVerificationSheet internal constructor(
                 ephemeralKeySecret,
                 configuration.brandLogo,
                 configuration.brandColor,
+                configuration.biometricConsent,
                 injectorKey,
                 System.currentTimeMillis()
             )

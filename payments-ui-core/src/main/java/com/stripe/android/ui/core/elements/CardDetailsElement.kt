@@ -10,7 +10,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryMonthFormFieldEntry
 import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryYearFormFieldEntry
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -25,9 +25,9 @@ import kotlinx.coroutines.flow.StateFlow
  * card number, expiration date, and CVC.
  */
 internal class CardDetailsElement(
-    identifier: IdentifierSpec,
+    identifier: FormFieldId,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    initialValues: Map<IdentifierSpec, String?>,
+    initialValues: Map<FormFieldId, String?>,
     coroutineScope: CoroutineScope,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -50,23 +50,23 @@ internal class CardDetailsElement(
     override fun sectionFieldErrorController(): SectionFieldValidationController =
         controller
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         // Nothing from FormArguments to populate
     }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         stateFlowOf(
             listOfNotNull(
                 controller.nameElement?.identifier,
                 controller.numberElement.identifier,
                 controller.expirationDateElement.identifier,
                 controller.cvcElement.identifier,
-                IdentifierSpec.CardBrand,
-                IdentifierSpec.PreferredCardBrand.takeIf { cbcEligibility is CardBrandChoiceEligibility.Eligible },
+                FormFieldId.CardBrand,
+                FormFieldId.PreferredCardBrand.takeIf { cbcEligibility is CardBrandChoiceEligibility.Eligible },
             )
         )
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
         val flows = buildList {
             if (controller.nameElement != null) {
                 add(
@@ -87,13 +87,13 @@ internal class CardDetailsElement(
             )
             add(
                 controller.numberElement.controller.cardBrandFlow.mapAsStateFlow {
-                    IdentifierSpec.CardBrand to FormFieldEntry(it.code, true)
+                    FormFieldId.CardBrand to FormFieldEntry(it.code, true)
                 }
             )
             if (cbcEligibility is CardBrandChoiceEligibility.Eligible) {
                 add(
                     controller.numberElement.controller.selectedCardBrandFlow.mapAsStateFlow { brand ->
-                        IdentifierSpec.PreferredCardBrand to FormFieldEntry(
+                        FormFieldId.PreferredCardBrand to FormFieldEntry(
                             value = brand.code.takeUnless { brand == CardBrand.Unknown },
                             isComplete = true
                         )
@@ -102,12 +102,12 @@ internal class CardDetailsElement(
             }
             add(
                 controller.expirationDateElement.controller.formFieldValue.mapAsStateFlow {
-                    IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it)
+                    FormFieldId.CardExpMonth to getExpiryMonthFormFieldEntry(it)
                 }
             )
             add(
                 controller.expirationDateElement.controller.formFieldValue.mapAsStateFlow {
-                    IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(it)
+                    FormFieldId.CardExpYear to getExpiryYearFormFieldEntry(it)
                 }
             )
 
@@ -115,7 +115,7 @@ internal class CardDetailsElement(
                 controller.cardPillElement.mapAsStateFlow { element ->
                     val hasCardPill = element != null
 
-                    IdentifierSpec.CardValidatedScan to FormFieldEntry(hasCardPill.toString(), true)
+                    FormFieldId.CardValidatedScan to FormFieldEntry(hasCardPill.toString(), true)
                 }
             )
         }

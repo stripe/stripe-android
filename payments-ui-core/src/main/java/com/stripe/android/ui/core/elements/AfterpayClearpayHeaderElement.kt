@@ -7,21 +7,21 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AfterpayClearpayHeaderElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     override val controller: Controller? = null,
     val currency: String?
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 
     val infoUrl: String

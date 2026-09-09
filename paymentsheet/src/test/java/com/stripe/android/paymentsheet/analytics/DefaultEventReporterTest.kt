@@ -306,15 +306,6 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onLpmSpecFailure fires event`() = runScenario {
-        eventReporter.onLpmSpecFailure(errorMessage = "Failed to serialize LPM spec")
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "luxe_serialize_failure")
-        assertThat(request.params).containsEntry("error_message", "Failed to serialize LPM spec")
-    }
-
-    @Test
     fun `onDismiss fires event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 

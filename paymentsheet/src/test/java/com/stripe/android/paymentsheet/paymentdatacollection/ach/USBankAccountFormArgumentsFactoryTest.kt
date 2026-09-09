@@ -30,7 +30,7 @@ internal class USBankAccountFormArgumentsFactoryTest {
             paymentMethodMetadata = metadata,
             selectedPaymentMethodCode = PaymentMethod.Type.Link.code,
             hostedSurface = "test_surface",
-            host = USBankAccountFormArgumentsFactory.Host(
+            integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                 isCompleteFlow = true,
                 shippingDetails = null,
                 draftPaymentSelection = draftPaymentSelection,

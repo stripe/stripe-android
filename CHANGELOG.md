@@ -1,11 +1,23 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+### PaymentSheet
+* [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+
+## 23.18.0 - 2026-09-08
 
 ### PaymentSheet
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.
+* [ADDED] Added support for Korean cards.
+* [ADDED] Added support for Naver Pay.
+* [ADDED] Added support for Kakao Pay.
+* [ADDED] Added support for Scalapay.
+
+### AddressElement
+* [CHANGED] Use Stripe-hosted address autocomplete by default.
 
 ## 23.17.1 - 2026-08-31
 

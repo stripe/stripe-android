@@ -23,8 +23,6 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.LpmSerializer
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodMetadataFactory {
     @Suppress("LongMethod")
@@ -40,7 +38,6 @@ internal object PaymentMethodMetadataFactory {
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
-        sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
@@ -123,7 +120,6 @@ internal object PaymentMethodMetadataFactory {
             } else {
                 null
             },
-            sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
@@ -157,12 +153,6 @@ internal object PaymentMethodMetadataFactory {
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
         )
-    }
-
-    private fun createSharedDataSpecs(): List<SharedDataSpec> {
-        val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
-        val specsString = inputStream.bufferedReader().use { it.readText() }
-        return LpmSerializer.deserializeList(specsString).getOrThrow()
     }
 
     fun defaultIntegrationMetadata(stripeIntent: StripeIntent): IntegrationMetadata {

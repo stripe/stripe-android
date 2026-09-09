@@ -94,14 +94,14 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$TextF
 	public final fun getLambda$549433638$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/uicore/elements/FormFieldId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/IdentifierSpec$$serializer;
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/FormFieldId$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/uicore/elements/FormFieldId;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/elements/IdentifierSpec;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/elements/FormFieldId;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }

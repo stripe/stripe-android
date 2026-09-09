@@ -3,12 +3,12 @@ package com.stripe.android.checkout
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.elements.ece.asPaymentSheet
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration as PaymentSheetBillingDetails
 
 @OptIn(CheckoutSessionPreview::class, CardFundingFilteringPrivatePreview::class)
 internal class CheckoutCommonConfigurationFactory @Inject constructor(
@@ -26,7 +26,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
-            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
+            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
     )
 
     fun createForExpressCheckoutElement(
@@ -42,9 +42,19 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             googlePayConfiguration =
                 configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
             linkConfiguration = expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
-            billingDetailsCollectionConfiguration = expressCheckoutElementConfiguration
-                .billingDetailsCollectionConfiguration
-                .asPaymentSheet(requiresBillingAddress = checkoutSessionResponse.requiresBillingAddress),
+            billingDetailsCollectionConfiguration = PaymentSheetBillingDetails(
+                email = if (expressCheckoutElementConfiguration.emailRequired) {
+                    PaymentSheetBillingDetails.CollectionMode.Always
+                } else {
+                    PaymentSheetBillingDetails.CollectionMode.Automatic
+                },
+                address = if (checkoutSessionResponse.requiresBillingAddress) {
+                    PaymentSheetBillingDetails.AddressCollectionMode.Full
+                } else {
+                    PaymentSheetBillingDetails.AddressCollectionMode.Automatic
+                },
+                attachDefaultsToPaymentMethod = true,
+            ),
         )
     }
 
@@ -59,7 +69,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
-            configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse),
+            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
     )
 
     private fun createCommonConfiguration(

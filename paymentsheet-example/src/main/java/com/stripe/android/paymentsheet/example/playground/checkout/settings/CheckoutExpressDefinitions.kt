@@ -43,40 +43,6 @@ internal object CheckoutExpressDefinitions {
         defaultButtonType = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.Pay,
         buttonTypeOptions = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.entries,
     )
-    val shippingRequired = boolean(
-        key = "express.shipping_required",
-        displayName = "Shipping address required",
-        defaultValue = false,
-    )
-
-    val billing = BillingDefinitions()
-
-    internal class BillingDefinitions {
-        val name = enumChoice(
-            key = "express.billing.name",
-            displayName = "Name",
-            defaultValue = ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                .CollectionMode.Automatic,
-        )
-        val email = enumChoice(
-            key = "express.billing.email",
-            displayName = "Email",
-            defaultValue = ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                .CollectionMode.Automatic,
-        )
-        val address = enumChoice(
-            key = "express.billing.address",
-            displayName = "Address",
-            defaultValue = ExpressCheckoutElement.Configuration.BillingDetailsCollectionConfiguration
-                .AddressCollectionMode.Automatic,
-        )
-        val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-            key = "express.billing",
-            displayName = "Billing details collection",
-            children = arrayOf(name, email, address),
-        )
-    }
-
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
@@ -119,8 +85,6 @@ internal object CheckoutExpressDefinitions {
                 shouldSetConfiguration,
                 link.configuration,
                 googlePay.configuration,
-                shippingRequired,
-                billing.configuration,
                 appearance.configuration,
             ),
         )

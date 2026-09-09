@@ -16,7 +16,6 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -32,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -266,10 +266,7 @@ internal class CheckoutControllerTest {
     fun `configure upgrades Automatic to Full when session requires billing address`() =
         runConfigureScenario(
             configuration = CheckoutController.Configuration().paymentElement(
-                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
-                    BillingDetailsCollectionConfiguration()
-                        .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
-                )
+                PaymentElement.Configuration()
             ),
             networkSetup = {
                 networkRule.checkoutInit(
@@ -714,69 +711,28 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateBillingAddress sends tax_region and stores address when automatic tax targets billing`() =
-        runMutationScenario(initModifier = automaticTaxFor("billing")) {
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[city]", "Denver"),
-                bodyPart("tax_region[postal_code]", "80202"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-                responseFactory = successResponseFactory(automaticTaxFor("billing")),
-            )
-
-            val result = controller.updateBillingAddress(
-                name = "Jane",
-                address = fullAddress,
-            )
-
-            result.getOrThrow()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
-        }
-
-    @Test
-    fun `updateBillingAddress does not send tax_region when automatic tax targets shipping`() =
-        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
-            // Automatic tax targets shipping, so a billing address update stays local: no request.
-            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
-
-            result.getOrThrow()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
-        }
-
-    @Test
-    fun `updateBillingAddress stores address without a network call when automatic tax is disabled`() =
+    fun `commitShippingAddress stores local details and reloads payment element state`() =
         runMutationScenario {
-            // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
-            // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
+            val response = committedState().checkoutSessionResponse
+            val address = fullAddress.build()
+
+            val result = controller.commitShippingAddress(
+                name = "John",
+                address = address,
+            )
 
             result.getOrThrow()
+
             val state = committedState()
-            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
-            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
+            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
+            assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+                address.asPaymentSheet()
+            )
         }
 
-    @Test
-    fun `updateBillingAddress does not store address on failure`() =
-        runMutationScenario(initModifier = automaticTaxFor("billing")) {
-            networkRule.checkoutUpdate { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error": {"message": "Invalid address"}}""")
-            }
-
-            val result = controller.updateBillingAddress(name = "Jane", address = fullAddress)
-
-            assertThat(result.isFailure).isTrue()
-            val state = committedState()
-            assertThat(state.collectedDetails.billingName).isNull()
-            assertThat(state.collectedDetails.billingAddress).isNull()
-        }
-
-    @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
             responseFactory = successResponseFactory { json ->
@@ -1045,17 +1001,6 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateBillingAddress is not gated by allowedShippingCountries`() =
-        runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
-            val result = controller.updateBillingAddress(
-                name = null,
-                address = Address().country("DE"),
-            )
-
-            assertThat(result.isSuccess).isTrue()
-        }
-
-    @Test
     fun `updateShippingAddress with missing country throws IllegalArgumentException before allowlist check`() =
         runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
             // Address.build() requires a country and throws synchronously, before the allowlist is
@@ -1127,15 +1072,6 @@ internal class CheckoutControllerTest {
                 .put("automatic_tax_address_source", source),
         )
     }
-
-    // Simulates process death by persisting the handle's registered providers into a bundle and
-    // rebuilding a fresh handle from it, the way SavedStateRegistry does across a real restart. The
-    // controller's namespaced child is then restored from that serialized state.
-    // Persisting a handle can only be done through the restricted savedStateProvider(); the same
-    // suppression the production code uses applies here.
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.simulateProcessDeath(): SavedStateHandle =
-        SavedStateHandle.createHandle(savedStateProvider().saveState(), null)
 
     @Suppress("RestrictedApi")
     private fun parentHandleWithState(state: CheckoutControllerState): SavedStateHandle {

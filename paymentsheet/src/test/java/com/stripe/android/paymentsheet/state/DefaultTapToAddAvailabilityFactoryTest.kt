@@ -92,7 +92,6 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
-            paymentMethodSpecs = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantCountry = null,
             isGooglePayEnabled = true,

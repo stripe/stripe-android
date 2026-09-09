@@ -27,7 +27,7 @@ import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -497,31 +497,31 @@ class LinkApiRepositoryTest {
             )
         val formValues = newLinkPaymentDetails.buildFormValues()
         assertThat(formValues).containsEntry(
-            IdentifierSpec.get("type"),
+            FormFieldId.get("type"),
             "card"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardNumber,
+            FormFieldId.CardNumber,
             "5555555555554444"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardCvc,
+            FormFieldId.CardCvc,
             "123"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardExpMonth,
+            FormFieldId.CardExpMonth,
             "12"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardExpYear,
+            FormFieldId.CardExpYear,
             "2050"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.Country,
+            FormFieldId.Country,
             "US"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.PostalCode,
+            FormFieldId.PostalCode,
             "12345"
         )
     }
@@ -1045,14 +1045,14 @@ class LinkApiRepositoryTest {
     private val cardPaymentMethodCreateParams =
         FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
             mapOf(
-                IdentifierSpec.CardNumber to FormFieldEntry("5555555555554444", true),
-                IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-                IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
-                IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
-                IdentifierSpec.Email to FormFieldEntry("jenny@example.com", true),
-                IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", true),
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.PostalCode to FormFieldEntry("12345", true),
+                FormFieldId.CardNumber to FormFieldEntry("5555555555554444", true),
+                FormFieldId.CardCvc to FormFieldEntry("123", true),
+                FormFieldId.CardExpMonth to FormFieldEntry("12", true),
+                FormFieldId.CardExpYear to FormFieldEntry("2050", true),
+                FormFieldId.Email to FormFieldEntry("jenny@example.com", true),
+                FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.PostalCode to FormFieldEntry("12345", true),
             ),
             "card",
             false,
@@ -1062,10 +1062,10 @@ class LinkApiRepositoryTest {
     private val cardPaymentMethodCreateParamsWithoutBillingAddress =
         FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardNumber to FormFieldEntry("5555555555554444", true),
-                IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-                IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
-                IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
+                FormFieldId.CardNumber to FormFieldEntry("5555555555554444", true),
+                FormFieldId.CardCvc to FormFieldEntry("123", true),
+                FormFieldId.CardExpMonth to FormFieldEntry("12", true),
+                FormFieldId.CardExpYear to FormFieldEntry("2050", true),
             ),
             code = "card",
             requiresMandate = false,

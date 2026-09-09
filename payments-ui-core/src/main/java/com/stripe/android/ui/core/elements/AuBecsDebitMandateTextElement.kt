@@ -5,7 +5,7 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AuBecsDebitMandateTextElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     val merchantName: String?,
     override val controller: InputController? = null
 ) : FormElement {
@@ -26,6 +26,6 @@ data class AuBecsDebitMandateTextElement(
     override val mandateText: ResolvableString =
         resolvableString(id = R.string.stripe_au_becs_mandate, merchantName ?: "")
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 }
