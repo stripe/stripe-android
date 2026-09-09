@@ -139,6 +139,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LpmNetworkTestModule::class,
+        ApiConfigurationFromNamedModule::class,
     ]
 )
 @Singleton
