@@ -13,7 +13,7 @@ internal fun configuration(
 internal fun boolean(
     key: String,
     displayName: String,
-    defaultValue: Boolean,
+    defaultValue: Boolean = false,
     updateRequest: CheckoutPlaygroundRequestUpdater<Boolean> = {},
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
     applyFeatureFlags: (Boolean) -> Unit = {},
@@ -22,7 +22,6 @@ internal fun boolean(
     displayName = displayName,
     defaultValue = defaultValue,
     options = listOf("On" to true, "Off" to false),
-    serialize = Boolean::toString,
     updateRequest = updateRequest,
     isApplicable = isApplicable,
     applyFeatureFlags = applyFeatureFlags,
@@ -47,9 +46,9 @@ internal inline fun <reified T : Enum<T>> enumChoice(
 internal fun <T> choice(
     key: String,
     displayName: String,
-    defaultValue: T,
     options: List<Pair<String, T>>,
-    serialize: (T) -> String,
+    defaultValue: T = options.first().second,
+    serialize: (T) -> String = { it.toString() },
     updateRequest: CheckoutPlaygroundRequestUpdater<T> = {},
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
     applyFeatureFlags: (T) -> Unit = {},

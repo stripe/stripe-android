@@ -24,7 +24,6 @@ internal object CheckoutSessionDefinitions {
     val customer = choice(
         key = "session.customer",
         displayName = "Customer",
-        defaultValue = CheckoutCustomer.Guest,
         options = CheckoutCustomer.entries.map { it.displayName to it },
         serialize = CheckoutCustomer::serializedValue,
         updateRequest = { customer -> put("customer", customer.serializedValue) },
@@ -76,7 +75,6 @@ internal object CheckoutSessionDefinitions {
     val merchant = choice(
         key = "session.merchant",
         displayName = "Merchant",
-        defaultValue = Merchant.US,
         options = Merchant.entries.filter { it != Merchant.Custom }.map { it.name to it },
         serialize = Merchant::value,
         updateRequest = { merchant -> put("merchant_country_code", merchant.value) },
@@ -108,7 +106,6 @@ internal object CheckoutSessionDefinitions {
     val automaticTax = boolean(
         key = "session.automatic_tax",
         displayName = "Automatic tax",
-        defaultValue = false,
         updateRequest = { enabled ->
             put("automatic_tax", enabled)
         },
@@ -116,7 +113,6 @@ internal object CheckoutSessionDefinitions {
     val adaptivePricingCountry = choice(
         key = "session.adaptive_pricing_country",
         displayName = "Adaptive pricing country",
-        defaultValue = AdaptivePricingCountry.None,
         options = AdaptivePricingCountry.entries.map { it.displayName to it },
         serialize = AdaptivePricingCountry::serializedValue,
         updateRequest = { country ->
@@ -129,19 +125,16 @@ internal object CheckoutSessionDefinitions {
     val shippingAddressCollection = boolean(
         key = "session.shipping_address_collection",
         displayName = "Collect shipping address",
-        defaultValue = false,
         updateRequest = { enabled -> put("shipping_address_collection", enabled) },
     )
     val billingAddressCollection = boolean(
         key = "session.billing_address_collection",
         displayName = "Collect billing address",
-        defaultValue = false,
         updateRequest = { enabled -> put("billing_address_collection", enabled) },
     )
     val linkType = choice(
         key = "controller.link_type",
         displayName = "Link Type",
-        defaultValue = LinkType.ServerControlled,
         options = LinkType.entries.map { it.value to it },
         serialize = LinkType::value,
         applyFeatureFlags = LinkType::applyFeatureFlags,
