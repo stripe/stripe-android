@@ -1640,16 +1640,16 @@ internal class PlaygroundTestDriver(
             .performScrollToNode(hasTestTag(PAYMENT_SUCCESS_INSTITUTION_ID))
         clickButtonWithTag(PAYMENT_SUCCESS_INSTITUTION_ID)
 
-        selectors.awaitBrowserAndDismissFirstRun(
-            getBrowser(BrowserUI.convert(testParameters.useBrowser))
-        )
+        val browser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+        selectors.awaitBrowserAndDismissFirstRun(browser)
         UiAutomatorText(
             label = "Success",
             labelMatchesExactly = true,
             device = device,
         ).click()
-        awaitActivityClass(
-            className = FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY,
+        submitBrowserAccountSelectionIfRequired(browser)
+        waitUntilTag(
+            tag = "loaded_picker_title",
             timeout = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT,
         )
         clickButtonWithTag("connect_account_button")
@@ -1757,6 +1757,33 @@ internal class PlaygroundTestDriver(
         }
 
         composeTestRule.onNode(matcher).performClick()
+    }
+
+    private fun submitBrowserAccountSelectionIfRequired(browser: BrowserUI) {
+        val connectButton = UiAutomatorText(
+            label = "Connect account",
+            labelMatchesExactly = true,
+            device = device,
+        )
+        composeTestRule.waitUntil(
+            conditionDescription = "${browser.name} to close or show its account selection button",
+            timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
+        ) {
+            val isBrowserForeground = selectors.isBrowserForeground(browser)
+            when {
+                isBrowserForeground && connectButton.exists() -> {
+                    connectButton.click()
+                    true
+                }
+                else -> !isBrowserForeground
+            }
+        }
+        composeTestRule.waitUntil(
+            conditionDescription = "${browser.name} to close after account selection",
+            timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
+        ) {
+            !selectors.isBrowserForeground(browser)
+        }
     }
 
     private fun clickButtonWithContentDescription(contentDescription: String) {

@@ -121,7 +121,6 @@ internal object DefaultBillingAddressSettingsDefinition :
             )
         }
     }
-
 }
 
 internal sealed class DefaultBillingAddress(val value: String) {
