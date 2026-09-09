@@ -7,151 +7,126 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.whenever
 
 internal class CheckoutPaymentSelectionHandlerTest {
     @Test
-    fun `saved selection completes only after controller refresh succeeds`() = runTest {
+    fun `saved selection completes only after selector succeeds`() = runScenario {
         val selection = savedSelection()
-        val controller = mock<CheckoutController>()
-        whenever(controller.isUpdating).thenReturn(MutableStateFlow(false))
-        whenever { controller.selectSavedPaymentMethod(selection) }.thenReturn(Result.success(Unit))
-        val scenario = createScenario(controller, this)
 
-        scenario.handler.select(selection, true)
+        handler.select(selection, true)
 
-        assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
-        scenario.selectionHolder.selectionCalls.expectNoEvents()
-        verify(controller).isUpdating
-        verify(controller).selectSavedPaymentMethod(selection)
-        verifyNoMoreInteractions(controller)
-        scenario.ensureAllEventsConsumed()
+        assertThat(savedPaymentMethodSelector.selectCalls.awaitItem()).isEqualTo(selection)
+        assertThat(immediateActionHandler.calls.awaitItem()).isEqualTo(Unit)
+        selectionHolder.selectionCalls.expectNoEvents()
     }
 
     @Test
-    fun `saved selection is rejected while Checkout is updating`() = runTest {
-        val selection = savedSelection()
-        val controller = mock<CheckoutController>()
-        whenever(controller.isUpdating).thenReturn(MutableStateFlow(true))
-        val scenario = createScenario(controller, this)
+    fun `saved selection is rejected while Checkout is updating`() = runScenario(
+        isProcessing = true,
+    ) {
+        handler.select(savedSelection(), true)
 
-        scenario.handler.select(selection, true)
-
-        scenario.completions.expectNoEvents()
-        scenario.selectionHolder.selectionCalls.expectNoEvents()
-        verify(controller).isUpdating
-        verify(controller, never()).selectSavedPaymentMethod(selection)
-        verifyNoMoreInteractions(controller)
-        scenario.ensureAllEventsConsumed()
+        savedPaymentMethodSelector.selectCalls.expectNoEvents()
+        immediateActionHandler.calls.expectNoEvents()
+        selectionHolder.selectionCalls.expectNoEvents()
     }
 
     @Test
-    fun `undispatched controller admission rejects a duplicate selection`() = runTest {
+    fun `undispatched selector admission rejects a duplicate selection`() = runScenario {
         val firstSelection = savedSelection()
         val secondSelection = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_second")
         )
-        val controller = mock<CheckoutController>()
-        val isUpdating = MutableStateFlow(false)
-        whenever(controller.isUpdating).thenReturn(isUpdating)
-        whenever { controller.selectSavedPaymentMethod(firstSelection) }.thenAnswer {
-            isUpdating.value = true
-            Result.success(Unit)
-        }
-        val scenario = createScenario(controller, this)
+        savedPaymentMethodSelector.onSelect = { processing.value = true }
 
-        scenario.handler.select(firstSelection, true)
-        scenario.handler.select(secondSelection, true)
+        handler.select(firstSelection, true)
+        handler.select(secondSelection, true)
 
-        assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
-        scenario.selectionHolder.selectionCalls.expectNoEvents()
-        verify(controller, times(2)).isUpdating
-        verify(controller).selectSavedPaymentMethod(firstSelection)
-        verify(controller, never()).selectSavedPaymentMethod(secondSelection)
-        verifyNoMoreInteractions(controller)
-        scenario.ensureAllEventsConsumed()
+        assertThat(savedPaymentMethodSelector.selectCalls.awaitItem()).isEqualTo(firstSelection)
+        savedPaymentMethodSelector.selectCalls.expectNoEvents()
+        assertThat(immediateActionHandler.calls.awaitItem()).isEqualTo(Unit)
+        selectionHolder.selectionCalls.expectNoEvents()
     }
 
     @Test
-    fun `failed saved selection can retry without completing`() = runTest {
+    fun `failed saved selection can retry without completing`() = runScenario {
         val selection = savedSelection()
-        val controller = mock<CheckoutController>()
-        whenever(controller.isUpdating).thenReturn(MutableStateFlow(false))
-        whenever { controller.selectSavedPaymentMethod(selection) }.thenReturn(
-            Result.failure(IllegalStateException("update failed")),
-            Result.success(Unit),
-        )
-        val scenario = createScenario(controller, this)
+        savedPaymentMethodSelector.result = Result.failure(IllegalStateException("update failed"))
 
-        scenario.handler.select(selection, true)
+        handler.select(selection, true)
 
-        scenario.completions.expectNoEvents()
+        assertThat(savedPaymentMethodSelector.selectCalls.awaitItem()).isEqualTo(selection)
+        immediateActionHandler.calls.expectNoEvents()
 
-        scenario.handler.select(selection, true)
+        savedPaymentMethodSelector.result = Result.success(Unit)
+        handler.select(selection, true)
 
-        assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
-        scenario.selectionHolder.selectionCalls.expectNoEvents()
-        verify(controller, times(2)).isUpdating
-        verify(controller, times(2)).selectSavedPaymentMethod(selection)
-        verifyNoMoreInteractions(controller)
-        scenario.ensureAllEventsConsumed()
+        assertThat(savedPaymentMethodSelector.selectCalls.awaitItem()).isEqualTo(selection)
+        assertThat(immediateActionHandler.calls.awaitItem()).isEqualTo(Unit)
+        selectionHolder.selectionCalls.expectNoEvents()
     }
 
     @Test
-    fun `Google Pay updates selection before completion without refreshing Checkout`() = runTest {
-        val controller = mock<CheckoutController>()
-        whenever(controller.isUpdating).thenReturn(MutableStateFlow(false))
-        val scenario = createScenario(controller, this)
+    fun `Google Pay updates selection before completion without selecting a saved method`() = runScenario {
+        immediateActionHandler.onInvoke = {
+            assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        }
 
-        scenario.handler.select(PaymentSelection.GooglePay, false)
+        handler.select(PaymentSelection.GooglePay, false)
 
-        assertThat(scenario.selectionHolder.selectionCalls.awaitItem()).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
-        verifyNoInteractions(controller)
-        scenario.ensureAllEventsConsumed()
+        assertThat(selectionHolder.selectionCalls.awaitItem()).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(immediateActionHandler.calls.awaitItem()).isEqualTo(Unit)
+        savedPaymentMethodSelector.selectCalls.expectNoEvents()
     }
 
     @Test
-    fun `Link updates selection before completion without refreshing Checkout`() = runTest {
-        val controller = mock<CheckoutController>()
-        whenever(controller.isUpdating).thenReturn(MutableStateFlow(false))
-        val scenario = createScenario(controller, this)
+    fun `Link updates selection before completion without selecting a saved method`() = runScenario {
         val selection = PaymentSelection.Link(brand = com.stripe.android.model.LinkBrand.Link)
+        immediateActionHandler.onInvoke = {
+            assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        }
 
-        scenario.handler.select(selection, false)
+        handler.select(selection, false)
 
-        assertThat(scenario.selectionHolder.selectionCalls.awaitItem()).isEqualTo(selection)
-        assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
-        verifyNoInteractions(controller)
-        scenario.ensureAllEventsConsumed()
+        assertThat(selectionHolder.selectionCalls.awaitItem()).isEqualTo(selection)
+        assertThat(immediateActionHandler.calls.awaitItem()).isEqualTo(Unit)
+        savedPaymentMethodSelector.selectCalls.expectNoEvents()
     }
 
-    private fun createScenario(
-        controller: CheckoutController,
-        coroutineScope: CoroutineScope,
-    ): Scenario {
+    private fun runScenario(
+        isProcessing: Boolean = false,
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val savedPaymentMethodSelector = FakeCheckoutSavedPaymentMethodSelector()
+        val processing = MutableStateFlow(isProcessing)
         val selectionHolder = FakeEmbeddedSelectionHolder()
-        val completions = Turbine<Unit>()
+        val immediateActionHandler = FakeEmbeddedRowSelectionImmediateActionHandler()
         val handler = CheckoutPaymentSelectionHandler(
-            checkoutController = controller,
+            savedPaymentMethodSelector = savedPaymentMethodSelector,
+            processing = processing,
             selectionHolder = selectionHolder,
-            immediateActionHandler = { completions.add(Unit) },
-            coroutineScope = coroutineScope,
+            immediateActionHandler = immediateActionHandler,
+            coroutineScope = this,
         )
-        return Scenario(handler, selectionHolder, completions)
+
+        Scenario(
+            handler = handler,
+            savedPaymentMethodSelector = savedPaymentMethodSelector,
+            processing = processing,
+            selectionHolder = selectionHolder,
+            immediateActionHandler = immediateActionHandler,
+        ).apply { block() }
+
+        savedPaymentMethodSelector.ensureAllEventsConsumed()
+        selectionHolder.ensureAllEventsConsumed()
+        immediateActionHandler.ensureAllEventsConsumed()
     }
 
     private fun savedSelection(): PaymentSelection.Saved {
@@ -160,13 +135,40 @@ internal class CheckoutPaymentSelectionHandlerTest {
 
     private data class Scenario(
         val handler: CheckoutPaymentSelectionHandler,
+        val savedPaymentMethodSelector: FakeCheckoutSavedPaymentMethodSelector,
+        val processing: MutableStateFlow<Boolean>,
         val selectionHolder: FakeEmbeddedSelectionHolder,
-        val completions: Turbine<Unit>,
-    ) {
-        fun ensureAllEventsConsumed() {
-            selectionHolder.selectionCalls.ensureAllEventsConsumed()
-            completions.ensureAllEventsConsumed()
-        }
+        val immediateActionHandler: FakeEmbeddedRowSelectionImmediateActionHandler,
+    )
+}
+
+internal class FakeCheckoutSavedPaymentMethodSelector : CheckoutSavedPaymentMethodSelector {
+    val selectCalls = Turbine<PaymentSelection.Saved>()
+    var result: Result<Unit> = Result.success(Unit)
+    var onSelect: (PaymentSelection.Saved) -> Unit = {}
+
+    override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
+        selectCalls.add(selection)
+        onSelect(selection)
+        return result
+    }
+
+    fun ensureAllEventsConsumed() {
+        selectCalls.ensureAllEventsConsumed()
+    }
+}
+
+internal class FakeEmbeddedRowSelectionImmediateActionHandler : EmbeddedRowSelectionImmediateActionHandler {
+    val calls = Turbine<Unit>()
+    var onInvoke: () -> Unit = {}
+
+    override fun invoke() {
+        calls.add(Unit)
+        onInvoke()
+    }
+
+    fun ensureAllEventsConsumed() {
+        calls.ensureAllEventsConsumed()
     }
 }
 
@@ -187,4 +189,8 @@ internal class FakeEmbeddedSelectionHolder : EmbeddedSelectionHolder {
     override fun setPreviousNewSelections(bundle: Bundle) = Unit
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? = null
+
+    fun ensureAllEventsConsumed() {
+        selectionCalls.ensureAllEventsConsumed()
+    }
 }
