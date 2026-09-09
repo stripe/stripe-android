@@ -6,32 +6,31 @@ import kotlinx.serialization.Serializable
 internal sealed interface PartnerTerms {
     data class Required(
         val partner: String,
-        val declarationId: String,
-        val text: String,
+        val declaration: Declaration,
     ) : PartnerTerms
 
     data object NotRequired : PartnerTerms
-}
 
-@Serializable
-internal enum class CryptoOnrampPartner {
-    @SerialName("swapped")
-    Swapped,
+    @Serializable
+    data class Declaration(
+        val id: String,
+        val type: PartnerDeclarationType,
+        @SerialName("text")
+        val text: String,
+    )
 }
 
 @Serializable
 internal enum class PartnerDeclarationType {
-    @SerialName("terms")
-    TermsAndConditions,
+    @SerialName("transaction_terms")
+    TransactionTerms,
 
-    @SerialName("tos")
+    @SerialName("terms_of_service")
     TermsOfService,
 }
 
 @Serializable
 internal data class RetrievePartnerTermsRequest(
-    val credentials: CryptoCustomerRequestParams.Credentials,
-    val partner: CryptoOnrampPartner,
     @SerialName("declaration_type")
     val declarationType: PartnerDeclarationType,
 )
@@ -40,10 +39,7 @@ internal data class RetrievePartnerTermsRequest(
 internal data class PartnerTermsResponse(
     val required: Boolean,
     val partner: String? = null,
-    @SerialName("declaration_id")
-    val declarationId: String? = null,
-    @SerialName("text")
-    val text: String? = null,
+    val declaration: PartnerTerms.Declaration? = null,
 ) {
     fun toPartnerTerms(): PartnerTerms {
         if (!required) {
@@ -52,8 +48,7 @@ internal data class PartnerTermsResponse(
 
         return PartnerTerms.Required(
             partner = requireNotNull(partner),
-            declarationId = requireNotNull(declarationId),
-            text = requireNotNull(text),
+            declaration = requireNotNull(declaration),
         )
     }
 }

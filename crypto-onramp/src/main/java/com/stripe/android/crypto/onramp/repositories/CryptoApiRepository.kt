@@ -23,7 +23,6 @@ import com.stripe.android.crypto.onramp.model.CryptoConsumerWalletResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.CryptoOnrampPartner
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.DeleteWalletRequestParams
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
@@ -150,14 +149,9 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun retrieveMissingIdentifiers(
         consumerSessionClientSecret: String
     ): Result<ComplianceIdentifierRequirements> {
-        val request = apiRequestFactory.createGet(
+        return executeConsumerAuthenticatedGet(
             url = identifierRequirementsUrl,
-            options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
-        )
-
-        return execute(
-            request = request,
+            consumerSessionClientSecret = consumerSessionClientSecret,
             responseSerializer = ComplianceIdentifierRequirementsResponse.serializer()
         ).mapCatching { it.toComplianceIdentifierRequirements() }
     }
@@ -180,14 +174,9 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun retrieveUserAttestation(
         consumerSessionClientSecret: String
     ): Result<UserAttestation> {
-        val request = apiRequestFactory.createGet(
+        return executeConsumerAuthenticatedGet(
             url = userAttestationUrl,
-            options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
-        )
-
-        return execute(
-            request = request,
+            consumerSessionClientSecret = consumerSessionClientSecret,
             responseSerializer = UserAttestationResponse.serializer()
         ).map { it.toUserAttestation() }
     }
@@ -204,22 +193,15 @@ internal class CryptoApiRepository @Inject constructor(
 
     suspend fun retrievePartnerTerms(
         consumerSessionClientSecret: String,
-        partner: CryptoOnrampPartner,
         declarationType: PartnerDeclarationType,
     ): Result<PartnerTerms> {
         val requestParams = RetrievePartnerTermsRequest(
-            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
-            partner = partner,
             declarationType = declarationType,
         )
-        val request = apiRequestFactory.createGet(
+        return executeConsumerAuthenticatedGet(
             url = partnerTermsUrl,
-            options = buildRequestOptions(),
+            consumerSessionClientSecret = consumerSessionClientSecret,
             params = Json.encodeToJsonElement(requestParams).jsonObject.toMap(),
-        )
-
-        return execute(
-            request = request,
             responseSerializer = PartnerTermsResponse.serializer(),
         ).mapCatching { it.toPartnerTerms() }
     }
@@ -234,7 +216,7 @@ internal class CryptoApiRepository @Inject constructor(
         )
 
         return executePost(
-            url = confirmPartnerTermsUrl,
+            url = partnerTermsUrl,
             paramsJson = Json.encodeToJsonElement(request).jsonObject,
             responseSerializer = Unit.serializer(),
         )
@@ -499,6 +481,27 @@ internal class CryptoApiRepository @Inject constructor(
         ).jsonObject
     }
 
+    private suspend fun <Response> executeConsumerAuthenticatedGet(
+        url: String,
+        consumerSessionClientSecret: String,
+        params: Map<String, *> = emptyMap<String, Any?>(),
+        responseSerializer: KSerializer<Response>,
+    ): Result<Response> {
+        val request = ConsumerAuthenticatedGetRequest(
+            request = apiRequestFactory.createGet(
+                url = url,
+                options = buildRequestOptions(),
+                params = params,
+            ),
+            consumerSessionClientSecret = consumerSessionClientSecret,
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = responseSerializer,
+        )
+    }
+
     private suspend fun <Response> executePost(
         url: String,
         paramsJson: JsonObject,
@@ -660,9 +663,6 @@ internal class CryptoApiRepository @Inject constructor(
         internal val partnerTermsUrl: String
             get() = getApiUrl("crypto/internal/partner_terms")
 
-        internal val confirmPartnerTermsUrl: String
-            get() = getApiUrl("crypto/internal/confirm_partner_terms")
-
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/wallet`
          */
@@ -720,5 +720,24 @@ internal class CryptoApiRepository @Inject constructor(
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
         }
+    }
+}
+
+private class ConsumerAuthenticatedGetRequest(
+    private val request: ApiRequest,
+    consumerSessionClientSecret: String,
+) : StripeRequest() {
+    override val method: Method = request.method
+    override val mimeType: MimeType = request.mimeType
+    override val retryResponseCodes: Iterable<Int> = request.retryResponseCodes
+    override val url: String = request.url
+    override val headers: Map<String, String> = request.headers + mapOf(
+        HEADER_CONSUMER_AUTH_TOKEN to consumerSessionClientSecret,
+    )
+
+    override fun toString(): String = request.toString()
+
+    private companion object {
+        private const val HEADER_CONSUMER_AUTH_TOKEN = "Stripe-Consumer-Auth-Token"
     }
 }

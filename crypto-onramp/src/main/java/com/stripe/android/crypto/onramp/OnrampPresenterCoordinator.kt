@@ -17,16 +17,16 @@ import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
-import com.stripe.android.crypto.onramp.model.OnrampStartTermsOfServiceResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
-import com.stripe.android.crypto.onramp.model.OnrampTermsOfServiceResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
@@ -237,54 +237,45 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun presentTermsAndConditionsIfNeeded() {
-        coroutineScope.launch {
-            when (val result = interactor.startTermsAndConditions()) {
-                is OnrampStartTermsAndConditionsResult.PresentationRequired -> {
-                    presentHTMLConfirmation(
-                        resultLauncher = termsAndConditionsResultLauncher,
-                        html = result.terms.text,
-                        declarationId = result.terms.declarationId,
-                        appearance = result.appearance,
-                        headingResId =
-                            PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
-                    )
-                }
-                OnrampStartTermsAndConditionsResult.NotRequired -> {
-                    onrampCallbacksState.termsAndConditionsCallback?.onResult(
-                        OnrampTermsAndConditionsResult.NotRequired()
-                    )
-                }
-                is OnrampStartTermsAndConditionsResult.Failed -> {
-                    onrampCallbacksState.termsAndConditionsCallback?.onResult(
-                        OnrampTermsAndConditionsResult.Failed(result.error)
-                    )
-                }
-            }
-        }
+        presentPartnerTermsIfNeeded(
+            declarationType = PartnerDeclarationType.TransactionTerms,
+            resultLauncher = termsAndConditionsResultLauncher,
+            callback = onrampCallbacksState.termsAndConditionsCallback,
+            headingResId = PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
+        )
     }
 
     fun presentTermsOfServiceIfNeeded() {
+        presentPartnerTermsIfNeeded(
+            declarationType = PartnerDeclarationType.TermsOfService,
+            resultLauncher = termsOfServiceResultLauncher,
+            callback = onrampCallbacksState.termsOfServiceCallback,
+            headingResId = PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
+        )
+    }
+
+    private fun presentPartnerTermsIfNeeded(
+        declarationType: PartnerDeclarationType,
+        resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
+        callback: OnrampPartnerTermsCallback?,
+        @StringRes headingResId: Int,
+    ) {
         coroutineScope.launch {
-            when (val result = interactor.startTermsOfService()) {
-                is OnrampStartTermsOfServiceResult.PresentationRequired -> {
+            when (val result = interactor.startPartnerTerms(declarationType)) {
+                is OnrampStartPartnerTermsResult.PresentationRequired -> {
                     presentHTMLConfirmation(
-                        resultLauncher = termsOfServiceResultLauncher,
-                        html = result.terms.text,
-                        declarationId = result.terms.declarationId,
+                        resultLauncher = resultLauncher,
+                        html = result.terms.declaration.text,
+                        declarationId = result.terms.declaration.id,
                         appearance = result.appearance,
-                        headingResId =
-                            PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
+                        headingResId = headingResId,
                     )
                 }
-                OnrampStartTermsOfServiceResult.NotRequired -> {
-                    onrampCallbacksState.termsOfServiceCallback?.onResult(
-                        OnrampTermsOfServiceResult.NotRequired()
-                    )
+                OnrampStartPartnerTermsResult.NotRequired -> {
+                    callback?.onResult(OnrampPartnerTermsResult.NotRequired())
                 }
-                is OnrampStartTermsOfServiceResult.Failed -> {
-                    onrampCallbacksState.termsOfServiceCallback?.onResult(
-                        OnrampTermsOfServiceResult.Failed(result.error)
-                    )
+                is OnrampStartPartnerTermsResult.Failed -> {
+                    callback?.onResult(OnrampPartnerTermsResult.Failed(result.error))
                 }
             }
         }
@@ -483,22 +474,33 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     private fun handleTermsAndConditionsResult(result: HTMLConfirmationActivityResult) {
-        coroutineScope.launch {
-            val termsAndConditionsResult = interactor.handleTermsAndConditionsResult(
-                result = result.result,
-                declarationId = result.declarationId,
-            )
-            onrampCallbacksState.termsAndConditionsCallback?.onResult(termsAndConditionsResult)
-        }
+        handlePartnerTermsResult(
+            result = result,
+            declarationType = PartnerDeclarationType.TransactionTerms,
+            callback = onrampCallbacksState.termsAndConditionsCallback,
+        )
     }
 
     private fun handleTermsOfServiceResult(result: HTMLConfirmationActivityResult) {
+        handlePartnerTermsResult(
+            result = result,
+            declarationType = PartnerDeclarationType.TermsOfService,
+            callback = onrampCallbacksState.termsOfServiceCallback,
+        )
+    }
+
+    private fun handlePartnerTermsResult(
+        result: HTMLConfirmationActivityResult,
+        declarationType: PartnerDeclarationType,
+        callback: OnrampPartnerTermsCallback?,
+    ) {
         coroutineScope.launch {
-            val termsOfServiceResult = interactor.handleTermsOfServiceResult(
+            val partnerTermsResult = interactor.handlePartnerTermsResult(
                 result = result.result,
                 declarationId = result.declarationId,
+                declarationType = declarationType,
             )
-            onrampCallbacksState.termsOfServiceCallback?.onResult(termsOfServiceResult)
+            callback?.onResult(partnerTermsResult)
         }
     }
 

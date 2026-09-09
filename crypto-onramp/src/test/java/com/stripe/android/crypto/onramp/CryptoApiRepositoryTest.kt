@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.CryptoOnrampPartner
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
@@ -62,6 +61,7 @@ class CryptoApiRepositoryTest {
     )
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
+    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
     fun testGrantingPartnerMerchantPermissionsSucceeds() {
@@ -256,22 +256,22 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveMissingIdentifiers(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
             assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
                 .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrThrow().identifiers)
@@ -406,20 +406,20 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/crs_carf_declaration")
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
             assertThat(result.getOrThrow().text)
                 .isEqualTo("I confirm this declaration.")
             assertThat(result.getOrThrow().version)
@@ -461,38 +461,38 @@ class CryptoApiRepositoryTest {
             """
                 {
                     "required": true,
-                    "partner": "example",
-                    "text": "Please accept these terms.",
-                    "declaration_id": "declaration_123"
+                    "partner": "swapped",
+                    "declaration": {
+                        "id": "copt_decl_123",
+                        "type": "transaction_terms",
+                        "text": "Please accept these terms."
+                    }
                 }
             """,
             emptyMap()
         )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
             .thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrievePartnerTerms(
             consumerSessionClientSecret = "test-secret",
-            partner = CryptoOnrampPartner.Swapped,
-            declarationType = PartnerDeclarationType.TermsAndConditions,
+            declarationType = PartnerDeclarationType.TransactionTerms,
         )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-        assertThat(apiRequest.baseUrl)
-            .isEqualTo("https://api.stripe.com/v1/crypto/internal/partner_terms")
-        assertThat(apiRequest.params)
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
             .isEqualTo(
-                mapOf(
-                    "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
-                    "partner" to "swapped",
-                    "declaration_type" to "terms",
-                )
+                "https://api.stripe.com/v1/crypto/internal/partner_terms" +
+                    "?declaration_type=transaction_terms"
             )
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+            .isEqualTo("test-secret")
         val terms = result.getOrThrow() as PartnerTerms.Required
-        assertThat(terms.partner).isEqualTo("example")
-        assertThat(terms.text).isEqualTo("Please accept these terms.")
-        assertThat(terms.declarationId).isEqualTo("declaration_123")
+        assertThat(terms.partner).isEqualTo("swapped")
+        assertThat(terms.declaration.id).isEqualTo("copt_decl_123")
+        assertThat(terms.declaration.type).isEqualTo(PartnerDeclarationType.TransactionTerms)
+        assertThat(terms.declaration.text).isEqualTo("Please accept these terms.")
     }
 
     @Test
@@ -503,33 +503,39 @@ class CryptoApiRepositoryTest {
                 {
                     "required": true,
                     "partner": "swapped",
-                    "text": "Please accept these terms of service.",
-                    "declaration_id": "declaration_456"
+                    "declaration": {
+                        "id": "copt_decl_456",
+                        "type": "terms_of_service",
+                        "text": "Please accept these terms of service."
+                    }
                 }
             """,
             emptyMap()
         )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
             .thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrievePartnerTerms(
             consumerSessionClientSecret = "test-secret",
-            partner = CryptoOnrampPartner.Swapped,
             declarationType = PartnerDeclarationType.TermsOfService,
         )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-        assertThat(apiRequest.params).isEqualTo(
-            mapOf(
-                "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
-                "partner" to "swapped",
-                "declaration_type" to "tos",
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url).isEqualTo(
+            "https://api.stripe.com/v1/crypto/internal/partner_terms" +
+                "?declaration_type=terms_of_service"
+        )
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+            .isEqualTo("test-secret")
+        val terms = result.getOrThrow() as PartnerTerms.Required
+        assertThat(terms.declaration).isEqualTo(
+            PartnerTerms.Declaration(
+                id = "copt_decl_456",
+                type = PartnerDeclarationType.TermsOfService,
+                text = "Please accept these terms of service.",
             )
         )
-        val terms = result.getOrThrow() as PartnerTerms.Required
-        assertThat(terms.text).isEqualTo("Please accept these terms of service.")
-        assertThat(terms.declarationId).isEqualTo("declaration_456")
     }
 
     @Test
@@ -543,13 +549,12 @@ class CryptoApiRepositoryTest {
             """,
             emptyMap()
         )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
             .thenReturn(stripeResponse)
 
         val result = cryptoApiRepository.retrievePartnerTerms(
             consumerSessionClientSecret = "test-secret",
-            partner = CryptoOnrampPartner.Swapped,
-            declarationType = PartnerDeclarationType.TermsAndConditions,
+            declarationType = PartnerDeclarationType.TransactionTerms,
         )
 
         assertThat(result.getOrThrow()).isEqualTo(PartnerTerms.NotRequired)
@@ -567,17 +572,17 @@ class CryptoApiRepositoryTest {
 
         val result = cryptoApiRepository.confirmPartnerTerms(
             consumerSessionClientSecret = "test-secret",
-            declarationId = "declaration_123",
+            declarationId = "copt_decl_123",
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         assertThat(apiRequest.baseUrl)
-            .isEqualTo("https://api.stripe.com/v1/crypto/internal/confirm_partner_terms")
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/partner_terms")
         assertThat(apiRequest.params).isEqualTo(
             mapOf(
                 "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
-                "declaration_id" to "declaration_123",
+                "declaration_id" to "copt_decl_123",
             )
         )
         assertThat(result.isSuccess).isTrue()

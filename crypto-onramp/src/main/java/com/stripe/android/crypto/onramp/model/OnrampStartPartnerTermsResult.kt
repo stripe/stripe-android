@@ -2,15 +2,15 @@ package com.stripe.android.crypto.onramp.model
 
 import com.stripe.android.link.LinkAppearance
 
-internal sealed interface OnrampStartTermsOfServiceResult {
+internal sealed interface OnrampStartPartnerTermsResult {
     class PresentationRequired internal constructor(
         val terms: PartnerTerms.Required,
         val appearance: LinkAppearance?,
-    ) : OnrampStartTermsOfServiceResult
+    ) : OnrampStartPartnerTermsResult
 
-    data object NotRequired : OnrampStartTermsOfServiceResult
+    data object NotRequired : OnrampStartPartnerTermsResult
 
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampStartTermsOfServiceResult
+    ) : OnrampStartPartnerTermsResult
 }

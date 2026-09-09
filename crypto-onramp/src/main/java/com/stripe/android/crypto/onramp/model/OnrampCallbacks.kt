@@ -21,8 +21,8 @@ class OnrampCallbacks {
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var userAttestationCallback: OnrampUserAttestationCallback? = null
-    private var termsAndConditionsCallback: OnrampTermsAndConditionsCallback? = null
-    private var termsOfServiceCallback: OnrampTermsOfServiceCallback? = null
+    private var termsAndConditionsCallback: OnrampPartnerTermsCallback? = null
+    private var termsOfServiceCallback: OnrampPartnerTermsCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
     private var samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null
@@ -72,14 +72,14 @@ class OnrampCallbacks {
     /**
      * Callback invoked when terms and conditions presentation completes.
      */
-    fun termsAndConditionsCallback(callback: OnrampTermsAndConditionsCallback) = apply {
+    fun termsAndConditionsCallback(callback: OnrampPartnerTermsCallback) = apply {
         this.termsAndConditionsCallback = callback
     }
 
     /**
      * Callback invoked when terms of service presentation completes.
      */
-    fun termsOfServiceCallback(callback: OnrampTermsOfServiceCallback) = apply {
+    fun termsOfServiceCallback(callback: OnrampPartnerTermsCallback) = apply {
         this.termsOfServiceCallback = callback
     }
 
@@ -123,8 +123,8 @@ class OnrampCallbacks {
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
         val userAttestationCallback: OnrampUserAttestationCallback?,
-        val termsAndConditionsCallback: OnrampTermsAndConditionsCallback?,
-        val termsOfServiceCallback: OnrampTermsOfServiceCallback?,
+        val termsAndConditionsCallback: OnrampPartnerTermsCallback?,
+        val termsOfServiceCallback: OnrampPartnerTermsCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
         val googlePayIsReadyCallback: ((Boolean) -> Unit)?,
         val samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)?,

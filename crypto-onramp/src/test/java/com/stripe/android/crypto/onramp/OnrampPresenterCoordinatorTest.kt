@@ -12,12 +12,10 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodCallback
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
-import com.stripe.android.crypto.onramp.model.OnrampStartTermsOfServiceResult
-import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsCallback
-import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
-import com.stripe.android.crypto.onramp.model.OnrampTermsOfServiceCallback
-import com.stripe.android.crypto.onramp.model.OnrampTermsOfServiceResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
@@ -326,37 +324,37 @@ class OnrampPresenterCoordinatorTest {
 
     @Test
     fun `terms not required invokes callback without presenting`() = runTest {
-        whenever(interactor.startTermsAndConditions()).thenReturn(
-            OnrampStartTermsAndConditionsResult.NotRequired
+        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)).thenReturn(
+            OnrampStartPartnerTermsResult.NotRequired
         )
-        val results = Turbine<OnrampTermsAndConditionsResult>()
+        val results = Turbine<OnrampPartnerTermsResult>()
         val coordinator = createCoordinator(
-            termsAndConditionsCallback = OnrampTermsAndConditionsCallback(results::add),
+            termsAndConditionsCallback = OnrampPartnerTermsCallback(results::add),
         )
 
         coordinator.presentTermsAndConditionsIfNeeded()
         testScope.testScheduler.advanceUntilIdle()
 
         assertThat(results.awaitItem())
-            .isInstanceOf(OnrampTermsAndConditionsResult.NotRequired::class.java)
+            .isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
         results.ensureAllEventsConsumed()
     }
 
     @Test
     fun `terms of service not required invokes callback without presenting`() = runTest {
-        whenever(interactor.startTermsOfService()).thenReturn(
-            OnrampStartTermsOfServiceResult.NotRequired
+        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService)).thenReturn(
+            OnrampStartPartnerTermsResult.NotRequired
         )
-        val results = Turbine<OnrampTermsOfServiceResult>()
+        val results = Turbine<OnrampPartnerTermsResult>()
         val coordinator = createCoordinator(
-            termsOfServiceCallback = OnrampTermsOfServiceCallback(results::add),
+            termsOfServiceCallback = OnrampPartnerTermsCallback(results::add),
         )
 
         coordinator.presentTermsOfServiceIfNeeded()
         testScope.testScheduler.advanceUntilIdle()
 
         assertThat(results.awaitItem())
-            .isInstanceOf(OnrampTermsOfServiceResult.NotRequired::class.java)
+            .isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
         results.ensureAllEventsConsumed()
     }
 
@@ -365,8 +363,8 @@ class OnrampPresenterCoordinatorTest {
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
-        termsAndConditionsCallback: OnrampTermsAndConditionsCallback? = null,
-        termsOfServiceCallback: OnrampTermsOfServiceCallback? = null,
+        termsAndConditionsCallback: OnrampPartnerTermsCallback? = null,
+        termsOfServiceCallback: OnrampPartnerTermsCallback? = null,
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 

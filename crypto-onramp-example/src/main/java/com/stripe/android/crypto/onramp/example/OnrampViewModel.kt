@@ -41,6 +41,7 @@ import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
@@ -89,6 +90,8 @@ internal class OnrampViewModel(
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
         .samsungPayIsReadyCallback { isReady, result -> samsungPayIsReady(isReady, result) }
         .userAttestationCallback(callback = ::onUserAttestationResult)
+        .termsAndConditionsCallback { onPartnerTermsResult("Terms and conditions", it) }
+        .termsOfServiceCallback { onPartnerTermsResult("Terms of service", it) }
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator.Builder().build(getApplication(), savedStateHandle, callbacks)
@@ -351,6 +354,18 @@ internal class OnrampViewModel(
             is OnrampUserAttestationResult.Cancelled -> {
                 _message.value = "User Attestation cancelled, please try again"
             }
+        }
+    }
+
+    private fun onPartnerTermsResult(
+        label: String,
+        result: OnrampPartnerTermsResult,
+    ) {
+        _message.value = when (result) {
+            is OnrampPartnerTermsResult.Accepted -> "$label accepted"
+            is OnrampPartnerTermsResult.NotRequired -> "$label not required"
+            is OnrampPartnerTermsResult.Cancelled -> "$label cancelled"
+            is OnrampPartnerTermsResult.Failed -> "$label failed: ${result.error.message}"
         }
     }
 

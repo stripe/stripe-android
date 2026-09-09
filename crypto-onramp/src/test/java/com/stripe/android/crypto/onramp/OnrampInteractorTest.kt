@@ -33,7 +33,6 @@ import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.CryptoOnrampPartner
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -50,19 +49,17 @@ import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampStartTermsAndConditionsResult
-import com.stripe.android.crypto.onramp.model.OnrampStartTermsOfServiceResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
-import com.stripe.android.crypto.onramp.model.OnrampTermsAndConditionsResult
-import com.stripe.android.crypto.onramp.model.OnrampTermsOfServiceResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
@@ -1031,23 +1028,25 @@ class OnrampInteractorTest {
     fun testStartTermsAndConditionsRequiresPresentation() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val termsAndConditions = PartnerTerms.Required(
-            partner = "example",
-            text = "Please accept these terms.",
-            declarationId = "declaration_123",
+            partner = "swapped",
+            declaration = PartnerTerms.Declaration(
+                id = "copt_decl_123",
+                type = PartnerDeclarationType.TransactionTerms,
+                text = "Please accept these terms.",
+            ),
         )
-        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any(), any()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
             .thenReturn(Result.success(termsAndConditions))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        val result = interactor.startTermsAndConditions()
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)
 
-        assertThat(result).isInstanceOf(OnrampStartTermsAndConditionsResult.PresentationRequired::class.java)
-        val presentationRequired = result as OnrampStartTermsAndConditionsResult.PresentationRequired
+        assertThat(result).isInstanceOf(OnrampStartPartnerTermsResult.PresentationRequired::class.java)
+        val presentationRequired = result as OnrampStartPartnerTermsResult.PresentationRequired
         assertThat(presentationRequired.terms).isEqualTo(termsAndConditions)
         verify(cryptoApiRepository).retrievePartnerTerms(
             any(),
-            eq(CryptoOnrampPartner.Swapped),
-            eq(PartnerDeclarationType.TermsAndConditions),
+            eq(PartnerDeclarationType.TransactionTerms),
         )
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsStarted)
     }
@@ -1061,24 +1060,24 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(linkState))
         interactor.onLinkControllerState(linkState)
 
-        val result = interactor.startTermsAndConditions()
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)
 
-        assertThat(result).isInstanceOf(OnrampStartTermsAndConditionsResult.Failed::class.java)
-        val failed = result as OnrampStartTermsAndConditionsResult.Failed
+        assertThat(result).isInstanceOf(OnrampStartPartnerTermsResult.Failed::class.java)
+        val failed = result as OnrampStartPartnerTermsResult.Failed
         assertThat(failed.error).isInstanceOf(LinkAccountNotVerifiedException::class.java)
-        verify(cryptoApiRepository, never()).retrievePartnerTerms(any(), any(), any())
+        verify(cryptoApiRepository, never()).retrievePartnerTerms(any(), any())
     }
 
     @Test
     fun testStartTermsAndConditionsReturnsNotRequired() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any(), any()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
             .thenReturn(Result.success(PartnerTerms.NotRequired))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        val result = interactor.startTermsAndConditions()
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)
 
-        assertThat(result).isEqualTo(OnrampStartTermsAndConditionsResult.NotRequired)
+        assertThat(result).isEqualTo(OnrampStartPartnerTermsResult.NotRequired)
     }
 
     @Test
@@ -1086,21 +1085,23 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val termsOfService = PartnerTerms.Required(
             partner = "swapped",
-            text = "Please accept these terms of service.",
-            declarationId = "declaration_456",
+            declaration = PartnerTerms.Declaration(
+                id = "copt_decl_456",
+                type = PartnerDeclarationType.TermsOfService,
+                text = "Please accept these terms of service.",
+            ),
         )
-        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any(), any()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
             .thenReturn(Result.success(termsOfService))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        val result = interactor.startTermsOfService()
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService)
 
-        assertThat(result).isInstanceOf(OnrampStartTermsOfServiceResult.PresentationRequired::class.java)
-        val presentationRequired = result as OnrampStartTermsOfServiceResult.PresentationRequired
+        assertThat(result).isInstanceOf(OnrampStartPartnerTermsResult.PresentationRequired::class.java)
+        val presentationRequired = result as OnrampStartPartnerTermsResult.PresentationRequired
         assertThat(presentationRequired.terms).isEqualTo(termsOfService)
         verify(cryptoApiRepository).retrievePartnerTerms(
             any(),
-            eq(CryptoOnrampPartner.Swapped),
             eq(PartnerDeclarationType.TermsOfService),
         )
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsOfServiceStarted)
@@ -1109,13 +1110,13 @@ class OnrampInteractorTest {
     @Test
     fun testStartTermsOfServiceReturnsNotRequired() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any(), any()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
             .thenReturn(Result.success(PartnerTerms.NotRequired))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        val result = interactor.startTermsOfService()
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService)
 
-        assertThat(result).isEqualTo(OnrampStartTermsOfServiceResult.NotRequired)
+        assertThat(result).isEqualTo(OnrampStartPartnerTermsResult.NotRequired)
     }
 
     @Test
@@ -1968,13 +1969,14 @@ class OnrampInteractorTest {
         whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handleTermsAndConditionsResult(
+        val result = interactor.handlePartnerTermsResult(
             result = HTMLConfirmationResult.Confirmed,
-            declarationId = "declaration_123",
+            declarationId = "copt_decl_123",
+            declarationType = PartnerDeclarationType.TransactionTerms,
         )
 
-        assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Accepted::class.java)
-        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("declaration_123"))
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Accepted::class.java)
+        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("copt_decl_123"))
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsCompleted)
     }
 
@@ -1985,25 +1987,27 @@ class OnrampInteractorTest {
         )
         interactor.onLinkControllerState(mockLinkStateWithAccount(unverifiedAccount))
 
-        val result = interactor.handleTermsAndConditionsResult(
+        val result = interactor.handlePartnerTermsResult(
             result = HTMLConfirmationResult.Confirmed,
-            declarationId = "declaration_123",
+            declarationId = "copt_decl_123",
+            declarationType = PartnerDeclarationType.TransactionTerms,
         )
 
-        assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Failed::class.java)
-        val failed = result as OnrampTermsAndConditionsResult.Failed
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Failed::class.java)
+        val failed = result as OnrampPartnerTermsResult.Failed
         assertThat(failed.error).isInstanceOf(LinkAccountNotVerifiedException::class.java)
         verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
     }
 
     @Test
     fun testHandleTermsAndConditionsResultCancelled() = runTest {
-        val result = interactor.handleTermsAndConditionsResult(
+        val result = interactor.handlePartnerTermsResult(
             result = HTMLConfirmationResult.Cancelled,
             declarationId = null,
+            declarationType = PartnerDeclarationType.TransactionTerms,
         )
 
-        assertThat(result).isInstanceOf(OnrampTermsAndConditionsResult.Cancelled::class.java)
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
         verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
     }
 
@@ -2013,24 +2017,26 @@ class OnrampInteractorTest {
         whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handleTermsOfServiceResult(
+        val result = interactor.handlePartnerTermsResult(
             result = HTMLConfirmationResult.Confirmed,
-            declarationId = "declaration_456",
+            declarationId = "copt_decl_456",
+            declarationType = PartnerDeclarationType.TermsOfService,
         )
 
-        assertThat(result).isInstanceOf(OnrampTermsOfServiceResult.Accepted::class.java)
-        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("declaration_456"))
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Accepted::class.java)
+        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("copt_decl_456"))
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsOfServiceCompleted)
     }
 
     @Test
     fun testHandleTermsOfServiceResultCancelled() = runTest {
-        val result = interactor.handleTermsOfServiceResult(
+        val result = interactor.handlePartnerTermsResult(
             result = HTMLConfirmationResult.Cancelled,
             declarationId = null,
+            declarationType = PartnerDeclarationType.TermsOfService,
         )
 
-        assertThat(result).isInstanceOf(OnrampTermsOfServiceResult.Cancelled::class.java)
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
         verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
     }
 

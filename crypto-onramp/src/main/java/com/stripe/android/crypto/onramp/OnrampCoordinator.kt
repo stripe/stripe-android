@@ -296,7 +296,7 @@ class OnrampCoordinator @Inject internal constructor(
         /**
          * Presents the current terms of service when acceptance is required.
          * Requires an authenticated Link user.
-         * Call this during initial onboarding, before submitting KYC information.
+         * Call this during onboarding after Link authentication.
          * The result will be delivered through the terms of service callback provided in
          * [OnrampCallbacks].
          */
