@@ -296,6 +296,7 @@ class DefaultWalletButtonsInteractorTest {
             WalletButtonsInteractor.ViewAction.OnButtonPressed(
                 button = WalletButtonsInteractor.WalletButton.GooglePay(
                     buttonType = null,
+                    apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     allowCreditCards = true,
                     cardBrandFilter = PaymentSheetCardBrandFilter(
