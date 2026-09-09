@@ -518,7 +518,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val call = fakeErrorReporter.awaitCall()
         assertThat(call.errorEvent).isEqualTo(
-            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE
+            ErrorReporter.ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE
         )
         assertThat(call.stripeException?.message).isEqualTo("Preparation failed")
     }
