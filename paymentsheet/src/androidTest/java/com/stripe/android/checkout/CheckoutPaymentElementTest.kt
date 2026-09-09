@@ -150,7 +150,9 @@ internal class CheckoutPaymentElementTest {
         ) {
             val requestReceived = CountDownLatch(1)
             val releaseResponse = CountDownLatch(1)
+            val requestCount = AtomicInteger()
             enqueueTaxUpdate { response ->
+                requestCount.incrementAndGet()
                 requestReceived.countDown()
                 check(releaseResponse.await(10, TimeUnit.SECONDS))
                 automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
@@ -161,6 +163,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
             contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
             contentPage.assertLpmIsEnabled("card", false)
+            assertThat(requestCount.get()).isEqualTo(1)
             assertThat(callbackCount.get()).isEqualTo(0)
             releaseResponse.countDown()
             waitForSessionTotal(controller, UPDATED_TOTAL)
@@ -168,6 +171,7 @@ internal class CheckoutPaymentElementTest {
             contentPage.assertLpmIsEnabled("card", true)
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
             testRules.compose.waitUntil(timeoutMillis = 5_000) { callbackCount.get() == 1 }
+            assertThat(requestCount.get()).isEqualTo(1)
             assertThat(callbackCount.get()).isEqualTo(1)
             markTestSucceeded()
         }
