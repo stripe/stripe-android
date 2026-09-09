@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -82,8 +83,8 @@ internal object PaymentMethodMetadataFactory {
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         apiConfiguration: ApiConfiguration.State = ApiConfiguration.State(
-            publishableKey = "pk_test_123",
-            stripeAccountId = "acct_123",
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         ),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(

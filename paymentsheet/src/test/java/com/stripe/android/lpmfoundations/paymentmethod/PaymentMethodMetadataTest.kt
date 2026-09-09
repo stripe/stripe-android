@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
@@ -2486,7 +2487,7 @@ internal class PaymentMethodMetadataTest {
     )
 
     private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_123",
-        stripeAccountId = "acct_123",
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
     )
 }
