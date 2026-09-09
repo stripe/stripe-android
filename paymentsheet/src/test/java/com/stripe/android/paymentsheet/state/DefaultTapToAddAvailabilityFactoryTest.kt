@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
-import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -16,11 +17,6 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultTapToAddAvailabilityFactoryTest {
-    private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_123",
-        stripeAccountId = "acct_123",
-    )
-
     @Test
     fun `isAvailable is true when supported by connection manager, session flag on, and customer metadata present`() {
         val factory = DefaultTapToAddAvailabilityFactory(
@@ -35,7 +31,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                apiConfiguration = apiConfiguration,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isTrue()
     }
@@ -54,7 +50,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                apiConfiguration = apiConfiguration,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isFalse()
     }
@@ -73,7 +69,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = DEFAULT_CUSTOMER_METADATA,
-                apiConfiguration = apiConfiguration,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isFalse()
     }
@@ -92,7 +88,7 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
                     ),
                 ),
                 customerMetadata = null,
-                apiConfiguration = apiConfiguration,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
         ).isFalse()
     }
@@ -117,8 +113,8 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
             passiveCaptcha = null,
             merchantLogoUrl = null,
             elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
-            accountId = "acct_test",
-            merchantId = "acct_test",
+            accountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            merchantId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
     }
 }

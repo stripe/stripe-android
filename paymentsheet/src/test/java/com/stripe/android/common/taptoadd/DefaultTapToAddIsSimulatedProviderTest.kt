@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -48,10 +49,11 @@ class DefaultTapToAddIsSimulatedProviderTest {
     }
 
     private fun apiConfiguration(isLiveMode: Boolean): ApiConfiguration.State {
-        return ApiConfiguration.State(
-            publishableKey = if (isLiveMode) ApiKeyFixtures.FAKE_LIVE_KEY else ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
-        )
+        return if (isLiveMode) {
+            DEFAULT_API_CONFIG.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)
+        } else {
+            DEFAULT_API_CONFIG
+        }
     }
 
     private fun context(debuggable: Boolean): Context {

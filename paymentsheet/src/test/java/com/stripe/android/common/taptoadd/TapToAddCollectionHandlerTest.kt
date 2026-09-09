@@ -6,11 +6,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -310,7 +310,7 @@ class TapToAddCollectionHandlerTest {
             assertThat(updateCall.options).isEqualTo(
                 ApiRequest.Options(
                     apiKey = "ek_123",
-                    stripeAccount = TEST_API_CONFIGURATION.stripeAccountId,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
             )
 
@@ -1219,10 +1219,6 @@ class TapToAddCollectionHandlerTest {
         val DEFAULT_CALLBACK = CreateCardPresentSetupIntentCallback {
             CreateIntentResult.Success("si_123_secret")
         }
-        val TEST_API_CONFIGURATION = ApiConfiguration.State(
-            publishableKey = "pk_test",
-            stripeAccountId = "acct_123",
-        )
         val DEFAULT_BILLING_DETAILS = PaymentSheet.BillingDetails(
             name = "Jane Doe",
             email = "jane@example.com",
