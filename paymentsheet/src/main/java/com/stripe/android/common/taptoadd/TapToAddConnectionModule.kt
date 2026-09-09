@@ -11,7 +11,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -61,7 +60,6 @@ internal interface TapToAddConnectionModule {
             return TerminalWrapper.create()
         }
 
-        @OptIn(TapToAddPreview::class)
         @Provides
         fun providesTapToAddConnectionManager(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
@@ -70,7 +68,7 @@ internal interface TapToAddConnectionModule {
             logger: Logger,
             applicationContext: Context,
             @IOContext workContext: CoroutineContext,
-            createCardPresentSetupIntentCallbackProvider: Provider<CreateCardPresentSetupIntentCallback?>,
+            callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
         ): TapToAddConnectionManager {
             return TapToAddConnectionManager.create(
@@ -80,9 +78,7 @@ internal interface TapToAddConnectionModule {
                 errorReporter = errorReporter,
                 isSimulatedProvider = isSimulatedProvider,
                 logger = logger,
-                hasCreateCardPresentSetupIntentCallback = {
-                    createCardPresentSetupIntentCallbackProvider.get() != null
-                },
+                callbackRetriever = callbackRetriever,
                 workContext = workContext,
             )
         }
