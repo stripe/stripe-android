@@ -65,7 +65,9 @@ internal data class VerificationPage(
     val isStripe: Boolean = false,
     /* If true, the SDK will skip rendering a success page at the end of the flow */
     @SerialName("skip_success_page")
-    val skipSuccessPage: Boolean = false
+    val skipSuccessPage: Boolean = false,
+    @SerialName("networking_data")
+    val networkingData: VerificationPageNetworkingData?
 ) : Parcelable {
     @Serializable
     internal enum class Status {

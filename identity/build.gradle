@@ -4,6 +4,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(":camera-core")
@@ -43,6 +44,7 @@ dependencies {
     ksp libs.daggerCompiler
 
     testImplementation project(':payments-core-testing')
+    testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.fragment
@@ -56,6 +58,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 }
 
 android {

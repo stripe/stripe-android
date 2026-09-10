@@ -24,6 +24,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageSerializer
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -64,7 +65,7 @@ internal class DefaultIdentityRepository @Inject constructor(
                 APP_IDENTIFIER to context.packageName
             )
         ),
-        VerificationPage.serializer()
+        VerificationPageSerializer
     )
 
     override suspend fun postVerificationPageData(

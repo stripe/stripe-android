@@ -77,6 +77,8 @@ internal fun IdentityNavGraph(
     onNavControllerCreated: (NavController) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+    // #TODO - Networked Identity: Keep NI out of this graph until merchant publishable-key delivery,
+    // clone/attach and save-consent APIs, and the host entry point after required disclosure are defined.
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
     }

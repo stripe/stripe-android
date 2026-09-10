@@ -8,6 +8,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
+import com.stripe.android.identity.networking.models.VerificationPageSerializer
 import kotlinx.serialization.json.Json
 
 internal const val ERROR_BODY = "errorBody"
@@ -152,18 +153,18 @@ internal val json: Json = Json {
 
 internal val SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE: VerificationPage =
     json.decodeFromString(
-        VerificationPage.serializer(),
+        VerificationPageSerializer,
         VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING
     )
 
 internal val SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE: VerificationPage =
     json.decodeFromString(
-        VerificationPage.serializer(),
+        VerificationPageSerializer,
         VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING
     )
 
 internal val SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE: VerificationPage =
     json.decodeFromString(
-        VerificationPage.serializer(),
+        VerificationPageSerializer,
         VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING
     )

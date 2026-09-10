@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_identity_link">Link</string>
+    <string name="stripe_identity_link_email_title">Continue with Link</string>
+    <string name="stripe_identity_link_email_body">Sign in to use a saved ID.</string>
+    <string name="stripe_identity_link_continue">Continue</string>
+    <string name="stripe_identity_link_manual">Manually verify identity</string>
+    <string name="stripe_identity_link_otp_title">Confirm it\'s you</string>
+    <string name="stripe_identity_link_otp_body">Enter the code sent to %1$s.</string>
+    <string name="stripe_identity_link_otp_error">The provided verification code is incorrect.</string>
+    <string name="stripe_identity_link_sending">Sending a verification code…</string>
+    <string name="stripe_identity_link_confirming">Confirming your code…</string>
+    <string name="stripe_identity_link_reauth_title">Sign in again</string>
+    <string name="stripe_identity_link_reauth_body">Your Link session expired. Enter your email to sign in again.</string>
+    <string name="stripe_identity_link_documents_title">Choose a saved ID</string>
+    <string name="stripe_identity_link_documents_body">Select an ID to continue.</string>
+    <string name="stripe_identity_link_documents_loading">Loading your saved IDs…</string>
+    <string name="stripe_identity_link_document_number">%1$s %2$s</string>
+</resources>
