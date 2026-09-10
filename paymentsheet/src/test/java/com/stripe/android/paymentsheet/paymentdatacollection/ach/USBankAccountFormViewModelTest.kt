@@ -155,18 +155,12 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `collect bank account is callable with initial screen state`() =
         runTest(UnconfinedTestDispatcher()) {
-            val apiConfiguration = DEFAULT_API_CONFIG.copy(
-                publishableKey = "pk_test_view_model_args",
-                stripeAccountId = "acct_view_model_args",
-            )
-            val viewModel = createViewModel(
-                args = defaultArgs.copy(apiConfiguration = apiConfiguration),
-            )
+            val viewModel = createViewModel()
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.handlePrimaryButtonClick()
             verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
-                eq(apiConfiguration.publishableKey),
-                eq(apiConfiguration.stripeAccountId),
+                eq(DEFAULT_API_CONFIG.publishableKey),
+                eq(DEFAULT_API_CONFIG.stripeAccountId),
                 any(),
                 any(),
             )
