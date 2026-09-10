@@ -115,7 +115,13 @@ internal class CreateCustomerState @Inject constructor(
         prefetchedPaymentMethods: PrefetchedPaymentMethods?,
     ): List<PaymentMethod> {
         if (prefetchedPaymentMethods == null) {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY,
+                additionalNonPiiParams = mapOf(
+                    "supported_payment_method_types" to metadata.supportedSavedPaymentMethodTypes()
+                        .joinToString(",") { it.code },
+                ),
+            )
             return emptyList()
         }
 

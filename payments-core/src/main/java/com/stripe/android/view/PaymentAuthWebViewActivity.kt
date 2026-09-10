@@ -104,6 +104,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
+                    additionalNonPiiParams = mapOf(
+                        "client_secret_length" to clientSecret.length.toString(),
+                    ),
                 )
             return
         }

@@ -6,6 +6,7 @@ import android.os.Build
 import android.text.style.StyleSpan
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.PlaceTypes
@@ -132,7 +133,8 @@ internal class DefaultPlacesClientProxy(
         } catch (e: Exception) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,
-                StripeException.create(e)
+                StripeException.create(e),
+                additionalNonPiiParams = e.googlePlacesErrorParams(),
             )
             Result.failure(
                 Exception("Could not find autocomplete predictions: ${e.message}")
@@ -165,7 +167,11 @@ internal class DefaultPlacesClientProxy(
             )
             Result.success(place.transformGoogleToStripeAddress(locale))
         } catch (e: Exception) {
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR,
+                StripeException.create(e),
+                additionalNonPiiParams = e.googlePlacesErrorParams(),
+            )
             Result.failure(
                 Exception("Could not fetch place: ${e.message}")
             )
@@ -187,7 +193,10 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         if (BuildConfig.DEBUG) {
             throw exception
         }
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY)
+        errorReporter.report(
+            ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY,
+            StripeException.create(exception),
+        )
         return Result.failure(exception)
     }
 
@@ -198,7 +207,18 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         if (BuildConfig.DEBUG) {
             throw exception
         }
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY)
+        errorReporter.report(
+            ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY,
+            StripeException.create(exception),
+        )
         return Result.failure(exception)
+    }
+}
+
+private fun Exception.googlePlacesErrorParams(): Map<String, String> {
+    return if (this is ApiException) {
+        mapOf("error_code" to statusCode.toString())
+    } else {
+        emptyMap()
     }
 }

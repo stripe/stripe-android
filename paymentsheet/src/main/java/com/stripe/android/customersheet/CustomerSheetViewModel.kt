@@ -739,7 +739,8 @@ internal class CustomerSheetViewModel(
 
                 if (metadata == null) {
                     errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM
+                        ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM,
+                        additionalNonPiiParams = missingMetadataParams(currentViewState),
                     )
 
                     _result.value = InternalCustomerSheetResult.Error(
@@ -1277,6 +1278,17 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewState.UpdatePaymentMethod -> CustomerSheetEventReporter.Screen.EditPaymentMethod
             else -> null
         }
+
+    private fun missingMetadataParams(
+        state: CustomerSheetViewState.AddPaymentMethod,
+    ): Map<String, String> {
+        return mapOf(
+            "payment_method_code" to state.paymentMethodCode,
+            "draft_selection_type" to (state.draftPaymentSelection?.javaClass?.name ?: "null"),
+            "is_processing" to state.isProcessing.toString(),
+            "has_form_values" to (state.formFieldValues != null).toString(),
+        )
+    }
 
     private data class CustomerState(
         val paymentMethods: List<PaymentMethod>,

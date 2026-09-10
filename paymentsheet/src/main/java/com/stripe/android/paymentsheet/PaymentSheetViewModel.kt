@@ -296,6 +296,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     is TapToAddNextStep.Continue -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
+                            additionalNonPiiParams = mapOf(
+                                "current_screen" to navigationHandler.currentScreen.value.javaClass.name,
+                                "payment_method_type" to (result.paymentSelection.paymentMethod.type?.code ?: "null"),
+                            ),
                         )
                     }
                 }

@@ -225,7 +225,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 }
             }
         } else {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT,
+                additionalNonPiiParams = mapOf("operation" to "create_card_payment_details"),
+            )
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
@@ -249,7 +252,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
         } ?: run {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT,
+                additionalNonPiiParams = mapOf("operation" to "create_payment_details_from_payment_method"),
+            )
             Result.failure(
                 exception = IllegalStateException("A non-null Link account is needed to create payment details")
             )
@@ -285,7 +291,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 clientAttributionMetadata = config.clientAttributionMetadata,
             )
         } else {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT,
+                additionalNonPiiParams = mapOf("operation" to "create_bank_account_payment_details"),
+            )
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )

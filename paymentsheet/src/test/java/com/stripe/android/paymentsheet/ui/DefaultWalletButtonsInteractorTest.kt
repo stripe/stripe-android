@@ -369,7 +369,10 @@ class DefaultWalletButtonsInteractorTest {
         assertThat(call.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM)
         assertThat(call.stripeException).isNull()
-        assertThat(call.additionalNonPiiParams).isEmpty()
+        assertThat(call.additionalNonPiiParams).containsExactly(
+            "wallet_type", "link",
+            "button_type", WalletButtonsInteractor.WalletButton.Link::class.java.name,
+        )
 
         errorReporter.ensureAllEventsConsumed()
     }
@@ -405,7 +408,11 @@ class DefaultWalletButtonsInteractorTest {
         assertThat(call.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM)
         assertThat(call.stripeException).isNull()
-        assertThat(call.additionalNonPiiParams).isEmpty()
+        assertThat(call.additionalNonPiiParams).containsExactly(
+            "wallet_type", "link",
+            "button_type", WalletButtonsInteractor.WalletButton.Link::class.java.name,
+            "selection_type", "null",
+        )
 
         errorReporter.ensureAllEventsConsumed()
     }

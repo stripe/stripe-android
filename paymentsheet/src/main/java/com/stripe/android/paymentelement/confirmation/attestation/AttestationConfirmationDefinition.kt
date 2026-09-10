@@ -98,7 +98,10 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             }
             AttestationActivityResult.NoResult -> {
                 errorReporter.report(
-                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT
+                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT,
+                    additionalNonPiiParams = mapOf(
+                        "confirmation_option_type" to confirmationOption.javaClass.name,
+                    ),
                 )
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),

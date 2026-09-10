@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements.autocomplete
 
 import android.os.Build
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -25,6 +27,7 @@ import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.android.libraries.places.api.net.SearchNearbyResponse
 import com.google.android.libraries.places.internal.zzmy
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.IsPlacesAvailable
@@ -180,6 +183,33 @@ class PlacesClientProxyTest {
         }
 
     @Test
+    fun `findAutocompletePredictions reports Google Places status code`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val errorReporter = FakeErrorReporter()
+            val error = ApiException(Status(GOOGLE_PLACES_ERROR_CODE))
+            val client = createGooglePlacesClient(
+                onFindAutocompletePredictions = { Tasks.forException(error) }
+            )
+            val proxy = DefaultPlacesClientProxy(client, errorReporter)
+
+            val result = proxy.findAutocompletePredictions(
+                query = "some query",
+                country = "US",
+                limit = 3,
+            )
+            runCurrent()
+
+            assertThat(result.exceptionOrNull()).isNotNull()
+            val report = errorReporter.awaitCall()
+            assertThat(report.errorEvent).isEqualTo(ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR)
+            assertThat(report.stripeException?.cause).isSameInstanceAs(error)
+            assertThat(report.additionalNonPiiParams).containsExactly(
+                "error_code", GOOGLE_PLACES_ERROR_CODE.toString(),
+            )
+            errorReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
     fun `getPlacesPoweredByGoogleDrawable returns drawable when places is available`() {
         val drawable = PlacesClientProxy.getPlacesPoweredByGoogleDrawable(
             isSystemDarkTheme = true,
@@ -326,5 +356,9 @@ class PlacesClientProxyTest {
             }
         }
         return client
+    }
+
+    private companion object {
+        const val GOOGLE_PLACES_ERROR_CODE = 9012
     }
 }

@@ -322,8 +322,9 @@ internal class DefaultTapToAddConnectionManager(
 
         errorEvent?.let { event ->
             errorReporter.report(
-                event,
-                StripeException.create(error),
+                errorEvent = event,
+                stripeException = StripeException.create(error),
+                additionalNonPiiParams = additionalParams,
             )
         }
 

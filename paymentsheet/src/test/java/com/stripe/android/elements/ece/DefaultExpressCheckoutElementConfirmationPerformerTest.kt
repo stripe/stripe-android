@@ -53,7 +53,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(call.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM)
         assertThat(call.stripeException).isNull()
-        assertThat(call.additionalNonPiiParams).isEmpty()
+        assertThat(call.additionalNonPiiParams).containsExactly(
+            "wallet_type", "google_pay",
+            "express_button_type", ExpressButton.GooglePay::class.java.name,
+        )
     }
 
     @Test
@@ -71,7 +74,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
         )
         assertThat(call.stripeException).isNull()
-        assertThat(call.additionalNonPiiParams).isEmpty()
+        assertThat(call.additionalNonPiiParams).containsExactly(
+            "wallet_type", "google_pay",
+            "express_button_type", ExpressButton.GooglePay::class.java.name,
+        )
     }
 
     @Test

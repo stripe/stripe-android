@@ -105,6 +105,16 @@ class RealErrorReporterTest {
     }
 
     @Test
+    fun `RealErrorReporter logs the original error type when Stripe error type is unavailable`() {
+        val exception = StripeException.create(TestException())
+
+        realErrorReporter.report(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE, exception)
+
+        val analyticsRequestParams = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(analyticsRequestParams["error_type"]).isEqualTo(TestException::class.java.name)
+    }
+
+    @Test
     fun `RealErrorReporter logs skips exception params when exception is null via analyticsRequestExecutor`() {
         realErrorReporter.report(
             errorEvent = ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
@@ -117,4 +127,6 @@ class RealErrorReporterTest {
         assertThat(analyticsRequestParams.get("status_code")).isNull()
         assertThat(analyticsRequestParams.get("request_id")).isNull()
     }
+
+    private class TestException : Exception()
 }

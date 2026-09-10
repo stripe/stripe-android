@@ -54,6 +54,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         errorReporter.report(
             errorEvent = ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION,
+            additionalNonPiiParams = mapOf("operation" to "attach_payment_method"),
         )
 
         return CustomerSheetDataResult.failure(

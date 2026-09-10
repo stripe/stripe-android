@@ -6,6 +6,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -388,13 +389,20 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             "`customer` field should be available when using `CustomerSession` in elements/session!"
         )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
-            ErrorReporter
-                .UnexpectedErrorEvent
-                .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
-                .eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS
         )
+        val unexpectedError = errorReporter.awaitCall()
+        assertThat(unexpectedError.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent
+                .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+        )
+        assertThat(unexpectedError.additionalNonPiiParams).containsExactly(
+            "intent_type", SetupIntent::class.java.name,
+            "payment_method_types", "card",
+            "sessions_error_type", "null",
+        )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test

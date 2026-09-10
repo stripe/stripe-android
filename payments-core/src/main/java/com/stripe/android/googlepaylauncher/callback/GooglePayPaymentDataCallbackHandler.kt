@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallbackRegistry
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallbackRegistry.Selection
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.launch
@@ -23,33 +24,19 @@ internal object GooglePayPaymentDataCallbackHandler {
         errorReporter: ErrorReporter,
         stringResolver: (ResolvableString) -> String
     ) {
-        val selection = GooglePayPaymentDataUpdateCallbackRegistry.get()
-
-        if (request == null) {
-            handleUnexpectedError(
-                event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST,
-                googlePayJsonFactory = googlePayJsonFactory,
-                errorReporter = errorReporter,
-                stringResolver = stringResolver,
-                onCompleteListener = onCompleteListener,
-            )
-
-            return
-        } else if (selection == null) {
-            handleUnexpectedError(
-                event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK,
-                googlePayJsonFactory = googlePayJsonFactory,
-                errorReporter = errorReporter,
-                stringResolver = stringResolver,
-                onCompleteListener = onCompleteListener,
-            )
-
-            return
-        }
+        val selection = validateInputs(
+            request = request,
+            selection = GooglePayPaymentDataUpdateCallbackRegistry.get(),
+            onCompleteListener = onCompleteListener,
+            googlePayJsonFactory = googlePayJsonFactory,
+            errorReporter = errorReporter,
+            stringResolver = stringResolver,
+        ) ?: return
+        val paymentDataRequest = requireNotNull(request)
 
         selection.workScope.launch {
             val update = runCatching {
-                GooglePayPaymentDataUpdate.fromIntermediatePaymentData(request)
+                GooglePayPaymentDataUpdate.fromIntermediatePaymentData(paymentDataRequest)
             }.getOrElse { error ->
                 handleUnexpectedError(
                     event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE,
@@ -58,6 +45,7 @@ internal object GooglePayPaymentDataCallbackHandler {
                     errorReporter = errorReporter,
                     stringResolver = stringResolver,
                     onCompleteListener = onCompleteListener,
+                    additionalNonPiiParams = failureStageParams("parse_intermediate_payment_data"),
                 )
 
                 return@launch
@@ -80,6 +68,7 @@ internal object GooglePayPaymentDataCallbackHandler {
                     errorReporter = errorReporter,
                     stringResolver = stringResolver,
                     onCompleteListener = onCompleteListener,
+                    additionalNonPiiParams = failureStageParams("serialize_callback_response"),
                 )
 
                 return@launch
@@ -87,6 +76,30 @@ internal object GooglePayPaymentDataCallbackHandler {
 
             onCompleteListener.complete(PaymentDataRequestUpdate.fromJson(json.toString()))
         }
+    }
+
+    private fun validateInputs(
+        request: IntermediatePaymentData?,
+        selection: Selection?,
+        onCompleteListener: OnCompleteListener<PaymentDataRequestUpdate>,
+        googlePayJsonFactory: GooglePayJsonFactory,
+        errorReporter: ErrorReporter,
+        stringResolver: (ResolvableString) -> String,
+    ): Selection? {
+        val event = when {
+            request == null -> ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST
+            selection == null -> ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK
+            else -> return selection
+        }
+        handleUnexpectedError(
+            event = event,
+            googlePayJsonFactory = googlePayJsonFactory,
+            errorReporter = errorReporter,
+            stringResolver = stringResolver,
+            onCompleteListener = onCompleteListener,
+            additionalNonPiiParams = inputPresenceParams(request != null, selection != null),
+        )
+        return null
     }
 
     private fun merchantFailureResponse(
@@ -112,10 +125,15 @@ internal object GooglePayPaymentDataCallbackHandler {
         googlePayJsonFactory: GooglePayJsonFactory,
         errorReporter: ErrorReporter,
         stringResolver: (ResolvableString) -> String,
+        additionalNonPiiParams: Map<String, String>,
     ) {
+        val callbackTriggerParams = callbackTrigger?.let {
+            mapOf("callback_trigger" to it.name)
+        }.orEmpty()
         errorReporter.report(
             errorEvent = event,
-            stripeException = throwable?.let { StripeException.create(it) }
+            stripeException = throwable?.let { StripeException.create(it) },
+            additionalNonPiiParams = callbackTriggerParams + additionalNonPiiParams,
         )
 
         onCompleteListener.complete(
@@ -145,5 +163,19 @@ internal object GooglePayPaymentDataCallbackHandler {
             GooglePayPaymentDataUpdate.CallbackTrigger.Offer ->
                 GooglePayPaymentDataError.Intent.Offer
         }
+    }
+
+    private fun inputPresenceParams(
+        hasRequest: Boolean,
+        hasRegisteredCallback: Boolean,
+    ): Map<String, String> {
+        return mapOf(
+            "has_request" to hasRequest.toString(),
+            "has_registered_callback" to hasRegisteredCallback.toString(),
+        )
+    }
+
+    private fun failureStageParams(stage: String): Map<String, String> {
+        return mapOf("failure_stage" to stage)
     }
 }

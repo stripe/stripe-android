@@ -171,7 +171,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                additionalNonPiiParams = mapOf(
+                    "launcher" to "embedded_sheet",
+                    "operation" to "launch_form",
+                    "payment_method_code" to code,
+                ),
             )
             return
         }
@@ -207,7 +212,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                additionalNonPiiParams = mapOf(
+                    "launcher" to "embedded_sheet",
+                    "operation" to "launch_manage",
+                    "selection_type" to (selection?.javaClass?.name ?: "null"),
+                ),
             )
             return
         }
@@ -237,7 +247,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                additionalNonPiiParams = mapOf(
+                    "launcher" to "embedded_sheet",
+                    "operation" to "launch_payment_options",
+                    "selection_type" to (selection?.javaClass?.name ?: "null"),
+                ),
             )
             return
         }

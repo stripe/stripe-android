@@ -115,7 +115,12 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
             errorReporter.report(
                 ErrorReporter
                     .UnexpectedErrorEvent
-                    .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+                    .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD,
+                additionalNonPiiParams = mapOf(
+                    "intent_type" to elementsSession.stripeIntent.javaClass.name,
+                    "payment_method_types" to elementsSession.stripeIntent.paymentMethodTypes.joinToString(","),
+                    "sessions_error_type" to (elementsSession.sessionsError?.javaClass?.name ?: "null"),
+                ),
             )
 
             throw IllegalStateException(

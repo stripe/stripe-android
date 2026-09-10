@@ -33,8 +33,13 @@ class GooglePayPaymentDataCallbackHandlerTest {
     ) {
         onPaymentDataChanged(null)
 
-        assertThat(errorReporter.awaitCall().errorEvent)
+        val report = errorReporter.awaitCall()
+        assertThat(report.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST)
+        assertThat(report.additionalNonPiiParams).containsExactly(
+            "has_request", "false",
+            "has_registered_callback", "true",
+        )
         assertErrorUpdate(listener.completions.awaitItem())
     }
 
@@ -45,8 +50,13 @@ class GooglePayPaymentDataCallbackHandlerTest {
     ) {
         onPaymentDataChanged(request())
 
-        assertThat(errorReporter.awaitCall().errorEvent)
+        val report = errorReporter.awaitCall()
+        assertThat(report.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK)
+        assertThat(report.additionalNonPiiParams).containsExactly(
+            "has_request", "true",
+            "has_registered_callback", "false",
+        )
         assertErrorUpdate(listener.completions.awaitItem())
     }
 
@@ -93,6 +103,9 @@ class GooglePayPaymentDataCallbackHandlerTest {
         assertThat(report.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE)
         assertThat(report.stripeException).isNotNull()
+        assertThat(report.additionalNonPiiParams).containsExactly(
+            "failure_stage", "parse_intermediate_payment_data",
+        )
         assertErrorUpdate(listener.completions.awaitItem())
     }
 
@@ -116,6 +129,9 @@ class GooglePayPaymentDataCallbackHandlerTest {
         assertThat(report.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE)
         assertThat(report.stripeException).isNotNull()
+        assertThat(report.additionalNonPiiParams).containsExactly(
+            "failure_stage", "serialize_callback_response",
+        )
         assertErrorUpdate(listener.completions.awaitItem())
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.hcaptcha.analytics
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -41,7 +42,11 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE)
             }
             else -> {
-                errorReporter.report(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
+                errorReporter.report(
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE,
+                    stripeException = error?.let(StripeException::create),
+                    additionalNonPiiParams = mapOf("is_error_null" to (error == null).toString()),
+                )
             }
         }
 

@@ -199,7 +199,10 @@ class DefaultTapToAddConnectionManagerTest {
         assertThat(reportCall.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE)
         assertThat(reportCall.stripeException?.cause).isInstanceOf(TerminalException::class.java)
-        assertThat(reportCall.additionalNonPiiParams).isEmpty()
+        assertThat(reportCall.additionalNonPiiParams).containsExactly(
+            "terminalErrorCode",
+            TerminalErrorCode.CANCEL_FAILED.toLogString(),
+        )
     }
 
     @Test

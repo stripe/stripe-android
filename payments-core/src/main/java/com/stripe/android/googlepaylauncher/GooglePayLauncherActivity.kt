@@ -99,7 +99,12 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                     val host = AuthActivityStarterHost.create(this)
                     viewModel.confirmStripeIntent(host, params)
                 } else {
-                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA,
+                        additionalNonPiiParams = mapOf(
+                            "status_code" to taskResult.status.statusCode.toString(),
+                        ),
+                    )
                     viewModel.updateResult(
                         GooglePayLauncher.Result.Failed(
                             RuntimeException(

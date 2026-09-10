@@ -296,7 +296,12 @@ internal class DefaultTapToAddCollectionHandler(
                 errorReporter.report(
                     ErrorReporter
                         .UnexpectedErrorEvent
-                        .TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION
+                        .TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION,
+                    additionalNonPiiParams = mapOf(
+                        "intent_status" to (intent.status?.toString() ?: "null"),
+                        "intent_payment_method_types" to intent.paymentMethodTypes.joinToString(","),
+                        "customer_metadata_type" to customerMetadata.javaClass.name,
+                    ),
                 )
 
                 throw IllegalStateException(

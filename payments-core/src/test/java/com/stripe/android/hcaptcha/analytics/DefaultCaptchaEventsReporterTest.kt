@@ -9,6 +9,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -89,9 +90,11 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["error_message"]).isEqualTo("test error")
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
 
-            // Verify unexpected error was reported
-            assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
+            val report = fakeErrorReporter.awaitCall()
+            assertThat(report.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
+            assertThat(report.stripeException?.cause).isInstanceOf(Throwable::class.java)
+            assertThat(report.additionalNonPiiParams).containsExactly("is_error_null", "false")
         }
 
     @Test
@@ -111,9 +114,11 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["error_message"]).isNull()
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
 
-            // Verify unexpected error was reported for null error
-            assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
+            val report = fakeErrorReporter.awaitCall()
+            assertThat(report.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
+            assertThat(report.stripeException).isNull()
+            assertThat(report.additionalNonPiiParams).containsExactly("is_error_null", "true")
         }
 
     @Test
@@ -130,9 +135,11 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
             assertThat(loggedParams["duration"]).isEqualTo(0f)
 
-            // Verify unexpected error was reported
-            assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
+            val report = fakeErrorReporter.awaitCall()
+            assertThat(report.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
+            assertThat(report.stripeException?.cause).isInstanceOf(Throwable::class.java)
+            assertThat(report.additionalNonPiiParams).containsExactly("is_error_null", "false")
         }
 
     @Test
@@ -153,9 +160,8 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["error_message"]).isEqualTo("Network error")
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
 
-            // Verify expected error was reported for HCaptchaException
-            assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE.eventName)
+            assertThat(fakeErrorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE)
         }
 
     @Test
@@ -226,8 +232,8 @@ internal class DefaultCaptchaEventsReporterTest {
 
     private fun runScenario(
         durationProvider: DurationProvider = DefaultDurationProvider.instance,
-        testBlock: (DefaultCaptchaEventsReporter, FakeAnalyticsRequestExecutor, FakeErrorReporter) -> Unit
-    ) {
+        testBlock: suspend (DefaultCaptchaEventsReporter, FakeAnalyticsRequestExecutor, FakeErrorReporter) -> Unit
+    ) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val fakeErrorReporter = FakeErrorReporter()
         val eventsReporter = DefaultCaptchaEventsReporter(
@@ -245,6 +251,7 @@ internal class DefaultCaptchaEventsReporterTest {
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor, fakeErrorReporter)
+        fakeErrorReporter.ensureAllEventsConsumed()
     }
 
     companion object {

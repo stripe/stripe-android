@@ -103,6 +103,11 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         if (intentId == null || clientSecret == null) {
             errorReporter.report(
                 errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE,
+                additionalNonPiiParams = mapOf(
+                    "is_intent_id_null" to (intentId == null).toString(),
+                    "is_client_secret_null" to (clientSecret == null).toString(),
+                    "intent_type" to args.intent.javaClass.name,
+                ),
             )
             return
         }

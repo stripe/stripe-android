@@ -108,7 +108,12 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                 if (result != null) {
                     onGooglePayResult(result)
                 } else {
-                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA,
+                        additionalNonPiiParams = mapOf(
+                            "status_code" to taskResult.status.statusCode.toString(),
+                        ),
+                    )
                     updateResult(
                         GooglePayPaymentMethodLauncher.Result.Failed(
                             RuntimeException(

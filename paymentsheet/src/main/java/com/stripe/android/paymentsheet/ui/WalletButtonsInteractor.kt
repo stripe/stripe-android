@@ -262,7 +262,11 @@ internal class DefaultWalletButtonsInteractor constructor(
                     }
                 } ?: run {
                     errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM
+                        ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM,
+                        additionalNonPiiParams = mapOf(
+                            "wallet_type" to action.button.walletType.code,
+                            "button_type" to action.button.javaClass.name,
+                        ),
                     )
                 }
             }
@@ -308,7 +312,12 @@ internal class DefaultWalletButtonsInteractor constructor(
             }
         } ?: run {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+                ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM,
+                additionalNonPiiParams = mapOf(
+                    "wallet_type" to button.walletType.code,
+                    "button_type" to button.javaClass.name,
+                    "selection_type" to (arguments.paymentSelection?.javaClass?.name ?: "null"),
+                ),
             )
         }
     }

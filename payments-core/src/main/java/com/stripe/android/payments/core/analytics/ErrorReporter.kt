@@ -102,7 +102,11 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                 "analytics_value" to stripeException.analyticsValue(),
                 "status_code" to statusCode?.toString(),
                 "request_id" to stripeException.requestId,
-                "error_type" to stripeException.stripeError?.type,
+                "error_type" to (
+                    stripeException.stripeError?.type
+                        ?: stripeException.cause?.javaClass?.name
+                        ?: stripeException.javaClass.name
+                ),
                 "error_code" to stripeException.stripeError?.code,
             ).filterNotNullValues()
         }
