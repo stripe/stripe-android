@@ -45,7 +45,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -921,14 +920,12 @@ internal class CheckoutSheetLauncherTest {
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val logger = FakeLogger()
         val confirmationHandler = FakeConfirmationHandler()
-        val checkoutUiContext = UnconfinedTestDispatcher(testScheduler)
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
             resultCallback = CheckoutController.ResultCallback {},
-            checkoutUiContext = checkoutUiContext,
         )
         val launcherState = CheckoutSheetLauncherState(savedStateHandle)
         val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(

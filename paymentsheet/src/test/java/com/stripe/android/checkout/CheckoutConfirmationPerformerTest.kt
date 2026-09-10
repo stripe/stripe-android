@@ -121,14 +121,12 @@ internal class CheckoutConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
-        val checkoutUiContext = UnconfinedTestDispatcher(testScheduler)
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
-            checkoutUiContext = checkoutUiContext,
         )
         val eventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
@@ -147,7 +145,6 @@ internal class CheckoutConfirmationPerformerTest {
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
-            checkoutUiContext = checkoutUiContext,
         )
 
         Scenario(
