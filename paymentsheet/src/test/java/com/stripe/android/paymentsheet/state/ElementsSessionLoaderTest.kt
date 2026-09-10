@@ -29,6 +29,22 @@ internal class ElementsSessionLoaderTest {
     }
 
     @Test
+    fun `passes API configuration to repository`() = runScenario {
+        val apiConfiguration = DEFAULT_API_CONFIG
+
+        loader(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            configuration = DEFAULT_CONFIG,
+            savedPaymentMethodSelection = null,
+            apiConfiguration = apiConfiguration,
+        )
+
+        assertThat(elementsSessionRepository.lastParams?.apiConfiguration).isEqualTo(apiConfiguration)
+    }
+
+    @Test
     fun `passes savedPaymentMethodSelection to repository`() = runScenario {
         val savedSelection = SavedSelection.PaymentMethod(id = "pm_123")
 

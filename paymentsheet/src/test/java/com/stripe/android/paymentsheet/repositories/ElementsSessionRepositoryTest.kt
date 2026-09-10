@@ -41,6 +41,34 @@ internal class ElementsSessionRepositoryTest {
     private val requestCaptor = argumentCaptor<StripeRequest>()
 
     @Test
+    fun `get constructs request options from API configuration`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+        val apiConfiguration = DEFAULT_API_CONFIG.copy(
+            publishableKey = "pk_test_request_options",
+            stripeAccountId = "acct_request_options",
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            apiConfiguration = apiConfiguration,
+        ).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val requestOptions = (requestCaptor.firstValue as ApiRequest).options
+        assertThat(requestOptions.apiKey).isEqualTo(apiConfiguration.publishableKey)
+        assertThat(requestOptions.stripeAccount).isEqualTo(apiConfiguration.stripeAccountId)
+    }
+
+    @Test
     fun `get with locale should retrieve with element session`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
