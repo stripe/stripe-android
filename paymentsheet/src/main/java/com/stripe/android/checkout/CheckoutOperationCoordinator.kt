@@ -20,6 +20,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
+    private val stateHolder: CheckoutControllerStateHolder,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
 ) {
@@ -113,7 +114,12 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
 
         try {
-            mapResult(wasRestored)?.let(resultCallback::onResult)
+            mapResult(wasRestored)?.let { result ->
+                if (result is CheckoutController.Result.Completed) {
+                    stateHolder.state = null
+                }
+                resultCallback.onResult(result)
+            }
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false

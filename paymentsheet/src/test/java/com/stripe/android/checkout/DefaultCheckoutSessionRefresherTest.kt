@@ -2,7 +2,9 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -21,6 +23,24 @@ internal class DefaultCheckoutSessionRefresherTest {
 
         assertThat(refreshActions.reloadCalls.awaitItem())
             .isEqualTo(initialState.copy(checkoutSessionResponse = response))
+    }
+
+    @Test
+    fun `refresh with selection commits response and selection together`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(id = "cs_updated")
+        val selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+
+        refresher.refresh(
+            response = response,
+            paymentSelection = selection,
+            previousNewSelections = android.os.Bundle(),
+        )
+
+        val committedState = refreshActions.reloadCalls.awaitItem()
+        assertThat(committedState.checkoutSessionResponse).isEqualTo(response)
+        assertThat(committedState.paymentSelection).isEqualTo(selection)
+        assertThat(committedState.previousNewSelections.previousNewSelection("cashapp"))
+            .isEqualTo(selection)
     }
 
     @Test

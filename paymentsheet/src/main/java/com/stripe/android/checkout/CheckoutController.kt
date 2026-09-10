@@ -267,6 +267,11 @@ class CheckoutController @Inject internal constructor(
             ?: return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session before it is configured.")
             )
+        if (stateHolder.state?.isOpen != true) {
+            return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate a completed or expired checkout session.")
+            )
+        }
         if (sheetStateHolder.sheetIsOpen) {
             return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
@@ -277,6 +282,7 @@ class CheckoutController @Inject internal constructor(
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
                 val state = requireNotNull(stateHolder.state)
+                check(state.isOpen) { "Cannot mutate a completed or expired checkout session." }
                 val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
                 val newState = state
                     .copy(checkoutSessionResponse = response)

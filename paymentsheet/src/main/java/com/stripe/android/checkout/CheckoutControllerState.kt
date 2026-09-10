@@ -27,6 +27,9 @@ internal data class CheckoutControllerState(
     val previousNewSelections: Bundle,
     val linkEagerPresentationSuppressed: Boolean,
 ) : Parcelable {
+    val isOpen: Boolean
+        get() = checkoutSessionResponse.status == CheckoutSessionResponse.Status.OPEN
+
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,

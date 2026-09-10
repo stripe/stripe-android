@@ -51,9 +51,9 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         val state = stateHolder.state
         if (state == null) {
-            defaultPresenter.present()
             return
         }
+        if (!state.isOpen) return
 
         sheetStateHolder.sheetIsOpen = true
         val didLaunch = selectionLauncher.launchIfEligible(

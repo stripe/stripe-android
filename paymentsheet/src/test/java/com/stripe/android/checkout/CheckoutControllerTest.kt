@@ -759,6 +759,14 @@ internal class CheckoutControllerTest {
         assertThat(result.isSuccess).isTrue()
         assertThat(controller.session.value?.status)
             .isInstanceOf(CheckoutController.Session.Status.Complete::class.java)
+
+        val mutation = controller.updateEmail("after-completion@example.com")
+
+        assertThat(mutation.isFailure).isTrue()
+        assertThat(mutation.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot mutate a completed or expired checkout session.")
+        assertThat(controller.session.value?.status)
+            .isInstanceOf(CheckoutController.Session.Status.Complete::class.java)
     }
 
     @Test
