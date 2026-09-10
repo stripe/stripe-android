@@ -124,6 +124,8 @@ internal class CustomerSheetScreenshotTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_123",
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

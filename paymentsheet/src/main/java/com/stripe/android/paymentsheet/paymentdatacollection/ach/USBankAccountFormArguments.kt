@@ -66,6 +66,8 @@ internal class USBankAccountFormArguments(
     val sellerBusinessName: String?,
     val forceSetupFutureUseBehavior: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val publishableKey: String,
+    val stripeAccountId: String?,
 ) {
     companion object {
         fun create(
