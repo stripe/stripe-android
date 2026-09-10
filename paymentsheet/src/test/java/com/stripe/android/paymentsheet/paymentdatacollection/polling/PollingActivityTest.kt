@@ -20,6 +20,8 @@ import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
@@ -159,9 +161,7 @@ internal class PollingActivityTest {
     @Test
     fun `Passes stripeAccountId through to result when polling succeeds`() {
         val fakePoller = FakeIntentStatusPoller()
-        val testStripeAccountId = "acct_test_123"
-        val argsWithStripeAccountId = defaultArgs.copy(stripeAccountId = testStripeAccountId)
-        val scenario = pollingScenario(args = argsWithStripeAccountId, poller = fakePoller)
+        val scenario = pollingScenario(poller = fakePoller)
 
         scenario.onActivity {
             fakePoller.emitNextPollResult(StripeIntent.Status.Succeeded)
@@ -169,15 +169,13 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-            assertThat(result.stripeAccountId).isEqualTo(testStripeAccountId)
+            assertThat(result.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
         }
     }
 
     @Test
     fun `Passes stripeAccountId through to result when polling is canceled`() {
-        val testStripeAccountId = "acct_test_456"
-        val argsWithStripeAccountId = defaultArgs.copy(stripeAccountId = testStripeAccountId)
-        val scenario = pollingScenario(args = argsWithStripeAccountId)
+        val scenario = pollingScenario()
 
         scenario.onActivity {
             composeTestRule
@@ -188,7 +186,7 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
-            assertThat(result.stripeAccountId).isEqualTo(testStripeAccountId)
+            assertThat(result.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
         }
     }
 
@@ -258,7 +256,7 @@ internal class PollingActivityTest {
                 timeLimit = args.timeLimitInSeconds.seconds,
                 initialDelay = args.initialDelayInSeconds.seconds,
                 ctaText = args.ctaText,
-                stripeAccountId = args.stripeAccountId,
+                requestOptions = args.requestOptions,
                 qrCodeUrl = args.qrCodeUrl,
                 paymentMethodType = args.paymentMethodType,
             ),
@@ -319,7 +317,10 @@ internal class PollingActivityTest {
             timeLimitInSeconds = 60,
             initialDelayInSeconds = 0,
             ctaText = R.string.stripe_blik_confirm_payment,
-            stripeAccountId = null,
+            requestOptions = ApiRequest.Options(
+                apiKey = DEFAULT_API_CONFIG.publishableKey,
+                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+            ),
             qrCodeUrl = null,
             paymentMethodType = "blik",
         )
