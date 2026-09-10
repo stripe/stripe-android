@@ -71,14 +71,17 @@ class GooglePayPaymentMethodLauncher internal constructor(
         lifecycleOwner = lifecycleOwner,
         activityResultLauncher = activityResultLauncher,
         onPaymentDataChangedCallback = null,
+        context = context,
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor,
     )
 
-    private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
-        stripeAccountId = PaymentConfiguration.getInstance(context).stripeAccountId
-    )
+    private val apiConfiguration = PaymentConfiguration.getInstance(context).let {
+        ApiConfiguration.State(
+            publishableKey = it.publishableKey,
+            stripeAccountId = it.stripeAccountId
+        )
+    }
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.

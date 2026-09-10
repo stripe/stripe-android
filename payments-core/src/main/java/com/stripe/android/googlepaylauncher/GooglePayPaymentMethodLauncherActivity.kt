@@ -38,10 +38,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     }
 
     private val errorReporter: ErrorReporter by lazy {
-        ErrorReporter.createFallbackInstance(
-            context = this,
-            apiConfigurationProvider = { args.apiConfiguration },
-        )
+        ErrorReporter.createFallbackInstance(context = this)
     }
 
     private lateinit var args: GooglePayPaymentMethodLauncherContractV2.Args

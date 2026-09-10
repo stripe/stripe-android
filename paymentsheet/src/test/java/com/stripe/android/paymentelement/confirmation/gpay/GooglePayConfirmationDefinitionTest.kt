@@ -8,7 +8,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -21,8 +20,8 @@ import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLaunch
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -55,7 +54,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,11 +66,6 @@ import com.stripe.android.R as PaymentsCoreR
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
-    @Before
-    fun setUp() {
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123", "acct_123")
-    }
-
     @get:Rule
     val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.allowNoExistingPaymentMethodForGooglePay,
