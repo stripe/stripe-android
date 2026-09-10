@@ -349,6 +349,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             configuration = configuration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
+            apiConfiguration = apiConfiguration,
         )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
@@ -516,6 +517,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+        apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadSessionLoad
@@ -527,6 +529,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     configuration = configuration,
                     savedPaymentMethodSelection = savedPaymentMethodSelection,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
