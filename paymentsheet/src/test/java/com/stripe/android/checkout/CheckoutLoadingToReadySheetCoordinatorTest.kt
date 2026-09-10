@@ -11,7 +11,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutLoadingToReadySheetCoordinatorTest {
@@ -135,46 +134,6 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
-    @Test
-    fun `Loading launch exception rolls back presentation`() = runScenario(
-        isUpdating = true,
-    ) {
-        launches.loadingError = IllegalStateException("Loading failed")
-
-        assertFailsWith<IllegalStateException> { present() }
-
-        assertThat(launches.loadingCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(awaitingReadyState.isAwaitingReady).isFalse()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-    }
-
-    @Test
-    fun `initial Ready launch exception rolls back presentation`() = runScenario {
-        launches.initialReadyError = IllegalStateException("Ready failed")
-
-        assertFailsWith<IllegalStateException> { present() }
-
-        assertThat(launches.initialReadyCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(awaitingReadyState.isAwaitingReady).isFalse()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-    }
-
-    @Test
-    fun `resumed Ready launch exception rolls back presentation`() = runScenario(
-        isUpdating = true,
-    ) {
-        launches.pendingReadyError = IllegalStateException("Ready failed")
-        present()
-        assertThat(launches.loadingCalls.awaitItem()).isEqualTo(Unit)
-
-        isUpdating.value = false
-        assertFailsWith<IllegalStateException> { runCurrent() }
-
-        assertThat(launches.pendingReadyCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(awaitingReadyState.isAwaitingReady).isFalse()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-    }
-
     private fun runScenario(
         isUpdating: Boolean = false,
         block: suspend Scenario.() -> Unit,
@@ -261,24 +220,18 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
         val initialReadyCalls = Turbine<Unit>()
         val pendingReadyCalls = Turbine<Unit>()
 
-        var loadingError: Exception? = null
-        var initialReadyError: Exception? = null
-        var pendingReadyError: Exception? = null
         var pendingReadyResult: ReadyLaunchResult = ReadyLaunchResult.Launched
 
         fun launchLoading() {
             loadingCalls.add(Unit)
-            loadingError?.let { throw it }
         }
 
         fun launchInitialReady() {
             initialReadyCalls.add(Unit)
-            initialReadyError?.let { throw it }
         }
 
         fun launchPendingReady(): ReadyLaunchResult {
             pendingReadyCalls.add(Unit)
-            pendingReadyError?.let { throw it }
             return pendingReadyResult
         }
 

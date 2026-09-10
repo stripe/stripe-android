@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -35,18 +34,13 @@ internal class CheckoutLoadingToReadySheetCoordinator(
         if (sheetStateHolder.sheetIsOpen) return
 
         sheetStateHolder.sheetIsOpen = true
-        try {
-            if (isUpdating.value) {
-                awaitingReadyState.isAwaitingReady = true
-                launchLoading()
-                resumePendingReadyLaunch()
-            } else {
-                launchReady()
-                awaitingReadyState.isAwaitingReady = false
-            }
-        } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-            close()
-            throw error
+        if (isUpdating.value) {
+            awaitingReadyState.isAwaitingReady = true
+            launchLoading()
+            resumePendingReadyLaunch()
+        } else {
+            launchReady()
+            awaitingReadyState.isAwaitingReady = false
         }
     }
 
@@ -61,15 +55,8 @@ internal class CheckoutLoadingToReadySheetCoordinator(
                 return@launch
             }
 
-            try {
-                awaitingReadyState.isAwaitingReady =
-                    launchPendingReady() == ReadyLaunchResult.KeepLoading
-            } catch (error: CancellationException) {
-                throw error
-            } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                clearPresentation()
-                throw error
-            }
+            awaitingReadyState.isAwaitingReady =
+                launchPendingReady() == ReadyLaunchResult.KeepLoading
         }
     }
 
