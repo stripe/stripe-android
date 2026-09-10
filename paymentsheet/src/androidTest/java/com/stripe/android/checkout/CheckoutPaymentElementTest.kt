@@ -25,6 +25,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -275,6 +276,7 @@ internal class CheckoutPaymentElementTest {
                 verticalModePage.clickNewPaymentMethodButton("cashapp")
             }
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                openHorizontalPaymentMethodListFromWalletOptions()
                 val cashAppTag = TEST_TAG_LIST + "cashapp"
                 testRules.compose.onNodeWithTag(TEST_TAG_LIST, useUnmergedTree = true)
                     .performScrollToNode(hasTestTag(cashAppTag))
@@ -375,12 +377,37 @@ internal class CheckoutPaymentElementTest {
     private fun preparePaymentOptionsScreen(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
     ) {
-        if (paymentMethodLayout == PaymentElement.Configuration.PaymentMethodLayout.Vertical) {
-            formPage.waitUntilVisible()
-            Espresso.pressBack()
-            formPage.waitUntilMissing()
+        when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> {
+                formPage.waitUntilVisible()
+                Espresso.pressBack()
+                formPage.waitUntilMissing()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                openHorizontalPaymentMethodListFromWalletOptions()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
+                error("Expected an explicit layout.")
+            }
         }
         waitForPaymentOptionsLayout(paymentMethodLayout)
+    }
+
+    private fun openHorizontalPaymentMethodListFromWalletOptions() {
+        // The checkout fixture enables Google Pay, and TestRules reports it as ready. Horizontal
+        // payment options therefore open on the wallet options screen rather than the payment
+        // method list. Selecting Add is an intentional step in that flow.
+        val googlePayTag = PaymentOptionsItem.GooglePay.viewType.name
+        val addCardTag = PaymentOptionsItem.AddCard.viewType.name
+        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+            val hasGooglePay = testRules.compose.onAllNodes(hasTestTag(googlePayTag))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+            val hasAdd = testRules.compose.onAllNodes(hasTestTag(addCardTag))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+            hasGooglePay && hasAdd
+        }
+        testRules.compose.onNodeWithTag(addCardTag).performClick()
+        waitForPaymentOptionsLayout(PaymentElement.Configuration.PaymentMethodLayout.Horizontal)
     }
 
     private fun waitForPaymentOptionsLayout(
