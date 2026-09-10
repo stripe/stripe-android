@@ -2,7 +2,6 @@ package com.stripe.example.activity
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,19 +22,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
-import com.stripe.example.StripeFactory
-import com.stripe.example.module.StripeIntentViewModel
 import com.stripe.example.theme.DefaultExampleTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 
 class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
-    private val viewModel: StripeIntentViewModel by viewModels()
-    private val stripe by lazy { StripeFactory(this).create() }
+    private val httpClient = OkHttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,28 +105,68 @@ class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
         onReady: (String) -> Unit,
         onFailure: (Throwable) -> Unit,
     ) {
-        viewModel.createPaymentIntent(country = "us").observe(this) { createResult ->
-            createResult.fold(
-                onSuccess = { response ->
-                    val clientSecret = response.getString("secret")
-                    lifecycleScope.launch {
-                        runCatching {
-                            stripe.confirmPaymentIntent(
-                                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                                    paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
-                                    clientSecret = clientSecret,
-                                )
-                            )
-                        }.fold(
-                            onSuccess = { onReady(clientSecret) },
-                            onFailure = onFailure,
-                        )
-                    }
-                },
+        lifecycleScope.launch {
+            runCatching {
+                val checkout = createPaymentIntent()
+                PaymentConfiguration.init(
+                    context = this@PaymentLauncherPlaygroundActivity,
+                    publishableKey = checkout.publishableKey,
+                    stripeAccountId = null,
+                )
+                Stripe(
+                    context = this@PaymentLauncherPlaygroundActivity,
+                    publishableKey = checkout.publishableKey,
+                    stripeAccountId = null,
+                    enableLogging = true,
+                    betas = emptySet(),
+                ).confirmPaymentIntent(
+                    ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+                        clientSecret = checkout.clientSecret,
+                    )
+                )
+                checkout.clientSecret
+            }.fold(
+                onSuccess = onReady,
                 onFailure = onFailure,
             )
         }
     }
+
+    private suspend fun createPaymentIntent(): Checkout {
+        return withContext(Dispatchers.IO) {
+            val requestBody = JSONObject()
+                .put("hot_dog_count", 1)
+                .put("salad_count", 0)
+                .put("is_subscribing", false)
+                .toString()
+                .toRequestBody(JSON_MEDIA_TYPE)
+            val request = Request.Builder()
+                .url("$BACKEND_URL/checkout")
+                .post(requestBody)
+                .build()
+
+            httpClient.newCall(request).execute().use { response ->
+                val responseBody = checkNotNull(response.body) {
+                    "Backend returned an empty response body"
+                }.string()
+                check(response.isSuccessful) {
+                    "Backend returned HTTP ${response.code}: $responseBody"
+                }
+                JSONObject(responseBody).let { json ->
+                    Checkout(
+                        publishableKey = json.getString("publishableKey"),
+                        clientSecret = json.getString("paymentIntent"),
+                    )
+                }
+            }
+        }
+    }
+
+    private data class Checkout(
+        val publishableKey: String,
+        val clientSecret: String,
+    )
 
     private fun PaymentResult.displayText(): String {
         return when (this) {
@@ -132,7 +177,9 @@ class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
     }
 
     private companion object {
+        private const val BACKEND_URL = "https://stripe-mobile-payment-sheet.stripedemos.com"
         private const val TEST_CARD_NUMBER = "4000582600000094"
+        private val JSON_MEDIA_TYPE = "application/json".toMediaType()
 
         private val PAYMENT_METHOD_CREATE_PARAMS = PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Card.Builder()
