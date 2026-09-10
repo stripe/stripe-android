@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -69,12 +69,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : ViewModel() {
@@ -556,15 +554,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
             )
         } else {
             collectBankAccountLauncher?.presentWithSetupIntent(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
             )
@@ -675,8 +673,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -686,8 +684,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         } else {
             collectBankAccountLauncher?.presentWithDeferredSetup(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -862,6 +860,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,
         val clientSecret: String?,
+        val apiConfiguration: ApiConfiguration.State,
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
