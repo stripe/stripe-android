@@ -242,14 +242,11 @@ internal class InputAddressViewModel @Inject internal constructor(
                     reportCompleted(addressDetails)
                 }
             }
-            is AddressElementActivityContract.Args.CheckoutShipping.Ready -> {
+            is AddressElementActivityContract.Args.CheckoutShipping -> {
                 saveCheckoutShippingAddress(
                     checkoutSessionResponse = args.checkoutSessionResponse,
                     addressDetails = addressDetails,
                 )
-            }
-            is AddressElementActivityContract.Args.CheckoutShipping.Loading -> {
-                error("Address Element ViewModel cannot be created for loading Checkout arguments")
             }
         }
     }

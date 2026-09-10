@@ -3,13 +3,10 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Build
 import android.os.Bundle
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -24,158 +21,12 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class AddressElementActivityTest {
-    @get:Rule
-    val composeTestRule = createEmptyComposeRule()
-
-    @Test
-    fun `loading transitions to ready intent`() {
-        val loadingIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
-        )
-        val readyIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Ready(
-                "pk_test_123",
-                null,
-                CheckoutSessionResponseFactory.create(),
-            )
-        )
-        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, loadingIntent)
-            .create()
-            .start()
-            .resume()
-            .visible()
-
-        controller.newIntent(readyIntent)
-
-        assertThat(controller.get().intent).isSameInstanceAs(readyIntent)
-        controller.pause().stop().destroy()
-    }
-
-    @Test
-    fun `loading ignores another loading intent`() {
-        val initialIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
-        )
-        val updatedIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_456")
-        )
-        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, initialIntent)
-            .create()
-            .start()
-            .resume()
-            .visible()
-
-        controller.newIntent(updatedIntent)
-
-        assertThat(controller.get().intent).isSameInstanceAs(initialIntent)
-        controller.pause().stop().destroy()
-    }
-
-    @Test
-    fun `ready ignores another ready intent`() {
-        val loadingIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
-        )
-        val initialReadyIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Ready(
-                "pk_test_123",
-                null,
-                CheckoutSessionResponseFactory.create(),
-            )
-        )
-        val updatedReadyIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Ready(
-                "pk_test_456",
-                null,
-                CheckoutSessionResponseFactory.create(),
-            )
-        )
-        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, loadingIntent)
-            .create()
-            .start()
-            .resume()
-            .visible()
-
-        controller.newIntent(initialReadyIntent)
-        controller.newIntent(updatedReadyIntent)
-
-        assertThat(controller.get().intent).isSameInstanceAs(initialReadyIntent)
-        controller.pause().stop().destroy()
-    }
-
-    @Test
-    fun `finishing activity ignores ready intent`() {
-        val loadingIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
-        )
-        val readyIntent = checkoutIntent(
-            AddressElementActivityContract.Args.CheckoutShipping.Ready(
-                "pk_test_123",
-                null,
-                CheckoutSessionResponseFactory.create(),
-            )
-        )
-        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, loadingIntent)
-            .create()
-            .start()
-            .resume()
-            .visible()
-
-        controller.get().finish()
-        controller.newIntent(readyIntent)
-
-        assertThat(controller.get().intent).isSameInstanceAs(loadingIntent)
-        controller.pause().stop().destroy()
-    }
-
-    @Test
-    fun loadingCheckoutActivityDoesNotCreateReadyViewModel() {
-        val args = AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
-        val intent = AddressElementActivityContract.CheckoutShipping.createIntent(application, args)
-        var viewModelCreateCalls = 0
-        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, intent)
-        controller.get().viewModelFactory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                viewModelCreateCalls += 1
-                error("Loading must not create Address Element dependencies")
-            }
-        }
-
-        controller.create().start().resume().visible()
-
-        assertThat(viewModelCreateCalls).isEqualTo(0)
-        controller.pause().stop().destroy()
-    }
-
-    @Test
-    fun loadingCheckoutActivityIsDismissible() {
-        val args = AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
-        val intent = AddressElementActivityContract.CheckoutShipping.createIntent(application, args)
-
-        ActivityScenario.launchActivityForResult<AddressElementActivity>(intent).use { scenario ->
-            assertThat(scenario.state).isEqualTo(Lifecycle.State.RESUMED)
-
-            composeTestRule.waitForIdle()
-            scenario.onActivity { activity ->
-                activity.onBackPressedDispatcher.onBackPressed()
-            }
-            composeTestRule.waitForIdle()
-            assertThat(
-                AddressElementActivityContract.CheckoutShipping.parseResult(
-                    scenario.result.resultCode,
-                    scenario.result.resultData,
-                )
-            ).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        }
-    }
-
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
@@ -210,7 +61,6 @@ internal class AddressElementActivityTest {
 
         assertThat(intent.component?.className).isEqualTo(AddressElementActivity::class.java.name)
         assertThat(AddressElementActivityContract.Args.fromIntent(intent)).isEqualTo(args)
-        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isEqualTo(0)
     }
 
     @Test
@@ -222,7 +72,6 @@ internal class AddressElementActivityTest {
 
         assertThat(intent.component?.className).isEqualTo(AddressElementActivity::class.java.name)
         assertThat(AddressElementActivityContract.Args.fromIntent(intent)).isEqualTo(args)
-        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isNotEqualTo(0)
     }
 
     @Test
@@ -349,7 +198,6 @@ internal class AddressElementActivityTest {
             assertThat(testScenario.stateHolder.complete(result)).isTrue()
             composeTestRule.waitForIdle()
 
-            assertThat(testScenario.scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             assertThat(
                 AddressElementActivityContract.Standalone.parseResult(
                     testScenario.scenario.getResult().resultCode,
@@ -371,7 +219,6 @@ internal class AddressElementActivityTest {
             assertThat(testScenario.stateHolder.complete(result)).isTrue()
             composeTestRule.waitForIdle()
 
-            assertThat(testScenario.scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             assertThat(
                 AddressElementActivityContract.CheckoutShipping.parseResult(
                     testScenario.scenario.getResult().resultCode,
@@ -408,7 +255,7 @@ internal class AddressElementActivityTest {
     )
 
     private fun checkoutArgs(response: CheckoutSessionResponse) =
-        AddressElementActivityContract.Args.CheckoutShipping.Ready(
+        AddressElementActivityContract.Args.CheckoutShipping(
             publishableKey = "pk_test_123",
             config = null,
             checkoutSessionResponse = response,

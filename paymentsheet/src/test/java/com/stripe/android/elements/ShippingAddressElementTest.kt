@@ -76,7 +76,7 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
-        assertThat(input.checkoutSessionResponse)
+        assertThat(launch.input.checkoutSessionResponse)
             .isSameInstanceAs(stateHolder.state!!.checkoutSessionResponse)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }

@@ -73,7 +73,7 @@ class InputAddressViewModelTest {
     private fun checkoutArgs(
         checkoutSessionResponse: CheckoutSessionResponse,
     ): (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { config ->
-        AddressElementActivityContract.Args.CheckoutShipping.Ready(
+        AddressElementActivityContract.Args.CheckoutShipping(
             publishableKey = "pk_123",
             config = config,
             checkoutSessionResponse = checkoutSessionResponse,
