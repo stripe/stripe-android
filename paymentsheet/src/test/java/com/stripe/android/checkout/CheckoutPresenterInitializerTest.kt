@@ -79,6 +79,7 @@ internal class CheckoutPresenterInitializerTest {
                 stateHolder = CheckoutControllerStateFactory.createStateHolder(
                     SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restoredState))
                 ),
+                paymentElementCallbackIdentifier = "test",
             )
 
             initializer.initialize()
@@ -106,6 +107,7 @@ internal class CheckoutPresenterInitializerTest {
             sheetLauncher = sheetLauncher,
             sheetStateHolder = sheetStateHolder,
             stateHolder = stateHolder,
+            paymentElementCallbackIdentifier = "test",
         )
 
         Scenario(

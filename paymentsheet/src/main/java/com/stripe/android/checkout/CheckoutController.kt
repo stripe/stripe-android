@@ -24,6 +24,7 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -73,6 +74,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val checkoutPresenterLifecycle: CheckoutPresenterLifecycle,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -388,12 +390,13 @@ class CheckoutController @Inject internal constructor(
      * @param activity The activity the payment UI will be presented from.
      */
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
+        val presenterLifecycleOwner = checkoutPresenterLifecycle.create(activity)
         val subcomponent = checkoutPresenterSubcomponentFactory.create(
             activityResultCaller = PaymentElementActivityResultCaller(
                 key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
                 registryOwner = activity,
             ),
-            lifecycleOwner = activity,
+            lifecycleOwner = presenterLifecycleOwner,
             activityResultRegistry = activity.activityResultRegistry,
             statusBarColor = StatusBarCompat.color(activity),
         )
@@ -402,10 +405,12 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Releases resources held by this controller and clears its loaded state. Call this when the
-     * controller is no longer needed.
+     * Dismisses payment UI, releases resources held by this controller and its presenters, and
+     * clears its loaded state. Call this when the controller is no longer needed.
      */
     fun destroy() {
+        checkoutPresenterLifecycle.destroy()
+        PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
         viewModelScope.cancel()
         checkoutStateLoader.clear()
         savedState.clear()
