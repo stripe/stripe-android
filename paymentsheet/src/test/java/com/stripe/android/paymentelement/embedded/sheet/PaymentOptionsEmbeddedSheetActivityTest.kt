@@ -23,6 +23,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -189,6 +190,12 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     @Test
     fun `new selection requiring a form survives recreation and back returns to the list`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
     ) { scenario ->
         formPage.waitUntilVisible()
 
