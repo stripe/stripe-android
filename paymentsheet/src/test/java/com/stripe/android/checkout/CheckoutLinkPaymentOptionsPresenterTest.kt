@@ -207,7 +207,34 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         verify(linkPaymentLauncher).unregister()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `host recreation keeps direct Link root flow open until its result`() {
+        val savedStateHandle = SavedStateHandle()
+        runScenario(savedStateHandle = savedStateHandle) {
+            presenter.present()
+
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+            verify(linkPaymentLauncher).unregister()
+            assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        }
+
+        runScenario(savedStateHandle = savedStateHandle) {
+            assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+            resultCallback(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                )
+            )
+
+            assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+            verify(defaultPresenter, never()).present()
+        }
     }
 
     @Suppress("LongMethod")
