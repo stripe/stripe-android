@@ -28,6 +28,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -451,12 +452,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
-                paymentConfigurationProvider = {
-                    PaymentConfiguration(
-                        publishableKey = "pk_test_123",
-                        stripeAccountId = "acct_123",
-                    )
-                },
+                apiConfigurationProvider = { DEFAULT_API_CONFIG },
             )
         )
 

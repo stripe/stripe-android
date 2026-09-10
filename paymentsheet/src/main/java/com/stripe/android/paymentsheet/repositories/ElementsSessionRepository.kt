@@ -4,6 +4,7 @@ import android.app.Application
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -37,7 +38,7 @@ internal interface ElementsSessionRepository {
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
-        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
@@ -67,7 +68,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
-        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         fraudDetectionDataRepository.refresh()
@@ -82,6 +83,10 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
+        val requestOptions = ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
         val elementsSession = retrieveElementsSession(params, requestOptions)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
