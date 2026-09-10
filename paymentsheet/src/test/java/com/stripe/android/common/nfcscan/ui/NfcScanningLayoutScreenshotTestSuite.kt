@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -31,6 +32,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
     ) {
         @get:Rule
         val paparazziRule = PaparazziRule(
+            LayoutDirection.entries,
             SystemAppearance.entries,
             listOf(paparazziOrientation),
             boxModifier = Modifier.fillMaxSize(),
