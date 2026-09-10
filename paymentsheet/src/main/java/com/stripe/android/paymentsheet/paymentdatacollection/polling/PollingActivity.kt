@@ -33,6 +33,7 @@ internal class PollingActivity : AppCompatActivity() {
             timeLimit = args.timeLimitInSeconds.seconds,
             initialDelay = args.initialDelayInSeconds.seconds,
             ctaText = args.ctaText,
+            publishableKey = args.publishableKey,
             stripeAccountId = args.stripeAccountId,
             qrCodeUrl = args.qrCodeUrl,
             paymentMethodType = args.paymentMethodType,
