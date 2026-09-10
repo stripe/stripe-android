@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -40,12 +40,6 @@ internal class CustomerRepositoryTest {
 
     private val repository = CustomerApiRepository(
         stripeRepository,
-        {
-            PaymentConfiguration(
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
-            )
-        },
         Logger.getInstance(false),
         workContext = testDispatcher,
         errorReporter = errorReporter
@@ -57,7 +51,7 @@ internal class CustomerRepositoryTest {
     }
 
     @Test
-    fun `retrieveCustomer() should use PaymentConfiguration stripe account ID`() = runTest {
+    fun `retrieveCustomer() should use provided stripe account ID`() = runTest {
         whenever(
             stripeRepository.retrieveCustomer(
                 customerId = any(),
@@ -69,6 +63,7 @@ internal class CustomerRepositoryTest {
         repository.retrieveCustomer(
             customerId = "customer_id",
             ephemeralKeySecret = "ephemeral_key",
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeRepository).retrieveCustomer(
@@ -90,6 +85,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 true,
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             verify(stripeRepository).getPaymentMethods(
@@ -119,6 +115,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.PayPal),
                 true,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             verify(stripeRepository).getPaymentMethods(
@@ -192,6 +189,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 true,
+                apiConfiguration = DEFAULT_API_CONFIG
             ).getOrThrow()
 
             assertThat(result).hasSize(1)
@@ -249,6 +247,7 @@ internal class CustomerRepositoryTest {
             ephemeralKeySecret = "ephemeral_key",
             listOf(PaymentMethod.Type.Card),
             true,
+            apiConfiguration = DEFAULT_API_CONFIG
         ).getOrThrow()
 
         assertThat(result).hasSize(2)
@@ -268,6 +267,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = true,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.getOrNull()).isEmpty()
@@ -287,6 +287,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = false,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.exceptionOrNull()?.message)
@@ -301,7 +302,6 @@ internal class CustomerRepositoryTest {
             val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
                 errorReporter = errorReporter
@@ -313,6 +313,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = true,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.getOrNull()).containsExactly(
@@ -334,7 +335,6 @@ internal class CustomerRepositoryTest {
             val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
                 errorReporter = errorReporter
@@ -346,6 +346,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = false,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.exceptionOrNull()?.message)
@@ -372,6 +373,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -393,6 +395,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.isFailure).isTrue()
@@ -415,6 +418,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 customerSessionClientSecret = "cuss_123",
                 paymentMethodId = "payment_method_id",
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -446,6 +450,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = paymentMethodToRemove.id,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(removedPaymentMethods).containsExactlyElementsIn(paymentMethodsToRemove)
@@ -472,6 +477,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = usBankAccount.id,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(removedPaymentMethods).containsExactlyElementsIn(listOf(usBankAccount))
@@ -496,6 +502,7 @@ internal class CustomerRepositoryTest {
                 customerId = FAKE_CUSTOMER_ID,
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 paymentMethodId = paymentMethodToRemove.id,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             val duplicates = paymentMethods.filter { paymentMethod ->
@@ -526,6 +533,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = paymentMethods.first().id,
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result.isFailure).isTrue()
@@ -554,6 +562,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result).isEqualTo(
@@ -577,6 +586,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result).isEqualTo(error)
@@ -592,7 +602,8 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                params = PaymentMethodUpdateParams.createCard()
+                params = PaymentMethodUpdateParams.createCard(),
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result).isEqualTo(success)
@@ -604,7 +615,7 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
-    fun `setDefaultPaymentMethod() should use PaymentConfiguration stripe account ID`() = runTest {
+    fun `setDefaultPaymentMethod() should use provided stripe account ID`() = runTest {
         whenever(
             stripeRepository.setDefaultPaymentMethod(
                 customerId = any(),
@@ -617,6 +628,7 @@ internal class CustomerRepositoryTest {
             customerId = "customer_id",
             ephemeralKeySecret = "ephemeral_key",
             paymentMethodId = "payment_method_id",
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeRepository).setDefaultPaymentMethod(
@@ -627,7 +639,7 @@ internal class CustomerRepositoryTest {
     }
 
     @Test
-    fun `retrievePaymentMethod() should use PaymentConfiguration stripe account ID`() = runTest {
+    fun `retrievePaymentMethod() should use provided stripe account ID`() = runTest {
         whenever(
             stripeRepository.retrieveCustomerPaymentMethod(
                 customerId = any(),
@@ -641,6 +653,7 @@ internal class CustomerRepositoryTest {
             customerId = "customer_id",
             ephemeralKeySecret = "ephemeral_key",
             paymentMethodId = "payment_method_id",
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeRepository).retrieveCustomerPaymentMethod(
@@ -661,7 +674,8 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                params = PaymentMethodUpdateParams.createCard()
+                params = PaymentMethodUpdateParams.createCard(),
+                apiConfiguration = DEFAULT_API_CONFIG
             )
 
             assertThat(result).isEqualTo(error)
@@ -674,7 +688,6 @@ internal class CustomerRepositoryTest {
             workContext = coroutineContext,
             errorReporter = errorReporter,
             stripeRepository = stripeRepository,
-            lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
             logger = Logger.getInstance(false),
         )
     }
