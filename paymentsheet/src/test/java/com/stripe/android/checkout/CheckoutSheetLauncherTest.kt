@@ -719,37 +719,6 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `missing refreshed state does not crash when mutation finishes`() = testScenario {
-        val mutationGate = CompletableDeferred<Unit>()
-        coroutineScope.launch {
-            operationCoordinator.runMutation {
-                mutationGate.await()
-                Result.success(Unit)
-            }
-        }
-        runCurrent()
-
-        val initialState = requireNotNull(embeddedContentState.value)
-        sheetLauncher.launchPaymentOptions(
-            paymentMethodMetadata = initialState.paymentMethodMetadata,
-            customerState = null,
-            selection = null,
-            configuration = initialState.configuration,
-        )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-
-        embeddedContentState.value = null
-        mutationGate.complete(Unit)
-        runCurrent()
-
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
-        )
-        assertThat(launcherState.isAwaitingReady).isTrue()
-    }
-
-    @Test
     fun `cancelling loading suppresses ready launch`() = testScenario {
         val mutationGate = CompletableDeferred<Unit>()
         coroutineScope.launch {

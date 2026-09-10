@@ -12,17 +12,12 @@ internal interface AwaitingReadyState {
     var isAwaitingReady: Boolean
 }
 
-internal sealed interface ReadyLaunchResult {
-    data object Launched : ReadyLaunchResult
-    data object KeepLoading : ReadyLaunchResult
-}
-
 internal class CheckoutLoadingToReadySheetCoordinator(
     lifecycleOwner: LifecycleOwner,
     private val sheetStateHolder: SheetStateHolder,
     private val isUpdating: StateFlow<Boolean>,
     private val awaitingReadyState: AwaitingReadyState,
-    private val launchPendingReady: () -> ReadyLaunchResult,
+    private val launchPendingReady: () -> Unit,
 ) {
     private val lifecycleScope = lifecycleOwner.lifecycleScope
     private var resumeJob: Job? = null
@@ -55,8 +50,8 @@ internal class CheckoutLoadingToReadySheetCoordinator(
                 return@launch
             }
 
-            awaitingReadyState.isAwaitingReady =
-                launchPendingReady() == ReadyLaunchResult.KeepLoading
+            launchPendingReady()
+            awaitingReadyState.isAwaitingReady = false
         }
     }
 

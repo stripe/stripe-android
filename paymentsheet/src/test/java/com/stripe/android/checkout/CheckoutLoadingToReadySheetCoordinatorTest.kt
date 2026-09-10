@@ -114,26 +114,6 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
-    @Test
-    fun `missing refreshed state keeps Loading dismissible`() = runScenario(
-        isUpdating = true,
-    ) {
-        launches.pendingReadyResult = ReadyLaunchResult.KeepLoading
-        present()
-        assertThat(launches.loadingCalls.awaitItem()).isEqualTo(Unit)
-
-        isUpdating.value = false
-        runCurrent()
-
-        assertThat(launches.pendingReadyCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(awaitingReadyState.isAwaitingReady).isTrue()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-
-        coordinator.close()
-        assertThat(awaitingReadyState.isAwaitingReady).isFalse()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-    }
-
     private fun runScenario(
         isUpdating: Boolean = false,
         block: suspend Scenario.() -> Unit,
@@ -220,8 +200,6 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
         val initialReadyCalls = Turbine<Unit>()
         val pendingReadyCalls = Turbine<Unit>()
 
-        var pendingReadyResult: ReadyLaunchResult = ReadyLaunchResult.Launched
-
         fun launchLoading() {
             loadingCalls.add(Unit)
         }
@@ -230,9 +208,8 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
             initialReadyCalls.add(Unit)
         }
 
-        fun launchPendingReady(): ReadyLaunchResult {
+        fun launchPendingReady() {
             pendingReadyCalls.add(Unit)
-            return pendingReadyResult
         }
 
         fun ensureAllEventsConsumed() {

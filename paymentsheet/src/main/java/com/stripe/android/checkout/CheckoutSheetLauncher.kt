@@ -286,15 +286,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
         )
     }
 
-    private fun launchRefreshedPaymentOptions(): ReadyLaunchResult {
-        val refreshedState = embeddedContentState.value
-        if (refreshedState == null) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
-            )
-            return ReadyLaunchResult.KeepLoading
-        }
-
+    private fun launchRefreshedPaymentOptions() {
+        val refreshedState = requireNotNull(embeddedContentState.value)
         activityLauncher.launch(
             createPaymentOptionsArgs(
                 paymentMethodMetadata = refreshedState.paymentMethodMetadata,
@@ -304,7 +297,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 presentationState = EmbeddedActivityArgs.PresentationState.Ready,
             )
         )
-        return ReadyLaunchResult.Launched
     }
 
     private fun createPaymentOptionsArgs(
