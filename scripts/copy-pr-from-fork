@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+
+usage() {
+  echo "Usage: $0 <pull-request-number> [remote]" >&2
+  echo "Example: $0 123 upstream" >&2
+}
+
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+  usage
+  exit 1
+fi
+
+pull_request_number="$1"
+remote="${2:-origin}"
+
+if [[ ! "$pull_request_number" =~ ^[1-9][0-9]*$ ]]; then
+  echo "Pull request number must be a positive integer." >&2
+  usage
+  exit 1
+fi
+
+branch="amk/public-pr-${pull_request_number}"
+
+git fetch --force --update-head-ok \
+  "$remote" \
+  "refs/pull/${pull_request_number}/head:refs/heads/${branch}"
+git checkout "$branch"

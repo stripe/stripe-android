@@ -207,7 +207,8 @@ constructor(
                 mapOf(ConfirmStripeIntentParams.PARAM_MANDATE_DATA to it)
             }.orEmpty()
         ).plus(
-            returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
+            returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }
+                ?: mapOf(PARAM_RETURN_URL to "stripesdk://payment_return_url/")
         ).plus(
             paymentMethodOptions?.let {
                 mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())
