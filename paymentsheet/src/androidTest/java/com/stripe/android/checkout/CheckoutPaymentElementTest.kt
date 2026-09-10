@@ -111,7 +111,7 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testBillingTaxUpdateRefreshesCheckoutSession() = runAutomaticTaxTest { context, controller ->
+    fun testBillingTaxUpdateRefreshesCheckoutSession() = runAutomaticTaxTest {
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
 
         contentPage.clickOnLpm("card")
@@ -122,17 +122,17 @@ internal class CheckoutPaymentElementTest {
         assertThat(controller.session.value?.tax?.status)
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
-        context.markTestSucceeded()
+        markTestSucceeded()
     }
 
     @Test
-    fun testBillingTaxUpdateFailureCanRetryFromPaymentOptions() = runAutomaticTaxTest { context, controller ->
+    fun testBillingTaxUpdateFailureCanRetryFromPaymentOptions() = runAutomaticTaxTest {
         enqueueTaxUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
 
-        context.presentPaymentOptions()
+        presentPaymentOptions()
         verticalModePage.clickNewPaymentMethodButton("card")
         fillOutCardAndBillingDetails()
         formPage.clickPrimaryButtonWithoutWaitingForDismissal()
@@ -149,7 +149,7 @@ internal class CheckoutPaymentElementTest {
         assertThat(controller.session.value?.tax?.status)
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
-        context.markTestSucceeded()
+        markTestSucceeded()
     }
 
     @Test
@@ -192,7 +192,7 @@ internal class CheckoutPaymentElementTest {
         runAutomaticTaxTest(
             paymentMethodLayout = paymentMethodLayout,
             checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
-        ) { context, controller ->
+        ) {
             enqueueTaxUpdate(automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_COMPLETE))
             contentPage.clickOnLpm("card")
             fillOutCardAndBillingDetails()
@@ -201,7 +201,7 @@ internal class CheckoutPaymentElementTest {
 
             enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
 
-            context.presentPaymentOptions()
+            presentPaymentOptions()
             preparePaymentOptionsScreen(paymentMethodLayout)
             clickPaymentOptionsPrimaryButton()
 
@@ -209,7 +209,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("card")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -222,8 +222,8 @@ internal class CheckoutPaymentElementTest {
                 INITIAL_TOTAL,
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
-        ) { context, controller ->
-            context.presentPaymentOptions()
+        ) {
+            presentPaymentOptions()
             selectCashApp(paymentMethodLayout)
             formPage.waitUntilVisible()
 
@@ -235,7 +235,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -249,8 +249,8 @@ internal class CheckoutPaymentElementTest {
                 INITIAL_TOTAL,
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
-        ) { context, controller ->
-            context.presentPaymentOptions()
+        ) {
+            presentPaymentOptions()
             selectCashApp(paymentMethodLayout)
             formPage.waitUntilVisible()
             assertBillingDetailsArePopulated()
@@ -262,7 +262,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -286,7 +286,7 @@ internal class CheckoutPaymentElementTest {
     }
 
     private fun runAutomaticTaxTest(
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
         checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
@@ -296,7 +296,7 @@ internal class CheckoutPaymentElementTest {
     private fun runAutomaticTaxTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
         checkoutInitResponse: (MockResponse) -> Unit,
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
@@ -306,21 +306,38 @@ internal class CheckoutPaymentElementTest {
     private fun runAutomaticTaxTest(
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) {
-        lateinit var controller: CheckoutController
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
-            setup = {
-                controller = it
-                it.configure(
+            setup = { controller ->
+                controller.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,
                 ).getOrThrow()
             },
-        ) { context ->
-            block(context, controller)
+        ) { runnerContext ->
+            Scenario(runnerContext).block()
+        }
+    }
+
+    private class Scenario(
+        private val runnerContext: CheckoutPaymentElementTestRunnerContext,
+    ) {
+        val controller: CheckoutController
+            get() = runnerContext.controller
+
+        fun presentPaymentOptions() {
+            runnerContext.presentPaymentOptions()
+        }
+
+        fun confirm() {
+            runnerContext.confirm()
+        }
+
+        fun markTestSucceeded() {
+            runnerContext.markTestSucceeded()
         }
     }
 
