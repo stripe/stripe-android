@@ -274,6 +274,7 @@ internal class CheckoutOperationCoordinatorTest {
         )
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Completed>()
+        assertThat(stateHolder.state).isNull()
     }
 
     @Test
@@ -756,10 +757,14 @@ internal class CheckoutOperationCoordinatorTest {
         }
         val resultTurbine = Turbine<CheckoutController.Result>()
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
+            state = CheckoutControllerStateFactory.create()
+        }
         val coordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
+            stateHolder = stateHolder,
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
             viewModelScope = backgroundScope,
@@ -775,6 +780,7 @@ internal class CheckoutOperationCoordinatorTest {
             resultTurbine = resultTurbine,
             refreshCalls = sessionRefresher.calls,
             sessionRefresher = sessionRefresher,
+            stateHolder = stateHolder,
             observerJob = observerJob,
             testScope = this,
         ).block()
@@ -790,6 +796,7 @@ internal class CheckoutOperationCoordinatorTest {
         val resultTurbine: Turbine<CheckoutController.Result>,
         val refreshCalls: Turbine<FakeCheckoutSessionRefresher.Call>,
         private val sessionRefresher: FakeCheckoutSessionRefresher,
+        val stateHolder: CheckoutControllerStateHolder,
         val observerJob: Job,
         private val testScope: TestScope,
     ) : CoroutineScope by testScope {
