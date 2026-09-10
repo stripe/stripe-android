@@ -8,6 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,9 +31,11 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -81,6 +85,9 @@ internal class EmbeddedInitialScreenFactoryTest {
     fun `create returns vertical payment options screen for vertical layout`() = runScenario(
         launchMode = EmbeddedLaunchMode.PaymentOptions,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
     ) {
@@ -95,6 +102,9 @@ internal class EmbeddedInitialScreenFactoryTest {
         runScenario(
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -170,6 +180,23 @@ internal class EmbeddedInitialScreenFactoryTest {
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
+        val savedPaymentMethodMutator = SavedPaymentMethodMutator(
+            paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
+            eventReporter = eventReporter,
+            coroutineScope = viewModelScope,
+            workContext = viewModelScope.coroutineContext,
+            uiContext = viewModelScope.coroutineContext,
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
+            selection = selectionHolder.selection,
+            setSelection = selectionHolder::setSelection,
+            customerStateHolder = customerStateHolder,
+            prePaymentMethodRemoveActions = {},
+            postPaymentMethodRemoveActions = {},
+            onUpdatePaymentMethod = { _, _, _, _, _ -> },
+            isLinkEnabled = stateFlowOf(paymentMethodMetadata.shouldShowLinkButton),
+            isNotPaymentFlow = true,
+            linkAccount = stateFlowOf(null),
+        )
         val navigatorEventReporter = FakeEventReporter()
         val navigator = EmbeddedNavigator(
             coroutineScope = viewModelScope,
@@ -193,6 +220,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(savedStateHandle),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            savedPaymentMethodMutator = savedPaymentMethodMutator,
         )
         val factory = EmbeddedInitialScreenFactory(
             launchMode = launchMode,
