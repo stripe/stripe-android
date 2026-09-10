@@ -5,6 +5,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.parseAppearance
@@ -16,6 +17,7 @@ internal class CheckoutPresenterInitializer @Inject constructor(
     private val activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
     private val sheetLauncher: EmbeddedSheetLauncher,
+    private val embeddedContentHelper: EmbeddedContentHelper,
     private val sheetStateHolder: SheetStateHolder,
     private val stateHolder: CheckoutControllerStateHolder,
 ) {
@@ -23,12 +25,14 @@ internal class CheckoutPresenterInitializer @Inject constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         sheetStateHolder.sheetLauncher = sheetLauncher
+        sheetStateHolder.embeddedContentHelper = embeddedContentHelper
         stateHolder.state?.embeddedConfiguration?.appearance?.parseAppearance()
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     sheetStateHolder.sheetLauncher = null
+                    sheetStateHolder.embeddedContentHelper = null
                 }
             }
         )
