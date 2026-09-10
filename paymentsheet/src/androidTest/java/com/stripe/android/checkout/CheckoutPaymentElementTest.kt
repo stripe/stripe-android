@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.After
@@ -308,26 +309,31 @@ internal class CheckoutPaymentElementTest {
         checkoutInitResponse: (MockResponse) -> Unit,
         block: suspend Scenario.() -> Unit,
     ) {
+        lateinit var controller: CheckoutController
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
-            setup = { controller ->
-                controller.configure(
+            setup = { configuredController ->
+                controller = configuredController
+                configuredController.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,
                 ).getOrThrow()
             },
         ) { runnerContext ->
-            Scenario(runnerContext).block()
+            runBlocking {
+                Scenario(
+                    runnerContext = runnerContext,
+                    controller = controller,
+                ).block()
+            }
         }
     }
 
     private class Scenario(
         private val runnerContext: CheckoutPaymentElementTestRunnerContext,
+        val controller: CheckoutController,
     ) {
-        val controller: CheckoutController
-            get() = runnerContext.controller
-
         fun presentPaymentOptions() {
             runnerContext.presentPaymentOptions()
         }
