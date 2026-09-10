@@ -19,14 +19,29 @@ class RealErrorReporter @Inject constructor(
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
     ) {
+        val unexpectedErrorParams = if (errorEvent is ErrorReporter.UnexpectedErrorEvent) {
+            mapOf(
+                FIELD_ERROR_CODE to errorEvent.partialEventName,
+                FIELD_ERROR_MESSAGE to errorEvent.partialEventName
+                    .replace('.', ' ')
+                    .replace('_', ' '),
+            )
+        } else {
+            emptyMap()
+        }
         val paramsFromStripeException = if (stripeException == null) {
             emptyMap()
         } else {
             ErrorReporter.getAdditionalParamsFromStripeException(stripeException = stripeException)
         }
-        val additionalParams = paramsFromStripeException + additionalNonPiiParams
+        val additionalParams = unexpectedErrorParams + paramsFromStripeException + additionalNonPiiParams
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
         )
+    }
+
+    private companion object {
+        const val FIELD_ERROR_CODE = "error_code"
+        const val FIELD_ERROR_MESSAGE = "error_message"
     }
 }

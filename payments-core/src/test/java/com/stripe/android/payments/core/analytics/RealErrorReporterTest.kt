@@ -105,6 +105,40 @@ class RealErrorReporterTest {
     }
 
     @Test
+    fun `RealErrorReporter logs useful information for every unexpected error`() {
+        ErrorReporter.UnexpectedErrorEvent.entries.forEach { event ->
+            realErrorReporter.report(event)
+        }
+
+        val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
+        assertThat(executedAnalyticsRequests).hasSize(ErrorReporter.UnexpectedErrorEvent.entries.size)
+        ErrorReporter.UnexpectedErrorEvent.entries.forEachIndexed { index, event ->
+            val analyticsRequestParams = executedAnalyticsRequests[index].params
+            assertThat(analyticsRequestParams["error_code"]).isEqualTo(event.partialEventName)
+            assertThat(analyticsRequestParams["error_message"]).isEqualTo(
+                event.partialEventName
+                    .replace('.', ' ')
+                    .replace('_', ' ')
+            )
+        }
+    }
+
+    @Test
+    fun `RealErrorReporter prioritizes specific error information for unexpected errors`() {
+        val exception = CardException(StripeError(code = "specific_error_code"), requestId = null)
+
+        realErrorReporter.report(
+            errorEvent = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT,
+            stripeException = exception,
+            additionalNonPiiParams = mapOf("error_message" to "specific error message")
+        )
+
+        val analyticsRequestParams = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(analyticsRequestParams["error_code"]).isEqualTo("specific_error_code")
+        assertThat(analyticsRequestParams["error_message"]).isEqualTo("specific error message")
+    }
+
+    @Test
     fun `RealErrorReporter logs skips exception params when exception is null via analyticsRequestExecutor`() {
         realErrorReporter.report(
             errorEvent = ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
