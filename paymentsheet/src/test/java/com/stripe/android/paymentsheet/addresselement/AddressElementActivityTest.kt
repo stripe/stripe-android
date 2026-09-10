@@ -4,12 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Bundle
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -17,6 +19,9 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class AddressElementActivityTest {
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun `loading transitions to ready intent`() {
         val loadingIntent = checkoutIntent(
@@ -135,13 +140,11 @@ internal class AddressElementActivityTest {
         ActivityScenario.launchActivityForResult<AddressElementActivity>(intent).use { scenario ->
             assertThat(scenario.state).isEqualTo(Lifecycle.State.RESUMED)
 
-            var isFinishing = false
+            composeTestRule.waitForIdle()
             scenario.onActivity { activity ->
                 activity.onBackPressedDispatcher.onBackPressed()
-                isFinishing = activity.isFinishing
             }
-
-            assertThat(isFinishing).isTrue()
+            composeTestRule.waitForIdle()
             assertThat(
                 AddressElementActivityContract.CheckoutShipping.parseResult(
                     scenario.result.resultCode,
