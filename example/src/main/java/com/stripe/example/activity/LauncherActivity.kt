@@ -126,6 +126,10 @@ class LauncherActivity : AppCompatActivity() {
                 ComposeExampleActivity::class.java
             ),
             Item(
+                activity.getString(R.string.payment_launcher_playground),
+                PaymentLauncherPlaygroundActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.confirm_with_us_bank_account_entry_point),
                 ConnectUSBankAccountActivity::class.java
             ),

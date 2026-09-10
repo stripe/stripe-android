@@ -123,6 +123,7 @@
     <string name="connect_example">Connect Example</string>
     <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>
     <string name="compose_example">Compose Example</string>
+    <string name="payment_launcher_playground">PaymentLauncher Next Action Playground</string>
 
     <string name="google_pay_environment_test">Test</string>
     <string name="google_pay_environment_production">Production *charges apply</string>
