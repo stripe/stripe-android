@@ -21,19 +21,28 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlin.test.assertFailsWith
 
 @Suppress("LargeClass")
@@ -46,6 +55,59 @@ internal class CheckoutOperationCoordinatorTest {
         }
 
         assertThat(result.getOrThrow()).isEqualTo("result")
+    }
+
+    @Test
+    fun `runMutation emits processing on the UI context and preserves the caller context`() = runScenario(
+        uiContextProvider = { scheduler -> StandardTestDispatcher(scheduler) },
+    ) {
+        val callerName = CoroutineName("mutation-caller")
+        val callerDispatcher = UnconfinedTestDispatcher(testScheduler)
+        val mutationStarted = CompletableDeferred<Unit>()
+        val releaseMutation = CompletableDeferred<Unit>()
+
+        coordinator.isUpdating.test {
+            assertThat(awaitItem()).isFalse()
+
+            val mutation = backgroundScope.async(callerDispatcher + callerName) {
+                coordinator.runMutation {
+                    assertThat(coroutineContext[CoroutineName]).isEqualTo(callerName)
+                    assertThat(coroutineContext[ContinuationInterceptor]).isEqualTo(callerDispatcher)
+                    mutationStarted.complete(Unit)
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+
+            assertThat(mutationStarted.isCompleted).isFalse()
+            assertThat(coordinator.isUpdating.value).isFalse()
+
+            runCurrent()
+
+            assertThat(awaitItem()).isTrue()
+            assertThat(mutationStarted.isCompleted).isTrue()
+
+            releaseMutation.complete(Unit)
+            runCurrent()
+
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `runMutation is updating inside the block when invoked on the UI context`() = runScenario {
+        withContext(uiContext) {
+            assertThat(coordinator.isUpdating.value).isFalse()
+
+            val result = coordinator.runMutation {
+                assertThat(coordinator.isUpdating.value).isTrue()
+                Result.success(Unit)
+            }
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(coordinator.isUpdating.value).isFalse()
+        }
     }
 
     @Test
@@ -179,6 +241,42 @@ internal class CheckoutOperationCoordinatorTest {
             releaseFirst.complete(Unit)
             assertThat(first.await().isSuccess).isTrue()
 
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `cancelling an admitted mutation releases processing and allows a later mutation`() = runScenario(
+        uiContextProvider = { scheduler -> StandardTestDispatcher(scheduler) },
+    ) {
+        val callerDispatcher = UnconfinedTestDispatcher(testScheduler)
+
+        coordinator.isUpdating.test {
+            assertThat(awaitItem()).isFalse()
+
+            val mutation = backgroundScope.async(callerDispatcher) {
+                coordinator.runMutation<Unit> {
+                    awaitCancellation()
+                }
+            }
+            runCurrent()
+
+            assertThat(awaitItem()).isTrue()
+            mutation.cancel()
+            runCurrent()
+            mutation.join()
+
+            assertThat(awaitItem()).isFalse()
+
+            val laterMutation = backgroundScope.async(callerDispatcher) {
+                coordinator.runMutation {
+                    Result.success("later")
+                }
+            }
+            runCurrent()
+
+            assertThat(laterMutation.await().getOrThrow()).isEqualTo("later")
+            assertThat(awaitItem()).isTrue()
             assertThat(awaitItem()).isFalse()
         }
     }
@@ -739,8 +837,12 @@ internal class CheckoutOperationCoordinatorTest {
         hasReloadedFromProcessDeath: Boolean = false,
         resultCallback: CheckoutController.ResultCallback? = null,
         logger: Logger = Logger.noop(),
+        uiContextProvider: (TestCoroutineScheduler) -> CoroutineContext = {
+            UnconfinedTestDispatcher(it)
+        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val uiContext = uiContextProvider(testScheduler)
         val confirmationState = MutableStateFlow(initialConfirmationState)
         val confirmationHandler = FakeConfirmationHandler(
             hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
@@ -756,6 +858,7 @@ internal class CheckoutOperationCoordinatorTest {
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
+            uiContext = uiContext,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
         )
         val observerJob = backgroundScope.launch {
@@ -765,6 +868,7 @@ internal class CheckoutOperationCoordinatorTest {
 
         Scenario(
             coordinator = coordinator,
+            uiContext = uiContext,
             confirmationState = confirmationState,
             resultTurbine = resultTurbine,
             refreshCalls = sessionRefresher.calls,
@@ -780,6 +884,7 @@ internal class CheckoutOperationCoordinatorTest {
 
     private class Scenario(
         val coordinator: CheckoutOperationCoordinator,
+        val uiContext: CoroutineContext,
         val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
         val resultTurbine: Turbine<CheckoutController.Result>,
         val refreshCalls: Turbine<FakeCheckoutSessionRefresher.Call>,

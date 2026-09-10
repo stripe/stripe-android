@@ -246,6 +246,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
+            uiContext = UnconfinedTestDispatcher(testScheduler),
             resultCallback = {},
         )
         val paymentSheetEventReporter = FakeEventReporter()

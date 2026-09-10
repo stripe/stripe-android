@@ -3,17 +3,21 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
@@ -21,6 +25,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
+    @UIContext private val uiContext: CoroutineContext,
     private val resultCallback: CheckoutController.ResultCallback,
 ) {
     private val admissionLock = Any()
@@ -37,19 +42,28 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
     ): Result<T> {
-        synchronized(admissionLock) {
-            pendingMutations += 1
-            updateIsUpdating()
-        }
+        var admitted = false
+        try {
+            withContext(NonCancellable + uiContext) {
+                synchronized(admissionLock) {
+                    pendingMutations += 1
+                    updateIsUpdating()
+                }
+                // Keep admission ownership through cancellation of the UI context handoff.
+                admitted = true
+            }
 
-        return try {
-            mutex.withLock {
+            return mutex.withLock {
                 block()
             }
         } finally {
-            synchronized(admissionLock) {
-                pendingMutations -= 1
-                updateIsUpdating()
+            if (admitted) {
+                withContext(NonCancellable + uiContext) {
+                    synchronized(admissionLock) {
+                        pendingMutations -= 1
+                        updateIsUpdating()
+                    }
+                }
             }
         }
     }

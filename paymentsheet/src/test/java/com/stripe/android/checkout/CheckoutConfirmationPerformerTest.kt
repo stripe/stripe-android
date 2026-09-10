@@ -126,6 +126,7 @@ internal class CheckoutConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
+            uiContext = UnconfinedTestDispatcher(testScheduler),
             resultCallback = {},
         )
         val eventReporter = FakeEventReporter()
