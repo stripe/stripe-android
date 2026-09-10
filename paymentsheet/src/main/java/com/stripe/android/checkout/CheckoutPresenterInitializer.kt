@@ -28,7 +28,9 @@ internal class CheckoutPresenterInitializer @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    sheetStateHolder.sheetLauncher = null
+                    if (sheetStateHolder.sheetLauncher === sheetLauncher) {
+                        sheetStateHolder.sheetLauncher = null
+                    }
                 }
             }
         )
