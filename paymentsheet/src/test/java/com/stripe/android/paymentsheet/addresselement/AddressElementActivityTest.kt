@@ -210,7 +210,7 @@ internal class AddressElementActivityTest {
 
         assertThat(intent.component?.className).isEqualTo(AddressElementActivity::class.java.name)
         assertThat(AddressElementActivityContract.Args.fromIntent(intent)).isEqualTo(args)
-        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isNotEqualTo(0)
+        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isEqualTo(0)
     }
 
     @Test
@@ -222,6 +222,7 @@ internal class AddressElementActivityTest {
 
         assertThat(intent.component?.className).isEqualTo(AddressElementActivity::class.java.name)
         assertThat(AddressElementActivityContract.Args.fromIntent(intent)).isEqualTo(args)
+        assertThat(intent.flags and FLAG_ACTIVITY_SINGLE_TOP).isNotEqualTo(0)
     }
 
     @Test
