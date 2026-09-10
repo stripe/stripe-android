@@ -736,6 +736,7 @@ internal class DefaultSheetActivityStateHolderTest {
             customerStateHolder = FakeCustomerStateHolder(),
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            showsWalletsHeader = false,
         )
     }
 

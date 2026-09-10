@@ -134,6 +134,15 @@ internal class EmbeddedInitialScreenFactoryTest {
         val viewModelScope = TestScope(UnconfinedTestDispatcher())
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val promotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        val continueCoordinator = FakeSheetActivityContinueCoordinator()
+        val linkAccountHolder = LinkAccountHolder(savedStateHandle)
+        val walletsInteractor = PaymentOptionsWalletsInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            linkAccountHolder = linkAccountHolder,
+            continueCoordinator = continueCoordinator,
+        )
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -158,7 +167,9 @@ internal class EmbeddedInitialScreenFactoryTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            linkAccountHolder = linkAccountHolder,
+            launchMode = launchMode,
+            walletsInteractor = walletsInteractor,
         )
         val manageInteractorFactory = FakeInitialScreenManageInteractorFactory()
         val updateInteractorFactory = FakeInitialScreenUpdateInteractorFactory()
@@ -180,7 +191,6 @@ internal class EmbeddedInitialScreenFactoryTest {
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
-        val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val savedPaymentMethodMutator = SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
             eventReporter = eventReporter,
@@ -218,10 +228,11 @@ internal class EmbeddedInitialScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = promotionsHelper,
             sheetActivityStateHolder = sheetActivityStateHolder,
             formScreenFactory = DefaultEmbeddedFormScreenFactory(formFactory),
-            linkAccountHolder = LinkAccountHolder(savedStateHandle),
+            linkAccountHolder = linkAccountHolder,
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
             savedPaymentMethodMutator = savedPaymentMethodMutator,
+            walletsInteractor = walletsInteractor,
         )
         val factory = EmbeddedInitialScreenFactory(
             launchMode = launchMode,

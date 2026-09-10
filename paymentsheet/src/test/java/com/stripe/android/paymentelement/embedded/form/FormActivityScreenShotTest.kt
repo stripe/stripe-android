@@ -26,14 +26,17 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
@@ -260,6 +263,22 @@ internal class FormActivityScreenShotTest {
         )
 
         stateHolder.updateMandate(usBankMandate)
+
+        TestFormActivityContent(
+            interactor = interactor,
+            stateHolder = stateHolder,
+            eventReporter = eventReporter,
+            enabled = enabled,
+        )
+    }
+
+    @Composable
+    private fun TestFormActivityContent(
+        interactor: VerticalModeFormInteractor,
+        stateHolder: SheetActivityStateHolder,
+        eventReporter: EventReporter,
+        enabled: Boolean,
+    ) {
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
@@ -267,6 +286,7 @@ internal class FormActivityScreenShotTest {
                 Column {
                     FormScreenContent(
                         interactor = interactor,
+                        showsWalletsHeader = false,
                         onClick = {},
                         onProcessingCompleted = {},
                         state = state.copy(isEnabled = enabled),
