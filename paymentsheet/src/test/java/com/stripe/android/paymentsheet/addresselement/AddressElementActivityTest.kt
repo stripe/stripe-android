@@ -31,7 +31,7 @@ internal class AddressElementActivityTest {
             .resume()
             .visible()
 
-        controller.get().onNewIntent(readyIntent)
+        controller.newIntent(readyIntent)
 
         assertThat(controller.get().intent).isSameInstanceAs(readyIntent)
         controller.pause().stop().destroy()
@@ -51,7 +51,7 @@ internal class AddressElementActivityTest {
             .resume()
             .visible()
 
-        controller.get().onNewIntent(updatedIntent)
+        controller.newIntent(updatedIntent)
 
         assertThat(controller.get().intent).isSameInstanceAs(initialIntent)
         controller.pause().stop().destroy()
@@ -74,8 +74,8 @@ internal class AddressElementActivityTest {
             .resume()
             .visible()
 
-        controller.get().onNewIntent(initialReadyIntent)
-        controller.get().onNewIntent(updatedReadyIntent)
+        controller.newIntent(initialReadyIntent)
+        controller.newIntent(updatedReadyIntent)
 
         assertThat(controller.get().intent).isSameInstanceAs(initialReadyIntent)
         controller.pause().stop().destroy()
@@ -96,7 +96,7 @@ internal class AddressElementActivityTest {
             .visible()
 
         controller.get().finish()
-        controller.get().onNewIntent(readyIntent)
+        controller.newIntent(readyIntent)
 
         assertThat(controller.get().intent).isSameInstanceAs(loadingIntent)
         controller.pause().stop().destroy()
