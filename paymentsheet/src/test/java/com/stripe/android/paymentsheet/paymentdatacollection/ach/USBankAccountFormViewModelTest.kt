@@ -273,7 +273,7 @@ class USBankAccountFormViewModelTest {
 
             viewModel.handlePrimaryButtonClick()
 
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), anyOrNull(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
@@ -888,7 +888,7 @@ class USBankAccountFormViewModelTest {
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
-            stripeAccountId = anyOrNull(),
+            stripeAccountId = any(),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
@@ -938,7 +938,7 @@ class USBankAccountFormViewModelTest {
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
-            stripeAccountId = anyOrNull(),
+            stripeAccountId = any(),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
