@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Lawrlwythiad wedi\'i gwblhau</string>
+  <string name="stripe_downloading_file">Wrthi\'n lawrlwytho\'r ffeil</string>
+  <string name="stripe_failed_to_open_url">Wedi methu agor yr URL: %s</string>
+  <string name="stripe_not_yet_built">Heb ei adeiladu eto...</string>
+  <string name="stripe_unable_to_download_file">Methu lawrlwytho\'r ffeil</string>
+</resources>

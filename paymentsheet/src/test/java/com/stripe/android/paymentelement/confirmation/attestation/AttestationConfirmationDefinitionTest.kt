@@ -319,6 +319,30 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'toResult' should report and continue without token for NoResult`() = runTest {
+        val fakeErrorReporter = FakeErrorReporter()
+        val definition = createAttestationConfirmationDefinition(errorReporter = fakeErrorReporter)
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = launcherArgs,
+            result = AttestationActivityResult.NoResult,
+        ).asNextStep()
+
+        assertThat(result.confirmationOption).isEqualTo(
+            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+                confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
+            )
+        )
+        assertThat(result.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(fakeErrorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent
+                .INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT
+        )
+    }
+
+    @Test
     fun `'toResult' should return 'NextStep' with attestationResult for Success result with Saved option`() {
         val definition = createAttestationConfirmationDefinition()
         val testToken = "test_token"

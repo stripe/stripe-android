@@ -166,7 +166,7 @@ internal class CheckoutControllerTest {
     ) {
         result.getOrThrow()
 
-        val billingAddress = requireNotNull(committedState?.collectedDetails?.billingAddress)
+        val billingAddress = requireNotNull(committedState?.embeddedConfiguration?.defaultBillingDetails?.address)
         assertThat(billingAddress.city).isEqualTo("San Francisco")
         assertThat(billingAddress.country).isEqualTo("US")
         assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
@@ -404,11 +404,11 @@ internal class CheckoutControllerTest {
         },
     ) {
         controller.session.test {
-            assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
+            assertThat(awaitItem()?.paymentOption).isNotNull()
 
             controller.clearPaymentOption().getOrThrow()
 
-            assertThat(requireNotNull(awaitItem()).paymentOptionDisplayData).isNull()
+            assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
         }
         val clearedState = committedState()
         assertThat(clearedState.paymentSelection).isNull()
@@ -438,7 +438,7 @@ internal class CheckoutControllerTest {
             assertThat(result.exceptionOrNull()).hasMessageThat()
                 .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
             // The rejected clear leaves the selection intact.
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(controller.session.value?.paymentOption).isNotNull()
         }
 
     @Test
@@ -456,12 +456,12 @@ internal class CheckoutControllerTest {
             val clearPaymentOption = async { controller.clearPaymentOption() }
             testScheduler.advanceUntilIdle()
 
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(controller.session.value?.paymentOption).isNotNull()
 
             holdResponse.countDown()
             assertThat(mutation.await().isSuccess).isTrue()
             assertThat(clearPaymentOption.await().isSuccess).isTrue()
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNull()
+            assertThat(controller.session.value?.paymentOption).isNull()
         }
 
     @Test
@@ -574,14 +574,14 @@ internal class CheckoutControllerTest {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
             responseFactory = successResponseFactory { json ->
-                json.put("total_summary", totalSummaryJson(due = 5099))
+                checkoutItemJson(json).put("total", 5099).put("subtotal", 5099)
             },
         )
 
         val result = controller.updateCurrency("usd")
 
         result.getOrThrow()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099.0)
     }
 
     @Test
@@ -606,6 +606,8 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+            .isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -736,14 +738,14 @@ internal class CheckoutControllerTest {
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
             responseFactory = successResponseFactory { json ->
-                json.put("total_summary", totalSummaryJson(due = 8000))
+                checkoutItemJson(json).put("total", 8000).put("subtotal", 8000)
             },
         )
 
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         result.getOrThrow()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(8000)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
     }
 
     @Test
@@ -1042,13 +1044,6 @@ internal class CheckoutControllerTest {
         }
     }
 
-    // Builds a total_summary object. The parser requires subtotal, due, and total to all be present
-    // to produce a non-null summary, so a test asserting on totalDueToday must set all three.
-    private fun totalSummaryJson(due: Long): JSONObject = JSONObject()
-        .put("subtotal", due)
-        .put("due", due)
-        .put("total", due)
-
     private fun combine(vararg modifiers: (JSONObject) -> Unit): (JSONObject) -> Unit = { json ->
         modifiers.forEach { it(json) }
     }
@@ -1100,19 +1095,33 @@ internal class CheckoutControllerTest {
     ): CheckoutController.Session {
         return CheckoutController.Session(
             id = DEFAULT_CHECKOUT_SESSION_ID,
+            businessName = null,
             status = CheckoutController.Session.Status.Open(),
-            liveMode = false,
+            livemode = false,
             currency = "usd",
+            presentmentDetails = null,
+            discountAmounts = emptyList(),
             email = null,
+            orderSummaryItems = emptyList(),
+            minorUnitsAmountDivisor = 100,
+            paymentOption = null,
+            shippingAddress = null,
             tax = CheckoutController.Session.Tax(CheckoutController.Session.Tax.Status.Ready),
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
-            paymentOptionDisplayData = null,
+            taxAmounts = emptyList(),
+            totals = CheckoutController.Session.Totals(
+                subtotal = CheckoutController.Session.Amount("$0.00", 0.0),
+                taxExclusive = CheckoutController.Session.Amount("$0.00", 0.0),
+                taxInclusive = CheckoutController.Session.Amount("$0.00", 0.0),
+                discount = CheckoutController.Session.Amount("$0.00", 0.0),
+                total = CheckoutController.Session.Amount("$0.00", 0.0),
+            ),
             currencySelectorOptions = null,
             availableExpressButtonTypes = availableExpressButtonTypes,
         )
     }
+
+    private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
+        .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
 
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,

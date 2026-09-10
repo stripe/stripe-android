@@ -50,7 +50,7 @@ internal class CheckoutControllerStateHolderTest {
         testScenario(paymentOptionFactory = factory) {
             stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
 
-            assertThat(stateHolder.session.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
+            assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
         }
     }
@@ -215,6 +215,7 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = false,
     )
 
     private fun testScenario(

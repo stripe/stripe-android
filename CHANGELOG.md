@@ -3,6 +3,12 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### All SDKs
+* [ADDED] Added Welsh (United Kingdom) localization.
+
+### PaymentSheet
+* [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+
 ## 23.18.0 - 2026-09-08
 
 ### PaymentSheet

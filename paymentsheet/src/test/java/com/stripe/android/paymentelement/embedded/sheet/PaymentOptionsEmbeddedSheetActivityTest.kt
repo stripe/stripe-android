@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -18,7 +18,6 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -31,6 +30,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -40,9 +40,10 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
+import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
@@ -50,11 +51,14 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsEmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
+    private val composeTestRule = createEmptyComposeRule()
+    private val formPage = FormPage(composeTestRule)
     private val managePage = ManagePage(composeTestRule)
     private val verticalModePage = VerticalModePage(composeTestRule)
     private val networkRule = NetworkRule()
@@ -64,6 +68,80 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    @Test
+    fun `loading renders and cancellation returns PaymentOptions`() = launch(
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+    ) { scenario ->
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
+
+        Espresso.pressBack()
+        onIdle()
+
+        val result = EmbeddedSheetContract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        ) as EmbeddedActivityResult.Cancelled
+        assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+    }
+
+    @Test
+    fun `recreated loading activity remains loading`() = launch(
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+    ) { scenario ->
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
+
+        scenario.recreate()
+        onIdle()
+
+        scenario.onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
+        }
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `ready intent updates loading content without replacing composition and survives recreation`() = launch(
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+    ) { scenario ->
+        val readyIntent = EmbeddedSheetContract.createIntent(
+            applicationContext,
+            createArgs(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                ),
+                presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            ),
+        )
+
+        scenario.recreate()
+        onIdle()
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
+
+        val initialBottomSheetNodeId = composeTestRule
+            .onNodeWithTag(BottomSheetContentTestTag)
+            .fetchSemanticsNode()
+            .id
+        scenario.onActivity { activity ->
+            activity.onNewIntent(readyIntent)
+        }
+        composeTestRule.waitForIdle()
+
+        formPage.waitUntilVisible()
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
+        val currentBottomSheetNodeId = composeTestRule
+            .onNodeWithTag(BottomSheetContentTestTag)
+            .fetchSemanticsNode()
+            .id
+        assertThat(currentBottomSheetNodeId).isEqualTo(initialBottomSheetNodeId)
+
+        scenario.recreate()
+        onIdle()
+
+        formPage.waitUntilVisible()
+        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
+    }
 
     @Test
     fun `pressing back returns cancelled result with PaymentOptions launch mode`() = launch { scenario ->
@@ -81,80 +159,48 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `when SheetActivityStateHolder has result, activity finishes with that result`() = launch { scenario ->
-        scenario.onActivity { activity ->
-            activity.sheetActivityStateHolder.setResult(
-                EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    selection = null,
-                    hasBeenConfirmed = false,
-                    customerState = null,
-                    checkoutSessionResponse = null,
-                    shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
-                )
-            )
-        }
+    fun `continue returns the selection and previous new selections`() {
+        val previousNewSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
-        onIdle()
+        launch(
+            selection = selection,
+            previousNewSelections = Bundle().apply {
+                stashNewSelection(previousNewSelection)
+            },
+        ) { scenario ->
+            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+                .performScrollTo()
+                .assertIsEnabled()
+                .performClick()
+            onIdle()
 
-        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
-        assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
-        val complete = result as EmbeddedActivityResult.Complete
-        assertThat(complete.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
-        )
-    }
-
-    @Test
-    fun `navigator back emits cancelled result`() = launch { scenario ->
-        scenario.onActivity { activity ->
-            activity.embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
-        }
-
-        onIdle()
-
-        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
-        assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
-        val cancelled = result as EmbeddedActivityResult.Cancelled
-        assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
-        )
-    }
-
-    @Test
-    fun `restores previously entered new selections into the selection holder`() = launch(
-        previousNewSelections = Bundle().apply {
-            stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-        },
-    ) { scenario ->
-        scenario.onActivity { activity ->
-            assertThat(activity.selectionHolder.getPreviousNewSelection("cashapp"))
-                .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            val result = EmbeddedSheetContract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            ) as EmbeddedActivityResult.Complete
+            assertThat(result.selection).isEqualTo(selection)
+            assertThat(result.previousNewSelections.previousNewSelection("cashapp"))
+                .isEqualTo(previousNewSelection)
+            assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
         }
     }
 
     @Test
-    fun `new selection requiring a form opens on the form and back returns to the list`() = launch(
+    fun `new selection requiring a form survives recreation and back returns to the list`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) { scenario ->
-        scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.canGoBack).isTrue()
-            assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
-        }
+        formPage.waitUntilVisible()
+
+        scenario.recreate()
+        onIdle()
+        formPage.waitUntilVisible()
 
         Espresso.pressBack()
         onIdle()
 
-        // Back returns to the payment options list rather than cancelling the sheet.
-        scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.canGoBack).isFalse()
-            assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
-        }
+        formPage.assertIsNotDisplayed()
+        verticalModePage.waitUntilVisible()
     }
 
     @Test
@@ -165,7 +211,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = paymentMethods,
             ),
-        ) { scenario ->
+        ) {
             verticalModePage.clickViewMore()
             managePage.waitUntilVisible()
 
@@ -174,41 +220,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
             managePage.assertNotVisible()
             verticalModePage.waitUntilVisible()
-            scenario.onActivity { activity ->
-                assertThat(activity.embeddedNavigator.canGoBack).isFalse()
-                assertThat(activity.embeddedNavigator.screen.value)
-                    .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
-            }
         }
-    }
-
-    @Test
-    fun `configuration change keeps saved payment method confirmation screen`() = launch { scenario ->
-        val interactor = FakeSavedPaymentMethodConfirmInteractor()
-        lateinit var originalScreen: EmbeddedNavigator.Screen.SavedPaymentMethodConfirm
-        scenario.onActivity { activity ->
-            originalScreen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
-                interactor = interactor,
-                isLiveMode = true,
-                sheetActivityStateHolder = activity.sheetActivityStateHolder,
-                confirmationHelper = FakeSheetActivityConfirmationHelper(),
-                embeddedSelectionHolder = activity.selectionHolder,
-                customerStateHolder = activity.customerStateHolder,
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
-            )
-            activity.embeddedNavigator.performAction(
-                EmbeddedNavigator.Action.ReplaceCurrentScreen(originalScreen)
-            )
-        }
-        onIdle()
-
-        scenario.recreate()
-        onIdle()
-
-        scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.screen.value).isSameInstanceAs(originalScreen)
-        }
-        interactor.validate()
     }
 
     @Test
@@ -223,40 +235,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `processing blocks back and disables vertical payment method rows`() = launch { scenario ->
-        val cardRow = composeTestRule.onNodeWithTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_card")
-        cardRow.assertIsEnabled()
-
-        scenario.onActivity { activity ->
-            activity.sheetActivityStateHolder.updateProcessing(true)
-        }
-        composeTestRule.waitForIdle()
-
-        cardRow.assertIsNotEnabled()
-        composeTestRule.onNodeWithText(
-            applicationContext.getString(R.string.stripe_paymentsheet_primary_button_processing)
-        ).assertIsDisplayed()
-        Espresso.pressBack()
-        onIdle()
-        scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
-        }
-    }
-
-    @Test
-    fun `vertical payment options displays activity error`() = launch { scenario ->
-        val errorMessage = "Unable to update the tax region."
-
-        scenario.onActivity { activity ->
-            activity.sheetActivityStateHolder.updateError(errorMessage.resolvableString)
-        }
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText(errorMessage).assertIsDisplayed()
-    }
-
-    @Test
     fun `saved checkout selection displays update error and re-enables payment options`() {
         val selection = savedSelectionWithBillingAddress()
         networkRule.checkoutUpdate { response ->
@@ -267,7 +245,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         launch(
             selection = selection,
             paymentMethodMetadata = checkoutPaymentMethodMetadata(),
-        ) { scenario ->
+        ) {
             val primaryButton = composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
             val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
             primaryButton.performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
@@ -280,10 +258,54 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             composeTestRule.onNodeWithText(expectedError).performScrollTo().assertIsDisplayed()
             primaryButton.assertIsEnabled()
             composeTestRule.onNodeWithTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_card").assertIsEnabled()
-            scenario.onActivity { activity ->
-                assertThat(activity.embeddedNavigator.screen.value)
-                    .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
-                assertThat(activity.sheetActivityStateHolder.state.value.isProcessing).isFalse()
+            verticalModePage.waitUntilVisible()
+        }
+    }
+
+    @Test
+    fun `processing disables payment options and blocks back`() {
+        val requestReceived = CountDownLatch(1)
+        val releaseResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            requestReceived.countDown()
+            check(releaseResponse.await(10, TimeUnit.SECONDS))
+        }
+
+        launch(
+            selection = savedSelectionWithBillingAddress(),
+            paymentMethodMetadata = checkoutPaymentMethodMetadata(),
+        ) { scenario ->
+            try {
+                val cardRow = composeTestRule.onNodeWithTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_card")
+                cardRow.assertIsEnabled()
+                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+                    .performScrollTo()
+                    .assertIsEnabled()
+                    .performClick()
+                val processingLabel = applicationContext.getString(
+                    R.string.stripe_paymentsheet_primary_button_processing
+                )
+                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                    composeTestRule.onAllNodesWithText(processingLabel)
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                        .isNotEmpty()
+                }
+                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                    requestReceived.count == 0L
+                }
+                cardRow.assertIsNotEnabled()
+                composeTestRule.onNodeWithText(processingLabel).assertIsDisplayed()
+
+                scenario.onActivity { activity ->
+                    activity.onBackPressedDispatcher.onBackPressed()
+                }
+
+                verticalModePage.waitUntilVisible()
+                cardRow.assertIsNotEnabled()
+            } finally {
+                releaseResponse.countDown()
             }
         }
     }
@@ -294,6 +316,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
+        presentationState: EmbeddedActivityArgs.PresentationState = EmbeddedActivityArgs.PresentationState.Ready,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) = launch(
         selection = selection,
@@ -304,6 +327,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 listOf(it.paymentMethod)
             }.orEmpty(),
         ),
+        presentationState = presentationState,
         block = block,
     )
 
@@ -325,27 +349,47 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         previousNewSelections: Bundle,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
+        presentationState: EmbeddedActivityArgs.PresentationState = EmbeddedActivityArgs.PresentationState.Ready,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-                    productUsage = setOf("EmbeddedPaymentElement"),
-                    statusBarColor = null,
-                    paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
+                input = createArgs(
                     selection = selection,
                     previousNewSelections = previousNewSelections,
+                    paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
-                    promotions = emptyList(),
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    presentationState = presentationState,
                 ),
             )
         ).use { scenario ->
             block(scenario)
         }
+    }
+
+    private fun createArgs(
+        selection: PaymentSelection? = null,
+        previousNewSelections: Bundle = Bundle(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+        customerState: CustomerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+        presentationState: EmbeddedActivityArgs.PresentationState,
+    ): EmbeddedActivityArgs {
+        return EmbeddedActivityArgs(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            productUsage = setOf("EmbeddedPaymentElement"),
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
+            selection = selection,
+            previousNewSelections = previousNewSelections,
+            customerState = customerState,
+            promotions = emptyList(),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            presentationState = presentationState,
+        )
     }
 
     private fun checkoutPaymentMethodMetadata(): PaymentMethodMetadata {

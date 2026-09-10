@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
@@ -97,6 +98,7 @@ internal data class PaymentMethodMetadata(
     val cardArts: List<PaymentMethod.Card.CardArt>,
     val shouldUseAutocompleteProxyEndpoints: Boolean,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    val apiConfiguration: ApiConfiguration.State,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
@@ -126,10 +128,20 @@ internal data class PaymentMethodMetadata(
     /**
      * Canonical source of truth for whether the Link button/row should be rendered in the
      * payment element UI. Link may remain functionally enabled ([linkState] non-null) even when
-     * its button is hidden via [PaymentSheet.LinkConfiguration.Display.WalletButtonHidden].
+     * [PaymentSheet.LinkConfiguration.Display.WalletButtonHidden] is configured. In that case,
+     * the button is still shown if the load-time lookup found an existing Link user.
      */
     val shouldShowLinkButton: Boolean
-        get() = linkState != null && linkConfiguration.shouldShowButton
+        get() {
+            val linkState = linkState ?: return false
+
+            return when (linkConfiguration.display) {
+                PaymentSheet.LinkConfiguration.Display.Automatic -> true
+                PaymentSheet.LinkConfiguration.Display.Never -> false
+                PaymentSheet.LinkConfiguration.Display.WalletButtonHidden ->
+                    linkState.loginState != LinkState.LoginState.LoggedOut
+            }
+        }
 
     /**
      * Returns the consumer's LinkBrand if logged in, otherwise falls back to the metadata's brand.
@@ -381,6 +393,7 @@ internal data class PaymentMethodMetadata(
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
@@ -442,6 +455,7 @@ internal data class PaymentMethodMetadata(
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = paymentMethodLayout,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -452,6 +466,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -511,6 +526,7 @@ internal data class PaymentMethodMetadata(
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                apiConfiguration = apiConfiguration,
             )
         }
     }

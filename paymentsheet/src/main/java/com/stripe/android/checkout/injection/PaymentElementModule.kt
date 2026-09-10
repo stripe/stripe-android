@@ -1,15 +1,23 @@
 package com.stripe.android.checkout.injection
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedWalletsHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
@@ -18,11 +26,16 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodV
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Named
+
+internal const val CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER =
+    "LinkPaymentLauncher_CheckoutPaymentMethodSelection"
 
 @Module
 internal interface PaymentElementModule {
@@ -31,7 +44,7 @@ internal interface PaymentElementModule {
 
     @Binds
     fun bindsEmbeddedPaymentOptionsPresenter(
-        presenter: DefaultEmbeddedPaymentOptionsPresenter,
+        presenter: CheckoutLinkPaymentOptionsPresenter,
     ): EmbeddedPaymentOptionsPresenter
 
     @Binds
@@ -75,6 +88,37 @@ internal interface PaymentElementModule {
                     )
                 }
             }
+        }
+
+        @Provides
+        @Named(CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER)
+        fun provideCheckoutLinkPaymentLauncher(
+            linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
+            linkActivityContract: LinkActivityContract,
+            @PaymentElementCallbackIdentifier identifier: String,
+            linkStore: LinkStore,
+        ): LinkPaymentLauncher {
+            return LinkPaymentLauncher(
+                linkAnalyticsComponentFactory = linkAnalyticsComponentFactory,
+                paymentElementCallbackIdentifier = identifier,
+                linkActivityContract = linkActivityContract,
+                linkStore = linkStore,
+            )
+        }
+
+        @Provides
+        fun provideLinkPaymentMethodSelectionLauncher(
+            @Named(CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER) launcher: LinkPaymentLauncher,
+            linkGateFactory: LinkGate.Factory,
+            linkAccountHolder: LinkAccountHolder,
+            @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
+        ): LinkPaymentMethodSelectionLauncher {
+            return LinkPaymentMethodSelectionLauncher(
+                launcher = launcher,
+                linkGateFactory = linkGateFactory,
+                linkAccountHolder = linkAccountHolder,
+                statusBarColor = statusBarColor,
+            )
         }
     }
 }

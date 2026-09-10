@@ -31,7 +31,7 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
         checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
             configuration.googlePayConfiguration.asPaymentSheet(
                 merchantCountry = merchantCountry,
-                liveMode = checkoutSessionResponse.liveMode,
+                liveMode = checkoutSessionResponse.livemode,
                 isDebugBuild = BuildConfig.DEBUG,
             )
         }
@@ -44,24 +44,20 @@ internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayCon
     checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
         paymentElementConfiguration.googlePayConfiguration.asPaymentSheet(
             merchantCountry = merchantCountry,
-            liveMode = checkoutSessionResponse.liveMode,
+            liveMode = checkoutSessionResponse.livemode,
             isDebugBuild = BuildConfig.DEBUG,
         )
     }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutCollectedDetails.toBillingDetails(
+internal fun CheckoutController.Configuration.State.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
+    collectedEmail: String?,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
-    address = billingAddress?.asPaymentSheet(),
-    email = resolveEmail(checkoutSessionResponse),
-    name = billingName,
+    address = defaults.billingDetails?.address?.asPaymentSheet(),
+    email = collectedEmail ?: checkoutSessionResponse.customerEmail,
+    name = defaults.billingDetails?.name,
 )
-
-@OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutCollectedDetails.resolveEmail(
-    response: CheckoutSessionResponse,
-): String? = email ?: response.customerEmail
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutCollectedDetails.toShippingDetails(): AddressDetails = AddressDetails(

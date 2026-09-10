@@ -33,7 +33,12 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
             .googlePay(configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse))
             .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
-            .defaultBillingDetails(collectedDetails.toBillingDetails(checkoutSessionResponse))
+            .defaultBillingDetails(
+                configuration.toBillingDetails(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedEmail = collectedDetails.email,
+                ),
+            )
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)
             .allowsPaymentMethodsRequiringShippingAddress(true)

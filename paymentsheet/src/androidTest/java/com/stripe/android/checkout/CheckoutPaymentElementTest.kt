@@ -140,7 +140,7 @@ internal class CheckoutPaymentElementTest {
         formPage.assertErrorIsShown(applicationContext.getString(R.string.stripe_something_went_wrong))
         formPage.waitUntilVisible()
         formPage.assertPrimaryButtonIsEnabled()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(INITIAL_TOTAL)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
 
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
         formPage.clickPrimaryButton()
@@ -422,7 +422,7 @@ internal class CheckoutPaymentElementTest {
 
     private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            controller.session.value?.totalSummary?.totalDueToday == total
+            controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
         }
     }
 
@@ -464,13 +464,11 @@ internal class CheckoutPaymentElementTest {
                     .put("computation_type", "automatic")
                     .put("status", taxStatus),
             )
-            json.put(
-                "total_summary",
-                JSONObject()
-                    .put("subtotal", INITIAL_TOTAL)
-                    .put("due", total)
-                    .put("total", total),
-            )
+            json.getJSONArray("checkout_items").getJSONObject(0)
+                .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                .put("subtotal", INITIAL_TOTAL)
+                .put("total", total)
+                .put("tax_exclusive", total - INITIAL_TOTAL)
             json.getJSONObject("elements_session").remove("link_settings")
             json.getJSONObject("server_built_elements_session_params")
                 .getJSONObject("deferred_intent")

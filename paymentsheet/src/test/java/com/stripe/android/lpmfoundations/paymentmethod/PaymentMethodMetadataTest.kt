@@ -1042,6 +1042,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1115,6 +1116,7 @@ internal class PaymentMethodMetadataTest {
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1175,6 +1177,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1213,6 +1216,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1271,6 +1275,7 @@ internal class PaymentMethodMetadataTest {
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1734,7 +1739,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
+                loginState = LinkState.LoginState.LoggedIn,
                 signupMode = null,
             ),
             linkConfiguration = PaymentSheet.LinkConfiguration(
@@ -1746,7 +1751,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `shouldShowLinkButton returns false when linkState is present and display is WalletButtonHidden`() {
+    fun `shouldShowLinkButton returns false for logged-out user when display is WalletButtonHidden`() {
         val metadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
@@ -1759,6 +1764,38 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for user needing verification when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for logged-in user when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
     }
 
     @Test
@@ -1989,6 +2026,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.availableWallets)
@@ -2058,6 +2096,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2082,6 +2121,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2110,6 +2150,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2118,7 +2159,6 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `createForPaymentElement requires automatic tax billing address when tax status requires it`() {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
@@ -2140,7 +2180,6 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `createForPaymentElement requires automatic tax billing address when tax status is ready`() {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            taxStatus = CheckoutSessionResponse.TaxStatus.READY,
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
@@ -2250,6 +2289,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 
@@ -2276,6 +2316,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 
@@ -2339,6 +2380,7 @@ internal class PaymentMethodMetadataTest {
     fun `paymentMethodOrientation returns Horizontal when layout is Horizontal`() {
         val metadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)

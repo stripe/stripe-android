@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,9 +24,9 @@ interface TextFieldConfig {
     /** Transformation for changing visual output of the input field. */
     val visualTransformation: VisualTransformation?
 
-    /** Overridden layout direction */
-    val layoutDirection: LayoutDirection?
-        get() = null
+    /** Should enforce text to be shown left-to-right */
+    val enforceLeftToRightTextDirection: Boolean
+        get() = false
 
     val trailingIcon: StateFlow<TextFieldIcon?>
 

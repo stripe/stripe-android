@@ -5,8 +5,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -52,9 +53,11 @@ class DefaultTapToAddConnectionManagerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
-
     private val testConnectionConfig =
-        TapToAddConnectionManager.ConnectionConfig(merchantDisplayName = "Test Merchant")
+        TapToAddConnectionManager.ConnectionConfig(
+            merchantDisplayName = "Test Merchant",
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
 
     @Test
     fun `isSupported returns true when terminal supports tap to add`() = test(
@@ -62,7 +65,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported).isTrue()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isTrue()
     }
 
     @Test
@@ -72,7 +75,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported).isTrue()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isTrue()
 
         verify(terminalInstance).supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -87,7 +90,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported).isTrue()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isTrue()
 
         verify(terminalInstance).supportsReadersOfType(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
@@ -101,7 +104,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.NotSupported(IllegalStateException("Not supported!")))
         }
     ) {
-        assertThat(manager.isSupported).isFalse()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isFalse()
     }
 
     @Test
@@ -112,7 +115,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
         }
     ) {
-        assertThat(manager.isSupported).isFalse()
+        assertThat(manager.isSupported(DEFAULT_API_CONFIG)).isFalse()
 
         wrapperScenario.isInitializedCalls.expectNoEvents()
     }
@@ -706,9 +709,8 @@ class DefaultTapToAddConnectionManagerTest {
                         errorReporter = errorReporter,
                         logger = logger,
                         isSimulatedProvider = object : TapToAddIsSimulatedProvider {
-                            override fun get(): Boolean = isSimulated
+                            override fun get(apiConfiguration: ApiConfiguration.State): Boolean = isSimulated
                         },
-                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") },
                         callbackRetriever = callbackRetriever,
                     ),
                     terminalInstance = terminalInstance,

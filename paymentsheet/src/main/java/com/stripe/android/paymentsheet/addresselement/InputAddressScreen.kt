@@ -136,7 +136,9 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = { viewModel.navigator.dismiss() },
+        onCloseClick = {
+            viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+        },
         topContent = {
             val currentState = billingSameAsShippingState
 

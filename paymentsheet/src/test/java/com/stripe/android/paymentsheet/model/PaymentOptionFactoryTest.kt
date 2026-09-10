@@ -59,7 +59,7 @@ class PaymentOptionFactoryTest {
             appearance = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
@@ -79,7 +79,7 @@ class PaymentOptionFactoryTest {
             appearance = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
@@ -106,7 +106,7 @@ class PaymentOptionFactoryTest {
             appearance = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }

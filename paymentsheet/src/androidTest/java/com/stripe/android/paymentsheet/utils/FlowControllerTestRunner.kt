@@ -42,7 +42,11 @@ internal class FlowControllerTestRunnerContext(
 
     suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
         val paymentOption = configureCallbackTurbine.awaitItem()
-        assertThat(paymentOption?.label).endsWith(label)
+        val expectedLabel = when (paymentMethodType) {
+            "card", "us_bank_account" -> "···· $label".withLtrIsolate()
+            else -> label
+        }
+        assertThat(paymentOption?.label).isEqualTo(expectedLabel)
         assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
     }
 

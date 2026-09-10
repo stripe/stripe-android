@@ -10,7 +10,6 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -22,6 +21,7 @@ import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLaunch
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -45,7 +45,6 @@ import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
@@ -429,7 +428,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -466,7 +465,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -504,7 +503,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -543,7 +542,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -553,16 +552,15 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `On 'launch', should create display items from payment method metadata`() = runTest {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            lineItems = listOf(
-                CheckoutSessionResponse.LineItem(
-                    id = "li_1",
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(
                     name = "Widget",
                     quantity = 2,
                     unitAmount = 1000L,
                     subtotal = 2000L,
                     total = 2000L,
-                ),
-            ),
+                )
+            )
         )
         val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
         val definition = createGooglePayConfirmationDefinition()
@@ -597,13 +595,10 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
-            displayItems = listOf(
-                GooglePayJsonFactory.DisplayItem(
-                    label = "Widget x2",
-                    type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                    price = 1000L,
-                ),
+            apiConfiguration = DEFAULT_API_CONFIG,
+            displayItems = GooglePayDisplayItemsFactory.create(
+                checkoutSessionResponse,
+                ApplicationProvider.getApplicationContext(),
             ),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -641,7 +636,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = shippingAddressParameters,
@@ -718,7 +713,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -751,7 +746,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,

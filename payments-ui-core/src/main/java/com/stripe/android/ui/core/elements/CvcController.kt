@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -58,7 +57,7 @@ class CvcController constructor(
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val enforceLeftToRightTextDirection: Boolean = true
 
     override val showOptionalLabel: Boolean = false
 

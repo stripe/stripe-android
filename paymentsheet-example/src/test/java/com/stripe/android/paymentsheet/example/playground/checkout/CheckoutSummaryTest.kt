@@ -61,15 +61,15 @@ internal class CheckoutSummaryTest {
     }
 
     @Test
-    fun `unknown tax shows calculated tax rows`() = runScenario(
-        taxStatus = Session.Tax.Status.Unknown,
+    fun `absent tax shows no pending message`() = runScenario(
+        taxStatus = null,
     ) {
         page.pendingTax.assertDoesNotExist()
         page.calculatedTax.assertIsDisplayed()
     }
 
     private fun runScenario(
-        taxStatus: Session.Tax.Status,
+        taxStatus: Session.Tax.Status?,
         block: Scenario.() -> Unit,
     ) {
         composeRule.setContent {

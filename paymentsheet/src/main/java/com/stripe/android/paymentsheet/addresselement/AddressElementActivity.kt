@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -27,7 +27,8 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
@@ -58,22 +59,23 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
-            val coroutineScope = rememberCoroutineScope()
-
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
             val bottomSheetState = rememberStripeBottomSheetState()
 
-            BackHandler {
-                viewModel.navigator.onBack()
+            LaunchedEffect(bottomSheetState) {
+                viewModel.resultStateHolder.result
+                    .filterNotNull()
+                    .collect { result ->
+                        bottomSheetState.hide()
+                        finishWithResult(result)
+                    }
             }
 
-            viewModel.navigator.onDismiss = { result ->
-                coroutineScope.launch {
-                    bottomSheetState.hide()
-                    setResult(result)
-                    finish()
+            BackHandler {
+                if (!viewModel.navigator.onBack()) {
+                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
                 }
             }
 
@@ -89,7 +91,9 @@ internal class AddressElementActivity : ComponentActivity() {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = {
+                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -124,13 +128,14 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
+    private fun finishWithResult(result: AddressElementActivityContract.Result) {
         setResult(
             result.resultCode,
             Intent().putExtras(
-                AddressElementActivityContract.Result(result).toBundle()
+                result.toBundle()
             )
         )
+        finish()
     }
 
     override fun finish() {

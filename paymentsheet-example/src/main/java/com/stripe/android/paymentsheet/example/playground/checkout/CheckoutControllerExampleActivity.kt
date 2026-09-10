@@ -214,7 +214,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                         }
                         CheckoutControllerExampleViewModel.Status.Configured -> {
                             ConfirmationControls(
-                                paymentOption = session?.paymentOptionDisplayData,
+                                paymentOption = session?.paymentOption,
                                 confirmationMessage = confirmationMessage,
                                 isUpdating = isUpdating,
                                 displayMandate = viewModel.displayMandate,

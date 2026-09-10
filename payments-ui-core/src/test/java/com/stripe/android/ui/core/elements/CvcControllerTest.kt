@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
@@ -69,10 +68,10 @@ internal class CvcControllerTest {
     }
 
     @Test
-    fun `Controller should always have an Ltr layout`() = runTest {
+    fun `Controller should enforce Ltr text direction`() = runTest {
         val cvcController = createController()
 
-        assertThat(cvcController.layoutDirection).isEqualTo(LayoutDirection.Ltr)
+        assertThat(cvcController.enforceLeftToRightTextDirection).isTrue()
     }
 
     @Test

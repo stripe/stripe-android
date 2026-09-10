@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.previousNewSelection
@@ -39,6 +40,10 @@ import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.asCallbackFor
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -81,6 +86,7 @@ internal class CheckoutSheetLauncherTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -372,6 +378,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         sheetLauncher.launchManage(
@@ -500,6 +507,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         sheetLauncher.launchPaymentOptions(
@@ -512,6 +520,180 @@ internal class CheckoutSheetLauncherTest {
 
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `updating launch sends loading then refreshed ready arguments`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        val initialState = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = initialState.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = initialState.configuration,
+        )
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(loadingArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+
+        val refreshedMetadata = PaymentMethodMetadataFactory.create()
+        val refreshedConfiguration = EmbeddedConfigurationFactory.create(merchantDisplayName = "Refreshed merchant")
+        val refreshedCustomer = createCustomerState()
+        embeddedContentState.value = EmbeddedContentHelperStateHolder.State(
+            paymentMethodMetadata = refreshedMetadata,
+            embeddedViewDisplaysMandateText = true,
+            configuration = refreshedConfiguration,
+        )
+        customerStateHolder.setCustomerState(refreshedCustomer)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        mutationGate.complete(Unit)
+        runCurrent()
+
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(readyArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(refreshedMetadata)
+        assertThat(readyArgs.configuration).isEqualTo(refreshedConfiguration)
+        assertThat(readyArgs.customerState).isEqualTo(refreshedCustomer)
+        assertThat(readyArgs.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `recreated launcher sends ready arguments when mutation finishes`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        val initialState = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = initialState.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = initialState.configuration,
+        )
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+        mutationGate.complete(Unit)
+        runCurrent()
+
+        val recreatedLauncherState = CheckoutSheetLauncherState(savedStateHandle)
+        recreateSheetLauncher(TestLifecycleOwner(), recreatedLauncherState)
+        runCurrent()
+
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+        assertThat(recreatedLauncherState.isAwaitingPaymentOptionsReady).isFalse()
+    }
+
+    @Test
+    fun `failed mutation sends retained state as ready arguments`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation<Unit> {
+                mutationGate.await()
+                Result.failure(IllegalStateException("Failed mutation"))
+            }
+        }
+        runCurrent()
+
+        val retainedState = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = retainedState.paymentMethodMetadata,
+            customerState = customerStateHolder.customer.value,
+            selection = selectionHolder.selection.value,
+            configuration = retainedState.configuration,
+        )
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+
+        mutationGate.complete(Unit)
+        runCurrent()
+
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(retainedState.paymentMethodMetadata)
+        assertThat(readyArgs.configuration).isEqualTo(retainedState.configuration)
+    }
+
+    @Test
+    fun `missing refreshed state does not crash when mutation finishes`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        val initialState = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = initialState.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = initialState.configuration,
+        )
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+
+        embeddedContentState.value = null
+        mutationGate.complete(Unit)
+        runCurrent()
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
+        )
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
+    }
+
+    @Test
+    fun `cancelling loading suppresses ready launch`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        val state = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = state.configuration,
+        )
+        dummyActivityResultCallerScenario.awaitLaunchCall()
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(
+            EmbeddedActivityResult.Cancelled(
+                customerState = null,
+                launchMode = EmbeddedLaunchMode.PaymentOptions,
+            )
+        )
+        mutationGate.complete(Unit)
+        runCurrent()
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
     }
 
     @Test
@@ -739,24 +921,41 @@ internal class CheckoutSheetLauncherTest {
             logger = logger,
             resultCallback = CheckoutController.ResultCallback {},
         )
+        val launcherState = CheckoutSheetLauncherState(savedStateHandle)
+        val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(
+            EmbeddedContentHelperStateHolder.State(
+                paymentMethodMetadata = paymentMethodMetadata,
+                embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedConfigurationFactory.create(),
+            )
+        )
 
         DummyActivityResultCaller.test {
-            val sheetLauncher = CheckoutSheetLauncher(
-                activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner,
-                selectionHolder = selectionHolder,
-                customerStateHolder = customerStateHolder,
-                sheetStateHolder = sheetStateHolder,
-                errorReporter = errorReporter,
-                sessionRefresher = sessionRefresher,
-                operationCoordinator = operationCoordinator,
-                logger = logger,
-                coroutineScope = testScope,
-                productUsage = setOf("Checkout"),
-                statusBarColor = null,
-                paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-                rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
-            )
+            fun createSheetLauncher(
+                owner: TestLifecycleOwner,
+                state: CheckoutSheetLauncherState,
+            ): CheckoutSheetLauncher {
+                return CheckoutSheetLauncher(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = owner,
+                    selectionHolder = selectionHolder,
+                    customerStateHolder = customerStateHolder,
+                    sheetStateHolder = sheetStateHolder,
+                    errorReporter = errorReporter,
+                    sessionRefresher = sessionRefresher,
+                    operationCoordinator = operationCoordinator,
+                    launcherState = state,
+                    embeddedContentState = embeddedContentState,
+                    logger = logger,
+                    coroutineScope = testScope,
+                    productUsage = setOf("Checkout"),
+                    statusBarColor = null,
+                    paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
+                    rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
+                )
+            }
+
+            val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
             val registerCall = awaitRegisterCall()
             val launcher = awaitNextRegisteredLauncher()
 
@@ -777,6 +976,11 @@ internal class CheckoutSheetLauncherTest {
                 sessionRefresher = sessionRefresher,
                 logger = logger,
                 operationCoordinator = operationCoordinator,
+                launcherState = launcherState,
+                savedStateHandle = savedStateHandle,
+                embeddedContentState = embeddedContentState,
+                coroutineScope = testScope,
+                createSheetLauncher = ::createSheetLauncher,
                 runCurrent = testScheduler::runCurrent,
             ).block()
         }
@@ -799,10 +1003,27 @@ internal class CheckoutSheetLauncherTest {
         val sessionRefresher: FakeCheckoutSessionRefresher,
         val logger: FakeLogger,
         val operationCoordinator: CheckoutOperationCoordinator,
+        val launcherState: CheckoutSheetLauncherState,
+        val savedStateHandle: SavedStateHandle,
+        val embeddedContentState: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
+        val coroutineScope: CoroutineScope,
+        private val createSheetLauncher: (
+            TestLifecycleOwner,
+            CheckoutSheetLauncherState,
+        ) -> CheckoutSheetLauncher,
         private val runCurrent: () -> Unit,
     ) {
         fun runCurrent() {
             runCurrent.invoke()
+        }
+
+        suspend fun recreateSheetLauncher(
+            lifecycleOwner: TestLifecycleOwner,
+            launcherState: CheckoutSheetLauncherState,
+        ) {
+            createSheetLauncher(lifecycleOwner, launcherState)
+            dummyActivityResultCallerScenario.awaitRegisterCall()
+            dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
         }
 
         suspend fun awaitRefreshCall(): FakeCheckoutSessionRefresher.Call {
