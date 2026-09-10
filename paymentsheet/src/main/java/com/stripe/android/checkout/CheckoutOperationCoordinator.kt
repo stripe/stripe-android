@@ -57,19 +57,38 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
-        return synchronized(admissionLock) {
-            if (sheetStateHolder.sheetIsOpen || pendingMutations > 0 || confirmationInFlight) {
-                return@synchronized null
+        val result = synchronized(admissionLock) {
+            val errorMessage = when {
+                sheetStateHolder.sheetIsOpen ->
+                    "Cannot confirm while a payment flow is presented."
+                pendingMutations > 0 ->
+                    "Cannot confirm while the checkout session is updating."
+                confirmationInFlight ->
+                    "Cannot confirm while another confirmation is in progress."
+                else -> null
             }
-            val confirmationArguments = arguments() ?: return@synchronized null
+            if (errorMessage != null) {
+                return@synchronized Result.failure(IllegalStateException(errorMessage))
+            }
+            val confirmationArguments = arguments() ?: return@synchronized Result.failure(
+                IllegalStateException(
+                    "Cannot create confirmation arguments for the current payment selection."
+                )
+            )
             check(mutex.tryLock()) {
                 "Checkout operation gate should be available after confirmation admission."
             }
             confirmationInFlight = true
             confirmationWasRestored = false
             updateIsUpdating()
-            confirmationArguments
+            Result.success(confirmationArguments)
         }
+        result.exceptionOrNull()?.let(::reportConfirmationFailure)
+        return result.getOrNull()
+    }
+
+    fun reportConfirmationFailure(error: Throwable) {
+        resultCallback.onResult(CheckoutController.Result.Failed(error))
     }
 
     suspend fun observeConfirmationResults() {
@@ -86,6 +105,9 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                         } else {
                             sessionRefresher.refresh()
                         }
+                    }
+                    if (state.result.requestsPaymentDetailsModification()) {
+                        sheetStateHolder.embeddedContentHelper?.presentPaymentOptions()
                     }
                     state.result.asCheckoutResult(wasRestored)
                 }
@@ -142,6 +164,11 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private fun updateIsUpdating() {
         _isUpdating.value = confirmationInFlight || pendingMutations > 0
     }
+}
+
+private fun ConfirmationHandler.Result.requestsPaymentDetailsModification(): Boolean {
+    return this is ConfirmationHandler.Result.Canceled &&
+        action == ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails
 }
 
 private fun ConfirmationHandler.Result.asCheckoutResult(
