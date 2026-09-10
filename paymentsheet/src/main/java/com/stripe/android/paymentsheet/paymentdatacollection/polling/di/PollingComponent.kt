@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 
 import android.app.Application
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -30,6 +31,7 @@ internal interface PollingComponent {
             @BindsInstance application: Application,
             @BindsInstance config: IntentStatusPoller.Config,
             @BindsInstance ioDispatcher: CoroutineDispatcher,
+            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): PollingComponent
     }
 }

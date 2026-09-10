@@ -512,6 +512,7 @@ class PollingViewModelTest {
                 timeLimit = timeLimit,
                 initialDelay = initialDelay,
                 ctaText = R.string.stripe_blik_confirm_payment,
+                publishableKey = "pk_test_123",
                 stripeAccountId = null,
                 qrCodeUrl = qrCodeUrl,
                 paymentMethodType = paymentMethodType,
