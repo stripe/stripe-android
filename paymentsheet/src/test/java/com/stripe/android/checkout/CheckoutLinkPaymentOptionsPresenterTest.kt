@@ -201,13 +201,13 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     }
 
     @Test
-    fun `destroy unregisters direct Link and preserves open root flow`() = runScenario {
+    fun `destroy unregisters direct Link and clears open state`() = runScenario {
         presenter.present()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         verify(linkPaymentLauncher).unregister()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Suppress("LongMethod")

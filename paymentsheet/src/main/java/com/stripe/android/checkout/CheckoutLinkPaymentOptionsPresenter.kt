@@ -41,6 +41,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     linkPaymentLauncher.unregister()
+                    sheetStateHolder.sheetIsOpen = false
                 }
             }
         )
