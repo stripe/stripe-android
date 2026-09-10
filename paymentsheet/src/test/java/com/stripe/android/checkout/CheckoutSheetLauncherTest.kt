@@ -742,7 +742,6 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `paymentOptionsResult merges returned previous new selections into selection holder`() = testScenario {
-        openPaymentOptionsSheet()
         val returnedSelections = Bundle().apply {
             stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         }
@@ -765,7 +764,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `paymentOptionsResult callback updates state on complete result`() = testScenario {
-        openPaymentOptionsSheet()
+        sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = EmbeddedActivityResult.Complete(
@@ -815,7 +814,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `paymentOptionsResult callback updates customer state on cancelled result`() = testScenario {
-        openPaymentOptionsSheet()
+        sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
@@ -835,7 +834,7 @@ internal class CheckoutSheetLauncherTest {
         selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
-        openPaymentOptionsSheet()
+        sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = emptyList()),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
@@ -854,7 +853,7 @@ internal class CheckoutSheetLauncherTest {
         selectionHolder.setSelection(savedSelection)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
-        openPaymentOptionsSheet()
+        sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
@@ -868,7 +867,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `paymentOptionsResult does not update state on error result`() = testScenario {
-        openPaymentOptionsSheet()
+        sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         val result = EmbeddedActivityResult.Error(
             launchMode = EmbeddedLaunchMode.PaymentOptions,
@@ -1014,10 +1013,6 @@ internal class CheckoutSheetLauncherTest {
     ) {
         fun runCurrent() {
             runCurrent.invoke()
-        }
-
-        fun openPaymentOptionsSheet() {
-            sheetStateHolder.sheetIsOpen = true
         }
 
         suspend fun recreateSheetLauncher(
