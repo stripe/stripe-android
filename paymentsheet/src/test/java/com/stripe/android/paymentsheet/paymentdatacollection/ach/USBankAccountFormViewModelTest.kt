@@ -6,7 +6,6 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -48,7 +47,6 @@ import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -108,11 +106,6 @@ class USBankAccountFormViewModelTest {
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
 
-    @Before
-    fun setup() {
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
-    }
-
     @Test
     fun `when email and name is valid then required fields are filled`() =
         runTest(UnconfinedTestDispatcher()) {
@@ -162,10 +155,21 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `collect bank account is callable with initial screen state`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+            val apiConfiguration = DEFAULT_API_CONFIG.copy(
+                publishableKey = "pk_test_view_model_args",
+                stripeAccountId = "acct_view_model_args",
+            )
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(apiConfiguration = apiConfiguration),
+            )
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.handlePrimaryButtonClick()
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), anyOrNull(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+                eq(apiConfiguration.publishableKey),
+                eq(apiConfiguration.stripeAccountId),
+                any(),
+                any(),
+            )
         }
 
     @Test
