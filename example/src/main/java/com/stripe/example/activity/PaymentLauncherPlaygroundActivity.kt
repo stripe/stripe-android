@@ -68,7 +68,7 @@ class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
                     .padding(16.dp)
             ) {
                 Text(
-                    "This creates a PaymentIntent, confirms it with test card " +
+                    "This creates a manual-capture PaymentIntent, confirms it with test card " +
                         "$TEST_CARD_NUMBER, and opens its 3DS challenge. Cancel or back out " +
                         "of the challenge to inspect the PaymentLauncher callback."
                 )
@@ -136,9 +136,11 @@ class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
     private suspend fun createPaymentIntent(): Checkout {
         return withContext(Dispatchers.IO) {
             val requestBody = JSONObject()
-                .put("hot_dog_count", 1)
-                .put("salad_count", 0)
-                .put("is_subscribing", false)
+                .put("mode", "payment")
+                .put("currency", "usd")
+                .put("amount", 1099)
+                .put("supported_payment_methods", listOf("card"))
+                .put("use_manual_capture", true)
                 .toString()
                 .toRequestBody(JSON_MEDIA_TYPE)
             val request = Request.Builder()
@@ -156,7 +158,7 @@ class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
                 JSONObject(responseBody).let { json ->
                     Checkout(
                         publishableKey = json.getString("publishableKey"),
-                        clientSecret = json.getString("paymentIntent"),
+                        clientSecret = json.getString("intentClientSecret"),
                     )
                 }
             }
@@ -177,7 +179,7 @@ class PaymentLauncherPlaygroundActivity : AppCompatActivity() {
     }
 
     private companion object {
-        private const val BACKEND_URL = "https://stripe-mobile-payment-sheet.stripedemos.com"
+        private const val BACKEND_URL = "https://stp-mobile-playground-backend-v7.stripedemos.com"
         private const val TEST_CARD_NUMBER = "4000582600000094"
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
 
