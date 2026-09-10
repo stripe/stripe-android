@@ -241,14 +241,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
-        val checkoutUiContext = UnconfinedTestDispatcher(testScheduler)
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
-            checkoutUiContext = checkoutUiContext,
         )
         val paymentSheetEventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(

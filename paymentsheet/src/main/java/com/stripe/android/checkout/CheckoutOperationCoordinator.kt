@@ -2,22 +2,18 @@
 
 package com.stripe.android.checkout
 
-import com.stripe.android.checkout.injection.CheckoutUiContext
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
@@ -26,7 +22,6 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
-    @CheckoutUiContext private val checkoutUiContext: CoroutineContext,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
@@ -42,11 +37,9 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
     ): Result<T> {
-        withContext(checkoutUiContext) {
-            synchronized(admissionLock) {
-                pendingMutations += 1
-                updateIsUpdating()
-            }
+        synchronized(admissionLock) {
+            pendingMutations += 1
+            updateIsUpdating()
         }
 
         return try {
@@ -54,11 +47,9 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 block()
             }
         } finally {
-            withContext(NonCancellable + checkoutUiContext) {
-                synchronized(admissionLock) {
-                    pendingMutations -= 1
-                    updateIsUpdating()
-                }
+            synchronized(admissionLock) {
+                pendingMutations -= 1
+                updateIsUpdating()
             }
         }
     }
@@ -112,28 +103,24 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private suspend fun completeConfirmation(
         mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
     ) {
-        val wasRestored = withContext(checkoutUiContext) {
-            synchronized(admissionLock) {
-                if (!confirmationInFlight || confirmationCompletionClaimed) {
-                    null
-                } else {
-                    confirmationCompletionClaimed = true
-                    confirmationWasRestored
-                }
+        val wasRestored = synchronized(admissionLock) {
+            if (!confirmationInFlight || confirmationCompletionClaimed) {
+                return
+            } else {
+                confirmationCompletionClaimed = true
+                confirmationWasRestored
             }
-        } ?: return
+        }
 
         try {
             mapResult(wasRestored)?.let(resultCallback::onResult)
         } finally {
-            withContext(NonCancellable + checkoutUiContext) {
-                synchronized(admissionLock) {
-                    confirmationInFlight = false
-                    confirmationWasRestored = false
-                    confirmationCompletionClaimed = false
-                    mutex.unlock()
-                    updateIsUpdating()
-                }
+            synchronized(admissionLock) {
+                confirmationInFlight = false
+                confirmationWasRestored = false
+                confirmationCompletionClaimed = false
+                mutex.unlock()
+                updateIsUpdating()
             }
         }
     }
