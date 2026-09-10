@@ -59,6 +59,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
+        updatedSelection?.hasAcknowledgedSepaMandate = true
         val previousNewSelections = Bundle(current.previousNewSelections).apply {
             stashNewSelection(updatedSelection)
         }
