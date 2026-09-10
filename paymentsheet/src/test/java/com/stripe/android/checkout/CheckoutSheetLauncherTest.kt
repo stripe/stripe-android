@@ -48,6 +48,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
@@ -568,6 +569,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `recreated launcher sends ready arguments when mutation finishes`() = testScenario {
+        createLinkPaymentOptionsPresenter()
         val mutationGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runMutation {
@@ -1015,6 +1017,20 @@ internal class CheckoutSheetLauncherTest {
     ) {
         fun runCurrent() {
             runCurrent.invoke()
+        }
+
+        fun createLinkPaymentOptionsPresenter() {
+            CheckoutLinkPaymentOptionsPresenter(
+                defaultPresenter = mock(),
+                selectionLauncher = mock(),
+                linkPaymentLauncher = mock(),
+                activityResultRegistry = mock(),
+                lifecycleOwner = lifecycleOwner,
+                stateHolder = mock(),
+                customerStateHolder = customerStateHolder,
+                linkAccountHolder = mock(),
+                sheetStateHolder = sheetStateHolder,
+            )
         }
 
         suspend fun recreateSheetLauncher(
