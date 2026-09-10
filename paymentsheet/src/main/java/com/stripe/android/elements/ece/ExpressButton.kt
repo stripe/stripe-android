@@ -4,6 +4,7 @@ package com.stripe.android.elements.ece
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.LinkAccountUpdate
@@ -62,6 +63,7 @@ internal sealed interface ExpressButton {
     }
 
     data class GooglePay(
+        val apiConfiguration: ApiConfiguration.State,
         val googlePayButtonType: GooglePayButtonType,
         val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
         val allowCreditCards: Boolean,
@@ -84,6 +86,7 @@ internal sealed interface ExpressButton {
                 buttonTheme: ButtonTheme,
             ): GooglePay {
                 return GooglePay(
+                    apiConfiguration = paymentMethodMetadata.apiConfiguration,
                     allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
                     googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType,
                     cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
