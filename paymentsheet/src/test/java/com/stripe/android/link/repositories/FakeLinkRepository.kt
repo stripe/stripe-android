@@ -252,6 +252,8 @@ internal open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        permissions: List<String>?,
+        merchantToken: String?,
     ): Result<LinkAccountSession> = createLinkAccountSessionResult
 
     override suspend fun recordConnectionsConsentAcquired(

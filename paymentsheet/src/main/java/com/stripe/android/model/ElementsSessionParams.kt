@@ -32,7 +32,10 @@ internal sealed interface ElementsSessionParams : Parcelable {
         override val customPaymentMethods: List<String>,
         override val externalPaymentMethods: List<String>,
         override val appId: String,
-        override val link: Link = Link(),
+        override val link: Link = Link(
+            disallowFundingSourceCreation = emptySet(),
+            financialConnectionsPermissions = null,
+        ),
         override val countryOverride: String? = null,
     ) : ElementsSessionParams {
 
@@ -57,7 +60,10 @@ internal sealed interface ElementsSessionParams : Parcelable {
         override val customPaymentMethods: List<String>,
         override val externalPaymentMethods: List<String>,
         override val appId: String,
-        override val link: Link = Link(),
+        override val link: Link = Link(
+            disallowFundingSourceCreation = emptySet(),
+            financialConnectionsPermissions = null,
+        ),
         override val countryOverride: String? = null,
     ) : ElementsSessionParams {
 
@@ -83,7 +89,10 @@ internal sealed interface ElementsSessionParams : Parcelable {
         override val mobileSessionId: String? = null,
         override val appId: String,
         override val sellerDetails: SellerDetails? = null,
-        override val link: Link = Link(),
+        override val link: Link = Link(
+            disallowFundingSourceCreation = emptySet(),
+            financialConnectionsPermissions = null,
+        ),
         override val countryOverride: String? = null,
     ) : ElementsSessionParams {
 
@@ -113,11 +122,23 @@ internal sealed interface ElementsSessionParams : Parcelable {
     @Parcelize
     data class Link(
         val disallowFundingSourceCreation: Set<String> = emptySet(),
+        val financialConnectionsPermissions: List<String>?,
     ) : Parcelable {
         fun toQueryParams(): Map<String, Any?> {
-            return disallowFundingSourceCreation.withIndex().associate { (index, fundingSource) ->
-                "link[disallow_funding_source_creation][$index]" to fundingSource
-            }
+            val disallowedFundingSources = disallowFundingSourceCreation
+                .withIndex()
+                .associate { (index, fundingSource) ->
+                    "link[disallow_funding_source_creation][$index]" to fundingSource
+                }
+            val permissions = financialConnectionsPermissions
+                ?.takeIf { it.isNotEmpty() }
+                ?.withIndex()
+                ?.associate { (index, permission) ->
+                    "deferred_intent[payment_method_options][link][financial_connections][permissions][$index]" to
+                        permission
+                }
+                .orEmpty()
+            return disallowedFundingSources + permissions
         }
     }
 }

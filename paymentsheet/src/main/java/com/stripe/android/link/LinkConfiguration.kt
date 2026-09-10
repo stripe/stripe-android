@@ -50,6 +50,10 @@ internal data class LinkConfiguration(
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     val linkPaymentMethodBankAccountDataConsent: String?,
+    val financialConnectionsPermissions: List<String>?,
+    val merchantPublishableKey: String?,
+    val merchantStripeAccountId: String?,
+    val elementsSessionAccountId: String?,
     val clientAttributionMetadata: ClientAttributionMetadata,
     val linkBrand: LinkBrand,
 ) : Parcelable {

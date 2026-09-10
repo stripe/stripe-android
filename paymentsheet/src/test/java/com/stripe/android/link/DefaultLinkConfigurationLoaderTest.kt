@@ -131,6 +131,32 @@ internal class DefaultLinkConfigurationLoaderTest {
         assertThat(commonConfig.billingDetailsCollectionConfiguration).isEqualTo(billingDetailsCollectionConfiguration)
     }
 
+    @OptIn(LinkControllerPreview::class)
+    @Test
+    fun `load() passes financial connections permissions to standalone Link initialization`() = runTest {
+        val paymentElementLoader = mock<PaymentElementLoader>()
+        val loader = createLoader(
+            paymentElementLoader = paymentElementLoader,
+            useNativeLink = true,
+        )
+        val permissions = listOf("balances", "ownership")
+        val controllerConfig = LinkController.Configuration(
+            merchantDisplayName = TestFactory.MERCHANT_NAME,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ).financialConnectionsPermissions(permissions).build()
+
+        loader.load(controllerConfig)
+
+        val modeCaptor = argumentCaptor<PaymentElementLoader.InitializationMode>()
+        verify(paymentElementLoader).load(
+            initializationMode = modeCaptor.capture(),
+            integrationConfiguration = any(),
+            metadata = any(),
+        )
+        val mode = modeCaptor.firstValue as PaymentElementLoader.InitializationMode.StandaloneLink
+        assertThat(mode.financialConnectionsPermissions).isEqualTo(permissions)
+    }
+
     @Test
     fun `load() sets isReloadingAfterProcessDeath true when configured key is present`() = runTest {
         val paymentElementLoader = mock<PaymentElementLoader>()

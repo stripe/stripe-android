@@ -86,10 +86,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
         return runCatching {
             val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+            val permissions = config.financialConnectionsPermissions?.takeIf { it.isNotEmpty() }
             linkRepository.createLinkAccountSession(
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 intentToken = config.stripeIntent.clientSecret ?: config.elementsSessionId,
                 linkMode = config.linkMode,
+                permissions = permissions,
+                merchantToken = config.elementsSessionAccountId.takeIf { permissions != null },
             ).getOrThrow()
         }
     }

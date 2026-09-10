@@ -521,11 +521,15 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        permissions: List<String>?,
+        merchantToken: String?,
     ): Result<LinkAccountSession> {
         return consumersApiService.createLinkAccountSession(
             consumerSessionClientSecret = consumerSessionClientSecret,
             intentToken = intentToken,
             linkMode = linkMode,
+            permissions = permissions,
+            merchantToken = merchantToken,
             requestSurface = requestSurface.value,
             requestOptions = apiRequestOptions,
         )

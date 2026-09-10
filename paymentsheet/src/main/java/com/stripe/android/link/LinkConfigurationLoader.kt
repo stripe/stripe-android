@@ -33,6 +33,7 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
             else -> Pair(
                 PaymentElementLoader.InitializationMode.StandaloneLink(
                     paymentMethodTypes = configuration.paymentMethodTypes,
+                    financialConnectionsPermissions = configuration.financialConnectionsPermissions,
                 ),
                 PaymentElementLoader.Configuration.StandaloneLink(configuration),
             )

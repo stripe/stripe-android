@@ -963,6 +963,8 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                permissions: List<String>?,
+                merchantToken: String?,
             ): Result<LinkAccountSession> {
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
             }
@@ -1006,6 +1008,8 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                permissions: List<String>?,
+                merchantToken: String?,
             ): Result<LinkAccountSession> {
                 capturedIntentToken = intentToken
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -1035,6 +1039,8 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                permissions: List<String>?,
+                merchantToken: String?,
             ): Result<LinkAccountSession> {
                 capturedIntentToken = intentToken
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -1053,6 +1059,74 @@ class DefaultLinkAccountManagerTest {
         accountManager.createLinkAccountSession()
 
         assertThat(capturedIntentToken).isEqualTo(TestFactory.LINK_CONFIGURATION.elementsSessionId)
+    }
+
+    @Test
+    fun `createLinkAccountSession passes requested permissions and merchant token`() = runSuspendTest {
+        var capturedPermissions: List<String>? = null
+        var capturedMerchantToken: String? = null
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                intentToken: String?,
+                linkMode: LinkMode?,
+                permissions: List<String>?,
+                merchantToken: String?,
+            ): Result<LinkAccountSession> {
+                capturedPermissions = permissions
+                capturedMerchantToken = merchantToken
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            linkRepository = linkRepository,
+            financialConnectionsPermissions = listOf("balances", "ownership"),
+            elementsSessionAccountId = "acct_123",
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        accountManager.createLinkAccountSession()
+
+        assertThat(capturedPermissions).containsExactly("balances", "ownership").inOrder()
+        assertThat(capturedMerchantToken).isEqualTo("acct_123")
+    }
+
+    @Test
+    fun `createLinkAccountSession normalizes empty permissions and omits merchant token`() = runSuspendTest {
+        var capturedPermissions: List<String>? = listOf("unexpected")
+        var capturedMerchantToken: String? = "unexpected"
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                intentToken: String?,
+                linkMode: LinkMode?,
+                permissions: List<String>?,
+                merchantToken: String?,
+            ): Result<LinkAccountSession> {
+                capturedPermissions = permissions
+                capturedMerchantToken = merchantToken
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            linkRepository = linkRepository,
+            financialConnectionsPermissions = emptyList(),
+            elementsSessionAccountId = "acct_123",
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        accountManager.createLinkAccountSession()
+
+        assertThat(capturedPermissions).isNull()
+        assertThat(capturedMerchantToken).isNull()
     }
 
     @Test
@@ -1247,6 +1321,8 @@ class DefaultLinkAccountManagerTest {
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter(),
         allowUserEmailEdits: Boolean = true,
         linkAuth: LinkAuth = fakeLinkAuth(),
+        financialConnectionsPermissions: List<String>? = null,
+        elementsSessionAccountId: String? = null,
     ): DefaultLinkAccountManager {
         val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
             email = customerEmail,
@@ -1258,6 +1334,8 @@ class DefaultLinkAccountManagerTest {
                 passthroughModeEnabled = passthroughModeEnabled,
                 customerInfo = customerInfo,
                 allowUserEmailEdits = allowUserEmailEdits,
+                financialConnectionsPermissions = financialConnectionsPermissions,
+                elementsSessionAccountId = elementsSessionAccountId,
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,

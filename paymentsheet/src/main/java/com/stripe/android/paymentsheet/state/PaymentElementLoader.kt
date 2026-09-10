@@ -211,6 +211,7 @@ internal interface PaymentElementLoader {
         @Parcelize
         data class StandaloneLink(
             val paymentMethodTypes: List<String>? = null,
+            val financialConnectionsPermissions: List<String>?,
         ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate.

@@ -9,4 +9,5 @@ import kotlinx.parcelize.Parcelize
 data class LinkAccountSession(
     val id: String,
     val clientSecret: String,
+    val permissions: List<String>,
 ) : StripeModel
