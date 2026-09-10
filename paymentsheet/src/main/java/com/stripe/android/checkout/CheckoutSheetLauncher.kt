@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
@@ -64,6 +65,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val sessionRefresher: CheckoutSessionRefresher,
     private val operationCoordinator: CheckoutOperationCoordinator,
+    private val resultCallback: CheckoutController.ResultCallback,
     private val launcherState: CheckoutSheetLauncherState,
     private val embeddedContentState: StateFlow<EmbeddedContentHelperStateHolder.State?>,
     private val logger: Logger,
@@ -210,7 +212,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
-        activityLauncher.launch(args)
+        launch(args)
     }
 
     override fun launchManage(
@@ -240,7 +242,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
-        activityLauncher.launch(args)
+        launch(args)
     }
 
     override fun launchPaymentOptions(
@@ -270,7 +272,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         )
         launcherState.isAwaitingPaymentOptionsReady =
             initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
-        activityLauncher.launch(initialArgs)
+        if (!launch(initialArgs)) return
 
         resumePendingReadyLaunch()
     }
@@ -290,9 +292,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
                 )
+                resetLaunchState()
                 return@launch
             }
-            activityLauncher.launch(
+            launch(
                 createPaymentOptionsArgs(
                     paymentMethodMetadata = refreshedState.paymentMethodMetadata,
                     configuration = refreshedState.configuration,
@@ -303,6 +306,32 @@ internal class CheckoutSheetLauncher @Inject constructor(
             )
             launcherState.isAwaitingPaymentOptionsReady = false
         }
+    }
+
+    private fun launch(args: EmbeddedActivityArgs): Boolean {
+        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+            resetLaunchState()
+            resultCallback.onResult(
+                CheckoutController.Result.Failed(invalidHostStateError(lifecycleOwner))
+            )
+            return false
+        }
+        return try {
+            activityLauncher.launch(args)
+            true
+        } catch (error: IllegalStateException) {
+            resetLaunchState()
+            resultCallback.onResult(
+                CheckoutController.Result.Failed(invalidHostStateError(lifecycleOwner, error))
+            )
+            false
+        }
+    }
+
+    private fun resetLaunchState() {
+        launcherState.isAwaitingPaymentOptionsReady = false
+        sheetStateHolder.sheetIsOpen = false
+        selectionHolder.setTemporarySelection(null)
     }
 
     private fun createPaymentOptionsArgs(

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -292,15 +293,24 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun presentPaymentOptions() {
         withCurrentState { state ->
+            if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                reportInvalidHostState()
+                return@withCurrentState
+            }
             val linkConfiguration = state.paymentSheetState.linkConfiguration
             val paymentSelection = viewModel.paymentSelection
 
-            val didPresentLink = linkPaymentMethodSelectionLauncher.launchIfEligible(
-                selection = paymentSelection,
-                configuration = linkConfiguration,
-                paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
-                hasUserDeclinedVerification = viewModel.state?.declinedLink2FA == true,
-            )
+            val didPresentLink = try {
+                linkPaymentMethodSelectionLauncher.launchIfEligible(
+                    selection = paymentSelection,
+                    configuration = linkConfiguration,
+                    paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
+                    hasUserDeclinedVerification = viewModel.state?.declinedLink2FA == true,
+                )
+            } catch (error: IllegalStateException) {
+                reportInvalidHostState(error)
+                return@withCurrentState
+            }
 
             if (!didPresentLink) {
                 showPaymentOptionList(state, paymentSelection)
@@ -332,9 +342,15 @@ internal class DefaultFlowController @Inject internal constructor(
         try {
             paymentOptionActivityLauncher.launch(args, options)
         } catch (e: IllegalStateException) {
-            val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
-            paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+            reportInvalidHostState(e)
         }
+    }
+
+    private fun reportInvalidHostState(cause: IllegalStateException? = null) {
+        val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+        paymentResultCallback.onPaymentSheetResult(
+            PaymentSheetResult.Failed(IllegalStateException(message, cause))
+        )
     }
 
     fun onLinkResultFromFlowController(result: LinkActivityResult) {

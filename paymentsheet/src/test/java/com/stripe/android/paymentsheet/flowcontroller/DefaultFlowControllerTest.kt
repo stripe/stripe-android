@@ -574,6 +574,35 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `presentPaymentOptions() with eligible Link and activity destroyed should fail`() = runTest {
+        linkGate.setShowRuxInFlowController(true)
+        val flowController = createFlowController(
+            paymentSelection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
+                selectedPayment = null,
+            )
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        flowController.configureExpectingSuccess()
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+
+        flowController.presentPaymentOptions()
+
+        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
+        assertThat(resultCaptor.firstValue.error).hasMessageThat()
+            .isEqualTo("The host activity is not in a valid state (DESTROYED).")
+        verify(flowControllerLinkPaymentLauncher, never()).present(
+            configuration = any(),
+            paymentMethodMetadata = any(),
+            linkAccountInfo = any(),
+            launchMode = any(),
+            linkExpressMode = any(),
+            statusBarColor = anyOrNull(),
+        )
+    }
+
+    @Test
     fun `presentPaymentOptions shows Link picker when a Link payment method is already selected`() = runTest {
         linkGate.setShowRuxInFlowController(true)
 
