@@ -4,9 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -18,8 +21,12 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInt
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -164,6 +171,92 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     fun `continue click delegates to continue coordinator`() = testScenario {
         factory.onContinueClick()
 
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `direct form displays Google Pay in the header`() = testScenario {
+        val walletsState = factory.walletsState()!!
+
+        assertThat(walletsState.googlePay(WalletLocation.HEADER)).isNotNull()
+        assertThat(walletsState.googlePay(WalletLocation.INLINE)).isNull()
+    }
+
+    @Test
+    fun `payment options list displays Link in header and Google Pay inline`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna"),
+            ),
+            availableWallets = WalletType.entries,
+            isGooglePayReady = true,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
+        val walletsState = factory.walletsState()!!
+
+        assertThat(walletsState.link(WalletLocation.HEADER)).isNotNull()
+        assertThat(walletsState.link(WalletLocation.INLINE)).isNull()
+        assertThat(walletsState.googlePay(WalletLocation.HEADER)).isNull()
+        assertThat(walletsState.googlePay(WalletLocation.INLINE)).isNotNull()
+    }
+
+    @Test
+    fun `single payment method with a saved payment method displays Link in header and Google Pay inline`() =
+        testScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWallets = WalletType.entries,
+                isGooglePayReady = true,
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+        ) {
+            customerStateHolder.setCustomerState(
+                PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PaymentMethodFixtures.createCards(1),
+                ),
+            )
+
+            val walletsState = factory.walletsState()!!
+
+            assertThat(walletsState.link(WalletLocation.HEADER)).isNotNull()
+            assertThat(walletsState.link(WalletLocation.INLINE)).isNull()
+            assertThat(walletsState.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(walletsState.googlePay(WalletLocation.INLINE)).isNotNull()
+        }
+
+    @Test
+    fun `Google Pay selection continues`() = testScenario {
+        factory.walletsState()!!.onGooglePayPressed()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `Link selection continues`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.Link),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
+        factory.walletsState()!!.onLinkPressed()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Link(LinkBrand.Link))
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
 
