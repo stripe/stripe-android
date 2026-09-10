@@ -36,7 +36,6 @@ import kotlin.coroutines.CoroutineContext
 internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     private val context: Context,
     private val paymentsClient: PaymentsClient,
-    private val requestOptions: ApiRequest.Options,
     private val args: GooglePayPaymentMethodLauncherContractV2.Args,
     private val stripeRepository: StripeRepository,
     private val googlePayJsonFactory: GooglePayJsonFactory,
@@ -167,6 +166,11 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             googlePayResult = googlePayResult,
             clientAttributionMetadata = args.clientAttributionMetadata,
             billingEmailOverride = args.billingEmailOverride,
+        )
+
+        val requestOptions = ApiRequest.Options(
+            apiKey = args.apiConfiguration.publishableKey,
+            stripeAccount = args.apiConfiguration.stripeAccountId
         )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(

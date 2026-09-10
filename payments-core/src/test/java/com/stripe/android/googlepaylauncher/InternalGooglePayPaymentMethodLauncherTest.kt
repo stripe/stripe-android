@@ -80,10 +80,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State(
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = ACCOUNT_ID,
-            ),
+            apiConfiguration = API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -100,7 +97,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
                 cardFundingFilter = DefaultCardFundingFilter,
                 clientAttributionMetadata = null,
                 isElements = true,
-                apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ACCOUNT_ID),
+                apiConfiguration = API_CONFIG,
                 displayItems = emptyList(),
                 billingEmailOverride = null,
                 shippingAddressParameters = null,
@@ -131,10 +128,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             transactionId = null,
             label = null,
             isElements = true,
-            apiConfiguration = ApiConfiguration.State(
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = ACCOUNT_ID,
-            ),
+            apiConfiguration = API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -156,6 +150,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             lifecycleOwner = lifecycleOwner,
             activityResultLauncher = activityResultLauncher,
             onPaymentDataChangedCallback = onPaymentDataChangedCallback,
+            context = context,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = context,
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -165,7 +160,10 @@ class InternalGooglePayPaymentMethodLauncherTest {
     }
 
     private companion object {
-        const val ACCOUNT_ID = "acct_123"
+        val API_CONFIG = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+        )
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             environment = GooglePayEnvironment.Test,
             merchantCountryCode = "US",
