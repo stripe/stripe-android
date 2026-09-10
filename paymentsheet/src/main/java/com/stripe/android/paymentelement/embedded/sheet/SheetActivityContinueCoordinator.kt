@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -23,6 +24,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     private val stateHolder: SheetActivityStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val launchMode: EmbeddedLaunchMode,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityContinueCoordinator {
@@ -58,6 +60,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             checkoutSessionResponse = checkoutSessionResponse,
             shouldInvokeSelectionCallback = false,
             launchMode = launchMode,

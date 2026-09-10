@@ -261,6 +261,7 @@ internal class EmbeddedSheetActivityTest {
                     selection = null,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
+                    linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,

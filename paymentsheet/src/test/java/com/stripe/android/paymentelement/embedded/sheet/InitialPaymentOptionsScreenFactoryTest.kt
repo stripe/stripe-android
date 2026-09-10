@@ -217,6 +217,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
                 customerStateHolder = customerStateHolder,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             ),
         )
 
