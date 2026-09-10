@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
@@ -24,8 +25,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementTestRunnerContext(
-    private val presenter: CheckoutPresenter,
+    private var presenter: CheckoutPresenter,
+    val controller: CheckoutController,
     private val countDownLatch: CountDownLatch,
+    private val scenario: ActivityScenario<MainActivity>,
 ) {
     fun presentPaymentOptions() {
         presenter.paymentElement().present()
@@ -33,6 +36,16 @@ internal class CheckoutPaymentElementTestRunnerContext(
 
     fun confirm() {
         presenter.confirm()
+    }
+
+    fun recreateHost() {
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.recreate()
+        scenario.onActivity { activity ->
+            presenter = controller.createPresenter(activity)
+            activity.setCheckoutContent(presenter)
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
     }
 
     /**
@@ -56,6 +69,7 @@ internal fun runCheckoutPaymentElementTest(
         }
     },
     successTimeoutSeconds: Long = 5L,
+    rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
     renderPaymentElementContent: Boolean = true,
     setup: suspend (CheckoutController) -> Unit,
     block: suspend (CheckoutPaymentElementTestRunnerContext) -> Unit,
@@ -75,7 +89,7 @@ internal fun runCheckoutPaymentElementTest(
         val controller: CheckoutController = CheckoutController.Builder(
             application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = SavedStateHandle(),
-        ).resultCallback { result ->
+        ).rowSelectionBehavior(rowSelectionBehavior).resultCallback { result ->
             resultCallback.onResult(result)
             countDownLatch.countDown()
         }.build()
@@ -88,12 +102,7 @@ internal fun runCheckoutPaymentElementTest(
         scenario.onActivity { activity ->
             presenter = controller.createPresenter(activity)
             if (renderPaymentElementContent) {
-                val paymentElement = presenter.paymentElement()
-                activity.setContent {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        paymentElement.Content()
-                    }
-                }
+                activity.setCheckoutContent(presenter)
             }
         }
 
@@ -103,7 +112,9 @@ internal fun runCheckoutPaymentElementTest(
             block(
                 CheckoutPaymentElementTestRunnerContext(
                     presenter = presenter,
+                    controller = controller,
                     countDownLatch = countDownLatch,
+                    scenario = scenario,
                 )
             )
         }
@@ -113,6 +124,15 @@ internal fun runCheckoutPaymentElementTest(
         assertThat(didCompleteSuccessfully).isTrue()
         scenario.onActivity {
             controller.destroy()
+        }
+    }
+}
+
+private fun MainActivity.setCheckoutContent(presenter: CheckoutPresenter) {
+    val paymentElement = presenter.paymentElement()
+    setContent {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            paymentElement.Content()
         }
     }
 }

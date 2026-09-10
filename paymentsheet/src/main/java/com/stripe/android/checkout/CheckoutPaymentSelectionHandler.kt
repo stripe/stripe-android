@@ -7,6 +7,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +20,11 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {
     private var isSelectingSavedPaymentMethod = false
+    private val _state = MutableStateFlow<VerticalPaymentSelectionHandler.State>(
+        VerticalPaymentSelectionHandler.State.Idle
+    )
+    override val state = _state.asStateFlow()
+
     private val immediateHandler = ImmediateVerticalPaymentSelectionHandler(
         updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
         completionAction = immediateActionHandler::invoke,
@@ -34,17 +41,33 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
         immediateHandler.onSelectionComplete()
     }
 
+    override fun clearFailure() {
+        if (_state.value is VerticalPaymentSelectionHandler.State.Failed) {
+            _state.value = VerticalPaymentSelectionHandler.State.Idle
+        }
+    }
+
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
         if (isSelectingSavedPaymentMethod) return
 
         isSelectingSavedPaymentMethod = true
+        _state.value = VerticalPaymentSelectionHandler.State.Selecting(selection)
         coroutineScope.launch {
             try {
-                checkoutController.selectSavedPaymentMethod(selection).onSuccess {
-                    onSelectionComplete()
-                }
+                checkoutController.selectSavedPaymentMethod(selection).fold(
+                    onSuccess = {
+                        onSelectionComplete()
+                        _state.value = VerticalPaymentSelectionHandler.State.Idle
+                    },
+                    onFailure = { error ->
+                        _state.value = VerticalPaymentSelectionHandler.State.Failed(error)
+                    },
+                )
             } finally {
                 isSelectingSavedPaymentMethod = false
+                if (_state.value is VerticalPaymentSelectionHandler.State.Selecting) {
+                    _state.value = VerticalPaymentSelectionHandler.State.Idle
+                }
             }
         }
     }
