@@ -19,6 +19,7 @@ import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -83,6 +84,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             scenario.result.resultData,
         ) as EmbeddedActivityResult.Cancelled
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(result.linkAccountInfo.lastUpdateReason)
+            .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
         assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
     }
 
@@ -182,6 +185,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             assertThat(result.selection).isEqualTo(selection)
             assertThat(result.previousNewSelections.previousNewSelection("cashapp"))
                 .isEqualTo(previousNewSelection)
+            assertThat(result.linkAccountInfo.lastUpdateReason)
+                .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
             assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
         }
     }
@@ -386,6 +391,10 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             selection = selection,
             previousNewSelections = previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
+            ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,

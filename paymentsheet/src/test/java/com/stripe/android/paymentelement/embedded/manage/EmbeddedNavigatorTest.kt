@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -820,6 +821,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
     }
 
@@ -877,6 +879,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
@@ -905,6 +908,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
         return screen to interactor
