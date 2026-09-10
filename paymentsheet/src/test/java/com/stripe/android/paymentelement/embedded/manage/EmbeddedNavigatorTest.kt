@@ -20,7 +20,9 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.PaymentOptionsWalletsInteractor
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
@@ -874,13 +876,23 @@ internal class EmbeddedNavigatorTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         )
+        val customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods)
+        val walletsInteractor = PaymentOptionsWalletsInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            continueCoordinator = FakeSheetActivityContinueCoordinator(),
+        )
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
-            customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            walletsInteractor = walletsInteractor,
         )
     }
 
@@ -962,6 +974,7 @@ internal class EmbeddedNavigatorTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
+            showsWalletsHeader = false,
         )
         return screen to formInteractor
     }

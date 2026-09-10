@@ -90,14 +90,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `no payment selection creates a single payment options screen`() = testScenario {
-        val screens = factory.createInitialScreen()
-
-        assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
-    }
-
-    @Test
     fun `restored new selection starts with the form on top of the payment options back stack`() = testScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
@@ -110,6 +102,33 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(screens).hasSize(2)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+    }
+
+    @Test
+    fun `single vertical payment method with a saved method creates a list`() = testScenario(
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
+        ),
+    ) {
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+    }
+
+    @Test
+    fun `multiple vertical payment methods create a list`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
     @Test
@@ -249,6 +268,14 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val manageInteractorFactory = EmbeddedManageScreenInteractorFactory {
             FakeManageScreenInteractor()
         }
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val walletsInteractor = PaymentOptionsWalletsInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            linkAccountHolder = linkAccountHolder,
+            continueCoordinator = continueCoordinator,
+        )
         val formScreenFactory = DefaultEmbeddedFormScreenFactory(
             formFactory = EmbeddedNavigator.Screen.Form.Factory(
                 interactorFactory = EmbeddedFormInteractorFactory(
@@ -266,7 +293,9 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
                 customerStateHolder = customerStateHolder,
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                linkAccountHolder = linkAccountHolder,
+                launchMode = com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode.PaymentOptions,
+                walletsInteractor = walletsInteractor,
             ),
         )
 
@@ -329,10 +358,11 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             sheetActivityStateHolder = sheetActivityStateHolder,
             formScreenFactory = formScreenFactory,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            linkAccountHolder = linkAccountHolder,
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
             savedPaymentMethodMutator = savedPaymentMethodMutator,
+            walletsInteractor = walletsInteractor,
         )
 
         Scenario(
