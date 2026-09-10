@@ -74,7 +74,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 types = requestedTypes,
                 silentlyFail = false,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -92,7 +92,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -110,7 +110,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -130,7 +130,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
                 params = params,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

@@ -3,7 +3,6 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -210,7 +209,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = any(),
-            stripeAccountId = eq(ApiKeyFixtures.FAKE_ACCOUNT_ID),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
         )
     }
 
@@ -262,7 +261,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
-            stripeAccountId = eq(ApiKeyFixtures.FAKE_ACCOUNT_ID),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
         )
     }
 
@@ -292,8 +291,8 @@ class CustomerAdapterTest {
         )
         val result = adapter.attachPaymentMethod("pm_1234")
         assertThat(result.getOrNull()).isNotNull()
-        assertThat(customerRepository.attachRequests.awaitItem().stripeAccountId)
-            .isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+        assertThat(customerRepository.attachRequests.awaitItem().apiConfiguration)
+            .isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -329,8 +328,8 @@ class CustomerAdapterTest {
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
-        assertThat(customerRepository.detachRequests.awaitItem().stripeAccountId)
-            .isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+        assertThat(customerRepository.detachRequests.awaitItem().apiConfiguration)
+            .isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -369,8 +368,8 @@ class CustomerAdapterTest {
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
-        assertThat(customerRepository.updateRequests.awaitItem().stripeAccountId)
-            .isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+        assertThat(customerRepository.updateRequests.awaitItem().apiConfiguration)
+            .isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test

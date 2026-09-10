@@ -45,7 +45,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     paymentMethodId = paymentMethodId,
                     params = params,
-                    stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }
@@ -70,7 +70,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
-                    stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }

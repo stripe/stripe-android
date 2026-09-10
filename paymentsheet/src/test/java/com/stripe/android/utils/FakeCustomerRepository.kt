@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -68,13 +69,13 @@ internal open class FakeCustomerRepository(
     override suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Customer? {
         _retrieveCustomerRequests.add(
             RetrieveCustomerRequest(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -86,7 +87,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>> {
         _getPaymentMethodsRequests.add(
             GetPaymentMethodsRequest(
@@ -94,7 +95,7 @@ internal open class FakeCustomerRepository(
                 ephemeralKeySecret = ephemeralKeySecret,
                 types = types,
                 silentlyFail = silentlyFail,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -105,14 +106,14 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -124,7 +125,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
@@ -132,7 +133,7 @@ internal open class FakeCustomerRepository(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
                 customerSessionClientSecret = customerSessionClientSecret,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -143,14 +144,14 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod> {
         _attachRequests.add(
             AttachRequest(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -162,7 +163,7 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod> {
         _updateRequests.add(
             UpdateRequest(
@@ -170,7 +171,7 @@ internal open class FakeCustomerRepository(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
                 params = params,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -181,14 +182,14 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String?,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Customer> {
         _setDefaultPaymentMethodRequests.add(
             SetDefaultRequest(
                 paymentMethodId = paymentMethodId,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -199,14 +200,14 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod> {
         _retrievePaymentMethodRequests.add(
             RetrievePaymentMethodRequest(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
             )
         )
 
@@ -216,7 +217,7 @@ internal open class FakeCustomerRepository(
     data class RetrieveCustomerRequest(
         val customerId: String,
         val ephemeralKeySecret: String,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     data class GetPaymentMethodsRequest(
@@ -224,7 +225,7 @@ internal open class FakeCustomerRepository(
         val ephemeralKeySecret: String,
         val types: List<PaymentMethod.Type>,
         val silentlyFail: Boolean,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     data class DetachRequest(
@@ -232,14 +233,14 @@ internal open class FakeCustomerRepository(
         val customerId: String,
         val ephemeralKeySecret: String,
         val customerSessionClientSecret: String? = null,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     data class AttachRequest(
         val customerId: String,
         val ephemeralKeySecret: String,
         val paymentMethodId: String,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     data class UpdateRequest(
@@ -247,20 +248,20 @@ internal open class FakeCustomerRepository(
         val customerId: String,
         val ephemeralKeySecret: String,
         val params: PaymentMethodUpdateParams,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     data class SetDefaultRequest(
         val paymentMethodId: String?,
         val customerId: String,
         val ephemeralKeySecret: String,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     data class RetrievePaymentMethodRequest(
         val customerId: String,
         val ephemeralKeySecret: String,
         val paymentMethodId: String,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 }

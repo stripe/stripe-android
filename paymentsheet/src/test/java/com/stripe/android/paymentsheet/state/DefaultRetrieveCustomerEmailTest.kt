@@ -2,11 +2,12 @@ package com.stripe.android.paymentsheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -34,7 +35,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         val call = customerRepository.retrieveCalls.awaitItem()
         assertThat(call.customerId).isEqualTo("cus_123")
         assertThat(call.ephemeralKeySecret).isEqualTo(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY)
-        assertThat(call.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
+        assertThat(call.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -102,7 +103,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
-            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         Scenario(
@@ -126,7 +127,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         data class RetrieveCall(
             val customerId: String,
             val ephemeralKeySecret: String,
-            val stripeAccountId: String?,
+            val apiConfiguration: ApiConfiguration.State,
         )
 
         val retrieveCalls = Turbine<RetrieveCall>()
@@ -134,9 +135,9 @@ internal class DefaultRetrieveCustomerEmailTest {
         override suspend fun retrieveCustomer(
             customerId: String,
             ephemeralKeySecret: String,
-            stripeAccountId: String?,
+            apiConfiguration: ApiConfiguration.State,
         ) = null.also {
-            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret, stripeAccountId))
+            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret, apiConfiguration))
         }
 
         override fun ensureAllEventsConsumed() {

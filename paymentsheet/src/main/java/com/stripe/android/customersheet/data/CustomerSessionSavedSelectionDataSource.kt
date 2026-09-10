@@ -104,7 +104,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
             customerId = ephemeralKey.customerId,
             ephemeralKeySecret = ephemeralKey.ephemeralKey,
             paymentMethodId = paymentMethodId,
-            stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+            apiConfiguration = apiConfigurationProvider.get(),
         ).getOrThrow()
     }
 

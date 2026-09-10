@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -14,7 +15,7 @@ internal interface CustomerRepository {
     suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Customer?
 
     /**
@@ -27,7 +28,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>>
 
     /**
@@ -39,7 +40,7 @@ internal interface CustomerRepository {
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     /**
@@ -51,7 +52,7 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     /**
@@ -61,7 +62,7 @@ internal interface CustomerRepository {
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
@@ -69,20 +70,20 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     suspend fun setDefaultPaymentMethod(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String?,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Customer>
 
     suspend fun retrievePaymentMethod(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 }

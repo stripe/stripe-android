@@ -185,7 +185,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             configuration = config,
             customerMetadata = paymentMethodMetadata.customerMetadata,
             customerEmail = elementsSessionCustomerEmail,
-            stripeAccountId = paymentMethodMetadata.apiConfiguration.stripeAccountId,
+            apiConfiguration = paymentMethodMetadata.apiConfiguration,
         )
     }
 }
