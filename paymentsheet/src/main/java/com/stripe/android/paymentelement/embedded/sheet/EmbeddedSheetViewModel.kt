@@ -41,9 +41,10 @@ internal class EmbeddedSheetViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
+            check(args.presentationState == EmbeddedActivityArgs.PresentationState.Ready)
             val customViewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             val component = DaggerEmbeddedSheetComponent.factory().build(
-                paymentMethodMetadata = args.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(args.paymentMethodMetadata),
                 statusBarColor = args.statusBarColor,
                 configuration = args.configuration,
                 productUsage = args.productUsage,
@@ -52,6 +53,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 savedStateHandle = extras.createSavedStateHandle(),
                 promotions = args.promotions,
                 launchMode = args.launchMode,
+                activityConfiguration = args.activityConfiguration,
                 viewModelScope = customViewModelScope,
             )
 

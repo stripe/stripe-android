@@ -324,6 +324,10 @@ internal class DefaultConfirmationHandler(
     }
 
     internal companion object {
+        fun wasAwaitingResult(savedStateHandle: SavedStateHandle): Boolean {
+            return savedStateHandle.contains(AWAITING_CONFIRMATION_RESULT_KEY)
+        }
+
         private const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
         private const val INITIAL_CONFIRMATION_ARGUMENTS_KEY = "INITIAL_CONFIRMATION_ARGUMENTS_KEY"
     }

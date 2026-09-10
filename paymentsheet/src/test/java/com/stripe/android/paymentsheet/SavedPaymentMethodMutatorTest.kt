@@ -21,7 +21,6 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -1016,8 +1015,6 @@ class SavedPaymentMethodMutatorTest {
         block: suspend Scenario.() -> Unit
     ) {
         runTest {
-            val currentScreen: MutableStateFlow<PaymentSheetScreen> = MutableStateFlow(PaymentSheetScreen.Loading)
-
             val postPaymentMethodRemovedTurbine = Turbine<Unit>()
             val prePaymentMethodRemovedTurbine = Turbine<Unit>()
             val updatePaymentMethodTurbine = Turbine<UpdateCall>()
@@ -1059,7 +1056,6 @@ class SavedPaymentMethodMutatorTest {
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
                 customerStateHolder = customerStateHolder,
                 selectionSource = selection,
-                currentScreen = currentScreen,
                 prePaymentMethodRemovedTurbine = prePaymentMethodRemovedTurbine,
                 postPaymentMethodRemovedTurbine = postPaymentMethodRemovedTurbine,
                 updatePaymentMethodTurbine = updatePaymentMethodTurbine,
@@ -1083,7 +1079,6 @@ class SavedPaymentMethodMutatorTest {
         val savedPaymentMethodMutator: SavedPaymentMethodMutator,
         val customerStateHolder: CustomerStateHolder,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
-        val currentScreen: MutableStateFlow<PaymentSheetScreen>,
         val prePaymentMethodRemovedTurbine: ReceiveTurbine<Unit>,
         val postPaymentMethodRemovedTurbine: ReceiveTurbine<Unit>,
         val updatePaymentMethodTurbine: ReceiveTurbine<UpdateCall>,

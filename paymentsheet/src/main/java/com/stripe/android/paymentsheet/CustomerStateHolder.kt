@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -36,9 +35,5 @@ internal interface CustomerStateHolder {
     companion object {
         const val SAVED_CUSTOMER = "customer_info"
         const val SAVED_PM_SELECTION = "saved_selection"
-    }
-
-    interface Factory {
-        fun create(viewModel: BaseSheetViewModel): CustomerStateHolder
     }
 }

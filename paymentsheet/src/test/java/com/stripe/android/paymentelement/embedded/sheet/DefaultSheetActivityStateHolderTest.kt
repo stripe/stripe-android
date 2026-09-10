@@ -8,7 +8,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -17,6 +20,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -27,6 +31,11 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.form.confirmationStateComplete
 import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirming
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
@@ -40,8 +49,12 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -303,6 +316,15 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `requestValidation emits validation request`() = testScenario {
+        stateHolder.validationRequested.test {
+            stateHolder.onPrimaryButtonDisabledClick()
+
+            assertThat(awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
     fun `updateMandate updates mandateText`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
@@ -348,9 +370,11 @@ internal class DefaultSheetActivityStateHolderTest {
             stateHolder.updatePrimaryButton {
                 PrimaryButton.UIState(
                     label = "Do something".resolvableString,
+                    canClickWhileDisabled = false,
                     onClick = {},
+                    onDisabledClick = {},
                     enabled = true,
-                    lockVisible = true
+                    lockVisible = true,
                 )
             }
 
@@ -381,9 +405,11 @@ internal class DefaultSheetActivityStateHolderTest {
             stateHolder.updatePrimaryButton {
                 PrimaryButton.UIState(
                     label = "Do something".resolvableString,
+                    canClickWhileDisabled = false,
                     onClick = {},
+                    onDisabledClick = {},
                     enabled = true,
-                    lockVisible = true
+                    lockVisible = true,
                 )
             }
 
@@ -610,6 +636,42 @@ internal class DefaultSheetActivityStateHolderTest {
         }
     }
 
+    @Test
+    fun `restored confirmation reports persisted in-progress Link selection`() = testRecreationScenario {
+        assertThat(selectionHolder.selection.value).isEqualTo(visibleSelection)
+        stateHolder.result.test {
+            confirmationHandler.state.value = confirmationStateComplete(true)
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(EmbeddedActivityResult.Complete::class.java)
+            assertThat((result as EmbeddedActivityResult.Complete).hasBeenConfirmed).isTrue()
+        }
+        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
+            .isEqualTo(linkSelection)
+    }
+
+    @Test
+    fun `terminal confirmation clears persisted in-progress selection`() = testRecreationScenario(
+        terminalResult = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.None)
+        )
+    ) {
+        assertThat(selectionHolder.selection.value).isEqualTo(visibleSelection)
+        stateHolder.result.test {
+            confirmationHandler.state.value = confirmationStateComplete(true)
+            awaitItem()
+        }
+        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
+            .isEqualTo(visibleSelection)
+        assertThat(eventReporter.billingAddressCompletedCalls.awaitItem()).isEqualTo(
+            FakeEventReporter.BillingAddressCompletedCall(
+                addressCountryCode = "US",
+                autocompleteResultSelected = false,
+                editDistance = null,
+            )
+        )
+    }
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
         val stateHolder: DefaultSheetActivityStateHolder,
@@ -618,6 +680,74 @@ internal class DefaultSheetActivityStateHolderTest {
         val navigator: EmbeddedNavigator,
     )
 
+    private class RecreationScenario(
+        val selectionHolder: EmbeddedSelectionHolder,
+        val stateHolder: DefaultSheetActivityStateHolder,
+        val confirmationHandler: FakeConfirmationHandler,
+        val eventReporter: FakeEventReporter,
+        val visibleSelection: PaymentSelection,
+        val linkSelection: PaymentSelection.Link,
+    )
+
+    private fun testRecreationScenario(
+        terminalResult: ConfirmationHandler.State.Complete? = null,
+        block: suspend RecreationScenario.() -> Unit,
+    ) = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val visibleSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        val linkSelection = PaymentSelection.Link(
+            brand = LinkBrand.Link,
+            linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
+        )
+        val initialSelectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle).apply {
+            setSelection(visibleSelection)
+        }
+        val initialConfirmationHandler = confirmingHandler()
+        val initialEventReporter = FakeEventReporter()
+        createStateHolder(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = initialSelectionHolder,
+            confirmationHandler = initialConfirmationHandler,
+            eventReporter = initialEventReporter,
+            savedStateHandle = savedStateHandle,
+        ).setInProgressSelection(linkSelection)
+        terminalResult?.let { initialConfirmationHandler.state.value = it }
+
+        val restoredConfirmationHandler = confirmingHandler()
+        val restoredEventReporter = FakeEventReporter()
+        val restoredSelectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val restoredStateHolder = createStateHolder(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = restoredSelectionHolder,
+            confirmationHandler = restoredConfirmationHandler,
+            eventReporter = restoredEventReporter,
+            savedStateHandle = savedStateHandle,
+            launchMode = EmbeddedLaunchMode.Complete,
+            eventReporterMode = EventReporter.Mode.Complete,
+        )
+
+        RecreationScenario(
+            selectionHolder = restoredSelectionHolder,
+            stateHolder = restoredStateHolder,
+            confirmationHandler = restoredConfirmationHandler,
+            eventReporter = restoredEventReporter,
+            visibleSelection = visibleSelection,
+            linkSelection = linkSelection,
+        ).block()
+        initialEventReporter.validate()
+        restoredEventReporter.validate()
+    }
+
+    private fun confirmingHandler(): FakeConfirmationHandler {
+        return FakeConfirmationHandler(
+            state = MutableStateFlow(
+                ConfirmationHandler.State.Confirming(FakeConfirmationOption())
+            )
+        )
+    }
+
+    @Suppress("LongMethod")
     private fun testScenario(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
@@ -635,9 +765,11 @@ internal class DefaultSheetActivityStateHolderTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
-        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
+        val eventReporter = FakeEventReporter()
         val viewModelScope = TestScope(UnconfinedTestDispatcher())
         val navigator = EmbeddedNavigator(
             coroutineScope = viewModelScope,
@@ -651,11 +783,26 @@ internal class DefaultSheetActivityStateHolderTest {
             configuration = config,
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
             launchMode = launchMode,
+            linkHandler = LinkHandler(FakeLinkConfigurationCoordinator()),
+            eventReporterMode = EventReporter.Mode.Embedded,
+            autocompleteAddressInteractorFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+                launcher = TestAutocompleteLauncher.noOp(),
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = null,
+                coroutineScope = null,
+                shouldUseAutocompleteProxyEndpointsProvider = { false },
+                eventReporter = FakeAddressLauncherEventReporter(),
+            ),
+            savedStateHandle = savedStateHandle,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
         )
@@ -676,6 +823,56 @@ internal class DefaultSheetActivityStateHolderTest {
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
         ).block()
+        eventReporter.validate()
+    }
+
+    private fun createStateHolder(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        selectionHolder: EmbeddedSelectionHolder,
+        confirmationHandler: FakeConfirmationHandler,
+        eventReporter: FakeEventReporter,
+        savedStateHandle: SavedStateHandle,
+        configuration: EmbeddedPaymentElement.Configuration =
+            EmbeddedConfirmationStateFixtures.defaultState().configuration,
+        onClickDelegate: OnClickOverrideDelegate = OnClickDelegateOverrideImpl(),
+        tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
+        customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form("card"),
+        eventReporterMode: EventReporter.Mode = EventReporter.Mode.Embedded,
+        testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
+        embeddedNavigatorProvider: Provider<EmbeddedNavigator> = Provider { error("Not expected") },
+        savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory> =
+            Provider { error("Not expected") },
+    ): DefaultSheetActivityStateHolder {
+        return DefaultSheetActivityStateHolder(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = selectionHolder,
+            configuration = configuration,
+            onClickDelegate = onClickDelegate,
+            eventReporter = eventReporter,
+            coroutineScope = TestScope(testDispatcher),
+            confirmationHandler = confirmationHandler,
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+            launchMode = launchMode,
+            linkHandler = LinkHandler(FakeLinkConfigurationCoordinator()),
+            eventReporterMode = eventReporterMode,
+            autocompleteAddressInteractorFactory = PaymentElementAutocompleteAddressInteractor.Factory(
+                launcher = TestAutocompleteLauncher.noOp(),
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = null,
+                coroutineScope = null,
+                shouldUseAutocompleteProxyEndpointsProvider = { false },
+                eventReporter = FakeAddressLauncherEventReporter(),
+            ),
+            savedStateHandle = savedStateHandle,
+            embeddedNavigatorProvider = embeddedNavigatorProvider,
+            savedPaymentMethodConfirmScreenFactoryProvider = savedPaymentMethodConfirmScreenFactoryProvider,
+        )
     }
 
     private class RecordingSavedPaymentMethodConfirmInteractorFactory(

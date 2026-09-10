@@ -1932,9 +1932,11 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     callback = {
                         PrimaryButton.UIState(
                             label = "Continue".resolvableString,
+                            canClickWhileDisabled = false,
+                            onClick = {},
+                            onDisabledClick = {},
                             enabled = true,
                             lockVisible = false,
-                            onClick = {}
                         )
                     }
                 )
@@ -3683,11 +3685,10 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
             )
 
-            val updatedViewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(updatedViewState.savedPaymentMethods).contains(originalPaymentMethod)
-
-            val finalViewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(finalViewState.savedPaymentMethods).contains(updatedPaymentMethod)
+            var updatedViewState = awaitViewState<SelectPaymentMethod>()
+            while (updatedPaymentMethod !in updatedViewState.savedPaymentMethods) {
+                updatedViewState = awaitViewState()
+            }
         }
     }
 

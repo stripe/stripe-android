@@ -100,7 +100,7 @@ internal class PaymentSheetAnalyticsTest(
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             analyticsPayloadField("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay,wechat_pay")),
-            analyticsPayloadField("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
             analyticsPayloadField("payment_method_layout", "horizontal"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")

@@ -8,7 +8,9 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -20,8 +22,10 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
@@ -38,6 +42,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 internal class EmbeddedInitialScreenFactoryTest {
     @get:Rule
@@ -81,6 +86,9 @@ internal class EmbeddedInitialScreenFactoryTest {
     fun `create returns vertical payment options screen for vertical layout`() = runScenario(
         launchMode = EmbeddedLaunchMode.PaymentOptions,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
     ) {
@@ -95,6 +103,9 @@ internal class EmbeddedInitialScreenFactoryTest {
         runScenario(
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -143,6 +154,7 @@ internal class EmbeddedInitialScreenFactoryTest {
                 eventReporter = eventReporter,
                 paymentMethodMessagePromotionsHelper = promotionsHelper,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                launchMode = launchMode,
             ),
             sheetActivityStateHolder = sheetActivityStateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
@@ -168,6 +180,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = promotionsHelper,
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            launchMode = launchMode,
         )
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val navigatorEventReporter = FakeEventReporter()
@@ -193,6 +206,11 @@ internal class EmbeddedInitialScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(savedStateHandle),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant, Inc.").build(),
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            launchMode = launchMode,
+            savedPaymentMethodMutator = mock<SavedPaymentMethodMutator>(),
+            cvcRecollectionHandler = FakeCvcRecollectionHandler(),
         )
         val factory = EmbeddedInitialScreenFactory(
             launchMode = launchMode,

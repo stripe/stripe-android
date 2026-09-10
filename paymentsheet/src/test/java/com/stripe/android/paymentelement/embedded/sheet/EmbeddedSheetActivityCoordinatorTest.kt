@@ -105,6 +105,31 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     }
 
     @Test
+    fun `loaded complete arguments replace and register presentation`() = runScenario(
+        initialArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+            launchMode = EmbeddedLaunchMode.Complete,
+        ),
+    ) {
+        val readyArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            launchMode = EmbeddedLaunchMode.Complete,
+        )
+
+        coordinator.handleLoadedArgs(readyArgs)
+
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        val createCall = presentationFactory.createCalls.awaitItem()
+        assertThat(createCall.args).isEqualTo(readyArgs)
+        assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
+        assertThat(readyPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(coordinator.currentArgs).isEqualTo(readyArgs)
+
+        coordinator.onDestroy()
+        assertThat(readyPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `intent without args is ignored`() = runScenario {
         assertTransitionIgnored(Intent())
     }
@@ -290,6 +315,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 promotions = emptyList(),
                 launchMode = launchMode,
+                activityConfiguration = EmbeddedActivityArgs.ActivityConfiguration.Embedded,
                 presentationState = presentationState,
             )
         }

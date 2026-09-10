@@ -48,7 +48,12 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val sheetActivityRegistrar: SheetActivityRegistrar,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
+    private val resultHandler: SheetActivityResultHandler,
+    private val walletsHeader: SheetWalletsHeader,
+    private val paymentSheetLinkEagerLauncher: PaymentSheetLinkEagerLauncher,
 ) : EmbeddedSheetPresentation {
+    private var shouldReportDismiss = false
+
     override fun register() {
         sheetActivityRegistrar.registerAndBootstrap(
             activityResultCaller = activityResultCaller,
@@ -56,7 +61,10 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         )
 
         activity.lifecycleScope.launch {
-            sheetActivityStateHolder.result.collect(activity::finishWithResult)
+            sheetActivityStateHolder.result.collect { result ->
+                shouldReportDismiss = resultHandler.shouldReportDismiss
+                finishWithResult(result)
+            }
         }
 
         activity.onBackPressedDispatcher.addCallback {
@@ -64,6 +72,8 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
             }
         }
+
+        paymentSheetLinkEagerLauncher.launchIfNeeded()
     }
 
     override fun canDismiss(): Boolean {
@@ -71,7 +81,8 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     }
 
     override fun onDismissed() {
-        activity.finishWithResult(createDismissalResult())
+        shouldReportDismiss = true
+        finishWithResult(createDismissalResult())
     }
 
     @Composable
@@ -80,16 +91,23 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             EmbeddedSheetReadyContent(
                 navigator = embeddedNavigator,
                 onResult = { result ->
-                    activity.finishWithResult(createNavigatorResult(result))
+                    shouldReportDismiss = true
+                    finishWithResult(createNavigatorResult(result))
                 },
             )
         }
     }
 
     override fun onDestroy() {
-        if (activity.isFinishing) {
+        if (activity.isFinishing && shouldReportDismiss) {
             eventReporter.onDismiss()
         }
+    }
+
+    private fun finishWithResult(result: EmbeddedActivityResult) {
+        val activityResult = resultHandler.createResult(result, activity.intent)
+        activity.setResult(activityResult.resultCode, activityResult.data)
+        activity.finish()
     }
 
     private fun createDismissalResult(): EmbeddedActivityResult {
@@ -102,6 +120,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = false,
                 launchMode = launchMode,
             )
+            is EmbeddedLaunchMode.Complete,
             is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
         }
     }
@@ -113,6 +132,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = result == true,
                 launchMode = launchMode,
             )
+            is EmbeddedLaunchMode.Complete,
             is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
         }
     }
@@ -148,7 +168,11 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         var hasResult by remember { mutableStateOf(false) }
         if (!hasResult) {
             Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                EmbeddedSheetScreenContent(navigator, screen)
+                EmbeddedSheetScreenContent(
+                    navigator = navigator,
+                    screen = screen,
+                    walletsHeader = { walletsHeader(screen) },
+                )
             }
             LaunchedEffect(navigator) {
                 navigator.result.collect { result ->
@@ -173,6 +197,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
 internal fun EmbeddedSheetScreenContent(
     navigator: EmbeddedNavigator,
     screen: EmbeddedNavigator.Screen,
+    walletsHeader: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -205,6 +230,8 @@ internal fun EmbeddedSheetScreenContent(
                         .padding(horizontalPadding),
                 )
             }
+
+            walletsHeader()
 
             Column(modifier = Modifier.animateContentSize()) {
                 screen.Content()
