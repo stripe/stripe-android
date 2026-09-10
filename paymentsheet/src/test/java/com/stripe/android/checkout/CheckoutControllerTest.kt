@@ -3,6 +3,8 @@ package com.stripe.android.checkout
 import android.app.Application
 import android.os.Bundle
 import android.os.Looper
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
@@ -72,6 +74,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -810,6 +813,42 @@ internal class CheckoutControllerTest {
         assertThat(controller.session.value).isNull()
         assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
         assertThat(createController(savedStateHandle.simulateProcessDeath()).session.value).isNull()
+    }
+
+    @Test
+    fun `destroy removes payment element callbacks`() = runTest {
+        val controller = createController()
+        PaymentElementCallbackReferences[DEFAULT_INTEGRATION_NAME] = PaymentElementCallbacks.Builder().build()
+        assertThat(PaymentElementCallbackReferences[DEFAULT_INTEGRATION_NAME]).isNotNull()
+
+        controller.destroy()
+
+        assertThat(PaymentElementCallbackReferences[DEFAULT_INTEGRATION_NAME]).isNull()
+    }
+
+    @Test
+    fun `destroy unregisters presenter launchers while host remains resumed`() = runTest {
+        val host = Robolectric.buildActivity(ComponentActivity::class.java).setup()
+        val activity = host.get()
+        val controller = createController()
+        fun registeredKeys(): List<String> {
+            val registryState = Bundle()
+            activity.activityResultRegistry.onSaveInstanceState(registryState)
+            return registryState.getStringArrayList("KEY_COMPONENT_ACTIVITY_REGISTERED_KEYS").orEmpty()
+        }
+        try {
+            val originalKeys = registeredKeys()
+            controller.createPresenter(activity)
+            assertThat(registeredKeys().size).isGreaterThan(originalKeys.size)
+
+            controller.destroy()
+
+            assertThat(registeredKeys()).containsExactlyElementsIn(originalKeys)
+            assertThat(activity.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
+        } finally {
+            controller.destroy()
+            host.pause().stop().destroy()
+        }
     }
 
     @Test

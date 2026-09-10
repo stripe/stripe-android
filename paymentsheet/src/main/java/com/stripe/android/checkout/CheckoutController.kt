@@ -10,6 +10,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
@@ -25,7 +27,9 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -78,6 +82,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val checkoutPresenterLifecycle: CheckoutPresenterLifecycle,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -414,15 +419,26 @@ class CheckoutController @Inject internal constructor(
      * checkout session.
      *
      * @param activity The activity the payment UI will be presented from.
+     * @throws IllegalStateException if [activity] has already been destroyed.
      */
     @MainThread
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
+        val presenterLifecycleOwner = checkoutPresenterLifecycle.create(activity)
+        val activityResultCaller = PaymentElementActivityResultCaller(
+            key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
+            registryOwner = activity,
+        )
+        // Some confirmation definitions do not unregister their underlying activity-result launcher.
+        presenterLifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    activityResultCaller.unregister()
+                }
+            }
+        )
         val subcomponent = checkoutPresenterSubcomponentFactory.create(
-            activityResultCaller = PaymentElementActivityResultCaller(
-                key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
-                registryOwner = activity,
-            ),
-            lifecycleOwner = activity,
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = presenterLifecycleOwner,
             activityResultRegistry = activity.activityResultRegistry,
             statusBarColor = StatusBarCompat.color(activity),
         )
@@ -431,11 +447,16 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Releases resources held by this controller and clears its loaded state. Call this when the
+     * Dismisses any currently active embedded Payment Element sheet, releases resources held by
+     * this controller and its presenters, and clears its loaded state. Call this when the
      * controller is no longer needed.
      */
     @MainThread
     fun destroy() {
+        checkoutPresenterLifecycle.destroy()
+        EmbeddedSheetActivity.dismiss(paymentElementCallbackIdentifier)
+        sheetStateHolder.sheetIsOpen = false
+        PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
         viewModelScope.cancel()
         checkoutStateLoader.clear()
         savedState.clear()

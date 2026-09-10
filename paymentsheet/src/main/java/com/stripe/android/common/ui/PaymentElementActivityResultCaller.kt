@@ -11,11 +11,14 @@ internal class PaymentElementActivityResultCaller(
     private val key: String,
     private val registryOwner: ActivityResultRegistryOwner
 ) : ActivityResultCaller {
+    private val launchers = mutableListOf<ActivityResultLauncher<*>>()
+
     override fun <I : Any?, O : Any?> registerForActivityResult(
         contract: ActivityResultContract<I, O>,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
         return registryOwner.activityResultRegistry.register(createKey(contract), contract, callback)
+            .also(launchers::add)
     }
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
@@ -23,7 +26,12 @@ internal class PaymentElementActivityResultCaller(
         registry: ActivityResultRegistry,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        return registry.register(createKey(contract), contract, callback)
+        return registry.register(createKey(contract), contract, callback).also(launchers::add)
+    }
+
+    fun unregister() {
+        launchers.forEach { it.unregister() }
+        launchers.clear()
     }
 
     private fun <I : Any?, O : Any?> createKey(contract: ActivityResultContract<I, O>): String {
