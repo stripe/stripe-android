@@ -6,10 +6,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutLoadingToReadySheetCoordinator
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.toCheckoutAddress
@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -75,12 +74,23 @@ class ShippingAddressElement internal constructor(
         errorReporter = errorReporter,
     )
 
+    private val loadingToReadySheetCoordinator = CheckoutLoadingToReadySheetCoordinator(
+        lifecycleOwner = lifecycleOwner,
+        sheetStateHolder = sheetStateHolder,
+        isUpdating = isUpdating,
+        awaitingReadyState = shippingAddressElementStateHolder,
+        launchPendingReady = {
+            requireNotNull(stateHolder.state)
+            launchReady(paymentConfiguration.get().publishableKey)
+        },
+    )
+
     private val activityLauncher:
         ActivityResultLauncher<AddressElementActivityContract.Args.CheckoutShipping> =
         activityResultCaller.registerForActivityResult(
             AddressElementActivityContract.CheckoutShipping
         ) { result ->
-            clearPresentation()
+            loadingToReadySheetCoordinator.close()
             when (result) {
                 is AddressElementActivityContract.Result.CheckoutShippingSucceeded -> {
                     val address = result.address.address?.toCheckoutAddress()
@@ -107,63 +117,30 @@ class ShippingAddressElement internal constructor(
             }
         )
 
-        resumePendingReadyLaunch()
+        loadingToReadySheetCoordinator.resumePendingReadyLaunch()
     }
 
     fun present() {
         if (stateHolder.state == null) {
-            errorReporter.report(
-                ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
-            )
+            reportNotConfigured()
             return
         }
 
-        if (sheetStateHolder.sheetIsOpen) return
-        sheetStateHolder.sheetIsOpen = true
-        try {
-            val publishableKey = paymentConfiguration.get().publishableKey
-            if (isUpdating.value) {
-                shippingAddressElementStateHolder.isAwaitingReady = true
+        loadingToReadySheetCoordinator.present(
+            launchLoading = {
                 activityLauncher.launch(
-                    AddressElementActivityContract.Args.CheckoutShipping.Loading(publishableKey)
+                    AddressElementActivityContract.Args.CheckoutShipping.Loading(
+                        paymentConfiguration.get().publishableKey
+                    )
                 )
-                resumePendingReadyLaunch()
-            } else {
-                launchReady(publishableKey)
-            }
-        } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-            clearPresentation()
-            throw error
-        }
-    }
-
-    private fun resumePendingReadyLaunch() {
-        if (!shippingAddressElementStateHolder.isAwaitingReady) {
-            return
-        }
-        lifecycleOwner.lifecycleScope.launch {
-            isUpdating.first { isUpdating -> !isUpdating }
-            if (!shippingAddressElementStateHolder.isAwaitingReady) {
-                return@launch
-            }
-            if (stateHolder.state == null) {
-                errorReporter.report(
-                    ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
-                )
-                return@launch
-            }
-            try {
-                val publishableKey = paymentConfiguration.get().publishableKey
-                launchReady(publishableKey)
-            } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
-                clearPresentation()
-                throw error
-            }
-        }
+            },
+            launchReady = {
+                launchReady(paymentConfiguration.get().publishableKey)
+            },
+        )
     }
 
     private fun launchReady(publishableKey: String) {
-        shippingAddressElementStateHolder.isAwaitingReady = false
         activityLauncher.launch(
             AddressElementActivityContract.Args.CheckoutShipping.Ready(
                 publishableKey = publishableKey,
@@ -178,9 +155,10 @@ class ShippingAddressElement internal constructor(
         )
     }
 
-    private fun clearPresentation() {
-        shippingAddressElementStateHolder.isAwaitingReady = false
-        sheetStateHolder.sheetIsOpen = false
+    private fun reportNotConfigured() {
+        errorReporter.report(
+            ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+        )
     }
 
     @CheckoutSessionPreview

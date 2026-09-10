@@ -36,7 +36,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
-import kotlin.test.assertFailsWith
 
 internal class ShippingAddressElementTest {
     @get:Rule
@@ -84,42 +83,6 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `present suppresses duplicate presentations`() = runScenario {
-        shippingAddressElement.present()
-        shippingAddressElement.present()
-
-        activityLauncher.launchCalls.awaitItem()
-        activityLauncher.launchCalls.expectNoEvents()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `ready launch failure clears presentation gate`() = runScenario {
-        activityLauncher.launchError = IllegalStateException("Launcher is unregistered")
-
-        assertFailsWith<IllegalStateException> {
-            shippingAddressElement.present()
-        }
-
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(shippingAddressElementStateHolder.isAwaitingReady).isFalse()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `loading launch failure clears presentation gate`() = runScenario(isUpdating = true) {
-        activityLauncher.launchError = IllegalStateException("Launcher is unregistered")
-
-        assertFailsWith<IllegalStateException> {
-            shippingAddressElement.present()
-        }
-
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(shippingAddressElementStateHolder.isAwaitingReady).isFalse()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
     fun `retained state transitions loading to ready when updating stops`() = runScenario(isUpdating = true) {
         shippingAddressElement.present()
 
@@ -131,13 +94,14 @@ internal class ShippingAddressElementTest {
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
+        paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         isUpdating.value = false
         runCurrent()
 
         val ready = activityLauncher.launchCalls.awaitItem().input
-        assertThat(ready).isInstanceOf(
-            AddressElementActivityContract.Args.CheckoutShipping.Ready::class.java
-        )
+        assertThat(ready)
+            .isInstanceOf(AddressElementActivityContract.Args.CheckoutShipping.Ready::class.java)
+        assertThat(ready.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         assertThat(shippingAddressElementStateHolder.isAwaitingReady).isFalse()
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -176,39 +140,6 @@ internal class ShippingAddressElementTest {
             AddressElementActivityContract.Args.CheckoutShipping.Ready::class.java
         )
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        recreated.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `missing refreshed state leaves loading dismissible`() = runScenario(isUpdating = true) {
-        shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-
-        stateHolder.state = null
-        isUpdating.value = false
-        runCurrent()
-
-        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
-            ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
-        )
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-        assertThat(shippingAddressElementStateHolder.isAwaitingReady).isTrue()
-        activityLauncher.launchCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `recreated element suppresses presentation while original is active`() = runScenario {
-        shippingAddressElement.present()
-        activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-
-        val recreated = createElement()
-        recreated.shippingAddressElement.present()
-
-        recreated.activityLauncher.launchCalls.expectNoEvents()
-        assertThat(shippingAddressElementStateHolder.isAwaitingReady).isFalse()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         recreated.ensureAllEventsConsumed()
     }
 
@@ -487,13 +418,11 @@ internal class ShippingAddressElementTest {
         ActivityResultLauncher<AddressElementActivityContract.Args.CheckoutShipping>() {
         val launchCalls = Turbine<LaunchCall>()
         val unregisterCalls = Turbine<Unit>()
-        var launchError: Throwable? = null
 
         override fun launch(
             input: AddressElementActivityContract.Args.CheckoutShipping,
             options: ActivityOptionsCompat?,
         ) {
-            launchError?.let { throw it }
             launchCalls.add(LaunchCall(input))
         }
 

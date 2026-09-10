@@ -7,8 +7,8 @@ import javax.inject.Singleton
 @Singleton
 internal class ShippingAddressElementStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-) {
-    var isAwaitingReady: Boolean
+) : AwaitingReadyState {
+    override var isAwaitingReady: Boolean
         get() = savedStateHandle.get<Boolean>(IS_AWAITING_READY_KEY) == true
         set(value) = savedStateHandle.set(IS_AWAITING_READY_KEY, value)
 
