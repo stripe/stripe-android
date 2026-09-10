@@ -201,17 +201,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     }
 
     @Test
-    fun `destroy unregisters direct Link and clears open state`() = runScenario {
-        presenter.present()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-        verify(linkPaymentLauncher).unregister()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-    }
-
-    @Test
-    fun `host recreation keeps direct Link root flow open until its result`() {
+    fun `host recreation unregisters old Link launcher and keeps root flow open until replacement result`() {
         val savedStateHandle = SavedStateHandle()
         runScenario(savedStateHandle = savedStateHandle) {
             presenter.present()
