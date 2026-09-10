@@ -18,15 +18,13 @@ internal class NativeLinkActivityContract @Inject constructor(
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
-        val apiConfiguration = input.configuration.apiConfiguration
         return LinkActivity.createIntent(
             context = context,
             args = NativeLinkArgs(
                 configuration = input.configuration,
                 paymentMethodMetadata = input.paymentMethodMetadata,
                 requestSurface = requestSurface,
-                stripeAccountId = apiConfiguration.stripeAccountId,
-                publishableKey = apiConfiguration.publishableKey,
+                apiConfiguration = input.configuration.apiConfiguration,
                 linkExpressMode = input.linkExpressMode,
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
