@@ -112,6 +112,7 @@ class WalletViewModelTest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                 linkBrand = LinkBrand.Link,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+                linkPaymentMethodBankAccountDataConsent = null,
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())
@@ -557,6 +558,59 @@ class WalletViewModelTest {
                     selectedPayment = null
                 )
             )
+    }
+
+    @Test
+    fun `performPaymentConfirmation records consent for a bank account`() = runTest(dispatcher) {
+        val consent = "Merchant can access balances. [Learn more](https://stripe.com)."
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        val linkAccountManager = WalletLinkAccountManager().apply {
+            listPaymentDetailsResult = Result.success(
+                ConsumerPaymentDetails(paymentDetails = listOf(bankAccount))
+            )
+        }
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                linkPaymentMethodBankAccountDataConsent = consent,
+            ),
+        )
+        viewModel.onItemSelected(bankAccount)
+
+        viewModel.onPrimaryButtonClicked()
+
+        assertThat(linkAccountManager.recordConnectionsConsentAcquiredCalls.awaitItem())
+            .isEqualTo(consent)
+    }
+
+    @Test
+    fun `performPaymentConfirmation continues when recording consent fails`() = runTest(dispatcher) {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        val linkAccountManager = WalletLinkAccountManager().apply {
+            listPaymentDetailsResult = Result.success(
+                ConsumerPaymentDetails(paymentDetails = listOf(bankAccount))
+            )
+            recordConnectionsConsentAcquiredResult = Result.failure(IllegalStateException("failed"))
+        }
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                linkPaymentMethodBankAccountDataConsent = "Merchant can access balances.",
+            ),
+        )
+        viewModel.onItemSelected(bankAccount)
+
+        viewModel.onPrimaryButtonClicked()
+
+        assertThat(linkConfirmationHandler.calls).containsExactly(
+            FakeLinkConfirmationHandler.Call(
+                paymentDetails = bankAccount,
+                cvc = null,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+            )
+        )
     }
 
     @Test

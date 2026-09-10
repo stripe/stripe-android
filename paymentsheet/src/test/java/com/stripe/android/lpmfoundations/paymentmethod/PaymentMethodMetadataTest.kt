@@ -1675,6 +1675,7 @@ internal class PaymentMethodMetadataTest {
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION.copy(
                     linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+                    linkPaymentMethodBankAccountDataConsent = null,
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
@@ -1696,6 +1697,7 @@ internal class PaymentMethodMetadataTest {
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION.copy(
                     linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                    linkPaymentMethodBankAccountDataConsent = null,
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
@@ -2361,6 +2363,7 @@ internal class PaymentMethodMetadataTest {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            linkPaymentMethodBankAccountDataConsent = null,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,

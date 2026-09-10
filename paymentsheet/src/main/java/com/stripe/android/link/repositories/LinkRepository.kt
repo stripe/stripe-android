@@ -215,6 +215,11 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
     ): Result<ConsumerPaymentDetails>
 
+    suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+    ): Result<Unit>
+
     suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         intentToken: String?,

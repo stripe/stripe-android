@@ -221,6 +221,15 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         TODO("Not yet implemented")
     }
 
+    override suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun refreshConsumerSession(
         appId: String,
         consumerSessionClientSecret: String,

@@ -463,6 +463,18 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
+    override suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+    ): Result<Unit> = withContext(workContext) {
+        consumersApiService.recordConnectionsConsentAcquired(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            localizedConsentText = localizedConsentText,
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
+        )
+    }
+
     override suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,

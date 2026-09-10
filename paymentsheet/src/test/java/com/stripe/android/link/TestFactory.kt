@@ -298,6 +298,7 @@ internal object TestFactory {
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
         forceSetupFutureUseBehaviorAndNewMandate = false,
         linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+        linkPaymentMethodBankAccountDataConsent = null,
         clientAttributionMetadata = ClientAttributionMetadata(
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,

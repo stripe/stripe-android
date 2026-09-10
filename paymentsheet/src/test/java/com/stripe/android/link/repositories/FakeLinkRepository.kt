@@ -254,6 +254,11 @@ internal open class FakeLinkRepository : LinkRepository {
         linkMode: LinkMode?,
     ): Result<LinkAccountSession> = createLinkAccountSessionResult
 
+    override suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+    ): Result<Unit> = Result.success(Unit)
+
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,

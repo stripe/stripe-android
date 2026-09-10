@@ -164,6 +164,7 @@ internal class AddPaymentMethodRequirementTest {
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION.copy(
                     linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                    linkPaymentMethodBankAccountDataConsent = null,
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,

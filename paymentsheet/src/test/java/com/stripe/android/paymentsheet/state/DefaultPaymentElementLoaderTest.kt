@@ -1321,6 +1321,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkPaymentMethodBankAccountDataConsent = null,
                 linkBrand = LinkBrand.Link,
             )
         )
@@ -1366,6 +1367,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkPaymentMethodBankAccountDataConsent = null,
                 linkBrand = LinkBrand.Link,
             )
         )
@@ -1465,6 +1467,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkPaymentMethodBankAccountDataConsent = null,
                 linkBrand = LinkBrand.Link,
             ),
             linkStore = FakeLinkStore(hasUsedLink = true),
@@ -1502,6 +1505,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkPaymentMethodBankAccountDataConsent = null,
                 linkBrand = LinkBrand.Link,
             )
         )
@@ -2267,6 +2271,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkPaymentMethodBankAccountDataConsent = null,
                 linkBrand = LinkBrand.Link,
             ),
             linkStore = FakeLinkStore(hasUsedLink = false),
@@ -4757,6 +4762,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+            linkPaymentMethodBankAccountDataConsent = null,
             linkBrand = LinkBrand.Link,
         )
     }
