@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
@@ -512,8 +513,7 @@ class PollingViewModelTest {
                 timeLimit = timeLimit,
                 initialDelay = initialDelay,
                 ctaText = R.string.stripe_blik_confirm_payment,
-                publishableKey = "pk_test_123",
-                stripeAccountId = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 qrCodeUrl = qrCodeUrl,
                 paymentMethodType = paymentMethodType,
             ),

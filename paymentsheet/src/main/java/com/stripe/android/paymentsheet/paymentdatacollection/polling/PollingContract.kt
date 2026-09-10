@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.payments.PaymentFlowResult
 import kotlinx.parcelize.Parcelize
 
@@ -31,8 +32,7 @@ internal class PollingContract :
         val timeLimitInSeconds: Int,
         val initialDelayInSeconds: Int,
         @StringRes val ctaText: Int,
-        val publishableKey: String,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
         val qrCodeUrl: String?,
         val paymentMethodType: String,
     ) : Parcelable {

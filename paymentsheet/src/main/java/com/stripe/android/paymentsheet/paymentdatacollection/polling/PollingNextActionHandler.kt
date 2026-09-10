@@ -73,8 +73,10 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_blik_confirm_payment,
-                    publishableKey = requestOptions.apiKey,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = requestOptions.apiKey,
+                        stripeAccountId = requestOptions.stripeAccount,
+                    ),
                     qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
@@ -85,8 +87,10 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    publishableKey = requestOptions.apiKey,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = requestOptions.apiKey,
+                        stripeAccountId = requestOptions.stripeAccount,
+                    ),
                     qrCodeUrl = getQrCodeForPayNow(actionable),
                     paymentMethodType = paymentMethodType.code,
                 )
@@ -97,8 +101,10 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    publishableKey = requestOptions.apiKey,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = requestOptions.apiKey,
+                        stripeAccountId = requestOptions.stripeAccount,
+                    ),
                     qrCodeUrl = getQrCodeForPromptPay(actionable),
                     paymentMethodType = paymentMethodType.code,
                 )

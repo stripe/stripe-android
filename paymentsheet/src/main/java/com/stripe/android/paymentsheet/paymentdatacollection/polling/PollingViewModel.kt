@@ -65,7 +65,7 @@ internal fun PollingState.toFlowResult(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                stripeAccountId = args.stripeAccountId,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
             )
         }
         PollingState.Canceled -> {
@@ -73,7 +73,7 @@ internal fun PollingState.toFlowResult(
                 clientSecret = args.clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.CANCELED,
                 canCancelSource = false,
-                stripeAccountId = args.stripeAccountId,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
             )
         }
     }
@@ -259,10 +259,7 @@ internal class PollingViewModel @Inject constructor(
                     application = extras.requireApplication(),
                     config = config,
                     ioDispatcher = Dispatchers.IO,
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                    ),
+                    apiConfiguration = args.apiConfiguration,
                 )
                 .subcomponentFactory
                 .create(
@@ -278,8 +275,7 @@ internal class PollingViewModel @Inject constructor(
         val timeLimit: Duration,
         val initialDelay: Duration,
         @StringRes val ctaText: Int,
-        val publishableKey: String,
-        val stripeAccountId: String?,
+        val apiConfiguration: ApiConfiguration.State,
         val qrCodeUrl: String?,
         val paymentMethodType: String,
     )
