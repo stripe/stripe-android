@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.DefaultTimeProvider
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.TimeProvider
@@ -18,7 +17,7 @@ import javax.inject.Named
 
 @Module(
     subcomponents = [PollingViewModelSubcomponent::class],
-    includes = [PaymentConfigurationModule::class, PollingAnalyticsModule::class],
+    includes = [PollingAnalyticsModule::class],
 )
 internal interface PollingViewModelModule {
 
