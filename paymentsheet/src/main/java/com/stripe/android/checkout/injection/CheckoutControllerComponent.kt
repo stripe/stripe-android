@@ -50,7 +50,6 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -122,7 +121,6 @@ import javax.inject.Singleton
         PaymentOptionCardArtModule::class,
         ApiConfigurationModule::class,
         ApiConfigurationResolverModule::class,
-        ApiRequestOptionsModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {

@@ -91,7 +91,7 @@ import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as UiCoreR
 
 @CustomerSheetViewModelScope
-internal class CustomerSheetViewModel(
+internal class CustomerSheetViewModel constructor(
     application: Application, // TODO (jameswoo) remove application
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentMethodDataSourceProvider: Single<CustomerSheetPaymentMethodDataSource>,

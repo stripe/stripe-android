@@ -14,10 +14,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -31,7 +32,6 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -50,7 +50,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -89,10 +88,8 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
-                        apiConfiguration = ApiConfiguration.State(
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = null,
-                        ),
+                        publishableKeyProvider = { args.publishableKey },
+                        stripeAccountIdProvider = { null },
                         allowsManualConfirmation = args.allowsManualConfirmation,
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         savedStateHandle = extras.createSavedStateHandle(),
@@ -140,7 +137,6 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LpmNetworkTestModule::class,
-        ApiConfigurationToNamedModule::class,
     ]
 )
 @Singleton
@@ -153,7 +149,11 @@ internal interface LpmNetworkTestViewModelComponent {
             @BindsInstance
             application: Application,
             @BindsInstance
-            apiConfiguration: ApiConfiguration.State,
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(STRIPE_ACCOUNT_ID)
+            stripeAccountIdProvider: () -> String?,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,
@@ -192,12 +192,12 @@ internal interface LpmNetworkTestModule {
 
         @Provides
         fun providesPaymentConfiguration(
-            apiConfigurationProvider: Provider<ApiConfiguration.State>,
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String,
         ): PaymentConfiguration {
-            val apiConfigurationState = apiConfigurationProvider.get()
             return PaymentConfiguration(
-                publishableKey = apiConfigurationState.publishableKey,
-                stripeAccountId = apiConfigurationState.stripeAccountId,
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
             )
         }
 

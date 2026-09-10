@@ -1,12 +1,12 @@
 package com.stripe.android.link
 
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -307,7 +307,7 @@ internal object TestFactory {
         ),
         cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         linkBrand = LinkBrand.Link,
-        apiConfiguration = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = "acct_123"),
+        apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(

@@ -14,7 +14,6 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -45,18 +44,8 @@ internal abstract class PaymentSheetLauncherModule {
         }
 
         @Provides
-        @Singleton
-        fun providePaymentMethodMetadataFlow(
-            viewModel: PaymentSheetViewModel
-        ): StateFlow<PaymentMethodMetadata?> {
-            return viewModel.paymentMethodMetadata
-        }
-
-        @Provides
-        fun providePaymentMethodMetadata(
-            flow: StateFlow<PaymentMethodMetadata?>
-        ): PaymentMethodMetadata? {
-            return flow.value
+        fun providePaymentMethodMetadata(viewModel: PaymentSheetViewModel): PaymentMethodMetadata? {
+            return viewModel.paymentMethodMetadata.value
         }
 
         @Provides
