@@ -122,7 +122,9 @@ class ShippingAddressElement internal constructor(
 
     fun present() {
         if (stateHolder.state == null) {
-            reportNotConfigured()
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+            )
             return
         }
 
@@ -152,12 +154,6 @@ class ShippingAddressElement internal constructor(
                     useStripeHostedAutocomplete = true,
                 ),
             )
-        )
-    }
-
-    private fun reportNotConfigured() {
-        errorReporter.report(
-            ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
         )
     }
 

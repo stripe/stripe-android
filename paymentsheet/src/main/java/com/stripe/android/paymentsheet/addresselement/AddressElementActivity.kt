@@ -119,8 +119,7 @@ internal class AddressElementActivity : ComponentActivity() {
         handleNewIntent(intent)
     }
 
-    @VisibleForTesting
-    internal fun handleNewIntent(intent: Intent) {
+    private fun handleNewIntent(intent: Intent) {
         if (coordinator?.handleNewIntent(intent, isFinishing) == true) {
             this.intent = intent
             requireNotNull(starterArgs).config?.appearance?.parseAppearance()
