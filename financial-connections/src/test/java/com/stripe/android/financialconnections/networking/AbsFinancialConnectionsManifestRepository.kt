@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.networking
 
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -104,7 +105,8 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse {
         TODO("Not yet implemented")
     }

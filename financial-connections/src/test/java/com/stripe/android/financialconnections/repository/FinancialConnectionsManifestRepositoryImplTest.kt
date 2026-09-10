@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -15,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
@@ -60,7 +62,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                         clientSecret = "",
                         applicationId = "",
                         supportsAppVerification = false,
-                        reFetchCondition = None::shouldReFetch
+                        reFetchCondition = None::shouldReFetch,
+                        preCollectedConsent = null
                     )
                 },
                 async {
@@ -68,7 +71,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                         clientSecret = "",
                         applicationId = "",
                         supportsAppVerification = false,
-                        reFetchCondition = None::shouldReFetch
+                        reFetchCondition = None::shouldReFetch,
+                        preCollectedConsent = null
                     )
                 }
             )
@@ -87,12 +91,59 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                     clientSecret = "",
                     applicationId = "",
                     supportsAppVerification = false,
-                    reFetchCondition = None::shouldReFetch
+                    reFetchCondition = None::shouldReFetch,
+                    preCollectedConsent = null
                 )
 
             assertThat(returnedManifest).isEqualTo(initialSync)
             verifyNoInteractions(mockRequestExecutor)
         }
+
+    @Test
+    fun `getOrFetchSession - includes pre_collected_consent in request when provided`() = runTest {
+        givenSyncSessionRequestReturnsAfterDelay(ApiKeyFixtures.syncResponse())
+        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+
+        val repository = buildRepository()
+        repository.getOrSynchronizeFinancialConnectionsSession(
+            clientSecret = "",
+            applicationId = "",
+            supportsAppVerification = false,
+            reFetchCondition = None::shouldReFetch,
+            preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        )
+
+        verify(apiRequestFactory).createPost(
+            url = any(),
+            options = any(),
+            params = paramsCaptor.capture(),
+            shouldCache = eq(false)
+        )
+        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(mapOf("consent" to "fccons_123"))
+    }
+
+    @Test
+    fun `getOrFetchSession - omits pre_collected_consent from request when not provided`() = runTest {
+        givenSyncSessionRequestReturnsAfterDelay(ApiKeyFixtures.syncResponse())
+        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+
+        val repository = buildRepository()
+        repository.getOrSynchronizeFinancialConnectionsSession(
+            clientSecret = "",
+            applicationId = "",
+            supportsAppVerification = false,
+            reFetchCondition = None::shouldReFetch,
+            preCollectedConsent = null
+        )
+
+        verify(apiRequestFactory).createPost(
+            url = any(),
+            options = any(),
+            params = paramsCaptor.capture(),
+            shouldCache = eq(false)
+        )
+        assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
+    }
 
     /**
      * Simulates an API call to retrieve manifest that takes some time.

@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
@@ -50,7 +51,8 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse
 
     /**
@@ -231,16 +233,18 @@ private class FinancialConnectionsManifestRepositoryImpl(
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse = mutex.withLock {
         val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
-        return cachedSync ?: synchronize(applicationId, clientSecret, supportsAppVerification)
+        return cachedSync ?: synchronize(applicationId, clientSecret, supportsAppVerification, preCollectedConsent)
     }
 
     private suspend fun synchronize(
         applicationId: String,
         clientSecret: String,
         supportsAppVerification: Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ): SynchronizeSessionResponse = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
@@ -256,8 +260,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     PARAMS_VERIFY_APP_ID to applicationId,
                     NetworkConstants.PARAMS_APPLICATION_ID to applicationId
                 ),
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                PARAMS_PRE_COLLECTED_CONSENT to preCollectedConsent?.let { mapOf("consent" to it.consent) }
+            ).filterNotNullValues()
         ),
         SynchronizeSessionResponse.serializer()
     ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
@@ -597,6 +602,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
         internal const val PARAMS_SUPPORT_APP_VERIFICATION = "supports_app_verification"
         internal const val PARAMS_VERIFY_APP_ID = "verified_app_id"
+        internal const val PARAMS_PRE_COLLECTED_CONSENT = "pre_collected_consent"
 
         internal val synchronizeSessionUrl: String
             get() = "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
