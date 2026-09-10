@@ -16,7 +16,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 
 @Module(
     subcomponents = [PollingViewModelSubcomponent::class],
@@ -46,7 +45,7 @@ internal interface PollingViewModelModule {
         @Provides
         @Named(PUBLISHABLE_KEY)
         fun providePublishableKeyProvider(
-            requestOptionsProvider: Provider<ApiRequest.Options>
-        ): () -> String = { requestOptionsProvider.get().apiKey }
+            requestOptions: ApiRequest.Options
+        ): () -> String = { requestOptions.apiKey }
     }
 }
