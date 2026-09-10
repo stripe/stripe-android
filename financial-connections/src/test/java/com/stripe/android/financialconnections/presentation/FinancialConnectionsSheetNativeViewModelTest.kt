@@ -72,7 +72,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        hasRequestedDataPermissions = false,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
@@ -98,6 +99,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                 CompleteFinancialConnectionsSession.Result(
                     session = sessionWithCustomManualEntry,
                     status = "canceled",
+                    generatedPaymentDetailIds = emptyList(),
                 )
             )
 
@@ -120,6 +122,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             CompleteFinancialConnectionsSession.Result(
                 session = sessionWithAccounts,
                 status = "completed",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -142,12 +145,57 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     }
 
     @Test
+    fun `permissioned session completes when generated payment details are present`() = runTest {
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = financialConnectionsSessionNoAccounts(),
+                status = "completed",
+                generatedPaymentDetailIds = listOf("csmrpd_123"),
+            )
+        )
+        val initialState = stateWithLinkBrand(LinkBrand.Link).copy(
+            configuration = configuration.copy(hasRequestedDataPermissions = true),
+        )
+        val viewModel = createViewModel(initialState = initialState)
+
+        nativeAuthFlowCoordinator().emit(Complete(null))
+
+        withState(viewModel) {
+            assertThat((it.viewEffect as? Finish)?.result).isInstanceOf(Completed::class.java)
+        }
+    }
+
+    @Test
+    fun `permissioned session fails when generated payment details are missing`() = runTest {
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = financialConnectionsSessionWithNoMoreAccounts,
+                status = "completed",
+                generatedPaymentDetailIds = emptyList(),
+            )
+        )
+        val initialState = stateWithLinkBrand(LinkBrand.Link).copy(
+            configuration = configuration.copy(hasRequestedDataPermissions = true),
+        )
+        val viewModel = createViewModel(initialState = initialState)
+
+        nativeAuthFlowCoordinator().emit(Complete(null))
+
+        withState(viewModel) {
+            val result = (it.viewEffect as? Finish)?.result
+            assertThat(result).isInstanceOf(Failed::class.java)
+            assertThat((result as Failed).error).isInstanceOf(UnclassifiedError::class.java)
+        }
+    }
+
+    @Test
     fun `onCloseClick - when closing, no accounts, no errors, finish with cancel`() = runTest {
         val sessionWithNoAccounts = financialConnectionsSessionNoAccounts()
         whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
             CompleteFinancialConnectionsSession.Result(
                 session = sessionWithNoAccounts,
                 status = "canceled",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -182,6 +230,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             CompleteFinancialConnectionsSession.Result(
                 session = sessionWithNoAccounts,
                 status = "custom_manual_entry",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -310,6 +359,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             CompleteFinancialConnectionsSession.Result(
                 session = session,
                 status = "completed",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -369,6 +419,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             CompleteFinancialConnectionsSession.Result(
                 session = session,
                 status = "completed",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -425,6 +476,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             CompleteFinancialConnectionsSession.Result(
                 session = session,
                 status = "completed",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -473,6 +525,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             CompleteFinancialConnectionsSession.Result(
                 session = session,
                 status = "completed",
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 

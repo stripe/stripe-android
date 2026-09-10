@@ -206,6 +206,7 @@ class WalletViewModelTest {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
+                    hasRequestedDataPermissions = false,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
@@ -225,6 +226,50 @@ class WalletViewModelTest {
             }
         }
     }
+
+    @Test
+    fun `permissioned bank account flow uses merchant credentials and reloads generated payment details`() =
+        runTest(dispatcher) {
+            val generatedBankAccount = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(id = "csmrpd_generated")
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                financialConnectionsPermissions = listOf("balances"),
+                merchantPublishableKey = "pk_merchant",
+                merchantStripeAccountId = "acct_merchant",
+            )
+            testAddBankAccount(configuration = configuration) { vm, linkAccountManager ->
+                skipItems(1)
+
+                vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
+                awaitItem()
+                awaitItem().run {
+                    val sheetConfiguration =
+                        (addBankAccountState as AddBankAccountState.Processing).configToPresent
+                    assertThat(sheetConfiguration).isEqualTo(
+                        FinancialConnectionsSheetConfiguration(
+                            financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
+                            publishableKey = "pk_merchant",
+                            stripeAccountId = "acct_merchant",
+                            hasRequestedDataPermissions = true,
+                        )
+                    )
+                }
+
+                linkAccountManager.nextListPaymentDetailsResult = Result.success(
+                    ConsumerPaymentDetails(
+                        paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails + generatedBankAccount
+                    )
+                )
+                vm.onFinancialConnectionsResult(
+                    FinancialConnectionsSheetResult.Completed(mockFinancialConnectionsSession())
+                )
+
+                awaitItem().run {
+                    assertThat(selectedItemId).isEqualTo(generatedBankAccount.id)
+                    assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+                }
+                assertThat(linkAccountManager.createBankAccountPaymentDetailsCalls).isEmpty()
+            }
+        }
 
     @Test
     fun `viewmodel should handle link account session request error when adding bank account`() = runTest(dispatcher) {
@@ -1256,12 +1301,14 @@ class WalletViewModelTest {
 
     private suspend fun testAddBankAccount(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         validate: suspend TurbineTestContext<WalletUiState>.(WalletViewModel, WalletLinkAccountManager) -> Unit,
     ) {
         val linkAccountManager = WalletLinkAccountManager()
         val vm = createViewModel(
             linkAccount = linkAccount,
             linkAccountManager = linkAccountManager,
+            configuration = configuration,
         )
         vm.onExpandedChanged(true)
 
@@ -1289,12 +1336,25 @@ class WalletViewModelTest {
 
 private open class WalletLinkAccountManager : FakeLinkAccountManager() {
     val listPaymentDetailsCalls = arrayListOf<Set<String>>()
+    val createBankAccountPaymentDetailsCalls = arrayListOf<String>()
     val updatePaymentDetailsCalls = arrayListOf<ConsumerPaymentDetailsUpdateParams>()
     val deletePaymentDetailsCalls = arrayListOf<String>()
+    var nextListPaymentDetailsResult: Result<ConsumerPaymentDetails>? = null
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
         listPaymentDetailsCalls.add(paymentMethodTypes)
+        nextListPaymentDetailsResult?.let {
+            listPaymentDetailsResult = it
+            nextListPaymentDetailsResult = null
+        }
         return super.listPaymentDetails(paymentMethodTypes)
+    }
+
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String
+    ): Result<ConsumerPaymentDetails.PaymentDetails> {
+        createBankAccountPaymentDetailsCalls.add(bankAccountId)
+        return super.createBankAccountPaymentDetails(bankAccountId)
     }
 
     override suspend fun updatePaymentDetails(

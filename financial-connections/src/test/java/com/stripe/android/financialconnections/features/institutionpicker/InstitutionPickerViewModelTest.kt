@@ -65,7 +65,8 @@ internal class InstitutionPickerViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val defaultConfiguration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        hasRequestedDataPermissions = false,
     )
 
     private fun buildViewModel(

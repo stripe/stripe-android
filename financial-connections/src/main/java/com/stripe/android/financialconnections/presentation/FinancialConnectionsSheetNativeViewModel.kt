@@ -356,7 +356,22 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         )
                     }
 
-                    session.hasAValidAccount() -> {
+                    state.configuration.hasRequestedDataPermissions &&
+                        completionResult.generatedPaymentDetailIds.isEmpty() -> {
+                        finishWithResult(
+                            Failed(
+                                error = UnclassifiedError(
+                                    name = "PermissionedLinkAccountSessionCompletionError",
+                                    message = "Permissioned Link Account Session completed " +
+                                        "without generated payment details.",
+                                )
+                            )
+                        )
+                    }
+
+                    session.hasAValidAccount() ||
+                        state.configuration.hasRequestedDataPermissions &&
+                        completionResult.generatedPaymentDetailIds.isNotEmpty() -> {
                         if (state.flowType == FinancialConnectionsSheetFlowType.ForInstantDebits) {
                             handleInstantDebitsCompletion(session)
                         } else {
