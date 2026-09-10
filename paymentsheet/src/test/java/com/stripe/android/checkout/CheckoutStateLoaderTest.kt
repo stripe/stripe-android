@@ -44,6 +44,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -448,6 +449,7 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
             delay = paymentElementLoaderDelay,
         )
+        val checkoutUiContext = UnconfinedTestDispatcher(testScheduler)
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
@@ -457,6 +459,7 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
             internalRowSelectionCallback = { internalRowSelectionCallback },
+            checkoutUiContext = checkoutUiContext,
         )
 
         Scenario(
