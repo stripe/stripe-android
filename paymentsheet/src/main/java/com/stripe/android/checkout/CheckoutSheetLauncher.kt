@@ -46,16 +46,9 @@ internal class CheckoutSheetLauncherState @Inject constructor(
             savedStateHandle[AWAITING_PAYMENT_OPTIONS_READY_KEY] = value
         }
 
-    override var sheetStateVersion: Int?
-        get() = savedStateHandle[SHEET_STATE_VERSION_KEY]
-        set(value) {
-            savedStateHandle[SHEET_STATE_VERSION_KEY] = value
-        }
-
     private companion object {
         const val AWAITING_PAYMENT_OPTIONS_READY_KEY =
             "CheckoutSheetLauncherState_AWAITING_PAYMENT_OPTIONS_READY"
-        const val SHEET_STATE_VERSION_KEY = "CheckoutSheetLauncherState_SHEET_STATE_VERSION"
     }
 }
 
@@ -92,20 +85,14 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            loadingToReadySheetCoordinator.close()
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
-                    closeDirectPresentation()
                     selectionHolder.setTemporarySelection(null)
                     handleFormResult(result)
                 }
-                is EmbeddedLaunchMode.Manage -> {
-                    closeDirectPresentation()
-                    handleManageResult(result)
-                }
-                is EmbeddedLaunchMode.PaymentOptions -> {
-                    loadingToReadySheetCoordinator.close()
-                    handlePaymentOptionsResult(result)
-                }
+                is EmbeddedLaunchMode.Manage -> handleManageResult(result)
+                is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -133,12 +120,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
         }
-    }
-
-    private fun closeDirectPresentation() {
-        launcherState.isAwaitingReady = false
-        launcherState.sheetStateVersion = null
-        sheetStateHolder.sheetIsOpen = false
     }
 
     private fun handleManageResult(result: EmbeddedActivityResult) {

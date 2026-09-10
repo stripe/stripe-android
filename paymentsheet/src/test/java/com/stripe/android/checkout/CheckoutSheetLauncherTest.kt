@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.os.Bundle
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -9,6 +10,10 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
@@ -20,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
@@ -49,6 +55,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -364,6 +372,36 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `nested Form result closes PaymentOptions root flow before reducing result`() = testScenario {
+        val state = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = state.configuration,
+        )
+        dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+        val customerState = createCustomerState()
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            hasBeenConfirmed = true,
+            customerState = customerState,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
+    }
+
+    @Test
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
@@ -600,6 +638,54 @@ internal class CheckoutSheetLauncherTest {
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
         assertThat(recreatedLauncherState.isAwaitingReady).isFalse()
+    }
+
+    @Test
+    fun `Checkout presenter recreation retains Loading and launches refreshed Ready once`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        val currentState = requireNotNull(embeddedContentState.value)
+        CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state =
+            CheckoutControllerStateFactory.create(
+                paymentSelection = PaymentSelection.GooglePay,
+                paymentMethodMetadata = currentState.paymentMethodMetadata,
+            )
+        sheetStateHolder.sheetLauncher = sheetLauncher
+        val firstLinkPaymentLauncher = mock<LinkPaymentLauncher>()
+        val firstPresenter = createCheckoutPresenter(lifecycleOwner, firstLinkPaymentLauncher)
+
+        firstPresenter.present()
+
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+        verify(firstLinkPaymentLauncher).unregister()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+        val replacementOwner = TestLifecycleOwner()
+        val replacementLauncher = recreateSheetLauncher(
+            lifecycleOwner = replacementOwner,
+            launcherState = CheckoutSheetLauncherState(savedStateHandle),
+        )
+        sheetStateHolder.sheetLauncher = replacementLauncher
+        createCheckoutPresenter(replacementOwner, mock())
+
+        mutationGate.complete(Unit)
+        runCurrent()
+
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
     @Test
@@ -1019,16 +1105,45 @@ internal class CheckoutSheetLauncherTest {
 
         fun openPaymentOptionsSheet() {
             sheetStateHolder.sheetIsOpen = true
-            launcherState.sheetStateVersion = sheetStateHolder.sheetStateVersion
         }
 
         suspend fun recreateSheetLauncher(
             lifecycleOwner: TestLifecycleOwner,
             launcherState: CheckoutSheetLauncherState,
-        ) {
-            createSheetLauncher(lifecycleOwner, launcherState)
+        ): CheckoutSheetLauncher {
+            val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
             dummyActivityResultCallerScenario.awaitRegisterCall()
             dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
+            return sheetLauncher
+        }
+
+        fun createCheckoutPresenter(
+            lifecycleOwner: TestLifecycleOwner,
+            linkPaymentLauncher: LinkPaymentLauncher,
+        ): CheckoutLinkPaymentOptionsPresenter {
+            val linkAccountHolder = LinkAccountHolder(savedStateHandle)
+            return CheckoutLinkPaymentOptionsPresenter(
+                defaultPresenter = DefaultEmbeddedPaymentOptionsPresenter(
+                    state = embeddedContentState,
+                    sheetStateHolder = sheetStateHolder,
+                    customerStateHolder = customerStateHolder,
+                    selectionHolder = selectionHolder,
+                    errorReporter = errorReporter,
+                ),
+                selectionLauncher = LinkPaymentMethodSelectionLauncher(
+                    launcher = linkPaymentLauncher,
+                    linkGateFactory = FakeLinkGate.Factory(),
+                    linkAccountHolder = linkAccountHolder,
+                    statusBarColor = null,
+                ),
+                linkPaymentLauncher = linkPaymentLauncher,
+                activityResultRegistry = mock<ActivityResultRegistry>(),
+                lifecycleOwner = lifecycleOwner,
+                stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
+                customerStateHolder = customerStateHolder,
+                linkAccountHolder = linkAccountHolder,
+                sheetStateHolder = sheetStateHolder,
+            )
         }
 
         suspend fun awaitRefreshCall(): FakeCheckoutSessionRefresher.Call {

@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 
 internal interface AwaitingReadyState {
     var isAwaitingReady: Boolean
-    var sheetStateVersion: Int?
 }
 
 internal sealed interface ReadyLaunchResult {
@@ -36,7 +35,6 @@ internal class CheckoutLoadingToReadySheetCoordinator(
         if (sheetStateHolder.sheetIsOpen) return
 
         sheetStateHolder.sheetIsOpen = true
-        awaitingReadyState.sheetStateVersion = sheetStateHolder.sheetStateVersion
         try {
             if (isUpdating.value) {
                 awaitingReadyState.isAwaitingReady = true
@@ -58,8 +56,7 @@ internal class CheckoutLoadingToReadySheetCoordinator(
         resumeJob = lifecycleScope.launch {
             isUpdating.first { isUpdating -> !isUpdating }
             if (!awaitingReadyState.isAwaitingReady) return@launch
-            adoptLegacySheetGateIfNeeded()
-            if (!ownsSheetGate()) {
+            if (!sheetStateHolder.sheetIsOpen) {
                 awaitingReadyState.isAwaitingReady = false
                 return@launch
             }
@@ -84,27 +81,6 @@ internal class CheckoutLoadingToReadySheetCoordinator(
 
     private fun clearPresentation() {
         awaitingReadyState.isAwaitingReady = false
-        val expectedVersion = awaitingReadyState.sheetStateVersion
-        val ownsCurrentGate = expectedVersion == sheetStateHolder.sheetStateVersion
-        val ownsLegacyGate = expectedVersion == null && sheetStateHolder.sheetStateVersion == 0
-        if (sheetStateHolder.sheetIsOpen && (ownsCurrentGate || ownsLegacyGate)) {
-            sheetStateHolder.sheetIsOpen = false
-        }
-        awaitingReadyState.sheetStateVersion = null
-    }
-
-    private fun ownsSheetGate(): Boolean {
-        return sheetStateHolder.sheetIsOpen &&
-            awaitingReadyState.sheetStateVersion == sheetStateHolder.sheetStateVersion
-    }
-
-    private fun adoptLegacySheetGateIfNeeded() {
-        if (
-            awaitingReadyState.sheetStateVersion == null &&
-            sheetStateHolder.sheetIsOpen &&
-            sheetStateHolder.sheetStateVersion == 0
-        ) {
-            awaitingReadyState.sheetStateVersion = 0
-        }
+        sheetStateHolder.sheetIsOpen = false
     }
 }

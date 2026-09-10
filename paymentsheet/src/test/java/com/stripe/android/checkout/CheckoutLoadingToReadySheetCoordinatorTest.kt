@@ -90,36 +90,6 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
     }
 
     @Test
-    fun `legacy pending presentation adopts untouched sheet gate`() = runTest {
-        val sheetSavedStateHandle = SavedStateHandle().apply {
-            set("SheetStateHolder_SHEET_IS_OPEN_KEY", true)
-        }
-        val sheetStateHolder = SheetStateHolder(sheetSavedStateHandle)
-        val awaitingReadyState = TestAwaitingReadyState().apply {
-            isAwaitingReady = true
-        }
-        val launches = FakeLaunches()
-        val coordinator = CheckoutLoadingToReadySheetCoordinator(
-            lifecycleOwner = TestLifecycleOwner(),
-            sheetStateHolder = sheetStateHolder,
-            isUpdating = MutableStateFlow(false),
-            awaitingReadyState = awaitingReadyState,
-            launchPendingReady = launches::launchPendingReady,
-        )
-
-        coordinator.resumePendingReadyLaunch()
-        testScheduler.runCurrent()
-
-        assertThat(launches.pendingReadyCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(awaitingReadyState.sheetStateVersion).isEqualTo(0)
-        assertThat(awaitingReadyState.isAwaitingReady).isFalse()
-
-        coordinator.close()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        launches.ensureAllEventsConsumed()
-    }
-
-    @Test
     fun `duplicate presentation is rejected while sheet is open`() = runScenario {
         present()
         present()
@@ -130,23 +100,19 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
     }
 
     @Test
-    fun `reacquired sheet gate prevents pending Ready launch`() = runScenario(
+    fun `closed root suppresses pending Ready launch`() = runScenario(
         isUpdating = true,
     ) {
         present()
         assertThat(launches.loadingCalls.awaitItem()).isEqualTo(Unit)
 
         sheetStateHolder.sheetIsOpen = false
-        sheetStateHolder.sheetIsOpen = true
         isUpdating.value = false
         runCurrent()
 
         launches.pendingReadyCalls.expectNoEvents()
         assertThat(awaitingReadyState.isAwaitingReady).isFalse()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-
-        coordinator.close()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
@@ -281,19 +247,12 @@ internal class CheckoutLoadingToReadySheetCoordinatorTest {
                 savedStateHandle[IS_AWAITING_READY_KEY] = value
             }
 
-        override var sheetStateVersion: Int?
-            get() = savedStateHandle[SHEET_STATE_VERSION_KEY]
-            set(value) {
-                savedStateHandle[SHEET_STATE_VERSION_KEY] = value
-            }
-
         fun recreate(): TestAwaitingReadyState {
             return TestAwaitingReadyState(savedStateHandle)
         }
 
         private companion object {
             const val IS_AWAITING_READY_KEY = "isAwaitingReady"
-            const val SHEET_STATE_VERSION_KEY = "sheetStateVersion"
         }
     }
 
