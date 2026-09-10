@@ -45,10 +45,6 @@ internal class ElementsSessionRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
         )
-        val apiConfiguration = DEFAULT_API_CONFIG.copy(
-            publishableKey = "pk_test_request_options",
-            stripeAccountId = "acct_request_options",
-        )
 
         createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -59,13 +55,13 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = apiConfiguration,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
         val requestOptions = (requestCaptor.firstValue as ApiRequest).options
-        assertThat(requestOptions.apiKey).isEqualTo(apiConfiguration.publishableKey)
-        assertThat(requestOptions.stripeAccount).isEqualTo(apiConfiguration.stripeAccountId)
+        assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
+        assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @Test
