@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -72,6 +73,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -321,7 +323,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
         )
