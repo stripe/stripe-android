@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -133,6 +134,31 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testSavedPaymentMethodLoading() {
+        val imageLoader = FakeStripeImageLoader()
+
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                pendingSavedPaymentMethodId = savedPaymentMethod.paymentMethod.id,
+                selectionError = null,
+                linkBrand = LinkBrand.Link,
+                isEnabled = false,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = imageLoader,
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+
+        imageLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
@@ -220,6 +246,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            pendingSavedPaymentMethodId = null,
+            selectionError = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -244,6 +272,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = selection,
+            pendingSavedPaymentMethodId = null,
+            selectionError = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -267,6 +297,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction = action,
                 selection = null,
+                pendingSavedPaymentMethodId = null,
+                selectionError = null,
                 linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},

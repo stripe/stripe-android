@@ -65,6 +65,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
         val linkBrand: LinkBrand,
+        val pendingSavedPaymentMethodId: String?,
+        val selectionError: Throwable?,
     )
 
     sealed interface Selection {
@@ -282,22 +284,30 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
-    private val isProcessing = combineAsStateFlow(
+    private val selectionError = MutableStateFlow<Throwable?>(null)
+
+    private val selectionOperation = combineAsStateFlow(
         processing,
         verticalPaymentSelectionHandler.state,
-    ) { hostProcessing, selectionState ->
-        hostProcessing || selectionState is VerticalPaymentSelectionHandler.State.Selecting
+        selectionError,
+    ) { isProcessing, selectionState, selectionError ->
+        SelectionOperation(
+            isProcessing = isProcessing || selectionState is VerticalPaymentSelectionHandler.State.Selecting,
+            pendingSelection = (selectionState as? VerticalPaymentSelectionHandler.State.Selecting)
+                ?.selection,
+            error = selectionError ?: (selectionState as? VerticalPaymentSelectionHandler.State.Failed)?.error,
+        )
     }
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
-        isProcessing,
+        selectionOperation,
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
         linkAccount,
-    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
+    ) { displayablePaymentMethods, operation, mostRecentSelection, displayedSavedPaymentMethod, action,
         temporarySelectionCode, linkAccount ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
@@ -315,12 +325,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
-            isProcessing = isProcessing,
+            isProcessing = operation.isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
+            pendingSavedPaymentMethodId = operation.pendingSelection?.paymentMethod?.id,
+            selectionError = operation.error,
         )
     }
 
@@ -328,9 +340,30 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState != null && walletsState.walletsInHeader
     }
 
+    private data class SelectionOperation(
+        val isProcessing: Boolean,
+        val pendingSelection: PaymentSelection.Saved?,
+        val error: Throwable?,
+    )
+
     init {
         coroutineScope.launch(mainDispatcher) {
+            verticalPaymentSelectionHandler.state.collect { selectionState ->
+                if (selectionState is VerticalPaymentSelectionHandler.State.Failed) {
+                    selectionError.value = selectionState.error
+                }
+            }
+        }
+
+        coroutineScope.launch(mainDispatcher) {
+            var hasReceivedInitialSelection = false
             selection.collect { currentSelection ->
+                if (hasReceivedInitialSelection) {
+                    selectionError.value = null
+                    verticalPaymentSelectionHandler.clearFailure()
+                }
+                hasReceivedInitialSelection = true
+
                 if (currentSelection == null && !isCurrentScreen.value) {
                     return@collect
                 }
