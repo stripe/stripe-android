@@ -15,12 +15,15 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -54,15 +57,21 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val addPaymentMethodInteractorFactory: EmbeddedAddPaymentMethodInteractorFactory,
     private val continueCoordinator: SheetActivityContinueCoordinator,
+    private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
 ) {
     fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
         return when (paymentMethodMetadata.paymentMethodOrientation()) {
             PaymentMethodOrientation.Vertical -> createVerticalInitialScreens()
-            PaymentMethodOrientation.Horizontal -> listOf(createHorizontalScreen())
+            PaymentMethodOrientation.Horizontal -> createHorizontalInitialScreens()
         }
     }
 
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
+        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
+            return listOf(formScreenFactory.createFormScreen(supportedPaymentMethodTypes.first()))
+        }
+
         val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
         val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
         val formHelper = createFormHelper(formHelperScope)
@@ -86,12 +95,60 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         }
     }
 
+    private fun createHorizontalInitialScreens(): List<EmbeddedNavigator.Screen> {
+        val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
+        val hasWallets = walletsState() != null
+        if (!hasSavedPaymentMethods && !hasWallets) {
+            return listOf(createHorizontalScreen())
+        }
+
+        return buildList {
+            add(createHorizontalSavedPaymentMethodsScreen())
+            if (selectionHolder.selection.value is PaymentSelection.New) {
+                add(createHorizontalScreen())
+            }
+        }
+    }
+
     private fun createHorizontalScreen(): EmbeddedNavigator.Screen {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = addPaymentMethodInteractorFactory.create(),
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        )
+    }
+
+    private fun createHorizontalSavedPaymentMethodsScreen(): EmbeddedNavigator.Screen {
+        return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
+            interactor = createSavedPaymentMethodsInteractor(),
+            sheetActivityState = sheetActivityStateHolder.state,
+            onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        )
+    }
+
+    private fun createSavedPaymentMethodsInteractor(): SelectSavedPaymentMethodsInteractor {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+        return DefaultSelectSavedPaymentMethodsInteractor(
+            paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
+            editing = savedPaymentMethodMutator.editing,
+            canEdit = savedPaymentMethodMutator.canEdit,
+            canRemove = customerStateHolder.canRemove,
+            toggleEdit = savedPaymentMethodMutator::toggleEditing,
+            isProcessing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+            isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>(),
+            currentSelection = selectionHolder.selection,
+            mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
+            onAddCardPressed = {
+                embeddedNavigatorProvider.get().performAction(
+                    EmbeddedNavigator.Action.GoToScreen(createHorizontalScreen())
+                )
+            },
+            onUpdatePaymentMethod = ::navigateToUpdateScreen,
+            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
     }
 
@@ -139,16 +196,11 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateSelection = { updatedSelection, _ ->
                 selectionHolder.setSelection(updatedSelection)
             },
-            isCurrentScreen = isCurrentScreen(),
+            isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.VerticalPaymentOptions>(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = { savedPaymentMethod ->
-                val screen = EmbeddedNavigator.Screen.ManageUpdate(
-                    interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
-                        displayableSavedPaymentMethod = savedPaymentMethod
-                    )
-                )
-                embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(screen))
+                navigateToUpdateScreen(savedPaymentMethod)
             },
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
                 shouldUpdateSelection(formHelper, paymentMethodCode)
@@ -174,10 +226,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     // The navigator is built from this initial screen (see EmbeddedActivityModule.provideEmbeddedNavigator), so
     // embeddedNavigatorProvider.get() can't be called synchronously here without recursing into the @Singleton
     // mid-construction. flow { } defers the get() until first collection, by which point the navigator exists.
-    private fun isCurrentScreen(): StateFlow<Boolean> = flow {
+    private inline fun <reified T : EmbeddedNavigator.Screen> isCurrentScreen(): StateFlow<Boolean> = flow {
         emitAll(embeddedNavigatorProvider.get().screen)
     }.map { screen ->
-        screen is EmbeddedNavigator.Screen.VerticalPaymentOptions
+        screen is T
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
@@ -205,6 +257,15 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 interactor = manageInteractorFactory.createManageScreenInteractor()
             )
         }
+        embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(screen))
+    }
+
+    private fun navigateToUpdateScreen(savedPaymentMethod: DisplayableSavedPaymentMethod) {
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(
+            interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
+                displayableSavedPaymentMethod = savedPaymentMethod
+            )
+        )
         embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(screen))
     }
 
