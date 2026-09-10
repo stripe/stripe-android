@@ -12,32 +12,48 @@ import javax.inject.Singleton
 internal class DefaultEmbeddedSelectionHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : EmbeddedSelectionHolder {
+    init {
+        persistPreviousNewSelections(readPreviousNewSelections())
+    }
+
     override val selection: StateFlow<PaymentSelection?> =
         savedStateHandle.getStateFlow(EMBEDDED_SELECTION_KEY, null)
     override val temporarySelection: StateFlow<String?> =
         savedStateHandle.getStateFlow(EMBEDDED_TEMPORARY_SELECTION_KEY, null)
-    override val previousNewSelections: Bundle = savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY]
-        ?: Bundle().also {
-            savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = it
-        }
+    override val previousNewSelections: PreviousNewSelections
+        get() = readPreviousNewSelections()
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         savedStateHandle[EMBEDDED_SELECTION_KEY] = updatedSelection
-        previousNewSelections.stashNewSelection(updatedSelection)
-        savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = previousNewSelections
+        persistPreviousNewSelections(previousNewSelections.updatedWith(updatedSelection))
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {
         savedStateHandle[EMBEDDED_TEMPORARY_SELECTION_KEY] = code
     }
 
-    override fun setPreviousNewSelections(bundle: Bundle) {
-        this.previousNewSelections.putAll(bundle)
-        savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = previousNewSelections
+    override fun setPreviousNewSelections(selections: PreviousNewSelections) {
+        persistPreviousNewSelections(previousNewSelections.mergedWith(selections))
+    }
+
+    override fun clearPreviousNewSelections() {
+        persistPreviousNewSelections(PreviousNewSelections.empty)
     }
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
-        return previousNewSelections.previousNewSelection(code)
+        return previousNewSelections[code]
+    }
+
+    private fun readPreviousNewSelections(): PreviousNewSelections {
+        return when (val savedSelections = savedStateHandle.get<Any?>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)) {
+            is Bundle -> PreviousNewSelections.fromBundle(savedSelections)
+            is PreviousNewSelections -> savedSelections
+            else -> PreviousNewSelections.empty
+        }
+    }
+
+    private fun persistPreviousNewSelections(selections: PreviousNewSelections) {
+        savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = selections.toBundle()
     }
 
     companion object {

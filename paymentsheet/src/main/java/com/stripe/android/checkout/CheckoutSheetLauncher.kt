@@ -13,8 +13,8 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -85,7 +85,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         )
     }
 
-    private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
+    private val activityLauncher: ActivityResultLauncher<EmbeddedActivityState> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             launcherState.isAwaitingPaymentOptionsReady = false
             sheetStateHolder.sheetIsOpen = false
@@ -195,20 +195,13 @@ internal class CheckoutSheetLauncher @Inject constructor(
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
-        val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-            productUsage = productUsage,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            statusBarColor = statusBarColor,
-            selection = currentSelection,
+        val args = EmbeddedActivityState.Ready.Form(
+            context = createContext(paymentMethodMetadata, configuration),
+            selectedPaymentMethodCode = code,
+            initialSelection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = listOfNotNull(promotion),
-            launchMode = EmbeddedLaunchMode.Form(
-                selectedPaymentMethodCode = code,
-            ),
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            promotion = promotion,
         )
         activityLauncher.launch(args)
     }
@@ -227,18 +220,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-            productUsage = productUsage,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            statusBarColor = statusBarColor,
-            selection = selection,
+        val args = EmbeddedActivityState.Ready.Manage(
+            context = createContext(paymentMethodMetadata, configuration),
+            initialSelection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.Manage,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)
     }
@@ -257,19 +243,17 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val initialArgs = createPaymentOptionsArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-            selection = selection,
-            customerState = customerState,
-            presentationState = if (operationCoordinator.isUpdating.value) {
-                EmbeddedActivityArgs.PresentationState.Loading
-            } else {
-                EmbeddedActivityArgs.PresentationState.Ready
-            },
-        )
-        launcherState.isAwaitingPaymentOptionsReady =
-            initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
+        val initialArgs = if (operationCoordinator.isUpdating.value) {
+            EmbeddedActivityState.LoadingPaymentOptions(
+                context = createContext(paymentMethodMetadata, configuration),
+                initialSelection = selection,
+                previousNewSelections = selectionHolder.previousNewSelections,
+                customerState = customerState,
+            )
+        } else {
+            createPaymentOptionsArgs(paymentMethodMetadata, customerState, selection, configuration)
+        }
+        launcherState.isAwaitingPaymentOptionsReady = initialArgs is EmbeddedActivityState.LoadingPaymentOptions
         activityLauncher.launch(initialArgs)
 
         resumePendingReadyLaunch()
@@ -298,7 +282,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
                     configuration = refreshedState.configuration,
                     selection = selectionHolder.selection.value,
                     customerState = customerStateHolder.customer.value,
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 )
             )
             launcherState.isAwaitingPaymentOptionsReady = false
@@ -310,20 +293,25 @@ internal class CheckoutSheetLauncher @Inject constructor(
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration,
-        presentationState: EmbeddedActivityArgs.PresentationState,
-    ): EmbeddedActivityArgs {
-        return EmbeddedActivityArgs(
+    ): EmbeddedActivityState.Ready.PaymentOptions {
+        return EmbeddedActivityState.Ready.PaymentOptions(
+            context = createContext(paymentMethodMetadata, configuration),
+            initialSelection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
+            customerState = customerState,
+        )
+    }
+
+    private fun createContext(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: EmbeddedPaymentElement.Configuration,
+    ): EmbeddedActivityState.Context {
+        return EmbeddedActivityState.Context(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
-            selection = selection,
-            previousNewSelections = selectionHolder.previousNewSelections,
-            customerState = customerState,
-            promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = presentationState,
         )
     }
 }

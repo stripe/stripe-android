@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import android.os.Bundle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
@@ -8,6 +7,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -38,7 +38,7 @@ internal class DefaultEmbeddedResultCallbackHelperTest {
         stateHelper.state = EmbeddedPaymentElement.State(
             confirmationState = EmbeddedConfirmationStateFixtures.defaultState(),
             customer = null,
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
         )
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
         val helper = DefaultEmbeddedResultCallbackHelper(

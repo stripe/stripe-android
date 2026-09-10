@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
@@ -26,6 +25,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -399,9 +399,8 @@ internal class CheckoutControllerTest {
     fun `clearPaymentOption clears payment option state`() = runMutationScenario(
         paymentSelection = PaymentSelection.GooglePay,
         temporarySelection = "card",
-        previousNewSelections = Bundle().apply {
-            putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-        },
+        previousNewSelections = PreviousNewSelections.empty
+            .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION),
     ) {
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
@@ -1186,7 +1185,7 @@ internal class CheckoutControllerTest {
         initModifier: (JSONObject) -> Unit = {},
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
-        previousNewSelections: Bundle = Bundle(),
+        previousNewSelections: PreviousNewSelections = PreviousNewSelections.empty,
         sheetIsOpen: Boolean = false,
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
