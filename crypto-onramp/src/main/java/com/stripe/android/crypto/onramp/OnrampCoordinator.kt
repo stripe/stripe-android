@@ -41,7 +41,9 @@ import javax.inject.Inject
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
+    private val onrampCallbackIdentifier: String,
 ) {
+    private lateinit var callbacks: OnrampCallbacks.State
 
     /**
      * Initialize the coordinator with the provided configuration.
@@ -207,6 +209,9 @@ class OnrampCoordinator @Inject internal constructor(
     fun createPresenter(
         activity: ComponentActivity
     ): Presenter {
+        // A finished host removes the global registration. Restore it before
+        // constructing launchers, which can synchronously deliver pending results.
+        OnrampCallbackReferences[onrampCallbackIdentifier] = callbacks
         return presenterComponentFactory
             .build(
                 activity = activity,
@@ -306,10 +311,12 @@ class OnrampCoordinator @Inject internal constructor(
 
             // Register callbacks eagerly so they're available for activity result
             // redelivery at onStart(), before Compose's first frame.
-            OnrampCallbackReferences[onrampComponent.onrampCallbackIdentifier] =
-                onrampCallbacks.build()
+            val callbacks = onrampCallbacks.build()
+            OnrampCallbackReferences[onrampComponent.onrampCallbackIdentifier] = callbacks
 
-            return onrampComponent.onrampCoordinator
+            return onrampComponent.onrampCoordinator.also {
+                it.callbacks = callbacks
+            }
         }
     }
 }
