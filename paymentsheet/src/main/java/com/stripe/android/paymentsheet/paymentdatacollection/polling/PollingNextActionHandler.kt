@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityOptionsCompat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -65,10 +64,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_blik_confirm_payment,
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = requestOptions.apiKey,
-                        stripeAccountId = requestOptions.stripeAccount,
-                    ),
+                    requestOptions = requestOptions,
                     qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
@@ -79,10 +75,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = requestOptions.apiKey,
-                        stripeAccountId = requestOptions.stripeAccount,
-                    ),
+                    requestOptions = requestOptions,
                     qrCodeUrl = getQrCodeForPayNow(actionable),
                     paymentMethodType = paymentMethodType.code,
                 )
@@ -93,10 +86,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = requestOptions.apiKey,
-                        stripeAccountId = requestOptions.stripeAccount,
-                    ),
+                    requestOptions = requestOptions,
                     qrCodeUrl = getQrCodeForPromptPay(actionable),
                     paymentMethodType = paymentMethodType.code,
                 )

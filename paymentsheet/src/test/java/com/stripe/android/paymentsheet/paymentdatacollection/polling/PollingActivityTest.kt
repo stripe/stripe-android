@@ -20,6 +20,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
@@ -255,7 +256,7 @@ internal class PollingActivityTest {
                 timeLimit = args.timeLimitInSeconds.seconds,
                 initialDelay = args.initialDelayInSeconds.seconds,
                 ctaText = args.ctaText,
-                apiConfiguration = args.apiConfiguration,
+                requestOptions = args.requestOptions,
                 qrCodeUrl = args.qrCodeUrl,
                 paymentMethodType = args.paymentMethodType,
             ),
@@ -316,7 +317,10 @@ internal class PollingActivityTest {
             timeLimitInSeconds = 60,
             initialDelayInSeconds = 0,
             ctaText = R.string.stripe_blik_confirm_payment,
-            apiConfiguration = DEFAULT_API_CONFIG,
+            requestOptions = ApiRequest.Options(
+                apiKey = DEFAULT_API_CONFIG.publishableKey,
+                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+            ),
             qrCodeUrl = null,
             paymentMethodType = "blik",
         )

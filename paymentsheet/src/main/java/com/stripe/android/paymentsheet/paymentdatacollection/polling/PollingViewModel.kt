@@ -9,7 +9,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
@@ -65,7 +65,7 @@ internal fun PollingState.toFlowResult(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                stripeAccountId = args.apiConfiguration.stripeAccountId,
+                stripeAccountId = args.requestOptions.stripeAccount,
             )
         }
         PollingState.Canceled -> {
@@ -73,7 +73,7 @@ internal fun PollingState.toFlowResult(
                 clientSecret = args.clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.CANCELED,
                 canCancelSource = false,
-                stripeAccountId = args.apiConfiguration.stripeAccountId,
+                stripeAccountId = args.requestOptions.stripeAccount,
             )
         }
     }
@@ -259,7 +259,7 @@ internal class PollingViewModel @Inject constructor(
                     application = extras.requireApplication(),
                     config = config,
                     ioDispatcher = Dispatchers.IO,
-                    apiConfiguration = args.apiConfiguration,
+                    requestOptions = args.requestOptions,
                 )
                 .subcomponentFactory
                 .create(
@@ -275,7 +275,7 @@ internal class PollingViewModel @Inject constructor(
         val timeLimit: Duration,
         val initialDelay: Duration,
         @StringRes val ctaText: Int,
-        val apiConfiguration: ApiConfiguration.State,
+        val requestOptions: ApiRequest.Options,
         val qrCodeUrl: String?,
         val paymentMethodType: String,
     )
