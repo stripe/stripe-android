@@ -9,6 +9,9 @@ NEXT_VERSION_BUMP: PATCH
 ### PaymentSheet
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
+### CryptoOnramp
+* [FIXED] Fixed missing callbacks when reusing an `OnrampCoordinator` to create a new presenter after its previous host activity finishes.
+
 ## 23.18.0 - 2026-09-08
 
 ### PaymentSheet
