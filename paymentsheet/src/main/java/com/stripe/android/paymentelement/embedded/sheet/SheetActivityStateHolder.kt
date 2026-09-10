@@ -4,6 +4,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -69,6 +70,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
@@ -111,6 +113,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         previousNewSelections = selectionHolder.previousNewSelections,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = launchMode,
@@ -120,6 +123,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         previousNewSelections = selectionHolder.previousNewSelections,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = launchMode,
@@ -131,6 +135,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             previousNewSelections = selectionHolder.previousNewSelections,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
+                            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                             checkoutSessionResponse = null,
                             shouldInvokeSelectionCallback = false,
                             launchMode = launchMode,
