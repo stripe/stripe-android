@@ -208,6 +208,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         launchForm("test_code")
 
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = null,
             hasBeenConfirmed = true,
@@ -236,6 +237,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         launchForm("cashapp")
 
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
@@ -266,6 +268,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             launchForm("cashapp")
 
             val result = EmbeddedActivityResult.Complete(
+                temporarySelection = null,
                 previousNewSelections = Bundle(),
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
@@ -292,6 +295,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             launchForm("cashapp")
 
             val result = EmbeddedActivityResult.Complete(
+                temporarySelection = null,
                 previousNewSelections = Bundle(),
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 hasBeenConfirmed = true,
@@ -359,6 +363,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = createCustomerState(),
             selection = null,
@@ -443,6 +448,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = customerState,
             selection = selection,
@@ -469,6 +475,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             val result = EmbeddedActivityResult.Complete(
+                temporarySelection = null,
                 previousNewSelections = Bundle(),
                 customerState = customerState,
                 selection = selection,
@@ -492,6 +499,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             val result = EmbeddedActivityResult.Complete(
+                temporarySelection = null,
                 previousNewSelections = Bundle(),
                 customerState = customerState,
                 selection = selection,
@@ -537,6 +545,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `form result handled correctly without prior launchForm call (simulates host recreation)`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
@@ -657,6 +666,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         }
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = returnedSelections,
             customerState = null,
             selection = null,
@@ -679,6 +689,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = customerState,
             selection = selection,
@@ -697,9 +708,32 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
+    fun `vertical payment option result displays the selected form in embedded content`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
+        val result = EmbeddedActivityResult.Complete(
+            temporarySelection = "affirm",
+            previousNewSelections = Bundle(),
+            customerState = null,
+            selection = null,
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.VerticalPaymentOptions,
+        )
+
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("affirm")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
     fun `paymentOptionsResult callback invokes completion callback on confirmed result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
             previousNewSelections = Bundle(),
             customerState = null,
             selection = null,

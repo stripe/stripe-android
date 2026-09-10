@@ -45,6 +45,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             navigateBack = {
                 val action = when (launchMode) {
                     EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
+                    EmbeddedLaunchMode.VerticalPaymentOptions -> EmbeddedNavigator.Action.Back
                     EmbeddedLaunchMode.Manage,
                     is EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(true)
                 }

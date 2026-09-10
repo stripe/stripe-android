@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.isInstanceOf
@@ -20,7 +21,10 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -165,6 +169,76 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         factory.onContinueClick()
 
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `selecting a form payment method closes and hands the form back to embedded content`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val screen = factory.createVerticalInitialScreen()
+
+        navigator.result.test {
+            screen.interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected("card")
+            )
+
+            assertThat(awaitItem()).isFalse()
+            assertThat(selectionHolder.selection.value).isNull()
+            assertThat(selectionHolder.temporarySelection.value).isEqualTo("card")
+        }
+    }
+
+    @Test
+    fun `selecting a no-form payment method closes and hands the selection back to embedded content`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
+        val screen = factory.createVerticalInitialScreen()
+
+        navigator.result.test {
+            screen.interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.PaymentMethodSelected("cashapp")
+            )
+
+            assertThat(awaitItem()).isFalse()
+            assertThat(selectionHolder.selection.value?.paymentMethodType).isEqualTo("cashapp")
+            assertThat(selectionHolder.temporarySelection.value).isNull()
+        }
+    }
+
+    @Test
+    fun `selecting a saved payment method closes and hands the selection back to embedded content`() = testScenario {
+        val screen = factory.createVerticalInitialScreen()
+
+        navigator.result.test {
+            screen.interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+
+            assertThat(awaitItem()).isFalse()
+            assertThat(selectionHolder.selection.value)
+                .isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            assertThat(selectionHolder.temporarySelection.value).isNull()
+        }
+    }
+
+    @Test
+    fun `selecting a wallet closes and hands the selection back to embedded content`() = testScenario {
+        val screen = factory.createVerticalInitialScreen()
+        val googlePay = screen.interactor.state.value.displayablePaymentMethods.first { it.code == "google_pay" }
+
+        navigator.result.test {
+            googlePay.onClick()
+
+            assertThat(awaitItem()).isFalse()
+            assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(selectionHolder.temporarySelection.value).isNull()
+        }
     }
 
     @Suppress("LongMethod")
