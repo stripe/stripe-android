@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import app.cash.turbine.test
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.compose.ui.graphics.toArgb
@@ -372,7 +373,8 @@ internal class CheckoutStateLoaderTest {
             )
         }
 
-        assertThat(paymentElementLoader.lastIntegrationConfiguration).isNotNull()
+        assertThat(paymentElementLoader.loadCompletion.isCompleted).isTrue()
+        assertThat(chooser.lastCall).isNotNull()
         assertThat(load.isCompleted).isFalse()
         assertThat(stateHolder.state).isNull()
         assertThat(customerStateHolder.customer.value).isNull()
@@ -382,26 +384,32 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `advancing the UI dispatcher commits controller and customer state`() = runScenario(
+    fun `advancing the UI dispatcher commits controller state before customer state`() = runScenario(
         customer = savedCustomer(),
         uiContextProvider = { StandardTestDispatcher(it) },
     ) {
-        val load = backgroundScope.async(UnconfinedTestDispatcher(testScheduler)) {
-            loader.loadInitial(
-                configuration = defaultConfiguration(),
-                checkoutSessionResponse = response(),
-            )
+        customerStateHolder.customer.test {
+            assertThat(awaitItem()).isNull()
+
+            val load = backgroundScope.async(UnconfinedTestDispatcher(testScheduler)) {
+                loader.loadInitial(
+                    configuration = defaultConfiguration(),
+                    checkoutSessionResponse = response(),
+                )
+            }
+
+            assertThat(load.isCompleted).isFalse()
+            assertThat(stateHolder.state).isNull()
+            expectNoEvents()
+
+            testScheduler.runCurrent()
+
+            assertThat(awaitItem()).isEqualTo(savedCustomer())
+            assertThat(stateHolder.state?.checkoutSessionResponse?.id)
+                .isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            load.await()
+            ensureAllEventsConsumed()
         }
-
-        assertThat(stateHolder.state).isNull()
-        assertThat(customerStateHolder.customer.value).isNull()
-
-        testScheduler.runCurrent()
-        load.await()
-
-        assertThat(stateHolder.state?.checkoutSessionResponse?.id)
-            .isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(customerStateHolder.customer.value).isEqualTo(savedCustomer())
     }
 
     @Test
