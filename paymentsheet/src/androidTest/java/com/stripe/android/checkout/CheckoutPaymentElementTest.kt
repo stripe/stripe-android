@@ -3,9 +3,14 @@ package com.stripe.android.checkout
 import android.app.Application
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -31,7 +36,10 @@ import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
@@ -196,6 +204,62 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
+    fun testSavedPaymentMethodSelectionSurvivesHostRecreation() {
+        val updateRequests = Turbine<Unit>()
+        val callbacks = Turbine<Unit>()
+        val releaseUpdateResponse = CountDownLatch(1)
+
+        runAutomaticTaxTest(
+            configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbacks.add(Unit)
+            },
+        ) {
+            enqueueTaxUpdate { response ->
+                updateRequests.add(Unit)
+                if (!releaseUpdateResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    throw AssertionError("Timed out waiting to release the Checkout Session update response.")
+                }
+                automaticTaxResponseWithSavedPaymentMethod(
+                    UPDATED_TOTAL,
+                    TAX_STATUS_COMPLETE,
+                ).invoke(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            try {
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    updateRequests.awaitItem()
+                }
+                assertSavedPaymentMethodSelectionIsPending()
+                callbacks.expectNoEvents()
+
+                recreateHost()
+
+                assertSavedPaymentMethodSelectionIsPending()
+                updateRequests.expectNoEvents()
+                callbacks.expectNoEvents()
+            } finally {
+                releaseUpdateResponse.countDown()
+            }
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                callbacks.awaitItem()
+            }
+            assertSavedPaymentMethodSelectionCompleted()
+            updateRequests.ensureAllEventsConsumed()
+            callbacks.ensureAllEventsConsumed()
+            markTestSucceeded()
+        }
+    }
+
+    @Test
     fun testSavedPaymentMethodSelectionFailureCanRetry() {
         val updateRequests = Turbine<Unit>()
         val callbacks = Turbine<Unit>()
@@ -228,6 +292,7 @@ internal class CheckoutPaymentElementTest {
             contentPage.assertLpmIsEnabled("card", true)
             contentPage.assertHasSelectedLpm("cashapp")
             callbacks.expectNoEvents()
+            assertSavedPaymentMethodSelectionErrorIsDisplayed()
 
             enqueueTaxUpdate { response ->
                 updateRequests.add(Unit)
@@ -246,12 +311,15 @@ internal class CheckoutPaymentElementTest {
                     updateRequests.awaitItem()
                 }
                 callbacks.expectNoEvents()
+                assertSavedPaymentMethodSelectionErrorIsDisplayed()
+                assertSavedPaymentMethodSelectionIsPending()
                 releaseRetryResponse.countDown()
 
                 waitForSessionTotal(controller, UPDATED_TOTAL)
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
                 contentPage.assertLpmIsEnabled("card", true)
+                assertSavedPaymentMethodSelectionErrorIsNotDisplayed()
                 withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
                     callbacks.awaitItem()
                     assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
@@ -574,6 +642,10 @@ internal class CheckoutPaymentElementTest {
             runnerContext.confirm()
         }
 
+        fun recreateHost() {
+            runnerContext.recreateHost()
+        }
+
         fun markTestSucceeded() {
             runnerContext.markTestSucceeded()
         }
@@ -651,6 +723,65 @@ internal class CheckoutPaymentElementTest {
             bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             responseFactory = responseFactory,
         )
+    }
+
+    private fun assertSavedPaymentMethodSelectionIsPending() {
+        contentPage.waitUntilVisible()
+        contentPage.assertLpmIsEnabled("card", false)
+        testRules.compose.onNodeWithTag(
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$SAVED_PAYMENT_METHOD_ID",
+            useUnmergedTree = true,
+        ).assertIsNotEnabled()
+        testRules.compose.onAllNodesWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(1)
+    }
+
+    private fun assertSavedPaymentMethodSelectionCompleted() {
+        contentPage.waitUntilVisible()
+        testRules.compose.waitUntil(timeoutMillis = REQUEST_TIMEOUT_SECONDS * 1_000) {
+            testRules.compose.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+        }
+        testRules.compose.onNodeWithTag(
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$SAVED_PAYMENT_METHOD_ID",
+            useUnmergedTree = true,
+        ).assertIsEnabled()
+        contentPage.assertLpmIsEnabled("card", true)
+        testRules.compose.onAllNodesWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(0)
+        contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+    }
+
+    private fun assertSavedPaymentMethodSelectionErrorIsDisplayed() {
+        testRules.compose.waitUntil(timeoutMillis = REQUEST_TIMEOUT_SECONDS * 1_000) {
+            testRules.compose.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+        testRules.compose.onNodeWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+    }
+
+    private fun assertSavedPaymentMethodSelectionErrorIsNotDisplayed() {
+        testRules.compose.waitUntil(timeoutMillis = REQUEST_TIMEOUT_SECONDS * 1_000) {
+            testRules.compose.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+        }
+        testRules.compose.onAllNodesWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(0)
     }
 
     private fun fillOutCardAndBillingDetails() {
