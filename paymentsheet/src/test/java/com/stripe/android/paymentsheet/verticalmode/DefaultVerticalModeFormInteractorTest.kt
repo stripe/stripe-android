@@ -364,6 +364,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = paymentMethodCode,
             ),

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -213,6 +214,7 @@ internal class EmbeddedNavigator private constructor(
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val customerStateHolder: CustomerStateHolder,
+            private val linkAccountHolder: LinkAccountHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
@@ -241,6 +243,7 @@ internal class EmbeddedNavigator private constructor(
                             successfulConfirmationResult(
                                 embeddedSelectionHolder = embeddedSelectionHolder,
                                 customerStateHolder = customerStateHolder,
+                                linkAccountHolder = linkAccountHolder,
                                 launchMode = launchMode,
                             )
                         )
@@ -260,6 +263,7 @@ internal class EmbeddedNavigator private constructor(
                 private val confirmationHelper: SheetActivityConfirmationHelper,
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
                 private val customerStateHolder: CustomerStateHolder,
+                private val linkAccountHolder: LinkAccountHolder,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
                     val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
@@ -274,6 +278,7 @@ internal class EmbeddedNavigator private constructor(
                         confirmationHelper = confirmationHelper,
                         embeddedSelectionHolder = embeddedSelectionHolder,
                         customerStateHolder = customerStateHolder,
+                        linkAccountHolder = linkAccountHolder,
                         launchMode = launchMode,
                     )
                 }
@@ -287,6 +292,7 @@ internal class EmbeddedNavigator private constructor(
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val customerStateHolder: CustomerStateHolder,
+            private val linkAccountHolder: LinkAccountHolder,
             private val launchMode: EmbeddedLaunchMode,
         ) : Screen(), Closeable {
             override fun topBarState() = stateFlowOf(
@@ -315,6 +321,7 @@ internal class EmbeddedNavigator private constructor(
                                 successfulConfirmationResult(
                                     embeddedSelectionHolder = embeddedSelectionHolder,
                                     customerStateHolder = customerStateHolder,
+                                    linkAccountHolder = linkAccountHolder,
                                     launchMode = launchMode,
                                 )
                             )
@@ -433,12 +440,14 @@ internal class EmbeddedNavigator private constructor(
 private fun successfulConfirmationResult(
     embeddedSelectionHolder: EmbeddedSelectionHolder,
     customerStateHolder: CustomerStateHolder,
+    linkAccountHolder: LinkAccountHolder,
     launchMode: EmbeddedLaunchMode,
 ) = EmbeddedActivityResult.Complete(
     selection = null,
     previousNewSelections = embeddedSelectionHolder.previousNewSelections,
     hasBeenConfirmed = true,
     customerState = customerStateHolder.customer.value,
+    linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
     checkoutSessionResponse = null,
     shouldInvokeSelectionCallback = false,
     launchMode = launchMode,

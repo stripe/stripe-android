@@ -99,6 +99,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
 
@@ -160,6 +161,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
     }
@@ -206,6 +208,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },

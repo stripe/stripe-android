@@ -148,6 +148,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
         )
         val manageInteractorFactory = FakeInitialScreenManageInteractorFactory()
         val updateInteractorFactory = FakeInitialScreenUpdateInteractorFactory()

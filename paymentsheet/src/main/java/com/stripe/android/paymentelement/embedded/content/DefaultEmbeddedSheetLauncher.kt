@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -14,6 +15,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkAccountInfoOrNull
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -56,6 +58,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
@@ -77,6 +80,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
 
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            result.linkAccountInfoOrNull?.let(linkAccountHolder::set)
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
@@ -190,6 +194,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
@@ -222,6 +227,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
@@ -252,6 +258,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,

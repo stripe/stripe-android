@@ -274,6 +274,7 @@ internal class EmbeddedSheetActivityTest {
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                         paymentMethods = paymentMethods,
                     ),
+                    linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Manage,
                     presentationState = EmbeddedActivityArgs.PresentationState.Ready,

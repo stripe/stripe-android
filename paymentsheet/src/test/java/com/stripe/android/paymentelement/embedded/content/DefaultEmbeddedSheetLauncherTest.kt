@@ -9,6 +9,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
@@ -80,6 +81,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             promotions = listOf(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
@@ -212,6 +214,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = true,
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
@@ -240,6 +243,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
@@ -270,6 +274,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
                 customerState = null,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.Form(
@@ -296,6 +301,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 hasBeenConfirmed = true,
                 customerState = null,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.Form(
@@ -318,6 +324,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val result = EmbeddedActivityResult.Cancelled(
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
@@ -341,6 +348,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
             val result = EmbeddedActivityResult.Cancelled(
                 customerState = null,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 launchMode = EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "card",
                 ),
@@ -361,6 +369,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = createCustomerState(),
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             selection = null,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
@@ -382,6 +391,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(),
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
@@ -407,6 +417,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentSelection.GooglePay,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
@@ -445,6 +456,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
@@ -471,6 +483,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val result = EmbeddedActivityResult.Complete(
                 previousNewSelections = Bundle(),
                 customerState = customerState,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 selection = selection,
                 hasBeenConfirmed = false,
                 checkoutSessionResponse = null,
@@ -494,6 +507,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val result = EmbeddedActivityResult.Complete(
                 previousNewSelections = Bundle(),
                 customerState = customerState,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 selection = selection,
                 hasBeenConfirmed = false,
                 checkoutSessionResponse = null,
@@ -541,6 +555,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
@@ -561,6 +576,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `form cancellation handled correctly without prior launchForm call`() = testScenario {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
@@ -588,6 +604,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
@@ -659,6 +676,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = returnedSelections,
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             selection = null,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
@@ -681,6 +699,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
@@ -702,6 +721,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = null,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             selection = null,
             hasBeenConfirmed = true,
             checkoutSessionResponse = null,
@@ -722,6 +742,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
@@ -742,6 +763,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = emptyList()),
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -761,6 +783,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -813,6 +836,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 lifecycleOwner = lifecycleOwner,
                 selectionHolder = selectionHolder,
                 customerStateHolder = customerStateHolder,
+                linkAccountHolder = LinkAccountHolder(savedStateHandle),
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
                 productUsage = setOf("EmbeddedPaymentElement"),
