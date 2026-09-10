@@ -1,12 +1,12 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.test
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
