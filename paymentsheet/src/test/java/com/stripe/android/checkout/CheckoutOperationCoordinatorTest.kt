@@ -25,18 +25,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertFailsWith
 
 @Suppress("LargeClass")
@@ -184,49 +181,6 @@ internal class CheckoutOperationCoordinatorTest {
 
             assertThat(awaitItem()).isFalse()
         }
-    }
-
-    @Test
-    fun `runMutation admits processing synchronously on the checkout UI context`() = runScenario {
-        val releaseMutation = CompletableDeferred<Unit>()
-
-        coordinator.isUpdating.test {
-            assertThat(awaitItem()).isFalse()
-
-            val mutation = backgroundScope.async(checkoutUiContext) {
-                coordinator.runMutation {
-                    releaseMutation.await()
-                    Result.success(Unit)
-                }
-            }
-
-            assertThat(awaitItem()).isTrue()
-
-            releaseMutation.complete(Unit)
-            assertThat(mutation.await().isSuccess).isTrue()
-            assertThat(awaitItem()).isFalse()
-        }
-    }
-
-    @Test
-    fun `cancelling an active mutation releases processing`() = runScenario {
-        coordinator.isUpdating.test {
-            assertThat(awaitItem()).isFalse()
-
-            val mutation = backgroundScope.async {
-                coordinator.runMutation<Unit> {
-                    awaitCancellation()
-                }
-            }
-
-            assertThat(awaitItem()).isTrue()
-
-            mutation.cancelAndJoin()
-
-            assertThat(awaitItem()).isFalse()
-        }
-
-        assertThat(coordinator.runMutation { Result.success(Unit) }.isSuccess).isTrue()
     }
 
     @Test
@@ -797,14 +751,12 @@ internal class CheckoutOperationCoordinatorTest {
         }
         val resultTurbine = Turbine<CheckoutController.Result>()
         val sessionRefresher = FakeCheckoutSessionRefresher()
-        val checkoutUiContext = UnconfinedTestDispatcher(testScheduler)
         val coordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
-            checkoutUiContext = checkoutUiContext,
         )
         val observerJob = backgroundScope.launch {
             coordinator.observeConfirmationResults()
@@ -819,7 +771,6 @@ internal class CheckoutOperationCoordinatorTest {
             sessionRefresher = sessionRefresher,
             observerJob = observerJob,
             testScope = this,
-            checkoutUiContext = checkoutUiContext,
         ).block()
 
         confirmationHandler.validate()
@@ -835,7 +786,6 @@ internal class CheckoutOperationCoordinatorTest {
         private val sessionRefresher: FakeCheckoutSessionRefresher,
         val observerJob: Job,
         private val testScope: TestScope,
-        val checkoutUiContext: CoroutineContext,
     ) : CoroutineScope by testScope {
         val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
         val backgroundScope = testScope.backgroundScope
