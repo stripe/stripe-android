@@ -43,10 +43,16 @@ import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.time.Duration
@@ -354,6 +360,80 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
     }
 
+    @Test
+    fun `loadInitial completes payment element loading before queued UI commit`() = runScenario(
+        customer = savedCustomer(),
+        uiContextProvider = { StandardTestDispatcher(it) },
+    ) {
+        val load = backgroundScope.async(UnconfinedTestDispatcher(testScheduler)) {
+            loader.loadInitial(
+                configuration = defaultConfiguration(),
+                checkoutSessionResponse = response(),
+            )
+        }
+
+        assertThat(paymentElementLoader.lastIntegrationConfiguration).isNotNull()
+        assertThat(load.isCompleted).isFalse()
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
+
+        testScheduler.runCurrent()
+        load.await()
+    }
+
+    @Test
+    fun `advancing the UI dispatcher commits controller and customer state`() = runScenario(
+        customer = savedCustomer(),
+        uiContextProvider = { StandardTestDispatcher(it) },
+    ) {
+        val load = backgroundScope.async(UnconfinedTestDispatcher(testScheduler)) {
+            loader.loadInitial(
+                configuration = defaultConfiguration(),
+                checkoutSessionResponse = response(),
+            )
+        }
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
+
+        testScheduler.runCurrent()
+        load.await()
+
+        assertThat(stateHolder.state?.checkoutSessionResponse?.id)
+            .isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(customerStateHolder.customer.value).isEqualTo(savedCustomer())
+    }
+
+    @Test
+    fun `cancellation before queued UI commit leaves both holders unchanged`() {
+        val existingState = committedState(paymentSelection = PaymentSelection.GooglePay)
+        val existingCustomer = savedCustomer()
+
+        runScenario(
+            uiContextProvider = { StandardTestDispatcher(it) },
+        ) {
+            stateHolder.state = existingState
+            customerStateHolder.setCustomerState(existingCustomer)
+
+            val load = backgroundScope.async(UnconfinedTestDispatcher(testScheduler)) {
+                loader.loadInitial(
+                    configuration = defaultConfiguration(),
+                    checkoutSessionResponse = response(),
+                )
+            }
+
+            assertThat(load.isCompleted).isFalse()
+            assertThat(stateHolder.state).isEqualTo(existingState)
+            assertThat(customerStateHolder.customer.value).isEqualTo(existingCustomer)
+
+            load.cancelAndJoin()
+            testScheduler.runCurrent()
+
+            assertThat(stateHolder.state).isEqualTo(existingState)
+            assertThat(customerStateHolder.customer.value).isEqualTo(existingCustomer)
+        }
+    }
+
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
     private fun response(
@@ -413,6 +493,9 @@ internal class CheckoutStateLoaderTest {
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
+        uiContextProvider: (TestCoroutineScheduler) -> CoroutineContext = {
+            UnconfinedTestDispatcher(it)
+        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val application = ApplicationProvider.getApplicationContext<Application>()
@@ -448,6 +531,7 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
             delay = paymentElementLoaderDelay,
         )
+        val uiContext = uiContextProvider(testScheduler)
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
@@ -457,6 +541,7 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
             internalRowSelectionCallback = { internalRowSelectionCallback },
+            uiContext = uiContext,
         )
 
         Scenario(
@@ -467,6 +552,7 @@ internal class CheckoutStateLoaderTest {
             chooser = recordingChooser,
             imageLoader = imageLoader,
             testScheduler = testScheduler,
+            backgroundScope = backgroundScope,
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -480,6 +566,7 @@ internal class CheckoutStateLoaderTest {
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
         val testScheduler: TestCoroutineScheduler,
+        val backgroundScope: CoroutineScope,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,

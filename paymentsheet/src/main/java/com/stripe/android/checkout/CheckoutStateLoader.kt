@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -17,8 +18,10 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
@@ -30,6 +33,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    @UIContext private val uiContext: CoroutineContext,
 ) {
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
@@ -105,7 +109,7 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        stateHolder.state = CheckoutControllerState(
+        val newState = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
@@ -119,7 +123,10 @@ internal class CheckoutStateLoader @Inject constructor(
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
 
-        customerStateHolder.setCustomerState(loadResults.customer)
+        withContext(uiContext) {
+            stateHolder.state = newState
+            customerStateHolder.setCustomerState(loadResults.customer)
+        }
     }
 
     private suspend fun loadPaymentElements(
