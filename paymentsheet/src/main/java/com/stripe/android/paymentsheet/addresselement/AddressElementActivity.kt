@@ -12,7 +12,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -35,34 +38,31 @@ import kotlinx.coroutines.flow.filterNotNull
 @OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
 
-    private var coordinator: AddressElementActivityCoordinator? = null
+    private var activityArgs by mutableStateOf<AddressElementActivityContract.Args?>(null)
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         AddressElementViewModel.Factory(
             applicationSupplier = { application },
-            starterArgsSupplier = { requireNotNull(starterArgs) }
+            starterArgsSupplier = { requireNotNull(activityArgs) }
         )
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs: AddressElementActivityContract.Args?
-        get() = coordinator?.args
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val starterArgs = AddressElementActivityContract.Args.fromIntent(intent)
-        if (starterArgs == null) {
+        val initialArgs = AddressElementActivityContract.Args.fromIntent(intent)
+        if (initialArgs == null) {
             finish()
             return
         }
-        coordinator = AddressElementActivityCoordinator(starterArgs)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (starterArgs !is AddressElementActivityContract.Args.CheckoutShipping.Loading) {
-            starterArgs.config?.appearance?.parseAppearance()
+        if (initialArgs !is AddressElementActivityContract.Args.CheckoutShipping.Loading) {
+            initialArgs.config?.appearance?.parseAppearance()
         }
+        activityArgs = initialArgs
 
         setContent { AddressElementContent() }
     }
@@ -70,7 +70,7 @@ internal class AddressElementActivity : ComponentActivity() {
     @Composable
     private fun AddressElementContent() {
         val bottomSheetState = rememberStripeBottomSheetState()
-        when (val args = requireNotNull(coordinator).args) {
+        when (val args = requireNotNull(activityArgs)) {
             is AddressElementActivityContract.Args.CheckoutShipping.Loading -> {
                 BackHandler {
                     finishWithResult(AddressElementActivityContract.Result.Canceled)
@@ -120,10 +120,16 @@ internal class AddressElementActivity : ComponentActivity() {
     }
 
     private fun handleNewIntent(intent: Intent) {
-        if (coordinator?.handleNewIntent(intent, isFinishing) == true) {
-            this.intent = intent
-            requireNotNull(starterArgs).config?.appearance?.parseAppearance()
-        }
+        val updatedArgs = AddressElementActivityContract.Args.fromIntent(intent) ?: return
+        val isValidTransition =
+            !isFinishing &&
+                activityArgs is AddressElementActivityContract.Args.CheckoutShipping.Loading &&
+                updatedArgs is AddressElementActivityContract.Args.CheckoutShipping.Ready
+        if (!isValidTransition) return
+
+        updatedArgs.config?.appearance?.parseAppearance()
+        this.intent = intent
+        activityArgs = updatedArgs
     }
 
     @Composable

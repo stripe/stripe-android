@@ -18,6 +18,91 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class AddressElementActivityTest {
     @Test
+    fun `loading transitions to ready intent`() {
+        val loadingIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
+        )
+        val readyIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Ready("pk_test_123", null)
+        )
+        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, loadingIntent)
+            .create()
+            .start()
+            .resume()
+            .visible()
+
+        controller.get().onNewIntent(readyIntent)
+
+        assertThat(controller.get().intent).isSameInstanceAs(readyIntent)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `loading ignores another loading intent`() {
+        val initialIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
+        )
+        val updatedIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_456")
+        )
+        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, initialIntent)
+            .create()
+            .start()
+            .resume()
+            .visible()
+
+        controller.get().onNewIntent(updatedIntent)
+
+        assertThat(controller.get().intent).isSameInstanceAs(initialIntent)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `ready ignores another ready intent`() {
+        val loadingIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
+        )
+        val initialReadyIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Ready("pk_test_123", null)
+        )
+        val updatedReadyIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Ready("pk_test_456", null)
+        )
+        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, loadingIntent)
+            .create()
+            .start()
+            .resume()
+            .visible()
+
+        controller.get().onNewIntent(initialReadyIntent)
+        controller.get().onNewIntent(updatedReadyIntent)
+
+        assertThat(controller.get().intent).isSameInstanceAs(initialReadyIntent)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `finishing activity ignores ready intent`() {
+        val loadingIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
+        )
+        val readyIntent = checkoutIntent(
+            AddressElementActivityContract.Args.CheckoutShipping.Ready("pk_test_123", null)
+        )
+        val controller = Robolectric.buildActivity(AddressElementActivity::class.java, loadingIntent)
+            .create()
+            .start()
+            .resume()
+            .visible()
+
+        controller.get().finish()
+        controller.get().onNewIntent(readyIntent)
+
+        assertThat(controller.get().intent).isSameInstanceAs(loadingIntent)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
     fun `loading checkout activity does not create ready view model`() {
         val args = AddressElementActivityContract.Args.CheckoutShipping.Loading("pk_test_123")
         val intent = AddressElementActivityContract.CheckoutShipping.createIntent(
@@ -203,5 +288,12 @@ internal class AddressElementActivityTest {
         )
 
         assertThat(parsed).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    private fun checkoutIntent(args: AddressElementActivityContract.Args.CheckoutShipping): Intent {
+        return AddressElementActivityContract.CheckoutShipping.createIntent(
+            ApplicationProvider.getApplicationContext(),
+            args,
+        )
     }
 }

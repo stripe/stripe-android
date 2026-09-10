@@ -83,6 +83,16 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `present suppresses duplicate presentations`() = runScenario {
+        shippingAddressElement.present()
+        shippingAddressElement.present()
+
+        activityLauncher.launchCalls.awaitItem()
+        activityLauncher.launchCalls.expectNoEvents()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `retained state transitions loading to ready when updating stops`() = runScenario(isUpdating = true) {
         shippingAddressElement.present()
 
