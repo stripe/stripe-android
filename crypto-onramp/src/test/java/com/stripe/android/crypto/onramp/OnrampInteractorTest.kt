@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -129,11 +130,16 @@ class OnrampInteractorTest {
 
     @Test
     fun testConfigureIsSuccessful() = runTest {
+        val application = RuntimeEnvironment.getApplication()
+        PaymentConfiguration.init(application, "pk_before_configure", "acct_before_configure")
         whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
 
         val result = interactor.configure(createConfigurationState())
 
         assert(result is OnrampConfigurationResult.Completed)
+        val paymentConfiguration = PaymentConfiguration.getInstance(application)
+        assertThat(paymentConfiguration.publishableKey).isEqualTo("pk_test_12345")
+        assertThat(paymentConfiguration.stripeAccountId).isNull()
     }
 
     @Test
@@ -797,6 +803,7 @@ class OnrampInteractorTest {
     @Test
     fun uncategorizedExceptionFallsBackToSafeUserMessage() = runTest {
         val application = mock<Application> {
+            on { applicationContext } doReturn RuntimeEnvironment.getApplication()
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn "Something went wrong. Please try again later."
         }
@@ -847,6 +854,7 @@ class OnrampInteractorTest {
     @Test
     fun appAttestationExceptionUsesSingleLocalizedFallbackUserMessage() = runTest {
         val application = mock<Application> {
+            on { applicationContext } doReturn RuntimeEnvironment.getApplication()
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn
                 "This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists."
@@ -1976,6 +1984,7 @@ class OnrampInteractorTest {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
         return mock {
+            on { applicationContext } doReturn runtimeApplication
             on { packageName } doReturn runtimeApplication.packageName
             on { getString(R.string.stripe_onramp_default_api_error_user_message) } doReturn
                 defaultApiErrorUserMessage
