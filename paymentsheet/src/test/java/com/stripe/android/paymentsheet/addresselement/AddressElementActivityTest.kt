@@ -135,11 +135,13 @@ internal class AddressElementActivityTest {
         ActivityScenario.launchActivityForResult<AddressElementActivity>(intent).use { scenario ->
             assertThat(scenario.state).isEqualTo(Lifecycle.State.RESUMED)
 
+            var isFinishing = false
             scenario.onActivity { activity ->
                 activity.onBackPressedDispatcher.onBackPressed()
+                isFinishing = activity.isFinishing
             }
 
-            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(isFinishing).isTrue()
             assertThat(
                 AddressElementActivityContract.CheckoutShipping.parseResult(
                     scenario.result.resultCode,
