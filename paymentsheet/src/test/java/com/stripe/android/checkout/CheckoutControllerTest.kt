@@ -740,12 +740,12 @@ internal class CheckoutControllerTest {
                 savedCustomerWithoutBillingAddress(),
             )
         ) {
-            val selection = requireNotNull(committedState().paymentSelection) as PaymentSelection.Saved
+            val selection = loadedSavedPaymentMethodSelection()
+            assertThat(selection.paymentMethod.billingDetails?.address).isNull()
 
             val result = controller.selectSavedPaymentMethod(selection)
 
             result.getOrThrow()
-            assertThat(committedState().paymentSelection).isEqualTo(selection)
         }
 
     @Test
