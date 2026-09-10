@@ -40,6 +40,7 @@ import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.asCallbackFor
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -492,7 +493,9 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions launches activity with correct parameters`() = testScenario {
+    fun `launchPaymentOptions launches activity with correct parameters`() = testScenario(
+        promotions = listOf(FakePaymentMethodMessagePromotionsHelper.klarnaPromotion),
+    ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.GooglePay
@@ -505,7 +508,7 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
+            promotions = listOf(FakePaymentMethodMessagePromotionsHelper.klarnaPromotion),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
@@ -895,6 +898,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Suppress("LongMethod")
     private fun testScenario(
+        promotions: List<PaymentMethodMessagePromotion>? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var immediateActionInvoked = false
@@ -952,6 +956,7 @@ internal class CheckoutSheetLauncherTest {
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
                     rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
+                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(promotions),
                 )
             }
 
