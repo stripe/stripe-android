@@ -712,9 +712,11 @@ internal class CheckoutControllerTest {
             initModifier = combine(
                 automaticTaxFor("billing"),
                 savedCustomerWithBillingAddress(),
-            )
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
         ) {
-            val selection = requireNotNull(committedState().paymentSelection) as PaymentSelection.Saved
+            val selection = loadedSavedPaymentMethodSelection()
+            val collectedDetails = committedState().collectedDetails
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "San Francisco"),
@@ -735,9 +737,9 @@ internal class CheckoutControllerTest {
 
             result.getOrThrow()
             val state = committedState()
-            assertThat(state.checkoutSessionResponse.liveMode).isTrue()
+            assertThat(state.checkoutSessionResponse.livemode).isTrue()
             assertThat(state.paymentSelection).isEqualTo(selection)
-            assertThat(state.collectedDetails.billingAddress).isNull()
+            assertThat(state.collectedDetails).isEqualTo(collectedDetails)
         }
 
     @Test
@@ -747,9 +749,10 @@ internal class CheckoutControllerTest {
                 automaticTaxFor("billing"),
                 savedCustomerWithBillingAddress(),
             ),
+            paymentSelection = PaymentSelection.GooglePay,
             assertLoadingConsumed = true,
         ) {
-            val selection = requireNotNull(committedState().paymentSelection) as PaymentSelection.Saved
+            val selection = loadedSavedPaymentMethodSelection()
             val requestReceived = CountDownLatch(1)
             val releaseResponse = CountDownLatch(1)
             networkRule.checkoutUpdate { response ->
@@ -767,21 +770,27 @@ internal class CheckoutControllerTest {
             }
 
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+            assertThat(committedState().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
             val result = async { controller.selectSavedPaymentMethod(selection) }
-            testScheduler.advanceUntilIdle()
+            try {
+                testScheduler.advanceUntilIdle()
 
-            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-            assertThat(isUpdatingTurbine.awaitItem()).isTrue()
-            assertThat(committedState().checkoutSessionResponse.liveMode).isFalse()
+                assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+                assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+                assertThat(committedState().checkoutSessionResponse.livemode).isFalse()
+                assertThat(committedState().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
-            releaseResponse.countDown()
-            result.await().getOrThrow()
+                releaseResponse.countDown()
+                result.await().getOrThrow()
 
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
-            val state = committedState()
-            assertThat(state.checkoutSessionResponse.liveMode).isTrue()
-            assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+                val state = committedState()
+                assertThat(state.checkoutSessionResponse.livemode).isTrue()
+                assertThat(state.paymentSelection).isEqualTo(selection)
+            } finally {
+                releaseResponse.countDown()
+            }
         }
 
     @Test
@@ -806,7 +815,7 @@ internal class CheckoutControllerTest {
     fun `selectSavedPaymentMethod skips tax update when saved method has no billing address`() =
         runMutationScenario(
             initModifier = combine(
-                automaticTaxFor("shipping"),
+                automaticTaxFor("billing"),
                 savedCustomerWithoutBillingAddress(),
             )
         ) {
@@ -1497,6 +1506,13 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
+
+        fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
+            val paymentMethod = requireNotNull(committedState().checkoutSessionResponse.customer)
+                .paymentMethods
+                .single()
+            return PaymentSelection.Saved(paymentMethod)
+        }
     }
 
     private companion object {
