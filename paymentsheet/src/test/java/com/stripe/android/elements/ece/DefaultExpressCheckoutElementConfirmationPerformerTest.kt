@@ -245,6 +245,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
+            stateHolder = stateHolder,
             logger = Logger.noop(),
             resultCallback = {},
         )

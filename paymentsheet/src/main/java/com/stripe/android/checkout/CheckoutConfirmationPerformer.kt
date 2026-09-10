@@ -24,6 +24,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 ) {
     fun confirm() {
         val state = stateHolder.state ?: return
+        if (!state.isOpen) return
         val paymentSelection = state.paymentSelection ?: return
         val arguments = operationCoordinator.tryBeginConfirmation {
           confirmationArgs(

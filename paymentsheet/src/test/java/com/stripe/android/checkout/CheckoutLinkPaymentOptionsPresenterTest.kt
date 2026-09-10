@@ -64,6 +64,16 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     }
 
     @Test
+    fun `payment options are not presented after checkout state is cleared`() = runScenario {
+        stateHolder.state = null
+
+        presenter.present()
+
+        verify(defaultPresenter, never()).present()
+        verifyLinkWasNotPresented()
+    }
+
+    @Test
     fun `eligible Link launches with exact arguments and keeps sheet open`() = runScenario {
         presenter.present()
 

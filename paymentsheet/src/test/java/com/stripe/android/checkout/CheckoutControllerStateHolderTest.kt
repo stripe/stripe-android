@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
@@ -172,6 +173,20 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `selection setters no-op after the checkout session expires`() = testScenario {
+        val expiredState = committedState(status = CheckoutSessionResponse.Status.EXPIRED)
+        stateHolder.state = expiredState
+
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+        stateHolder.setTemporarySelection("card")
+        stateHolder.setPreviousNewSelections(
+            Bundle().apply { putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION) },
+        )
+
+        assertThat(stateHolder.state).isEqualTo(expiredState)
+    }
+
+    @Test
     fun `projects selection, temporarySelection and previousNewSelections from a restored state`() = runTest {
         // Simulates process-death restore: a committed state is read back from SavedStateHandle by a
         // freshly constructed holder, and every selection projection must reflect it.
@@ -202,10 +217,12 @@ internal class CheckoutControllerStateHolderTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         requiresShippingAddress: Boolean = false,
+        status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(
             requiresShippingAddress = requiresShippingAddress,
+            status = status,
         ),
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),
