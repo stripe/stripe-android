@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkout.injection.CheckoutUiContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -12,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
@@ -21,18 +23,19 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    @CheckoutUiContext private val checkoutUiContext: CoroutineContext,
 ) {
     fun confirm() {
-        val state = stateHolder.state ?: return
-        val paymentSelection = state.paymentSelection ?: return
-        val arguments = operationCoordinator.tryBeginConfirmation {
-          confirmationArgs(
-              state = state,
-              paymentSelection = paymentSelection,
-          )
-        } ?: return
-        analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
-        viewModelScope.launch {
+        viewModelScope.launch(checkoutUiContext) {
+            val state = stateHolder.state ?: return@launch
+            val paymentSelection = state.paymentSelection ?: return@launch
+            val arguments = operationCoordinator.tryBeginConfirmation {
+                confirmationArgs(
+                    state = state,
+                    paymentSelection = paymentSelection,
+                )
+            } ?: return@launch
+            analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
             try {
                 confirmationHandler.start(arguments)
             } catch (error: CancellationException) {

@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementTestRunnerContext(
     private val presenter: CheckoutPresenter,
+    val controller: CheckoutController,
     private val countDownLatch: CountDownLatch,
 ) {
     fun presentPaymentOptions() {
@@ -102,6 +103,7 @@ internal fun runCheckoutPaymentElementTest(
             block(
                 CheckoutPaymentElementTestRunnerContext(
                     presenter = presenter,
+                    controller = controller,
                     countDownLatch = countDownLatch,
                 )
             )

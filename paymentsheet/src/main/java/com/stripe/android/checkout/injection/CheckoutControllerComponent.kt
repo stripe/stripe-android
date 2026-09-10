@@ -101,6 +101,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 @Component(
@@ -303,6 +304,10 @@ internal interface CheckoutControllerModule {
         fun provideEmbeddedVerticalProcessing(
             checkoutController: CheckoutController,
         ): StateFlow<Boolean> = checkoutController.isUpdating
+
+        @Provides
+        @CheckoutUiContext
+        fun provideCheckoutUiContext(): CoroutineContext = Dispatchers.Main.immediate
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
