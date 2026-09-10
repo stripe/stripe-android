@@ -729,6 +729,13 @@ step_bundles:
           timeout: 1200
           inputs:
             - content: ./gradlew splitInstrumentationTestReportsByClass
+      - script@1:
+          title: Merge instrumentation retry results
+          is_skippable: true
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - content: python3 "$BITRISE_SOURCE_DIR/scripts/merge_instrumentation_junit_reports.py"
       - bundle::export_test_results:
           inputs:
             - test_title: $test_title
