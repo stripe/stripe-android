@@ -13,12 +13,10 @@ internal fun createIntentStatusPoller(
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
         stripeRepository = FakeStripeRepository(enqueuedStatuses),
-        requestOptionsProvider = {
-            ApiRequest.Options(
-                apiKey = "key",
-                stripeAccount = "acct_123",
-            )
-        },
+        requestOptions = ApiRequest.Options(
+            apiKey = "key",
+            stripeAccount = "acct_123",
+        ),
         config = IntentStatusPoller.Config(
             clientSecret = "secret",
         ),

@@ -12,13 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultIntentStatusPoller @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val requestOptionsProvider: Provider<ApiRequest.Options>,
+    private val requestOptions: ApiRequest.Options,
     private val config: IntentStatusPoller.Config,
     private val dispatcher: CoroutineDispatcher,
 ) : IntentStatusPoller {
@@ -57,7 +56,7 @@ class DefaultIntentStatusPoller @Inject constructor(
     private suspend fun fetchIntentStatus(): StripeIntent.Status? {
         val paymentIntent = stripeRepository.retrievePaymentIntent(
             clientSecret = config.clientSecret,
-            options = requestOptionsProvider.get(),
+            options = requestOptions,
         )
         return paymentIntent.getOrNull()?.status
     }
