@@ -116,10 +116,6 @@ internal class AddressElementActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleNewIntent(intent)
-    }
-
-    private fun handleNewIntent(intent: Intent) {
         val updatedArgs = AddressElementActivityContract.Args.fromIntent(intent) ?: return
         val isValidTransition =
             !isFinishing &&
