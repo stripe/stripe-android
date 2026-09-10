@@ -1,11 +1,11 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import android.os.Bundle
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -75,7 +75,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
                 statusBarColor = statusBarColor,
             ),
             customer = state.customer,
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
         )
     }
 }

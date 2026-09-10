@@ -20,8 +20,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.BottomSheetScaffold
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 
 internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     @Assisted private val activity: EmbeddedSheetActivity,
-    @Assisted private val args: EmbeddedActivityArgs,
+    @Assisted private val state: EmbeddedActivityState.Ready,
     @Assisted private val activityResultCaller: ActivityResultCaller,
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
@@ -93,33 +93,30 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     }
 
     private fun createDismissalResult(): EmbeddedActivityResult {
-        return when (val launchMode = args.launchMode) {
-            is EmbeddedLaunchMode.Form -> EmbeddedActivityResult.Cancelled(
+        return when (state) {
+            is EmbeddedActivityState.Ready.Form -> EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
-                launchMode = launchMode,
+                launchMode = state.launchMode,
             )
-            is EmbeddedLaunchMode.Manage -> createManageResult(
+            is EmbeddedActivityState.Ready.Manage -> createManageResult(
                 shouldInvokeSelectionCallback = false,
-                launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedActivityState.Ready.PaymentOptions -> createPaymentOptionsCancellationResult()
         }
     }
 
     private fun createNavigatorResult(result: Boolean?): EmbeddedActivityResult {
-        return when (val launchMode = args.launchMode) {
-            is EmbeddedLaunchMode.Form -> createDismissalResult()
-            is EmbeddedLaunchMode.Manage -> createManageResult(
+        return when (state) {
+            is EmbeddedActivityState.Ready.Form -> createDismissalResult()
+            is EmbeddedActivityState.Ready.Manage -> createManageResult(
                 shouldInvokeSelectionCallback = result == true,
-                launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedActivityState.Ready.PaymentOptions -> createPaymentOptionsCancellationResult()
         }
     }
 
     private fun createManageResult(
         shouldInvokeSelectionCallback: Boolean,
-        launchMode: EmbeddedLaunchMode.Manage,
     ): EmbeddedActivityResult {
         return EmbeddedActivityResult.Complete(
             selection = selectionHolder.selection.value,
@@ -128,7 +125,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             customerState = customerStateHolder.customer.value,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
-            launchMode = launchMode,
+            launchMode = EmbeddedLaunchMode.Manage,
         )
     }
 
@@ -160,10 +157,10 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     }
 
     @AssistedFactory
-    interface Factory : EmbeddedSheetPresentation.Factory {
-        override fun create(
+    interface Factory {
+        fun create(
             activity: EmbeddedSheetActivity,
-            args: EmbeddedActivityArgs,
+            state: EmbeddedActivityState.Ready,
             activityResultCaller: ActivityResultCaller,
         ): ReadyEmbeddedSheetPresentation
     }

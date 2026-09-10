@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -9,6 +8,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
@@ -16,17 +16,16 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
-import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -73,20 +72,13 @@ internal class CheckoutSheetLauncherTest {
                 url = "https://www.test.com",
             ),
         )
-        val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
-            productUsage = setOf("Checkout"),
-            paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-            statusBarColor = null,
-            selection = null,
+        val expectedArgs = EmbeddedActivityState.Ready.Form(
+            context = readyContext(paymentMethodMetadata),
+            selectedPaymentMethodCode = code,
+            initialSelection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = listOf(promotion),
-            launchMode = EmbeddedLaunchMode.Form(
-                selectedPaymentMethodCode = code,
-            ),
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            promotion = promotion,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -115,8 +107,8 @@ internal class CheckoutSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(launchCall.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityState.Ready.Form
+        assertThat(launchCall.initialSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -131,8 +123,8 @@ internal class CheckoutSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(launchCall.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityState.Ready.Form
+        assertThat(launchCall.initialSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -146,8 +138,8 @@ internal class CheckoutSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(launchCall.selection).isNull()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityState.Ready.Form
+        assertThat(launchCall.initialSelection).isNull()
     }
 
     @Test
@@ -161,8 +153,8 @@ internal class CheckoutSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(launchCall.selection).isNull()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityState.Ready.Form
+        assertThat(launchCall.initialSelection).isNull()
     }
 
     @Test
@@ -201,7 +193,7 @@ internal class CheckoutSheetLauncherTest {
 
         val customerState = createCustomerState()
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = customerState,
@@ -224,7 +216,7 @@ internal class CheckoutSheetLauncherTest {
     fun `formActivityLauncher invokes immediate action when complete result has selection`() = testScenario {
         launchForm("cashapp")
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = null,
@@ -242,7 +234,7 @@ internal class CheckoutSheetLauncherTest {
     fun `formActivityLauncher does not invoke immediate action when the result is confirmed`() = testScenario {
         launchForm("cashapp")
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
             customerState = null,
@@ -261,7 +253,7 @@ internal class CheckoutSheetLauncherTest {
         val response = CheckoutSessionResponseFactory.create()
         sessionRefresher.enqueueRefreshAction {}
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = null,
@@ -284,7 +276,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `formActivityLauncher does not refresh checkout session when complete result has no response`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = null,
@@ -344,7 +336,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `form result handled correctly without prior launchForm call (simulates host recreation)`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
             customerState = null,
@@ -367,18 +359,11 @@ internal class CheckoutSheetLauncherTest {
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
-            productUsage = setOf("Checkout"),
-            paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-            statusBarColor = null,
-            selection = PaymentSelection.GooglePay,
+        val expectedArgs = EmbeddedActivityState.Ready.Manage(
+            context = readyContext(paymentMethodMetadata),
+            initialSelection = PaymentSelection.GooglePay,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.Manage,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         sheetLauncher.launchManage(
@@ -425,7 +410,7 @@ internal class CheckoutSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
@@ -446,7 +431,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `manageSheetLauncher invokes immediate action for saved selection when flagged`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             customerState = null,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             hasBeenConfirmed = false,
@@ -496,18 +481,11 @@ internal class CheckoutSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.GooglePay
-        val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
-            productUsage = setOf("Checkout"),
-            paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-            statusBarColor = null,
-            selection = selection,
+        val expectedArgs = EmbeddedActivityState.Ready.PaymentOptions(
+            context = readyContext(paymentMethodMetadata),
+            initialSelection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         sheetLauncher.launchPaymentOptions(
@@ -534,15 +512,16 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         val initialState = requireNotNull(embeddedContentState.value)
+        val initialCustomer = createCustomerState()
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = initialState.paymentMethodMetadata,
-            customerState = null,
+            customerState = initialCustomer,
             selection = null,
             configuration = initialState.configuration,
         )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        val loadingState = dummyActivityResultCallerScenario.awaitLaunchCall()
+            as EmbeddedActivityState.LoadingPaymentOptions
+        assertThat(loadingState.customerState).isEqualTo(initialCustomer)
 
         val refreshedMetadata = PaymentMethodMetadataFactory.create()
         val refreshedConfiguration = EmbeddedConfigurationFactory.create(merchantDisplayName = "Refreshed merchant")
@@ -557,13 +536,12 @@ internal class CheckoutSheetLauncherTest {
         mutationGate.complete(Unit)
         runCurrent()
 
-        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(refreshedMetadata)
-        assertThat(readyArgs.configuration).isEqualTo(refreshedConfiguration)
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall()
+            as EmbeddedActivityState.Ready.PaymentOptions
+        assertThat(readyArgs.context.paymentMethodMetadata).isEqualTo(refreshedMetadata)
+        assertThat(readyArgs.context.configuration).isEqualTo(refreshedConfiguration)
         assertThat(readyArgs.customerState).isEqualTo(refreshedCustomer)
-        assertThat(readyArgs.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(readyArgs.initialSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -584,8 +562,8 @@ internal class CheckoutSheetLauncherTest {
             selection = null,
             configuration = initialState.configuration,
         )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(loadingArgs).isInstanceOf<EmbeddedActivityState.LoadingPaymentOptions>()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -597,8 +575,8 @@ internal class CheckoutSheetLauncherTest {
         recreateSheetLauncher(TestLifecycleOwner(), recreatedLauncherState)
         runCurrent()
 
-        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(readyArgs).isInstanceOf<EmbeddedActivityState.Ready.PaymentOptions>()
         assertThat(recreatedLauncherState.isAwaitingPaymentOptionsReady).isFalse()
     }
 
@@ -620,16 +598,16 @@ internal class CheckoutSheetLauncherTest {
             selection = selectionHolder.selection.value,
             configuration = retainedState.configuration,
         )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(loadingArgs).isInstanceOf<EmbeddedActivityState.LoadingPaymentOptions>()
 
         mutationGate.complete(Unit)
         runCurrent()
 
-        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(retainedState.paymentMethodMetadata)
-        assertThat(readyArgs.configuration).isEqualTo(retainedState.configuration)
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall()
+            as EmbeddedActivityState.Ready.PaymentOptions
+        assertThat(readyArgs.context.paymentMethodMetadata).isEqualTo(retainedState.paymentMethodMetadata)
+        assertThat(readyArgs.context.configuration).isEqualTo(retainedState.configuration)
     }
 
     @Test
@@ -650,8 +628,8 @@ internal class CheckoutSheetLauncherTest {
             selection = null,
             configuration = initialState.configuration,
         )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(loadingArgs).isInstanceOf<EmbeddedActivityState.LoadingPaymentOptions>()
 
         embeddedContentState.value = null
         mutationGate.complete(Unit)
@@ -707,11 +685,12 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             configuration = EmbeddedConfigurationFactory.create(),
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
+            as EmbeddedActivityState.Ready.PaymentOptions
 
-        assertThat(launchCall.previousNewSelections.previousNewSelection("card"))
+        assertThat(launchCall.previousNewSelections["card"])
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(launchCall.previousNewSelections.previousNewSelection("cashapp"))
+        assertThat(launchCall.previousNewSelections["cashapp"])
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
@@ -744,9 +723,8 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `paymentOptionsResult merges returned previous new selections into selection holder`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
-        val returnedSelections = Bundle().apply {
-            stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-        }
+        val returnedSelections = PreviousNewSelections.empty
+            .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = returnedSelections,
             customerState = null,
@@ -770,7 +748,7 @@ internal class CheckoutSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
@@ -793,7 +771,7 @@ internal class CheckoutSheetLauncherTest {
         val expectedError = IllegalStateException("Refresh failed")
         sessionRefresher.enqueueRefreshAction { throw expectedError }
         val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
+            previousNewSelections = PreviousNewSelections.empty,
             customerState = null,
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
@@ -1044,6 +1022,18 @@ internal class CheckoutSheetLauncherTest {
             )
             dummyActivityResultCallerScenario.awaitLaunchCall()
         }
+    }
+
+    private fun readyContext(
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): EmbeddedActivityState.Context {
+        return EmbeddedActivityState.Context(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("Checkout"),
+            paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
+            statusBarColor = null,
+        )
     }
 
     private companion object {

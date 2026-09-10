@@ -8,6 +8,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.os.BundleCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.toArgs
+import com.stripe.android.paymentelement.embedded.toState
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -22,7 +24,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
         val activityArgs = savedInstanceState?.let {
             BundleCompat.getParcelable(it, STATE_ACTIVITY_ARGS, EmbeddedActivityArgs::class.java)
-        } ?: EmbeddedActivityArgs.fromIntent(intent) ?: run {
+        } ?: EmbeddedActivityArgs.fromIntent(intent)
+        val activityState = activityArgs?.toState()
+        if (activityState == null) {
             finish()
             return
         }
@@ -30,13 +34,13 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         renderEdgeToEdge()
         val coordinator = EmbeddedSheetActivityCoordinator(
             activity = this,
-            initialArgs = activityArgs,
+            initialState = activityState,
             presentationFactory = EmbeddedSheetPresentation,
         )
         this.coordinator = coordinator
         coordinator.register()
         setContent {
-            PaymentElementTheme(appearance = activityArgs.configuration.appearance) {
+            PaymentElementTheme(appearance = coordinator.currentState.appearance) {
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { coordinator.canDismiss() },
                 )
@@ -65,9 +69,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        EmbeddedActivityArgs.fromIntent(intent)?.let {
-            outState.putParcelable(STATE_ACTIVITY_ARGS, it)
-        }
+        coordinator?.currentState?.let { outState.putParcelable(STATE_ACTIVITY_ARGS, it.toArgs()) }
         super.onSaveInstanceState(outState)
     }
 

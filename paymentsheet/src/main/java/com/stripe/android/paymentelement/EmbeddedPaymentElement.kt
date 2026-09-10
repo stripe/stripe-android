@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement
 
 import android.app.Activity
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
@@ -23,6 +22,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
+import com.stripe.android.paymentelement.embedded.PreviousNewSelectionsParceler
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -45,6 +46,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import javax.inject.Inject
 
 @EmbeddedPaymentElementScope
@@ -766,10 +768,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
      */
     @Poko
     @Parcelize
+    @TypeParceler<PreviousNewSelections, PreviousNewSelectionsParceler>()
     class State internal constructor(
         internal val confirmationState: EmbeddedConfirmationStateHolder.State,
         internal val customer: CustomerState?,
-        internal val previousNewSelections: Bundle,
+        internal val previousNewSelections: PreviousNewSelections,
     ) : Parcelable
 
     internal companion object {

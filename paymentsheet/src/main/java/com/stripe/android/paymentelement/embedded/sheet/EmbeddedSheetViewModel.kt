@@ -7,7 +7,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,41 +23,42 @@ internal class EmbeddedSheetViewModel @Inject constructor(
     }
 
     class Factory(
-        private val argsSupplier: () -> EmbeddedActivityArgs,
+        private val stateSupplier: () -> EmbeddedActivityState.Ready,
     ) : ViewModelProvider.Factory {
         fun createReadyPresentation(
             activity: EmbeddedSheetActivity,
-            args: EmbeddedActivityArgs,
+            state: EmbeddedActivityState.Ready,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
             val viewModel = ViewModelProvider(activity, this)[EmbeddedSheetViewModel::class.java]
             return viewModel.embeddedSheetPresentationFactory.create(
                 activity = activity,
-                args = args,
+                state = state,
                 activityResultCaller = activityResultCaller,
             )
         }
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val args = argsSupplier()
+            val state = stateSupplier()
+            val context = state.context
             val customViewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             val component = DaggerEmbeddedSheetComponent.factory().build(
-                paymentMethodMetadata = args.paymentMethodMetadata,
-                statusBarColor = args.statusBarColor,
-                configuration = args.configuration,
-                productUsage = args.productUsage,
-                paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                paymentMethodMetadata = context.paymentMethodMetadata,
+                statusBarColor = context.statusBarColor,
+                configuration = context.configuration,
+                productUsage = context.productUsage,
+                paymentElementCallbackIdentifier = context.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),
-                promotions = args.promotions,
-                launchMode = args.launchMode,
+                promotions = state.promotions,
+                launchMode = state.launchMode,
                 viewModelScope = customViewModelScope,
             )
 
-            component.customerStateHolder.setCustomerState(args.customerState)
-            component.selectionHolder.setPreviousNewSelections(args.previousNewSelections)
-            component.selectionHolder.setSelection(args.selection)
+            component.customerStateHolder.setCustomerState(state.customerState)
+            component.selectionHolder.setPreviousNewSelections(state.previousNewSelections)
+            component.selectionHolder.setSelection(state.initialSelection)
 
             return component.viewModel as T
         }

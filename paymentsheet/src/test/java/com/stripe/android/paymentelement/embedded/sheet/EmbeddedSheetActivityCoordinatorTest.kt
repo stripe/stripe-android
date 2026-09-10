@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import android.content.Intent
-import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -14,7 +13,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
+import com.stripe.android.paymentelement.embedded.toArgs
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -40,7 +41,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     @Test
     fun `construction creates the presentation`() = runScenario {
         assertThat(createCall.activity).isSameInstanceAs(activity)
-        assertThat(createCall.args).isEqualTo(args)
+        assertThat(createCall.state).isEqualTo(state)
         assertThat(createCall.activityResultCaller).isSameInstanceAs(activity)
     }
 
@@ -84,18 +85,17 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
     @Test
     fun `valid loading to ready transition replaces and registers presentation`() = runScenario {
-        val readyArgs = createArgs(
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+        val readyState = createReadyState(
             callbackIdentifier = "updated_callback_identifier",
         )
-        val readyIntent = createIntent(readyArgs)
+        val readyIntent = createIntent(readyState)
 
         coordinator.handleNewIntent(readyIntent)
 
         assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
         val createCall = presentationFactory.createCalls.awaitItem()
         assertThat(createCall.activity).isSameInstanceAs(activity)
-        assertThat(createCall.args).isEqualTo(readyArgs)
+        assertThat(createCall.state).isEqualTo(readyState)
         assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
         assertThat(readyPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
         assertThat(activity.intent).isSameInstanceAs(readyIntent)
@@ -112,7 +112,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     @Test
     fun `loading intent is ignored`() = runScenario {
         assertTransitionIgnored(
-            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Loading))
+            createIntent(createLoadingState())
         )
     }
 
@@ -120,20 +120,17 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     fun `ready manage intent is ignored`() = runScenario {
         assertTransitionIgnored(
             createIntent(
-                createArgs(
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
-                    launchMode = EmbeddedLaunchMode.Manage,
-                )
+                createManageState()
             )
         )
     }
 
     @Test
     fun `ready coordinator ignores later ready intent`() = runScenario(
-        initialArgs = createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready),
+        initialState = createReadyState(),
     ) {
         assertTransitionIgnored(
-            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready))
+            createIntent(createReadyState())
         )
     }
 
@@ -142,14 +139,12 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         activity.finish()
 
         assertTransitionIgnored(
-            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready))
+            createIntent(createReadyState())
         )
     }
 
     private fun runScenario(
-        initialArgs: EmbeddedActivityArgs = createArgs(
-            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
-        ),
+        initialState: EmbeddedActivityState = createLoadingState(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val activity = Robolectric.buildActivity(EmbeddedSheetActivity::class.java).get()
@@ -161,14 +156,14 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         )
         val coordinator = EmbeddedSheetActivityCoordinator(
             activity = activity,
-            initialArgs = initialArgs,
+            initialState = initialState,
             presentationFactory = presentationFactory,
         )
         val createCall = presentationFactory.createCalls.awaitItem()
 
         Scenario(
             activity = activity,
-            args = initialArgs,
+            state = initialState,
             coordinator = coordinator,
             initialPresentation = initialPresentation,
             readyPresentation = readyPresentation,
@@ -183,7 +178,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
     private data class Scenario(
         val activity: EmbeddedSheetActivity,
-        val args: EmbeddedActivityArgs,
+        val state: EmbeddedActivityState,
         val coordinator: EmbeddedSheetActivityCoordinator,
         val initialPresentation: FakeEmbeddedSheetPresentation,
         val readyPresentation: FakeEmbeddedSheetPresentation,
@@ -212,13 +207,13 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         override fun create(
             activity: EmbeddedSheetActivity,
-            args: EmbeddedActivityArgs,
+            state: EmbeddedActivityState,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
-            createCalls.add(CreateCall(activity, args, activityResultCaller))
-            return when (args.presentationState) {
-                EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
-                EmbeddedActivityArgs.PresentationState.Ready -> readyPresentation
+            createCalls.add(CreateCall(activity, state, activityResultCaller))
+            return when (state) {
+                is EmbeddedActivityState.LoadingPaymentOptions -> initialPresentation
+                is EmbeddedActivityState.Ready -> readyPresentation
             }
         }
 
@@ -228,7 +223,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         data class CreateCall(
             val activity: EmbeddedSheetActivity,
-            val args: EmbeddedActivityArgs,
+            val state: EmbeddedActivityState,
             val activityResultCaller: ActivityResultCaller,
         )
     }
@@ -274,28 +269,47 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     private companion object {
         const val CONTENT_TEST_TAG = "coordinator_content"
 
-        fun createArgs(
-            presentationState: EmbeddedActivityArgs.PresentationState,
-            launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        fun createReadyState(
             callbackIdentifier: String = "callback_identifier",
-        ): EmbeddedActivityArgs {
-            return EmbeddedActivityArgs(
+        ): EmbeddedActivityState.Ready.PaymentOptions {
+            return EmbeddedActivityState.Ready.PaymentOptions(
+                context = createContext(callbackIdentifier),
+                initialSelection = null,
+                previousNewSelections = PreviousNewSelections.empty,
+                customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            )
+        }
+
+        fun createManageState(): EmbeddedActivityState.Ready.Manage {
+            return EmbeddedActivityState.Ready.Manage(
+                context = createContext("callback_identifier"),
+                initialSelection = null,
+                previousNewSelections = PreviousNewSelections.empty,
+                customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            )
+        }
+
+        fun createLoadingState(): EmbeddedActivityState.LoadingPaymentOptions {
+            return EmbeddedActivityState.LoadingPaymentOptions(
+                context = createContext("callback_identifier"),
+                initialSelection = null,
+                previousNewSelections = PreviousNewSelections.empty,
+                customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            )
+        }
+
+        private fun createContext(callbackIdentifier: String): EmbeddedActivityState.Context {
+            return EmbeddedActivityState.Context(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 productUsage = setOf("EmbeddedPaymentElement"),
                 paymentElementCallbackIdentifier = callbackIdentifier,
                 statusBarColor = null,
-                selection = null,
-                previousNewSelections = Bundle(),
-                customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                promotions = emptyList(),
-                launchMode = launchMode,
-                presentationState = presentationState,
             )
         }
 
-        fun createIntent(args: EmbeddedActivityArgs): Intent {
-            return Intent().putExtra(EmbeddedActivityArgs.EXTRA_ARGS, args)
+        fun createIntent(state: EmbeddedActivityState): Intent {
+            return Intent().putExtra(EmbeddedActivityArgs.EXTRA_ARGS, state.toArgs())
         }
     }
 }

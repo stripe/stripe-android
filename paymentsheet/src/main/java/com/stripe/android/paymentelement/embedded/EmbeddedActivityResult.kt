@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -9,15 +8,17 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 
 internal sealed interface EmbeddedActivityResult : Parcelable {
 
     val launchMode: EmbeddedLaunchMode
 
     @Parcelize
+    @TypeParceler<PreviousNewSelections, PreviousNewSelectionsParceler>()
     data class Complete(
         val selection: PaymentSelection?,
-        val previousNewSelections: Bundle,
+        val previousNewSelections: PreviousNewSelections,
         val hasBeenConfirmed: Boolean,
         val customerState: CustomerState?,
         val checkoutSessionResponse: CheckoutSessionResponse?,

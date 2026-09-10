@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
@@ -15,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -148,7 +148,11 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         )
         confirmationStateHolder.state = loadedState
         val stateHelper = FakeEmbeddedStateHelper()
-        stateHelper.state = if (loadedState != null) EmbeddedPaymentElement.State(loadedState, null, Bundle()) else null
+        stateHelper.state = if (loadedState != null) {
+            EmbeddedPaymentElement.State(loadedState, null, PreviousNewSelections.empty)
+        } else {
+            null
+        }
         val callbackHelper = FakeEmbeddedResultCallbackHelper(
             stateHelper = stateHelper
         )
