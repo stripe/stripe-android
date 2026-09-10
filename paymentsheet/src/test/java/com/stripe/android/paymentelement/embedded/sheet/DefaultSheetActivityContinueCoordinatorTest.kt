@@ -115,6 +115,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             stateHolder = stateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = LAUNCH_MODE,
             coroutineScope = this,
         )
@@ -166,6 +167,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = checkoutSessionResponse,
                 shouldInvokeSelectionCallback = false,
                 launchMode = LAUNCH_MODE,

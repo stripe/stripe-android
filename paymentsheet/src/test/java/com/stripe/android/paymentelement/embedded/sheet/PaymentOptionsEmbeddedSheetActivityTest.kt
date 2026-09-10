@@ -386,6 +386,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             selection = selection,
             previousNewSelections = previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,

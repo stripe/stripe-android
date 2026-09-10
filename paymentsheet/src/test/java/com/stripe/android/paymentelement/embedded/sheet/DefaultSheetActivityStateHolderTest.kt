@@ -447,6 +447,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -475,6 +476,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -509,6 +511,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -655,6 +658,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
@@ -666,6 +670,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
 
@@ -727,6 +732,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
     }
