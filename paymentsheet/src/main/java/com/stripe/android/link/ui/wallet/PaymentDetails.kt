@@ -346,7 +346,7 @@ internal fun RowScope.PaymentDetails(
             CardInfo(
                 modifier = modifier,
                 title = paymentDetails.displayName.resolve(),
-                subtitle = "•••• ${paymentDetails.last4}",
+                subtitle = stringResource(R.string.stripe_link_payment_method_last4, paymentDetails.last4),
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
         }
@@ -402,7 +402,7 @@ private fun RowScope.BankAccountInfo(
     PaymentMethodInfo(
         modifier = modifier,
         title = bankAccount.displayName.resolve(),
-        subtitle = "•••• ${bankAccount.last4}",
+        subtitle = stringResource(R.string.stripe_link_payment_method_last4, bankAccount.last4),
         icon = {
             BankIcon(bankAccount.bankIconCode)
         }

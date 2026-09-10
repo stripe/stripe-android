@@ -2,7 +2,10 @@ package com.stripe.android.link.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -32,11 +35,13 @@ internal class LinkAppBarScreenshotTest(
     @Test
     fun testLinkAppBarState() {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
-                LinkAppBar(
-                    state = testCase.state,
-                    onBackPressed = {},
-                )
+            CompositionLocalProvider(LocalLayoutDirection provides testCase.layoutDirection) {
+                DefaultLinkTheme {
+                    LinkAppBar(
+                        state = testCase.state,
+                        onBackPressed = {},
+                    )
+                }
             }
         }
     }
@@ -55,6 +60,17 @@ internal class LinkAppBarScreenshotTest(
                         isElevated = false,
                         linkBrand = LinkBrand.Link,
                     )
+                ),
+                TestCase(
+                    name = "LinkAppBarWithLogoAndCloseButtonRtl",
+                    state = LinkAppBarState(
+                        canNavigateBack = false,
+                        showHeader = true,
+                        title = null,
+                        isElevated = false,
+                        linkBrand = LinkBrand.Link,
+                    ),
+                    layoutDirection = LayoutDirection.Rtl,
                 ),
                 TestCase(
                     name = "OnelinkAppBarWithLogoAndCloseButton",
@@ -90,7 +106,11 @@ internal class LinkAppBarScreenshotTest(
         }
     }
 
-    internal data class TestCase(val name: String, val state: LinkAppBarState) {
+    internal data class TestCase(
+        val name: String,
+        val state: LinkAppBarState,
+        val layoutDirection: LayoutDirection = LayoutDirection.Ltr,
+    ) {
         override fun toString(): String = name
     }
 }

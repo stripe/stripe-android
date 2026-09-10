@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
@@ -31,8 +32,9 @@ internal class UpdateCardScreenshotTest(
 ) {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         SystemAppearance.entries,
-        listOf(FontSize.DefaultFont)
+        listOf(FontSize.DefaultFont),
     )
 
     @Test
