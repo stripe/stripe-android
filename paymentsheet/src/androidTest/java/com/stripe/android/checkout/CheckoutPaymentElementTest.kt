@@ -286,7 +286,6 @@ internal class CheckoutPaymentElementTest {
                 contentPage.assertHasSelectedLpm("cashapp")
                 callbacks.expectNoEvents()
                 releaseResponse.countDown()
-
                 waitForSessionTotal(controller, UPDATED_TOTAL)
                 contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
                 contentPage.assertLpmIsEnabled("card", true)
@@ -887,5 +886,7 @@ internal class CheckoutPaymentElementTest {
         const val BILLING_ADDRESS_ZIP = "94103"
         const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
         const val TAX_STATUS_COMPLETE = "complete"
+        const val REQUEST_TIMEOUT_SECONDS = 5L
+        const val UPDATE_RESPONSE_TIMEOUT_SECONDS = 15L
     }
 }
