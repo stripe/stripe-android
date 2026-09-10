@@ -30,10 +30,13 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementtestpages.BillingDetailsPage
+import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
@@ -48,6 +51,7 @@ internal class CheckoutPaymentElementTest {
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
+    private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
     private val verticalModePage = VerticalModePage(testRules.compose)
@@ -83,6 +87,71 @@ internal class CheckoutPaymentElementTest {
 
             // Backing out of the form must not clear the previously selected payment method.
             contentPage.assertHasSelectedLpm("cashapp")
+            context.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testCancellingPaymentOptionsRebindsUpdatedSavedPaymentMethod() {
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("billing_address_collection", "required")
+                    json.put(
+                        "customer",
+                        JSONObject()
+                            .put("id", "cus_123")
+                            .put("can_detach_payment_method", true)
+                            .put("payment_methods", JSONArray().put(savedCardJson(BILLING_ADDRESS_ZIP))),
+                    )
+                    json.getJSONObject("elements_session").remove("link_settings")
+                }
+            },
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+                ).getOrThrow()
+            },
+        ) { context ->
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
+                .isEqualTo(BILLING_ADDRESS_ZIP)
+
+            context.presentPaymentOptions()
+            verticalModePage.waitUntilVisible()
+            verticalModePage.clickEdit()
+            editPage.waitUntilVisible()
+            billingDetailsPage.zipCode.performTextReplacement(UPDATED_BILLING_ZIP)
+
+            networkRule.checkoutUpdate(
+                bodyPart("payment_method_to_update[payment_method_id]", SAVED_CARD.id),
+                bodyPart(
+                    "payment_method_to_update[billing_details][address][postal_code]",
+                    UPDATED_BILLING_ZIP,
+                ),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put(
+                        "customer",
+                        JSONObject()
+                            .put("id", "cus_123")
+                            .put("can_detach_payment_method", true)
+                            .put("payment_methods", JSONArray().put(savedCardJson(UPDATED_BILLING_ZIP))),
+                    )
+                }
+            }
+            editPage.update()
+            verticalModePage.waitUntilVisible()
+            Espresso.pressBack()
+
+            testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                controller.session.value?.paymentOption?.billingDetails?.address?.postalCode == UPDATED_BILLING_ZIP
+            }
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
+                .isEqualTo(UPDATED_BILLING_ZIP)
             context.markTestSucceeded()
         }
     }
@@ -449,6 +518,21 @@ internal class CheckoutPaymentElementTest {
         }
     }
 
+    private fun savedCardJson(postalCode: String): JSONObject {
+        return SAVED_CARD.createJson().put(
+            "billing_details",
+            JSONObject().put(
+                "address",
+                JSONObject()
+                    .put("line1", BILLING_ADDRESS_LINE_ONE)
+                    .put("city", BILLING_ADDRESS_CITY)
+                    .put("state", BILLING_ADDRESS_STATE)
+                    .put("country", "US")
+                    .put("postal_code", postalCode),
+            ),
+        )
+    }
+
     private fun automaticTaxResponse(
         total: Long,
         taxStatus: String,
@@ -507,7 +591,9 @@ internal class CheckoutPaymentElementTest {
         const val BILLING_ADDRESS_CITY = "San Francisco"
         const val BILLING_ADDRESS_STATE = "CA"
         const val BILLING_ADDRESS_ZIP = "94103"
+        const val UPDATED_BILLING_ZIP = "94107"
         const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
         const val TAX_STATUS_COMPLETE = "complete"
+        val SAVED_CARD = CardPaymentMethodDetails(id = "pm_12345", last4 = "4242")
     }
 }

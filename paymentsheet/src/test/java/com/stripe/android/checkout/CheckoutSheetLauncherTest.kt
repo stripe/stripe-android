@@ -854,6 +854,27 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `paymentOptionsResult cancelled rebinds saved selection to updated payment method`() = testScenario {
+        val paymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+        val updatedPaymentMethod = paymentMethod.copy(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(displayBrand = "visa")
+        )
+        selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
+        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
+
+        sheetStateHolder.sheetIsOpen = true
+        val result = EmbeddedActivityResult.Cancelled(
+            customerState = createCustomerState(paymentMethods = listOf(updatedPaymentMethod)),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Saved(updatedPaymentMethod))
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
     fun `paymentOptionsResult cancelled preserves valid saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
