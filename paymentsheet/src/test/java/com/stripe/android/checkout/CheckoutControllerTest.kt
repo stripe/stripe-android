@@ -396,6 +396,16 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `destroy removes payment element callbacks`() = runTest {
+        val controller = createController()
+        PaymentElementCallbackReferences[DEFAULT_INTEGRATION_NAME] = PaymentElementCallbacks.Builder().build()
+
+        controller.destroy()
+
+        assertThat(PaymentElementCallbackReferences[DEFAULT_INTEGRATION_NAME]).isNull()
+    }
+
+    @Test
     fun `clearPaymentOption clears payment option state`() = runMutationScenario(
         paymentSelection = PaymentSelection.GooglePay,
         temporarySelection = "card",
