@@ -88,6 +88,9 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(mutationStarted.isCompleted).isTrue()
 
             releaseMutation.complete(Unit)
+            expectNoEvents()
+            assertThat(mutation.isCompleted).isFalse()
+
             runCurrent()
 
             assertThat(mutation.await().isSuccess).isTrue()
@@ -159,7 +162,9 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `mutations are serialized without isUpdating flickering between them`() = runScenario {
+    fun `mutations are serialized without isUpdating flickering between them`() = runScenario(
+        uiContextProvider = { scheduler -> StandardTestDispatcher(scheduler) },
+    ) {
         val firstStarted = CompletableDeferred<Unit>()
         val releaseFirst = CompletableDeferred<Unit>()
         val secondStarted = CompletableDeferred<Unit>()
@@ -175,6 +180,7 @@ internal class CheckoutOperationCoordinatorTest {
                     Result.success(Unit)
                 }
             }
+            runCurrent()
             firstStarted.await()
             assertThat(awaitItem()).isTrue()
 
@@ -278,6 +284,49 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(laterMutation.await().getOrThrow()).isEqualTo("later")
             assertThat(awaitItem()).isTrue()
             assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `cancelling the UI context job does not strand mutation cleanup`() {
+        val uiJob = Job()
+
+        runScenario(
+            uiContextProvider = { scheduler ->
+                StandardTestDispatcher(scheduler) + uiJob
+            },
+        ) {
+            val callerDispatcher = UnconfinedTestDispatcher(testScheduler)
+
+            coordinator.isUpdating.test {
+                assertThat(awaitItem()).isFalse()
+
+                val mutation = backgroundScope.async(callerDispatcher) {
+                    coordinator.runMutation<Unit> {
+                        awaitCancellation()
+                    }
+                }
+                runCurrent()
+
+                assertThat(awaitItem()).isTrue()
+
+                uiJob.cancel()
+                mutation.cancel()
+                runCurrent()
+                mutation.join()
+
+                assertThat(coordinator.isUpdating.value).isFalse()
+                assertThat(awaitItem()).isFalse()
+
+                val laterMutation = backgroundScope.async(callerDispatcher) {
+                    coordinator.runMutation { Result.success(Unit) }
+                }
+                runCurrent()
+
+                assertThat(laterMutation.await().isSuccess).isTrue()
+                assertThat(awaitItem()).isTrue()
+                assertThat(awaitItem()).isFalse()
+            }
         }
     }
 

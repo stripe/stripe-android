@@ -44,7 +44,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     ): Result<T> {
         var admitted = false
         try {
-            withContext(NonCancellable + uiContext) {
+            withContext(uiContext + NonCancellable) {
                 synchronized(admissionLock) {
                     pendingMutations += 1
                     updateIsUpdating()
@@ -58,7 +58,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             }
         } finally {
             if (admitted) {
-                withContext(NonCancellable + uiContext) {
+                withContext(uiContext + NonCancellable) {
                     synchronized(admissionLock) {
                         pendingMutations -= 1
                         updateIsUpdating()
