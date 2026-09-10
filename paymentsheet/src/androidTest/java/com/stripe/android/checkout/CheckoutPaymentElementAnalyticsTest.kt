@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
@@ -41,6 +42,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     @Test
     fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementTest(
         networkRule = networkRule,
+        rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
@@ -86,6 +88,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     @Test
     fun testTotalChangeFailureSendsAnalyticsErrorCode() = runCheckoutPaymentElementTest(
         networkRule = networkRule,
+        rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         resultCallback = { result ->
             assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
             val failure = result as CheckoutController.Result.Failed

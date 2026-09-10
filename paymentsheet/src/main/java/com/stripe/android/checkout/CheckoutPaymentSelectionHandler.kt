@@ -41,6 +41,12 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
         immediateHandler.onSelectionComplete()
     }
 
+    override fun clearFailure() {
+        if (_state.value is VerticalPaymentSelectionHandler.State.Failed) {
+            _state.value = VerticalPaymentSelectionHandler.State.Idle
+        }
+    }
+
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
         if (_state.value is VerticalPaymentSelectionHandler.State.Selecting) return
 
@@ -48,11 +54,19 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
 
         coroutineScope.launch {
             try {
-                checkoutController.selectSavedPaymentMethod(selection).onSuccess {
-                    onSelectionComplete()
-                }
+                checkoutController.selectSavedPaymentMethod(selection).fold(
+                    onSuccess = {
+                        onSelectionComplete()
+                        _state.value = VerticalPaymentSelectionHandler.State.Idle
+                    },
+                    onFailure = { error ->
+                        _state.value = VerticalPaymentSelectionHandler.State.Failed(error)
+                    },
+                )
             } finally {
-                _state.value = VerticalPaymentSelectionHandler.State.Idle
+                if (_state.value is VerticalPaymentSelectionHandler.State.Selecting) {
+                    _state.value = VerticalPaymentSelectionHandler.State.Idle
+                }
             }
         }
     }

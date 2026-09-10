@@ -27,6 +27,7 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
     ) {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
+        assertThat(handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
         handler.select(selection, true)
 
         assertThat(events.awaitItem()).isEqualTo(Event.SelectionUpdated(selection, true))
@@ -41,6 +42,13 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
 
         assertThat(events.awaitItem()).isEqualTo(Event.SelectionCompleted)
         events.expectNoEvents()
+    }
+
+    @Test
+    fun `clearFailure is a no-op`() = runScenario(completion = null) {
+        handler.clearFailure()
+
+        assertThat(handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
     }
 
     @Test
