@@ -820,6 +820,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            walletsHeaderProvider = javax.inject.Provider { error("Not expected") },
         )
     }
 
@@ -880,6 +881,7 @@ internal class EmbeddedNavigatorTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
+            showsWalletsHeader = { false },
         )
         return screen to formInteractor
     }

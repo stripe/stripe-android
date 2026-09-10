@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -214,6 +215,7 @@ internal class EmbeddedNavigator private constructor(
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val customerStateHolder: CustomerStateHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
+            private val showsWalletsHeader: () -> Boolean,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -233,6 +235,7 @@ internal class EmbeddedNavigator private constructor(
                 val state by sheetActivityStateHolder.state.collectAsState()
                 FormScreenContent(
                     interactor = formInteractor,
+                    showsWalletsHeader = showsWalletsHeader(),
                     onClick = {
                         confirmationHelper.confirm()
                     },
@@ -260,6 +263,7 @@ internal class EmbeddedNavigator private constructor(
                 private val confirmationHelper: SheetActivityConfirmationHelper,
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
                 private val customerStateHolder: CustomerStateHolder,
+                private val walletsHeaderProvider: Provider<SheetWalletsHeader>,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
                     val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
@@ -275,6 +279,9 @@ internal class EmbeddedNavigator private constructor(
                         embeddedSelectionHolder = embeddedSelectionHolder,
                         customerStateHolder = customerStateHolder,
                         launchMode = launchMode,
+                        showsWalletsHeader = {
+                            walletsHeaderProvider.get().isVisible()
+                        },
                     )
                 }
             }

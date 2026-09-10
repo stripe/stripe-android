@@ -48,6 +48,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val sheetActivityRegistrar: SheetActivityRegistrar,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
+    private val walletsHeader: SheetWalletsHeader,
 ) : EmbeddedSheetPresentation {
     override fun register() {
         sheetActivityRegistrar.registerAndBootstrap(
@@ -147,8 +148,13 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         val screen by navigator.screen.collectAsState()
         var hasResult by remember { mutableStateOf(false) }
         if (!hasResult) {
+            val walletsHeaderState = walletsHeader.stateFor(screen)
             Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                EmbeddedSheetScreenContent(navigator, screen)
+                EmbeddedSheetScreenContent(
+                    navigator = navigator,
+                    screen = screen,
+                    walletsHeaderState = walletsHeaderState,
+                )
             }
             LaunchedEffect(navigator) {
                 navigator.result.collect { result ->
@@ -173,6 +179,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
 internal fun EmbeddedSheetScreenContent(
     navigator: EmbeddedNavigator,
     screen: EmbeddedNavigator.Screen,
+    walletsHeaderState: SheetWalletsHeader.State?,
 ) {
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -197,12 +204,21 @@ internal fun EmbeddedSheetScreenContent(
             val headerText by remember(screen) {
                 screen.title()
             }.collectAsState()
-            headerText?.let { text ->
-                H4Text(
-                    text = text.resolve(),
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .padding(horizontalPadding),
+            if (walletsHeaderState == null) {
+                headerText?.let { text ->
+                    H4Text(
+                        text = text.resolve(),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .padding(horizontalPadding),
+                    )
+                }
+            }
+
+            walletsHeaderState?.let { state ->
+                SheetWalletsHeaderContent(
+                    state = state.walletsState,
+                    dividerSpacing = state.dividerSpacing,
                 )
             }
 
