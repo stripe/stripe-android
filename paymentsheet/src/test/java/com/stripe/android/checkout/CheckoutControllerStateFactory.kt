@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
@@ -10,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -34,7 +34,7 @@ internal object CheckoutControllerStateFactory {
         savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
             SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
-        previousNewSelections: Bundle = Bundle(),
+        previousNewSelections: PreviousNewSelections = PreviousNewSelections.empty,
         linkEagerPresentationSuppressed: Boolean = false,
     ): CheckoutControllerState {
         return CheckoutControllerState(

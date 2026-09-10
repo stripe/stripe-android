@@ -1,13 +1,12 @@
 package com.stripe.android.checkout
 
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.previousNewSelection
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -65,8 +64,8 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     override val temporarySelection: StateFlow<String?> =
         stateFlow.mapAsStateFlow { it?.temporarySelection }
 
-    override val previousNewSelections: Bundle
-        get() = state?.previousNewSelections ?: Bundle()
+    override val previousNewSelections: PreviousNewSelections
+        get() = state?.previousNewSelections ?: PreviousNewSelections.empty
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
@@ -78,16 +77,20 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         state = current.copy(temporarySelection = code)
     }
 
-    override fun setPreviousNewSelections(bundle: Bundle) {
+    override fun setPreviousNewSelections(selections: PreviousNewSelections) {
         val current = requireState(operation = "setPreviousNewSelections") ?: return
-        val previousNewSelections = Bundle(current.previousNewSelections).apply {
-            putAll(bundle)
-        }
-        state = current.copy(previousNewSelections = previousNewSelections)
+        state = current.copy(
+            previousNewSelections = current.previousNewSelections.mergedWith(selections),
+        )
+    }
+
+    override fun clearPreviousNewSelections() {
+        val current = requireState(operation = "clearPreviousNewSelections") ?: return
+        state = current.copy(previousNewSelections = PreviousNewSelections.empty)
     }
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
-        return previousNewSelections.previousNewSelection(code)
+        return previousNewSelections[code]
     }
 
     /**

@@ -24,9 +24,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -263,22 +263,21 @@ internal class EmbeddedSheetActivityTest {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                        .build(),
-                    productUsage = setOf("EmbeddedPaymentElement"),
-                    paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
-                    statusBarColor = null,
-                    selection = selection,
-                    previousNewSelections = Bundle(),
+                input = EmbeddedActivityState.Ready.Manage(
+                    context = EmbeddedActivityState.Context(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                        productUsage = setOf("EmbeddedPaymentElement"),
+                        paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
+                        statusBarColor = null,
+                        linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
+                        promotions = emptyList(),
+                    ),
+                    initialSelection = selection,
+                    previousNewSelections = PreviousNewSelections.empty,
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                         paymentMethods = paymentMethods,
                     ),
-                    linkAccountInfo = LinkAccountUpdate.Value(null),
-                    promotions = emptyList(),
-                    launchMode = EmbeddedLaunchMode.Manage,
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 ),
             )
         ).use { scenario ->

@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.os.Bundle
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -22,6 +21,7 @@ import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -358,9 +358,8 @@ internal class CheckoutStateLoaderTest {
     fun `reload carries the temporary selection and previous new selections forward`() = runScenario {
         val seeded = committedState(
             temporarySelection = "card",
-            previousNewSelections = Bundle().apply {
-                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-            },
+            previousNewSelections = PreviousNewSelections.empty
+                .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION),
         )
 
         loader.reload(seeded)
@@ -383,9 +382,8 @@ internal class CheckoutStateLoaderTest {
         // configuration load must start from a clean slate rather than carrying them forward.
         stateHolder.state = committedState(
             temporarySelection = "card",
-            previousNewSelections = Bundle().apply {
-                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-            },
+            previousNewSelections = PreviousNewSelections.empty
+                .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION),
         )
 
         val state = loadInitial().state
@@ -494,7 +492,7 @@ internal class CheckoutStateLoaderTest {
         savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
             SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
-        previousNewSelections: Bundle = Bundle(),
+        previousNewSelections: PreviousNewSelections = PreviousNewSelections.empty,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(

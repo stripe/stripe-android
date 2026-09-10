@@ -38,23 +38,24 @@ internal class DefaultEmbeddedSelectionHolderTest {
         assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         assertThat(selectionHolder.previousNewSelections.isEmpty).isFalse()
-        assertThat(selectionHolder.previousNewSelections.size()).isEqualTo(1)
+        assertThat(selectionHolder.previousNewSelections["cashapp"])
+            .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
     @Test
-    fun `initializing with empty savedStateHandle stores previousNewSelections bundle`() = testScenario {
-        val savedBundle = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
+    fun `initializing with empty savedStateHandle stores previousNewSelections`() = testScenario {
+        val savedSelections = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
 
-        assertThat(savedBundle).isNotNull()
-        assertThat(savedBundle?.isEmpty).isTrue()
+        assertThat(savedSelections).isNotNull()
+        assertThat(savedSelections?.isEmpty).isTrue()
     }
 
     @Test
     fun `setting new selection persists previousNewSelections in savedStateHandle`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
-        val savedBundle = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
-        assertThat(savedBundle?.previousNewSelection("cashapp"))
+        val savedSelections = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
+        assertThat(savedSelections?.let(PreviousNewSelections::fromBundle)?.get("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
         val restoredHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
@@ -80,9 +81,9 @@ internal class DefaultEmbeddedSelectionHolderTest {
         setup = {
             set(
                 EMBEDDED_PREVIOUS_SELECTIONS_KEY,
-                Bundle().apply {
-                    putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-                }
+                PreviousNewSelections.empty
+                    .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+                    .toBundle()
             )
         },
     ) {
@@ -124,24 +125,23 @@ internal class DefaultEmbeddedSelectionHolderTest {
     @Test
     fun `setting previousNewSelections updates previousNewSelections`() = testScenario {
         assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
-        val previousNewSelections = Bundle().apply {
-            putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-        }
+        val previousNewSelections = PreviousNewSelections.empty
+            .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         selectionHolder.setPreviousNewSelections(previousNewSelections)
         assertThat(selectionHolder.previousNewSelections.isEmpty).isFalse()
-        assertThat(selectionHolder.previousNewSelections.size()).isEqualTo(1)
+        assertThat(selectionHolder.previousNewSelections["cashapp"])
+            .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
     @Test
-    fun `setting previousNewSelections persists bundle in savedStateHandle`() = testScenario {
-        val previousNewSelections = Bundle().apply {
-            putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-        }
+    fun `setting previousNewSelections persists in savedStateHandle`() = testScenario {
+        val previousNewSelections = PreviousNewSelections.empty
+            .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
         selectionHolder.setPreviousNewSelections(previousNewSelections)
 
-        val savedBundle = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
-        assertThat(savedBundle?.previousNewSelection("cashapp"))
+        val savedSelections = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
+        assertThat(savedSelections?.let(PreviousNewSelections::fromBundle)?.get("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
