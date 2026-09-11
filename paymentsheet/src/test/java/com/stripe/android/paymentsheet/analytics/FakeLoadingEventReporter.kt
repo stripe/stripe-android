@@ -26,7 +26,7 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         _elementsSessionLoadFailedTurbine.ensureAllEventsConsumed()
     }
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         _loadStartedTurbine.add(
             LoadStartedCall(
                 initializedViaCompose = initializedViaCompose,
@@ -46,7 +46,7 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         )
     }
 
-    override fun onLoadFailed(error: Throwable) {
+    override fun onLoadFailed(error: Throwable, publishableKey: String) {
         _loadFailedTurbine.add(
             LoadFailedCall(
                 error = error,
