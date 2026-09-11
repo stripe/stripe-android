@@ -8,6 +8,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
@@ -121,7 +122,7 @@ class GooglePayRepositoryTest {
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
-            googlePayConfig = GooglePayConfig(context),
+            googlePayConfig = GooglePayConfig(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             paymentsClientFactory = { paymentsClient },
             errorReporter = errorReporter,
             logger = Logger.noop(),

@@ -92,7 +92,7 @@ internal class DefaultGooglePayRepositoryFactoryTest {
         }
 
     @Test
-    fun `uses explicit credentials`() =
+    fun `uses credentials from GooglePayConfig constructed with explicit credentials`() =
         runScenario(allowNoExistingPaymentMethodForGooglePay = false, googlePayConfig = googlePayConfig) {
             val request = readyRequest()
             assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()

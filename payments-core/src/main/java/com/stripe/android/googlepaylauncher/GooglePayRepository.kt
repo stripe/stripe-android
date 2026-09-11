@@ -85,7 +85,7 @@ internal class DefaultGooglePayRepository(
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        googlePayConfig,
+        googlePayConfig = googlePayConfig,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks
