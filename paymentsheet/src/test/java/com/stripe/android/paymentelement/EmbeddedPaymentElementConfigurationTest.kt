@@ -2,7 +2,10 @@ package com.stripe.android.paymentelement
 
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
@@ -16,9 +19,25 @@ import org.junit.Test
 
 class EmbeddedPaymentElementConfigurationTest {
 
+    @Test
+    @OptIn(ApiConfigurationPreview::class)
+    fun `api configuration is included in common configuration`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Test Merchant")
+            .apiConfiguration(
+                ApiConfiguration("pk_test_123").stripeAccountId("acct_123")
+            )
+            .build()
+
+        val apiConfiguration = configuration.asCommonConfiguration().apiConfiguration
+
+        assertThat(apiConfiguration?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(apiConfiguration?.stripeAccountId).isEqualTo("acct_123")
+    }
+
     @OptIn(
         ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
         CardFundingFilteringPrivatePreview::class,
+        ApiConfigurationPreview::class
     )
     @Test
     fun `newBuilder round-trips all properties`() {
@@ -68,6 +87,9 @@ class EmbeddedPaymentElementConfigurationTest {
             .termsDisplay(mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER))
             .opensCardScannerAutomatically(true)
             .userOverrideCountry("GB")
+            .apiConfiguration(
+                ApiConfiguration("pk_test_123").stripeAccountId("acct_123")
+            )
             .build()
 
         val roundTripped = original.newBuilder().build()
@@ -85,6 +107,6 @@ class EmbeddedPaymentElementConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(23)
+        assertThat(propertyCount).isEqualTo(24)
     }
 }
