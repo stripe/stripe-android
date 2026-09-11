@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -932,18 +933,18 @@ internal class CheckoutControllerTest {
     @Test
     fun `commitShippingAddress waits for an in-flight mutation before committing shipping details`() =
         runMutationScenario {
-            val mutationStarted = CountDownLatch(1)
+            val mutationStarted = CompletableDeferred<Unit>()
             val releaseMutation = CountDownLatch(1)
             networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
-                mutationStarted.countDown()
+                mutationStarted.complete(Unit)
                 releaseMutation.await(10, TimeUnit.SECONDS)
                 successResponseFactory().invoke(response)
             }
 
             val mutation = async { controller.applyPromotionCode("10OFF") }
-            assertThat(mutationStarted.await(10, TimeUnit.SECONDS)).isTrue()
+            mutationStarted.await()
 
             val address = fullAddress.build()
             val originalResponse = committedState().checkoutSessionResponse
