@@ -2,16 +2,20 @@
 
 package com.stripe.android.checkout
 
+import androidx.annotation.MainThread
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,23 +41,32 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
     ): Result<T> {
-        synchronized(admissionLock) {
-            pendingMutations += 1
-            updateIsUpdating()
-        }
+        var admitted = false
+        try {
+            withContext(Dispatchers.Main.immediate) {
+                synchronized(admissionLock) {
+                    pendingMutations += 1
+                    admitted = true
+                    updateIsUpdating()
+                }
+            }
 
-        return try {
-            mutex.withLock {
+            return mutex.withLock {
                 block()
             }
         } finally {
-            synchronized(admissionLock) {
-                pendingMutations -= 1
-                updateIsUpdating()
+            if (admitted) {
+                withContext(NonCancellable + Dispatchers.Main.immediate) {
+                    synchronized(admissionLock) {
+                        pendingMutations -= 1
+                        updateIsUpdating()
+                    }
+                }
             }
         }
     }
 
+    @MainThread
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
@@ -103,24 +116,28 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private suspend fun completeConfirmation(
         mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
     ) {
-        val wasRestored = synchronized(admissionLock) {
-            if (!confirmationInFlight || confirmationCompletionClaimed) {
-                return
-            } else {
-                confirmationCompletionClaimed = true
-                confirmationWasRestored
+        val wasRestored = withContext(Dispatchers.Main.immediate) {
+            synchronized(admissionLock) {
+                if (!confirmationInFlight || confirmationCompletionClaimed) {
+                    return@withContext null
+                } else {
+                    confirmationCompletionClaimed = true
+                    confirmationWasRestored
+                }
             }
-        }
+        } ?: return
 
         try {
             mapResult(wasRestored)?.let(resultCallback::onResult)
         } finally {
-            synchronized(admissionLock) {
-                confirmationInFlight = false
-                confirmationWasRestored = false
-                confirmationCompletionClaimed = false
-                mutex.unlock()
-                updateIsUpdating()
+            withContext(NonCancellable + Dispatchers.Main.immediate) {
+                synchronized(admissionLock) {
+                    confirmationInFlight = false
+                    confirmationWasRestored = false
+                    confirmationCompletionClaimed = false
+                    mutex.unlock()
+                    updateIsUpdating()
+                }
             }
         }
     }

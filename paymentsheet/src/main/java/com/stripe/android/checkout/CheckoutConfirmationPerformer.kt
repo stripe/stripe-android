@@ -9,6 +9,7 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -23,16 +24,16 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val state = stateHolder.state ?: return
-        val paymentSelection = state.paymentSelection ?: return
-        val arguments = operationCoordinator.tryBeginConfirmation {
-          confirmationArgs(
-              state = state,
-              paymentSelection = paymentSelection,
-          )
-        } ?: return
-        analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            val state = stateHolder.state ?: return@launch
+            val paymentSelection = state.paymentSelection ?: return@launch
+            val arguments = operationCoordinator.tryBeginConfirmation {
+                confirmationArgs(
+                    state = state,
+                    paymentSelection = paymentSelection,
+                )
+            } ?: return@launch
+            analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
             try {
                 confirmationHandler.start(arguments)
             } catch (error: CancellationException) {

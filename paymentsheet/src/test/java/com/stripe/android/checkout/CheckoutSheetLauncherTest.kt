@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -43,9 +44,12 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,6 +62,9 @@ import org.robolectric.RobolectricTestRunner
 internal class CheckoutSheetLauncherTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @get:Rule
     val paymentConfigurationTestRule = PaymentConfigurationTestRule(applicationContext)
@@ -903,6 +910,7 @@ internal class CheckoutSheetLauncherTest {
         promotions: List<PaymentMethodMessagePromotion>? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         var immediateActionInvoked = false
         val testScope = this
         val lifecycleOwner = TestLifecycleOwner()

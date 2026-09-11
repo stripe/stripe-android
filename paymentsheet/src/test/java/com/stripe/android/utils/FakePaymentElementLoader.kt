@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
@@ -41,6 +42,8 @@ internal class FakePaymentElementLoader(
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
+
+    val loadCompletion = CompletableDeferred<Unit>()
 
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
@@ -96,7 +99,7 @@ internal class FakePaymentElementLoader(
     ): Result<PaymentElementLoader.State> {
         lastIntegrationConfiguration = integrationConfiguration
         delay(delay)
-        return if (shouldFail) {
+        val result: Result<PaymentElementLoader.State> = if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))
         } else {
             val configuration = integrationConfiguration.commonConfiguration
@@ -119,5 +122,7 @@ internal class FakePaymentElementLoader(
                 )
             )
         }
+        loadCompletion.complete(Unit)
+        return result
     }
 }

@@ -18,9 +18,17 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -28,6 +36,9 @@ import kotlin.test.Test
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutConfirmationPerformerTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `confirm does nothing when state is not loaded`() = runScenario(state = null) {
@@ -76,6 +87,35 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm admits only one immediate confirmation`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+    ) {
+        withContext(Dispatchers.Main.immediate) {
+            performer.confirm()
+            performer.confirm()
+        }
+
+        confirmationHandler.startTurbine.awaitItem()
+        confirmationHandler.startTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `confirm from a background context emits updating on Main`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+        mainDispatcherProvider = { StandardTestDispatcher(it) },
+    ) {
+        performer.confirm()
+
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        confirmationHandler.startTurbine.expectNoEvents()
+
+        testScheduler.runCurrent()
+
+        assertThat(operationCoordinator.isUpdating.value).isTrue()
+        confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
     fun `confirm records the payment selection for analytics`() = runScenario(
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
@@ -114,8 +154,13 @@ internal class CheckoutConfirmationPerformerTest {
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
+        mainDispatcherProvider: (TestCoroutineScheduler) -> CoroutineDispatcher = {
+            UnconfinedTestDispatcher(it)
+        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val mainDispatcher = mainDispatcherProvider(testScheduler)
+        Dispatchers.setMain(mainDispatcher)
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
@@ -149,9 +194,11 @@ internal class CheckoutConfirmationPerformerTest {
 
         Scenario(
             performer = performer,
+            operationCoordinator = operationCoordinator,
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             stateHolder = stateHolder,
+            testScheduler = testScheduler,
         ).block()
 
         confirmationHandler.validate()
@@ -161,9 +208,11 @@ internal class CheckoutConfirmationPerformerTest {
 
     private class Scenario(
         val performer: CheckoutConfirmationPerformer,
+        val operationCoordinator: CheckoutOperationCoordinator,
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
+        val testScheduler: TestCoroutineScheduler,
     )
 
     private companion object {

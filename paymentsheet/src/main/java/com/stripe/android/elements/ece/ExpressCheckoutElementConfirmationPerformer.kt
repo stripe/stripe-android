@@ -15,6 +15,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,27 +35,26 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
-        val confirmationArgs = operationCoordinator.tryBeginConfirmation {
-            val state = stateHolder.state ?: run {
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
-                )
-                return@tryBeginConfirmation null
-            }
-            getConfirmationArgs(
-                state = state,
-                expressButton = expressButton,
-            ) ?: run {
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
-                )
-                null
-            }
-        } ?: return
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            val confirmationArgs = operationCoordinator.tryBeginConfirmation {
+                val state = stateHolder.state ?: run {
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
+                    )
+                    return@tryBeginConfirmation null
+                }
+                getConfirmationArgs(
+                    state = state,
+                    expressButton = expressButton,
+                ) ?: run {
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+                    )
+                    null
+                }
+            } ?: return@launch
 
-        analyticsPerformer.onExpressCheckoutElementConfirmationStarted(expressButton.toSelection())
-
-        viewModelScope.launch {
+            analyticsPerformer.onExpressCheckoutElementConfirmationStarted(expressButton.toSelection())
             try {
                 confirmationHandler.start(confirmationArgs)
             } catch (error: CancellationException) {

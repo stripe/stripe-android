@@ -29,10 +29,18 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -40,6 +48,9 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `confirm reports unexpected error when state is not loaded`() = runScenario(
@@ -201,6 +212,49 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         }
     }
 
+    @Test
+    fun `confirm admits only one immediate confirmation`() {
+        val state = createState()
+
+        runScenario(
+            state = state,
+            expressButton = createGooglePayExpressButton(
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
+            ),
+        ) {
+            withContext(Dispatchers.Main.immediate) {
+                performer.confirm(expressButton)
+                performer.confirm(expressButton)
+            }
+
+            confirmationHandler.startTurbine.awaitItem()
+            confirmationHandler.startTurbine.expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `confirm from a background context emits updating on Main`() {
+        val state = createState()
+
+        runScenario(
+            state = state,
+            expressButton = createGooglePayExpressButton(
+                paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
+            ),
+            mainDispatcherProvider = { StandardTestDispatcher(it) },
+        ) {
+            performer.confirm(expressButton)
+
+            assertThat(operationCoordinator.isUpdating.value).isFalse()
+            confirmationHandler.startTurbine.expectNoEvents()
+
+            testScheduler.runCurrent()
+
+            assertThat(operationCoordinator.isUpdating.value).isTrue()
+            confirmationHandler.startTurbine.awaitItem()
+        }
+    }
+
     private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
@@ -233,8 +287,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     private fun runScenario(
         state: CheckoutControllerState?,
         expressButton: ExpressButton,
+        mainDispatcherProvider: (TestCoroutineScheduler) -> CoroutineDispatcher = {
+            UnconfinedTestDispatcher(it)
+        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val mainDispatcher = mainDispatcherProvider(testScheduler)
+        Dispatchers.setMain(mainDispatcher)
         val confirmationHandler = FakeConfirmationHandler()
         val errorReporter = FakeErrorReporter()
         val savedStateHandle = SavedStateHandle()
@@ -270,11 +329,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
         Scenario(
             performer = performer,
+            operationCoordinator = operationCoordinator,
             confirmationHandler = confirmationHandler,
             errorReporter = errorReporter,
             paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
+            testScheduler = testScheduler,
         ).block()
 
         confirmationHandler.validate()
@@ -285,10 +346,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
+        val operationCoordinator: CheckoutOperationCoordinator,
         val confirmationHandler: FakeConfirmationHandler,
         val errorReporter: FakeErrorReporter,
         val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
+        val testScheduler: TestCoroutineScheduler,
     )
 }

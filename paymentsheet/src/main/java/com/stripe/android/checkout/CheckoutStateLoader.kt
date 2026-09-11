@@ -15,8 +15,10 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -105,7 +107,7 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        stateHolder.state = CheckoutControllerState(
+        val newState = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
@@ -119,7 +121,10 @@ internal class CheckoutStateLoader @Inject constructor(
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
 
-        customerStateHolder.setCustomerState(loadResults.customer)
+        withContext(Dispatchers.Main.immediate) {
+            stateHolder.state = newState
+            customerStateHolder.setCustomerState(loadResults.customer)
+        }
     }
 
     private suspend fun loadPaymentElements(
