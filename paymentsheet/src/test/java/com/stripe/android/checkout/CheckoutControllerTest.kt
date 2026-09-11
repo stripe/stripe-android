@@ -719,7 +719,7 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             val previousResponse = committedState().checkoutSessionResponse
             val response = previousResponse.copy(
-                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 5099L)),
+                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
                 automaticTaxEnabled = true,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             )
@@ -736,7 +736,7 @@ internal class CheckoutControllerTest {
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099.0)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
