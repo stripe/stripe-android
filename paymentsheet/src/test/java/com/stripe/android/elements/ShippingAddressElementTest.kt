@@ -80,6 +80,30 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `present passes ShippingAddressElement configuration to the address form`() {
+        val appearance = ShippingAddressElement.Configuration.Appearance()
+            .themeMode(ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+        val configuration = CheckoutController.Configuration()
+            .shippingAddressElement(
+                ShippingAddressElement.Configuration()
+                    .title("Shipping address")
+                    .buttonTitle("Use this address")
+                    .appearance(appearance)
+            )
+            .build()
+
+        runScenario(configuration = configuration) {
+            shippingAddressElement.present()
+
+            val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+            assertThat(config.title).isEqualTo("Shipping address")
+            assertThat(config.buttonTitle).isEqualTo("Use this address")
+            assertThat(config.appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
     fun `present suppresses duplicate presentations`() = runScenario {
         shippingAddressElement.present()
         shippingAddressElement.present()
@@ -269,9 +293,12 @@ internal class ShippingAddressElementTest {
 
     private fun runScenario(
         configured: Boolean = true,
+        configuration: CheckoutController.Configuration.State =
+            CheckoutControllerStateFactory.create().configuration,
         block: suspend Scenario.() -> Unit,
     ) = runScenario(
         configured = configured,
+        configuration = configuration,
         commitShippingAddress = FakeCommitShippingAddress(
             CompletableDeferred(Result.success(Unit)),
         ),
@@ -280,6 +307,7 @@ internal class ShippingAddressElementTest {
 
     private fun runScenario(
         configured: Boolean,
+        configuration: CheckoutController.Configuration.State,
         commitShippingAddress: FakeCommitShippingAddress,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -288,7 +316,7 @@ internal class ShippingAddressElementTest {
             savedStateHandle = savedStateHandle,
         )
         if (configured) {
-            stateHolder.state = CheckoutControllerStateFactory.create()
+            stateHolder.state = CheckoutControllerStateFactory.create(configuration = configuration)
         }
         val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         val paymentConfiguration = RecordingProvider(
