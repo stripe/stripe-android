@@ -29,9 +29,11 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -713,20 +715,25 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `commitShippingAddress stores local details and reloads payment element state`() =
-        runMutationScenario {
-            val response = committedState().checkoutSessionResponse
+    fun `commitShippingAddress commits caller-provided response and shipping details without another tax request`() =
+        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
+            val previousResponse = committedState().checkoutSessionResponse
+            val response = previousResponse.copy(
+                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+            )
             val address = fullAddress.build()
 
             val result = controller.commitShippingAddress(
                 name = "John",
                 address = address,
+                updatedCheckoutSessionResponse = response,
             )
 
             result.getOrThrow()
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
@@ -921,6 +928,48 @@ internal class CheckoutControllerTest {
 
             // A single loading window spanned both operations, with no flicker to false in between.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+        }
+
+    @Test
+    fun `commitShippingAddress waits for an in-flight mutation before committing shipping details`() =
+        runMutationScenario {
+            val mutationStarted = CompletableDeferred<Unit>()
+            val releaseMutation = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                mutationStarted.complete(Unit)
+                releaseMutation.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            mutationStarted.await()
+
+            val address = fullAddress.build()
+            val originalResponse = committedState().checkoutSessionResponse
+            val commit = async {
+                controller.commitShippingAddress(
+                    name = "John",
+                    address = address,
+                    updatedCheckoutSessionResponse = originalResponse,
+                )
+            }
+            testScheduler.advanceUntilIdle()
+
+            assertThat(commit.isCompleted).isFalse()
+
+            releaseMutation.countDown()
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(commit.await().isSuccess).isTrue()
+
+            val state = committedState()
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
+            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
+            assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+                address.asPaymentSheet()
+            )
         }
 
     // region allowedShippingCountries validation

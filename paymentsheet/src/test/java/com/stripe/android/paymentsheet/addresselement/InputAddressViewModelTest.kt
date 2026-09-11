@@ -1,15 +1,28 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -54,6 +67,7 @@ class InputAddressViewModelTest {
             resultStateHolder,
             eventReporter,
             placesClient = null,
+            taxRegionUpdater = createTaxRegionUpdater(),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -62,6 +76,28 @@ class InputAddressViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val networkRule = NetworkRule()
+
+    private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
+        return CheckoutSessionTaxRegionUpdater(
+            CheckoutSessionRepository(
+                clientParams = ElementsSessionClientParams(
+                    mobileAppId = "com.stripe.android.paymentsheet.test",
+                    mobileSessionIdProvider = { "test_session" },
+                ),
+                stripeNetworkClient = DefaultStripeNetworkClient(),
+                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = ApplicationProvider.getApplicationContext(),
+                    publishableKey = "pk_test_123",
+                ),
+                publishableKeyProvider = { "pk_test_123" },
+                stripeAccountIdProvider = { "acct_123" },
+            ),
+        )
+    }
 
     @Test
     fun `onScreenShown fires onShow with initial country`() {
@@ -1002,22 +1038,86 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `checkout shipping save emits checkout success without performing additional work`() {
+    fun `checkout shipping save updates tax from submitted address and returns updated response`() =
+        runCheckoutSaveScenario {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[line2]", "Floor 2"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.getJSONArray("checkout_items").getJSONObject(0)
+                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .put("total", 5099)
+                }
+            }
+
+            resultStateHolder.result.test {
+                assertThat(awaitItem()).isNull()
+                viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
+                assertThat(result.checkoutSessionResponse.id).isEqualTo(response.id)
+                assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+                assertThat(result.checkoutSessionResponse).isNotEqualTo(response)
+            }
+        }
+
+    @Test
+    fun `checkout shipping save without automatic tax returns original response without request`() =
+        runCheckoutSaveScenario(automaticTaxEnabled = false) {
+            resultStateHolder.result.test {
+                assertThat(awaitItem()).isNull()
+                viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
+                assertThat(result.checkoutSessionResponse).isSameInstanceAs(response)
+            }
+        }
+
+    @Test
+    fun `checkout shipping save with billing tax source returns original response without request`() =
+        runCheckoutSaveScenario(taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING) {
+            resultStateHolder.result.test {
+                assertThat(awaitItem()).isNull()
+                viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
+                assertThat(result.checkoutSessionResponse).isSameInstanceAs(response)
+            }
+        }
+
+    private fun runCheckoutSaveScenario(
+        automaticTaxEnabled: Boolean = true,
+        taxAddressSource: CheckoutSessionResponse.TaxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        block: suspend CheckoutSaveScenario.() -> Unit,
+    ) = runTest {
+        val response = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = automaticTaxEnabled,
+            taxAddressSource = taxAddressSource,
+        )
         val viewModel = createViewModel(
             argsFactory = { config ->
                 AddressElementActivityContract.Args.CheckoutShipping(
                     publishableKey = "pk_123",
                     config = config,
+                    checkoutSessionResponse = response,
                 )
             },
         )
-
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
-        )
+        CheckoutSaveScenario(viewModel, response).block()
     }
+
+    private data class CheckoutSaveScenario(
+        val viewModel: InputAddressViewModel,
+        val response: CheckoutSessionResponse,
+    )
 
     @Test
     fun `isInlineAutocompleteEnabled is always true`() {
@@ -1049,6 +1149,7 @@ class InputAddressViewModelTest {
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
+            taxRegionUpdater = createTaxRegionUpdater(),
         ).also { viewModelStoreRule.track(it) }
     }
 
