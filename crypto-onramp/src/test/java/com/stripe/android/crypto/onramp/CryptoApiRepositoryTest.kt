@@ -59,6 +59,7 @@ class CryptoApiRepositoryTest {
     )
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
+    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
     fun testGrantingPartnerMerchantPermissionsSucceeds() {
@@ -253,22 +254,22 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveMissingIdentifiers(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
             assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
                 .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrThrow().identifiers)
@@ -403,20 +404,20 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/crs_carf_declaration")
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
             assertThat(result.getOrThrow().text)
                 .isEqualTo("I confirm this declaration.")
             assertThat(result.getOrThrow().version)
