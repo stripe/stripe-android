@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
@@ -134,8 +135,10 @@ internal class OnrampInteractor @Inject constructor(
             )
         }
 
-        // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
-        // `LinkController.configure()` to do it.
+        PaymentConfiguration.init(
+            context = application.applicationContext,
+            publishableKey = configurationState.publishableKey,
+        )
         val linkResult = linkController.configure(
             LinkController.Configuration(
                 merchantDisplayName = configurationState.merchantDisplayName,

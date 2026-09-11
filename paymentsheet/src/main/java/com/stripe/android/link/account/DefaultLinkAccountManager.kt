@@ -87,6 +87,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return runCatching {
             val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
             linkRepository.createLinkAccountSession(
+                apiConfiguration = config.apiConfiguration,
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 intentToken = config.stripeIntent.clientSecret ?: config.elementsSessionId,
                 linkMode = config.linkMode,
@@ -127,6 +128,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession> {
         return runCatching {
             linkRepository.logOut(
+                apiConfiguration = config.apiConfiguration,
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 consumerAccountPublishableKey = linkAccount.consumerPublishableKey,
             ).getOrThrow()
@@ -201,6 +203,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
             linkRepository.createPaymentMethod(
+                apiConfiguration = config.apiConfiguration,
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethod = linkPaymentMethod,
                 clientAttributionMetadata = config.clientAttributionMetadata,
@@ -215,6 +218,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return if (linkAccountValue != null) {
             linkAccountValue.let { account ->
                 linkRepository.createCardPaymentDetails(
+                    apiConfiguration = config.apiConfiguration,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     userEmail = account.email,
                     stripeIntent = config.stripeIntent,
@@ -239,6 +243,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
         return linkAccountValue?.let { account ->
             linkRepository.createPaymentDetailsFromPaymentMethod(
+                apiConfiguration = config.apiConfiguration,
                 paymentMethod = paymentMethod,
                 userEmail = account.email,
                 stripeIntent = config.stripeIntent,
@@ -265,6 +270,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             val paymentDetails = cardPaymentDetails.paymentDetails
             val paymentMethodCreateParams = cardPaymentDetails.originalParams
             linkRepository.shareCardPaymentDetails(
+                apiConfiguration = config.apiConfiguration,
                 id = paymentDetails.id,
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
@@ -279,6 +285,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccount != null) {
             linkRepository.createBankAccountPaymentDetails(
+                apiConfiguration = config.apiConfiguration,
                 bankAccountId = bankAccountId,
                 userEmail = linkAccount.email,
                 consumerSessionClientSecret = linkAccount.clientSecret,
@@ -304,6 +311,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
             linkRepository.sharePaymentDetails(
+                apiConfiguration = config.apiConfiguration,
                 paymentDetailsId = paymentDetailsId,
                 consumerSessionClientSecret = account.clientSecret,
                 expectedPaymentMethodType = expectedPaymentMethodType,
@@ -380,6 +388,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?: return Result.failure(NoLinkAccountFoundException())
         linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(
+            apiConfiguration = config.apiConfiguration,
             consumerSessionClientSecret = linkAccount.clientSecret,
             isResendSmsCode = isResendSmsCode
         )
@@ -397,6 +406,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.confirmVerification(
+            apiConfiguration = config.apiConfiguration,
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
@@ -415,6 +425,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?: return Result.failure(NoLinkAccountFoundException())
 
         return linkRepository.postConsentUpdate(
+            apiConfiguration = config.apiConfiguration,
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
         )
@@ -424,6 +435,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listPaymentDetails(
+            apiConfiguration = config.apiConfiguration,
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = linkAccount.clientSecret,
         ).onSuccess { paymentDetailsList ->
@@ -437,6 +449,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listShippingAddresses(
+            apiConfiguration = config.apiConfiguration,
             consumerSessionClientSecret = linkAccount.clientSecret,
         )
     }
@@ -445,6 +458,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.deletePaymentDetails(
+            apiConfiguration = config.apiConfiguration,
             paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = linkAccount.clientSecret,
         )
@@ -457,6 +471,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.updatePaymentDetails(
+            apiConfiguration = config.apiConfiguration,
             updateParams = updateParams,
             consumerSessionClientSecret = linkAccount.clientSecret,
         ).map { updatedPaymentDetails ->
@@ -473,6 +488,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.updatePhoneNumber(
+            apiConfiguration = config.apiConfiguration,
             consumerSessionClientSecret = linkAccount.clientSecret,
             phoneNumber = phoneNumber,
         ).map { consumerSession ->
