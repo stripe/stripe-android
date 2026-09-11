@@ -58,6 +58,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         starterArgs.config.appearance.parseAppearance()
 
+        disableAutofillForUserKey()
+
         viewModel.registerForActivityResult(
             activityResultCaller = this,
             lifecycleOwner = this,

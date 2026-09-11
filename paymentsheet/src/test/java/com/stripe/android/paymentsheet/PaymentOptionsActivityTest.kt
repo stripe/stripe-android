@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
+import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -127,6 +128,40 @@ internal class PaymentOptionsActivityTest {
             ).isEqualTo(
                 PaymentOptionsActivityResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
             )
+        }
+    }
+
+    @Test
+    fun `user key excludes activity hierarchy from autofill`() {
+        PaymentConfiguration.init(context, "uk_test_123")
+
+        runActivityScenario { scenario ->
+            scenario.onActivity { activity ->
+                assertThat(activity.window.decorView.importantForAutofill)
+                    .isEqualTo(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS)
+            }
+        }
+    }
+
+    @Test
+    fun `publishable key leaves activity hierarchy autofill importance unchanged`() {
+        runActivityScenario { scenario ->
+            scenario.onActivity { activity ->
+                assertThat(activity.window.decorView.importantForAutofill)
+                    .isEqualTo(View.IMPORTANT_FOR_AUTOFILL_AUTO)
+            }
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.M])
+    fun `user key does not access autofill APIs before Android O`() {
+        PaymentConfiguration.init(context, "uk_test_123")
+
+        runActivityScenario { scenario ->
+            scenario.onActivity { activity ->
+                assertThat(activity.isFinishing).isFalse()
+            }
         }
     }
 

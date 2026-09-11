@@ -29,11 +29,18 @@ class ApiKeyValidator {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        private const val USER_KEY_PREFIX = "uk_"
+
         private val DEFAULT = ApiKeyValidator()
 
         @JvmStatic
         fun get(): ApiKeyValidator {
             return DEFAULT
+        }
+
+        @JvmStatic
+        fun isUserKey(apiKey: String): Boolean {
+            return apiKey.startsWith(USER_KEY_PREFIX)
         }
     }
 }

@@ -49,4 +49,24 @@ class ApiKeyValidatorTest {
             ApiKeyValidator.get().requireValid(null)
         }
     }
+
+    @Test
+    fun `isUserKey returns true for live user key`() {
+        assertEquals(true, ApiKeyValidator.isUserKey("uk_live_123"))
+    }
+
+    @Test
+    fun `isUserKey returns true for test user key`() {
+        assertEquals(true, ApiKeyValidator.isUserKey("uk_test_123"))
+    }
+
+    @Test
+    fun `isUserKey returns false for live publishable key`() {
+        assertEquals(false, ApiKeyValidator.isUserKey("pk_live_123"))
+    }
+
+    @Test
+    fun `isUserKey returns false for test publishable key`() {
+        assertEquals(false, ApiKeyValidator.isUserKey("pk_test_123"))
+    }
 }
