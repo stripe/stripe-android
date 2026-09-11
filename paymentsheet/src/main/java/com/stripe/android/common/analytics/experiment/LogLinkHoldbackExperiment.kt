@@ -4,6 +4,7 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHol
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.ProvidedDefaultValues
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
@@ -93,7 +94,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             }
             else -> {
                 // Link is disabled — perform the lookup for experiment logging.
-                isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
+                isReturningUser(
+                    email = customerEmail,
+                    sessionId = elementsSession.elementsSessionId,
+                    apiConfiguration = state.paymentMethodMetadata.apiConfiguration,
+                )
             }
         }
 
@@ -149,11 +154,13 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun isReturningUser(
         email: String,
         sessionId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Boolean {
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(
                 email = email,
                 sessionId = sessionId,
+                apiConfiguration = apiConfiguration,
             )
             .map { it.exists }
             .onFailure {

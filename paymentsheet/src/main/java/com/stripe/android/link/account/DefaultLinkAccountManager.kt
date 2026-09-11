@@ -90,6 +90,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 intentToken = config.stripeIntent.clientSecret ?: config.elementsSessionId,
                 linkMode = config.linkMode,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }
     }
@@ -129,6 +130,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkRepository.logOut(
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 consumerAccountPublishableKey = linkAccount.consumerPublishableKey,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onSuccess {
             errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
@@ -204,6 +206,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethod = linkPaymentMethod,
                 clientAttributionMetadata = config.clientAttributionMetadata,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }
     }
@@ -220,6 +223,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     stripeIntent = config.stripeIntent,
                     consumerSessionClientSecret = account.clientSecret,
                     clientAttributionMetadata = config.clientAttributionMetadata,
+                    apiConfiguration = config.apiConfiguration,
                 ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
@@ -245,6 +249,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = account.clientSecret,
                 clientAttributionMetadata = config.clientAttributionMetadata,
                 customerEphemeralKey = customerEphemeralKey,
+                apiConfiguration = config.apiConfiguration,
             ).onSuccess {
                 errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
@@ -269,6 +274,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 clientAttributionMetadata = config.clientAttributionMetadata,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }
     }
@@ -283,6 +289,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 userEmail = linkAccount.email,
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 clientAttributionMetadata = config.clientAttributionMetadata,
+                apiConfiguration = config.apiConfiguration,
             )
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)
@@ -312,6 +319,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 allowRedisplay = allowRedisplay,
                 apiKey = apiKey,
                 clientAttributionMetadata = config.clientAttributionMetadata,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }
     }
@@ -381,7 +389,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            isResendSmsCode = isResendSmsCode
+            isResendSmsCode = isResendSmsCode,
+            apiConfiguration = config.apiConfiguration,
         )
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -400,6 +409,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
+            apiConfiguration = config.apiConfiguration,
         )
             .onSuccess {
                 linkEventsReporter.on2FAComplete()
@@ -417,6 +427,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.postConsentUpdate(
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
+            apiConfiguration = config.apiConfiguration,
         )
     }
 
@@ -426,6 +437,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.listPaymentDetails(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = linkAccount.clientSecret,
+            apiConfiguration = config.apiConfiguration,
         ).onSuccess { paymentDetailsList ->
             _consumerState.value = _consumerState.value
                 ?.withPaymentDetailsResponse(paymentDetailsList)
@@ -438,6 +450,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listShippingAddresses(
             consumerSessionClientSecret = linkAccount.clientSecret,
+            apiConfiguration = config.apiConfiguration,
         )
     }
 
@@ -447,6 +460,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.deletePaymentDetails(
             paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = linkAccount.clientSecret,
+            apiConfiguration = config.apiConfiguration,
         )
     }
 
@@ -459,6 +473,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.updatePaymentDetails(
             updateParams = updateParams,
             consumerSessionClientSecret = linkAccount.clientSecret,
+            apiConfiguration = config.apiConfiguration,
         ).map { updatedPaymentDetails ->
             updatedPaymentDetails.also {
                 _consumerState.value = _consumerState.value?.withUpdatedPaymentDetail(
@@ -475,6 +490,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.updatePhoneNumber(
             consumerSessionClientSecret = linkAccount.clientSecret,
             phoneNumber = phoneNumber,
+            apiConfiguration = config.apiConfiguration,
         ).map { consumerSession ->
             setAccount(consumerSession = consumerSession)
         }

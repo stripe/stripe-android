@@ -197,7 +197,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>
     ): Result<SharePaymentDetails> {
-        sharePaymentDetailsCalls.add(SharePaymentDetailsCall(extraParams))
+        sharePaymentDetailsCalls.add(SharePaymentDetailsCall(extraParams, requestOptions))
         return Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     }
 
@@ -264,6 +264,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
 
     data class SharePaymentDetailsCall(
         val extraParams: Map<String, Any?>,
+        val requestOptions: ApiRequest.Options
     )
 
     data class CreatePaymentDetailsFromPaymentMethodCall(
