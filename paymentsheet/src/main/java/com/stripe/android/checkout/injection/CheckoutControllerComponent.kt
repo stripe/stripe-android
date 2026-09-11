@@ -301,8 +301,10 @@ internal interface CheckoutControllerModule {
         @Provides
         @EmbeddedVerticalProcessing
         fun provideEmbeddedVerticalProcessing(
-            checkoutController: CheckoutController,
-        ): StateFlow<Boolean> = checkoutController.isUpdating
+            confirmationHandler: ConfirmationHandler,
+        ): StateFlow<Boolean> {
+            return confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming }
+        }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
