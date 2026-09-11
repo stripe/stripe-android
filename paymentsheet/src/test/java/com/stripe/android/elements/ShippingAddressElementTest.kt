@@ -162,6 +162,30 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `present passes ShippingAddressElement configuration to the address form`() {
+        val appearance = ShippingAddressElement.Configuration.Appearance()
+            .themeMode(ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+        val configuration = CheckoutController.Configuration()
+            .shippingAddressElement(
+                ShippingAddressElement.Configuration()
+                    .title("Shipping address")
+                    .buttonTitle("Use this address")
+                    .appearance(appearance)
+            )
+            .build()
+
+        runScenario(configuration = configuration) {
+            shippingAddressElement.present()
+
+            val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+            assertThat(config.title).isEqualTo("Shipping address")
+            assertThat(config.buttonTitle).isEqualTo("Use this address")
+            assertThat(config.appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
     fun `present suppresses duplicate presentations`() = runScenario {
         shippingAddressElement.present()
         shippingAddressElement.present()
