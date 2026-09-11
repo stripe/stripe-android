@@ -24,7 +24,7 @@ class NativeLinkActivityContractTest {
     fun before() {
         PaymentConfiguration.init(
             context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test_abcdefg"
+            publishableKey = "pk_test_abcdefg",
         )
     }
 
