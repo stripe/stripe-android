@@ -14,12 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
@@ -812,6 +814,7 @@ class PaymentSheet internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration.State? = null,
     ) : Parcelable {
 
         @JvmOverloads
@@ -917,6 +920,7 @@ class PaymentSheet internal constructor(
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
             externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
             customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
+            apiConfiguration = null,
         )
 
         /**
@@ -952,6 +956,7 @@ class PaymentSheet internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration.State? = null
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1129,6 +1134,17 @@ class PaymentSheet internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            /**
+             * Sets the API credentials to use for PaymentSheet or FlowController.
+             *
+             * When not set, the payment element uses the credentials initialized through
+             * [com.stripe.android.PaymentConfiguration].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            internal fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+                this.apiConfiguration = apiConfiguration.build()
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1154,6 +1170,7 @@ class PaymentSheet internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -1196,6 +1213,12 @@ class PaymentSheet internal constructor(
                 @Suppress("DEPRECATION")
                 googlePlacesApiKey?.let { googlePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
+                apiConfiguration?.let {
+                    @OptIn(ApiConfigurationPreview::class)
+                    apiConfiguration(
+                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                    )
+                }
             }
     }
 
