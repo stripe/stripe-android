@@ -43,10 +43,13 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -904,98 +907,102 @@ internal class CheckoutSheetLauncherTest {
         promotions: List<PaymentMethodMessagePromotion>? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        var immediateActionInvoked = false
-        val testScope = this
-        val lifecycleOwner = TestLifecycleOwner()
-        val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val customerStateHolder = DefaultCustomerStateHolder(
-            savedStateHandle = savedStateHandle,
-            selection = selectionHolder.selection,
-            customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata),
-            paymentMethodMetadataFlow = stateFlowOf(null),
-        )
-        val sheetStateHolder = SheetStateHolder(savedStateHandle)
-        val errorReporter = FakeErrorReporter()
-        val sessionRefresher = FakeCheckoutSessionRefresher()
-        val logger = FakeLogger()
-        val confirmationHandler = FakeConfirmationHandler()
-        val operationCoordinator = CheckoutOperationCoordinator(
-            confirmationHandler = confirmationHandler,
-            sheetStateHolder = sheetStateHolder,
-            sessionRefresher = sessionRefresher,
-            logger = logger,
-            uiContext = UnconfinedTestDispatcher(testScheduler),
-            resultCallback = CheckoutController.ResultCallback {},
-        )
-        val launcherState = CheckoutSheetLauncherState(savedStateHandle)
-        val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(
-            EmbeddedContentHelperStateHolder.State(
-                paymentMethodMetadata = paymentMethodMetadata,
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedConfigurationFactory.create(),
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        try {
+            var immediateActionInvoked = false
+            val testScope = this
+            val lifecycleOwner = TestLifecycleOwner()
+            val savedStateHandle = SavedStateHandle()
+            val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+            val customerStateHolder = DefaultCustomerStateHolder(
+                savedStateHandle = savedStateHandle,
+                selection = selectionHolder.selection,
+                customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata),
+                paymentMethodMetadataFlow = stateFlowOf(null),
             )
-        )
-
-        DummyActivityResultCaller.test {
-            fun createSheetLauncher(
-                owner: TestLifecycleOwner,
-                state: CheckoutSheetLauncherState,
-            ): CheckoutSheetLauncher {
-                return CheckoutSheetLauncher(
-                    activityResultCaller = activityResultCaller,
-                    lifecycleOwner = owner,
-                    selectionHolder = selectionHolder,
-                    customerStateHolder = customerStateHolder,
-                    sheetStateHolder = sheetStateHolder,
-                    errorReporter = errorReporter,
-                    sessionRefresher = sessionRefresher,
-                    operationCoordinator = operationCoordinator,
-                    launcherState = state,
-                    embeddedContentState = embeddedContentState,
-                    logger = logger,
-                    coroutineScope = testScope,
-                    productUsage = setOf("Checkout"),
-                    statusBarColor = null,
-                    paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-                    rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
-                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(promotions),
-                )
-            }
-
-            val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
-            val registerCall = awaitRegisterCall()
-            val launcher = awaitNextRegisteredLauncher()
-
-            assertThat(registerCall).isNotNull()
-            assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
-
-            Scenario(
-                selectionHolder = selectionHolder,
-                lifecycleOwner = lifecycleOwner,
-                customerStateHolder = customerStateHolder,
-                dummyActivityResultCallerScenario = this,
-                registerCall = registerCall,
-                launcher = launcher,
-                sheetLauncher = sheetLauncher,
+            val sheetStateHolder = SheetStateHolder(savedStateHandle)
+            val errorReporter = FakeErrorReporter()
+            val sessionRefresher = FakeCheckoutSessionRefresher()
+            val logger = FakeLogger()
+            val confirmationHandler = FakeConfirmationHandler()
+            val operationCoordinator = CheckoutOperationCoordinator(
+                confirmationHandler = confirmationHandler,
                 sheetStateHolder = sheetStateHolder,
-                errorReporter = errorReporter,
-                immediateActionWasInvoked = { immediateActionInvoked },
                 sessionRefresher = sessionRefresher,
                 logger = logger,
-                operationCoordinator = operationCoordinator,
-                launcherState = launcherState,
-                savedStateHandle = savedStateHandle,
-                embeddedContentState = embeddedContentState,
-                coroutineScope = testScope,
-                createSheetLauncher = ::createSheetLauncher,
-                runCurrent = testScheduler::runCurrent,
-            ).block()
-        }
+                resultCallback = CheckoutController.ResultCallback {},
+            )
+            val launcherState = CheckoutSheetLauncherState(savedStateHandle)
+            val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(
+                EmbeddedContentHelperStateHolder.State(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    embeddedViewDisplaysMandateText = true,
+                    configuration = EmbeddedConfigurationFactory.create(),
+                )
+            )
 
-        confirmationHandler.validate()
-        sessionRefresher.ensureAllEventsConsumed()
+            DummyActivityResultCaller.test {
+                fun createSheetLauncher(
+                    owner: TestLifecycleOwner,
+                    state: CheckoutSheetLauncherState,
+                ): CheckoutSheetLauncher {
+                    return CheckoutSheetLauncher(
+                        activityResultCaller = activityResultCaller,
+                        lifecycleOwner = owner,
+                        selectionHolder = selectionHolder,
+                        customerStateHolder = customerStateHolder,
+                        sheetStateHolder = sheetStateHolder,
+                        errorReporter = errorReporter,
+                        sessionRefresher = sessionRefresher,
+                        operationCoordinator = operationCoordinator,
+                        launcherState = state,
+                        embeddedContentState = embeddedContentState,
+                        logger = logger,
+                        coroutineScope = testScope,
+                        productUsage = setOf("Checkout"),
+                        statusBarColor = null,
+                        paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
+                        rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
+                        paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(promotions),
+                    )
+                }
+
+                val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
+                val registerCall = awaitRegisterCall()
+                val launcher = awaitNextRegisteredLauncher()
+
+                assertThat(registerCall).isNotNull()
+                assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
+
+                Scenario(
+                    selectionHolder = selectionHolder,
+                    lifecycleOwner = lifecycleOwner,
+                    customerStateHolder = customerStateHolder,
+                    dummyActivityResultCallerScenario = this,
+                    registerCall = registerCall,
+                    launcher = launcher,
+                    sheetLauncher = sheetLauncher,
+                    sheetStateHolder = sheetStateHolder,
+                    errorReporter = errorReporter,
+                    immediateActionWasInvoked = { immediateActionInvoked },
+                    sessionRefresher = sessionRefresher,
+                    logger = logger,
+                    operationCoordinator = operationCoordinator,
+                    launcherState = launcherState,
+                    savedStateHandle = savedStateHandle,
+                    embeddedContentState = embeddedContentState,
+                    coroutineScope = testScope,
+                    createSheetLauncher = ::createSheetLauncher,
+                    runCurrent = testScheduler::runCurrent,
+                ).block()
+            }
+
+            confirmationHandler.validate()
+            sessionRefresher.ensureAllEventsConsumed()
+        } finally {
+            Dispatchers.resetMain()
+        }
     }
 
     private class Scenario(

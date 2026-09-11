@@ -2,12 +2,13 @@
 
 package com.stripe.android.checkout
 
+import androidx.annotation.MainThread
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
@@ -25,7 +25,6 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
-    @UIContext private val uiContext: CoroutineContext,
     private val resultCallback: CheckoutController.ResultCallback,
 ) {
     private val admissionLock = Any()
@@ -44,7 +43,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     ): Result<T> {
         var admitted = false
         try {
-            withContext(uiContext + NonCancellable) {
+            withContext(NonCancellable + Dispatchers.Main.immediate) {
                 synchronized(admissionLock) {
                     pendingMutations += 1
                     updateIsUpdating()
@@ -58,7 +57,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             }
         } finally {
             if (admitted) {
-                withContext(uiContext + NonCancellable) {
+                withContext(NonCancellable + Dispatchers.Main.immediate) {
                     synchronized(admissionLock) {
                         pendingMutations -= 1
                         updateIsUpdating()
@@ -68,6 +67,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
+    @MainThread
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
@@ -117,24 +117,28 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private suspend fun completeConfirmation(
         mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
     ) {
-        val wasRestored = synchronized(admissionLock) {
-            if (!confirmationInFlight || confirmationCompletionClaimed) {
-                return
-            } else {
-                confirmationCompletionClaimed = true
-                confirmationWasRestored
+        val wasRestored = withContext(Dispatchers.Main.immediate) {
+            synchronized(admissionLock) {
+                if (!confirmationInFlight || confirmationCompletionClaimed) {
+                    return@withContext null
+                } else {
+                    confirmationCompletionClaimed = true
+                    confirmationWasRestored
+                }
             }
-        }
+        } ?: return
 
         try {
             mapResult(wasRestored)?.let(resultCallback::onResult)
         } finally {
-            synchronized(admissionLock) {
-                confirmationInFlight = false
-                confirmationWasRestored = false
-                confirmationCompletionClaimed = false
-                mutex.unlock()
-                updateIsUpdating()
+            withContext(NonCancellable + Dispatchers.Main.immediate) {
+                synchronized(admissionLock) {
+                    confirmationInFlight = false
+                    confirmationWasRestored = false
+                    confirmationCompletionClaimed = false
+                    mutex.unlock()
+                    updateIsUpdating()
+                }
             }
         }
     }

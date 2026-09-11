@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,9 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import org.junit.Test
 import java.util.concurrent.CopyOnWriteArrayList
@@ -109,6 +112,26 @@ internal class CheckoutOperationCoordinatorTest {
             }
 
             assertThat(result.isSuccess).isTrue()
+            assertThat(coordinator.isUpdating.value).isFalse()
+        }
+    }
+
+    @Test
+    fun `runMutation closes the gate before returning on the UI context`() = runScenario {
+        withContext(Dispatchers.Main.immediate) {
+            val releaseMutation = CompletableDeferred<Unit>()
+            val mutation = launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+                coordinator.runMutation {
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+
+            assertThat(coordinator.isUpdating.value).isTrue()
+            assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNull()
+
+            releaseMutation.complete(Unit)
+            mutation.join()
             assertThat(coordinator.isUpdating.value).isFalse()
         }
     }
@@ -892,43 +915,47 @@ internal class CheckoutOperationCoordinatorTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val uiContext = uiContextProvider(testScheduler)
-        val confirmationState = MutableStateFlow(initialConfirmationState)
-        val confirmationHandler = FakeConfirmationHandler(
-            hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
-            state = confirmationState,
-        )
-        val sheetStateHolder = SheetStateHolder(SavedStateHandle()).apply {
-            this.sheetIsOpen = sheetIsOpen
-        }
-        val resultTurbine = Turbine<CheckoutController.Result>()
-        val sessionRefresher = FakeCheckoutSessionRefresher()
-        val coordinator = CheckoutOperationCoordinator(
-            confirmationHandler = confirmationHandler,
-            sheetStateHolder = sheetStateHolder,
-            sessionRefresher = sessionRefresher,
-            logger = logger,
-            uiContext = uiContext,
-            resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
-        )
-        val observerJob = backgroundScope.launch {
-            coordinator.observeConfirmationResults()
-        }
-        testScheduler.runCurrent()
+        Dispatchers.setMain(uiContext[ContinuationInterceptor] as CoroutineDispatcher)
+        try {
+            val confirmationState = MutableStateFlow(initialConfirmationState)
+            val confirmationHandler = FakeConfirmationHandler(
+                hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
+                state = confirmationState,
+            )
+            val sheetStateHolder = SheetStateHolder(SavedStateHandle()).apply {
+                this.sheetIsOpen = sheetIsOpen
+            }
+            val resultTurbine = Turbine<CheckoutController.Result>()
+            val sessionRefresher = FakeCheckoutSessionRefresher()
+            val coordinator = CheckoutOperationCoordinator(
+                confirmationHandler = confirmationHandler,
+                sheetStateHolder = sheetStateHolder,
+                sessionRefresher = sessionRefresher,
+                logger = logger,
+                resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
+            )
+            val observerJob = backgroundScope.launch {
+                coordinator.observeConfirmationResults()
+            }
+            testScheduler.runCurrent()
 
-        Scenario(
-            coordinator = coordinator,
-            uiContext = uiContext,
-            confirmationState = confirmationState,
-            resultTurbine = resultTurbine,
-            refreshCalls = sessionRefresher.calls,
-            sessionRefresher = sessionRefresher,
-            observerJob = observerJob,
-            testScope = this,
-        ).block()
+            Scenario(
+                coordinator = coordinator,
+                uiContext = uiContext,
+                confirmationState = confirmationState,
+                resultTurbine = resultTurbine,
+                refreshCalls = sessionRefresher.calls,
+                sessionRefresher = sessionRefresher,
+                observerJob = observerJob,
+                testScope = this,
+            ).block()
 
-        confirmationHandler.validate()
-        resultTurbine.ensureAllEventsConsumed()
-        sessionRefresher.ensureAllEventsConsumed()
+            confirmationHandler.validate()
+            resultTurbine.ensureAllEventsConsumed()
+            sessionRefresher.ensureAllEventsConsumed()
+        } finally {
+            Dispatchers.resetMain()
+        }
     }
 
     private class Scenario(
