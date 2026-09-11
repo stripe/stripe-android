@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -80,9 +81,8 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `present passes ShippingAddressElement configuration to the address form`() {
-        val appearance = ShippingAddressElement.Configuration.Appearance()
-            .themeMode(ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+    fun `present passes full ShippingAddressElement configuration to the address form`() {
+        val appearance = configuredAppearance()
         val configuration = CheckoutController.Configuration()
             .shippingAddressElement(
                 ShippingAddressElement.Configuration()
@@ -98,7 +98,8 @@ internal class ShippingAddressElementTest {
             val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
             assertThat(config.title).isEqualTo("Shipping address")
             assertThat(config.buttonTitle).isEqualTo("Use this address")
-            assertThat(config.appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+
+            assertAppearance(config.appearance)
             assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
         }
     }
@@ -192,6 +193,7 @@ internal class ShippingAddressElementTest {
 
         runScenario(
             configured = true,
+            configuration = CheckoutControllerStateFactory.create().configuration,
             commitShippingAddress = FakeCommitShippingAddress(commitResult),
         ) {
             shippingAddressElement.present()
@@ -463,4 +465,144 @@ internal class ShippingAddressElementTest {
         val registration: Registration,
         val createElement: suspend () -> ElementScenario,
     )
+
+    private fun assertAppearance(appearance: PaymentSheet.Appearance) {
+        assertFormColors(appearance)
+        assertThat(appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+        assertPrimaryButton(appearance)
+        assertThat(appearance.formInsetValues).isEqualTo(
+            PaymentSheet.Insets(
+                startDp = 1f,
+                topDp = 2f,
+                endDp = 3f,
+                bottomDp = 4f,
+            )
+        )
+    }
+
+    private fun assertFormColors(appearance: PaymentSheet.Appearance) {
+        assertThat(appearance.colorsLight).isEqualTo(
+            PaymentSheet.Colors(
+                primary = Color.Red,
+                surface = Color.Green,
+                component = Color.Blue,
+                componentBorder = Color.Yellow,
+                componentDivider = Color.Cyan,
+                onComponent = Color.Magenta,
+                subtitle = Color.Gray,
+                placeholderText = Color.DarkGray,
+                onSurface = Color.White,
+                appBarIcon = Color.Black,
+                error = Color.LightGray,
+            )
+        )
+        assertThat(appearance.colorsDark).isEqualTo(
+            PaymentSheet.Colors(
+                primary = Color.Magenta,
+                surface = Color.Cyan,
+                component = Color.Yellow,
+                componentBorder = Color.Red,
+                componentDivider = Color.Green,
+                onComponent = Color.Blue,
+                subtitle = Color.DarkGray,
+                placeholderText = Color.Gray,
+                onSurface = Color.Black,
+                appBarIcon = Color.White,
+                error = Color.LightGray,
+            )
+        )
+    }
+
+    private fun assertPrimaryButton(appearance: PaymentSheet.Appearance) {
+        assertThat(appearance.primaryButton.colorsLight).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                background = Color.Green,
+                onBackground = Color.White,
+                border = Color.Black,
+            )
+        )
+        assertThat(appearance.primaryButton.colorsDark).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                background = Color.Blue,
+                onBackground = Color.Yellow,
+                border = Color.Red,
+            )
+        )
+        assertThat(appearance.primaryButton.shape).isEqualTo(
+            PaymentSheet.PrimaryButtonShape(
+                cornerRadiusDp = 12f,
+                borderStrokeWidthDp = 2f,
+                heightDp = 48f,
+            )
+        )
+        assertThat(appearance.primaryButton.typography).isEqualTo(
+            PaymentSheet.PrimaryButtonTypography(
+                fontResId = 123,
+                fontSizeSp = 18f,
+            )
+        )
+    }
+
+    private fun configuredAppearance() = ShippingAddressElement.Configuration.Appearance()
+        .colorsLight(configuredLightColors())
+        .colorsDark(configuredDarkColors())
+        .themeMode(ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+        .primaryButton(configuredPrimaryButton())
+        .formInsetValues(
+            ShippingAddressElement.Configuration.Appearance.Insets(1f, 2f, 3f, 4f)
+        )
+
+    private fun configuredLightColors() =
+        ShippingAddressElement.Configuration.Appearance.Colors.light()
+            .primary(Color.Red)
+            .surface(Color.Green)
+            .component(Color.Blue)
+            .componentBorder(Color.Yellow)
+            .componentDivider(Color.Cyan)
+            .onComponent(Color.Magenta)
+            .subtitle(Color.Gray)
+            .placeholderText(Color.DarkGray)
+            .onSurface(Color.White)
+            .appBarIcon(Color.Black)
+            .error(Color.LightGray)
+
+    private fun configuredDarkColors() =
+        ShippingAddressElement.Configuration.Appearance.Colors.dark()
+            .primary(Color.Magenta)
+            .surface(Color.Cyan)
+            .component(Color.Yellow)
+            .componentBorder(Color.Red)
+            .componentDivider(Color.Green)
+            .onComponent(Color.Blue)
+            .subtitle(Color.DarkGray)
+            .placeholderText(Color.Gray)
+            .onSurface(Color.Black)
+            .appBarIcon(Color.White)
+            .error(Color.LightGray)
+
+    private fun configuredPrimaryButton() =
+        ShippingAddressElement.Configuration.Appearance.PrimaryButton()
+            .colorsLight(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.light()
+                    .background(Color.Green)
+                    .onBackground(Color.White)
+                    .border(Color.Black)
+            )
+            .colorsDark(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.dark()
+                    .background(Color.Blue)
+                    .onBackground(Color.Yellow)
+                    .border(Color.Red)
+            )
+            .shape(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Shape()
+                    .cornerRadiusDp(12f)
+                    .borderStrokeWidthDp(2f)
+                    .heightDp(48f)
+            )
+            .typography(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Typography()
+                    .fontResId(123)
+                    .fontSizeSp(18f)
+            )
 }
