@@ -929,6 +929,48 @@ internal class CheckoutControllerTest {
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
 
+    @Test
+    fun `commitShippingAddress waits for an in-flight mutation before committing shipping details`() =
+        runMutationScenario {
+            val mutationStarted = CountDownLatch(1)
+            val releaseMutation = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                mutationStarted.countDown()
+                releaseMutation.await(10, TimeUnit.SECONDS)
+                successResponseFactory().invoke(response)
+            }
+
+            val mutation = async { controller.applyPromotionCode("10OFF") }
+            assertThat(mutationStarted.await(10, TimeUnit.SECONDS)).isTrue()
+
+            val address = fullAddress.build()
+            val originalResponse = committedState().checkoutSessionResponse
+            val commit = async {
+                controller.commitShippingAddress(
+                    name = "John",
+                    address = address,
+                    updatedCheckoutSessionResponse = originalResponse,
+                )
+            }
+            testScheduler.advanceUntilIdle()
+
+            assertThat(commit.isCompleted).isFalse()
+
+            releaseMutation.countDown()
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(commit.await().isSuccess).isTrue()
+
+            val state = committedState()
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
+            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
+            assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+                address.asPaymentSheet()
+            )
+        }
+
     // region allowedShippingCountries validation
 
     @Test

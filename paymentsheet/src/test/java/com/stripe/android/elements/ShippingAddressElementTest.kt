@@ -168,6 +168,72 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `successful result forwards the original response when tax is unchanged`() = runScenario {
+        shippingAddressElement.present()
+        val originalResponse = activityLauncher.launchCalls.awaitItem().input.checkoutSessionResponse
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        val address = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                country = "US",
+                line1 = "510 Townsend St",
+                postalCode = "94103",
+            ),
+        )
+
+        registration.dispatch(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(address, originalResponse)
+        )
+
+        assertThat(commitShippingAddress.calls.awaitItem().checkoutSessionResponse)
+            .isSameInstanceAs(originalResponse)
+    }
+
+    @Test
+    fun `unchanged address and response are committed exactly once`() = runScenario {
+        val existingAddress = CheckoutController.Address.State(
+            city = null,
+            country = "US",
+            line1 = "510 Townsend St",
+            line2 = null,
+            postalCode = "94103",
+            state = null,
+        )
+        stateHolder.state = requireNotNull(stateHolder.state).let { state ->
+            state.copy(
+                collectedDetails = state.collectedDetails.copy(
+                    shippingName = "Jenny Rosen",
+                    shippingAddress = existingAddress,
+                ),
+            )
+        }
+        shippingAddressElement.present()
+        val originalResponse = activityLauncher.launchCalls.awaitItem().input.checkoutSessionResponse
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        val address = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                country = "US",
+                line1 = "510 Townsend St",
+                postalCode = "94103",
+            ),
+        )
+
+        registration.dispatch(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(address, originalResponse)
+        )
+
+        assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
+            FakeCommitShippingAddress.Call(
+                name = address.name,
+                address = existingAddress,
+                checkoutSessionResponse = originalResponse,
+            )
+        )
+        commitShippingAddress.calls.expectNoEvents()
+    }
+
+    @Test
     fun `successful result suppresses presentation until commit completes`() {
         val commitResult = CompletableDeferred<Result<Unit>>()
 
