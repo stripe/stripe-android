@@ -12,6 +12,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +25,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
@@ -33,54 +38,94 @@ import kotlinx.coroutines.flow.filterNotNull
 @OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
 
+    private var activityArgs by mutableStateOf<AddressElementActivityContract.Args?>(null)
+
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         AddressElementViewModel.Factory(
             applicationSupplier = { application },
-            starterArgsSupplier = { requireNotNull(starterArgs) }
+            starterArgsSupplier = { requireNotNull(activityArgs) }
         )
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs by lazy {
-        AddressElementActivityContract.Args.fromIntent(intent)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val starterArgs = starterArgs
-        if (starterArgs == null) {
+        val initialArgs = AddressElementActivityContract.Args.fromIntent(intent)
+        if (initialArgs == null) {
             finish()
             return
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        starterArgs.config?.appearance?.parseAppearance()
+        if (initialArgs !is AddressElementActivityContract.Args.CheckoutShipping.Loading) {
+            initialArgs.config?.appearance?.parseAppearance()
+        }
+        activityArgs = initialArgs
 
-        setContent {
-            val navController = rememberNavController()
-            viewModel.navigator.navigationController = navController
+        setContent { AddressElementContent() }
+    }
 
-            val bottomSheetState = rememberStripeBottomSheetState()
-
-            LaunchedEffect(bottomSheetState) {
-                viewModel.resultStateHolder.result
-                    .filterNotNull()
-                    .collect { result ->
-                        bottomSheetState.hide()
-                        finishWithResult(result)
+    @Composable
+    private fun AddressElementContent() {
+        val bottomSheetState = rememberStripeBottomSheetState()
+        when (val args = requireNotNull(activityArgs)) {
+            is AddressElementActivityContract.Args.CheckoutShipping.Loading -> {
+                BackHandler {
+                    finishWithResult(AddressElementActivityContract.Result.Canceled)
+                }
+                val loadingModifier = remember(bottomSheetState) { Modifier }
+                StripeTheme {
+                    ElementsBottomSheetLayout(
+                        state = bottomSheetState,
+                        onDismissed = {
+                            finishWithResult(AddressElementActivityContract.Result.Canceled)
+                        },
+                    ) {
+                        BottomSheetLoadingIndicator(modifier = loadingModifier)
                     }
-            }
-
-            BackHandler {
-                if (!viewModel.navigator.onBack()) {
-                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
                 }
             }
+            is AddressElementActivityContract.Args.CheckoutShipping.Ready,
+            is AddressElementActivityContract.Args.Standalone -> {
+                val navController = rememberNavController()
+                viewModel.navigator.navigationController = navController
 
-            AddressElementUi(bottomSheetState, navController)
+                LaunchedEffect(bottomSheetState) {
+                    viewModel.resultStateHolder.result
+                        .filterNotNull()
+                        .collect { result ->
+                            bottomSheetState.hide()
+                            finishWithResult(result)
+                        }
+                }
+
+                BackHandler {
+                    if (!viewModel.navigator.onBack()) {
+                        viewModel.resultStateHolder.setResult(
+                            AddressElementActivityContract.Result.Canceled
+                        )
+                    }
+                }
+
+                AddressElementUi(bottomSheetState, navController)
+            }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val updatedArgs = AddressElementActivityContract.Args.fromIntent(intent) ?: return
+        val isValidTransition =
+            !isFinishing &&
+                activityArgs is AddressElementActivityContract.Args.CheckoutShipping.Loading &&
+                updatedArgs is AddressElementActivityContract.Args.CheckoutShipping.Ready
+        if (!isValidTransition) return
+
+        updatedArgs.config?.appearance?.parseAppearance()
+        this.intent = intent
+        activityArgs = updatedArgs
     }
 
     @Composable

@@ -7,15 +7,15 @@ import org.junit.Test
 
 internal class ShippingAddressElementStateHolderTest {
     @Test
-    fun `presentation state survives process death`() {
+    fun `awaiting ready state survives process death`() {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = ShippingAddressElementStateHolder(savedStateHandle)
-        stateHolder.isPresenting = true
+        stateHolder.isAwaitingReady = true
 
         val restoredStateHolder = ShippingAddressElementStateHolder(
             savedStateHandle = savedStateHandle.simulateProcessDeath(),
         )
 
-        assertThat(restoredStateHolder.isPresenting).isTrue()
+        assertThat(restoredStateHolder.isAwaitingReady).isTrue()
     }
 }

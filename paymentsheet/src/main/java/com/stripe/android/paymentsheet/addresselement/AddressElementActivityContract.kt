@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import com.stripe.android.view.ActivityStarter
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 internal object AddressElementActivityContract {
@@ -34,7 +35,7 @@ internal object AddressElementActivityContract {
     internal object CheckoutShipping :
         ActivityResultContract<Args.CheckoutShipping, CheckoutShippingResult>() {
         override fun createIntent(context: Context, input: Args.CheckoutShipping): Intent {
-            return createActivityIntent(context, input)
+            return createActivityIntent(context, input).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
 
         override fun parseResult(resultCode: Int, intent: Intent?): CheckoutShippingResult {
@@ -49,7 +50,8 @@ internal object AddressElementActivityContract {
     }
 
     private fun createActivityIntent(context: Context, input: Args): Intent {
-        return Intent(context, AddressElementActivity::class.java).putExtra(EXTRA_ARGS, input)
+        return Intent(context, AddressElementActivity::class.java)
+            .putExtra(EXTRA_ARGS, input)
     }
 
     /**
@@ -69,10 +71,21 @@ internal object AddressElementActivityContract {
         ) : Args()
 
         @Parcelize
-        data class CheckoutShipping internal constructor(
-            override val publishableKey: String,
-            override val config: AddressLauncher.Configuration?,
-        ) : Args()
+        sealed class CheckoutShipping : Args() {
+            @Parcelize
+            data class Loading internal constructor(
+                override val publishableKey: String,
+            ) : CheckoutShipping() {
+                @IgnoredOnParcel
+                override val config: AddressLauncher.Configuration? = null
+            }
+
+            @Parcelize
+            data class Ready internal constructor(
+                override val publishableKey: String,
+                override val config: AddressLauncher.Configuration?,
+            ) : CheckoutShipping()
+        }
 
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
