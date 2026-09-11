@@ -25,7 +25,6 @@ internal class AddressElementViewModel @Inject internal constructor(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return DaggerAddressElementViewModelFactoryComponent.factory()
                 .create(
-                    application = applicationSupplier(),
                     context = applicationSupplier(),
                     starterArgs = starterArgsSupplier(),
                 )
