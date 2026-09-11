@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
 import android.content.Context
-import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -21,7 +19,6 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
-        ElementsSessionClientParamsModule::class,
         AddressElementViewModelModule::class,
     ]
 )
@@ -31,7 +28,6 @@ internal interface AddressElementViewModelFactoryComponent {
     @Component.Factory
     interface Factory {
         fun create(
-            @BindsInstance application: Application,
             @BindsInstance context: Context,
             @BindsInstance starterArgs: AddressElementActivityContract.Args,
         ): AddressElementViewModelFactoryComponent

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
 import dagger.Module
@@ -56,6 +58,15 @@ internal class AddressElementViewModelModule {
         is AddressElementActivityContract.Args.CheckoutShipping -> {
             CheckoutShippingPrimaryButtonAction
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideElementsSessionClientParams(context: Context): ElementsSessionClientParams {
+        return ElementsSessionClientParams(
+            mobileAppId = context.packageName,
+            mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
+        )
     }
 
     @Provides
