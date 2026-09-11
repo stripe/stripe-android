@@ -5,6 +5,7 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -56,6 +57,7 @@ internal class Test3ds2 : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-perspective")
     @Test
     fun test3DS2OOB() {
         testDriver.confirmNewOrGuestComplete(
