@@ -296,35 +296,62 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testControllerMutationDisablesVerticalPaymentMethods() = runAutomaticTaxTest(
-        paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
-        checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
-            INITIAL_TOTAL,
-            TAX_STATUS_REQUIRES_LOCATION,
-        ),
-    ) {
-        val requestReceived = CountDownLatch(1)
-        val releaseResponse = CountDownLatch(1)
-        networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
-            requestReceived.countDown()
-            check(releaseResponse.await(10, TimeUnit.SECONDS))
-            automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
-        }
-        val mutationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        val mutation = mutationScope.async { controller.applyPromotionCode("10OFF") }
+    fun testSavedPaymentMethodSelectionQueuesDuringControllerMutation() {
+        val callbacks = Turbine<Unit>()
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbacks.add(Unit)
+            },
+        ) {
+            val mutationRequestReceived = CountDownLatch(1)
+            val releaseMutationResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
+                mutationRequestReceived.countDown()
+                check(releaseMutationResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_REQUIRES_LOCATION)(response)
+            }
+            val mutationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            val mutation = mutationScope.async { controller.applyPromotionCode("10OFF") }
+            val selectionUpdateRequests = Turbine<Unit>()
+            enqueueTaxUpdate { response ->
+                selectionUpdateRequests.add(Unit)
+                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+            }
 
-        try {
-            assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
-            contentPage.assertLpmIsEnabled("card", false)
-        } finally {
-            releaseResponse.countDown()
+            try {
+                assertThat(mutationRequestReceived.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)).isTrue()
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+                contentPage.assertLpmIsEnabled("card", true)
+
+                contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
+                contentPage.assertLpmIsEnabled("card", false)
+                selectionUpdateRequests.expectNoEvents()
+                callbacks.expectNoEvents()
+                releaseMutationResponse.countDown()
+
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    selectionUpdateRequests.awaitItem()
+                    callbacks.awaitItem()
+                }
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+                contentPage.assertLpmIsEnabled("card", true)
+            } finally {
+                releaseMutationResponse.countDown()
+            }
+            runBlocking { mutation.await().getOrThrow() }
+            mutationScope.cancel()
+            selectionUpdateRequests.ensureAllEventsConsumed()
+            callbacks.ensureAllEventsConsumed()
+            markTestSucceeded()
         }
-        runBlocking { mutation.await().getOrThrow() }
-        mutationScope.cancel()
-        contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
-        contentPage.assertLpmIsEnabled("card", true)
-        markTestSucceeded()
     }
 
     @Test
