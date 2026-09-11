@@ -212,7 +212,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     val customPaymentMethodIds = customPaymentMethods.toElementSessionParam()
 
     val linkParams = ElementsSessionParams.Link(
-        disallowFundingSourceCreation = linkDisallowedFundingSourceCreation
+        disallowFundingSourceCreation = linkDisallowedFundingSourceCreation,
+        financialConnectionsPermissions = (this as? PaymentElementLoader.InitializationMode.StandaloneLink)
+            ?.financialConnectionsPermissions,
     )
 
     return when (this) {

@@ -179,6 +179,7 @@ internal object TestFactory {
     val LINK_ACCOUNT_SESSION = LinkAccountSession(
         id = "fcsess_123",
         clientSecret = CLIENT_SECRET,
+        permissions = emptyList(),
     )
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
@@ -299,6 +300,10 @@ internal object TestFactory {
         forceSetupFutureUseBehaviorAndNewMandate = false,
         linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
         linkPaymentMethodBankAccountDataConsent = null,
+        financialConnectionsPermissions = null,
+        merchantPublishableKey = PUBLISHABLE_KEY,
+        merchantStripeAccountId = null,
+        elementsSessionAccountId = null,
         clientAttributionMetadata = ClientAttributionMetadata(
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,

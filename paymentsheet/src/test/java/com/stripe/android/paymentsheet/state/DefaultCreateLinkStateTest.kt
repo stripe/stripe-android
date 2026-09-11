@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -138,6 +141,35 @@ internal class DefaultCreateLinkStateTest {
 
         assertThat(result).isInstanceOf<LinkState>()
         assertThat((result as LinkState).signupMode).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
+    }
+
+    @OptIn(LinkControllerPreview::class)
+    @Test
+    fun `standalone Link carries financial connections permissions and merchant credentials`() = runTest {
+        val permissions = listOf("balances", "ownership")
+        val configuration = LinkController.Configuration(
+            merchantDisplayName = "Test Merchant",
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = "acct_connected",
+        ).financialConnectionsPermissions(permissions).build()
+        val elementsSession = createElementsSession()
+
+        val result = createLinkStateFactory().invoke(
+            elementsSession = elementsSession,
+            configuration = configuration.asCommonConfiguration(),
+            initializationMode = PaymentElementLoader.InitializationMode.StandaloneLink(
+                paymentMethodTypes = null,
+                financialConnectionsPermissions = permissions,
+            ),
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        val linkConfiguration = (result as LinkState).configuration
+        assertThat(linkConfiguration.financialConnectionsPermissions).isEqualTo(permissions)
+        assertThat(linkConfiguration.merchantPublishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(linkConfiguration.merchantStripeAccountId).isEqualTo("acct_connected")
+        assertThat(linkConfiguration.elementsSessionAccountId).isEqualTo(elementsSession.accountId)
     }
 
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(

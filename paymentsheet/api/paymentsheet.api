@@ -294,6 +294,7 @@ public final class com/stripe/android/link/LinkController$Configuration {
 	public final fun appearance (Lcom/stripe/android/link/LinkAppearance;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun email (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun financialConnectionsPermissions (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun paymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun phoneNumber (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun supportedPaymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;

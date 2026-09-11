@@ -309,6 +309,12 @@ internal class DefaultCreateLinkState @Inject constructor(
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         linkPaymentMethodBankAccountDataConsent =
             elementsSession.linkSettings?.linkPaymentMethodBankAccountDataConsent,
+        financialConnectionsPermissions =
+            (initializationMode as? PaymentElementLoader.InitializationMode.StandaloneLink)
+                ?.financialConnectionsPermissions,
+        merchantPublishableKey = configuration.apiConfiguration?.publishableKey,
+        merchantStripeAccountId = configuration.apiConfiguration?.stripeAccountId,
+        elementsSessionAccountId = elementsSession.accountId,
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
     )

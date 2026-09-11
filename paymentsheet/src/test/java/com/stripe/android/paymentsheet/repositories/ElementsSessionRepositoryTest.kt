@@ -667,6 +667,65 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
+    fun `Standalone Link financial connections permissions are passed through correctly`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.StandaloneLink(
+                paymentMethodTypes = listOf(PaymentMethod.Type.Link.code),
+                financialConnectionsPermissions = listOf("balances", "ownership"),
+            ),
+            customer = null,
+            customPaymentMethods = emptyList(),
+            externalPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val params = requireNotNull((requestCaptor.firstValue as ApiRequest).params)
+        assertThat(
+            params[
+                "deferred_intent[payment_method_options][link][financial_connections][permissions][0]"
+            ]
+        ).isEqualTo("balances")
+        assertThat(
+            params[
+                "deferred_intent[payment_method_options][link][financial_connections][permissions][1]"
+            ]
+        ).isEqualTo("ownership")
+    }
+
+    @Test
+    fun `Empty Standalone Link financial connections permissions are omitted`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.StandaloneLink(
+                paymentMethodTypes = listOf(PaymentMethod.Type.Link.code),
+                financialConnectionsPermissions = emptyList(),
+            ),
+            customer = null,
+            customPaymentMethods = emptyList(),
+            externalPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val params = requireNotNull((requestCaptor.firstValue as ApiRequest).params)
+        assertThat(
+            params.keys.any { key ->
+                key.startsWith("deferred_intent[payment_method_options][link][financial_connections]")
+            }
+        ).isFalse()
+    }
+
+    @Test
     fun `Request URL is elements sessions endpoint`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())

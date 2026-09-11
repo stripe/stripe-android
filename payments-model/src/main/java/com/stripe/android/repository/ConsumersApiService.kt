@@ -160,6 +160,8 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        permissions: List<String>?,
+        merchantToken: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession>
@@ -571,6 +573,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        permissions: List<String>?,
+        merchantToken: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession> {
@@ -586,6 +590,8 @@ class ConsumersApiServiceImpl(
                     ),
                     "intent_token" to intentToken,
                     "link_mode" to linkMode?.value,
+                    "permissions" to permissions?.takeIf { it.isNotEmpty() },
+                    "merchant_token" to merchantToken.takeIf { permissions?.isNotEmpty() == true },
                     "request_surface" to requestSurface,
                 ),
             ),

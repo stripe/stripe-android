@@ -215,6 +215,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        permissions: List<String>?,
+        merchantToken: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession> {

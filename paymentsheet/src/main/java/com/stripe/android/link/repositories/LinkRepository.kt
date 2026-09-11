@@ -224,6 +224,8 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        permissions: List<String>?,
+        merchantToken: String?,
     ): Result<LinkAccountSession>
 
     /**

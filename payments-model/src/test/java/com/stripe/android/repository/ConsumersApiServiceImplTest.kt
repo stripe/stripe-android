@@ -16,7 +16,9 @@ import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainBodyPartsWithPrefix
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -300,6 +302,59 @@ class ConsumersApiServiceImplTest {
         consumersApiService.recordConnectionsConsentAcquired(
             consumerSessionClientSecret = "secret",
             localizedConsentText = consentText,
+            requestSurface = "android_payment_element",
+            requestOptions = DEFAULT_OPTIONS,
+        ).getOrThrow()
+    }
+
+    @Test
+    fun `createLinkAccountSession() sends permissions and merchant token`() = runTest {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/link_account_sessions"),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
+            bodyPart("intent_token", "session_123"),
+            bodyPart("link_mode", "LINK_PAYMENT_METHOD"),
+            RequestMatcher { request -> request.bodyText.contains("permissions%5B%5D=balances") },
+            RequestMatcher { request -> request.bodyText.contains("permissions%5B%5D=ownership") },
+            bodyPart("merchant_token", "acct_123"),
+            bodyPart("request_surface", "android_payment_element"),
+        ) { response ->
+            response.setBody(
+                """{"id":"fcsess_123","client_secret":"secret","permissions":["balances","ownership"]}"""
+            )
+        }
+
+        val result = consumersApiService.createLinkAccountSession(
+            consumerSessionClientSecret = "secret",
+            intentToken = "session_123",
+            linkMode = com.stripe.android.model.LinkMode.LinkPaymentMethod,
+            permissions = listOf("balances", "ownership"),
+            merchantToken = "acct_123",
+            requestSurface = "android_payment_element",
+            requestOptions = DEFAULT_OPTIONS,
+        ).getOrThrow()
+
+        assertThat(result.permissions).containsExactly("balances", "ownership").inOrder()
+    }
+
+    @Test
+    fun `createLinkAccountSession() omits permissions and merchant token when permissions are empty`() = runTest {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/link_account_sessions"),
+            doesNotContainBodyPartsWithPrefix("permissions"),
+            doesNotContainBodyPartsWithPrefix("merchant_token"),
+        ) { response ->
+            response.setBody("""{"id":"fcsess_123","client_secret":"secret"}""")
+        }
+
+        consumersApiService.createLinkAccountSession(
+            consumerSessionClientSecret = "secret",
+            intentToken = null,
+            linkMode = null,
+            permissions = emptyList(),
+            merchantToken = "acct_ignored",
             requestSurface = "android_payment_element",
             requestOptions = DEFAULT_OPTIONS,
         ).getOrThrow()
