@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.repository.api
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import javax.inject.Inject
@@ -13,6 +14,7 @@ internal class RealProvideApiRequestOptions @Inject constructor(
     private val consumerSessionProvider: ConsumerSessionProvider,
     private val isLinkWithStripe: IsLinkWithStripe,
     private val apiRequestOptions: ApiRequest.Options,
+    private val configuration: FinancialConnectionsSheetConfiguration,
 ) : ProvideApiRequestOptions {
 
     override fun invoke(
@@ -26,6 +28,8 @@ internal class RealProvideApiRequestOptions @Inject constructor(
     }
 
     private fun consumerApiRequestOptions(): ApiRequest.Options? {
+        if (configuration.hasRequestedDataPermissions) return null
+
         val session = consumerSessionProvider.provideConsumerSession()?.takeIf { it.isVerified }
         val consumerPublishableKey = session?.publishableKey?.takeIf { isLinkWithStripe() }
 

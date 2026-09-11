@@ -143,7 +143,11 @@ internal class WalletViewModel(
         }
 
         viewModelScope.launch {
-            loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+            loadPaymentDetails(
+                selectedItemId = linkLaunchMode.selectedItemId,
+                isAfterAdding = false,
+                selectNewBankAccount = false,
+            )
         }
 
         viewModelScope.launch {
@@ -201,15 +205,30 @@ internal class WalletViewModel(
 
     private suspend fun loadPaymentDetails(
         selectedItemId: String?,
-        isAfterAdding: Boolean = false
+        isAfterAdding: Boolean,
+        selectNewBankAccount: Boolean,
     ) {
+        val existingPaymentDetailIds = uiState.value.paymentDetailsList.mapTo(mutableSetOf()) { it.id }
         linkAccountManager.listPaymentDetails(
             paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount.supportedPaymentDetailsTypes)
         ).fold(
             onSuccess = { response ->
+                val generatedBankAccountId = response.paymentDetails
+                    .filterIsInstance<ConsumerPaymentDetails.BankAccount>()
+                    .firstOrNull { it.id !in existingPaymentDetailIds }
+                    ?.id
+                if (selectNewBankAccount && generatedBankAccountId == null) {
+                    onAddBankAccountError(
+                        error = IllegalStateException(
+                            "Permissioned Link Account Session completed without generated payment details."
+                        ),
+                        loggerMessage = "Failed to load generated bank account",
+                    )
+                    return@fold
+                }
                 _uiState.update {
                     it.copy(
-                        selectedItemId = selectedItemId,
+                        selectedItemId = if (selectNewBankAccount) generatedBankAccountId else selectedItemId,
                         userSetIsExpanded = if (isAfterAdding) false else it.userSetIsExpanded,
                         errorMessage = if (isAfterAdding) null else it.errorMessage,
                         addBankAccountState = if (isAfterAdding) AddBankAccountState.Idle else it.addBankAccountState,
@@ -391,7 +410,11 @@ internal class WalletViewModel(
         viewModelScope.launch {
             linkAccountManager.deletePaymentDetails(item.id).fold(
                 onSuccess = {
-                    loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
+                    loadPaymentDetails(
+                        selectedItemId = uiState.value.selectedItem?.id,
+                        isAfterAdding = false,
+                        selectNewBankAccount = false,
+                    )
                 },
                 onFailure = { error ->
                     updateErrorMessageAndStopProcessing(
@@ -478,9 +501,19 @@ internal class WalletViewModel(
         viewModelScope.launch {
             linkAccountManager.createLinkAccountSession()
                 .mapCatching { session ->
+                    val hasRequestedDataPermissions = configuration.financialConnectionsPermissions
+                        ?.isNotEmpty() == true
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
-                        publishableKey = linkAccount.consumerPublishableKey!!,
+                        publishableKey = if (hasRequestedDataPermissions) {
+                            requireNotNull(configuration.merchantPublishableKey)
+                        } else {
+                            requireNotNull(linkAccount.consumerPublishableKey)
+                        },
+                        stripeAccountId = configuration.merchantStripeAccountId
+                            .takeIf { hasRequestedDataPermissions },
+                        hasRequestedDataPermissions = hasRequestedDataPermissions,
+                        existingConsumer = linkAccount.toFinancialConnectionsConsumer(),
                     )
                 }
                 .fold(
@@ -517,13 +550,28 @@ internal class WalletViewModel(
         viewModelScope.launch {
             when (result) {
                 is FinancialConnectionsSheetResult.Completed -> {
-                    val accountId = result.financialConnectionsSession.accounts.data.firstOrNull()?.id
-                    if (accountId != null) {
+                    val hasRequestedDataPermissions = configuration.financialConnectionsPermissions
+                        ?.isNotEmpty() == true
+                    if (hasRequestedDataPermissions) {
+                        loadPaymentDetails(
+                            selectedItemId = null,
+                            isAfterAdding = true,
+                            selectNewBankAccount = true,
+                        )
+                    } else {
+                        val accountId = result.financialConnectionsSession.accounts.data.firstOrNull()?.id
+                        if (accountId == null) {
+                            _uiState.update {
+                                it.copy(addBankAccountState = AddBankAccountState.Idle)
+                            }
+                            return@launch
+                        }
                         linkAccountManager.createBankAccountPaymentDetails(accountId)
                             .mapCatching { paymentDetails ->
                                 loadPaymentDetails(
                                     selectedItemId = paymentDetails.id,
-                                    isAfterAdding = true
+                                    isAfterAdding = true,
+                                    selectNewBankAccount = false,
                                 )
                             }
                             .onFailure {
@@ -532,10 +580,6 @@ internal class WalletViewModel(
                                     loggerMessage = "Failed to create/load bank account"
                                 )
                             }
-                    } else {
-                        _uiState.update {
-                            it.copy(addBankAccountState = AddBankAccountState.Idle)
-                        }
                     }
                 }
                 FinancialConnectionsSheetResult.Canceled -> {

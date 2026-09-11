@@ -19,13 +19,22 @@ internal class AttachedPaymentAccountRepository @Inject constructor(
     savedStateHandle = savedStateHandle,
 ) {
 
-    fun set(paymentAccount: PaymentAccountParams) {
+    fun set(
+        paymentAccount: PaymentAccountParams,
+        generatedPaymentDetailIds: List<String>,
+    ) {
         logger.debug("payment account set to $paymentAccount")
-        set(State(paymentAccount))
+        set(
+            State(
+                attachedPaymentAccount = paymentAccount,
+                generatedPaymentDetailIds = generatedPaymentDetailIds,
+            )
+        )
     }
 
     @Parcelize
     data class State(
-        val attachedPaymentAccount: PaymentAccountParams? = null
+        val attachedPaymentAccount: PaymentAccountParams?,
+        val generatedPaymentDetailIds: List<String>,
     ) : Parcelable
 }

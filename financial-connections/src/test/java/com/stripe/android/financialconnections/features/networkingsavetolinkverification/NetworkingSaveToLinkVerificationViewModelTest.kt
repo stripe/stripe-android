@@ -138,7 +138,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                     attachedPaymentAccount = PaymentAccountParams.BankAccount(
                         routingNumber = "123456789",
                         accountNumber = "123456789"
-                    )
+                    ),
+                    generatedPaymentDetailIds = emptyList(),
                 )
             )
 

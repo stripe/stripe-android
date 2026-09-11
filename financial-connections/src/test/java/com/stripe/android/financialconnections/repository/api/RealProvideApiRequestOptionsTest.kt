@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.repository.api
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -12,6 +13,13 @@ class RealProvideApiRequestOptionsTest {
     private val merchantApiRequestOptions = ApiRequest.Options(
         apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         stripeAccount = "acct_123",
+    )
+    private val configuration = FinancialConnectionsSheetConfiguration(
+        financialConnectionsSessionClientSecret = "fcsess_secret",
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = "acct_123",
+        hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
 
     @Test
@@ -25,6 +33,7 @@ class RealProvideApiRequestOptionsTest {
             consumerSessionProvider = { cachedConsumerSession },
             isLinkWithStripe = { true },
             apiRequestOptions = merchantApiRequestOptions,
+            configuration = configuration,
         )
 
         val apiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
@@ -44,6 +53,7 @@ class RealProvideApiRequestOptionsTest {
             consumerSessionProvider = { cachedConsumerSession },
             isLinkWithStripe = { false },
             apiRequestOptions = merchantApiRequestOptions,
+            configuration = configuration,
         )
 
         val consumerApiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
@@ -61,6 +71,7 @@ class RealProvideApiRequestOptionsTest {
             consumerSessionProvider = { cachedConsumerSession },
             isLinkWithStripe = { true },
             apiRequestOptions = merchantApiRequestOptions,
+            configuration = configuration,
         )
 
         val consumerApiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
@@ -78,6 +89,7 @@ class RealProvideApiRequestOptionsTest {
             consumerSessionProvider = { cachedConsumerSession },
             isLinkWithStripe = { true },
             apiRequestOptions = merchantApiRequestOptions,
+            configuration = configuration,
         )
 
         val consumerApiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
@@ -95,10 +107,29 @@ class RealProvideApiRequestOptionsTest {
             consumerSessionProvider = { cachedConsumerSession },
             isLinkWithStripe = { true },
             apiRequestOptions = merchantApiRequestOptions,
+            configuration = configuration,
         )
 
         val consumerApiOptions = provideApiRequestOptions(useConsumerPublishableKey = false)
         assertThat(consumerApiOptions).isEqualTo(merchantApiRequestOptions)
+    }
+
+    @Test
+    fun `Provides merchant API options for permissioned Link sessions`() = runTest {
+        val cachedConsumerSession = makeCachedConsumerSession(
+            isVerified = true,
+            publishableKey = "pk_consumer",
+        )
+        val provideApiRequestOptions = RealProvideApiRequestOptions(
+            consumerSessionProvider = { cachedConsumerSession },
+            isLinkWithStripe = { true },
+            apiRequestOptions = merchantApiRequestOptions,
+            configuration = configuration.copy(hasRequestedDataPermissions = true),
+        )
+
+        val apiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
+
+        assertThat(apiOptions).isEqualTo(merchantApiRequestOptions)
     }
 
     private fun makeCachedConsumerSession(

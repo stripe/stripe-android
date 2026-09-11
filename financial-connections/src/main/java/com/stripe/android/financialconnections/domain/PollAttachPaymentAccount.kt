@@ -42,8 +42,11 @@ internal class PollAttachPaymentAccount @Inject constructor(
                     paymentAccount = params,
                     // null, if account should not be saved to Link user.
                     consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret,
-                ).also {
-                    attachedPaymentAccountRepository.set(params)
+                ).also { response ->
+                    attachedPaymentAccountRepository.set(
+                        paymentAccount = params,
+                        generatedPaymentDetailIds = response.generatedPaymentDetailIds,
+                    )
                 }
             } catch (e: StripeException) {
                 throw e.toDomainException(

@@ -2,12 +2,14 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
 internal class CompleteFinancialConnectionsSession @Inject constructor(
     private val repository: FinancialConnectionsRepository,
     private val fetchPaginatedAccountsForSession: FetchPaginatedAccountsForSession,
+    private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val configuration: FinancialConnectionsSheetConfiguration
 ) {
 
@@ -25,6 +27,7 @@ internal class CompleteFinancialConnectionsSession @Inject constructor(
         return Result(
             session = fullSession,
             status = computeSessionCompletionStatus(fullSession, earlyTerminationCause, closeAuthFlowError),
+            generatedPaymentDetailIds = attachedPaymentAccountRepository.get()?.generatedPaymentDetailIds.orEmpty(),
         )
     }
 
@@ -39,6 +42,7 @@ internal class CompleteFinancialConnectionsSession @Inject constructor(
     data class Result(
         val session: FinancialConnectionsSession,
         val status: String,
+        val generatedPaymentDetailIds: List<String>,
     )
 }
 

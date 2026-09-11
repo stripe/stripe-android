@@ -34,7 +34,9 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForData(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )
@@ -66,7 +68,9 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForData(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )
@@ -98,7 +102,9 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForInstantDebits(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )
@@ -130,7 +136,9 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForInstantDebits(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )

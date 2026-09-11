@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
@@ -47,7 +48,15 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     )
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
-    private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
+    private val consumerSessionRepository = RealConsumerSessionRepository(
+        savedStateHandle = SavedStateHandle(),
+        configuration = FinancialConnectionsSheetConfiguration(
+            financialConnectionsSessionClientSecret = "fcsess_secret",
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            hasRequestedDataPermissions = false,
+            existingConsumer = null,
+        ),
+    )
     private val fraudDetectionDataRepository = mock<FraudDetectionDataRepository>()
 
     private fun buildRepository(

@@ -23,6 +23,8 @@ internal class CurrentLinkBrandTest {
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            hasRequestedDataPermissions = false,
+            existingConsumer = null,
         ),
         reducedBranding = false,
         testMode = false,
@@ -37,7 +39,10 @@ internal class CurrentLinkBrandTest {
     )
 
     private val manifestRepository = FakeFinancialConnectionsManifestRepository()
-    private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
+    private val consumerSessionRepository = RealConsumerSessionRepository(
+        savedStateHandle = SavedStateHandle(),
+        configuration = initialState.configuration,
+    )
 
     @Test
     fun `falls back to initial state linkBrand`() {

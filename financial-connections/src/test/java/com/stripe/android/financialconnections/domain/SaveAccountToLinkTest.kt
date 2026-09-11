@@ -202,7 +202,8 @@ internal class SaveAccountToLinkTest {
                     attachedPaymentAccount = PaymentAccountParams.BankAccount(
                         accountNumber = "acct_123",
                         routingNumber = "110000000",
-                    )
+                    ),
+                    generatedPaymentDetailIds = emptyList(),
                 )
             )
 
@@ -241,7 +242,8 @@ internal class SaveAccountToLinkTest {
                 attachedPaymentAccount = PaymentAccountParams.BankAccount(
                     accountNumber = "acct_123",
                     routingNumber = "110000000",
-                )
+                ),
+                generatedPaymentDetailIds = emptyList(),
             )
         )
 
@@ -273,7 +275,9 @@ internal class SaveAccountToLinkTest {
             locale = Locale.getDefault(),
             configuration = FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             successContentRepository = successRepository,
             repository = repository,

@@ -14,6 +14,8 @@ internal data class LinkAccountSessionPaymentAccount(
     val microdepositVerificationMethod: MicrodepositVerificationMethod = UNKNOWN,
     @SerialName(value = "networking_successful")
     val networkingSuccessful: Boolean? = null,
+    @SerialName(value = "generated_payment_detail_ids")
+    val generatedPaymentDetailIds: List<String> = emptyList(),
     @SerialName(value = "next_pane")
     val nextPane: FinancialConnectionsSessionManifest.Pane? = null
 ) {

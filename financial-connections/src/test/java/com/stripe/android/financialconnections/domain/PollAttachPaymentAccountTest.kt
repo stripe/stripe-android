@@ -31,7 +31,9 @@ internal class PollAttachPaymentAccountTest {
     private val attachedPaymentAccountRepository = mock(AttachedPaymentAccountRepository::class.java)
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret",
-        publishableKey = "publishable_key"
+        publishableKey = "publishable_key",
+        hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
 
     private val pollAttachPaymentAccount = PollAttachPaymentAccount(
@@ -52,6 +54,7 @@ internal class PollAttachPaymentAccountTest {
         val paymentAccount = LinkAccountSessionPaymentAccount(
             id = "acct_123",
             microdepositVerificationMethod = DESCRIPTOR_CODE,
+            generatedPaymentDetailIds = listOf("csmrpd_123"),
         )
 
         whenever(
@@ -66,7 +69,10 @@ internal class PollAttachPaymentAccountTest {
         val result = pollAttachPaymentAccount(sync, null, params)
 
         assertThat(result).isEqualTo(paymentAccount)
-        verify(attachedPaymentAccountRepository).set(params)
+        verify(attachedPaymentAccountRepository).set(
+            paymentAccount = params,
+            generatedPaymentDetailIds = listOf("csmrpd_123"),
+        )
     }
 
     @Test

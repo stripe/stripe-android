@@ -11,6 +11,8 @@ internal object TextFixtures {
     val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret_123",
         publishableKey = "pk_test_123",
+        hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
 
     val syncResponse = SynchronizeSessionResponse(

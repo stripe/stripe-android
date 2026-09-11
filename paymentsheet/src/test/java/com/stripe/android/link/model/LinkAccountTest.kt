@@ -109,6 +109,26 @@ class LinkAccountTest {
         assertThat(linkAccount.consumerLinkBrand).isNull()
     }
 
+    @Test
+    fun `toFinancialConnectionsConsumer includes existing consumer details`() {
+        val linkAccount = LinkAccount(
+            consumerSession = makeConsumerSession(
+                linkBrand = LinkBrand.Link,
+                isVerified = true,
+            ),
+            consumerPublishableKey = "pk_consumer",
+        )
+
+        val consumer = linkAccount.toFinancialConnectionsConsumer()
+
+        assertThat(consumer.emailAddress).isEqualTo("test@example.com")
+        assertThat(consumer.phoneNumber).isEqualTo("(•••) ••• ••07")
+        assertThat(consumer.clientSecret).isEqualTo("consumer_session_007")
+        assertThat(consumer.publishableKey).isEqualTo("pk_consumer")
+        assertThat(consumer.isVerified).isTrue()
+        assertThat(consumer.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
     private fun makeConsumerSession(
         linkBrand: LinkBrand? = null,
         isVerified: Boolean = false,

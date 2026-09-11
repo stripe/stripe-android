@@ -1,27 +1,18 @@
 package com.stripe.android.financialconnections.repository
 
-import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.financialconnections.FinancialConnectionsConsumer
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState.Verified
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType.SignUp
-import com.stripe.android.model.LinkBrand
 import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 internal const val KeyConsumerSession = "ConsumerSession"
 
-@Parcelize
-internal data class CachedConsumerSession(
-    val emailAddress: String,
-    val phoneNumber: String,
-    val clientSecret: String,
-    val publishableKey: String?,
-    val isVerified: Boolean,
-    val linkBrand: LinkBrand?,
-) : Parcelable
+internal typealias CachedConsumerSession = FinancialConnectionsConsumer
 
 internal fun interface ConsumerSessionProvider {
     fun provideConsumerSession(): CachedConsumerSession?
@@ -42,7 +33,14 @@ internal interface ConsumerSessionRepository : ConsumerSessionProvider {
 
 internal class RealConsumerSessionRepository @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    configuration: FinancialConnectionsSheetConfiguration,
 ) : ConsumerSessionRepository {
+
+    init {
+        if (savedStateHandle.contains(KeyConsumerSession).not()) {
+            savedStateHandle[KeyConsumerSession] = configuration.existingConsumer
+        }
+    }
 
     override val consumerSessionFlow: StateFlow<CachedConsumerSession?> =
         savedStateHandle.getStateFlow(key = KeyConsumerSession, initialValue = null)

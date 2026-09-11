@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections.repository
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.financialconnections.FinancialConnectionsConsumer
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkBrand
 import org.junit.Test
@@ -15,7 +17,7 @@ class RealConsumerSessionRepositoryTest {
             isVerified = true,
         )
 
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
         store.storeNewConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
@@ -38,7 +40,7 @@ class RealConsumerSessionRepositoryTest {
             isVerified = false,
         )
 
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
         store.storeNewConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
@@ -56,7 +58,7 @@ class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `Keeps existing publishable key when storing updated consumer session`() {
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
 
         val session1 = makeConsumerSession(
             clientSecret = "abc_123",
@@ -86,7 +88,7 @@ class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `Overrides existing publishable key when storing new consumer session`() {
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
 
         val session1 = makeConsumerSession(
             clientSecret = "abc_123",
@@ -122,7 +124,7 @@ class RealConsumerSessionRepositoryTest {
             linkBrand = LinkBrand.Onelink,
         )
 
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
         store.storeNewConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
@@ -131,13 +133,13 @@ class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `consumerSessionFlow emits null initially`() {
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
         assertThat(store.consumerSessionFlow.value).isNull()
     }
 
     @Test
     fun `consumerSessionFlow emits updated session when stored`() {
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
 
         val session = makeConsumerSession(
             clientSecret = "abc_123",
@@ -152,7 +154,7 @@ class RealConsumerSessionRepositoryTest {
 
     @Test
     fun `updateConsumerSession updates linkBrand from new session`() {
-        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        val store = createStore()
 
         val session1 = makeConsumerSession(
             clientSecret = "abc_123",
@@ -170,6 +172,38 @@ class RealConsumerSessionRepositoryTest {
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `Seeds existing consumer from configuration`() {
+        val existingConsumer = FinancialConnectionsConsumer(
+            emailAddress = "email@email.com",
+            phoneNumber = "(•••) •••-1234",
+            clientSecret = "consumer_secret",
+            publishableKey = "pk_consumer",
+            isVerified = true,
+            linkBrand = LinkBrand.Link,
+        )
+
+        val store = createStore(existingConsumer = existingConsumer)
+
+        assertThat(store.provideConsumerSession()).isEqualTo(existingConsumer)
+        assertThat(store.consumerSessionFlow.value).isEqualTo(existingConsumer)
+    }
+
+    private fun createStore(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        existingConsumer: FinancialConnectionsConsumer? = null,
+    ): RealConsumerSessionRepository {
+        return RealConsumerSessionRepository(
+            savedStateHandle = savedStateHandle,
+            configuration = FinancialConnectionsSheetConfiguration(
+                financialConnectionsSessionClientSecret = "fcsess_secret",
+                publishableKey = "pk_merchant",
+                hasRequestedDataPermissions = existingConsumer != null,
+                existingConsumer = existingConsumer,
+            ),
+        )
     }
 
     private fun makeConsumerSession(
