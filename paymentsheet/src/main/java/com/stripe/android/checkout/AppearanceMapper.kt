@@ -3,9 +3,20 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.elements.PaymentElement.Configuration.Appearance
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentsheet.PaymentSheet
 
 internal fun Appearance.State.asPaymentSheet(): PaymentSheet.Appearance {
+    return PaymentSheet.Appearance.Builder()
+        .colorsLight(colorsLight.asPaymentSheet())
+        .colorsDark(colorsDark.asPaymentSheet())
+        .themeMode(themeMode.asPaymentSheet())
+        .primaryButton(primaryButton.asPaymentSheet())
+        .formInsetValues(formInsetValues.asPaymentSheet())
+        .build()
+}
+
+internal fun ShippingAddressElement.Configuration.Appearance.State.asPaymentSheet(): PaymentSheet.Appearance {
     return PaymentSheet.Appearance.Builder()
         .colorsLight(colorsLight.asPaymentSheet())
         .colorsDark(colorsDark.asPaymentSheet())
@@ -44,3 +55,50 @@ private fun Appearance.ThemeMode.asPaymentSheet(): PaymentSheet.ThemeMode = when
     Appearance.ThemeMode.AlwaysLight -> PaymentSheet.ThemeMode.AlwaysLight
     Appearance.ThemeMode.AlwaysDark -> PaymentSheet.ThemeMode.AlwaysDark
 }
+
+private fun ShippingAddressElement.Configuration.Appearance.Colors.State.asPaymentSheet(): PaymentSheet.Colors =
+    PaymentSheet.Colors(
+        primary = primary,
+        surface = surface,
+        component = component,
+        componentBorder = componentBorder,
+        componentDivider = componentDivider,
+        onComponent = onComponent,
+        onSurface = onSurface,
+        subtitle = subtitle,
+        placeholderText = placeholderText,
+        appBarIcon = appBarIcon,
+        error = error,
+    )
+
+private fun ShippingAddressElement.Configuration.Appearance.PrimaryButton.State.asPaymentSheet():
+    PaymentSheet.PrimaryButton = PaymentSheet.PrimaryButton(
+        colorsLight = colorsLight.asPaymentSheet(),
+        colorsDark = colorsDark.asPaymentSheet(),
+        shape = PaymentSheet.PrimaryButtonShape(
+            shape.cornerRadiusDp,
+            shape.borderStrokeWidthDp,
+            shape.heightDp,
+        ),
+        typography = PaymentSheet.PrimaryButtonTypography(
+            typography.fontResId,
+            typography.fontSizeSp,
+        ),
+    )
+
+private fun ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.State.asPaymentSheet():
+    PaymentSheet.PrimaryButtonColors = PaymentSheet.PrimaryButtonColors(
+        background = background,
+        onBackground = onBackground,
+        border = border,
+    )
+
+private fun ShippingAddressElement.Configuration.Appearance.Insets.State.asPaymentSheet(): PaymentSheet.Insets =
+    PaymentSheet.Insets(startDp, topDp, endDp, bottomDp)
+
+private fun ShippingAddressElement.Configuration.Appearance.ThemeMode.asPaymentSheet(): PaymentSheet.ThemeMode =
+    when (this) {
+        ShippingAddressElement.Configuration.Appearance.ThemeMode.Automatic -> PaymentSheet.ThemeMode.Automatic
+        ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysLight -> PaymentSheet.ThemeMode.AlwaysLight
+        ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark -> PaymentSheet.ThemeMode.AlwaysDark
+    }
