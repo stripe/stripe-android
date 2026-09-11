@@ -283,6 +283,29 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `recordConnectionsConsentAcquired() sends all parameters`() = runTest {
+        val consentText = "Rocket Deliveries can access balances. [Learn more](https://stripe.com)."
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/connections_consent_acquired"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart("credentials[consumer_session_client_secret]", "secret"),
+            bodyPart("consent", "{\"localizedConsent\":\"$consentText\"}"),
+        ) { response ->
+            response.setBody("{}")
+        }
+
+        consumersApiService.recordConnectionsConsentAcquired(
+            consumerSessionClientSecret = "secret",
+            localizedConsentText = consentText,
+            requestSurface = "android_payment_element",
+            requestOptions = DEFAULT_OPTIONS,
+        ).getOrThrow()
+    }
+
+    @Test
     fun `createPaymentDetails() sends all parameters`() = runTest {
         val email = "email@example.com"
         val requestSurface = "android_payment_element"

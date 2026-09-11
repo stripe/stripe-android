@@ -236,6 +236,11 @@ internal interface LinkRepository {
         apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails>
 
+    suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+    ): Result<Unit>
+
     suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         intentToken: String?,

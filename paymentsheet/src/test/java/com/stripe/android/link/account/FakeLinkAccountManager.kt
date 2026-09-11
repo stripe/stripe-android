@@ -85,6 +85,7 @@ internal open class FakeLinkAccountManager(
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
+    var recordConnectionsConsentAcquiredResult: Result<Unit> = Result.success(Unit)
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
@@ -112,6 +113,7 @@ internal open class FakeLinkAccountManager(
         createPaymentMethodResult
     }
     val createPaymentMethodCalls = Turbine<LinkPaymentMethod>()
+    val recordConnectionsConsentAcquiredCalls = Turbine<String>()
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -286,6 +288,11 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
         return postConsentUpdateResult
+    }
+
+    override suspend fun recordConnectionsConsentAcquired(localizedConsentText: String): Result<Unit> {
+        recordConnectionsConsentAcquiredCalls.add(localizedConsentText)
+        return recordConnectionsConsentAcquiredResult
     }
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {

@@ -128,6 +128,7 @@ internal data class ElementsSession(
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+        val linkPaymentMethodBankAccountDataConsent: String?,
         val linkBrand: LinkBrand,
     ) : StripeModel
 

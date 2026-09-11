@@ -50,6 +50,7 @@ internal data class LinkConfiguration(
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+    val linkPaymentMethodBankAccountDataConsent: String?,
     val clientAttributionMetadata: ClientAttributionMetadata,
     val linkBrand: LinkBrand,
     val apiConfiguration: ApiConfiguration.State,

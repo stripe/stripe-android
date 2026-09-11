@@ -315,6 +315,8 @@ internal class DefaultCreateLinkState @Inject constructor(
             .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
         linkSupportedPaymentMethodsOnboardingEnabled =
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
+        linkPaymentMethodBankAccountDataConsent =
+            elementsSession.linkSettings?.linkPaymentMethodBankAccountDataConsent,
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
         apiConfiguration = apiConfiguration,
