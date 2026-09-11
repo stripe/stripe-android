@@ -508,7 +508,6 @@ class ConfirmPaymentIntentParamsTest {
                 mapOf(
                     "client_secret" to CLIENT_SECRET,
                     "use_stripe_sdk" to false,
-                    "return_url" to "stripe://return_url",
                     "payment_method_data" to mapOf(
                         "type" to "alipay"
                     ),

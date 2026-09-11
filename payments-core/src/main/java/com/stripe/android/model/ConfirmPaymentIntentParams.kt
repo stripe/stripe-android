@@ -611,9 +611,6 @@ constructor(
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                // return_url is no longer used by is still required by the backend
-                // TODO(smaskell): remove this when no longer required
-                returnUrl = "stripe://return_url",
                 paymentMethodCode = PaymentMethod.Type.Alipay.code,
             )
         }
