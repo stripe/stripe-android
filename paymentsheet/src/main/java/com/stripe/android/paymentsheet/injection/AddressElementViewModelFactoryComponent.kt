@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
+import android.app.Application
 import android.content.Context
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
@@ -30,6 +31,7 @@ internal interface AddressElementViewModelFactoryComponent {
     @Component.Factory
     interface Factory {
         fun create(
+            @BindsInstance application: Application,
             @BindsInstance context: Context,
             @BindsInstance starterArgs: AddressElementActivityContract.Args,
         ): AddressElementViewModelFactoryComponent
