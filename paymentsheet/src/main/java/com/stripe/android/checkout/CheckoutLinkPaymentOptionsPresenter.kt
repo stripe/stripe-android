@@ -4,6 +4,7 @@ package com.stripe.android.checkout
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
 import com.stripe.android.link.LinkActivityResult
@@ -30,6 +31,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
+    private val resultCallback: CheckoutController.ResultCallback,
 ) : EmbeddedPaymentOptionsPresenter {
     init {
         linkPaymentLauncher.register(
@@ -48,6 +50,12 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
 
     override fun present() {
         if (sheetStateHolder.sheetIsOpen) return
+        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+            resultCallback.onResult(
+                CheckoutController.Result.Failed(invalidHostStateError(lifecycleOwner))
+            )
+            return
+        }
         val state = stateHolder.state
         if (state == null) {
             defaultPresenter.present()
@@ -55,12 +63,20 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
         }
 
         sheetStateHolder.sheetIsOpen = true
-        val didLaunch = selectionLauncher.launchIfEligible(
-            selection = state.paymentSelection,
-            configuration = state.paymentMethodMetadata.linkState?.configuration,
-            paymentMethodMetadata = state.paymentMethodMetadata,
-            hasUserDeclinedVerification = state.linkEagerPresentationSuppressed,
-        )
+        val didLaunch = try {
+            selectionLauncher.launchIfEligible(
+                selection = state.paymentSelection,
+                configuration = state.paymentMethodMetadata.linkState?.configuration,
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                hasUserDeclinedVerification = state.linkEagerPresentationSuppressed,
+            )
+        } catch (error: IllegalStateException) {
+            sheetStateHolder.sheetIsOpen = false
+            resultCallback.onResult(
+                CheckoutController.Result.Failed(invalidHostStateError(lifecycleOwner, error))
+            )
+            return
+        }
         if (!didLaunch) {
             presentDefault()
         }

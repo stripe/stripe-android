@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -638,7 +639,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `missing refreshed state does not crash when mutation finishes`() = testScenario {
+    fun `missing refreshed state resets launch state when mutation finishes`() = testScenario {
         val mutationGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runMutation {
@@ -665,7 +666,8 @@ internal class CheckoutSheetLauncherTest {
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
             "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
         )
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
@@ -898,6 +900,25 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
+    @Test
+    fun `launchForm after host is destroyed reports failure and resets launch state`() = testScenario {
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+
+        sheetLauncher.launchForm(
+            code = "card",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            configuration = EmbeddedConfigurationFactory.create(),
+            customerState = null,
+            promotion = null,
+        )
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().contains("The host activity is not in a valid state (DESTROYED).")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isNull()
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
         promotions: List<PaymentMethodMessagePromotion>? = null,
@@ -920,12 +941,13 @@ internal class CheckoutSheetLauncherTest {
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val logger = FakeLogger()
         val confirmationHandler = FakeConfirmationHandler()
+        val resultTurbine = Turbine<CheckoutController.Result>()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
-            resultCallback = CheckoutController.ResultCallback {},
+            resultCallback = CheckoutController.ResultCallback(resultTurbine::add),
         )
         val launcherState = CheckoutSheetLauncherState(savedStateHandle)
         val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(
@@ -950,6 +972,7 @@ internal class CheckoutSheetLauncherTest {
                     errorReporter = errorReporter,
                     sessionRefresher = sessionRefresher,
                     operationCoordinator = operationCoordinator,
+                    resultCallback = CheckoutController.ResultCallback(resultTurbine::add),
                     launcherState = state,
                     embeddedContentState = embeddedContentState,
                     logger = logger,
@@ -983,6 +1006,7 @@ internal class CheckoutSheetLauncherTest {
                 sessionRefresher = sessionRefresher,
                 logger = logger,
                 operationCoordinator = operationCoordinator,
+                resultTurbine = resultTurbine,
                 launcherState = launcherState,
                 savedStateHandle = savedStateHandle,
                 embeddedContentState = embeddedContentState,
@@ -990,6 +1014,7 @@ internal class CheckoutSheetLauncherTest {
                 createSheetLauncher = ::createSheetLauncher,
                 runCurrent = testScheduler::runCurrent,
             ).block()
+            resultTurbine.ensureAllEventsConsumed()
         }
 
         confirmationHandler.validate()
@@ -1010,6 +1035,7 @@ internal class CheckoutSheetLauncherTest {
         val sessionRefresher: FakeCheckoutSessionRefresher,
         val logger: FakeLogger,
         val operationCoordinator: CheckoutOperationCoordinator,
+        val resultTurbine: Turbine<CheckoutController.Result>,
         val launcherState: CheckoutSheetLauncherState,
         val savedStateHandle: SavedStateHandle,
         val embeddedContentState: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,

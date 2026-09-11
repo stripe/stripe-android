@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
 import com.stripe.android.link.LinkAccountUpdate
@@ -32,16 +33,19 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 internal class CheckoutLinkPaymentOptionsPresenterTest {
     @Test
@@ -210,12 +214,43 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
+    @Test
+    fun `present after host is destroyed reports failure without leaving sheet open`() = runScenario {
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+        presenter.present()
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().contains("The host activity is not in a valid state (DESTROYED).")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        verifyLinkWasNotPresented()
+    }
+
+    @Test
+    fun `Link launcher failure reports failure without leaving sheet open`() = runScenario {
+        val launchError = IllegalStateException("Host cannot launch")
+        doThrow(launchError).whenever(linkPaymentLauncher).present(
+            configuration = any(),
+            paymentMethodMetadata = any(),
+            linkAccountInfo = any(),
+            launchMode = any(),
+            linkExpressMode = any(),
+            statusBarColor = anyOrNull(),
+        )
+
+        presenter.present()
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error.cause).isSameInstanceAs(launchError)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
     @Suppress("LongMethod")
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: PaymentSelection? = linkSelection,
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkState = com.stripe.android.paymentsheet.state.LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
@@ -242,6 +277,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkPaymentLauncher = mock<LinkPaymentLauncher>()
         val activityResultRegistry = mock<ActivityResultRegistry>()
         val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
+        val resultTurbine = Turbine<CheckoutController.Result>()
         val presenter = CheckoutLinkPaymentOptionsPresenter(
             defaultPresenter = defaultPresenter,
             selectionLauncher = LinkPaymentMethodSelectionLauncher(
@@ -257,6 +293,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
             sheetStateHolder = sheetStateHolder,
+            resultCallback = CheckoutController.ResultCallback(resultTurbine::add),
         )
         val callbackCaptor = argumentCaptor<(LinkActivityResult) -> Unit>()
         verify(linkPaymentLauncher).register(
@@ -278,7 +315,9 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             linkAccountInfo = linkAccountInfo,
             paymentMethodMetadata = paymentMethodMetadata,
             resultCallback = callbackCaptor.firstValue,
+            resultTurbine = resultTurbine,
         ).block()
+        resultTurbine.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
@@ -294,6 +333,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAccountInfo: LinkAccountUpdate.Value,
         val paymentMethodMetadata: com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata,
         val resultCallback: (LinkActivityResult) -> Unit,
+        val resultTurbine: Turbine<CheckoutController.Result>,
     ) {
         val linkConfiguration: LinkConfiguration
             get() = requireNotNull(paymentMethodMetadata.linkState?.configuration)
