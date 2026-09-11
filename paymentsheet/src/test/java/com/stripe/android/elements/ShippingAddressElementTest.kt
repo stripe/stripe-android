@@ -81,9 +81,7 @@ internal class ShippingAddressElementTest {
         }
 
     @Test
-    fun `present launches a blank address form with hosted autocomplete`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `present launches a blank address form with hosted autocomplete`() = runScenario {
         shippingAddressElement.present()
 
         val launch = activityLauncher.launchCalls.awaitItem()
@@ -106,9 +104,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `present suppresses duplicate presentations`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `present suppresses duplicate presentations`() = runScenario {
         shippingAddressElement.present()
         shippingAddressElement.present()
 
@@ -118,9 +114,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `recreated element suppresses presentation while original is active`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `recreated element suppresses presentation while original is active`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -134,9 +128,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `present resolves the latest payment configuration`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `present resolves the latest payment configuration`() = runScenario {
         shippingAddressElement.present()
 
         val firstLaunch = activityLauncher.launchCalls.awaitItem()
@@ -154,9 +146,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `successful result clears presentation and commits complete address`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `successful result clears presentation and commits complete address`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
 
@@ -201,8 +191,6 @@ internal class ShippingAddressElementTest {
         val commitResult = CompletableDeferred<Result<Unit>>()
 
         runScenario(
-            configured = true,
-            configuration = configuredCheckoutConfiguration,
             commitShippingAddress = FakeCommitShippingAddress(commitResult),
         ) {
             shippingAddressElement.present()
@@ -239,9 +227,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `canceled result clears presentation without committing`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `canceled result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -253,9 +239,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `malformed successful result clears presentation without committing`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `malformed successful result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -277,9 +261,7 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `recreated element result clears presentation after host destruction`() = runScenario(
-        configuration = configuredCheckoutConfiguration,
-    ) {
+    fun `recreated element result clears presentation after host destruction`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
@@ -311,20 +293,9 @@ internal class ShippingAddressElementTest {
     private fun runScenario(
         configured: Boolean = true,
         configuration: CheckoutController.Configuration.State = configuredCheckoutConfiguration,
-        block: suspend Scenario.() -> Unit,
-    ) = runScenario(
-        configured = configured,
-        configuration = configuration,
-        commitShippingAddress = FakeCommitShippingAddress(
+        commitShippingAddress: FakeCommitShippingAddress = FakeCommitShippingAddress(
             CompletableDeferred(Result.success(Unit)),
         ),
-        block = block,
-    )
-
-    private fun runScenario(
-        configured: Boolean,
-        configuration: CheckoutController.Configuration.State,
-        commitShippingAddress: FakeCommitShippingAddress,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
