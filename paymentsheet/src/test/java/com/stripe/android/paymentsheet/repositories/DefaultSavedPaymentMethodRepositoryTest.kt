@@ -342,8 +342,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { "acct_123" },
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
