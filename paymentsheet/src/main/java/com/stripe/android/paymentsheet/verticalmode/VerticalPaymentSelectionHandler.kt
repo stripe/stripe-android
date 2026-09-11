@@ -11,9 +11,12 @@ internal interface VerticalPaymentSelectionHandler {
 
     fun onSelectionComplete()
 
+    fun clearFailure()
+
     sealed interface State {
         data object Idle : State
         data class Selecting(val selection: PaymentSelection.Saved) : State
+        data class Failed(val error: Throwable) : State
     }
 }
 
@@ -33,4 +36,6 @@ internal class ImmediateVerticalPaymentSelectionHandler(
     override fun onSelectionComplete() {
         completionAction?.invoke()
     }
+
+    override fun clearFailure() = Unit
 }

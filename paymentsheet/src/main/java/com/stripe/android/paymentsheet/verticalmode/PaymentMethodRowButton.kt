@@ -567,7 +567,7 @@ private fun RowStyle.getVerticalInsets(): Dp = when (this) {
     is RowStyle.FlatWithRadio -> additionalVerticalInsetsDp.dp
 }
 
-private fun RowStyle.getHorizontalInsets(): Dp = when (this) {
+internal fun RowStyle.getHorizontalInsets(): Dp = when (this) {
     is RowStyle.FloatingButton -> ROW_CONTENT_HORIZONTAL_SPACING.dp
     is RowStyle.FlatWithCheckmark -> horizontalInsetsDp.dp
     is RowStyle.FlatWithDisclosure -> horizontalInsetsDp.dp
