@@ -433,12 +433,12 @@ class DefaultLinkAccountManagerTest {
             )
             var callCount = 0
             override suspend fun createCardPaymentDetails(
-                apiConfiguration: ApiConfiguration.State,
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 userEmail: String,
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {
@@ -448,21 +448,21 @@ class DefaultLinkAccountManagerTest {
             }
 
             override suspend fun lookupConsumer(
-                apiConfiguration: ApiConfiguration.State,
                 email: String?,
                 linkAuthIntentId: String?,
                 sessionId: String,
                 customerId: String?,
-                supportedVerificationTypes: List<String>?
+                supportedVerificationTypes: List<String>?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSessionLookup> {
                 callCount += 1
                 return super.lookupConsumer(
-                    apiConfiguration = apiConfiguration,
                     email = email,
                     linkAuthIntentId = linkAuthIntentId,
                     sessionId = sessionId,
                     customerId = customerId,
-                    supportedVerificationTypes = supportedVerificationTypes
+                    supportedVerificationTypes = supportedVerificationTypes,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -486,13 +486,13 @@ class DefaultLinkAccountManagerTest {
             var createPaymentDetailsFromPaymentMethodCallCount = 0
             var capturedCustomerEphemeralKey = "not_called"
             override suspend fun createPaymentDetailsFromPaymentMethod(
-                apiConfiguration: ApiConfiguration.State,
                 paymentMethod: PaymentMethod,
                 userEmail: String,
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
                 customerEphemeralKey: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.Saved> {
                 createPaymentDetailsFromPaymentMethodCallCount += 1
                 capturedCustomerEphemeralKey = customerEphemeralKey
@@ -551,11 +551,11 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var shareCardPaymentDetailsCallCount = 0
             override suspend fun shareCardPaymentDetails(
-                apiConfiguration: ApiConfiguration.State,
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.Passthrough> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
@@ -563,11 +563,11 @@ class DefaultLinkAccountManagerTest {
                     shareCardPaymentDetailsCallCount += 1
                 }
                 return super.shareCardPaymentDetails(
-                    apiConfiguration = apiConfiguration,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     id = id,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -595,12 +595,12 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
             override suspend fun startVerification(
-                apiConfiguration: ApiConfiguration.State,
                 consumerSessionClientSecret: String,
-                isResendSmsCode: Boolean
+                isResendSmsCode: Boolean,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.startVerification(apiConfiguration, consumerSessionClientSecret, isResendSmsCode)
+                return super.startVerification(consumerSessionClientSecret, isResendSmsCode, apiConfiguration)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -671,17 +671,17 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
             override suspend fun confirmVerification(
-                apiConfiguration: ApiConfiguration.State,
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consentGranted: Boolean?
+                consentGranted: Boolean?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
                 return super.confirmVerification(
-                    apiConfiguration = apiConfiguration,
                     verificationCode = verificationCode,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    consentGranted = consentGranted
+                    consentGranted = consentGranted,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -709,10 +709,10 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
             override suspend fun confirmVerification(
-                apiConfiguration: ApiConfiguration.State,
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consentGranted: Boolean?
+                consentGranted: Boolean?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
                 return Result.failure(error)
@@ -740,9 +740,9 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var paymentMethodTypes: Set<String>? = null
             override suspend fun listPaymentDetails(
-                apiConfiguration: ApiConfiguration.State,
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.failure(error)
@@ -763,9 +763,9 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var paymentMethodTypes: Set<String>? = null
             override suspend fun listPaymentDetails(
-                apiConfiguration: ApiConfiguration.State,
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -973,10 +973,10 @@ class DefaultLinkAccountManagerTest {
     fun `createLinkAccountSession returns repository result on success`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             override suspend fun createLinkAccountSession(
-                apiConfiguration: ApiConfiguration.State,
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
             }
@@ -1017,10 +1017,10 @@ class DefaultLinkAccountManagerTest {
         var capturedIntentToken: String? = null
         val linkRepository = object : FakeLinkRepository() {
             override suspend fun createLinkAccountSession(
-                apiConfiguration: ApiConfiguration.State,
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 capturedIntentToken = intentToken
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -1047,10 +1047,10 @@ class DefaultLinkAccountManagerTest {
         var capturedIntentToken: String? = null
         val linkRepository = object : FakeLinkRepository() {
             override suspend fun createLinkAccountSession(
-                apiConfiguration: ApiConfiguration.State,
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 capturedIntentToken = intentToken
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)

@@ -158,9 +158,9 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     ): Boolean {
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(
-                apiConfiguration = apiConfiguration,
                 email = email,
                 sessionId = sessionId,
+                apiConfiguration = apiConfiguration,
             )
             .map { it.exists }
             .onFailure {

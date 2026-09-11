@@ -6,10 +6,13 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.RequestSurface
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -21,6 +24,20 @@ class NativeLinkActivityContractTest {
         publishableKey = "pk_test_abcdefg",
         stripeAccountId = "acct_123",
     )
+
+    @Before
+    fun before() {
+        PaymentConfiguration.init(
+            context = ApplicationProvider.getApplicationContext(),
+            publishableKey = testApiConfiguration.publishableKey,
+            stripeAccountId = testApiConfiguration.stripeAccountId,
+        )
+    }
+
+    @After
+    fun after() {
+        PaymentConfiguration.clearInstance()
+    }
 
     @Test
     fun `intent is created correctly`() {

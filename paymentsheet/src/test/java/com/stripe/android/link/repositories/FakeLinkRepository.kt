@@ -64,12 +64,12 @@ internal open class FakeLinkRepository : LinkRepository {
     private val mobileSignUpCalls = Turbine<MobileSignUpCall>()
 
     override suspend fun lookupConsumer(
-        apiConfiguration: ApiConfiguration.State,
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?,
-        supportedVerificationTypes: List<String>?
+        supportedVerificationTypes: List<String>?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup> {
         lookupConsumerCalls.add(
             item = LookupCall(
@@ -81,9 +81,9 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     override suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        apiConfiguration: ApiConfiguration.State,
         email: String,
-        sessionId: String
+        sessionId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup> {
         lookupConsumerWithoutBackendLoggingCalls.add(
             item = LookupCall(
@@ -95,7 +95,6 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     override suspend fun mobileLookupConsumer(
-        apiConfiguration: ApiConfiguration.State,
         email: String?,
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
@@ -104,7 +103,8 @@ internal open class FakeLinkRepository : LinkRepository {
         sessionId: String,
         customerId: String?,
         supportedVerificationTypes: List<String>?,
-        linkAuthTokenClientSecret: String?
+        linkAuthTokenClientSecret: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup> {
         mobileLookupCalls.add(
             item = MobileLookupCall(
@@ -120,24 +120,23 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     override suspend fun refreshConsumer(
-        apiConfiguration: ApiConfiguration.State,
         appId: String,
         consumerSessionClientSecret: String,
-        supportedVerificationTypes: List<String>?
+        supportedVerificationTypes: List<String>?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionRefresh> = refreshConsumerResult
 
     override suspend fun consumerSignUp(
-        apiConfiguration: ApiConfiguration.State,
         email: String,
         phone: String?,
         country: String?,
         countryInferringMethod: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
+        consentAction: ConsumerSignUpConsentAction,
+        apiConfiguration: ApiConfiguration.State,
     ) = consumerSignUpResult
 
     override suspend fun mobileSignUp(
-        apiConfiguration: ApiConfiguration.State,
         name: String?,
         email: String,
         phoneNumber: String?,
@@ -148,7 +147,8 @@ internal open class FakeLinkRepository : LinkRepository {
         currency: String?,
         incentiveEligibilitySession: IncentiveEligibilitySession?,
         verificationToken: String,
-        appId: String
+        appId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionSignup> {
         mobileSignUpCalls.add(
             item = MobileSignUpCall(
@@ -168,42 +168,41 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     override suspend fun createCardPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ) = createCardPaymentDetailsResult
 
     override suspend fun createPaymentDetailsFromPaymentMethod(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethod: PaymentMethod,
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
         customerEphemeralKey: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkPaymentDetails.Saved> = createPaymentDetailsFromPaymentMethodResult
 
     override suspend fun createBankAccountPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ) = createBankAccountPaymentDetailsResult
 
     override suspend fun shareCardPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkPaymentDetails.Passthrough> = shareCardPaymentDetailsResult
 
     override suspend fun sharePaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String?,
@@ -212,74 +211,75 @@ internal open class FakeLinkRepository : LinkRepository {
         allowRedisplay: String?,
         apiKey: String?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<SharePaymentDetails> = sharePaymentDetails
 
     override suspend fun createPaymentMethod(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         paymentMethod: LinkPaymentMethod,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ) = createPaymentMethod
 
     override suspend fun logOut(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
-        consumerAccountPublishableKey: String?
+        consumerAccountPublishableKey: String?,
+        apiConfiguration: ApiConfiguration.State,
     ) = logOutResult
 
     override suspend fun startVerification(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
-        isResendSmsCode: Boolean
+        isResendSmsCode: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ) = startVerificationResult
 
     override suspend fun confirmVerification(
-        apiConfiguration: ApiConfiguration.State,
         verificationCode: String,
         consumerSessionClientSecret: String,
-        consentGranted: Boolean?
+        consentGranted: Boolean?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession> = confirmVerificationResult
 
     override suspend fun postConsentUpdate(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Unit> = postConsentUpdateResult
 
     override suspend fun listPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails> = listPaymentDetailsResult
 
     override suspend fun listShippingAddresses(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerShippingAddresses> = listShippingAddressesResult
 
     override suspend fun deletePaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Unit> = deletePaymentDetailsResult
 
     override suspend fun updatePaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails> = updatePaymentDetailsResult
 
     override suspend fun createLinkAccountSession(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkAccountSession> = createLinkAccountSessionResult
 
     override suspend fun updatePhoneNumber(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         phoneNumber: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession> = updatePhoneNumberResult
 
     suspend fun awaitMobileLookup(): MobileLookupCall {

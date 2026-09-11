@@ -34,12 +34,12 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
-        apiConfiguration: ApiConfiguration.State,
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?,
         supportedVerificationTypes: List<String>?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -48,9 +48,9 @@ internal interface LinkRepository {
      * Link global holdback to look up consumers in the event Link is disabled.
      */
     suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        apiConfiguration: ApiConfiguration.State,
         email: String,
         sessionId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -60,7 +60,6 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
-        apiConfiguration: ApiConfiguration.State,
         email: String?,
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
@@ -70,33 +69,33 @@ internal interface LinkRepository {
         customerId: String?,
         supportedVerificationTypes: List<String>?,
         linkAuthTokenClientSecret: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup>
 
     /**
      * Refresh the mobile consumer session.
      */
     suspend fun refreshConsumer(
-        apiConfiguration: ApiConfiguration.State,
         appId: String,
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionRefresh>
 
     /**
      * Sign up for a new Link account.
      */
     suspend fun consumerSignUp(
-        apiConfiguration: ApiConfiguration.State,
         email: String,
         phone: String?,
         country: String?,
         countryInferringMethod: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
+        consentAction: ConsumerSignUpConsentAction,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionSignup>
 
     suspend fun mobileSignUp(
-        apiConfiguration: ApiConfiguration.State,
         name: String?,
         email: String,
         phoneNumber: String?,
@@ -107,49 +106,49 @@ internal interface LinkRepository {
         currency: String?,
         incentiveEligibilitySession: IncentiveEligibilitySession?,
         verificationToken: String,
-        appId: String
+        appId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionSignup>
 
     /**
      * Create a new card payment method in the consumer account.
      */
     suspend fun createCardPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkPaymentDetails.New>
 
     suspend fun createPaymentDetailsFromPaymentMethod(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethod: PaymentMethod,
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
         customerEphemeralKey: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkPaymentDetails.Saved>
 
     suspend fun createBankAccountPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String?,
@@ -158,97 +157,98 @@ internal interface LinkRepository {
         allowRedisplay: String?,
         apiKey: String?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         paymentMethod: LinkPaymentMethod,
-        clientAttributionMetadata: ClientAttributionMetadata
+        clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     suspend fun logOut(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
      * Start an SMS verification.
      */
     suspend fun startVerification(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
-        isResendSmsCode: Boolean = false
+        isResendSmsCode: Boolean = false,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
      * Confirm an SMS verification code.
      */
     suspend fun confirmVerification(
-        apiConfiguration: ApiConfiguration.State,
         verificationCode: String,
         consumerSessionClientSecret: String,
         consentGranted: Boolean?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
      * Update consent status for the signed in consumer.
      */
     suspend fun postConsentUpdate(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Unit>
 
     /**
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails>
 
     /**
      * Fetch all shipping addresses for the signed in consumer.
      */
     suspend fun listShippingAddresses(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerShippingAddresses>
 
     /**
      * Delete the payment method from the consumer account.
      */
     suspend fun deletePaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Unit>
 
     /**
      * Update an existing payment method in the consumer account.
      */
     suspend fun updatePaymentDetails(
-        apiConfiguration: ApiConfiguration.State,
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails>
 
     suspend fun createLinkAccountSession(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         intentToken: String?,
         linkMode: LinkMode?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkAccountSession>
 
     /**
      * Update the phone number for the signed in consumer.
      */
     suspend fun updatePhoneNumber(
-        apiConfiguration: ApiConfiguration.State,
         consumerSessionClientSecret: String,
         phoneNumber: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 }

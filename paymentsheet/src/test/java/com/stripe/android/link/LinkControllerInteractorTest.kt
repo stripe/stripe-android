@@ -48,7 +48,6 @@ import org.robolectric.annotation.Config
 import java.util.Optional
 import javax.inject.Provider
 import kotlin.jvm.optionals.getOrNull
-import kotlin.test.assertFailsWith
 
 @Suppress("LargeClass")
 @ExperimentalCoroutinesApi
@@ -150,8 +149,7 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `configure() sets new configuration without initializing PaymentConfiguration`() = runTest {
-        PaymentConfiguration.clearInstance()
+    fun `configure() sets new configuration and loads it`() = runTest {
         val interactor = createInteractor()
 
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
@@ -170,9 +168,9 @@ class LinkControllerInteractorTest {
             )
         assertThat(interactor.configure(controllerConfig).isSuccess).isTrue()
         assertThat(linkComponent.configuration).isEqualTo(loadedConfiguration)
-        assertFailsWith<IllegalStateException> {
-            PaymentConfiguration.getInstance(application)
-        }
+        val paymentConfiguration = PaymentConfiguration.getInstance(application)
+        assertThat(paymentConfiguration.publishableKey).isEqualTo("pk_123")
+        assertThat(paymentConfiguration.stripeAccountId).isEqualTo("acct_123")
     }
 
     @Test

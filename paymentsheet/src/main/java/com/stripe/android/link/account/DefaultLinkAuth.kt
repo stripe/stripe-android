@@ -62,12 +62,12 @@ internal class DefaultLinkAuth @Inject constructor(
             )
         } else {
             linkRepository.lookupConsumer(
-                apiConfiguration = config.apiConfiguration,
                 email = email,
                 linkAuthIntentId = linkAuthIntentId,
                 sessionId = sessionId,
                 customerId = customerId,
-                supportedVerificationTypes = supportedVerificationTypes
+                supportedVerificationTypes = supportedVerificationTypes,
+                apiConfiguration = config.apiConfiguration,
             )
         }
     }
@@ -91,13 +91,13 @@ internal class DefaultLinkAuth @Inject constructor(
             )
         } else {
             linkRepository.consumerSignUp(
-                apiConfiguration = config.apiConfiguration,
                 email = email,
                 phone = phoneNumber,
                 country = country,
                 countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction.consumerAction,
+                apiConfiguration = config.apiConfiguration,
             )
         }
     }
@@ -107,10 +107,10 @@ internal class DefaultLinkAuth @Inject constructor(
         supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionRefresh> {
         return linkRepository.refreshConsumer(
-            apiConfiguration = config.apiConfiguration,
             appId = applicationId,
             consumerSessionClientSecret = consumerSessionClientSecret,
-            supportedVerificationTypes = supportedVerificationTypes
+            supportedVerificationTypes = supportedVerificationTypes,
+            apiConfiguration = config.apiConfiguration,
         )
     }
 
@@ -126,7 +126,6 @@ internal class DefaultLinkAuth @Inject constructor(
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
             linkRepository.mobileLookupConsumer(
-                apiConfiguration = config.apiConfiguration,
                 verificationToken = verificationToken,
                 appId = applicationId,
                 email = email,
@@ -136,6 +135,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 customerId = customerId,
                 supportedVerificationTypes = supportedVerificationTypes,
                 linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onFailure { error ->
             val operation = if (email != null) "lookup" else "lookupByAuthIntent"
@@ -154,7 +154,6 @@ internal class DefaultLinkAuth @Inject constructor(
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
             linkRepository.mobileSignUp(
-                apiConfiguration = config.apiConfiguration,
                 name = name,
                 email = email,
                 phoneNumber = phoneNumber,
@@ -166,6 +165,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 amount = config.stripeIntent.amount,
                 currency = config.stripeIntent.currency,
                 incentiveEligibilitySession = null,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onFailure { error ->
             reportAttestationError(error, operation = "signup")

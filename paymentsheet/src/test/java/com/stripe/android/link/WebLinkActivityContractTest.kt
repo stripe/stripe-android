@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -12,6 +13,8 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,6 +26,20 @@ class WebLinkActivityContractTest {
         publishableKey = "pk_test_abcdefg",
         stripeAccountId = "acct_123",
     )
+
+    @Before
+    fun before() {
+        PaymentConfiguration.init(
+            context = ApplicationProvider.getApplicationContext(),
+            publishableKey = testApiConfiguration.publishableKey,
+            stripeAccountId = testApiConfiguration.stripeAccountId,
+        )
+    }
+
+    @After
+    fun after() {
+        PaymentConfiguration.clearInstance()
+    }
 
     @Test
     fun `intent is created correctly`() {
