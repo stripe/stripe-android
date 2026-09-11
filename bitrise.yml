@@ -456,25 +456,24 @@ workflows:
             - test_title: CardScan instrumentation tests
       # Firebase Test Lab runs remotely, so it can share this job without
       # competing with CardScan's local emulator.
-# ir-answer-accumulate
-#       - android-build-for-ui-testing@0:
-#         title: Build PaymentSheet Google Pay E2E test APKs
-#         is_always_run: true
-#         timeout: 1200
-#         inputs:
-#            - module: paymentsheet-example
-#            - variant: baseDebug
-#            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
-#     - virtual-device-testing-for-android@1:
-#         title: Run TestGooglePay on virtual devices
-#         is_always_run: true
-#         timeout: 3600
-#         inputs:
-#           - test_type: instrumentation
-#           - auto_google_login: "true"
-#           - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
-#           - download_test_results: "true"
-#          - test_timeout: "2700"
+      - android-build-for-ui-testing@0:
+          title: Build PaymentSheet Google Pay E2E test APKs
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - module: paymentsheet-example
+            - variant: baseDebug
+            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+      - virtual-device-testing-for-android@1:
+          title: Run TestGooglePay on virtual devices
+          is_always_run: true
+          timeout: 3600
+          inputs:
+            - test_type: instrumentation
+            - auto_google_login: "true"
+            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
+            - download_test_results: "true"
+            - test_timeout: "2700"
       - deploy-to-bitrise-io@2:
           title: Deploy Google Pay E2E test results
           is_always_run: true
