@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,7 +68,12 @@ internal fun LinkControllerUi(
     playgroundState: LinkControllerPlaygroundState,
     onPaymentMethodButtonClick: (email: String, filter: List<LinkController.PaymentMethodType>?) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
-    onPresentClick: (email: String, phoneNumber: String?, filter: List<LinkController.PaymentMethodType>?) -> Unit,
+    onPresentClick: (
+        email: String,
+        phoneNumber: String?,
+        filter: List<LinkController.PaymentMethodType>?,
+        financialConnectionsPermissions: List<String>?,
+    ) -> Unit,
     onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
     onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
@@ -86,6 +92,9 @@ internal fun LinkControllerUi(
     var registrationName by rememberSaveable { mutableStateOf("") }
     var updatePhoneNumber by rememberSaveable { mutableStateOf("") }
     var selectedPaymentMethodTypes by remember { mutableStateOf(setOf<LinkController.PaymentMethodType>()) }
+    var selectedFinancialConnectionsPermissions by remember {
+        mutableStateOf(setOf<FinancialConnectionsPermission>())
+    }
     val errorToPresent = playgroundState.linkControllerError()
 
     LaunchedEffect(errorToPresent) {
@@ -108,7 +117,9 @@ internal fun LinkControllerUi(
         Divider(Modifier.padding(bottom = 10.dp))
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag(LINK_CONTROLLER_CONSUMER_EMAIL_TEST_TAG)
+                .fillMaxWidth(),
             value = email,
             label = { Text(text = "Consumer email") },
             onValueChange = { email = it }
@@ -260,14 +271,27 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
-        PresentButton(
+        FinancialConnectionsPermissionSelector(
             modifier = Modifier.fillMaxWidth(),
+            selectedPermissions = selectedFinancialConnectionsPermissions,
+            onSelectionChange = { selectedFinancialConnectionsPermissions = it },
+        )
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
+
+        PresentButton(
+            modifier = Modifier
+                .testTag(LINK_CONTROLLER_PRESENT_BUTTON_TEST_TAG)
+                .fillMaxWidth(),
             email = email,
             onClick = {
                 onPresentClick(
                     email.trim(),
                     phoneNumber.trim().takeIf { it.isNotEmpty() },
                     selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList(),
+                    FinancialConnectionsPermission.entries
+                        .filter { it in selectedFinancialConnectionsPermissions }
+                        .map { it.value }
+                        .takeIf { it.isNotEmpty() },
                 )
             },
         )
@@ -393,7 +417,7 @@ private fun LinkControllerUiPreview() {
             playgroundState = LinkControllerPlaygroundState(),
             onPaymentMethodButtonClick = { _, _ -> },
             onCreatePaymentMethodClick = {},
-            onPresentClick = { _, _, _ -> },
+            onPresentClick = { _, _, _, _ -> },
             onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
             onAuthorizeClick = {},
@@ -684,6 +708,54 @@ private fun PaymentMethodTypeSelector(
         }
     }
 }
+
+@Composable
+private fun FinancialConnectionsPermissionSelector(
+    selectedPermissions: Set<FinancialConnectionsPermission>,
+    onSelectionChange: (Set<FinancialConnectionsPermission>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = "Financial Connections Permissions",
+            style = MaterialTheme.typography.caption,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        FinancialConnectionsPermission.entries.forEach { permission ->
+            LabeledCheckbox(
+                modifier = Modifier
+                    .testTag(financialConnectionsPermissionTestTag(permission.value))
+                    .clickable {
+                        onSelectionChange(
+                            if (permission in selectedPermissions) {
+                                selectedPermissions - permission
+                            } else {
+                                selectedPermissions + permission
+                            }
+                        )
+                    }
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                label = permission.value,
+                checked = permission in selectedPermissions,
+            )
+        }
+    }
+}
+
+private enum class FinancialConnectionsPermission(val value: String) {
+    PaymentMethod("payment_method"),
+    Balances("balances"),
+    Ownership("ownership"),
+    Transactions("transactions"),
+}
+
+internal fun financialConnectionsPermissionTestTag(permission: String): String =
+    "financial_connections_permission_$permission"
+
+internal const val LINK_CONTROLLER_CONSUMER_EMAIL_TEST_TAG = "link_controller_consumer_email"
+internal const val LINK_CONTROLLER_PRESENT_BUTTON_TEST_TAG = "link_controller_present_button"
 
 @Composable
 private fun PresentButton(
