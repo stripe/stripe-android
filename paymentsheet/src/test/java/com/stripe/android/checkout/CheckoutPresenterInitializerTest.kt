@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
+import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
@@ -37,12 +38,14 @@ internal class CheckoutPresenterInitializerTest {
     }
 
     @Test
-    fun `initialize registers the sheet launcher into the holder`() = runScenario {
+    fun `initialize registers payment presentation dependencies into the holder`() = runScenario {
         assertThat(sheetStateHolder.sheetLauncher).isNull()
+        assertThat(sheetStateHolder.embeddedContentHelper).isNull()
 
         initializer.initialize()
 
         assertThat(sheetStateHolder.sheetLauncher).isSameInstanceAs(sheetLauncher)
+        assertThat(sheetStateHolder.embeddedContentHelper).isSameInstanceAs(embeddedContentHelper)
         confirmationHandler.registerTurbine.awaitItem()
     }
 
@@ -54,6 +57,7 @@ internal class CheckoutPresenterInitializerTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         assertThat(sheetStateHolder.sheetLauncher).isNull()
+        assertThat(sheetStateHolder.embeddedContentHelper).isNull()
         confirmationHandler.registerTurbine.awaitItem()
     }
 
@@ -75,6 +79,7 @@ internal class CheckoutPresenterInitializerTest {
                 activityResultCaller = mock(),
                 lifecycleOwner = TestLifecycleOwner(),
                 sheetLauncher = FakeEmbeddedSheetLauncher(),
+                embeddedContentHelper = FakeEmbeddedContentHelper(),
                 sheetStateHolder = SheetStateHolder(SavedStateHandle()),
                 stateHolder = CheckoutControllerStateFactory.createStateHolder(
                     SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restoredState))
@@ -97,6 +102,7 @@ internal class CheckoutPresenterInitializerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val activityResultCaller = mock<ActivityResultCaller>()
         val sheetLauncher = FakeEmbeddedSheetLauncher()
+        val embeddedContentHelper = FakeEmbeddedContentHelper()
         val sheetStateHolder = SheetStateHolder(SavedStateHandle())
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         val initializer = CheckoutPresenterInitializer(
@@ -104,6 +110,7 @@ internal class CheckoutPresenterInitializerTest {
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             sheetLauncher = sheetLauncher,
+            embeddedContentHelper = embeddedContentHelper,
             sheetStateHolder = sheetStateHolder,
             stateHolder = stateHolder,
         )
@@ -114,10 +121,12 @@ internal class CheckoutPresenterInitializerTest {
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             sheetLauncher = sheetLauncher,
+            embeddedContentHelper = embeddedContentHelper,
             sheetStateHolder = sheetStateHolder,
         ).block()
 
         confirmationHandler.validate()
+        embeddedContentHelper.presentPaymentOptionsCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -126,6 +135,7 @@ internal class CheckoutPresenterInitializerTest {
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: TestLifecycleOwner,
         val sheetLauncher: EmbeddedSheetLauncher,
+        val embeddedContentHelper: FakeEmbeddedContentHelper,
         val sheetStateHolder: SheetStateHolder,
     )
 }

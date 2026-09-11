@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
@@ -30,25 +31,41 @@ import kotlin.test.Test
 internal class CheckoutConfirmationPerformerTest {
 
     @Test
-    fun `confirm does nothing when state is not loaded`() = runScenario(state = null) {
+    fun `confirm fails when state is not loaded`() = runScenario(state = null) {
         performer.confirm()
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().isEqualTo(
+            "CheckoutPresenter.confirm() cannot be called before " +
+                "CheckoutController.configure() has completed successfully."
+        )
     }
 
     @Test
-    fun `confirm does nothing when there is no selection`() = runScenario(
+    fun `confirm fails when there is no selection`() = runScenario(
         state = CheckoutControllerStateFactory.create(paymentSelection = null),
     ) {
         performer.confirm()
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().isEqualTo(
+            "Cannot confirm without a payment selection."
+        )
     }
 
     @Test
-    fun `confirm does nothing when the selection cannot be converted to a confirmation option`() = runScenario(
+    fun `confirm fails when the selection cannot be converted to a confirmation option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             paymentSelection = PaymentSelection.GooglePay,
         ),
     ) {
         performer.confirm()
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().isEqualTo(
+            "Cannot create confirmation arguments for the current payment selection."
+        )
     }
 
     @Test
@@ -121,12 +138,13 @@ internal class CheckoutConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val resultTurbine = Turbine<CheckoutController.Result>()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            resultCallback = {},
+            resultCallback = CheckoutController.ResultCallback(resultTurbine::add),
         )
         val eventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
@@ -152,11 +170,13 @@ internal class CheckoutConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             stateHolder = stateHolder,
+            resultTurbine = resultTurbine,
         ).block()
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         eventReporter.validate()
+        resultTurbine.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -164,6 +184,7 @@ internal class CheckoutConfirmationPerformerTest {
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
+        val resultTurbine: Turbine<CheckoutController.Result>,
     )
 
     private companion object {
