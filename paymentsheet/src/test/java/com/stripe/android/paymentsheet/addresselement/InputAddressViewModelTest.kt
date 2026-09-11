@@ -91,10 +91,10 @@ class InputAddressViewModelTest {
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = ApplicationProvider.getApplicationContext(),
-                    publishableKey = "pk_123",
+                    publishableKey = "pk_test_123",
                 ),
-                publishableKeyProvider = { "pk_123" },
-                stripeAccountIdProvider = { null },
+                publishableKeyProvider = { "pk_test_123" },
+                stripeAccountIdProvider = { "acct_123" },
             ),
         )
     }
