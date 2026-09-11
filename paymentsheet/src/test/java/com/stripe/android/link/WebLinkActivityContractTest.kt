@@ -6,7 +6,6 @@ import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.networking.StripeRepository
@@ -22,17 +21,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class WebLinkActivityContractTest {
 
-    private val testApiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_abcdefg",
-        stripeAccountId = "acct_123",
-    )
-
     @Before
     fun before() {
         PaymentConfiguration.init(
             context = ApplicationProvider.getApplicationContext(),
-            publishableKey = testApiConfiguration.publishableKey,
-            stripeAccountId = testApiConfiguration.stripeAccountId,
+            publishableKey = "pk_test_abcdefg",
         )
     }
 
@@ -48,7 +41,7 @@ class WebLinkActivityContractTest {
         }
         val contract = contract(stripeRepository)
         val args = LinkActivityContract.Args(
-            configuration = TestFactory.LINK_CONFIGURATION.copy(apiConfiguration = testApiConfiguration),
+            configuration = TestFactory.LINK_CONFIGURATION,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),

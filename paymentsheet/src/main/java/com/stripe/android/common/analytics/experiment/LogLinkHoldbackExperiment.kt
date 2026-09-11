@@ -49,7 +49,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val mode: EventReporter.Mode,
-    private val logger: Logger,
+    private val logger: Logger
 ) : LogLinkHoldbackExperiment {
 
     override operator fun invoke(

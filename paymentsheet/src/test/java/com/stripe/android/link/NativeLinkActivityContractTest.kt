@@ -7,8 +7,8 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.RequestSurface
 import org.junit.After
@@ -20,17 +20,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class NativeLinkActivityContractTest {
 
-    private val testApiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_abcdefg",
-        stripeAccountId = "acct_123",
-    )
-
     @Before
     fun before() {
         PaymentConfiguration.init(
             context = ApplicationProvider.getApplicationContext(),
-            publishableKey = testApiConfiguration.publishableKey,
-            stripeAccountId = testApiConfiguration.stripeAccountId,
+            publishableKey = "pk_test_abcdefg"
         )
     }
 
@@ -43,10 +37,10 @@ class NativeLinkActivityContractTest {
     fun `intent is created correctly`() {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = REQUEST_SURFACE
         )
         val args = LinkActivityContract.Args(
-            configuration = TestFactory.LINK_CONFIGURATION.copy(apiConfiguration = testApiConfiguration),
+            configuration = TestFactory.LINK_CONFIGURATION,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
@@ -63,10 +57,10 @@ class NativeLinkActivityContractTest {
         }
         assertThat(actualArg).isEqualTo(
             NativeLinkArgs(
-                configuration = TestFactory.LINK_CONFIGURATION.copy(apiConfiguration = testApiConfiguration),
+                configuration = TestFactory.LINK_CONFIGURATION,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 requestSurface = REQUEST_SURFACE,
-                apiConfiguration = testApiConfiguration,
+                apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
@@ -84,7 +78,7 @@ class NativeLinkActivityContractTest {
 
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = REQUEST_SURFACE
         )
 
         val result = contract.parseResult(
@@ -99,7 +93,7 @@ class NativeLinkActivityContractTest {
     fun `complete with canceled result when result not found`() {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = REQUEST_SURFACE
         )
 
         val result = contract.parseResult(
@@ -119,7 +113,7 @@ class NativeLinkActivityContractTest {
     fun `unknown result code results in canceled`() {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = REQUEST_SURFACE
         )
 
         val result = contract.parseResult(42, Intent())
@@ -136,7 +130,7 @@ class NativeLinkActivityContractTest {
     fun `canceled result code is handled correctly`() {
         val contract = NativeLinkActivityContract(
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = REQUEST_SURFACE
         )
 
         val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())

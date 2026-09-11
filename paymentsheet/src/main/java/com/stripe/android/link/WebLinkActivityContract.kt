@@ -20,7 +20,7 @@ import javax.inject.Inject
  */
 internal class WebLinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
-    private val errorReporter: ErrorReporter,
+    private val errorReporter: ErrorReporter
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
