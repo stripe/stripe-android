@@ -8,7 +8,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentsClient
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
@@ -30,10 +29,6 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(AndroidJUnit4::class)
 class GooglePayRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val googlePayConfig = GooglePayConfig(
-        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-        connectedAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
-    )
 
     @Test
     fun `when google pay is ready, 'isReady' should return true`() = runTest {
@@ -126,7 +121,7 @@ class GooglePayRepositoryTest {
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
-            googlePayConfig = googlePayConfig,
+            googlePayConfig = GooglePayConfig(context),
             paymentsClientFactory = { paymentsClient },
             errorReporter = errorReporter,
             logger = Logger.noop(),
