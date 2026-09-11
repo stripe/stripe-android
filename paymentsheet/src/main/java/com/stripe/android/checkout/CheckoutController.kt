@@ -901,6 +901,10 @@ class CheckoutController @Inject internal constructor(
                  * The customer's full name.
                  */
                 val name: String?,
+                /**
+                 * The customer's phone number.
+                 */
+                val phone: String?,
             ) {
                 /**
                  * A billing address.
