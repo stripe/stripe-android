@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -36,8 +37,8 @@ internal class DefaultGooglePayRepositoryFactoryTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_test_api_configuration",
-        stripeAccountId = "acct_api_configuration",
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
     )
     private var capturedRequest: IsReadyToPayRequest? = null
 
@@ -45,8 +46,8 @@ internal class DefaultGooglePayRepositoryFactoryTest {
     fun setup() {
         PaymentConfiguration.init(
             context = context,
-            publishableKey = "pk_test_payment_configuration",
-            stripeAccountId = "acct_payment_configuration",
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
         )
         GooglePayRepository.googlePayAvailabilityClientFactory =
             object : GooglePayAvailabilityClient.Factory {
@@ -73,7 +74,7 @@ internal class DefaultGooglePayRepositoryFactoryTest {
         runScenario(allowNoExistingPaymentMethodForGooglePay = false, apiConfiguration = apiConfiguration) {
             assertThat(existingPaymentMethodRequired()).isTrue()
             assertThat(tokenizationPublishableKey())
-                .isEqualTo("pk_test_api_configuration/acct_api_configuration")
+                .isEqualTo("${apiConfiguration.publishableKey}/${apiConfiguration.stripeAccountId}")
         }
 
     @Test
@@ -87,7 +88,7 @@ internal class DefaultGooglePayRepositoryFactoryTest {
         runScenario(allowNoExistingPaymentMethodForGooglePay = false, apiConfiguration = null) {
             assertThat(existingPaymentMethodRequired()).isTrue()
             assertThat(tokenizationPublishableKey())
-                .isEqualTo("pk_test_payment_configuration/acct_payment_configuration")
+                .isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         }
 
     private fun runScenario(

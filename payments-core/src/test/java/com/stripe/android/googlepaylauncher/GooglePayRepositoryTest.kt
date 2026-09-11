@@ -8,6 +8,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.ApiConfiguration
@@ -30,8 +31,8 @@ import kotlin.time.Duration.Companion.seconds
 class GooglePayRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val apiConfiguration = ApiConfiguration.State(
-        publishableKey = "pk_123",
-        stripeAccountId = "acct_123",
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
     )
 
     @Test
