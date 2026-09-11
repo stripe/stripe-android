@@ -47,8 +47,8 @@ internal class DefaultGooglePayRepositoryFactoryTest {
     fun setup() {
         PaymentConfiguration.init(
             context = context,
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = null,
+            publishableKey = "pk_payment_configuration",
+            stripeAccountId = "acct_payment_configuration",
         )
         GooglePayRepository.googlePayAvailabilityClientFactory =
             object : GooglePayAvailabilityClient.Factory {
@@ -74,8 +74,6 @@ internal class DefaultGooglePayRepositoryFactoryTest {
         runScenario(allowNoExistingPaymentMethodForGooglePay = false, googlePayConfig = googlePayConfig) {
             val request = readyRequest()
             assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()
-            assertThat(tokenizationPublishableKey(request))
-                .isEqualTo("${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}/${ApiKeyFixtures.FAKE_STRIPE_ACCOUNT}")
         }
 
     @Test
@@ -90,7 +88,16 @@ internal class DefaultGooglePayRepositoryFactoryTest {
             val request = readyRequest()
             assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()
             assertThat(tokenizationPublishableKey(request))
-                .isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+                .isEqualTo("pk_payment_configuration/acct_payment_configuration")
+        }
+
+    @Test
+    fun `uses explicit credentials`() =
+        runScenario(allowNoExistingPaymentMethodForGooglePay = false, googlePayConfig = googlePayConfig) {
+            val request = readyRequest()
+            assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()
+            assertThat(tokenizationPublishableKey(request))
+                .isEqualTo("${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}/${ApiKeyFixtures.FAKE_STRIPE_ACCOUNT}")
         }
 
     private fun runScenario(
