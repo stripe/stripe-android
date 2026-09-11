@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutCollectedDetails
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -93,6 +94,42 @@ internal class ShippingAddressElementTest {
         val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
         assertThat(config.allowedCountries).containsExactly("US", "CA")
         assertThat(config.address).isNull()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present prefills the form with the checkout session shipping address`() = runScenario {
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            collectedDetails = CheckoutCollectedDetails(
+                email = null,
+                shippingName = "Jenny Rosen",
+                shippingAddress = CheckoutController.Address.State(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            ),
+        )
+
+        shippingAddressElement.present()
+
+        val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+        assertThat(config.address).isEqualTo(
+            AddressDetails(
+                name = "Jenny Rosen",
+                address = PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            )
+        )
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 

@@ -11,6 +11,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.checkout.toShippingDetails
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -115,6 +116,10 @@ class ShippingAddressElement internal constructor(
             return
         }
 
+        val address = state.collectedDetails
+            .takeIf { it.shippingName != null || it.shippingAddress != null }
+            ?.toShippingDetails()
+
         shippingAddressElementStateHolder.isPresenting = true
         activityLauncher.launch(
             AddressElementActivityContract.Args.CheckoutShipping(
@@ -124,6 +129,7 @@ class ShippingAddressElement internal constructor(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                     ),
                     billingAddress = null,
+                    address = address,
                     allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
                         ?: emptySet(),
                     useStripeHostedAutocomplete = true,

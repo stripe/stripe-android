@@ -16,6 +16,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -173,6 +174,84 @@ internal class CheckoutControllerTest {
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
     }
+
+    @Test
+    fun `configure keeps a valid default shipping address in session when SAE is configured`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration()
+                .shippingAddressElement(ShippingAddressElement.Configuration())
+                .defaults(
+                    CheckoutController.Configuration.Defaults().shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("John Shipping")
+                            .address(
+                                CheckoutController.Address()
+                                    .city("San Francisco")
+                                    .country("US")
+                                    .line1("510 Townsend St")
+                                    .postalCode("94103")
+                                    .state("CA")
+                            )
+                    )
+                ),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
+            assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("US")
+            assertThat(committedState?.collectedDetails?.shippingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
+    fun `configure drops a default shipping address outside allowed countries when SAE is configured`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration()
+                .shippingAddressElement(ShippingAddressElement.Configuration())
+                .defaults(
+                    CheckoutController.Configuration.Defaults().shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("John Shipping")
+                            .address(CheckoutController.Address().country("DE"))
+                    )
+                ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        allowedShippingCountries(listOf("US", "CA")),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress).isNull()
+            assertThat(committedState?.collectedDetails?.shippingName).isNull()
+            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `configure keeps a disallowed default shipping address when SAE is not configured`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(CheckoutController.Address().country("DE"))
+                )
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        allowedShippingCountries(listOf("US", "CA")),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
+            assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("DE")
+        }
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(

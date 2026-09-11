@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.elements.CheckoutGooglePayConfiguration.Display as GooglePayDisplay
 
 @OptIn(CheckoutSessionPreview::class)
@@ -69,3 +70,22 @@ internal fun CheckoutCollectedDetails.toShippingDetails(): AddressDetails = Addr
     name = shippingName,
     address = shippingAddress?.asPaymentSheet(),
 )
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutController.Configuration.State.normalizeShippingDefaults(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): CheckoutController.Configuration.State {
+    if (shippingAddressElementConfiguration == null) {
+        return this
+    }
+
+    val shippingDetails = defaults.shippingDetails ?: return this
+    val shippingAddress = shippingDetails.address ?: return this
+    if (checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess) {
+        return this
+    }
+
+    return copy(
+        defaults = defaults.copy(shippingDetails = null),
+    )
+}
