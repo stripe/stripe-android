@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -19,6 +20,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
+        ElementsSessionClientParamsModule::class,
         AddressElementViewModelModule::class,
     ]
 )
