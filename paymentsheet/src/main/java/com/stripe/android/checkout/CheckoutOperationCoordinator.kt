@@ -43,13 +43,12 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     ): Result<T> {
         var admitted = false
         try {
-            withContext(NonCancellable + Dispatchers.Main.immediate) {
+            withContext(Dispatchers.Main.immediate) {
                 synchronized(admissionLock) {
                     pendingMutations += 1
+                    admitted = true
                     updateIsUpdating()
                 }
-                // Keep admission ownership through cancellation of the UI context handoff.
-                admitted = true
             }
 
             return mutex.withLock {

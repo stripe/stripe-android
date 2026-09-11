@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
@@ -117,8 +118,12 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `runMutation closes the gate before returning on the UI context`() = runScenario {
-        withContext(Dispatchers.Main.immediate) {
+    fun `runMutation closes the gate before returning on the Main dispatcher`() = runScenario(
+        uiContextProvider = { scheduler ->
+            ImmediateMainTestDispatcher(StandardTestDispatcher(scheduler))
+        },
+    ) {
+        withContext(uiContext) {
             val releaseMutation = CompletableDeferred<Unit>()
             val mutation = launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
                 coordinator.runMutation {
@@ -131,6 +136,7 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNull()
 
             releaseMutation.complete(Unit)
+            runCurrent()
             mutation.join()
             assertThat(coordinator.isUpdating.value).isFalse()
         }
@@ -311,45 +317,36 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `cancelling the UI context job does not strand mutation cleanup`() {
-        val uiJob = Job()
+    fun `cancelling before queued admission leaves processing unchanged`() = runScenario(
+        uiContextProvider = { scheduler -> StandardTestDispatcher(scheduler) },
+    ) {
+        val callerDispatcher = UnconfinedTestDispatcher(testScheduler)
 
-        runScenario(
-            uiContextProvider = { scheduler ->
-                StandardTestDispatcher(scheduler) + uiJob
-            },
-        ) {
-            val callerDispatcher = UnconfinedTestDispatcher(testScheduler)
+        coordinator.isUpdating.test {
+            assertThat(awaitItem()).isFalse()
 
-            coordinator.isUpdating.test {
-                assertThat(awaitItem()).isFalse()
-
-                val mutation = backgroundScope.async(callerDispatcher) {
-                    coordinator.runMutation<Unit> {
-                        awaitCancellation()
-                    }
+            val mutation = backgroundScope.async(callerDispatcher) {
+                coordinator.runMutation {
+                    Result.success(Unit)
                 }
-                runCurrent()
-
-                assertThat(awaitItem()).isTrue()
-
-                uiJob.cancel()
-                mutation.cancel()
-                runCurrent()
-                mutation.join()
-
-                assertThat(coordinator.isUpdating.value).isFalse()
-                assertThat(awaitItem()).isFalse()
-
-                val laterMutation = backgroundScope.async(callerDispatcher) {
-                    coordinator.runMutation { Result.success(Unit) }
-                }
-                runCurrent()
-
-                assertThat(laterMutation.await().isSuccess).isTrue()
-                assertThat(awaitItem()).isTrue()
-                assertThat(awaitItem()).isFalse()
             }
+
+            assertThat(mutation.isCompleted).isFalse()
+            mutation.cancel()
+            runCurrent()
+            mutation.join()
+
+            expectNoEvents()
+            assertThat(coordinator.isUpdating.value).isFalse()
+
+            val laterMutation = backgroundScope.async(callerDispatcher) {
+                coordinator.runMutation { Result.success(Unit) }
+            }
+            runCurrent()
+
+            assertThat(laterMutation.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isTrue()
+            assertThat(awaitItem()).isFalse()
         }
     }
 
@@ -978,6 +975,35 @@ internal class CheckoutOperationCoordinatorTest {
 
         fun enqueueRefreshAction(action: suspend () -> Unit) {
             sessionRefresher.enqueueRefreshAction(action)
+        }
+    }
+
+    private class ImmediateMainTestDispatcher(
+        private val delegate: CoroutineDispatcher,
+    ) : MainCoroutineDispatcher() {
+        private val immediateDispatcher = object : MainCoroutineDispatcher() {
+            override val immediate: MainCoroutineDispatcher
+                get() = this
+
+            override fun dispatch(context: CoroutineContext, block: Runnable) {
+                delegate.dispatch(context, block)
+            }
+
+            override fun isDispatchNeeded(context: CoroutineContext): Boolean {
+                val currentDispatcher = context[ContinuationInterceptor]
+                return currentDispatcher !== this && currentDispatcher !== this@ImmediateMainTestDispatcher
+            }
+        }
+
+        override val immediate: MainCoroutineDispatcher
+            get() = immediateDispatcher
+
+        override fun dispatch(context: CoroutineContext, block: Runnable) {
+            delegate.dispatch(context, block)
+        }
+
+        override fun isDispatchNeeded(context: CoroutineContext): Boolean {
+            return delegate.isDispatchNeeded(context)
         }
     }
 

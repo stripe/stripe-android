@@ -389,7 +389,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `advancing the UI dispatcher commits controller state before customer state`() = runScenario(
+    fun `advancing the UI dispatcher commits controller and customer state`() = runScenario(
         customer = savedCustomer(),
         uiContextProvider = { StandardTestDispatcher(it) },
     ) {
