@@ -1,6 +1,6 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### All SDKs
@@ -9,6 +9,10 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+
+### CryptoOnramp
+* [ADDED] Added `presentTermsAndConditionsIfNeeded()` to present and record terms acceptance only when required.
+* [ADDED] Added `presentTermsOfServiceIfNeeded()` to present and record terms of service acceptance during onboarding only when required.
 
 ## 23.18.0 - 2026-09-08
 
@@ -23,15 +27,15 @@ NEXT_VERSION_BUMP: PATCH
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.
 
+### CryptoOnramp
+* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
+
 ## 23.17.1 - 2026-08-31
 
 ### PaymentSheet
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
 * [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
 * [FIXED][13323](https://github.com/stripe/stripe-android/pull/13323) Fixed an issue where selecting "Not you?" during Link 2FA did not fully log out the previous account, preventing subsequent logins.
-
-### CryptoOnramp
-* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
 
 ## 23.17.0 - 2026-08-24
 

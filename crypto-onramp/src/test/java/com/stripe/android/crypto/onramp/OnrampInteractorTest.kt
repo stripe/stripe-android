@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.exception.AppAttestationUnavailableExcep
 import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
 import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipChallengeException
 import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipSignatureException
+import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
@@ -48,10 +49,14 @@ import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
@@ -60,6 +65,8 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
+import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
@@ -78,8 +85,6 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
-import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
-import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
@@ -100,6 +105,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -1018,6 +1024,101 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun testStartTermsAndConditionsRequiresPresentation() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val termsAndConditions = PartnerTerms.Required(
+            partner = "swapped",
+            declaration = PartnerTerms.Declaration(
+                id = "copt_decl_123",
+                type = PartnerDeclarationType.TransactionTerms,
+                text = "Please accept these terms.",
+            ),
+        )
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
+            .thenReturn(Result.success(termsAndConditions))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)
+
+        assertThat(result).isInstanceOf(OnrampStartPartnerTermsResult.PresentationRequired::class.java)
+        val presentationRequired = result as OnrampStartPartnerTermsResult.PresentationRequired
+        assertThat(presentationRequired.terms).isEqualTo(termsAndConditions)
+        verify(cryptoApiRepository).retrievePartnerTerms(
+            any(),
+            eq(PartnerDeclarationType.TransactionTerms),
+        )
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsStarted)
+    }
+
+    @Test
+    fun testStartTermsAndConditionsFailsForUnverifiedLinkAccount() = runTest {
+        val unverifiedAccount = mockLinkAccount(
+            sessionState = LinkController.SessionState.NeedsVerification,
+        )
+        val linkState = mockLinkStateWithAccount(unverifiedAccount)
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(linkState))
+        interactor.onLinkControllerState(linkState)
+
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)
+
+        assertThat(result).isInstanceOf(OnrampStartPartnerTermsResult.Failed::class.java)
+        val failed = result as OnrampStartPartnerTermsResult.Failed
+        assertThat(failed.error).isInstanceOf(LinkAccountNotVerifiedException::class.java)
+        verify(cryptoApiRepository, never()).retrievePartnerTerms(any(), any())
+    }
+
+    @Test
+    fun testStartTermsAndConditionsReturnsNotRequired() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
+            .thenReturn(Result.success(PartnerTerms.NotRequired))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)
+
+        assertThat(result).isEqualTo(OnrampStartPartnerTermsResult.NotRequired)
+    }
+
+    @Test
+    fun testStartTermsOfServiceRequiresPresentation() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val termsOfService = PartnerTerms.Required(
+            partner = "swapped",
+            declaration = PartnerTerms.Declaration(
+                id = "copt_decl_456",
+                type = PartnerDeclarationType.TermsOfService,
+                text = "Please accept these terms of service.",
+            ),
+        )
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
+            .thenReturn(Result.success(termsOfService))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService)
+
+        assertThat(result).isInstanceOf(OnrampStartPartnerTermsResult.PresentationRequired::class.java)
+        val presentationRequired = result as OnrampStartPartnerTermsResult.PresentationRequired
+        assertThat(presentationRequired.terms).isEqualTo(termsOfService)
+        verify(cryptoApiRepository).retrievePartnerTerms(
+            any(),
+            eq(PartnerDeclarationType.TermsOfService),
+        )
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsOfServiceStarted)
+    }
+
+    @Test
+    fun testStartTermsOfServiceReturnsNotRequired() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(cryptoApiRepository.retrievePartnerTerms(any(), any()))
+            .thenReturn(Result.success(PartnerTerms.NotRequired))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService)
+
+        assertThat(result).isEqualTo(OnrampStartPartnerTermsResult.NotRequired)
+    }
+
+    @Test
     fun testStartIdentityVerificationIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val response = StartIdentityVerificationResponse(
@@ -1839,30 +1940,65 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleUserAttestationResultConfirmedSuccess() = runTest {
+    fun testConfirmUserAttestationSuccess() = runTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
         whenever(cryptoApiRepository.confirmUserAttestation(any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handleUserAttestationResult(
-            UserAttestationActivityResult(
-                UserAttestationScreenAction.Confirm
-            )
-        )
+        val result = interactor.confirmUserAttestation()
 
         assertThat(result).isInstanceOf(OnrampUserAttestationResult.Confirmed::class.java)
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.UserAttestationCompleted)
     }
 
     @Test
-    fun testHandleUserAttestationResultCancelled() = runTest {
-        val result = interactor.handleUserAttestationResult(
-            UserAttestationActivityResult(
-                UserAttestationScreenAction.Cancelled
-            )
+    fun testConfirmTermsAndConditionsSuccess() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
+            .thenReturn(Result.success(Unit))
+
+        val result = interactor.confirmPartnerTerms(
+            declarationId = "copt_decl_123",
+            declarationType = PartnerDeclarationType.TransactionTerms,
         )
 
-        assertThat(result).isInstanceOf(OnrampUserAttestationResult.Cancelled::class.java)
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Accepted::class.java)
+        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("copt_decl_123"))
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsAndConditionsCompleted)
+    }
+
+    @Test
+    fun testConfirmTermsAndConditionsFailsForUnverifiedLinkAccount() = runTest {
+        val unverifiedAccount = mockLinkAccount(
+            sessionState = LinkController.SessionState.NeedsVerification,
+        )
+        interactor.onLinkControllerState(mockLinkStateWithAccount(unverifiedAccount))
+
+        val result = interactor.confirmPartnerTerms(
+            declarationId = "copt_decl_123",
+            declarationType = PartnerDeclarationType.TransactionTerms,
+        )
+
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Failed::class.java)
+        val failed = result as OnrampPartnerTermsResult.Failed
+        assertThat(failed.error).isInstanceOf(LinkAccountNotVerifiedException::class.java)
+        verify(cryptoApiRepository, never()).confirmPartnerTerms(any(), any())
+    }
+
+    @Test
+    fun testConfirmTermsOfServiceSuccess() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(cryptoApiRepository.confirmPartnerTerms(any(), any()))
+            .thenReturn(Result.success(Unit))
+
+        val result = interactor.confirmPartnerTerms(
+            declarationId = "copt_decl_456",
+            declarationType = PartnerDeclarationType.TermsOfService,
+        )
+
+        assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Accepted::class.java)
+        verify(cryptoApiRepository).confirmPartnerTerms(any(), eq("copt_decl_456"))
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.TermsOfServiceCompleted)
     }
 
     @Test
@@ -1909,11 +2045,14 @@ class OnrampInteractorTest {
             type = LinkController.PaymentMethodType.Card
         )
 
-    private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
+    private fun mockLinkAccount(
+        consumerSessionClientSecret: String? = "secret_123",
+        sessionState: LinkController.SessionState = LinkController.SessionState.LoggedIn,
+    ): LinkController.LinkAccount = LinkController.LinkAccount(
         email = "test@email.com",
         redactedPhoneNumber = "***-***-1234",
-        sessionState = LinkController.SessionState.LoggedIn,
-        consumerSessionClientSecret = "secret_123",
+        sessionState = sessionState,
+        consumerSessionClientSecret = consumerSessionClientSecret,
         linkSessionKey = "lsk_123",
     )
 
