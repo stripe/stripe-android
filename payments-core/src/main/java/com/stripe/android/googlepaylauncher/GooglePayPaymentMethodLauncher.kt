@@ -20,6 +20,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -188,7 +189,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                 environment: GooglePayEnvironment,
                 cardFundingFilter: CardFundingFilter,
                 cardBrandFilter: CardBrandFilter,
-                apiConfiguration: ApiConfiguration.State?
+                googlePayConfig: GooglePayConfig
             ): GooglePayRepository {
                 return DefaultGooglePayRepository(
                     context = context,
@@ -196,7 +197,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
-                    apiConfiguration = null,
+                    googlePayConfig = googlePayConfig,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
@@ -217,7 +218,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     environment = config.environment,
                     cardFundingFilter = cardFundingFilter,
                     cardBrandFilter = cardBrandFilter,
-                    apiConfiguration = null,
+                    googlePayConfig = GooglePayConfig(context),
                 )
                 readyCallback.onReady(
                     repository.isReady().first().also {

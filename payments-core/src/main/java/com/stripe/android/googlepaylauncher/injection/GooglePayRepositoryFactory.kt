@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
@@ -20,7 +20,7 @@ interface GooglePayRepositoryFactory {
         environment: GooglePayEnvironment,
         cardFundingFilter: CardFundingFilter,
         cardBrandFilter: CardBrandFilter,
-        apiConfiguration: ApiConfiguration.State?,
+        googlePayConfig: GooglePayConfig,
     ): GooglePayRepository
 }
 
@@ -34,7 +34,7 @@ class DefaultGooglePayRepositoryFactory @Inject constructor(
         environment: GooglePayEnvironment,
         cardFundingFilter: CardFundingFilter,
         cardBrandFilter: CardBrandFilter,
-        apiConfiguration: ApiConfiguration.State?
+        googlePayConfig: GooglePayConfig
     ): GooglePayRepository {
         return DefaultGooglePayRepository(
             appContext,
@@ -47,7 +47,7 @@ class DefaultGooglePayRepositoryFactory @Inject constructor(
             logger = logger,
             cardFundingFilter = cardFundingFilter,
             cardBrandFilter = cardBrandFilter,
-            apiConfiguration = apiConfiguration
+            googlePayConfig = googlePayConfig
         )
     }
 }

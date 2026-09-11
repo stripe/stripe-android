@@ -312,7 +312,7 @@ internal class GooglePayLauncherViewModel(
                 billingAddressParameters = args.config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
-                apiConfiguration = null,
+                googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
                 errorReporter = errorReporter,
                 logger = logger,
                 cardFundingFilter = DefaultCardFundingFilter,

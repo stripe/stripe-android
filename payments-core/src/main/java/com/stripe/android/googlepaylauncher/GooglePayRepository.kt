@@ -9,7 +9,6 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 
@@ -53,7 +51,7 @@ internal class DefaultGooglePayRepository(
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
-    private val apiConfiguration: ApiConfiguration.State?,
+    googlePayConfig: GooglePayConfig,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
@@ -65,31 +63,29 @@ internal class DefaultGooglePayRepository(
     @Inject
     internal constructor(
         context: Context,
-        googlePayConfig: GooglePayPaymentMethodLauncher.Config,
+        launcherConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger,
         errorReporter: ErrorReporter,
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter,
-        apiConfigurationProvider: Provider<ApiConfiguration.State>,
+        googlePayConfig: GooglePayConfig,
     ) : this(
         context.applicationContext,
-        googlePayConfig.environment,
-        googlePayConfig.billingAddressConfig.convert(),
-        googlePayConfig.existingPaymentMethodRequired,
-        googlePayConfig.allowCreditCards,
-        apiConfigurationProvider.get(),
+        launcherConfig.environment,
+        launcherConfig.billingAddressConfig.convert(),
+        launcherConfig.existingPaymentMethodRequired,
+        launcherConfig.allowCreditCards,
+        googlePayConfig,
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,
         cardBrandFilter,
         cardFundingFilter,
-        googlePayConfig.additionalEnabledNetworks
+        launcherConfig.additionalEnabledNetworks
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        apiConfiguration?.let {
-            GooglePayConfig(it.publishableKey, it.stripeAccountId)
-        } ?: GooglePayConfig(context),
+        googlePayConfig,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks
