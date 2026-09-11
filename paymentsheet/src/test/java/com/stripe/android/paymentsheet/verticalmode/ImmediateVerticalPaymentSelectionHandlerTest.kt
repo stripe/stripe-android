@@ -11,6 +11,17 @@ import org.junit.Test
 internal class ImmediateVerticalPaymentSelectionHandlerTest {
 
     @Test
+    fun `state is always idle`() = runScenario(completion = null) {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+        assertThat(handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
+        handler.select(selection, true)
+        assertThat(handler.state.value).isEqualTo(VerticalPaymentSelectionHandler.State.Idle)
+
+        assertThat(events.awaitItem()).isEqualTo(Event.SelectionUpdated(selection, true))
+    }
+
+    @Test
     fun `updates selection before invoking supplied completion`() = runScenario(
         completion = { events -> events.add(Event.SelectionCompleted) },
     ) {

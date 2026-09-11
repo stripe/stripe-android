@@ -24,6 +24,8 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -205,6 +207,23 @@ class CheckoutController @Inject internal constructor(
             },
         ) {
             kotlin.Result.success(checkoutSessionResponse)
+        }
+    }
+
+    internal suspend fun selectSavedPaymentMethod(
+        selection: PaymentSelection.Saved,
+    ): kotlin.Result<Unit> {
+        val address = selection.billingDetails?.address?.toCheckoutAddress()
+        return withCheckoutState(
+            additionalStateMutations = { copy(paymentSelection = selection) },
+        ) {
+            address?.let {
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    address = it,
+                )
+            } ?: kotlin.Result.success(checkoutSessionResponse)
         }
     }
 

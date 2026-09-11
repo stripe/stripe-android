@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementTestRunnerContext(
     private val presenter: CheckoutPresenter,
+    val controller: CheckoutController,
     private val countDownLatch: CountDownLatch,
 ) {
     fun presentPaymentOptions() {
@@ -56,8 +58,9 @@ internal fun runCheckoutPaymentElementTest(
         }
     },
     successTimeoutSeconds: Long = 5L,
+    rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
     setup: suspend (CheckoutController) -> Unit,
-    block: (CheckoutPaymentElementTestRunnerContext) -> Unit,
+    block: suspend (CheckoutPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
@@ -74,7 +77,7 @@ internal fun runCheckoutPaymentElementTest(
         val controller: CheckoutController = CheckoutController.Builder(
             application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = SavedStateHandle(),
-        ).resultCallback { result ->
+        ).rowSelectionBehavior(rowSelectionBehavior).resultCallback { result ->
             resultCallback.onResult(result)
             countDownLatch.countDown()
         }.build()
@@ -96,12 +99,15 @@ internal fun runCheckoutPaymentElementTest(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        block(
-            CheckoutPaymentElementTestRunnerContext(
-                presenter = presenter,
-                countDownLatch = countDownLatch,
+        runBlocking {
+            block(
+                CheckoutPaymentElementTestRunnerContext(
+                    presenter = presenter,
+                    controller = controller,
+                    countDownLatch = countDownLatch,
+                )
             )
-        )
+        }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()

@@ -26,10 +26,10 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         val state = stateHolder.state ?: return
         val paymentSelection = state.paymentSelection ?: return
         val arguments = operationCoordinator.tryBeginConfirmation {
-          confirmationArgs(
-              state = state,
-              paymentSelection = paymentSelection,
-          )
+            confirmationArgs(
+                state = state,
+                paymentSelection = paymentSelection,
+            )
         } ?: return
         analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
         viewModelScope.launch {
