@@ -36,6 +36,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 publishableKey = "test_key",
                 hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )
@@ -69,6 +70,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 publishableKey = "test_key",
                 hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )
@@ -102,6 +104,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 publishableKey = "test_key",
                 hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )
@@ -135,6 +138,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 publishableKey = "test_key",
                 hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = null
         )

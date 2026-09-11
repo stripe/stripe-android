@@ -58,6 +58,7 @@ class FinancialConnectionsSheet internal constructor(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             hasRequestedDataPermissions = false,
+            existingConsumer = null,
         )
     }
 

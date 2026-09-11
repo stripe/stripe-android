@@ -27,6 +27,7 @@ class FinancialConnectionsSheetForDataContractTest {
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             hasRequestedDataPermissions = false,
+            existingConsumer = null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         args.validate()
@@ -38,6 +39,7 @@ class FinancialConnectionsSheetForDataContractTest {
             " ",
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             hasRequestedDataPermissions = false,
+            existingConsumer = null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         assertFailsWith<InvalidParameterException>(
@@ -53,6 +55,7 @@ class FinancialConnectionsSheetForDataContractTest {
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             " ",
             hasRequestedDataPermissions = false,
+            existingConsumer = null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         assertFailsWith<InvalidParameterException>(

@@ -74,6 +74,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 

@@ -513,6 +513,7 @@ internal class WalletViewModel(
                         stripeAccountId = configuration.merchantStripeAccountId
                             .takeIf { hasRequestedDataPermissions },
                         hasRequestedDataPermissions = hasRequestedDataPermissions,
+                        existingConsumer = linkAccount.toFinancialConnectionsConsumer(),
                     )
                 }
                 .fold(

@@ -14,6 +14,7 @@ internal class HostedAuthUrlBuilderTest {
             publishableKey = "pk_merchant",
             stripeAccountId = "acct_merchant",
             hasRequestedDataPermissions = false,
+            existingConsumer = null,
         )
         val hostedAuthUrl = "https://connect.stripe.com/hosted_auth"
 

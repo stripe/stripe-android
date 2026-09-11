@@ -33,6 +33,7 @@ internal class PollAttachPaymentAccountTest {
         financialConnectionsSessionClientSecret = "client_secret",
         publishableKey = "publishable_key",
         hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
 
     private val pollAttachPaymentAccount = PollAttachPaymentAccount(

@@ -2,6 +2,7 @@ package com.stripe.android.link.model
 
 import android.os.Parcelable
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.financialconnections.FinancialConnectionsConsumer
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
@@ -68,6 +69,17 @@ internal data class LinkAccount(
 
     val consentPresentation: ConsentPresentation?
         get() = linkAuthIntentInfo?.consentPresentation
+
+    internal fun toFinancialConnectionsConsumer(): FinancialConnectionsConsumer {
+        return FinancialConnectionsConsumer(
+            emailAddress = email,
+            phoneNumber = redactedPhoneNumber,
+            clientSecret = clientSecret,
+            publishableKey = consumerPublishableKey,
+            isVerified = isVerified,
+            linkBrand = consumerLinkBrand,
+        )
+    }
 
     @IgnoredOnParcel
     val accountStatus = when {

@@ -19,6 +19,7 @@ class RealProvideApiRequestOptionsTest {
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         stripeAccountId = "acct_123",
         hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
 
     @Test

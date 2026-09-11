@@ -20,6 +20,7 @@ internal class FinancialConnectionsLiteRepositoryTest {
             publishableKey = "pk_merchant",
             stripeAccountId = "acct_merchant",
             hasRequestedDataPermissions = true,
+            existingConsumer = null,
         )
 
         val options = with(repository) { configuration.apiRequestOptions() }

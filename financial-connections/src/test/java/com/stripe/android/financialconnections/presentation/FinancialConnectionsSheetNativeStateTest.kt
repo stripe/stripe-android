@@ -14,6 +14,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         hasRequestedDataPermissions = false,
+        existingConsumer = null,
     )
 
     @Test

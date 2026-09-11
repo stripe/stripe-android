@@ -65,6 +65,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
                 hasRequestedDataPermissions = false,
+                existingConsumer = null,
             ),
             elementsSessionContext = elementsSessionContext
         )

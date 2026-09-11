@@ -207,6 +207,7 @@ class WalletViewModelTest {
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
                     hasRequestedDataPermissions = false,
+                    existingConsumer = linkAccount.toFinancialConnectionsConsumer(),
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
@@ -231,12 +232,16 @@ class WalletViewModelTest {
     fun `permissioned bank account flow uses merchant credentials and reloads generated payment details`() =
         runTest(dispatcher) {
             val generatedBankAccount = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(id = "csmrpd_generated")
+            val linkAccount = TestFactory.LINK_ACCOUNT_WITH_PK
             val configuration = TestFactory.LINK_CONFIGURATION.copy(
                 financialConnectionsPermissions = listOf("balances"),
                 merchantPublishableKey = "pk_merchant",
                 merchantStripeAccountId = "acct_merchant",
             )
-            testAddBankAccount(configuration = configuration) { vm, linkAccountManager ->
+            testAddBankAccount(
+                linkAccount = linkAccount,
+                configuration = configuration,
+            ) { vm, linkAccountManager ->
                 skipItems(1)
 
                 vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
@@ -250,6 +255,7 @@ class WalletViewModelTest {
                             publishableKey = "pk_merchant",
                             stripeAccountId = "acct_merchant",
                             hasRequestedDataPermissions = true,
+                            existingConsumer = linkAccount.toFinancialConnectionsConsumer(),
                         )
                     )
                 }
