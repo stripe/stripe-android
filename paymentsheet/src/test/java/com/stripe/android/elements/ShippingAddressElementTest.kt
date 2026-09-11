@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNT
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CompletableDeferred
@@ -76,6 +77,22 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present passes checkout session allowed shipping countries`() = runScenario {
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                allowedShippingCountries = listOf("US", "CA"),
+            ),
+        )
+
+        shippingAddressElement.present()
+
+        val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+        assertThat(config.allowedCountries).containsExactly("US", "CA")
+        assertThat(config.address).isNull()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 

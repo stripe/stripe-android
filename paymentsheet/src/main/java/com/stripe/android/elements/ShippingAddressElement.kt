@@ -104,7 +104,7 @@ class ShippingAddressElement internal constructor(
     }
 
     fun present() {
-        if (stateHolder.state == null) {
+        val state = stateHolder.state ?: run {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
             )
@@ -124,6 +124,8 @@ class ShippingAddressElement internal constructor(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                     ),
                     billingAddress = null,
+                    allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
+                        ?: emptySet(),
                     useStripeHostedAutocomplete = true,
                 ),
             )
