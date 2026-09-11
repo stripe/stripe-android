@@ -18,16 +18,17 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -35,6 +36,9 @@ import kotlin.test.Test
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutConfirmationPerformerTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `confirm does nothing when state is not loaded`() = runScenario(state = null) {
@@ -150,60 +154,56 @@ internal class CheckoutConfirmationPerformerTest {
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
-        mainDispatcherProvider: (TestCoroutineScheduler) -> TestDispatcher = {
+        mainDispatcherProvider: (TestCoroutineScheduler) -> CoroutineDispatcher = {
             UnconfinedTestDispatcher(it)
         },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val mainDispatcher = mainDispatcherProvider(testScheduler)
         Dispatchers.setMain(mainDispatcher)
-        try {
-            val confirmationHandler = FakeConfirmationHandler()
-            val savedStateHandle = SavedStateHandle()
-            val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
-            stateHolder.state = state
-            val sessionRefresher = FakeCheckoutSessionRefresher()
-            val operationCoordinator = CheckoutOperationCoordinator(
-                confirmationHandler = confirmationHandler,
-                sheetStateHolder = SheetStateHolder(savedStateHandle),
-                sessionRefresher = sessionRefresher,
-                logger = Logger.noop(),
-                resultCallback = {},
-            )
-            val eventReporter = FakeEventReporter()
-            val analyticsPerformer = CheckoutAnalyticsPerformer(
-                confirmationHandler = confirmationHandler,
-                eventReporter = eventReporter,
-                savedStateHandle = savedStateHandle,
-            )
-            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-                analyticsPerformer.reportConfirmationResults()
-            }
-            val performer = CheckoutConfirmationPerformer(
-                confirmationHandler = confirmationHandler,
-                stateHolder = stateHolder,
-                operationCoordinator = operationCoordinator,
-                analyticsPerformer = analyticsPerformer,
-                commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
-                statusBarColor = statusBarColor,
-                viewModelScope = backgroundScope,
-            )
-
-            Scenario(
-                performer = performer,
-                operationCoordinator = operationCoordinator,
-                confirmationHandler = confirmationHandler,
-                eventReporter = eventReporter,
-                stateHolder = stateHolder,
-                testScheduler = testScheduler,
-            ).block()
-
-            confirmationHandler.validate()
-            sessionRefresher.ensureAllEventsConsumed()
-            eventReporter.validate()
-        } finally {
-            Dispatchers.resetMain()
+        val confirmationHandler = FakeConfirmationHandler()
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = state
+        val sessionRefresher = FakeCheckoutSessionRefresher()
+        val operationCoordinator = CheckoutOperationCoordinator(
+            confirmationHandler = confirmationHandler,
+            sheetStateHolder = SheetStateHolder(savedStateHandle),
+            sessionRefresher = sessionRefresher,
+            logger = Logger.noop(),
+            resultCallback = {},
+        )
+        val eventReporter = FakeEventReporter()
+        val analyticsPerformer = CheckoutAnalyticsPerformer(
+            confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
+            savedStateHandle = savedStateHandle,
+        )
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            analyticsPerformer.reportConfirmationResults()
         }
+        val performer = CheckoutConfirmationPerformer(
+            confirmationHandler = confirmationHandler,
+            stateHolder = stateHolder,
+            operationCoordinator = operationCoordinator,
+            analyticsPerformer = analyticsPerformer,
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
+            statusBarColor = statusBarColor,
+            viewModelScope = backgroundScope,
+        )
+
+        Scenario(
+            performer = performer,
+            operationCoordinator = operationCoordinator,
+            confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
+            stateHolder = stateHolder,
+            testScheduler = testScheduler,
+        ).block()
+
+        confirmationHandler.validate()
+        sessionRefresher.ensureAllEventsConsumed()
+        eventReporter.validate()
     }
 
     private class Scenario(

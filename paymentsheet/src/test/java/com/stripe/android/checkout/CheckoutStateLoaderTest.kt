@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
@@ -52,13 +53,11 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.coroutines.ContinuationInterceptor
-import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.time.Duration
@@ -71,6 +70,9 @@ import kotlin.time.Duration.Companion.seconds
 )
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutStateLoaderTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `loadInitial commits only payment element metadata when ECE is not configured`() = runScenario {
@@ -507,73 +509,69 @@ internal class CheckoutStateLoaderTest {
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
-        uiContextProvider: (TestCoroutineScheduler) -> CoroutineContext = {
+        uiContextProvider: (TestCoroutineScheduler) -> CoroutineDispatcher = {
             UnconfinedTestDispatcher(it)
         },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val uiContext = uiContextProvider(testScheduler)
-        Dispatchers.setMain(uiContext[ContinuationInterceptor] as CoroutineDispatcher)
-        try {
-            val application = ApplicationProvider.getApplicationContext<Application>()
-            val imageLoader = FakeStripeImageLoader(
-                loadResult = Result.success(Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)),
-            )
-            val flagImageResolver = FlagImageResolver(
-                flagImageRepository = FlagImageRepository(imageLoader = imageLoader, displayDensity = 3f),
-                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                    context = application,
-                    publishableKey = "pk_test_123",
-                ),
-            )
-            val savedStateHandle = SavedStateHandle()
-            val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
-            val customerStateHolder = DefaultCustomerStateHolder(
-                savedStateHandle = savedStateHandle,
-                selection = stateHolder.selection,
-                paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
-                    it?.paymentMethodMetadata
-                },
-                customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
-                    it?.paymentMethodMetadata?.customerMetadata
-                },
-            )
-            val recordingChooser = RecordingSelectionChooser(chosenSelection)
-            val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
-            val paymentElementLoader = FakePaymentElementLoader(
-                paymentSelection = loaderSelection,
-                shouldFail = shouldFail,
-                isGooglePayAvailable = isGooglePayAvailable,
-                customer = customer,
-                delay = paymentElementLoaderDelay,
-            )
-            val loader = CheckoutStateLoader(
-                embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
-                commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
-                flagImageResolver = flagImageResolver,
-                paymentElementLoader = paymentElementLoader,
-                selectionChooser = chooser,
-                stateHolder = stateHolder,
-                customerStateHolder = customerStateHolder,
-                internalRowSelectionCallback = { internalRowSelectionCallback },
-            )
+        Dispatchers.setMain(uiContext)
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        val imageLoader = FakeStripeImageLoader(
+            loadResult = Result.success(Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)),
+        )
+        val flagImageResolver = FlagImageResolver(
+            flagImageRepository = FlagImageRepository(imageLoader = imageLoader, displayDensity = 3f),
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = application,
+                publishableKey = "pk_test_123",
+            ),
+        )
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val customerStateHolder = DefaultCustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = stateHolder.selection,
+            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata
+            },
+            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata?.customerMetadata
+            },
+        )
+        val recordingChooser = RecordingSelectionChooser(chosenSelection)
+        val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
+        val paymentElementLoader = FakePaymentElementLoader(
+            paymentSelection = loaderSelection,
+            shouldFail = shouldFail,
+            isGooglePayAvailable = isGooglePayAvailable,
+            customer = customer,
+            delay = paymentElementLoaderDelay,
+        )
+        val loader = CheckoutStateLoader(
+            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
+            flagImageResolver = flagImageResolver,
+            paymentElementLoader = paymentElementLoader,
+            selectionChooser = chooser,
+            stateHolder = stateHolder,
+            customerStateHolder = customerStateHolder,
+            internalRowSelectionCallback = { internalRowSelectionCallback },
+        )
 
-            Scenario(
-                loader = loader,
-                stateHolder = stateHolder,
-                customerStateHolder = customerStateHolder,
-                paymentElementLoader = paymentElementLoader,
-                chooser = recordingChooser,
-                imageLoader = imageLoader,
-                testScheduler = testScheduler,
-                backgroundScope = backgroundScope,
-            ).block()
+        Scenario(
+            loader = loader,
+            stateHolder = stateHolder,
+            customerStateHolder = customerStateHolder,
+            paymentElementLoader = paymentElementLoader,
+            chooser = recordingChooser,
+            imageLoader = imageLoader,
+            testScheduler = testScheduler,
+            backgroundScope = backgroundScope,
+        ).block()
 
-            imageLoader.ensureAllEventsConsumed()
-        } finally {
-            Dispatchers.resetMain()
-        }
+        imageLoader.ensureAllEventsConsumed()
     }
 
     private class Scenario(
