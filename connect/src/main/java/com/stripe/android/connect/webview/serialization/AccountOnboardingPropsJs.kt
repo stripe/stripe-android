@@ -31,19 +31,21 @@ internal fun AccountOnboardingProps.toJs(): AccountOnboardingPropsJs {
         setPrivacyPolicyUrl = privacyPolicyUrl,
         setRecipientTermsOfServiceUrl = recipientTermsOfServiceUrl,
         setSkipTermsOfServiceCollection = skipTermsOfServiceCollection,
-        setCollectionOptions = collectionOptions?.let {
-            AccountOnboardingPropsJs.CollectionOptionsJs(
-                fields = it.fields?.value,
-                futureRequirements = it.futureRequirements?.value,
-                requirements = it.requirements?.let { req ->
-                    when (req) {
-                        is AccountOnboardingProps.RequirementsOption.Only ->
-                            AccountOnboardingPropsJs.RequirementsJs(only = req.only, exclude = null)
-                        is AccountOnboardingProps.RequirementsOption.Exclude ->
-                            AccountOnboardingPropsJs.RequirementsJs(only = null, exclude = req.exclude)
-                    }
-                }
-            )
+        setCollectionOptions = collectionOptions?.toJs()
+    )
+}
+
+internal fun AccountOnboardingProps.CollectionOptions.toJs(): AccountOnboardingPropsJs.CollectionOptionsJs {
+    return AccountOnboardingPropsJs.CollectionOptionsJs(
+        fields = fields?.value,
+        futureRequirements = futureRequirements?.value,
+        requirements = requirements?.let { requirements ->
+            when (requirements) {
+                is AccountOnboardingProps.RequirementsOption.Only ->
+                    AccountOnboardingPropsJs.RequirementsJs(only = requirements.only, exclude = null)
+                is AccountOnboardingProps.RequirementsOption.Exclude ->
+                    AccountOnboardingPropsJs.RequirementsJs(only = null, exclude = requirements.exclude)
+            }
         }
     )
 }

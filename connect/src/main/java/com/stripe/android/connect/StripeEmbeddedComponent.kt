@@ -20,4 +20,9 @@ internal enum class StripeEmbeddedComponent(val componentName: String) {
      * Represents the Payments component: [https://docs.stripe.com/connect/supported-embedded-components/payments](https://docs.stripe.com/connect/supported-embedded-components/payments)
      */
     PAYMENTS("payments"),
+
+    /**
+     * Represents the Notification Banner component.
+     */
+    NOTIFICATION_BANNER("notification-banner"),
 }
