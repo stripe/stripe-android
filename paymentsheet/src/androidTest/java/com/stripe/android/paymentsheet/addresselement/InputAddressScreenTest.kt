@@ -87,11 +87,15 @@ class InputAddressScreenTest {
     }
 
     @Test
-    fun form_bottom_inset_adds_space_to_the_form_content() {
+    fun form_bottom_inset_is_applied_to_the_form_content() {
         val heightWithoutBottomInset = formContentHeight(bottomInsetDp = 0f)
-        val heightWithBottomInset = formContentHeight(bottomInsetDp = 40f)
+        val heightWithBottomInset = formContentHeight(bottomInsetDp = BOTTOM_INSET_DP)
 
-        assertThat(heightWithBottomInset).isGreaterThan(heightWithoutBottomInset)
+        assertThat(heightWithBottomInset - heightWithoutBottomInset).isEqualTo(
+            with(composeTestRule.density) {
+                BOTTOM_INSET_DP.dp.roundToPx()
+            }
+        )
     }
 
     private fun formContentHeight(bottomInsetDp: Float): Int {
@@ -109,6 +113,10 @@ class InputAddressScreenTest {
             .fetchSemanticsNode()
             .size
             .height
+    }
+
+    private companion object {
+        const val BOTTOM_INSET_DP = 40f
     }
 
     private fun setContent(
