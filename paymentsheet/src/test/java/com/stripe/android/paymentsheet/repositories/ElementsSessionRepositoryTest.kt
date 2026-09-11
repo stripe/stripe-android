@@ -3,9 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -13,6 +11,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -42,6 +41,30 @@ internal class ElementsSessionRepositoryTest {
     private val requestCaptor = argumentCaptor<StripeRequest>()
 
     @Test
+    fun `get constructs request options from API configuration`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        ).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val requestOptions = (requestCaptor.firstValue as ApiRequest).options
+        assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
+        assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+    }
+
+    @Test
     fun `get with locale should retrieve with element session`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
@@ -58,6 +81,7 @@ internal class ElementsSessionRepositoryTest {
                 customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = null,
                 countryOverride = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
             ).getOrThrow()
         }
 
@@ -91,6 +115,7 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                 ).getOrThrow()
             }
 
@@ -119,6 +144,7 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                 ).getOrThrow()
             }
 
@@ -137,7 +163,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         ).get(
@@ -149,6 +174,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -172,7 +198,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         ).get(
@@ -189,6 +214,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -210,6 +236,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -231,6 +258,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -248,7 +276,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         ).get(
@@ -266,6 +293,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -282,7 +310,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -299,6 +326,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -317,7 +345,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -334,6 +361,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -352,7 +380,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -366,6 +393,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -384,7 +412,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -414,6 +441,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -433,7 +461,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -455,6 +482,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -476,7 +504,6 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -506,6 +533,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -546,6 +574,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -593,6 +622,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -629,6 +659,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -657,6 +688,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
         )
 
@@ -681,6 +713,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -703,6 +736,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -730,6 +764,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -763,6 +798,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -793,6 +829,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -816,6 +853,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -839,6 +877,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -862,6 +901,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -890,6 +930,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -914,6 +955,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -928,7 +970,7 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
         )
 
-        createRepository(publishableKey = "uk_12345").get(
+        createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
@@ -937,6 +979,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -954,7 +997,7 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
         )
 
-        createRepository(publishableKey = "uk_12345").get(
+        createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                 clientSecret = "client_secret",
             ),
@@ -963,6 +1006,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -980,7 +1024,7 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
         )
 
-        createRepository(publishableKey = "uk_12345").get(
+        createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -995,6 +1039,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1005,13 +1050,10 @@ internal class ElementsSessionRepositoryTest {
         assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
     }
 
-    private fun createRepository(
-        publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-    ) = RealElementsSessionRepository(
+    private fun createRepository() = RealElementsSessionRepository(
         ApplicationProvider.getApplicationContext(),
         stripeNetworkClient,
         stripeRepository,
-        { PaymentConfiguration(publishableKey) },
         testDispatcher,
         clientParams = TEST_CLIENT_PARAMS,
     )

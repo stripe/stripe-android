@@ -8,6 +8,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -524,6 +525,7 @@ class CustomerAdapterDataSourceTest {
         val lastParams = elementsSessionRepository.lastParams
 
         assertThat(lastParams?.customPaymentMethods).isEmpty()
+        assertThat(lastParams?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
@@ -721,6 +723,7 @@ class CustomerAdapterDataSourceTest {
             customerAdapter = adapter,
             elementsSessionRepository = elementsSessionRepository,
             errorReporter = errorReporter,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             workContext = coroutineContext,
         )
     }

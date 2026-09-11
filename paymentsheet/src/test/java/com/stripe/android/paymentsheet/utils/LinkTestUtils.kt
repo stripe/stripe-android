@@ -118,6 +118,7 @@ internal object LinkTestUtils {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = linkBrand,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 }

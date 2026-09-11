@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -31,6 +32,7 @@ internal class ElementsSessionLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+        apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
         return elementsSessionRepository.get(
             initializationMode = initializationMode,
@@ -39,6 +41,7 @@ internal class ElementsSessionLoader @Inject constructor(
             customPaymentMethods = configuration.customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
             countryOverride = configuration.userOverrideCountry,
+            apiConfiguration = apiConfiguration,
             linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
         ).getOrThrow()
     }

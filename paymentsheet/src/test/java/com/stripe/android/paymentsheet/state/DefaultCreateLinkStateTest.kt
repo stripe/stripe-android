@@ -5,11 +5,13 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
@@ -47,9 +49,11 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
+        assertThat(retrieveCustomerEmail.invokedWith?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -105,6 +109,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
@@ -134,6 +139,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(result).isInstanceOf<LinkState>()
@@ -154,6 +160,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(linkStateResult).isInstanceOf<LinkState>()
@@ -191,6 +198,7 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PAYMENT_INTENT_INIT_MODE,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
@@ -271,11 +279,13 @@ internal class DefaultCreateLinkStateTest {
             configuration: CommonConfiguration,
             customerMetadata: CustomerMetadata?,
             customerEmail: String?,
+            apiConfiguration: ApiConfiguration.State,
         ): String? {
             invokedWith = Invocation(
                 configuration = configuration,
                 customerMetadata = customerMetadata,
                 customerEmail = customerEmail,
+                apiConfiguration = apiConfiguration,
             )
             return customerEmail
         }
@@ -284,6 +294,7 @@ internal class DefaultCreateLinkStateTest {
             val configuration: CommonConfiguration,
             val customerMetadata: CustomerMetadata?,
             val customerEmail: String?,
+            val apiConfiguration: ApiConfiguration.State,
         )
     }
 

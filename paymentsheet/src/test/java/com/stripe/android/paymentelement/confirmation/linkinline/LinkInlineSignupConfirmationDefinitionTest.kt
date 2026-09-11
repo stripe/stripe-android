@@ -818,6 +818,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,
+                apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
             ),
             userInput = userInput,
         )

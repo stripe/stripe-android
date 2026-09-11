@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.attestation.IntegrityRequestManager
@@ -60,7 +61,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 }.onFailure { error ->
                     attestationAnalyticsEventsReporter.prepareFailed(error)
                     errorReporter.report(
-                        UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
+                        ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
                         stripeException = StripeException.create(error)
                     )
                 }
