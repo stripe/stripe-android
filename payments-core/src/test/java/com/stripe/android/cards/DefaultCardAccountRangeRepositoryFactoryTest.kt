@@ -20,7 +20,8 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
         context = context,
         productUsageTokens = setOf("SomeProduct"),
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
-        analyticsRequestExecutor = { analyticsRequests.add(it) }
+        analyticsRequestExecutor = { analyticsRequests.add(it) },
+        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey }
     )
 
     @BeforeTest

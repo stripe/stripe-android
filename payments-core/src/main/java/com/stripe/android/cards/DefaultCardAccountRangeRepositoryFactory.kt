@@ -3,6 +3,7 @@ package com.stripe.android.cards
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -19,9 +20,9 @@ import javax.inject.Inject
 import javax.inject.Named
 
 /**
- * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
+ * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepository].
  *
- * Will throw an exception if [PaymentConfiguration] has not been instantiated.
+ * Falls back to static account ranges if the publishable key provider throws.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
@@ -29,6 +30,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
@@ -50,6 +52,9 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        publishableKeyProvider = context.applicationContext.let { appContext ->
+            { PaymentConfiguration.getInstance(appContext).publishableKey }
+        },
     )
 
     @Throws(IllegalStateException::class)
@@ -82,9 +87,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         store: CardAccountRangeStore
     ): CardAccountRangeSource {
         return runCatching {
-            PaymentConfiguration.getInstance(
-                appContext
-            ).publishableKey
+            publishableKeyProvider()
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
