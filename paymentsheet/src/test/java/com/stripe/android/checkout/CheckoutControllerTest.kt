@@ -716,12 +716,10 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `commitShippingAddress commits caller-provided response and shipping details without another tax request`() =
-        runMutationScenario {
+        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             val previousResponse = committedState().checkoutSessionResponse
             val response = previousResponse.copy(
                 checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
-                automaticTaxEnabled = true,
-                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             )
             val address = fullAddress.build()
 
