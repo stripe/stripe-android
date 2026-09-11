@@ -9,9 +9,11 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -26,9 +28,8 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
@@ -40,7 +41,8 @@ internal class AddressElementActivity : ComponentActivity() {
             starterArgsSupplier = { requireNotNull(starterArgs) }
         )
 
-    private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
+    @VisibleForTesting
+    internal val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
     private val starterArgs by lazy {
         AddressElementActivityContract.Args.fromIntent(intent)
@@ -59,23 +61,27 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
+            val state by viewModel.stateHolder.state.collectAsState()
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = { targetValue ->
+                    targetValue != ModalBottomSheetValue.Hidden ||
+                        state !is AddressElementActivityStateHolder.State.Processing
+                },
+            )
 
-            LaunchedEffect(bottomSheetState) {
-                viewModel.resultStateHolder.result
-                    .filterNotNull()
-                    .collect { result ->
-                        bottomSheetState.hide()
-                        finishWithResult(result)
-                    }
+            LaunchedEffect(state) {
+                (state as? AddressElementActivityStateHolder.State.Completed)?.let { completed ->
+                    bottomSheetState.hide()
+                    finishWithResult(completed.result)
+                }
             }
 
             BackHandler {
                 if (!viewModel.navigator.onBack()) {
-                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+                    viewModel.stateHolder.tryCancel()
                 }
             }
 
@@ -91,9 +97,7 @@ internal class AddressElementActivity : ComponentActivity() {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = {
-                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-                },
+                onDismissed = { viewModel.stateHolder.tryCancel() },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -101,7 +105,9 @@ internal class AddressElementActivity : ComponentActivity() {
                         startDestination = AddressElementScreen.InputAddress.route,
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
+                            InputAddressScreen(
+                                viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                            )
                         }
                         composable(
                             AddressElementScreen.Autocomplete.route,

@@ -16,7 +16,9 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -25,6 +27,7 @@ import javax.inject.Provider
 @OptIn(CheckoutSessionPreview::class)
 internal fun interface CommitShippingAddress {
     suspend operator fun invoke(
+        checkoutSessionResponse: CheckoutSessionResponse,
         name: String?,
         address: CheckoutController.Address.State,
     ): Result<Unit>
@@ -74,9 +77,10 @@ class ShippingAddressElement internal constructor(
                     if (address == null) {
                         shippingAddressElementStateHolder.isPresenting = false
                     } else {
-                        coroutineScope.launch {
+                        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
                             try {
                                 commitShippingAddress(
+                                    result.updatedResponse,
                                     result.address.name,
                                     address,
                                 )
@@ -104,7 +108,8 @@ class ShippingAddressElement internal constructor(
     }
 
     fun present() {
-        if (stateHolder.state == null) {
+        val state = stateHolder.state
+        if (state == null) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
             )
@@ -126,6 +131,7 @@ class ShippingAddressElement internal constructor(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
                 ),
+                checkoutSessionResponse = state.checkoutSessionResponse,
             )
         )
     }

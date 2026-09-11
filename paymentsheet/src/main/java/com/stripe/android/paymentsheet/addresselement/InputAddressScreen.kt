@@ -34,10 +34,12 @@ import javax.inject.Provider
 @Composable
 internal fun InputAddressScreen(
     primaryButtonEnabled: Boolean,
+    primaryButtonLoading: Boolean,
     primaryButtonText: String,
     title: String,
     onPrimaryButtonClick: () -> Unit,
     onDisabledButtonClick: () -> Unit,
+    closeButtonEnabled: Boolean,
     onCloseClick: () -> Unit,
     topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
@@ -52,6 +54,7 @@ internal fun InputAddressScreen(
         topBar = {
             AddressOptionsAppBar(
                 isRootScreen = true,
+                enabled = closeButtonEnabled,
                 onButtonClick = {
                     focusManager.clearFocus()
                     onCloseClick()
@@ -77,12 +80,13 @@ internal fun InputAddressScreen(
                 bottomContent()
                 PrimaryButton(
                     isEnabled = primaryButtonEnabled,
+                    isLoading = primaryButtonLoading,
                     label = primaryButtonText,
                     onButtonClick = {
                         focusManager.clearFocus()
                         onPrimaryButtonClick()
                     },
-                    canClickWhileDisabled = true,
+                    canClickWhileDisabled = !primaryButtonLoading,
                     onDisabledButtonClick = {
                         focusManager.clearFocus()
                         onDisabledButtonClick()
@@ -96,11 +100,11 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
+    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
-            inputAddressViewModelSubcomponentFactoryProvider
+            inputAddressViewModelSubcomponentFactoryProvider,
         )
     )
     LaunchedEffect(Unit) {
@@ -117,11 +121,14 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val activityState by viewModel.stateHolder.state.collectAsState()
+    val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
-        primaryButtonEnabled = completeValues != null,
+        primaryButtonEnabled = completeValues != null && formEnabled,
+        primaryButtonLoading = activityState is AddressElementActivityStateHolder.State.Processing,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -136,8 +143,9 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
+        closeButtonEnabled = activityState is AddressElementActivityStateHolder.State.Idle,
         onCloseClick = {
-            viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+            viewModel.stateHolder.tryCancel()
         },
         topContent = {
             val currentState = billingSameAsShippingState
@@ -157,6 +165,9 @@ internal fun InputAddressScreen(
             }
         },
         formContent = {
+            saveError?.let { error ->
+                Text(text = error.resolve(), color = MaterialTheme.colors.error)
+            }
             FormUI(
                 hiddenIdentifiersFlow = remember {
                     stateFlowOf(emptySet())
