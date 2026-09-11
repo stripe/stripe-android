@@ -6,7 +6,9 @@ import androidx.core.app.ActivityOptionsCompat
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 
-internal class FakeActivityLauncher<I> : ActivityResultLauncher<I>() {
+internal class FakeActivityLauncher<I>(
+    private var throwOnNextLaunch: Throwable? = null,
+) : ActivityResultLauncher<I>() {
     private val _launchCall = Turbine<Unit>()
     val launchCall: ReceiveTurbine<Unit> = _launchCall
     override val contract: ActivityResultContract<I, *>
@@ -14,6 +16,11 @@ internal class FakeActivityLauncher<I> : ActivityResultLauncher<I>() {
 
     override fun launch(input: I, options: ActivityOptionsCompat?) {
         _launchCall.add(Unit)
+
+        throwOnNextLaunch?.let { error ->
+            throwOnNextLaunch = null
+            throw error
+        }
     }
 
     override fun unregister() {
