@@ -21,6 +21,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -74,6 +75,13 @@ class GooglePayPaymentMethodLauncher internal constructor(
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor,
     )
+
+    private val apiConfiguration = PaymentConfiguration.getInstance(context).let {
+        ApiConfiguration.State(
+            publishableKey = it.publishableKey,
+            stripeAccountId = it.stripeAccountId
+        )
+    }
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
@@ -266,6 +274,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
             "present() may only be called when Google Pay is available on this device."
         }
 
+        // Use explicitly passed publishable key if provided, else fallback to global PaymentConfiguration
+        val apiConfig = publishableKey?.let {
+            apiConfiguration.copy(publishableKey = it)
+        } ?: apiConfiguration
+
         internalLauncher.present(
             currencyCode = currencyCode,
             amount = amount,
@@ -276,7 +289,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             transactionId = transactionId,
             label = label,
             isElements = isElements,
-            publishableKey = publishableKey,
+            apiConfiguration = apiConfig,
             displayItems = displayItems,
             billingEmailOverride = billingEmailOverride,
             shippingAddressParameters = null,

@@ -10,6 +10,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -91,7 +92,7 @@ class GooglePayConfirmationFlowTest {
                     transactionId = "pi_12345",
                     label = null,
                     isElements = true,
-                    publishableKey = null,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     displayItems = emptyList(),
                     billingEmailOverride = null,
                     shippingAddressParameters = null,

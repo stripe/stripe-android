@@ -9,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.FakeActivityResultLauncher
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.test.runTest
@@ -79,7 +80,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -96,7 +97,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
                 cardFundingFilter = DefaultCardFundingFilter,
                 clientAttributionMetadata = null,
                 isElements = true,
-                publishableKey = null,
+                apiConfiguration = API_CONFIG,
                 displayItems = emptyList(),
                 billingEmailOverride = null,
                 shippingAddressParameters = null,
@@ -127,7 +128,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             transactionId = null,
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -159,6 +160,10 @@ class InternalGooglePayPaymentMethodLauncherTest {
     }
 
     private companion object {
+        val API_CONFIG = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+        )
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             environment = GooglePayEnvironment.Test,
             merchantCountryCode = "US",
