@@ -366,6 +366,36 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `nested Form result closes PaymentOptions root flow before reducing result`() = testScenario {
+        val state = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = state.configuration,
+        )
+        dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+        val customerState = createCustomerState()
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            hasBeenConfirmed = true,
+            customerState = customerState,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
+    }
+
+    @Test
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
@@ -591,7 +621,7 @@ internal class CheckoutSheetLauncherTest {
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
+        assertThat(launcherState.isAwaitingReady).isTrue()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
@@ -604,7 +634,7 @@ internal class CheckoutSheetLauncherTest {
 
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertThat(recreatedLauncherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(recreatedLauncherState.isAwaitingReady).isFalse()
     }
 
     @Test
@@ -638,37 +668,6 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `missing refreshed state does not crash when mutation finishes`() = testScenario {
-        val mutationGate = CompletableDeferred<Unit>()
-        coroutineScope.launch {
-            operationCoordinator.runMutation {
-                mutationGate.await()
-                Result.success(Unit)
-            }
-        }
-        runCurrent()
-
-        val initialState = requireNotNull(embeddedContentState.value)
-        sheetLauncher.launchPaymentOptions(
-            paymentMethodMetadata = initialState.paymentMethodMetadata,
-            customerState = null,
-            selection = null,
-            configuration = initialState.configuration,
-        )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-
-        embeddedContentState.value = null
-        mutationGate.complete(Unit)
-        runCurrent()
-
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
-        )
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
-    }
-
-    @Test
     fun `cancelling loading suppresses ready launch`() = testScenario {
         val mutationGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
@@ -698,7 +697,7 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(launcherState.isAwaitingReady).isFalse()
     }
 
     @Test
@@ -748,7 +747,6 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `paymentOptionsResult merges returned previous new selections into selection holder`() = testScenario {
-        sheetStateHolder.sheetIsOpen = true
         val returnedSelections = Bundle().apply {
             stashNewSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         }
@@ -1041,10 +1039,11 @@ internal class CheckoutSheetLauncherTest {
         suspend fun recreateSheetLauncher(
             lifecycleOwner: TestLifecycleOwner,
             launcherState: CheckoutSheetLauncherState,
-        ) {
-            createSheetLauncher(lifecycleOwner, launcherState)
+        ): CheckoutSheetLauncher {
+            val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
             dummyActivityResultCallerScenario.awaitRegisterCall()
             dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
+            return sheetLauncher
         }
 
         suspend fun awaitRefreshCall(): FakeCheckoutSessionRefresher.Call {

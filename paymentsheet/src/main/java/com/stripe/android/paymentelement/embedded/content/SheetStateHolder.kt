@@ -12,7 +12,9 @@ internal class SheetStateHolder @Inject constructor(
 
     var sheetIsOpen: Boolean
         get() = savedStateHandle.get<Boolean>(SHEET_IS_OPEN_KEY) == true
-        set(value) = savedStateHandle.set(SHEET_IS_OPEN_KEY, value)
+        set(value) {
+            savedStateHandle[SHEET_IS_OPEN_KEY] = value
+        }
 
     companion object {
         private const val SHEET_IS_OPEN_KEY = "SheetStateHolder_SHEET_IS_OPEN_KEY"
