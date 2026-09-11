@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -5040,7 +5041,7 @@ internal class DefaultPaymentElementLoaderTest {
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
                     cardBrandFilter: CardBrandFilter,
-                    apiConfiguration: ApiConfiguration.State?,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }

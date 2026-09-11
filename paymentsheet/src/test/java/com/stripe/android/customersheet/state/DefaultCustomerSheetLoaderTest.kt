@@ -4,9 +4,9 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -847,7 +847,7 @@ internal class DefaultCustomerSheetLoaderTest {
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
                     cardBrandFilter: CardBrandFilter,
-                    apiConfiguration: ApiConfiguration.State?,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return if (isGooglePayReady) {
                         readyGooglePayRepository
