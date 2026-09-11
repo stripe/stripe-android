@@ -1,13 +1,18 @@
 package com.stripe.android.checkout
 
+import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -17,7 +22,11 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.SepaMandateContract
+import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.asCallbackFor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -76,6 +85,68 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm shows mandate before confirming an unacknowledged saved SEPA payment method`() = runScenario(
+        state = savedSepaState(),
+    ) {
+        performer.confirm()
+
+        val args = activityResultCallerScenario.awaitLaunchCall() as SepaMandateContract.Args
+        assertThat(args.merchantName).isEqualTo(stateHolder.state?.checkoutSessionResponse?.businessName)
+        confirmationHandler.startTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `confirm starts confirmation after saved SEPA mandate is acknowledged`() = runScenario(
+        state = savedSepaState(),
+    ) {
+        performer.confirm()
+        activityResultCallerScenario.awaitLaunchCall()
+
+        sepaMandateCallback.onActivityResult(SepaMandateResult.Acknowledged)
+
+        confirmationHandler.startTurbine.awaitItem()
+        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
+    fun `confirm reports cancellation when saved SEPA mandate is canceled`() = runScenario(
+        state = savedSepaState(),
+    ) {
+        performer.confirm()
+        activityResultCallerScenario.awaitLaunchCall()
+
+        sepaMandateCallback.onActivityResult(SepaMandateResult.Canceled)
+
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
+        confirmationHandler.startTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `confirm directly confirms an acknowledged saved SEPA payment method`() {
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD).also {
+            it.hasAcknowledgedSepaMandate = true
+        }
+        runScenario(state = savedSepaState(paymentSelection)) {
+            performer.confirm()
+
+            confirmationHandler.startTurbine.awaitItem()
+        }
+    }
+
+    @Test
+    fun `confirm directly confirms saved SEPA when merchant displays mandate text`() = runScenario(
+        state = savedSepaState(
+            embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .embeddedViewDisplaysMandateText(false)
+                .build(),
+        ),
+    ) {
+        performer.confirm()
+
+        confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
     fun `confirm records the payment selection for analytics`() = runScenario(
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
@@ -111,52 +182,77 @@ internal class CheckoutConfirmationPerformerTest {
         )
     }
 
+    private fun savedSepaState(
+        paymentSelection: PaymentSelection.Saved =
+            PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration =
+            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+    ): CheckoutControllerState {
+        return CheckoutControllerStateFactory.create(
+            paymentSelection = paymentSelection,
+            embeddedConfiguration = embeddedConfiguration,
+        )
+    }
+
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
-        stateHolder.state = state
-        val sessionRefresher = FakeCheckoutSessionRefresher()
-        val operationCoordinator = CheckoutOperationCoordinator(
-            confirmationHandler = confirmationHandler,
-            sheetStateHolder = SheetStateHolder(savedStateHandle),
-            sessionRefresher = sessionRefresher,
-            logger = Logger.noop(),
-            resultCallback = {},
-        )
-        val eventReporter = FakeEventReporter()
-        val analyticsPerformer = CheckoutAnalyticsPerformer(
-            confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
-            savedStateHandle = savedStateHandle,
-        )
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            analyticsPerformer.reportConfirmationResults()
+        DummyActivityResultCaller.test {
+            val confirmationHandler = FakeConfirmationHandler()
+            val savedStateHandle = SavedStateHandle()
+            val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+            stateHolder.state = state
+            val sessionRefresher = FakeCheckoutSessionRefresher()
+            val resultTurbine = Turbine<CheckoutController.Result>()
+            val resultCallback = CheckoutController.ResultCallback(resultTurbine::add)
+            val operationCoordinator = CheckoutOperationCoordinator(
+                confirmationHandler = confirmationHandler,
+                sheetStateHolder = SheetStateHolder(savedStateHandle),
+                sessionRefresher = sessionRefresher,
+                logger = Logger.noop(),
+                resultCallback = resultCallback,
+            )
+            val eventReporter = FakeEventReporter()
+            val analyticsPerformer = CheckoutAnalyticsPerformer(
+                confirmationHandler = confirmationHandler,
+                eventReporter = eventReporter,
+                savedStateHandle = savedStateHandle,
+            )
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                analyticsPerformer.reportConfirmationResults()
+            }
+            val performer = CheckoutConfirmationPerformer(
+                confirmationHandler = confirmationHandler,
+                stateHolder = stateHolder,
+                operationCoordinator = operationCoordinator,
+                analyticsPerformer = analyticsPerformer,
+                commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = TestLifecycleOwner(),
+                resultCallback = resultCallback,
+                statusBarColor = statusBarColor,
+                viewModelScope = backgroundScope,
+            )
+            awaitNextRegisteredLauncher()
+            val sepaMandateCallback = awaitRegisterCall().callback.asCallbackFor<SepaMandateResult>()
+
+            Scenario(
+                performer = performer,
+                confirmationHandler = confirmationHandler,
+                eventReporter = eventReporter,
+                stateHolder = stateHolder,
+                activityResultCallerScenario = this,
+                sepaMandateCallback = sepaMandateCallback,
+                resultTurbine = resultTurbine,
+            ).block()
+
+            confirmationHandler.validate()
+            sessionRefresher.ensureAllEventsConsumed()
+            eventReporter.validate()
+            resultTurbine.ensureAllEventsConsumed()
         }
-        val performer = CheckoutConfirmationPerformer(
-            confirmationHandler = confirmationHandler,
-            stateHolder = stateHolder,
-            operationCoordinator = operationCoordinator,
-            analyticsPerformer = analyticsPerformer,
-            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
-            statusBarColor = statusBarColor,
-            viewModelScope = backgroundScope,
-        )
-
-        Scenario(
-            performer = performer,
-            confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
-            stateHolder = stateHolder,
-        ).block()
-
-        confirmationHandler.validate()
-        sessionRefresher.ensureAllEventsConsumed()
-        eventReporter.validate()
     }
 
     private class Scenario(
@@ -164,6 +260,9 @@ internal class CheckoutConfirmationPerformerTest {
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
+        val activityResultCallerScenario: DummyActivityResultCaller.Scenario,
+        val sepaMandateCallback: ActivityResultCallback<SepaMandateResult>,
+        val resultTurbine: Turbine<CheckoutController.Result>,
     )
 
     private companion object {

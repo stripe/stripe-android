@@ -8,7 +8,6 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import dagger.Lazy
 import javax.inject.Inject
-import javax.inject.Provider
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -17,7 +16,7 @@ class CheckoutPresenter @Inject internal constructor(
     private val currencySelectorElementProvider: Lazy<CurrencySelectorElement>,
     private val shippingAddressElementProvider: Lazy<ShippingAddressElement>,
     private val expressCheckoutElementProvider: Lazy<ExpressCheckoutElement>,
-    private val checkoutConfirmationPerformerProvider: Provider<CheckoutConfirmationPerformer>,
+    private val checkoutConfirmationPerformer: CheckoutConfirmationPerformer,
 ) {
 
     /**
@@ -57,6 +56,6 @@ class CheckoutPresenter @Inject internal constructor(
      * [CheckoutController].
      */
     fun confirm() {
-        checkoutConfirmationPerformerProvider.get().confirm()
+        checkoutConfirmationPerformer.confirm()
     }
 }
