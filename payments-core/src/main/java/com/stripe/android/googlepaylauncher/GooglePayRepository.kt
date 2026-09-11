@@ -59,7 +59,7 @@ internal class DefaultGooglePayRepository(
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
-    private val additionalEnabledNetworks: List<String> = emptyList(),
+    private val additionalEnabledNetworks: List<String> = emptyList()
 ) : GooglePayRepository {
 
     @Inject
