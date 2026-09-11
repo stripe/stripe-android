@@ -29,6 +29,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
@@ -713,20 +715,28 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `commitShippingAddress stores local details and reloads payment element state`() =
+    fun `commitShippingAddress commits returned response and shipping details without a tax request`() =
         runMutationScenario {
-            val response = committedState().checkoutSessionResponse
+            val previousResponse = committedState().checkoutSessionResponse
+            val response = previousResponse.copy(
+                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 5099L)),
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            )
+            assertThat(previousResponse.amount).isNotEqualTo(response.amount)
             val address = fullAddress.build()
 
             val result = controller.commitShippingAddress(
                 name = "John",
                 address = address,
+                updatedCheckoutSessionResponse = response,
             )
 
             result.getOrThrow()
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")

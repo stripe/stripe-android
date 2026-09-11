@@ -3,11 +3,15 @@ package com.stripe.android.paymentsheet.addresselement
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
@@ -22,6 +26,7 @@ import javax.inject.Named
 import javax.inject.Provider
 
 @Suppress("TooManyFunctions")
+@OptIn(CheckoutSessionPreview::class)
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
@@ -29,6 +34,7 @@ internal class InputAddressViewModel @Inject constructor(
     private val eventReporter: AddressLauncherEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
+    private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -207,6 +213,7 @@ internal class InputAddressViewModel @Inject constructor(
         completedFormValues: Map<FormFieldId, FormFieldEntry>?,
         checkboxChecked: Boolean
     ) {
+        if (!_formEnabled.value) return
         if (completedFormValues == null) {
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
@@ -225,17 +232,34 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
-        completeWithAddress(
-            addressDetails = addressDetails,
-            result = when (args) {
-                is AddressElementActivityContract.Args.Standalone -> {
-                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+        when (args) {
+            is AddressElementActivityContract.Args.Standalone -> {
+                completeWithAddress(
+                    addressDetails = addressDetails,
+                    result = AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails),
+                )
+            }
+            is AddressElementActivityContract.Args.CheckoutShipping -> {
+                viewModelScope.launch {
+                    taxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = args.checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        address = requireNotNull(addressDetails.address?.toCheckoutAddress()),
+                    ).fold(
+                        onSuccess = { response ->
+                            completeWithAddress(
+                                addressDetails = addressDetails,
+                                result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                                    address = addressDetails,
+                                    checkoutSessionResponse = response,
+                                ),
+                            )
+                        },
+                        onFailure = { _formEnabled.value = true },
+                    )
                 }
-                is AddressElementActivityContract.Args.CheckoutShipping -> {
-                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
-                }
-            },
-        )
+            }
+        }
     }
 
     private fun completeWithAddress(
