@@ -1,23 +1,21 @@
 package com.stripe.android.paymentsheet
 
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
@@ -25,6 +23,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventRule
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -33,16 +32,16 @@ import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
+import kotlin.time.Duration.Companion.seconds
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class PaymentSheetAnalyticsTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
 ) {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),

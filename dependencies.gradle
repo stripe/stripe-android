@@ -26,6 +26,7 @@ ext.versions = [
         androidxRecyclerview        : '1.4.0',
         androidxWebkit              : '1.15.0',
         binaryCompatibilityValidator: '0.18.1',
+        burst                       : '2.10.2',
         cameraX                     : '1.5.3',
         dagger                      : '2.58',
         detekt                      : '2.0.0-alpha.2',
@@ -83,6 +84,7 @@ ext.versions = [
 ext.buildLibs = [
         androidGradlePlugin         : "com.android.tools.build:gradle:${versions.androidGradlePlugin}",
         binaryCompatibilityValidator: "org.jetbrains.kotlinx:binary-compatibility-validator:${versions.binaryCompatibilityValidator}",
+        burst                       : "app.cash.burst:burst-gradle-plugin:${versions.burst}",
         composeGradlePlugin         : "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${versions.kotlin}",
         detektGradlePlugin          : "dev.detekt:detekt-gradle-plugin:${versions.detekt}",
         dokkaPlugin                 : "org.jetbrains.dokka:dokka-gradle-plugin:${versions.dokka}",

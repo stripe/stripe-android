@@ -3,10 +3,8 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -22,8 +20,8 @@ import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -37,12 +35,13 @@ import okhttp3.mockwebserver.SocketPolicy
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class PaymentSheetTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
+    private val integrationType: IntegrationType,
 ) {
     private val networkRule = NetworkRule()
 
@@ -54,9 +53,6 @@ internal class PaymentSheetTest(
     private val composeTestRule = testRules.compose
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
-    @TestParameter(valuesProvider = IntegrationTypeProvider::class)
-    lateinit var integrationType: IntegrationType
 
     private val defaultConfiguration = PaymentSheet.Configuration(
         merchantDisplayName = "Example, Inc.",

@@ -11,7 +11,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -23,33 +22,8 @@ import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 
-internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentSheet.PaymentMethodLayout) {
-
-    abstract fun assertHasSelectedPaymentMethod(
-        composeTestRule: ComposeTestRule,
-        context: Context,
-        paymentMethod: PaymentMethod
-    )
-
-    abstract fun setDefaultPaymentMethod(
-        composeTestRule: ComposeTestRule,
-        newDefaultPaymentMethod: PaymentMethod,
-    )
-
-    abstract fun assertSetDefaultPaymentMethodCheckboxDisplayedAndDisabled(
-        composeTestRule: ComposeTestRule,
-        paymentMethod: PaymentMethod,
-    )
-
-    abstract fun assertDefaultPaymentMethodBadgeDisplayed(
-        composeTestRule: ComposeTestRule,
-    )
-
-    abstract fun openNewCardForm(
-        composeTestRule: ComposeTestRule,
-    )
-
-    data object Horizontal : PaymentSheetLayoutType(
+internal enum class PaymentSheetLayoutType(val paymentMethodLayout: PaymentSheet.PaymentMethodLayout) {
+    Horizontal(
         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
     ) {
         override fun assertHasSelectedPaymentMethod(
@@ -130,9 +104,9 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
             savedPaymentMethodsPage.clickNewCardButton()
         }
-    }
+    },
 
-    data object Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
+    Vertical(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,
@@ -225,7 +199,31 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
             verticalModePage.clickNewPaymentMethodButton(PaymentMethod.Type.Card.code)
         }
-    }
+    };
+
+    abstract fun assertHasSelectedPaymentMethod(
+        composeTestRule: ComposeTestRule,
+        context: Context,
+        paymentMethod: PaymentMethod
+    )
+
+    abstract fun setDefaultPaymentMethod(
+        composeTestRule: ComposeTestRule,
+        newDefaultPaymentMethod: PaymentMethod,
+    )
+
+    abstract fun assertSetDefaultPaymentMethodCheckboxDisplayedAndDisabled(
+        composeTestRule: ComposeTestRule,
+        paymentMethod: PaymentMethod,
+    )
+
+    abstract fun assertDefaultPaymentMethodBadgeDisplayed(
+        composeTestRule: ComposeTestRule,
+    )
+
+    abstract fun openNewCardForm(
+        composeTestRule: ComposeTestRule,
+    )
 
     private companion object {
         fun assertExactlyOneDefaultLabelShown(composeTestRule: ComposeTestRule) {
@@ -241,11 +239,5 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             editPage.onSetAsDefaultCheckbox().assertIsDisplayed()
             editPage.onSetAsDefaultCheckbox().assertIsNotEnabled()
         }
-    }
-}
-
-internal object PaymentSheetLayoutTypeProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<PaymentSheetLayoutType> {
-       return listOf(PaymentSheetLayoutType.Vertical, PaymentSheetLayoutType.Horizontal)
     }
 }

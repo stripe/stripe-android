@@ -2,29 +2,28 @@ package com.stripe.android.paymentelement
 
 import android.net.Uri
 import androidx.test.espresso.Espresso
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.clientAttributionMetadataParamsForDeferredIntent
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
@@ -33,15 +32,18 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
+import kotlin.time.Duration.Companion.seconds
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-@RunWith(TestParameterInjector::class)
-internal class EmbeddedPaymentElementAnalyticsTest {
+@Burst
+internal class EmbeddedPaymentElementAnalyticsTest(
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
+) {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
@@ -59,9 +61,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
-
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")

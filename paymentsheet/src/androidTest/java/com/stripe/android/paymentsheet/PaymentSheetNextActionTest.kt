@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
@@ -13,30 +11,31 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import kotlin.time.Duration.Companion.seconds
 import org.hamcrest.Matchers.allOf
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class PaymentSheetNextActionTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
 ) {
     // The retrieve happens after the sheet has already handed back its result, so give
     // validate() a moment to see it.

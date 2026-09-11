@@ -4,9 +4,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.intent.rule.IntentsRule
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -23,7 +23,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
@@ -36,10 +35,13 @@ import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
-internal class EmbeddedPaymentElementTest {
+@Burst
+internal class EmbeddedPaymentElementTest(
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
+) {
     private val networkRule = NetworkRule()
 
     @get:Rule
@@ -51,9 +53,6 @@ internal class EmbeddedPaymentElementTest {
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
-
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")

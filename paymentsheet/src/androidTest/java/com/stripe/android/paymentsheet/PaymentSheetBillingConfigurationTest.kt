@@ -2,11 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -16,25 +14,24 @@ import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
-import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import org.junit.Rule
+import org.junit.Test
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class PaymentSheetBillingConfigurationTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
 ) {
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
@@ -229,9 +226,7 @@ internal class PaymentSheetBillingConfigurationTest(
 
     @Test
     fun testWithDefaults(
-        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
         integrationType: ProductIntegrationType,
-        @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
         layoutType: PaymentSheetLayoutType,
     ) = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
@@ -268,7 +263,7 @@ internal class PaymentSheetBillingConfigurationTest(
             ),
         )
 
-        page.clickOnLpm("cashapp", layoutType is PaymentSheetLayoutType.Vertical)
+        page.clickOnLpm("cashapp", layoutType == PaymentSheetLayoutType.Vertical)
 
         networkRule.enqueue(
             method("POST"),

@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.nfcscan
 
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.common.nfcscan.NfcScanningContract
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.networktesting.NetworkRule
@@ -10,15 +10,13 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class NfcScanningTest {
     private val networkRule = NetworkRule()
 
@@ -37,10 +35,10 @@ internal class NfcScanningTest {
 
     @Test
     fun success(
-        @TestParameter(valuesProvider = NfcScanningIntegrationType.Provider::class)
+        apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+            ApiConfigurationTestType.PaymentConfigurationOnly,
+        ),
         integrationType: NfcScanningIntegrationType,
-        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runNfcScanningIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,

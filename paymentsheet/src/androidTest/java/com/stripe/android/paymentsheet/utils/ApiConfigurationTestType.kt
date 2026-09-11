@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
 import android.content.Context
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.TestApiKeys
 
@@ -31,12 +30,4 @@ internal sealed class ApiConfigurationTestType(
         paymentConfigurationPublishableKey: String,
         paymentConfigurationStripeAccount: String
     ) : ApiConfigurationTestType(paymentConfigurationPublishableKey, paymentConfigurationStripeAccount)
-}
-
-internal object ApiConfigurationTestTypeProvider : TestParameterValuesProvider() {
-    override fun provideValues(
-        context: Context?,
-    ): List<ApiConfigurationTestType> = listOf(
-        ApiConfigurationTestType.PaymentConfigurationOnly,
-    )
 }
