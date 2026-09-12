@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.DEFAULT_BILLING_ADDRESS_PHONE
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
@@ -50,7 +51,10 @@ internal class TestLink : BasePlaygroundTest() {
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
             settings[MerchantSettingsDefinition] = Merchant.US
             settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
-            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(
+                email = email,
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         }
     }
 
@@ -63,7 +67,10 @@ internal class TestLink : BasePlaygroundTest() {
             settings[MerchantSettingsDefinition] = Merchant.US
             settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
             settings[LinkTypeSettingsDefinition] = LinkType.Native
-            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(
+                email = email,
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         }
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
@@ -33,7 +34,10 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObjectNotFoundException
+import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
@@ -68,6 +72,7 @@ import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
 import com.stripe.android.utils.awaitWindowFocus
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
@@ -1526,7 +1531,7 @@ internal class PlaygroundTestDriver(
         if (authAction == AuthorizeAction.Cancel) {
             cancelInstantDebitsFlowOnLaunch()
         } else {
-            executeEntireInstantDebitsFlow()
+            executeNewConsumerInstantDebitsFlow()
         }
     }
 
@@ -1605,7 +1610,7 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("done_button")
     }
 
-    private fun executeEntireInstantDebitsFlow() {
+    private fun executeNewConsumerInstantDebitsFlow() {
         awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(
@@ -1619,14 +1624,30 @@ internal class PlaygroundTestDriver(
         }
 
         clickButtonWithTag("consent_cta")
-        clickButtonWithTag("existing_email-button")
-        clickButtonWithTag("test_mode_fill_button")
+        waitUntilTag(PHONE_NUMBER_TEXT_FIELD_TAG)
+        composeTestRule.onNodeWithTag(PHONE_NUMBER_TEXT_FIELD_TAG)
+            .performTextReplacement(INSTANT_DEBITS_TEST_PHONE_NUMBER)
+        clickButtonWithText("Continue with Link")
 
-        waitUntilTag("loaded_picker_title")
-        scrollToAndClick("Success")
+        waitUntilTag(
+            tag = "loaded_picker_title",
+            timeout = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT,
+        )
+        composeTestRule.onNode(hasScrollToNodeAction())
+            .performScrollToNode(hasTestTag(PAYMENT_SUCCESS_INSTITUTION_ID))
+        clickButtonWithTag(PAYMENT_SUCCESS_INSTITUTION_ID)
 
-        clickButtonWithTag("link_account_picker_cta")
-        return clickButtonWithTag("done_button")
+        val browser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
+        selectors.awaitBrowserAndDismissFirstRun(browser)
+        selectSuccessBankAccountInBrowser(browser)
+        submitBrowserAccountSelectionIfRequired(browser)
+        waitUntilTag(
+            tag = "loaded_picker_title",
+            timeout = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT,
+        )
+        clickButtonWithTag("connect_account_button")
+
+        clickButtonWithTag("done_button")
     }
 
     private fun doUSBankAccountAuthorization(authAction: AuthorizeAction?) {
@@ -1678,9 +1699,13 @@ internal class PlaygroundTestDriver(
     }
 
     private fun waitUntilTag(tag: String) {
+        waitUntilTag(tag, FINANCIAL_CONNECTIONS_UI_TIMEOUT)
+    }
+
+    private fun waitUntilTag(tag: String, timeout: Duration) {
         composeTestRule.waitUntil(
             conditionDescription = "node with test tag '$tag' to appear",
-            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+            timeoutMillis = timeout.inWholeMilliseconds,
         ) {
             composeTestRule
                 .onAllNodesWithTag(tag)
@@ -1709,6 +1734,89 @@ internal class PlaygroundTestDriver(
         }
 
         composeTestRule.onNode(matcher).performClick()
+    }
+
+    private fun clickButtonWithText(text: String) {
+        val matcher = hasText(text).and(isEnabled()).and(hasClickAction())
+        composeTestRule.waitUntil(
+            conditionDescription = "enabled button with text '$text' to appear",
+            timeoutMillis = FINANCIAL_CONNECTIONS_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
+            composeTestRule
+                .onAllNodes(matcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(matcher).performClick()
+    }
+
+    private fun submitBrowserAccountSelectionIfRequired(browser: BrowserUI) {
+        val selector = browserTextSelector(browser, "Connect account")
+        composeTestRule.waitUntil(
+            conditionDescription = "${browser.name} to close or show its account selection button",
+            timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
+        ) {
+            !isBrowserOpen(browser) || device.findObject(selector).exists()
+        }
+        if (isBrowserOpen(browser)) {
+            clickBrowserObject(browser, selector)
+        }
+        composeTestRule.waitUntil(
+            conditionDescription = "${browser.name} to close after account selection",
+            timeoutMillis = FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT.inWholeMilliseconds,
+        ) {
+            !isBrowserOpen(browser)
+        }
+    }
+
+    private fun selectSuccessBankAccountInBrowser(browser: BrowserUI) {
+        val selector = browserTextSelector(browser, "Success")
+        val account = device.findObject(selector)
+        if (!account.waitForExists(BROWSER_ACCOUNT_LOAD_WAIT.inWholeMilliseconds)) {
+            if (!isBrowserOpen(browser)) {
+                return
+            }
+            val scrollableSelector = UiSelector()
+                .scrollable(true)
+                .packageName(browser.packageName)
+            val accountFound = try {
+                UiScrollable(scrollableSelector).scrollIntoView(selector)
+            } catch (exception: UiObjectNotFoundException) {
+                if (isBrowserOpen(browser)) {
+                    throw exception
+                }
+                return
+            }
+            if (!accountFound && !isBrowserOpen(browser)) {
+                return
+            }
+            check(accountFound) {
+                "Could not find the Success bank account in ${browser.name}"
+            }
+        }
+
+        clickBrowserObject(browser, selector)
+    }
+
+    private fun clickBrowserObject(browser: BrowserUI, selector: UiSelector) {
+        try {
+            device.findObject(selector).click()
+        } catch (exception: UiObjectNotFoundException) {
+            if (isBrowserOpen(browser)) {
+                throw exception
+            }
+        }
+    }
+
+    private fun browserTextSelector(browser: BrowserUI, text: String): UiSelector {
+        return UiSelector()
+            .text(text)
+            .packageName(browser.packageName)
+    }
+
+    private fun isBrowserOpen(browser: BrowserUI): Boolean {
+        return device.hasObject(By.pkg(browser.packageName))
     }
 
     internal fun setup(testParameters: TestParameters) {
@@ -1813,6 +1921,7 @@ internal class PlaygroundTestDriver(
         // failure path). Kept well under the 90s per-test Timeout so a hang surfaces a clear message.
         val ACTIVITY_TRANSITION_TIMEOUT: Duration = 45.seconds
         val CHECKOUT_PREPARATION_TIMEOUT: Duration = 45.seconds
+        val BROWSER_ACCOUNT_LOAD_WAIT: Duration = 5.seconds
         val FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT: Duration = 60.seconds
         val FINANCIAL_CONNECTIONS_UI_TIMEOUT: Duration = 45.seconds
         val FINANCIAL_CONNECTIONS_LITE_INITIAL_PANE_TEST_IDS = listOf(
@@ -1820,6 +1929,8 @@ internal class PlaygroundTestDriver(
             "agree-button",
         )
         const val ACTIVITY_POLL_INTERVAL_MS = 250L
+        const val INSTANT_DEBITS_TEST_PHONE_NUMBER = "6223115555"
+        const val PAYMENT_SUCCESS_INSTITUTION_ID = "bcinst_QsDedeogZ5PA7V"
 
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
