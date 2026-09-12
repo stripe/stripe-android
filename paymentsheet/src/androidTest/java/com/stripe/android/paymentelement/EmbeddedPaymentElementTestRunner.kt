@@ -12,6 +12,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
@@ -24,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+@OptIn(ApiConfigurationPreview::class)
 internal class EmbeddedPaymentElementTestRunnerContext(
     val embeddedPaymentElement: EmbeddedPaymentElement,
     val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
@@ -39,6 +41,7 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     ) {
         val configurationBuilder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .configurationMutator()
+        apiConfigurationTestType.apiConfiguration?.let(configurationBuilder::apiConfiguration)
         embeddedPaymentElement.configure(
             intentConfiguration = intentConfiguration,
             configuration = configurationBuilder.build()

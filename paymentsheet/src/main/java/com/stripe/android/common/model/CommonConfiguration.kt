@@ -248,6 +248,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -273,6 +274,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(

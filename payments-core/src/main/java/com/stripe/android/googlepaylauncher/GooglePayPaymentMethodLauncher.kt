@@ -20,6 +20,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -187,7 +188,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             override fun invoke(
                 environment: GooglePayEnvironment,
                 cardFundingFilter: CardFundingFilter,
-                cardBrandFilter: CardBrandFilter
+                cardBrandFilter: CardBrandFilter,
+                googlePayConfig: GooglePayConfig
             ): GooglePayRepository {
                 return DefaultGooglePayRepository(
                     context = context,
@@ -195,6 +197,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
+                    googlePayConfig = googlePayConfig,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
@@ -214,7 +217,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
                 val repository = googlePayRepositoryFactory(
                     environment = config.environment,
                     cardFundingFilter = cardFundingFilter,
-                    cardBrandFilter = cardBrandFilter
+                    cardBrandFilter = cardBrandFilter,
+                    googlePayConfig = GooglePayConfig(context),
                 )
                 readyCallback.onReady(
                     repository.isReady().first().also {

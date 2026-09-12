@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
@@ -19,7 +20,7 @@ class AddressElementViewModelModuleTest {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                publishableKey = DEFAULT_API_CONFIG.publishableKey,
                 config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -36,9 +37,10 @@ class AddressElementViewModelModuleTest {
         val placesClient = module.provideGooglePlacesClient(
             context = mock<Context>(),
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                publishableKey = DEFAULT_API_CONFIG.publishableKey,
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
 
         assertThat(placesClient).isNull()

@@ -51,6 +51,7 @@ internal class DefaultGooglePayRepository(
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
+    googlePayConfig: GooglePayConfig,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
@@ -62,27 +63,29 @@ internal class DefaultGooglePayRepository(
     @Inject
     internal constructor(
         context: Context,
-        googlePayConfig: GooglePayPaymentMethodLauncher.Config,
+        launcherConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger,
         errorReporter: ErrorReporter,
         cardBrandFilter: CardBrandFilter,
-        cardFundingFilter: CardFundingFilter
+        cardFundingFilter: CardFundingFilter,
+        googlePayConfig: GooglePayConfig,
     ) : this(
         context.applicationContext,
-        googlePayConfig.environment,
-        googlePayConfig.billingAddressConfig.convert(),
-        googlePayConfig.existingPaymentMethodRequired,
-        googlePayConfig.allowCreditCards,
+        launcherConfig.environment,
+        launcherConfig.billingAddressConfig.convert(),
+        launcherConfig.existingPaymentMethodRequired,
+        launcherConfig.allowCreditCards,
+        googlePayConfig,
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,
         cardBrandFilter,
         cardFundingFilter,
-        googlePayConfig.additionalEnabledNetworks
+        launcherConfig.additionalEnabledNetworks
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        GooglePayConfig(context),
+        googlePayConfig = googlePayConfig,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks

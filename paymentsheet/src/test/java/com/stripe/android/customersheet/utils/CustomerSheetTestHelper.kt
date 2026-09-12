@@ -82,7 +82,7 @@ internal interface CustomerSheetTestHelper {
         savedPaymentSelection: PaymentSelection? = null,
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
             publishableKey = "pk_test_123",
-            stripeAccountId = null,
+            stripeAccountId = "acct_123",
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
@@ -129,7 +129,16 @@ internal interface CustomerSheetTestHelper {
             configuration = configuration,
             integrationType = integrationType,
             statusBarColor = null,
-            paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
+            apiConfigurationProvider = {
+                if (isLiveMode) {
+                    ApiConfiguration.State(publishableKey = "pk_live", stripeAccountId = "acct_123")
+                } else {
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = requireNotNull(paymentConfiguration.stripeAccountId),
+                    )
+                }
+            },
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }

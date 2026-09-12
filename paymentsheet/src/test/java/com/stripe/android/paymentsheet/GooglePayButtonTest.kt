@@ -8,7 +8,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG
@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import org.junit.Rule
 import org.junit.runner.RunWith
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(AndroidJUnit4::class)
@@ -24,18 +23,11 @@ class GooglePayButtonTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    @BeforeTest
-    fun setup() {
-        PaymentConfiguration.init(
-            composeTestRule.activity.applicationContext,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-        )
-    }
-
     @Test
     fun `when state is null, should show the Google Pay Button`() {
         composeTestRule.setContent {
             GooglePayButton(
+                apiConfiguration = TEST_API_CONFIGURATION,
                 state = null,
                 allowCreditCards = true,
                 buttonType = GooglePayButtonType.Pay,
@@ -56,6 +48,7 @@ class GooglePayButtonTest {
     fun `when state is 'Ready', should show the Google Pay Button`() {
         composeTestRule.setContent {
             GooglePayButton(
+                apiConfiguration = TEST_API_CONFIGURATION,
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = true,
                 buttonType = GooglePayButtonType.Pay,
@@ -76,6 +69,7 @@ class GooglePayButtonTest {
     fun `when state is 'StartProcessing, should show the Google Pay Button`() {
         composeTestRule.setContent {
             GooglePayButton(
+                apiConfiguration = TEST_API_CONFIGURATION,
                 state = PrimaryButton.State.StartProcessing,
                 allowCreditCards = true,
                 buttonType = GooglePayButtonType.Pay,
@@ -96,6 +90,7 @@ class GooglePayButtonTest {
     fun `when state is 'FinishProcessing', should show the Google Pay Button`() {
         composeTestRule.setContent {
             GooglePayButton(
+                apiConfiguration = TEST_API_CONFIGURATION,
                 state = PrimaryButton.State.FinishProcessing {},
                 allowCreditCards = true,
                 buttonType = GooglePayButtonType.Pay,
@@ -110,5 +105,12 @@ class GooglePayButtonTest {
 
         composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertExists()
+    }
+
+    private companion object {
+        val TEST_API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        )
     }
 }
