@@ -29,6 +29,15 @@ internal class GooglePayLauncherTest {
     }
 
     @Test
+    fun `presentForPaymentIntent() should successfully return a result with manual injection publishable key`() {
+        runGooglePayLauncherTest(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        ) { _, launcher ->
+            launcher.presentForPaymentIntent("pi_123_secret_456")
+        }
+    }
+
+    @Test
     fun `init should fire expected event`() {
         runGooglePayLauncherTest(
             integrationTypes = listOf(LauncherIntegrationType.Activity),
