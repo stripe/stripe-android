@@ -22,6 +22,7 @@ class CardScanDemoActivity : AppCompatActivity() {
             cardScanSheet.present(
                 CardScanConfiguration(
                     elementsSessionId = null,
+                    publishableKey = null,
                     enableMlKitTextRecognition = viewBinding.enableMlKitCheckbox.isChecked,
                     disableSsdOcr = viewBinding.disableSsdOcrCheckbox.isChecked,
                 )

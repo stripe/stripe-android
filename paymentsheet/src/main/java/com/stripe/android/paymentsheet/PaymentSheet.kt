@@ -1140,8 +1140,8 @@ class PaymentSheet internal constructor(
              * When not set, the payment element uses the credentials initialized through
              * [com.stripe.android.PaymentConfiguration].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            internal fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+            @ApiConfigurationPreview
+            fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
             }
 

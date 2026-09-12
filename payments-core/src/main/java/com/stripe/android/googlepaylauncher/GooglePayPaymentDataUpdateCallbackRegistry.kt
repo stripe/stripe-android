@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.annotation.MainThread
+import com.stripe.android.core.ApiConfiguration
 import kotlinx.coroutines.CoroutineScope
 
 internal object GooglePayPaymentDataUpdateCallbackRegistry {
@@ -17,9 +18,9 @@ internal object GooglePayPaymentDataUpdateCallbackRegistry {
         registeredCallbacks.remove(key)
     }
 
-    fun select(key: String, workScope: CoroutineScope) {
+    fun select(key: String, workScope: CoroutineScope, apiConfiguration: ApiConfiguration.State) {
         selection = registeredCallbacks[key]?.let {
-            Selection(callback = it, workScope = workScope)
+            Selection(callback = it, workScope = workScope, apiConfiguration = apiConfiguration)
         }
     }
 
@@ -34,5 +35,6 @@ internal object GooglePayPaymentDataUpdateCallbackRegistry {
     class Selection(
         val callback: GooglePayPaymentDataUpdateCallback,
         val workScope: CoroutineScope,
+        val apiConfiguration: ApiConfiguration.State,
     )
 }

@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -43,7 +44,7 @@ class InputAddressViewModelTest {
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
-                    publishableKey = "pk_123",
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     config = currentConfig,
                 )
             },
@@ -1006,7 +1007,7 @@ class InputAddressViewModelTest {
         val viewModel = createViewModel(
             argsFactory = { config ->
                 AddressElementActivityContract.Args.CheckoutShipping(
-                    publishableKey = "pk_123",
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     config = config,
                 )
             },
@@ -1036,7 +1037,7 @@ class InputAddressViewModelTest {
     ): InputAddressViewModel {
         return InputAddressViewModel(
             AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration.Builder()
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)

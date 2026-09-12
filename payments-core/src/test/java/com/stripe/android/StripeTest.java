@@ -91,7 +91,7 @@ public class StripeTest {
     private final Context context = ApplicationProvider.getApplicationContext();
     @NonNull
     private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
-            DefaultFraudDetectionDataRepository(context);
+            DefaultFraudDetectionDataRepository(context, () -> ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
     @NonNull
     private final Stripe defaultStripe = createStripe();
 

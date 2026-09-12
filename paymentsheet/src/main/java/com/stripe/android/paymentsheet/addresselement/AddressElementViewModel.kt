@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.DaggerAddressElementViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -29,10 +28,7 @@ internal class AddressElementViewModel @Inject internal constructor(
                 .create(
                     context = applicationSupplier(),
                     starterArgs = args,
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = null,
-                    ),
+                    apiConfiguration = args.apiConfiguration,
                 )
                 .addressElementViewModel as T
         }

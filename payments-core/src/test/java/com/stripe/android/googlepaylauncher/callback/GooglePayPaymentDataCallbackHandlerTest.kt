@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallbackRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
@@ -204,7 +205,11 @@ class GooglePayPaymentDataCallbackHandlerTest {
 
         if (registerCallback) {
             GooglePayPaymentDataUpdateCallbackRegistry.register(CALLBACK_KEY, callback)
-            GooglePayPaymentDataUpdateCallbackRegistry.select(CALLBACK_KEY, this)
+            GooglePayPaymentDataUpdateCallbackRegistry.select(
+                CALLBACK_KEY,
+                this,
+                ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
+            )
         }
 
         Scenario(

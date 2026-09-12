@@ -20,7 +20,7 @@ class AddressElementViewModelModuleTest {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = DEFAULT_API_CONFIG.publishableKey,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -37,10 +37,9 @@ class AddressElementViewModelModuleTest {
         val placesClient = module.provideGooglePlacesClient(
             context = mock<Context>(),
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = DEFAULT_API_CONFIG.publishableKey,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
 
         assertThat(placesClient).isNull()

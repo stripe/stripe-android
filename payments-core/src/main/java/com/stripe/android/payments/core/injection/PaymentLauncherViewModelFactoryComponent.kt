@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.BindsInstance
 import dagger.Component
@@ -15,8 +16,8 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         PaymentLauncherModule::class,
-        ApiConfigurationToNamedModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,

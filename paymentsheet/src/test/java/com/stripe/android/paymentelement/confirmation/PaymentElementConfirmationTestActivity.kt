@@ -13,13 +13,11 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -36,6 +34,7 @@ import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -44,7 +43,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -124,10 +123,10 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         ElementsSessionClientParamsModule::class,
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
-        ApiConfigurationFromNamedModule::class,
         GooglePayLauncherModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
     ]
@@ -210,18 +209,7 @@ internal interface PaymentElementConfirmationTestModule {
         fun providesProductUsage(): Set<String> = setOf()
 
         @Provides
-        fun providesPaymentConfiguration(): PaymentConfiguration = PaymentConfiguration(
-            publishableKey = "pk_123",
-            stripeAccountId = null,
-        )
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providesPublishableKey(config: PaymentConfiguration): () -> String = { config.publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun providesStripeAccountId(config: PaymentConfiguration): () -> String? = { config.stripeAccountId }
+        fun providesApiConfiguration(): ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 
         @Provides
         @Singleton

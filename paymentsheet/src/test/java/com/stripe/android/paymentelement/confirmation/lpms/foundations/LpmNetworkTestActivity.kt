@@ -12,13 +12,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -32,7 +30,7 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -89,8 +87,10 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
-                        publishableKeyProvider = { args.publishableKey },
-                        stripeAccountIdProvider = { null },
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         allowsManualConfirmation = args.allowsManualConfirmation,
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         savedStateHandle = extras.createSavedStateHandle(),
@@ -132,14 +132,13 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
-        ApiConfigurationFromNamedModule::class,
+        ApiRequestOptionsModule::class,
         ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LpmNetworkTestModule::class,
-        ApiConfigurationFromNamedModule::class,
     ]
 )
 @Singleton
@@ -152,11 +151,7 @@ internal interface LpmNetworkTestViewModelComponent {
             @BindsInstance
             application: Application,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
-            @BindsInstance
-            @Named(STRIPE_ACCOUNT_ID)
-            stripeAccountIdProvider: () -> String?,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,
@@ -192,17 +187,6 @@ internal interface LpmNetworkTestModule {
 
         @Provides
         fun providesLogger(): Logger = FakeLogger()
-
-        @Provides
-        fun providesPaymentConfiguration(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String,
-        ): PaymentConfiguration {
-            return PaymentConfiguration(
-                publishableKey = publishableKeyProvider(),
-                stripeAccountId = stripeAccountIdProvider(),
-            )
-        }
 
         @Provides
         @Named(ENABLE_LOGGING)
