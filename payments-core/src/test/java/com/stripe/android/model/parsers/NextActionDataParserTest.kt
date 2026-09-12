@@ -12,6 +12,22 @@ import kotlin.test.Test
 internal class NextActionDataParserTest {
 
     @Test
+    fun `parse with await_authorization type should create AwaitAuthorization`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "await_authorization",
+                "await_authorization": {}
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isEqualTo(StripeIntent.NextActionData.AwaitAuthorization)
+    }
+
+    @Test
     fun `parse with intent_confirmation_challenge type should create IntentConfirmationChallenge`() {
         val nextActionJson = JSONObject(
             """

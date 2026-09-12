@@ -21,6 +21,10 @@ private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
 private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
 
+// Keep in sync with Bizum's server-side authorization timeout.
+private const val BIZUM_TIME_LIMIT_IN_SECONDS = 70 * 60
+private const val BIZUM_INITIAL_DELAY_IN_SECONDS = 5
+
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
@@ -88,6 +92,17 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
                     requestOptions = requestOptions,
                     qrCodeUrl = getQrCodeForPromptPay(actionable),
+                    paymentMethodType = paymentMethodType.code,
+                )
+            PaymentMethod.Type.Bizum ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_bizum_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
             else ->

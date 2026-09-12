@@ -317,6 +317,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        Bizum(
+            "bizum",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         WeChatPay(
             "wechat_pay",
             isReusable = false,

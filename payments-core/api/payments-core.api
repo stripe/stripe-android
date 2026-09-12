@@ -2122,6 +2122,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field BacsDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Bancontact Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Billie Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Bizum Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Blik Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Boleto Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -2312,6 +2313,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createBillie (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createBillie (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createBillie (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createBizum ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createBizum (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createBizum (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createBizum (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createBlik ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createBlik (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createBlik (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -2586,6 +2591,11 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createBillie (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createBillie (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createBillie$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createBizum ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createBizum (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createBizum (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createBizum (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createBizum$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createBlik ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createBlik (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createBlik (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -3583,6 +3593,17 @@ public abstract class com/stripe/android/model/StripeIntent$NextActionData : com
 	public static final field $stable I
 }
 
+public final class com/stripe/android/model/StripeIntent$NextActionData$AwaitAuthorization : com/stripe/android/model/StripeIntent$NextActionData {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/model/StripeIntent$NextActionData$AwaitAuthorization;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/model/StripeIntent$NextActionData$BlikAuthorize : com/stripe/android/model/StripeIntent$NextActionData {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -3683,6 +3704,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$VerifyWi
 
 public final class com/stripe/android/model/StripeIntent$NextActionType : java/lang/Enum {
 	public static final field AlipayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field AwaitAuthorization Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field BlikAuthorize Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field CashAppRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayBoletoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
