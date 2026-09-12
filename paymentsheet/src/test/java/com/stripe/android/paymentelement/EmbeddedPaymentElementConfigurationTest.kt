@@ -6,6 +6,7 @@ import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
@@ -24,14 +25,15 @@ class EmbeddedPaymentElementConfigurationTest {
     fun `api configuration is included in common configuration`() {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Test Merchant")
             .apiConfiguration(
-                ApiConfiguration("pk_test_123").stripeAccountId("acct_123")
+                ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
+                    .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
             )
             .build()
 
         val apiConfiguration = configuration.asCommonConfiguration().apiConfiguration
 
-        assertThat(apiConfiguration?.publishableKey).isEqualTo("pk_test_123")
-        assertThat(apiConfiguration?.stripeAccountId).isEqualTo("acct_123")
+        assertThat(apiConfiguration?.publishableKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
+        assertThat(apiConfiguration?.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
     }
 
     @OptIn(
@@ -88,7 +90,8 @@ class EmbeddedPaymentElementConfigurationTest {
             .opensCardScannerAutomatically(true)
             .userOverrideCountry("GB")
             .apiConfiguration(
-                ApiConfiguration("pk_test_123").stripeAccountId("acct_123")
+                ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
+                    .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
             )
             .build()
 
