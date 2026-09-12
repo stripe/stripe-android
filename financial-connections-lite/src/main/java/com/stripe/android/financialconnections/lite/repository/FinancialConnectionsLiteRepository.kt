@@ -24,8 +24,8 @@ internal class FinancialConnectionsLiteRepositoryImpl(
 ) : FinancialConnectionsLiteRepository {
 
     fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
-        publishableKeyProvider = { publishableKey },
-        stripeAccountIdProvider = { stripeAccountId },
+        apiKey = publishableKey,
+        stripeAccount = stripeAccountId,
     )
 
     override suspend fun synchronize(

@@ -64,9 +64,8 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
     private val intentCreateIntentWithConfirmationTokenCallback: Provider<CreateIntentWithConfirmationTokenCallback?>,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     errorReporter: ErrorReporter,
-    // Provider is required to defer ApiRequest.Options creation until after PaymentConfiguration is initialized.
-    // Without it, Dagger would eagerly create ApiRequest.Options during graph construction, causing a crash
-    // if PaymentConfiguration.init() hasn't been called yet.
+    // Defer request options until the integration's API configuration is available after loading.
+    // The retriever itself can be constructed before loading as a dependency of the interceptor factory.
     requestOptionsProvider: Provider<ApiRequest.Options>,
 ) : CallbackRetriever(errorReporter, requestOptionsProvider) {
     suspend fun waitForConfirmationTokenCallback(): CreateIntentWithConfirmationTokenCallback {

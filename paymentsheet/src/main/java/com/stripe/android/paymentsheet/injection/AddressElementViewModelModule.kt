@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -19,7 +18,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -52,7 +50,12 @@ internal class AddressElementViewModelModule {
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        requestOptionsProvider = { ApiRequest.Options(apiKey = args.publishableKey) },
+        requestOptionsProvider = {
+            ApiRequest.Options(
+                apiKey = args.apiConfiguration.publishableKey,
+                stripeAccount = args.apiConfiguration.stripeAccountId,
+            )
+        },
     )
 
     @Provides
@@ -80,7 +83,6 @@ internal class AddressElementViewModelModule {
     internal fun provideGooglePlacesClient(
         context: Context,
         args: AddressElementActivityContract.Args,
-        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ): PlacesClientProxy? {
         val config = args.config ?: return null
         return config.googlePlacesApiKey?.let {
@@ -89,7 +91,7 @@ internal class AddressElementViewModelModule {
                 it,
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
-                    apiConfigurationProvider = apiConfigurationProvider,
+                    apiConfigurationProvider = { args.apiConfiguration },
                 ),
             )
         }

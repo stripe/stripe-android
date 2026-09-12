@@ -9,7 +9,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -45,6 +44,21 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        fun createFallbackInstance(
+            context: Context,
+            publishableKeyProvider: () -> String,
+            productUsage: Set<String>,
+        ): ErrorReporter = createFallbackInstance(
+            context = context,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
+            productUsage = productUsage,
+        )
+
         fun createFallbackInstance(
             context: Context,
             productUsage: Set<String> = emptySet(),
@@ -510,9 +524,8 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKeyProvider(
+        fun provideApiConfiguration(
             apiConfigurationProvider: () -> ApiConfiguration.State,
-        ): () -> String = { apiConfigurationProvider().publishableKey }
+        ): ApiConfiguration.State = apiConfigurationProvider()
     }
 }

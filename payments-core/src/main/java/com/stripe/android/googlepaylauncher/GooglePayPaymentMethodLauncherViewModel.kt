@@ -60,6 +60,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             GooglePayPaymentDataUpdateCallbackRegistry.select(
                 key = dynamicCallbackId,
                 workScope = viewModelScope.plus(workContext),
+                apiConfiguration = args.apiConfiguration,
             )
         }
     }

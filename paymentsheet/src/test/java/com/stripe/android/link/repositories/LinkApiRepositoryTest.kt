@@ -1114,6 +1114,7 @@ class LinkApiRepositoryTest {
         consumersApiService: ConsumersApiService = FakeConsumersApiService()
     ): LinkApiRepository {
         return LinkApiRepository(
+            apiConfigurationProvider = { DEFAULT_API_CONFIGURATION },
             application = ApplicationProvider.getApplicationContext(),
             requestSurface = RequestSurface.PaymentElement,
             stripeRepository = stripeRepository,

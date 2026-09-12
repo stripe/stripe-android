@@ -12,6 +12,7 @@ class CardScanAction(
     private val isStripeCardScanAllowed: Boolean,
     private val enableMlKitCardScan: Boolean,
     private val disableSsdOcrCardScan: Boolean,
+    private val publishableKey: String,
     val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
 ) : CardDetailsAction {
     @Composable
@@ -21,6 +22,7 @@ class CardScanAction(
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            publishableKey = publishableKey,
             onResult = { result ->
                 (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
                     onScannedCard(

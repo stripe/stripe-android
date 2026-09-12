@@ -9,6 +9,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -21,6 +22,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         ApiConfigurationModule::class,

@@ -1240,6 +1240,7 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
+                publishableKey = DEFAULT_OPTIONS.apiKey,
                 requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             ).getOrThrow()
         assertThat(paymentMethods)
@@ -1297,6 +1298,7 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
+                publishableKey = DEFAULT_OPTIONS.apiKey,
                 requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             ).getOrThrow()
         assertThat(paymentMethods)
