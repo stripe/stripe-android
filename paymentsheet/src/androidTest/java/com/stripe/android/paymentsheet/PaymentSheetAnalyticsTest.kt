@@ -106,7 +106,7 @@ internal class PaymentSheetAnalyticsTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
             )
         }
 
@@ -183,7 +183,7 @@ internal class PaymentSheetAnalyticsTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = verticalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(verticalModeConfiguration),
             )
         }
 
@@ -271,7 +271,7 @@ internal class PaymentSheetAnalyticsTest(
                         currency = "usd"
                     )
                 ),
-                configuration = horizontalModeConfiguration
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration)
             )
         }
 
@@ -359,14 +359,16 @@ internal class PaymentSheetAnalyticsTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration.newBuilder()
-                    .customer(
-                        PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                configuration = apiConfigurationTestType.applyTo(
+                    horizontalModeConfiguration.newBuilder()
+                        .customer(
+                            PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
                         )
-                    )
-                    .build()
+                        .build()
+                )
             )
         }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
