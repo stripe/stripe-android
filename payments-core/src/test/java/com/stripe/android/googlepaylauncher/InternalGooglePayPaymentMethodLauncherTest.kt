@@ -27,7 +27,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
         }
 
         createLauncher(instanceId = "instanceId", onPaymentDataChangedCallback = callback)
-        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this)
+        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this, API_CONFIG)
 
         assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()?.callback).isSameInstanceAs(callback)
         GooglePayPaymentDataUpdateCallbackRegistry.deselect()
@@ -36,7 +36,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
     @Test
     fun `init does not register anything when callback is null`() = runTest {
         createLauncher(instanceId = "instanceId", onPaymentDataChangedCallback = null)
-        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this)
+        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this, API_CONFIG)
 
         assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()).isNull()
     }
@@ -55,7 +55,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
         )
 
         lifecycleOwner.currentState = Lifecycle.State.DESTROYED
-        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this)
+        GooglePayPaymentDataUpdateCallbackRegistry.select("instanceId", this, API_CONFIG)
 
         assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()).isNull()
     }
