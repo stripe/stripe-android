@@ -34,6 +34,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun FormScreenContent(
     interactor: VerticalModeFormInteractor,
+    showsWalletsHeader: Boolean,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     state: SheetActivityStateHolder.State,
@@ -43,7 +44,7 @@ internal fun FormScreenContent(
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
-    VerticalModeFormUI(interactor = interactor, showsWalletHeader = false)
+    VerticalModeFormUI(interactor = interactor, showsWalletHeader = showsWalletsHeader)
     USBankAccountMandate(state)
     FormActivityError(state)
     Spacer(Modifier.height(40.dp))

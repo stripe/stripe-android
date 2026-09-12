@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -222,7 +223,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return !requiresFormScreen
     }
 
-    private fun walletsState(): WalletsState? {
+    internal fun walletsState(): WalletsState? {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return WalletsState.create(
             isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
@@ -232,13 +233,32 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,
             googlePayButtonType = GooglePayButtonType.Pay,
-            onGooglePayPressed = { throw IllegalStateException("Not possible.") },
-            onLinkPressed = { throw IllegalStateException("Not possible.") },
+            onGooglePayPressed = {
+                onWalletPressed(PaymentSelection.GooglePay)
+            },
+            onLinkPressed = {
+                onWalletPressed(PaymentSelection.Link(paymentMethodMetadata.effectiveLinkBrand(linkAccount)))
+            },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
-            walletsAllowedInHeader = emptyList(),
+            walletsAllowedInHeader = walletsAllowedInHeader(),
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
+    }
+
+    private fun walletsAllowedInHeader(): List<WalletType> {
+        val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty()
+        return if (showsDirectForm) {
+            WalletType.entries
+        } else {
+            listOf(WalletType.Link)
+        }
+    }
+
+    private fun onWalletPressed(selection: PaymentSelection) {
+        selectionHolder.setSelection(selection)
+        onContinueClick()
     }
 }

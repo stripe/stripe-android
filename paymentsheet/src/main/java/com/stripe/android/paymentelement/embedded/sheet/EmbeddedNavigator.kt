@@ -8,6 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -23,6 +24,8 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.navigation.horizontalModeWalletsDividerSpacing
+import com.stripe.android.paymentsheet.navigation.verticalModeWalletsDividerSpacing
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -144,6 +147,10 @@ internal class EmbeddedNavigator private constructor(
     }
 
     sealed class Screen {
+        abstract val walletsHeaderBehavior: WalletsHeaderBehavior
+
+        abstract val walletsDividerSpacing: Dp
+
         @Composable
         abstract fun Content()
 
@@ -156,6 +163,9 @@ internal class EmbeddedNavigator private constructor(
         class ManageAll(
             private val interactor: ManageScreenInteractor,
         ) : Screen(), Closeable {
+            override val walletsHeaderBehavior = WalletsHeaderBehavior.Never
+            override val walletsDividerSpacing = horizontalModeWalletsDividerSpacing
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
                 return interactor.state.mapAsStateFlow { state ->
                     state.topBarState(interactor)
@@ -186,6 +196,9 @@ internal class EmbeddedNavigator private constructor(
         class ManageUpdate(
             private val interactor: UpdatePaymentMethodInteractor,
         ) : Screen(), Closeable {
+            override val walletsHeaderBehavior = WalletsHeaderBehavior.Never
+            override val walletsDividerSpacing = horizontalModeWalletsDividerSpacing
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
             override fun title(): StateFlow<ResolvableString?> {
@@ -215,6 +228,9 @@ internal class EmbeddedNavigator private constructor(
             private val customerStateHolder: CustomerStateHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
+            override val walletsHeaderBehavior = WalletsHeaderBehavior.RootOnly
+            override val walletsDividerSpacing = horizontalModeWalletsDividerSpacing
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     isLiveMode = formInteractor.isLiveMode,
@@ -230,9 +246,15 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
+                Content(showsWalletsHeader = false)
+            }
+
+            @Composable
+            fun Content(showsWalletsHeader: Boolean) {
                 val state by sheetActivityStateHolder.state.collectAsState()
                 FormScreenContent(
                     interactor = formInteractor,
+                    showsWalletsHeader = showsWalletsHeader,
                     onClick = {
                         confirmationHelper.confirm()
                     },
@@ -289,6 +311,9 @@ internal class EmbeddedNavigator private constructor(
             private val customerStateHolder: CustomerStateHolder,
             private val launchMode: EmbeddedLaunchMode,
         ) : Screen(), Closeable {
+            override val walletsHeaderBehavior = WalletsHeaderBehavior.Never
+            override val walletsDividerSpacing = horizontalModeWalletsDividerSpacing
+
             override fun topBarState() = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(isLiveMode, PaymentSheetTopBarState.Editable.Never)
             )
@@ -336,6 +361,9 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
+            override val walletsHeaderBehavior = WalletsHeaderBehavior.Always
+            override val walletsDividerSpacing = verticalModeWalletsDividerSpacing
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     isLiveMode = isLiveMode,
@@ -379,6 +407,9 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
+            override val walletsHeaderBehavior = WalletsHeaderBehavior.RootOnly
+            override val walletsDividerSpacing = horizontalModeWalletsDividerSpacing
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     isLiveMode = interactor.isLiveMode,
@@ -415,6 +446,21 @@ internal class EmbeddedNavigator private constructor(
 
             override fun close() {
                 interactor.close()
+            }
+        }
+    }
+
+    enum class WalletsHeaderBehavior {
+        Never,
+        RootOnly,
+        Always,
+        ;
+
+        fun isVisible(canGoBack: Boolean): Boolean {
+            return when (this) {
+                Never -> false
+                RootOnly -> !canGoBack
+                Always -> true
             }
         }
     }
