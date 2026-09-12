@@ -94,6 +94,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
         assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()?.callback)
             .isSameInstanceAs(callback)
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()?.apiConfiguration)
+            .isEqualTo(ARGS.apiConfiguration)
     }
 
     @Test

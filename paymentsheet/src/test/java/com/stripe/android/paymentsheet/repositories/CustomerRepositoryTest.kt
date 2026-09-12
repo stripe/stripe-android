@@ -97,6 +97,7 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
+                publishableKey = eq(DEFAULT_API_CONFIG.publishableKey),
                 requestOptions = eq(expectedRequestOptions())
             )
         }
@@ -127,6 +128,7 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
+                publishableKey = eq(DEFAULT_API_CONFIG.publishableKey),
                 requestOptions = any()
             )
         }
@@ -179,6 +181,7 @@ internal class CustomerRepositoryTest {
                             )
                         ),
                         productUsageTokens = any(),
+                        publishableKey = any(),
                         requestOptions = any()
                     )
                 }.thenReturn(Result.success(mockedReturnPaymentMethods))
@@ -237,6 +240,7 @@ internal class CustomerRepositoryTest {
                         )
                     ),
                     productUsageTokens = any(),
+                    publishableKey = any(),
                     requestOptions = any()
                 )
             }.thenReturn(Result.success(mockedReturnPaymentMethods))
@@ -703,6 +707,7 @@ internal class CustomerRepositoryTest {
             repository.getPaymentMethods(
                 listPaymentMethodsParams = any(),
                 productUsageTokens = any(),
+                publishableKey = any(),
                 requestOptions = any()
             )
         )
@@ -719,6 +724,7 @@ internal class CustomerRepositoryTest {
                 getPaymentMethods(
                     listPaymentMethodsParams = any(),
                     productUsageTokens = any(),
+                    publishableKey = any(),
                     requestOptions = any(),
                 )
             }.doReturn(result)
@@ -835,6 +841,7 @@ internal class CustomerRepositoryTest {
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             productUsageTokens: Set<String>,
+            publishableKey: String,
             requestOptions: ApiRequest.Options
         ): Result<List<PaymentMethod>> {
             return Result.success(paymentMethodsToRetrieve)

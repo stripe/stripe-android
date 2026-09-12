@@ -3,7 +3,7 @@ package com.stripe.android.cards
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -18,11 +18,12 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepository].
  *
- * Falls back to static account ranges if the publishable key provider throws.
+ * Falls back to static account ranges if the API configuration provider throws.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
@@ -30,7 +31,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
@@ -52,8 +53,14 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-        publishableKeyProvider = context.applicationContext.let { appContext ->
-            { PaymentConfiguration.getInstance(appContext).publishableKey }
+        apiConfigurationProvider = context.applicationContext.let { appContext ->
+            Provider {
+                val configuration = PaymentConfiguration.getInstance(appContext)
+                ApiConfiguration.State(
+                    publishableKey = configuration.publishableKey,
+                    stripeAccountId = configuration.stripeAccountId,
+                )
+            }
         },
     )
 
@@ -87,7 +94,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         store: CardAccountRangeStore
     ): CardAccountRangeSource {
         return runCatching {
-            publishableKeyProvider()
+            apiConfigurationProvider.get().publishableKey
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
