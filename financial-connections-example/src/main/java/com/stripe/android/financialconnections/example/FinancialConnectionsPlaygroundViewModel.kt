@@ -451,8 +451,6 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     private fun syncDebugOverrides(playgroundSettings: PlaygroundSettings) {
-        // FC standalone flows read this setting from DebugConfiguration, but PaymentSheet-driven
-        // Link surfaces in this app still rely on the global feature flag override.
         FeatureFlags.forceOnelink.setEnabled(
             playgroundSettings.get<ForceOnelinkSetting>().selectedOption
         )

@@ -20,7 +20,7 @@ internal class NetworkingLinkVerificationPreviewParameterProvider :
         unknownError()
     )
 
-    private fun canonical() = NetworkingLinkVerificationState(
+    internal fun canonical() = NetworkingLinkVerificationState(
         payload = payload(),
         confirmVerification = Uninitialized
     )

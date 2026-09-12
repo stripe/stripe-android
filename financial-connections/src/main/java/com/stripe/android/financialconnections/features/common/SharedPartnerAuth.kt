@@ -32,8 +32,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -60,12 +58,13 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -264,7 +263,8 @@ private fun PrePaneContent(
             item {
                 PrepaneHeader(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    content = content
+                    content = content,
+                    showInModal = showInModal,
                 )
             }
             items(content.body.entries) { bodyItem ->
@@ -276,7 +276,8 @@ private fun PrePaneContent(
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = onClickableTextClick,
                         defaultStyle = typography.bodyMedium.copy(
-                            color = colors.textDefault,
+                            color = colors.textTertiary,
+                            textAlign = linkTextAlign(showInModal),
                         ),
                     )
                 }
@@ -371,94 +372,109 @@ private fun PrepaneFooter(
     showInModal: Boolean,
     showSecondaryButton: Boolean,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        FinancialConnectionsButton(
+    val secondaryLabel = stringResource(
+        id = if (showInModal) {
+            R.string.stripe_prepane_cancel_cta
+        } else {
+            R.string.stripe_prepane_choose_different_bank_cta
+        }
+    )
+    FooterButtons(
+        // Side by side only when the prepane is presented as a sheet; the full-screen pane keeps the
+        // stacked layout, where the secondary action is the wider "Choose a different bank".
+        preferSideBySide = showInModal,
+        stackedSpacing = 16.dp,
+        primary = FooterButton(
             onClick = onContinueClick,
-            type = Type.Primary,
-            loading = status is Loading && status()?.action == Action.AUTHENTICATING,
             enabled = status !is Loading,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("prepane_cta")
-                .fillMaxWidth()
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = oAuthPrepane.cta.text,
-                    textAlign = TextAlign.Center
-                )
-                oAuthPrepane.cta.icon?.default?.let {
-                    Spacer(modifier = Modifier.size(12.dp))
-                    StripeImage(
-                        url = it,
-                        contentDescription = null,
-                        imageLoader = LocalImageLoader.current,
-                        errorContent = { },
-                        modifier = Modifier.size(16.dp)
+            loading = status is Loading && status()?.action == Action.AUTHENTICATING,
+            testTag = "prepane_cta",
+            content = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = oAuthPrepane.cta.text,
+                        textAlign = TextAlign.Center
                     )
+                    oAuthPrepane.cta.icon?.default?.let {
+                        Spacer(modifier = Modifier.size(12.dp))
+                        StripeImage(
+                            url = it,
+                            contentDescription = null,
+                            imageLoader = LocalImageLoader.current,
+                            errorContent = { },
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
-            }
-        }
-
-        if (showSecondaryButton) {
-            FinancialConnectionsButton(
+            },
+        ),
+        secondary = if (showSecondaryButton) {
+            FooterButton(
                 onClick = onCancelClick,
-                type = Type.Secondary,
                 enabled = status !is Loading,
-                modifier = Modifier
-                    .semantics { testTagsAsResourceId = true }
-                    .testTag("cancel_cta")
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(
-                        id = if (showInModal) {
-                            R.string.stripe_prepane_cancel_cta
-                        } else {
-                            R.string.stripe_prepane_choose_different_bank_cta
-                        }
-                    ),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
+                loading = false,
+                testTag = "cancel_cta",
+                content = { Text(text = secondaryLabel, textAlign = TextAlign.Center) },
+            )
+        } else {
+            null
+        },
+    )
 }
 
 @Composable
 private fun PrepaneHeader(
     content: OauthPrepane,
-    modifier: Modifier = Modifier
+    showInModal: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val title = remember(content.title) { TextResource.Text(fromHtml(content.title)) }
     val subtitle = remember(content.subtitle) { TextResource.Text(fromHtml(content.subtitle)) }
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalAlignment = if (shouldCenterLinkContent(showInModal)) {
+            Alignment.CenterHorizontally
+        } else {
+            Alignment.Start
+        },
     ) {
         content.institutionIcon?.default?.let {
             InstitutionIcon(institutionIcon = it)
+            Spacer(modifier = Modifier.size(16.dp))
         }
         AnnotatedText(
             text = title,
             onClickableTextClick = { },
-            defaultStyle = typography.headingLarge.copy(
-                color = colors.textDefault
+            defaultStyle = (if (showInModal) typography.headingLarge else typography.headingXLarge).copy(
+                color = colors.textPrimary,
+                textAlign = linkTextAlign(showInModal),
             ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(
+            modifier = Modifier.size(
+                if (FinancialConnectionsTheme.theme.isLink) 4.dp else 16.dp
+            )
         )
         AnnotatedText(
             text = subtitle,
             onClickableTextClick = { },
             defaultStyle = typography.bodyMedium.copy(
-                color = colors.textDefault
+                color = colors.textTertiary,
+                textAlign = linkTextAlign(showInModal),
             ),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
+
+@Composable
+private fun shouldCenterLinkContent(showInModal: Boolean): Boolean =
+    FinancialConnectionsTheme.theme.isLink && showInModal.not()
+
+@Composable
+private fun linkTextAlign(showInModal: Boolean): TextAlign =
+    if (shouldCenterLinkContent(showInModal)) TextAlign.Center else TextAlign.Start
 
 @Composable
 private fun GifWebView(
@@ -530,6 +546,28 @@ internal fun PartnerAuthDrawerPreview(
     state: SharedPartnerAuthState
 ) {
     FinancialConnectionsPreview {
+        Box(modifier = Modifier.background(colors.background)) {
+            SharedPartnerAuthContent(
+                state = state,
+                inModal = true,
+                onClickableTextClick = {},
+                onContinueClick = {},
+                onCancelClick = {}
+            )
+        }
+    }
+}
+
+@Preview(
+    group = "SharedPartnerAuth - Drawer",
+    name = "Link DS 3.0"
+)
+@Composable
+internal fun PartnerAuthDrawerLinkPreview(
+    @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
+    state: SharedPartnerAuthState
+) {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         Box(modifier = Modifier.background(colors.background)) {
             SharedPartnerAuthContent(
                 state = state,

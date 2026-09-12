@@ -40,14 +40,14 @@ internal enum class Theme {
         @Composable
         get() = when (this) {
             DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
-            LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
+            LinkLight -> if (isSystemInDarkTheme()) LinkDarkColors else LinkColors
         }
 
     fun icon(linkBrand: LinkBrand): Int = when (this) {
         DefaultLight -> R.drawable.stripe_logo
         LinkLight -> when (linkBrand) {
-            LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_monochrome
-            LinkBrand.Link -> R.drawable.stripe_link_logo_monochrome
+            LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_color
+            LinkBrand.Link -> R.drawable.stripe_link_logo_color
         }
     }
 
@@ -55,6 +55,14 @@ internal enum class Theme {
         val default: Theme = DefaultLight
     }
 }
+
+/**
+ * Whether the Link DS 3.0 design is active. Prefer expressing differences as color tokens on
+ * [FinancialConnectionsColors]; only branch on this for structural changes that no token can express
+ * (pill buttons, grouped card lists, the warmup sheet's horizontal footer).
+ */
+internal val Theme.isLink: Boolean
+    get() = this == Theme.LinkLight
 
 private val Colors = FinancialConnectionsColors(
     background = Neutral0,
@@ -75,8 +83,16 @@ private val Colors = FinancialConnectionsColors(
     logo = Brand600,
     iconTint = Brand500,
     iconBackground = Brand25,
+    iconBackgroundOnCard = Brand25,
     spinner = Brand500,
     border = Brand600,
+    successIconBackground = Brand500,
+    successIconForeground = Neutral0,
+    textPrimary = Neutral800,
+    textTertiary = Neutral600,
+    iconSecondary = Neutral700,
+    borderOnCard = Neutral100,
+    dividerOnCard = Neutral100,
 )
 
 private val DarkThemeColors = FinancialConnectionsColors(
@@ -98,54 +114,78 @@ private val DarkThemeColors = FinancialConnectionsColors(
     logo = Neutral0,
     iconTint = Brand500,
     iconBackground = Brand25Dark,
+    iconBackgroundOnCard = Brand25Dark,
     spinner = Brand500,
     border = Brand600,
+    successIconBackground = Brand500,
+    successIconForeground = Neutral0,
+    textPrimary = Neutral25,
+    textTertiary = Neutral800Dark,
+    iconSecondary = Neutral25,
+    borderOnCard = Neutral100Dark,
+    dividerOnCard = Neutral100Dark,
 )
 
-private val InstantDebitsColors = FinancialConnectionsColors(
+private val LinkColors = FinancialConnectionsColors(
     background = Neutral0,
-    backgroundSecondary = Neutral25,
-    backgroundHighlighted = Neutral50,
-    textDefault = Neutral800,
-    textSubdued = Neutral600,
+    backgroundSecondary = LinkNeutral100,
+    backgroundHighlighted = LinkNeutral200,
+    textDefault = LinkNeutral900,
+    textSubdued = LinkNeutral600,
     textCritical = FeedbackCritical600,
-    icon = Neutral700,
+    icon = LinkNeutral700,
     borderNeutral = Neutral100,
     spinnerNeutral = Neutral200,
     warningLight = Attention50,
     warning = Attention300,
-    primary = LinkGreen200,
-    primaryAccent = LinkGreen900,
-    textAction = LinkGreen500,
-    textFieldFocused = LinkGreen200,
-    logo = LinkGreen900,
-    iconTint = LinkGreen500,
-    iconBackground = LinkGreen50,
-    spinner = LinkGreen200,
-    border = LinkGreen200,
+    primary = LinkNeutral900,
+    primaryAccent = LinkNeutral0,
+    textAction = LinkBrand600,
+    textFieldFocused = LinkNeutral900,
+    logo = LinkNeutral900,
+    iconTint = LinkNeutral900,
+    iconBackground = LinkNeutral100,
+    iconBackgroundOnCard = LinkNeutral200,
+    spinner = LinkNeutral900,
+    border = LinkNeutral900,
+    successIconBackground = LinkGreen200,
+    successIconForeground = LinkNeutral900,
+    textPrimary = LinkNeutral900,
+    textTertiary = LinkNeutral600,
+    iconSecondary = LinkNeutral700,
+    borderOnCard = Color.Black.copy(alpha = 0.12f),
+    dividerOnCard = Color.Black.copy(alpha = 0.08f),
 )
 
-private val InstantDebitsDarkModeColors = FinancialConnectionsColors(
+private val LinkDarkColors = FinancialConnectionsColors(
     background = Neutral0Dark,
-    backgroundSecondary = Neutral25Dark,
-    backgroundHighlighted = Neutral50Dark,
-    textDefault = Neutral25,
-    textSubdued = Neutral800Dark,
+    backgroundSecondary = LinkNeutral800,
+    backgroundHighlighted = LinkNeutral700,
+    textDefault = LinkNeutral0,
+    textSubdued = LinkNeutral200,
     textCritical = FeedbackCritical600,
-    icon = Neutral25,
+    icon = LinkNeutral200,
     borderNeutral = Neutral100Dark,
     spinnerNeutral = Neutral200,
     warningLight = Attention100Dark,
     warning = Attention300,
-    primary = LinkGreen200,
-    primaryAccent = LinkGreen900,
+    primary = LinkNeutral0,
+    primaryAccent = LinkNeutral900,
     textAction = LinkGreen200,
-    textFieldFocused = Brand600,
+    textFieldFocused = LinkNeutral0,
     logo = Neutral0,
-    iconTint = LinkGreen500,
-    iconBackground = LinkGreen50Dark,
-    spinner = LinkGreen200,
-    border = LinkGreen200,
+    iconTint = LinkNeutral0,
+    iconBackground = LinkNeutral800,
+    iconBackgroundOnCard = LinkNeutral700,
+    spinner = LinkNeutral0,
+    border = LinkNeutral0,
+    successIconBackground = LinkGreen200,
+    successIconForeground = LinkNeutral900,
+    textPrimary = LinkNeutral0,
+    textTertiary = LinkNeutral200,
+    iconSecondary = LinkNeutral200,
+    borderOnCard = Color.White.copy(alpha = 0.12f),
+    dividerOnCard = Color.White.copy(alpha = 0.08f),
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -232,6 +272,12 @@ private val Typography = FinancialConnectionsTypography(
     ).toCompat(),
 )
 
+private val LinkTypography = Typography.copy(
+    headingXLarge = Typography.headingXLarge.copy(fontWeight = FontWeight.W600),
+    headingLarge = Typography.headingLarge.copy(fontWeight = FontWeight.W600),
+    headingMedium = Typography.headingMedium.copy(fontWeight = FontWeight.W600),
+)
+
 internal val TextSelectionColors: TextSelectionColors
     @Composable
     get() = TextSelectionColors(
@@ -241,16 +287,25 @@ internal val TextSelectionColors: TextSelectionColors
 
 private val FinancialConnectionsRippleConfiguration: RippleConfiguration
     @Composable
-    get() = RippleConfiguration(
-        color = RippleDefaults.rippleColor(
-            contentColor = FinancialConnectionsTheme.colors.textAction,
-            lightTheme = MaterialTheme.colors.isLight,
-        ),
-        rippleAlpha = RippleDefaults.rippleAlpha(
-            contentColor = FinancialConnectionsTheme.colors.textAction,
-            lightTheme = MaterialTheme.colors.isLight,
+    get() {
+        // DS 3.0's textAction is green, which tints every pressed row green. Press feedback there is
+        // meant to be neutral, so it follows the text color instead.
+        val rippleContentColor = if (FinancialConnectionsTheme.theme.isLink) {
+            FinancialConnectionsTheme.colors.textDefault
+        } else {
+            FinancialConnectionsTheme.colors.textAction
+        }
+        return RippleConfiguration(
+            color = RippleDefaults.rippleColor(
+                contentColor = rippleContentColor,
+                lightTheme = MaterialTheme.colors.isLight,
+            ),
+            rippleAlpha = RippleDefaults.rippleAlpha(
+                contentColor = rippleContentColor,
+                lightTheme = MaterialTheme.colors.isLight,
+            )
         )
-    )
+    }
 
 @Composable
 internal fun FinancialConnectionsTheme(
@@ -259,8 +314,9 @@ internal fun FinancialConnectionsTheme(
 ) {
     CompositionLocalProvider(
         LocalNavHostController provides rememberNavController(),
-        LocalTypography provides Typography,
+        LocalTypography provides if (theme.isLink) LinkTypography else Typography,
         LocalColors provides theme.colors,
+        LocalTheme provides theme,
     ) {
         val view = LocalView.current
         val window = findWindow()
@@ -313,6 +369,11 @@ private val LocalColors =
         error("no Colors provided")
     }
 
+private val LocalTheme =
+    staticCompositionLocalOf<Theme> {
+        error("no Theme provided")
+    }
+
 internal object FinancialConnectionsTheme {
     val typography
         @Composable
@@ -320,6 +381,9 @@ internal object FinancialConnectionsTheme {
     val colors
         @Composable
         get() = LocalColors.current
+    val theme
+        @Composable
+        get() = LocalTheme.current
 }
 
 private fun TextStyle.toCompat(useDefaultLineHeight: Boolean = false): TextStyle {

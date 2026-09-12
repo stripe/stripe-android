@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.Attention300
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.KeyboardController
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -53,7 +54,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-private val LOGO_HEIGHT = 20.dp
+private val LogoHeight = 20.dp
+private val LinkLogoHeight = 24.dp
 private val PILL_HORIZONTAL_PADDING = 4.dp
 private val PILL_VERTICAL_PADDING = 2.dp
 private const val PILL_RADIUS = 8f
@@ -196,10 +198,10 @@ private fun Title(
     ) {
         if (hideStripeLogo.not()) {
             Image(
-                modifier = Modifier.height(LOGO_HEIGHT),
+                modifier = Modifier.height(if (theme.isLink) LinkLogoHeight else LogoHeight),
                 contentScale = ContentScale.FillHeight,
                 painter = painterResource(id = theme.icon(linkBrand)),
-                colorFilter = if (isSystemInDarkTheme()) {
+                colorFilter = if (theme.isLink.not() && isSystemInDarkTheme()) {
                     ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
                 } else {
                     null
@@ -256,10 +258,25 @@ internal fun TopAppBarWithStripeLogoPreview() {
     }
 }
 
+@Preview(group = "Components", name = "TopAppBar - OneLink")
+@Composable
+internal fun TopAppBarWithOneLinkLogoPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        FinancialConnectionsTopAppBar(
+            state = TopAppBarState(
+                hideStripeLogo = false,
+                linkBrand = LinkBrand.Onelink,
+                theme = Theme.LinkLight,
+            ),
+            onCloseClick = {},
+        )
+    }
+}
+
 @Preview(group = "Components", name = "TopAppBar - Instant Debits")
 @Composable
 internal fun TopAppBarWithLinkLogoPreview() {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(
                 hideStripeLogo = false,

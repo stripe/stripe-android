@@ -170,7 +170,7 @@ private fun LazyListScope.consentBody(
             onClickableTextClick = { onClickableTextClick(it) },
             defaultStyle = typography.headingXLarge.copy(
                 textAlign = TextAlign.Center,
-                color = colors.textDefault,
+                color = colors.textPrimary,
             )
         )
         Spacer(modifier = Modifier.size(32.dp))
@@ -205,7 +205,7 @@ private fun ConsentFooter(
             onClickableTextClick = onClickableTextClick,
             defaultStyle = typography.labelSmall.copy(
                 textAlign = TextAlign.Center,
-                color = colors.textDefault
+                color = colors.textTertiary
             )
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -227,7 +227,7 @@ private fun ConsentFooter(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     textAlign = TextAlign.Center,
-                    color = colors.textDefault
+                    color = colors.textTertiary
                 )
             )
         }

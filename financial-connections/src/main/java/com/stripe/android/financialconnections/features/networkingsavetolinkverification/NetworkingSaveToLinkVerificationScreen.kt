@@ -24,6 +24,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,8 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -162,20 +165,26 @@ private fun NetworkingSaveToLinkVerificationLoaded(
 
 @Composable
 private fun Header(payload: Payload) {
+    val isLink = FinancialConnectionsTheme.theme.isLink
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(if (isLink) 4.dp else 16.dp),
     ) {
         Text(
+            modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.stripe_networking_save_to_link_verification_title),
             style = FinancialConnectionsTheme.typography.headingXLarge,
-            color = FinancialConnectionsTheme.colors.textDefault,
+            color = FinancialConnectionsTheme.colors.textPrimary,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
         )
         Text(
+            modifier = Modifier.fillMaxWidth(),
             text = stringResource(
                 R.string.stripe_networking_verification_desc,
                 payload.phoneNumber
             ),
             style = FinancialConnectionsTheme.typography.bodyMedium,
+            color = FinancialConnectionsTheme.colors.textTertiary,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
         )
     }
 }
@@ -191,6 +200,18 @@ internal fun SaveToLinkVerificationPreview(
             state = state,
             onSkipClick = {},
             onCloseFromErrorClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(name = "Link", group = "Networking Save to Link Verification")
+internal fun SaveToLinkVerificationLinkPreview() {
+    FinancialConnectionsPreview(theme = Theme.LinkLight) {
+        NetworkingSaveToLinkVerificationContent(
+            state = NetworkingSaveToLinkVerificationPreviewParameterProvider().canonical(),
+            onSkipClick = {},
+            onCloseFromErrorClick = {},
         )
     }
 }
