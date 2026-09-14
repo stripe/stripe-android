@@ -412,12 +412,8 @@ class CardDetailsElementTest {
             FormFieldId.CardExpMonth to "06",
             FormFieldId.CardExpYear to "2030",
         )
-        val repositoryFactory = DefaultCardAccountRangeRepositoryFactory(
-            context = context,
-            publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-        )
         val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = repositoryFactory,
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             coroutineScope = coroutineScope,
             initialValues = initialValues,
             uiContext = testDispatcher,
@@ -425,7 +421,7 @@ class CardDetailsElementTest {
         )
         val cardDetailsElement = CardDetailsElement(
             FormFieldId.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = repositoryFactory,
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             coroutineScope = coroutineScope,
             initialValues = initialValues,
             controller = cardController,
