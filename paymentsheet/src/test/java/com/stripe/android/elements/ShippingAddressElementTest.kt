@@ -39,6 +39,10 @@ internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
+    private val configuredCheckoutConfiguration = CheckoutController.Configuration()
+        .shippingAddressElement(ShippingAddressElement.Configuration())
+        .build()
+
     @Test
     fun `present before checkout configuration reports and does not launch`() = runScenario(configured = false) {
         shippingAddressElement.present()
@@ -55,6 +59,26 @@ internal class ShippingAddressElementTest {
         activityLauncher.launchCalls.expectNoEvents()
         paymentConfiguration.getCalls.expectNoEvents()
     }
+
+    @Test
+    fun `present without shipping address element configuration reports and does not launch`() =
+        runScenario(
+            configuration = CheckoutController.Configuration().build(),
+        ) {
+            shippingAddressElement.present()
+
+            val call = errorReporter.awaitCall()
+            assertThat(call.errorEvent).isEqualTo(
+                ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+            )
+            assertThat(call.errorEvent.eventName).isEqualTo(
+                "checkout.shipping_address_element.present.not_configured"
+            )
+            assertThat(call.stripeException).isNull()
+            assertThat(call.additionalNonPiiParams).isEmpty()
+            activityLauncher.launchCalls.expectNoEvents()
+            paymentConfiguration.getCalls.expectNoEvents()
+        }
 
     @Test
     fun `present launches a blank address form with hosted autocomplete`() = runScenario {
@@ -167,7 +191,6 @@ internal class ShippingAddressElementTest {
         val commitResult = CompletableDeferred<Result<Unit>>()
 
         runScenario(
-            configured = true,
             commitShippingAddress = FakeCommitShippingAddress(commitResult),
         ) {
             shippingAddressElement.present()
@@ -269,18 +292,10 @@ internal class ShippingAddressElementTest {
 
     private fun runScenario(
         configured: Boolean = true,
-        block: suspend Scenario.() -> Unit,
-    ) = runScenario(
-        configured = configured,
-        commitShippingAddress = FakeCommitShippingAddress(
+        configuration: CheckoutController.Configuration.State = configuredCheckoutConfiguration,
+        commitShippingAddress: FakeCommitShippingAddress = FakeCommitShippingAddress(
             CompletableDeferred(Result.success(Unit)),
         ),
-        block = block,
-    )
-
-    private fun runScenario(
-        configured: Boolean,
-        commitShippingAddress: FakeCommitShippingAddress,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -288,7 +303,9 @@ internal class ShippingAddressElementTest {
             savedStateHandle = savedStateHandle,
         )
         if (configured) {
-            stateHolder.state = CheckoutControllerStateFactory.create()
+            stateHolder.state = CheckoutControllerStateFactory.create(
+                configuration = configuration,
+            )
         }
         val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         val paymentConfiguration = RecordingProvider(

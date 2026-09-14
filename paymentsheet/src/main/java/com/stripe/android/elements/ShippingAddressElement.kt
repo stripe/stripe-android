@@ -104,7 +104,8 @@ class ShippingAddressElement internal constructor(
     }
 
     fun present() {
-        if (stateHolder.state == null) {
+        val state = stateHolder.state
+        if (state == null || state.configuration.shippingAddressElementConfiguration == null) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
             )
