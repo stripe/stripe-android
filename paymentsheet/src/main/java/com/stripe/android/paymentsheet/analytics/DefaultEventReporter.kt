@@ -80,6 +80,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
+            publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey
         )
     }
 
