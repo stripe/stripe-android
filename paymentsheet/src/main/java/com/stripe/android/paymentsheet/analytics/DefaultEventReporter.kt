@@ -86,6 +86,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
+            publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey
         )
     }
 
@@ -632,7 +633,11 @@ internal class DefaultEventReporter @Inject internal constructor(
                     publishableKey = it,
                 )
             }
-            executeEvent(event, paymentMethodMetadata, publishableKey)
+            executeEvent(
+                event,
+                paymentMethodMetadata,
+                publishableKey ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
+            )
         }
     }
 
