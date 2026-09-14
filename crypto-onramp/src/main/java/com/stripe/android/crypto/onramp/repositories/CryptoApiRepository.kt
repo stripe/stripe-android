@@ -488,6 +488,23 @@ internal class CryptoApiRepository @Inject constructor(
         ).jsonObject
     }
 
+    private suspend fun <Response> executePost(
+        url: String,
+        paramsJson: JsonObject,
+        responseSerializer: KSerializer<Response>,
+    ): Result<Response> {
+        val request = apiRequestFactory.createPost(
+            url = url,
+            options = buildRequestOptions(),
+            params = paramsJson.toMap(),
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = responseSerializer
+        )
+    }
+
     private suspend fun <Response> executeConsumerAuthenticatedGet(
         url: String,
         consumerSessionClientSecret: String,
@@ -506,23 +523,6 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = request,
             responseSerializer = responseSerializer,
-        )
-    }
-
-    private suspend fun <Response> executePost(
-        url: String,
-        paramsJson: JsonObject,
-        responseSerializer: KSerializer<Response>,
-    ): Result<Response> {
-        val request = apiRequestFactory.createPost(
-            url = url,
-            options = buildRequestOptions(),
-            params = paramsJson.toMap(),
-        )
-
-        return execute(
-            request = request,
-            responseSerializer = responseSerializer
         )
     }
 
