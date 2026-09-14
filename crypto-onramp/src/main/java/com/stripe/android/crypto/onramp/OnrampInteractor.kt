@@ -468,8 +468,15 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun fulfillAdditionalKycRequirement(
         submission: AdditionalKycSubmission,
     ): Result<AdditionalKycSubmissionResponse> {
-        val secret = consumerSessionClientSecret()
+        val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
+        val linkAccount = storedLinkAccount?.takeIf { it.consumerSessionClientSecret != null }
+            ?: linkController.state(application).value.internalLinkAccount
+        val secret = linkAccount?.consumerSessionClientSecret
             ?: return fulfillAdditionalKycRequirementFailure(MissingConsumerSecretException())
+
+        if (linkAccount.sessionState != LinkController.SessionState.LoggedIn) {
+            return fulfillAdditionalKycRequirementFailure(LinkAccountNotVerifiedException())
+        }
 
         val documents = uploadAdditionalKycDocuments(submission.documents)
             .getOrElse { error -> return fulfillAdditionalKycRequirementFailure(error) }
