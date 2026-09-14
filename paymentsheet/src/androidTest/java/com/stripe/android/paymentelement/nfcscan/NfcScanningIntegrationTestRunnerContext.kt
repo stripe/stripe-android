@@ -64,7 +64,7 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
                 context.presentPaymentSheet {
                     presentWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 }
             }
@@ -82,7 +82,7 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
                 context.configureFlowController {
                     configureWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()

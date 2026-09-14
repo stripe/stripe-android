@@ -81,9 +81,11 @@ internal class PreparePaymentMethodTest(
                             externalId = "external_123",
                         )
                     ),
-                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                        .shippingDetails(SHIPPING_ADDRESS)
-                        .build()
+                    configuration = apiConfigurationTestType.applyTo(
+                        PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                            .shippingDetails(SHIPPING_ADDRESS)
+                            .build()
+                    )
                 )
             }
 
@@ -142,9 +144,11 @@ internal class PreparePaymentMethodTest(
                             externalId = "external_456",
                         )
                     ),
-                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                        .shippingDetails(SHIPPING_ADDRESS)
-                        .build(),
+                    configuration = apiConfigurationTestType.applyTo(
+                        PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                            .shippingDetails(SHIPPING_ADDRESS)
+                            .build()
+                    ),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -202,7 +206,7 @@ internal class PreparePaymentMethodTest(
                 externalId = "external_789",
             )
 
-            context.embeddedPaymentElement.configure(
+            context.configure(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000L,
@@ -214,11 +218,10 @@ internal class PreparePaymentMethodTest(
                         externalId = "external_789",
                     )
                 ),
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                    .shippingDetails(SHIPPING_ADDRESS)
+            ) {
+                shippingDetails(SHIPPING_ADDRESS)
                     .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-                    .build()
-            )
+            }
 
             embeddedContentPage.clickOnLpm(code = "card")
             embeddedFormPage.fillOutCardDetails()
