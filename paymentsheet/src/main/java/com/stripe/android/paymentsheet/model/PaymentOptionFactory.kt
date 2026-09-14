@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.isSystemDarkTheme
 import javax.inject.Inject
 
@@ -39,15 +40,25 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(context),
+                    useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(context),
                 )
             },
         )
     }
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
-    val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
+private fun useDarkThemeIcon(context: Context): Boolean {
+    return context.isSystemDarkTheme() ||
+        StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
+}
+
+internal fun PaymentSheet.Appearance?.shouldUseDarkThemeIcon(context: Context): Boolean {
+    if (this == null) return useDarkThemeIcon(context)
+    return shouldUseDarkThemeIcon(context.isSystemDarkTheme())
+}
+
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean): Boolean {
+    val isDark = themeMode.isDarkTheme(isSystemDarkTheme)
     val componentColor = Color(getColors(isDark).component)
     return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }

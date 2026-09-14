@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -58,13 +59,15 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
         }
 
         return PaymentOptionDisplayData(
-            imageLoader = {
+            paymentOptionResource = PaymentOptionResource(
+                appearance = paymentMethodMetadata.appearance,
+            ) { useDarkThemeIcon ->
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    useDarkThemeIcon = null,
+                    useDarkThemeIcon = useDarkThemeIcon,
                 )
             },
             label = selection.label(
