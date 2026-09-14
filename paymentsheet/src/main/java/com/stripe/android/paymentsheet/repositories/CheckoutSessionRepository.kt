@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -25,7 +24,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -35,16 +34,11 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    private fun createOptions(): ApiRequest.Options = ApiRequest.Options(
-        apiKey = apiConfigurationProvider.get().publishableKey,
-        stripeAccount = apiConfigurationProvider.get().stripeAccountId,
-    )
-
     private suspend fun executePost(
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
+        val options = apiRequestOptionsProvider.get()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -14,6 +13,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
@@ -584,10 +584,10 @@ class CheckoutSessionConfirmationInterceptorTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            apiConfigurationProvider = {
-                ApiConfiguration.State(
-                    publishableKey = "pk_test_123",
-                    stripeAccountId = "acct_123",
+            apiRequestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
             },
         )

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -342,7 +343,12 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
+            apiRequestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
+            },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
