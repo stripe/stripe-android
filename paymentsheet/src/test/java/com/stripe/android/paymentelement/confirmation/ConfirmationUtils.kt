@@ -105,7 +105,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     createIntentCallback = createIntentCallback,
                     stripeRepository = stripeRepository,
                     allowsManualConfirmation = false,
-                    requestOptionsProvider = { requestOptions },
+                    requestOptions = requestOptions,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
@@ -123,7 +123,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     customerMetadata = customerMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
-                    requestOptionsProvider = { requestOptions },
+                    requestOptions = requestOptions,
                     userFacingLogger = FakeUserFacingLogger(),
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
@@ -139,7 +139,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     handler = handler,
                     stripeRepository = stripeRepository,
                     errorReporter = errorReporter,
-                    requestOptionsProvider = { requestOptions },
+                    requestOptions = requestOptions,
                 )
             }
         },
@@ -175,7 +175,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     stripeRepository = stripeRepository,
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-                    requestOptionsProvider = { requestOptions },
+                    requestOptions = requestOptions,
                 )
             }
         },

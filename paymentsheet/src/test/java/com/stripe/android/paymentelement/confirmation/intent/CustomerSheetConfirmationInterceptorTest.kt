@@ -359,7 +359,7 @@ class CustomerSheetConfirmationInterceptorTest {
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             stripeRepository = stripeRepository,
-            requestOptionsProvider = { requestOptions },
+            requestOptions = requestOptions,
             setupIntentInterceptorFactory = setupIntentInterceptorFactory,
             attachPaymentMethodInterceptorFactory = attachPaymentMethodInterceptorFactory,
             logger = logger,

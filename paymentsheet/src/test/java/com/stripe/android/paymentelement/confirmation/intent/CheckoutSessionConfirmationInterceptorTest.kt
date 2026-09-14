@@ -609,9 +609,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-            requestOptionsProvider = {
-                ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123")
-            },
+            requestOptions = ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123"),
         )
 
         runTest {
