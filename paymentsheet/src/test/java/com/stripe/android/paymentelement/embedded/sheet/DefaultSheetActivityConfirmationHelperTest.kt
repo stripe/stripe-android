@@ -10,11 +10,8 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
-import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -27,7 +24,9 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `confirm invokes onClickOverride when set`() = testScenario {
+    fun `confirm invokes onClickOverride instead of continue coordinator when set`() = testScenario(
+        configurationModifier = { formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue) },
+    ) {
         val onClickTurbine = Turbine<Unit>()
         onClickDelegate.set {
             onClickTurbine.add(Unit)
@@ -38,6 +37,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
         assertThat(onClickTurbine.awaitItem()).isNotNull()
         onClickTurbine.ensureAllEventsConsumed()
         confirmationHandler.startTurbine.expectNoEvents()
+        continueCoordinator.onContinueCalls.expectNoEvents()
     }
 
     @Test
@@ -74,25 +74,14 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     }
 
     @Test
-    fun `when formSheetAction=continue confirm returns result`() = testScenario(
+    fun `when formSheetAction=continue confirm delegates to continue coordinator`() = testScenario(
         configurationModifier = { formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue) }
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHelper.confirm()
 
-        assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
-            EmbeddedActivityResult.Complete(
-                previousNewSelections = selectionHolder.previousNewSelections,
-                selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-                hasBeenConfirmed = false,
-                customerState = null,
-                shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.Form(
-                    selectedPaymentMethodCode = "card",
-                ),
-            )
-        )
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
 
         assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -103,7 +92,6 @@ internal class DefaultSheetActivityConfirmationHelperTest {
         EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = {
             this
         },
-        customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -114,7 +102,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             .configurationModifier()
             .build()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val stateHelper = FakeSheetActivityStateHolder()
+        val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
         val confirmationHelper = DefaultSheetActivityConfirmationHelper(
@@ -122,35 +110,30 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             selectionHolder = selectionHolder,
-            stateHelper = stateHelper,
+            continueCoordinator = continueCoordinator,
             onClickDelegate = onClickDelegate,
             eventReporter = eventReporter,
-            customerStateHolder = customerStateHolder,
             coroutineScope = backgroundScope,
-            launchMode = EmbeddedLaunchMode.Form(
-                selectedPaymentMethodCode = "card",
-            ),
             statusBarColor = null,
         )
 
         Scenario(
             confirmationHelper = confirmationHelper,
             confirmationHandler = confirmationHandler,
-            stateHelper = stateHelper,
+            continueCoordinator = continueCoordinator,
             onClickDelegate = onClickDelegate,
             eventReporter = eventReporter,
             selectionHolder = selectionHolder,
         ).block()
         eventReporter.validate()
         confirmationHandler.validate()
-        stateHelper.validate()
-        customerStateHolder.validate()
+        continueCoordinator.validate()
     }
 
     private class Scenario(
         val confirmationHelper: DefaultSheetActivityConfirmationHelper,
         val confirmationHandler: FakeConfirmationHandler,
-        val stateHelper: FakeSheetActivityStateHolder,
+        val continueCoordinator: FakeSheetActivityContinueCoordinator,
         val onClickDelegate: OnClickDelegateOverrideImpl,
         val eventReporter: FakeEventReporter,
         val selectionHolder: EmbeddedSelectionHolder,

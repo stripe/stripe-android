@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.elements
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 
@@ -20,21 +20,21 @@ internal suspend fun SectionFieldElement.errorTest(fieldValidationMessage: Field
     }
 }
 
-internal fun List<SectionFieldElement>.element(identifierSpec: IdentifierSpec): SectionFieldElement {
-    val element = nullableElement(identifierSpec)
+internal fun List<SectionFieldElement>.element(formFieldId: FormFieldId): SectionFieldElement {
+    val element = nullableElement(formFieldId)
 
     assertThat(element).isNotNull()
 
     return requireNotNull(element)
 }
 
-private fun List<SectionFieldElement>.nullableElement(identifierSpec: IdentifierSpec): SectionFieldElement? {
+private fun List<SectionFieldElement>.nullableElement(formFieldId: FormFieldId): SectionFieldElement? {
     for (element in this) {
         if (element is RowElement) {
-            element.fields.nullableElement(identifierSpec)?.let {
+            element.fields.nullableElement(formFieldId)?.let {
                 return it
             }
-        } else if (element.identifier == identifierSpec) {
+        } else if (element.identifier == formFieldId) {
             return element
         }
     }

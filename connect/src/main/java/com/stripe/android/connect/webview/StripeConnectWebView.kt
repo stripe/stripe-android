@@ -47,6 +47,7 @@ import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationException
@@ -66,16 +67,19 @@ internal class StripeConnectWebView private constructor(
     private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
+    coroutineScope: CoroutineScope,
 ) : WebView(mutableContext), WebViewForPaparazzi {
 
     constructor(
         application: Application,
         delegate: Delegate,
         logger: Logger,
+        coroutineScope: CoroutineScope,
     ) : this(
         mutableContext = MutableContextWrapper(application),
         delegate = delegate,
         logger = logger,
+        coroutineScope = coroutineScope,
     )
 
     private val loggerTag = javaClass.simpleName
@@ -113,7 +117,12 @@ internal class StripeConnectWebView private constructor(
             mediaPlaybackRequiresUserGesture = false
         }
 
-        setDownloadListener(StripeDownloadListener(context))
+        setDownloadListener(
+            StripeDownloadListener(
+                context = context,
+                coroutineScope = coroutineScope,
+            )
+        )
         addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 

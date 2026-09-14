@@ -231,6 +231,10 @@
   <string name="stripe_selfie_captures">Selfie-Aufnahmen</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Super! Ihre Bilder werden überprüft …</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Mit Ihrer Erlaubnis kann Stripe Ihre Bilder verwenden, um die Betrugserkennung zu verbessern. Eine Ablehnung hat keine Auswirkungen auf Ihre Verifizierung.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Mit einem Selfie verifizieren</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">Ein Selfie wurde aufgenommen</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

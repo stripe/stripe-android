@@ -34,7 +34,6 @@ class CryptoApiRepositoryAdditionalKycTest {
     ) {
         val result = repository.fulfillAdditionalKycRequirement(
             liquidityProvider = "swapped",
-            submissionType = "document",
             documents = listOf(
                 AdditionalKycDocumentSubmissionRequest(
                     documentType = "source_of_funds",
@@ -53,47 +52,22 @@ class CryptoApiRepositoryAdditionalKycTest {
             consumerSessionClientSecret = "secret_123",
         )
 
-        val request = captureRequest()
-        assertDocumentAndQuestionnaireRequest(request)
+        assertDocumentAndQuestionnaireRequest(captureRequest())
         assertDocumentAndQuestionnaireResponse(result.getOrThrow())
     }
 
     @Test
-    fun `questionnaire submission omits documents`() = runScenario(
-        responseBody = questionnaireSubmissionResponse,
+    fun `fulfillment response missing required fields fails parsing`() = runScenario(
+        responseBody = missingIdSubmissionResponse,
     ) {
         val result = repository.fulfillAdditionalKycRequirement(
             liquidityProvider = "swapped",
-            submissionType = "questionnaire",
-            documents = null,
-            questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                answers = listOf(
-                    AdditionalKycQuestionnaireAnswerRequest(
-                        questionId = "funding_sources",
-                        value = "Salary",
-                    )
-                )
-            ),
+            documents = emptyList(),
+            questionnaire = null,
             consumerSessionClientSecret = "secret_123",
         )
 
-        val request = captureRequest()
-        assertThat(request.params).isEqualTo(
-            mapOf(
-                "credentials" to mapOf("consumer_session_client_secret" to "secret_123"),
-                "liquidity_provider" to "swapped",
-                "submission_type" to "questionnaire",
-                "questionnaire" to mapOf(
-                    "answers" to listOf(
-                        mapOf(
-                            "question_id" to "funding_sources",
-                            "value" to "Salary",
-                        )
-                    )
-                ),
-            )
-        )
-        assertThat(result.getOrThrow().documents).isNull()
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -102,7 +76,6 @@ class CryptoApiRepositoryAdditionalKycTest {
     ) {
         val result = repository.fulfillAdditionalKycRequirement(
             liquidityProvider = "swapped",
-            submissionType = "document",
             documents = listOf(
                 AdditionalKycDocumentSubmissionRequest(
                     documentType = "proof_of_address",
@@ -114,12 +87,10 @@ class CryptoApiRepositoryAdditionalKycTest {
             consumerSessionClientSecret = "secret_123",
         )
 
-        val request = captureRequest()
-        assertThat(request.params).isEqualTo(
+        assertThat(captureRequest().params).isEqualTo(
             mapOf(
                 "credentials" to mapOf("consumer_session_client_secret" to "secret_123"),
                 "liquidity_provider" to "swapped",
-                "submission_type" to "document",
                 "documents" to listOf(
                     mapOf(
                         "document_type" to "proof_of_address",
@@ -137,8 +108,7 @@ class CryptoApiRepositoryAdditionalKycTest {
     ) {
         val result = repository.fulfillAdditionalKycRequirement(
             liquidityProvider = "swapped",
-            submissionType = "document",
-            documents = null,
+            documents = emptyList(),
             questionnaire = null,
             consumerSessionClientSecret = "secret_123",
         )
@@ -148,8 +118,7 @@ class CryptoApiRepositoryAdditionalKycTest {
         assertThat(response.objectType).isEqualTo("crypto_onramp_kyc_submission")
         assertThat(response.status).isEqualTo("pending_verification")
         assertThat(response.liquidityProvider).isNull()
-        assertThat(response.submissionType).isNull()
-        assertThat(response.submittedAt).isNull()
+        assertThat(response.created).isNull()
     }
 
     private fun assertDocumentAndQuestionnaireRequest(request: ApiRequest) {
@@ -162,7 +131,6 @@ class CryptoApiRepositoryAdditionalKycTest {
             mapOf(
                 "credentials" to mapOf("consumer_session_client_secret" to "secret_123"),
                 "liquidity_provider" to "swapped",
-                "submission_type" to "document",
                 "documents" to listOf(
                     mapOf(
                         "document_type" to "source_of_funds",
@@ -186,15 +154,16 @@ class CryptoApiRepositoryAdditionalKycTest {
         assertThat(response.id).isEqualTo("cks_123")
         assertThat(response.objectType).isEqualTo("crypto.kyc_submission")
         assertThat(response.liquidityProvider).isEqualTo("swapped")
-        assertThat(response.submissionType).isEqualTo("document")
         val document = requireNotNull(response.documents).single()
         assertThat(document.documentType).isEqualTo("source_of_funds")
         assertThat(document.documentSubtype).isEqualTo("bank_statement")
         assertThat(document.fileIds).containsExactly("file_1", "file_2").inOrder()
+        assertThat(document.status).isEqualTo("pending_verification")
         val questionnaire = requireNotNull(response.questionnaire)
         assertThat(questionnaire.answers.single().questionId).isEqualTo("purchase_purpose")
         assertThat(questionnaire.answers.single().value).isEqualTo("Personal investment")
-        assertThat(response.submittedAt).isEqualTo(1723264800L)
+        assertThat(response.status).isEqualTo("pending_verification")
+        assertThat(response.created).isEqualTo(1_723_264_800L)
     }
 
     private fun runScenario(
@@ -245,7 +214,6 @@ class CryptoApiRepositoryAdditionalKycTest {
                   "id": "cks_123",
                   "object": "crypto.kyc_submission",
                   "liquidity_provider": "swapped",
-                  "submission_type": "document",
                   "status": "pending_verification",
                   "documents": [
                     {
@@ -263,26 +231,7 @@ class CryptoApiRepositoryAdditionalKycTest {
                       }
                     ]
                   },
-                  "submitted_at": 1723264800
-                }
-            """.trimIndent()
-
-        val questionnaireSubmissionResponse =
-            """
-                {
-                  "id": "cks_124",
-                  "object": "crypto.kyc_submission",
-                  "liquidity_provider": "swapped",
-                  "submission_type": "questionnaire",
-                  "questionnaire": {
-                    "answers": [
-                      {
-                        "question_id": "funding_sources",
-                        "value": "Salary"
-                      }
-                    ]
-                  },
-                  "submitted_at": 1723264801
+                  "created": 1723264800
                 }
             """.trimIndent()
 
@@ -292,14 +241,22 @@ class CryptoApiRepositoryAdditionalKycTest {
                   "id": "cks_125",
                   "object": "crypto.kyc_submission",
                   "liquidity_provider": "swapped",
-                  "submission_type": "document",
+                  "status": "pending_verification",
                   "documents": [
                     {
                       "document_type": "proof_of_address",
-                      "file_ids": ["file_1"]
+                      "file_ids": ["file_1"],
+                      "status": "pending_verification"
                     }
                   ],
-                  "submitted_at": 1723264802
+                  "created": 1723264802
+                }
+            """.trimIndent()
+
+        val missingIdSubmissionResponse =
+            """
+                {
+                  "object": "crypto_onramp_kyc_submission"
                 }
             """.trimIndent()
 

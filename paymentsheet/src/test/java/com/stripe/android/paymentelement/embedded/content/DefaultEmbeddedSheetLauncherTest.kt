@@ -74,12 +74,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            promotions = listOf(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -210,6 +211,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = true,
             customerState = null,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -237,6 +239,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             customerState = null,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -266,6 +269,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
                 customerState = null,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "card",
@@ -291,6 +295,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 hasBeenConfirmed = true,
                 customerState = null,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "card",
@@ -357,6 +362,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = createCustomerState(),
             selection = null,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -394,12 +400,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
         )
 
@@ -438,6 +445,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Manage,
         )
@@ -463,6 +471,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerState = customerState,
                 selection = selection,
                 hasBeenConfirmed = false,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = true,
                 launchMode = EmbeddedLaunchMode.Manage,
             )
@@ -485,6 +494,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerState = customerState,
                 selection = selection,
                 hasBeenConfirmed = false,
+                checkoutSessionResponse = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.Manage,
             )
@@ -529,6 +539,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             hasBeenConfirmed = true,
             customerState = null,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -569,12 +580,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
+            productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
@@ -646,6 +658,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = null,
             selection = null,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
@@ -667,6 +680,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
@@ -687,6 +701,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = null,
             selection = null,
             hasBeenConfirmed = true,
+            checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
@@ -797,6 +812,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
+                productUsage = setOf("EmbeddedPaymentElement"),
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 embeddedResultCallbackHelper = callbackHelper,

@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateA
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -57,6 +58,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
@@ -182,12 +184,13 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
@@ -212,12 +215,13 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
         )
         activityLauncher.launch(args)
@@ -240,12 +244,13 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)

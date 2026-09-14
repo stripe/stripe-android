@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,6 +15,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -20,12 +23,19 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -35,14 +45,31 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
+import java.util.Locale
+import javax.inject.Provider
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal class FormActivityScreenShotTest {
-    @get:Rule
-    val paparazziRule = PaparazziRule(
+    private val paparazziRule = PaparazziRule(
         PaymentSheetAppearance.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
+
+    private val scopedThemePaparazziRule = PaparazziRule(
+        SystemAppearance.entries,
+        boxModifier = Modifier.padding(16.dp),
+        includeStripeTheme = false,
+    )
+
+    private val localeRule = LocaleTestRule(Locale.US)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(paparazziRule)
+        .around(scopedThemePaparazziRule)
+        .around(localeRule)
 
     @Test
     fun testFormActivity_enabled() {
@@ -102,13 +129,80 @@ internal class FormActivityScreenShotTest {
 
     @Test
     fun testFormActivity_confirmSavedPaymentMethod() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val confirmationHandler = FakeConfirmationHandler()
+        val customerStateHolder = FakeCustomerStateHolder()
+        val launchMode = EmbeddedLaunchMode.Form(
+            selectedPaymentMethodCode = "card",
+        )
+        val stateHolder = DefaultSheetActivityStateHolder(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = selectionHolder,
+            configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
+            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            onClickDelegate = OnClickDelegateOverrideImpl(),
+            eventReporter = FakeEventReporter(),
+            confirmationHandler = confirmationHandler,
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+            customerStateHolder = customerStateHolder,
+            launchMode = launchMode,
+            embeddedNavigatorProvider = Provider { error("Not expected") },
+            savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+        )
+        val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
+            interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = false),
+            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+            sheetActivityStateHolder = stateHolder,
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            embeddedSelectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            launchMode = launchMode,
+        )
+
         paparazziRule.snapshot {
-            TestFormActivityUi(
-                ConfirmationHandler.State.Idle,
-                savedPaymentMethodSelectionToConfirm = PaymentSelection.Saved(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                ),
-            )
+            ViewModelStoreOwnerContext {
+                EventReporterProvider(FakeEventReporter()) {
+                    screen.Content()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testAutomaticTheme() {
+        snapshotWithAppearance(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun testAlwaysLightTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        )
+    }
+
+    @Test
+    fun testAlwaysDarkTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        )
+    }
+
+    @Test
+    fun testCustomAppearanceTheme() {
+        snapshotWithAppearance(PaymentSheetAppearance.CrazyAppearance.appearance)
+    }
+
+    private fun snapshotWithAppearance(appearance: PaymentSheet.Appearance) {
+        scopedThemePaparazziRule.snapshot {
+            PaymentElementTheme(appearance = appearance) {
+                Surface(color = MaterialTheme.colors.surface) {
+                    TestFormActivityUi(
+                        confirmationState = ConfirmationHandler.State.Idle,
+                        enabled = true,
+                    )
+                }
+            }
         }
     }
 
@@ -117,7 +211,6 @@ internal class FormActivityScreenShotTest {
         confirmationState: ConfirmationHandler.State,
         enabled: Boolean = false,
         usBankMandate: ResolvableString? = null,
-        savedPaymentMethodSelectionToConfirm: PaymentSelection.Saved? = null,
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
@@ -136,6 +229,8 @@ internal class FormActivityScreenShotTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
+            embeddedNavigatorProvider = Provider { error("Not expected") },
+            savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -153,27 +248,27 @@ internal class FormActivityScreenShotTest {
             sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
         )
 
         stateHolder.updateMandate(usBankMandate)
-        stateHolder.updateSavedPaymentSelectionToConfirm(savedPaymentMethodSelectionToConfirm)
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
-            Column {
-                FormScreenContent(
-                    interactor = interactor,
-                    eventReporter = eventReporter,
-                    onClick = {},
-                    onProcessingCompleted = {},
-                    state = state.copy(isEnabled = enabled),
-                    updateSelection = {},
-                    savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
-                )
+            EventReporterProvider(eventReporter) {
+                Column {
+                    FormScreenContent(
+                        interactor = interactor,
+                        onClick = {},
+                        onProcessingCompleted = {},
+                        state = state.copy(isEnabled = enabled),
+                        onPrimaryButtonDisabledClick = {},
+                    )
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -39,7 +40,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
         @Test
         fun snapshot() {
             paparazziRule.snapshot {
-                NfcScanningTheme {
+                NfcScanningTheme(appearance = PaymentSheet.Appearance()) {
                     NfcScanningLayout(
                         status = screenshotStatus.status,
                         tapZone = tapZone,
@@ -226,7 +227,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
         @Test
         fun idle() {
             paparazziRule.gif(end = 5000L) {
-                NfcScanningTheme {
+                NfcScanningTheme(appearance = PaymentSheet.Appearance()) {
                     NfcScanningLayout(
                         status = NfcScanningStatus.Idle(),
                         tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
@@ -242,7 +243,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
         @Test
         fun error() {
             paparazziRule.gif(end = 2000L) {
-                NfcScanningTheme {
+                NfcScanningTheme(appearance = PaymentSheet.Appearance()) {
                     var status by remember {
                         mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }
@@ -267,7 +268,7 @@ internal class NfcScanningLayoutScreenshotTestSuite {
         @Test
         fun scanned() {
             paparazziRule.gif(end = 3000L) {
-                NfcScanningTheme {
+                NfcScanningTheme(appearance = PaymentSheet.Appearance()) {
                     var status by remember {
                         mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle())
                     }

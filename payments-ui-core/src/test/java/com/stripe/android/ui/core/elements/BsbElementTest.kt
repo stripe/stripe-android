@@ -2,19 +2,45 @@ package com.stripe.android.ui.core.elements
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.view.BecsDebitBanks
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class BsbElementTest {
     @Test
-    fun `controller updates bank name and complete form entry`() = runTest {
-        val identifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
+    fun `default banks include server bank prefixes`() = runTest {
         val element = BsbElement(
-            identifierSpec = identifier,
-            banks = listOf(BecsDebitBanks.Bank("00", "Stripe Test Bank")),
+            formFieldId = FormFieldId.Generic("au_becs_debit[bsb_number]"),
+            initialValue = null,
+        )
+
+        element.controller.onValueChange("369000")
+
+        element.bankName.test {
+            assertThat(awaitItem()).isEqualTo("BNK Banking Corporation Ltd")
+        }
+    }
+
+    @Test
+    fun `most specific bank prefix determines bank name`() = runTest {
+        val element = BsbElement(
+            formFieldId = FormFieldId.Generic("au_becs_debit[bsb_number]"),
+            initialValue = null,
+        )
+
+        element.controller.onValueChange("611000")
+
+        element.bankName.test {
+            assertThat(awaitItem()).isEqualTo("Select Credit Union")
+        }
+    }
+
+    @Test
+    fun `controller updates bank name and complete form entry`() = runTest {
+        val identifier = FormFieldId.Generic("au_becs_debit[bsb_number]")
+        val element = BsbElement(
+            formFieldId = identifier,
             initialValue = null,
         )
 

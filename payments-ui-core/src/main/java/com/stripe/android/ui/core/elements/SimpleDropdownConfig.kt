@@ -7,7 +7,7 @@ import com.stripe.android.uicore.elements.DropdownConfig
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SimpleDropdownConfig(
     override val label: ResolvableString,
-    private val items: List<DropdownItemSpec>
+    private val items: List<DropdownItem>
 ) : DropdownConfig {
     override val debugLabel = "simple_dropdown"
 

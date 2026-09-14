@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import android.text.SpannableString
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -21,7 +24,10 @@ import org.junit.runner.RunWith
 
 @OptIn(AddressAutocompletePreview::class)
 @RunWith(TestParameterInjector::class)
-class PaymentSheetAddressAutocompleteTest {
+internal class PaymentSheetAddressAutocompleteTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val placesClientProxyTestRule = PlacesClientProxyTestRule()
 
     @get:Rule
@@ -34,8 +40,10 @@ class PaymentSheetAddressAutocompleteTest {
 
     private val paymentSheetPage = PaymentSheetPage(composeTestRule)
 
+    @Suppress("DEPRECATION")
     @Test
     fun testUnfilled() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { context ->
@@ -70,8 +78,10 @@ class PaymentSheetAddressAutocompleteTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun testPrefilled() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { context ->

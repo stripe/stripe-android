@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
@@ -15,7 +14,6 @@ import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
-import com.stripe.android.paymentsheet.utils.PrefsTestStore
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import org.junit.Rule
@@ -96,10 +94,6 @@ internal class CustomerSheetTest {
             assertThat(card?.brand).isEqualTo(CardBrand.Visa)
         }
     ) { context ->
-        context.scenario.onActivity {
-            PrefsTestStore(it).clear()
-        }
-
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -132,10 +126,6 @@ internal class CustomerSheetTest {
             assertThat(card?.brand).isEqualTo(CardBrand.Visa)
         }
     ) { context ->
-        context.scenario.onActivity {
-            PrefsTestStore(it).clear()
-        }
-
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }

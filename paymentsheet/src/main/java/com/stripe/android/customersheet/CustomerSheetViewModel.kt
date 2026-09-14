@@ -35,7 +35,7 @@ import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelCo
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -469,6 +469,7 @@ internal class CustomerSheetViewModel(
                 formElements = paymentMethodMetadata.formElementsForCode(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                        coroutineScope = viewModelScope,
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         /*
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
@@ -818,6 +819,7 @@ internal class CustomerSheetViewModel(
         val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                coroutineScope = viewModelScope,
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 /*
                  * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.

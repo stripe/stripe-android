@@ -19,7 +19,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
@@ -157,8 +157,8 @@ class CvcController constructor(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         val isInspectionMode = LocalInspectionMode.current
         val focusRequester = remember { FocusRequester() }

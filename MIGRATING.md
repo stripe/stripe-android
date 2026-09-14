@@ -1,5 +1,10 @@
 # Migration Guide
 
+## Migrating from versions < 23.17.0
+- Changes to `googlePlacesApiKey`:
+  * `PaymentSheet.Configuration.Builder.googlePlacesApiKey`, `AddressLauncher.Configuration.Builder.googlePlacesApiKey`, and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key are deprecated and will be removed in a future release.
+  * Remove the builder call or constructor argument from your integration. Address autocomplete continues to work without a Google Places API key, and integrations that did not provide one receive autocomplete automatically.
+
 ## Migrating from versions < 23.0.0
 - The SDK now requires Android 6.0+ (API level 23+)
 - The SDK now targets `compileSdkVersion` and `targetSdkVersion` 36

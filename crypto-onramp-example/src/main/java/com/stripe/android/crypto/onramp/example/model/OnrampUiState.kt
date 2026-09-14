@@ -40,12 +40,13 @@ internal data class OnrampUiState(
     val sourceCurrency: SourceCurrency = SourceCurrency.USD,
     val googlePayIsReady: Boolean = false,
     val samsungPayIsReady: Boolean = false,
+    val kycResidence: KycResidence,
     val kycFirstName: String = "",
     val kycLastName: String = "",
     val kycBirthCountry: String = "",
     val kycBirthCity: String = "",
     val kycNationalities: String = "",
-    val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
+    val kycAddress: PaymentSheet.Address = PaymentSheet.Address(country = "US"),
     val identifierInputs: List<IdentifierInputEntry> = listOf(IdentifierInputEntry()),
     val missingIdentifiersSummary: String? = null,
     val submitIdentifiersSummary: String? = null,
@@ -68,10 +69,13 @@ internal enum class Screen {
 
 internal enum class SourceCurrency(
     val value: String,
-    val symbol: String,
+    val displayName: String,
 ) {
-    USD(value = "usd", symbol = "$"),
-    EUR(value = "eur", symbol = "€"),
+    USD(value = "usd", displayName = "$ USD"),
+    EUR(value = "eur", displayName = "€ EUR"),
+    CAD(value = "cad", displayName = "CAD"),
+    COP(value = "cop", displayName = "COP"),
+    PHP(value = "php", displayName = "PHP"),
 }
 
 private object NullPaymentMethodDisplayDataParceler : Parceler<PaymentMethodDisplayData?> {

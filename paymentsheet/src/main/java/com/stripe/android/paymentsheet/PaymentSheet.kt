@@ -1099,9 +1099,10 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Google Places API key to support autocomplete when collecting billing details
+             * Google Places API key. This is no longer required for address autocomplete.
              */
             @AddressAutocompletePreview
+            @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
@@ -1167,7 +1168,7 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
             CardFundingFilteringPrivatePreview::class,
-            AddressAutocompletePreview::class
+            AddressAutocompletePreview::class,
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1192,6 +1193,7 @@ class PaymentSheet internal constructor(
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
+                @Suppress("DEPRECATION")
                 googlePlacesApiKey?.let { googlePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
             }
@@ -3716,18 +3718,6 @@ class PaymentSheet internal constructor(
                 Display.WalletButtonHidden -> true
             }
 
-        /**
-         * Canonical source of truth for whether the Link button/row should be rendered in the
-         * payment element UI. Link may remain functionally enabled (see [shouldDisplay]) even
-         * when its button is hidden, e.g. to support the returning-user flow and inline sign-up
-         * without a visible entry point.
-         */
-        internal val shouldShowButton: Boolean
-            get() = when (display) {
-                Display.Automatic -> true
-                Display.Never, Display.WalletButtonHidden -> false
-            }
-
         class Builder {
             private var display: Display = Display.Automatic
             private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
@@ -3775,9 +3765,8 @@ class PaymentSheet internal constructor(
             Never,
 
             /**
-             * Link's button/row is hidden from the payment element UI, but Link remains
-             * otherwise enabled: the returning-user flow and the inline sign-up checkbox are
-             * still shown.
+             * Link remains enabled, including automatic verification and inline sign-up.
+             * Its button or row is shown when an existing Link user is detected and hidden otherwise.
              */
             WalletButtonHidden;
 

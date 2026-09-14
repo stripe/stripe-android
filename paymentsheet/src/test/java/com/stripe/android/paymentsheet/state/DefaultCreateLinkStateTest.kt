@@ -3,11 +3,14 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.ClientAttributionMetadata
@@ -110,6 +113,33 @@ internal class DefaultCreateLinkStateTest {
             .contains(LinkDisabledReason.AutomaticTaxBillingAddress)
     }
 
+    @Test
+    fun `uses checkout session save consent to determine Link signup mode`() = runTest {
+        val createLinkState = createLinkStateFactory()
+        val elementsSession = createElementsSession()
+        val customerMetadata = CustomerMetadata.CheckoutSession(
+            sessionId = "cs_test_123",
+            customerId = "cus_123",
+            removePaymentMethod = PaymentMethodRemovePermission.None,
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
+        )
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = customerMetadata,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        assertThat(result).isInstanceOf<LinkState>()
+        assertThat((result as LinkState).signupMode).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
+    }
+
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
         flags: Map<ElementsSession.Flag, Boolean>,
         isLinkInlineSignupAvailableForSavedPaymentMethods: Boolean
@@ -188,7 +218,6 @@ internal class DefaultCreateLinkStateTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
-            paymentMethodSpecs = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantCountry = "US",
             isGooglePayEnabled = false,

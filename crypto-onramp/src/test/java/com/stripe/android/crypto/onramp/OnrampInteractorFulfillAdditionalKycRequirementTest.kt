@@ -8,6 +8,7 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
+import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
@@ -39,6 +40,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     @Test
     fun `documents are uploaded in order before submission`() = runScenario {
         val response = submissionResponse()
+        val expectedDocuments = documentRequests(fileIds = listOf("file_1", "file_2"))
+        val expectedQuestionnaire = questionnaireRequest()
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
             .thenReturn(Result.success(StripeFile(id = "file_1")))
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile))
@@ -46,22 +49,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         whenever(
             cryptoApiRepository.fulfillAdditionalKycRequirement(
                 liquidityProvider = "swapped",
-                submissionType = "document",
-                documents = listOf(
-                    AdditionalKycDocumentSubmissionRequest(
-                        documentType = "source_of_funds",
-                        documentSubtype = "bank_statement",
-                        fileIds = listOf("file_1", "file_2"),
-                    )
-                ),
-                questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                    answers = listOf(
-                        AdditionalKycQuestionnaireAnswerRequest(
-                            questionId = "purchase_purpose",
-                            value = "Long-term savings",
-                        )
-                    )
-                ),
+                documents = expectedDocuments,
+                questionnaire = expectedQuestionnaire,
                 consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
             )
         ).thenReturn(Result.success(response))
@@ -76,59 +65,11 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile)
             verify(cryptoApiRepository).fulfillAdditionalKycRequirement(
                 liquidityProvider = "swapped",
-                submissionType = "document",
-                documents = listOf(
-                    AdditionalKycDocumentSubmissionRequest(
-                        documentType = "source_of_funds",
-                        documentSubtype = "bank_statement",
-                        fileIds = listOf("file_1", "file_2"),
-                    )
-                ),
-                questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                    answers = listOf(
-                        AdditionalKycQuestionnaireAnswerRequest(
-                            questionId = "purchase_purpose",
-                            value = "Long-term savings",
-                        )
-                    )
-                ),
-                consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
-            )
-        }
-    }
-
-    @Test
-    fun `questionnaire-only submission bypasses uploads`() = runScenario {
-        val response = submissionResponse(submissionType = "questionnaire")
-        val expectedQuestionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-            answers = listOf(
-                AdditionalKycQuestionnaireAnswerRequest(
-                    questionId = "purchase_purpose",
-                    value = "Long-term savings",
-                )
-            )
-        )
-        whenever(
-            cryptoApiRepository.fulfillAdditionalKycRequirement(
-                liquidityProvider = "swapped",
-                submissionType = "questionnaire",
-                documents = null,
+                documents = expectedDocuments,
                 questionnaire = expectedQuestionnaire,
                 consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
             )
-        ).thenReturn(Result.success(response))
-
-        val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
-
-        assertThat(result.getOrThrow()).isSameInstanceAs(response)
-        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any())
-        verify(cryptoApiRepository).fulfillAdditionalKycRequirement(
-            liquidityProvider = "swapped",
-            submissionType = "questionnaire",
-            documents = null,
-            questionnaire = expectedQuestionnaire,
-            consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
-        )
+        }
     }
 
     @Test
@@ -139,7 +80,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             documentSubmission(files = listOf(firstFile))
         )
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(MissingConsumerSecretException::class.java)
+        assertUnexpectedError<MissingConsumerSecretException>(result.exceptionOrNull())
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any())
         verifyFulfillmentWasNotRequested()
     }
@@ -154,7 +95,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             documentSubmission(files = listOf(firstFile, secondFile))
         )
 
-        assertThat(result.exceptionOrNull()).isSameInstanceAs(uploadError)
+        val error = assertUnexpectedError<IllegalStateException>(result.exceptionOrNull())
+        assertThat(error.underlyingError).isSameInstanceAs(uploadError)
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(secondFile)
         verifyFulfillmentWasNotRequested()
     }
@@ -168,41 +110,44 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             documentSubmission(files = listOf(firstFile))
         )
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(MissingAdditionalKycFileIdException::class.java)
+        val error = assertUnexpectedError<MissingAdditionalKycFileIdException>(result.exceptionOrNull())
+        assertThat(error.code).isEqualTo("unexpected_error")
+        assertThat(error.userMessage).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(error.developerMessage).contains("Uploaded additional KYC document is missing a file ID")
+        assertThat(error.developerMessage).contains("operation: fulfill_additional_kyc_requirement")
+        assertThat(error.docUrl).isNull()
         verifyFulfillmentWasNotRequested()
     }
 
     @Test
     fun `submission failure is propagated`() = runScenario {
         val submissionError = IllegalStateException("Submission failed")
-        val questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-            answers = listOf(
-                AdditionalKycQuestionnaireAnswerRequest(
-                    questionId = "purchase_purpose",
-                    value = "Long-term savings",
-                )
-            )
-        )
+        val documents = documentRequests(fileIds = listOf("file_1"))
+        val questionnaire = questionnaireRequest()
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
+            .thenReturn(Result.success(StripeFile(id = "file_1")))
         whenever(
             cryptoApiRepository.fulfillAdditionalKycRequirement(
                 liquidityProvider = "swapped",
-                submissionType = "questionnaire",
-                documents = null,
+                documents = documents,
                 questionnaire = questionnaire,
                 consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
             )
         ).thenReturn(Result.failure(submissionError))
 
-        val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
+        val result = interactor.fulfillAdditionalKycRequirement(
+            documentSubmission(files = listOf(firstFile))
+        )
 
-        assertThat(result.exceptionOrNull()).isSameInstanceAs(submissionError)
+        val error = assertUnexpectedError<IllegalStateException>(result.exceptionOrNull())
+        assertThat(error.underlyingError).isSameInstanceAs(submissionError)
     }
 
     private fun runScenario(
         consumerSessionClientSecret: String? = CONSUMER_SESSION_CLIENT_SECRET,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val application: Application = RuntimeEnvironment.getApplication()
+        val application = createApplication()
         val linkController = mock<LinkController>()
         val cryptoApiRepository = mock<CryptoApiRepository>()
         whenever(linkController.state(any())).thenReturn(
@@ -234,21 +179,55 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         suspend fun verifyFulfillmentWasNotRequested() {
             verify(cryptoApiRepository, never()).fulfillAdditionalKycRequirement(
                 liquidityProvider = any(),
-                submissionType = any(),
-                documents = anyOrNull(),
+                documents = any(),
                 questionnaire = anyOrNull(),
                 consumerSessionClientSecret = any(),
             )
         }
     }
 
+    private inline fun <reified T : Throwable> assertUnexpectedError(error: Throwable?): UnexpectedException {
+        assertThat(error).isInstanceOf(UnexpectedException::class.java)
+        return (error as UnexpectedException).also {
+            assertThat(it.underlyingError).isInstanceOf(T::class.java)
+        }
+    }
+
+    private fun createApplication(): Application {
+        val application = mock<Application>()
+        val runtimeApplication: Application = RuntimeEnvironment.getApplication()
+        whenever(application.packageName).thenReturn(runtimeApplication.packageName)
+        whenever(application.getString(R.string.stripe_onramp_default_api_error_user_message))
+            .thenReturn("Something went wrong. Please try again later.")
+        return application
+    }
+
     private companion object {
         const val CONSUMER_SESSION_CLIENT_SECRET = "secret_123"
+        fun documentRequests(fileIds: List<String>): List<AdditionalKycDocumentSubmissionRequest> {
+            return listOf(
+                AdditionalKycDocumentSubmissionRequest(
+                    documentType = "source_of_funds",
+                    documentSubtype = "bank_statement",
+                    fileIds = fileIds,
+                )
+            )
+        }
+
+        fun questionnaireRequest(): AdditionalKycQuestionnaireSubmissionRequest {
+            return AdditionalKycQuestionnaireSubmissionRequest(
+                answers = listOf(
+                    AdditionalKycQuestionnaireAnswerRequest(
+                        questionId = "purchase_purpose",
+                        value = "Long-term savings",
+                    )
+                )
+            )
+        }
 
         fun documentSubmission(files: List<File>): AdditionalKycSubmission {
             return AdditionalKycSubmission(
                 liquidityProvider = "swapped",
-                submissionType = "document",
                 documents = listOf(
                     AdditionalKycDocumentSubmission(
                         documentType = "source_of_funds",
@@ -267,31 +246,15 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             )
         }
 
-        fun questionnaireSubmission(): AdditionalKycSubmission {
-            return AdditionalKycSubmission(
-                liquidityProvider = "swapped",
-                submissionType = "questionnaire",
-                documents = null,
-                questionnaire = AdditionalKycQuestionnaireSubmission(
-                    answers = listOf(
-                        AdditionalKycQuestionnaireAnswer(
-                            questionId = "purchase_purpose",
-                            value = "Long-term savings",
-                        )
-                    )
-                ),
-            )
-        }
-
-        fun submissionResponse(
-            submissionType: String = "document",
-        ): AdditionalKycSubmissionResponse {
+        fun submissionResponse(): AdditionalKycSubmissionResponse {
             return AdditionalKycSubmissionResponse(
                 id = "kyc_submission_123",
                 objectType = "crypto_onramp_kyc_submission",
                 liquidityProvider = "swapped",
-                submissionType = submissionType,
-                submittedAt = 1_786_998_400,
+                documents = null,
+                questionnaire = null,
+                status = "pending_verification",
+                created = 1_786_998_400,
             )
         }
 
@@ -302,6 +265,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
                     redactedPhoneNumber = "***-***-1234",
                     sessionState = LinkController.SessionState.LoggedIn,
                     consumerSessionClientSecret = consumerSessionClientSecret,
+                    linkSessionKey = null,
                 ),
                 merchantLogoUrl = null,
                 selectedPaymentMethodPreview = null,

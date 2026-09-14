@@ -113,6 +113,7 @@ internal fun OnrampScreen(
                     onKycBirthCountryChange = viewModel::updateKycBirthCountry,
                     onKycBirthCityChange = viewModel::updateKycBirthCity,
                     onKycNationalitiesChange = viewModel::updateKycNationalities,
+                    onKycResidenceChange = viewModel::updateKycResidence,
                     onKycAddressChange = viewModel::updateKycAddress,
                     onIdentifierTypeChange = viewModel::updateIdentifierType,
                     onIdentifierValueChange = viewModel::updateIdentifierValue,

@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Szelfi készítése</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Remek! Képek ellenőrzése....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Az Ön engedélyével a Stripe felhasználhatja a képeit a csalásfelderítés javítása érdekében. Az elutasítás nem befolyásolja a hitelesítését.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Hitelesítés szelfivel</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">szelfi rögítve</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

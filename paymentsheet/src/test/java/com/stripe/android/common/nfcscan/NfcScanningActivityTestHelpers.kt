@@ -41,10 +41,11 @@ internal object NfcScanningActivityTestHelpers {
             mockedIsoDep.`when`<IsoDep> { IsoDep.get(any()) }.thenReturn(fakeIsoDep.wrappedInstance)
 
             ActivityScenario.launchActivityForResult<NfcScanningActivity>(intent).use { scenario ->
-                scenario.onActivity {
+                scenario.onActivity { activity ->
                     runBlocking {
                         block(
                             NfcScanningActivityScenario(
+                                activity = activity,
                                 composeRule = composeRule,
                                 activityScenario = scenario,
                                 isoDep = fakeIsoDep,

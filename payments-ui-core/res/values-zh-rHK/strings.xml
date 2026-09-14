@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">您輸入的 IBAN 無效，「%s」是不支援的國家代碼。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">您的 IBAN 應以兩個字母的國家代碼開頭。</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL 銀行</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">您的 BLIK 代碼不完整。</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +67,12 @@
   <string name="stripe_klarna_pay_later">用 Klarna 先買後付</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">電話</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">透過 NICEPAY 確認付款，即表示閣下允許 %s 據其條款，使用此付款方式扣取日後的款項。</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">持卡人姓名</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">選擇您想如何付款：</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->

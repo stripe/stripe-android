@@ -1,14 +1,14 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
-import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
@@ -54,6 +55,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 ) : IntentConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
+    private val genericErrorMessage: String = context.getString(R.string.stripe_something_went_wrong)
     private val isSaveEnabled: Boolean =
         customerMetadata?.saveConsent is PaymentMethodSaveConsentBehavior.Enabled
 
@@ -71,7 +73,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-                    shippingInformation = null,
+                    shipping = shippingValues.toCheckoutSessionShipping(),
                 )
                 confirmCheckoutSession(params)
             },
@@ -105,7 +107,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
-            shippingInformation = confirmationOption.shippingInformation,
+            // ECE Google Pay returns the buyer's final shipping address after confirmation starts.
+            // It cannot be reconciled with the earlier shippingValues snapshot, so use it for this
+            // confirmation and otherwise retain the controller shipping.
+            shipping = confirmationOption.shippingInformation.toCheckoutSessionShipping()
+                ?: shippingValues.toCheckoutSessionShipping(),
         )
         return confirmCheckoutSession(params)
     }
@@ -128,8 +134,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         }
         val finalEstimatedTotal = updatedCheckoutSessionResponse?.totalSummary?.totalAmountDue
         if (initialEstimatedTotal != finalEstimatedTotal) {
-            val error = IllegalStateException(
-                "The estimated total changed from $initialEstimatedTotal to $finalEstimatedTotal."
+            val error = LocalStripeException(
+                displayMessage = genericErrorMessage,
+                analyticsValue = "checkoutSessionTotalChanged",
+                errorCode = "checkout_session_total_changed",
             )
             return Result.failure(error)
         }
@@ -140,7 +148,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
-        shippingInformation: ShippingInformation?,
+        shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = when (intent) {
         is PaymentIntent -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
@@ -148,13 +156,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             returnUrl = returnUrl,
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
-            shipping = shippingInformation.toCheckoutSessionShipping(),
+            shipping = shipping,
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
-            shipping = shippingInformation.toCheckoutSessionShipping(),
+            shipping = shipping,
         )
     }
 
@@ -232,23 +240,20 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     }
 }
 
-@OptIn(CheckoutSessionPreview::class)
-private fun Address.toCheckoutAddress(): CheckoutController.Address.State? {
-    return CheckoutController.Address.State(
-        city = city,
-        country = country ?: return null,
-        line1 = line1,
-        line2 = line2,
-        postalCode = postalCode,
-        state = state,
-    )
-}
-
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
-    return this?.let {
+    return this?.takeIf { it.address?.toParamMap()?.isNotEmpty() == true }?.let {
         ConfirmCheckoutSessionParams.Shipping(
             name = it.name,
             address = it.address,
+        )
+    }
+}
+
+private fun ConfirmPaymentIntentParams.Shipping?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
+    return this?.takeIf { it.getAddress().toParamMap().isNotEmpty() }?.let {
+        ConfirmCheckoutSessionParams.Shipping(
+            name = it.getName(),
+            address = it.getAddress(),
         )
     }
 }

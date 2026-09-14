@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.NoOpCardScanEventsReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.Amount
@@ -31,6 +32,9 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.assertHasErrorMessage
 import com.stripe.paymentelementtestpages.assertHasNoErrorMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -48,6 +52,9 @@ internal class VerticalModeFormUITest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     private val formPage = FormPage(composeRule)
 
@@ -206,7 +213,9 @@ internal class VerticalModeFormUITest {
                 hasIntentToSetup = false,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
-            formElements = CardDefinition.formElements(),
+            formElements = CardDefinition.formElements(
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+            ),
             isValidating = false,
             headerInformation = headerInformation,
         )

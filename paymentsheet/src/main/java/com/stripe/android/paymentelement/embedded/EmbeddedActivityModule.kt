@@ -28,16 +28,17 @@ import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageSc
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
-import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
-import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -45,11 +46,17 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -58,8 +65,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
@@ -119,6 +124,16 @@ internal interface EmbeddedActivityModule {
         confirmationHelper: DefaultSheetActivityConfirmationHelper
     ): SheetActivityConfirmationHelper
 
+    @Binds
+    fun bindsContinueCoordinator(
+        continueCoordinator: DefaultSheetActivityContinueCoordinator
+    ): SheetActivityContinueCoordinator
+
+    @Binds
+    fun bindsAddressLauncherEventReporter(
+        eventReporter: DefaultAddressLauncherEventReporter
+    ): AddressLauncherEventReporter
+
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
@@ -128,30 +143,15 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
-        @ViewModelScope
-        fun provideViewModelScope(): CoroutineScope {
-            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        }
-
-        @Provides
-        @Singleton
         fun provideEmbeddedNavigator(
-            launchMode: EmbeddedLaunchMode,
-            formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
-            initialManageScreenFactory: InitialManageScreenFactory,
-            initialPaymentOptionsScreenFactory: InitialPaymentOptionsScreenFactory,
+            initialScreenFactory: EmbeddedInitialScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
-            val initialBackStack = when (launchMode) {
-                is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
-                is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
-                is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
-            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialBackStack = initialBackStack,
+                initialBackStack = initialScreenFactory.create(),
             )
         }
 
@@ -208,6 +208,33 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
+        fun provideAutocompleteAddressInteractorFactory(
+            stripeAutocompleteRepository: StripeAutocompleteRepository,
+            @ViewModelScope coroutineScope: CoroutineScope,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            eventReporter: AddressLauncherEventReporter,
+        ): AutocompleteAddressInteractor.Factory {
+            return PaymentElementAutocompleteAddressInteractor.Factory(
+                // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
+                launcher = null,
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                    isPlacesAvailable = false,
+                    isInlineAutocompleteEnabled = true,
+                ),
+                placesClient = null,
+                stripeAutocompleteRepository = stripeAutocompleteRepository,
+                coroutineScope = coroutineScope,
+                shouldUseAutocompleteProxyEndpointsProvider = {
+                    paymentMethodMetadata.shouldUseAutocompleteProxyEndpoints
+                },
+                eventReporter = eventReporter,
+            )
+        }
+
+        @Provides
+        @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
             return DefaultStripeImageLoader(context)
         }
@@ -245,10 +272,10 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
-            promotion: PaymentMethodMessagePromotion?,
+            promotions: List<PaymentMethodMessagePromotion>,
             eventReporter: EventReporter
         ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
-            listOfNotNull(promotion),
+            promotions,
             eventReporter
         )
     }

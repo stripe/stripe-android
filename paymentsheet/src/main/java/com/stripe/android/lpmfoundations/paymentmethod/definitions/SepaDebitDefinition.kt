@@ -1,10 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
-import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.addSavePaymentOptionElements
+import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.IbanConfig
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -39,7 +39,7 @@ internal object SepaDebitDefinition : PaymentMethodDefinition {
 }
 
 private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    private val ibanIdentifier = IdentifierSpec.Generic("sepa_debit[iban]")
+    private val ibanIdentifier = FormFieldId.Generic("sepa_debit[iban]")
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,

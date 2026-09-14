@@ -11,10 +11,11 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -136,10 +137,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         ): PaymentMethodVerticalLayoutInteractor {
             val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Default)
             val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
                 coroutineScope = formHelperScope,
                 paymentMethodMetadata = paymentMethodMetadata,
+                linkInlineHandler = LinkInlineHandler.create(),
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {

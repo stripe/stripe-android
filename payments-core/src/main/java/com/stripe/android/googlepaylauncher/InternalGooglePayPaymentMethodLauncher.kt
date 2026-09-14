@@ -3,6 +3,8 @@ package com.stripe.android.googlepaylauncher
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
@@ -25,7 +27,10 @@ import dagger.assisted.AssistedInject
 @JvmSuppressWildcards
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructor(
+    @Assisted private val instanceId: String,
+    @Assisted private val lifecycleOwner: LifecycleOwner,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+    @Assisted private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
     context: Context,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
@@ -41,6 +46,21 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit
                 )
+            )
+        }
+
+        onPaymentDataChangedCallback?.let { callback ->
+            GooglePayPaymentDataUpdateCallbackRegistry.register(
+                key = instanceId,
+                callback = callback,
+            )
+
+            lifecycleOwner.lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        GooglePayPaymentDataUpdateCallbackRegistry.deregister(instanceId)
+                    }
+                }
             )
         }
     }
@@ -63,6 +83,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
+                dynamicCallbackId = instanceId.takeIf { onPaymentDataChangedCallback != null },
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,

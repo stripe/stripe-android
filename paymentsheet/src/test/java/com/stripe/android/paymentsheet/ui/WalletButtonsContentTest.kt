@@ -8,6 +8,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -70,6 +71,7 @@ class WalletButtonsContentTest {
             fun test(
                 state: StateFlow<WalletButtonsInteractor.State> = stateFlowOf(
                     WalletButtonsInteractor.State(
+                        appearance = PaymentSheet.Appearance(),
                         walletButtons = emptyList(),
                         link2FAState = null,
                         buttonsEnabled = false

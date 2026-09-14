@@ -623,6 +623,54 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(result).isNull()
     }
 
+    @Test
+    fun `mandateDataForDeferredIntent returns Korean cards mandate when intent is for future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.KrCard,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null for Korean cards without future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.KrCard,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns Naver Pay mandate when intent is for future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.NaverPay,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null for Naver Pay without future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.NaverPay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isNull()
+    }
+
     private companion object {
         private const val CLIENT_SECRET = "client_secret"
     }

@@ -4,9 +4,11 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
+import androidx.core.net.toUri
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import dev.drewhamilton.poko.Poko
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -263,17 +265,45 @@ sealed interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        internal data class AlipayRedirect constructor(
-            val data: String,
-            val authCompleteUrl: String?,
+        internal data class AlipayRedirect(
+            val type: Type,
             val webViewUrl: Uri,
-            val returnUrl: String? = null
+            val returnUrl: String?
         ) : NextActionData() {
+            sealed interface Type : Parcelable {
+                @Parcelize
+                data object Default : Type
 
-            internal constructor(data: String, webViewUrl: String, returnUrl: String? = null) :
-                this(data, extractReturnUrl(data), Uri.parse(webViewUrl), returnUrl)
+                @Parcelize
+                data class WithNativeData(val data: String) : Type {
+                    @IgnoredOnParcel
+                    val authCompleteUrl: String? by lazy {
+                        extractReturnUrl(data)
+                    }
+                }
+            }
 
-            private companion object {
+            internal companion object {
+                fun create(
+                    data: String?,
+                    webViewUrl: String,
+                    returnUrl: String? = null
+                ): AlipayRedirect {
+                    val webViewUri = webViewUrl.toUri()
+
+                    val type = if (data != null) {
+                        Type.WithNativeData(data = data)
+                    } else {
+                        Type.Default
+                    }
+
+                    return AlipayRedirect(
+                        type = type,
+                        webViewUrl = webViewUri,
+                        returnUrl = returnUrl,
+                    )
+                }
+
                 /**
                  * The alipay data string is formatted as query parameters.
                  * When authenticate is complete, we make a request to the
@@ -281,10 +311,9 @@ sealed interface StripeIntent : StripeModel {
                  * the updated state
                  */
                 private fun extractReturnUrl(data: String): String? = runCatching {
-                    Uri.parse("alipay://url?$data")
-                        .getQueryParameter("return_url")?.takeIf {
-                            StripeUrlUtils.isStripeUrl(it)
-                        }
+                    "alipay://url?$$data".toUri().getQueryParameter("return_url")?.takeIf {
+                        StripeUrlUtils.isStripeUrl(it)
+                    }
                 }.getOrNull()
             }
         }

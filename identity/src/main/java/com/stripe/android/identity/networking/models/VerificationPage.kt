@@ -59,7 +59,7 @@ internal data class VerificationPage(
     @SerialName("user_session_id")
     val userSessionId: String,
     @SerialName("experiments")
-    val experiments: List<VerificationPageStaticContentExperiment>,
+    val experiments: List<VerificationPageStaticContentExperiment> = emptyList(),
     /* Whether this verification was triggered by Stripe */
     @SerialName("is_stripe")
     val isStripe: Boolean = false,
@@ -83,8 +83,22 @@ internal data class VerificationPage(
     }
 
     internal companion object {
+        const val IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT =
+            "idprod_3d_face_capture_mobile"
+
         fun VerificationPage.isUnsupportedClient() = unsupportedClient
 
         fun VerificationPage.requireSelfie() = selfieCapture != null
+
+        fun VerificationPage.has3DFaceCaptureExperiment(): Boolean =
+            experiments.any {
+                it.experimentName == IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
+            }
+
+        fun VerificationPage.enable3DFaceCapture(): Boolean =
+            has3DFaceCaptureExperiment()
+
+        fun VerificationPage.shouldSubmit3DFaceCaptureData(): Boolean =
+            enable3DFaceCapture()
     }
 }

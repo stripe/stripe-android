@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
@@ -95,26 +96,35 @@ class PaymentLauncherFactory(
     ): PaymentLauncher {
         val productUsage = setOf("PaymentLauncher")
         return StripePaymentLauncher(
-            publishableKeyProvider = { publishableKey },
-            stripeAccountIdProvider = { stripeAccountId },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                )
+            },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,
+            includePaymentSheetNextHandlers = false,
             enableLogging = BuildConfig.DEBUG,
             productUsage = productUsage,
-            includePaymentSheetNextHandlers = false,
         )
     }
 
     fun create(applicationContext: Context): PaymentLauncher {
         val productUsage = setOf("PaymentLauncher")
         return StripePaymentLauncher(
-            publishableKeyProvider = { PaymentConfiguration.getInstance(applicationContext).publishableKey },
-            stripeAccountIdProvider = { PaymentConfiguration.getInstance(applicationContext).stripeAccountId },
+            apiConfigurationProvider = {
+                val config = PaymentConfiguration.getInstance(applicationContext)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,
+            includePaymentSheetNextHandlers = false,
             enableLogging = BuildConfig.DEBUG,
             productUsage = productUsage,
-            includePaymentSheetNextHandlers = false,
         )
     }
 }

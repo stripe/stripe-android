@@ -18,9 +18,9 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInt
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
-import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -160,6 +160,13 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
     }
 
+    @Test
+    fun `continue click delegates to continue coordinator`() = testScenario {
+        factory.onContinueClick()
+
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
         isGooglePayReady: Boolean = true,
@@ -180,6 +187,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val eventReporter = FakeEventReporter()
         val testScope = TestScope(UnconfinedTestDispatcher())
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
+        val continueCoordinator = FakeSheetActivityContinueCoordinator()
+        val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
@@ -202,12 +211,11 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                     tapToAddHelper = FakeTapToAddHelper.noOp(),
                     eventReporter = FakeEventReporter(),
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                    autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 ),
-                eventReporter = FakeEventReporter(),
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
-                savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
                 customerStateHolder = customerStateHolder,
             ),
         )
@@ -219,6 +227,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             isLiveMode = true,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
         )
         val navigator = EmbeddedNavigator(
             coroutineScope = testScope,
@@ -237,6 +246,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
 
         val factory = InitialPaymentOptionsScreenFactory(
@@ -254,6 +264,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             formScreenFactory = formScreenFactory,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
+            continueCoordinator = continueCoordinator,
         )
 
         Scenario(
@@ -262,8 +273,10 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             customerStateHolder = customerStateHolder,
             navigator = navigator,
             sheetActivityStateHolder = sheetActivityStateHolder,
+            continueCoordinator = continueCoordinator,
         ).block()
         eventReporter.validate()
+        continueCoordinator.validate()
     }
 
     private class Scenario(
@@ -272,6 +285,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val customerStateHolder: CustomerStateHolder,
         val navigator: EmbeddedNavigator,
         val sheetActivityStateHolder: FakeSheetActivityStateHolder,
+        val continueCoordinator: FakeSheetActivityContinueCoordinator,
     )
 }
 

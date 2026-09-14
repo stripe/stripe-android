@@ -12,6 +12,8 @@
 
 **GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
 
+**Pull requests** — always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
+
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
 ## Architecture
@@ -31,8 +33,7 @@ Multi-module Android library for payment processing and financial services.
 - No defaults for internal code: public APIs give parameters defaults (`= null`, `= false`) for ergonomic construction; non-public code (`internal` or `@RestrictTo`) omits defaults on both model fields and function parameters to force explicit decisions at each call site
 
 **Testing** — MUST invoke the relevant skill (in `.agents/skills/`) before writing any test code:
-- `write-unit-tests` — unit test structure, runScenario pattern, Turbine Flow testing, Truth assertions
-- `create-fake` — fake implementations with Turbine call tracking
+- `write-unit-tests` — unit test structure, fake implementations, runScenario pattern, Turbine testing, Truth assertions
 - `compose-tests` — Compose UI tests with composeRule, Robolectric, node assertions
 - `network-tests` — NetworkRule integration tests with testBodyFromFile and fixture patterns
 

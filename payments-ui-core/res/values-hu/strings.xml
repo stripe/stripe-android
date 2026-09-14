@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">A beírt IBAN-szám érvénytelen, a(z) „%s” nem támogatott országkód.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL bank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK kódja hiányos.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Fizetés később Klarnával.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">A NICEPAY segítségével történő fizetés megerősítésével Ön engedélyezi %s számára, hogy a feltételeinek megfelelően a jövőbeli fizetésekhez megterhelje ezt a fizetési módot.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">A kártyán szereplő név</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Válassza ki, hogyan szeretne fizetni:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->

@@ -36,7 +36,6 @@ internal class ElementsSessionJsonParser(
 
         val countryCode = paymentMethodPreference.optString(FIELD_COUNTRY_CODE)
         val unactivatedPaymentMethodTypes = json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
-        val paymentMethodSpecs = json.optJSONArray(FIELD_PAYMENT_METHOD_SPECS)?.toString()
         val externalPaymentMethodData = json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_DATA)?.toString()
 
         val orderedPaymentMethodTypes =
@@ -97,7 +96,6 @@ internal class ElementsSessionJsonParser(
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
-                paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
                 customer = customer,
                 merchantCountry = merchantCountry,
@@ -570,7 +568,6 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
-        private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
         private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
         private const val FIELD_ELIGIBLE = "eligible"
         private const val FIELD_PREFERRED_NETWORKS = "preferred_networks"

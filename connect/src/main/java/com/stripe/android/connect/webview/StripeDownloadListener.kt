@@ -8,15 +8,14 @@ import android.webkit.DownloadListener
 import com.stripe.android.connect.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class StripeDownloadListener(
     private val context: Context,
+    private val coroutineScope: CoroutineScope,
     private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
     private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(),
-    private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
 ) : DownloadListener {
 
     override fun onDownloadStart(
@@ -31,7 +30,7 @@ internal class StripeDownloadListener(
             return
         }
 
-        ioScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             val downloadId = stripeDownloadManager.enqueueDownload(url, contentDisposition, mimetype)
             if (downloadId == null) {
                 showErrorToast()

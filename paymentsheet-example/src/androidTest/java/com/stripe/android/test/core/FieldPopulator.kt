@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.countryCode
 import com.stripe.android.test.core.ui.Selectors
-import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
 import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.core.R as CoreR
@@ -129,7 +128,7 @@ internal class FieldPopulator(
             selectors.getEmail()
                 .ifExistsAssertContentDescriptionEquals(values.email)
 
-            selectors.getName(selectors.getResourceString(TranslationId.AddressName.resourceId))
+            selectors.getName(selectors.getResourceString(CoreR.string.stripe_address_label_full_name))
                 .ifExistsAssertContentDescriptionEquals(values.name)
 
             selectors.composeTestRule.onNodeWithText(
@@ -226,7 +225,7 @@ internal class FieldPopulator(
     }
 
     fun populateName(
-        labelText: String = selectors.getResourceString(TranslationId.AddressName.resourceId)
+        labelText: String = selectors.getResourceString(CoreR.string.stripe_address_label_full_name)
     ) {
         selectors.getName(labelText).apply {
             performTextInput(values.name)

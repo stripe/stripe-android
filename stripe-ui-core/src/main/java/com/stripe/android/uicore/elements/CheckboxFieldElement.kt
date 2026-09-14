@@ -7,7 +7,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CheckboxFieldElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     override val controller: CheckboxFieldController = CheckboxFieldController()
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

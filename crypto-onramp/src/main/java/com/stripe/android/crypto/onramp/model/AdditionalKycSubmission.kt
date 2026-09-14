@@ -7,8 +7,7 @@ import java.io.File
 @Parcelize
 internal data class AdditionalKycSubmission(
     val liquidityProvider: String,
-    val submissionType: String,
-    val documents: List<AdditionalKycDocumentSubmission>?,
+    val documents: List<AdditionalKycDocumentSubmission>,
     val questionnaire: AdditionalKycQuestionnaireSubmission?,
 ) : Parcelable
 

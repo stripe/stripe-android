@@ -23,13 +23,8 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
-import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
-import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -196,28 +191,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
                             linkLaunchMode = parentComponent.linkLaunchMode
                         ),
-                        formHelper = DefaultFormHelper.create(
-                            coroutineScope = parentComponent.viewModel.viewModelScope,
-                            cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
-                            paymentMethodMetadata = parentComponent.paymentMethodMetadata,
-                            eventReporter = parentComponent.eventReporter,
-                            savedStateHandle = parentComponent.viewModel.savedStateHandle,
-                            autocompleteAddressInteractorFactory =
-                                PaymentElementAutocompleteAddressInteractor.Factory(
-                                    launcher = parentComponent.autocompleteLauncher,
-                                    autocompleteConfig = AutocompleteAddressInteractor.Config(
-                                        googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
-                                        autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                                        isInlineAutocompleteEnabled = true,
-                                    ),
-                                    placesClient = null,
-                                    stripeAutocompleteRepository = null,
-                                    coroutineScope = null,
-                                    shouldUseAutocompleteProxyEndpointsProvider = { false },
-                                    eventReporter = NoOpAddressLauncherEventReporter,
-                                ),
-                            isLinkUI = true,
-                        ),
+                        formHelper = NativeLinkFormHelperFactory(parentComponent).create(),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkLaunchMode = parentComponent.linkLaunchMode,

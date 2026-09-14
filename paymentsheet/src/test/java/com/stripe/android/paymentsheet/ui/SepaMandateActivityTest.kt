@@ -11,6 +11,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +39,10 @@ internal class SepaMandateActivityTest {
     @Test
     fun testActivityReturnsCanceledResultOnBackPressed() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val args = SepaMandateContract.Args("Example, Inc.")
+        val args = SepaMandateContract.Args(
+            merchantName = "Example, Inc.",
+            appearance = PaymentSheet.Appearance(),
+        )
         val sepaMandateContract = SepaMandateContract()
         val intent = sepaMandateContract.createIntent(context, args)
         val scenario = ActivityScenario.launchActivityForResult<SepaMandateActivity>(intent)
@@ -53,7 +57,10 @@ internal class SepaMandateActivityTest {
     @Test
     fun testContinueReturnsAcknowledgedResult() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val args = SepaMandateContract.Args("Example, Inc.")
+        val args = SepaMandateContract.Args(
+            merchantName = "Example, Inc.",
+            appearance = PaymentSheet.Appearance(),
+        )
         val sepaMandateContract = SepaMandateContract()
         val intent = sepaMandateContract.createIntent(context, args)
         val scenario = ActivityScenario.launchActivityForResult<SepaMandateActivity>(intent)

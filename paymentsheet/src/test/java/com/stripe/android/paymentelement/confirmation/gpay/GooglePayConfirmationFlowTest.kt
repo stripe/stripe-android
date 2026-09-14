@@ -43,6 +43,7 @@ class GooglePayConfirmationFlowTest {
                 val mediator = ConfirmationMediator(
                     savedStateHandle = savedStateHandle,
                     definition = GooglePayConfirmationDefinition(
+                        instanceId = "instanceId",
                         context = ApplicationProvider.getApplicationContext<Context>(),
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
@@ -104,6 +105,7 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
+            instanceId = "instanceId",
             context = ApplicationProvider.getApplicationContext<Context>(),
             googlePayPaymentMethodLauncherFactory =
                 RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),

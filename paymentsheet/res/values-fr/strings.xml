@@ -114,6 +114,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_internal_error_message">Un problème est survenu. Veuillez essayer une autre carte bancaire.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">La carte bancaire n’est pas prise en charge. Essayez avec une autre carte.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Veuillez réessayer.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">ou saisissez manuellement</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->

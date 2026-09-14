@@ -10,7 +10,7 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
@@ -147,7 +147,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         }
 
         override fun clickPrimaryButton() {
-            composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .performScrollTo()
                 .performClick()
 
@@ -175,7 +175,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         }
 
         protected fun hasPrimaryButton(): Boolean {
-            return composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            return composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }

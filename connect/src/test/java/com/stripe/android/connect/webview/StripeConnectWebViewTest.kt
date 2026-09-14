@@ -24,6 +24,7 @@ import com.stripe.android.connect.webview.serialization.SetOnExit
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -58,7 +59,8 @@ class StripeConnectWebViewTest {
         webView = StripeConnectWebView(
             application = RuntimeEnvironment.getApplication(),
             delegate = mockDelegate,
-            logger = Logger.getInstance(enableLogging = true)
+            logger = Logger.getInstance(enableLogging = true),
+            coroutineScope = TestScope(),
         )
     }
 

@@ -393,8 +393,7 @@ internal class AdditionalKycStateHolder(
 
         return AdditionalKycSubmission(
             liquidityProvider = requirement.requestedBy,
-            submissionType = requirement.submissionType,
-            documents = if (requirement.submissionType == DOCUMENT_SUBMISSION_TYPE) {
+            documents = if (requirement.document != null) {
                 completedSlots.groupBy { slot -> slot.subtypeId }.map { (subtypeId, slots) ->
                     AdditionalKycDocumentSubmission(
                         documentType = requirement.description,
@@ -403,7 +402,7 @@ internal class AdditionalKycStateHolder(
                     )
                 }
             } else {
-                null
+                emptyList()
             },
             questionnaire = requirement.questionnaire?.let { questionnaire ->
                 AdditionalKycQuestionnaireSubmission(
@@ -446,7 +445,7 @@ internal class AdditionalKycStateHolder(
         return AdditionalKycScreenState(
             page = page,
             requirementType = requirementType,
-            errorMessages = requirement?.errors?.map { error -> error.message }.orEmpty(),
+            errorMessages = requirement?.errors?.map { error -> error.developerMessage }.orEmpty(),
             questions = requirement?.questionnaire?.questions.orEmpty().map { question ->
                 AdditionalKycQuestionState(
                     id = question.id,
@@ -539,8 +538,8 @@ internal class AdditionalKycStateHolder(
             return AdditionalKycValidationError.MissingRequiredAnswers
         }
 
-        if (requirement.submissionType == DOCUMENT_SUBMISSION_TYPE) {
-            val document = requirement.document ?: return null
+        if (requirement.document != null) {
+            val document = requirement.document
             val completedSlots = documentSlots.filter { slot -> slot.file != null }
             if (completedSlots.size < document.minDocuments.coerceAtLeast(MINIMUM_DOCUMENT_COUNT)) {
                 return AdditionalKycValidationError.MissingDocuments
@@ -567,11 +566,7 @@ internal class AdditionalKycStateHolder(
 
     private fun isCollectionAvailable(): Boolean {
         val requirement = requirement ?: return false
-        return when (requirement.submissionType) {
-            DOCUMENT_SUBMISSION_TYPE -> requirement.document != null
-            QUESTIONNAIRE_SUBMISSION_TYPE -> requirement.questionnaire != null
-            else -> false
-        }
+        return requirement.document != null || requirement.questionnaire != null
     }
 
     private fun addNextUploadSlotIfNeeded(completedSlotIndex: Int) {
@@ -678,8 +673,6 @@ internal class AdditionalKycStateHolder(
     )
 
     private companion object {
-        private const val DOCUMENT_SUBMISSION_TYPE = "document"
-        private const val QUESTIONNAIRE_SUBMISSION_TYPE = "questionnaire"
         private const val PROOF_OF_ADDRESS = "proof_of_address"
         private const val SOURCE_OF_FUNDS = "source_of_funds"
         private const val SOURCE_OF_FUNDS_QUESTIONS = "source_of_funds_questions"
@@ -700,13 +693,13 @@ internal class AdditionalKycStateHolder(
         }
 
         private fun createDocumentSlots(requirement: AdditionalKycRequirement?): List<DocumentSlot> {
-            if (requirement?.submissionType != DOCUMENT_SUBMISSION_TYPE) {
+            if (requirement?.document == null) {
                 return emptyList()
             }
             return listOf(
                 DocumentSlot(
                     index = 0,
-                    subtypeId = requirement.document?.acceptedSubtypes?.firstOrNull()?.id,
+                    subtypeId = requirement.document.acceptedSubtypes.firstOrNull()?.id,
                     file = null,
                 )
             )
@@ -719,9 +712,7 @@ internal class AdditionalKycStateHolder(
             return when {
                 pendingRequirements.isNotEmpty() -> AdditionalKycCollectionPage.Pending
                 requirement == null -> AdditionalKycCollectionPage.Unavailable
-                requirement.submissionType == DOCUMENT_SUBMISSION_TYPE && requirement.document == null ->
-                    AdditionalKycCollectionPage.Unavailable
-                requirement.submissionType == QUESTIONNAIRE_SUBMISSION_TYPE && requirement.questionnaire == null ->
+                requirement.document == null && requirement.questionnaire == null ->
                     AdditionalKycCollectionPage.Unavailable
                 requirement.description !in setOf(
                     PROOF_OF_ADDRESS,

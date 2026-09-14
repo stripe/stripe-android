@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItem
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -332,64 +331,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(
             confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.additionalEnabledNetworks
         ).isEqualTo(additionalNetworks)
-    }
-
-    @Test
-    fun `On Google Pay selection with displayItems, should return expected option with displayItems`() {
-        val displayItems = listOf(
-            GooglePayDisplayItem(
-                label = "Widget".resolvableString,
-                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 2000L,
-            ),
-            GooglePayDisplayItem(
-                label = "Tax".resolvableString,
-                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
-                price = 500L,
-            ),
-        )
-
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                        countryCode = "US",
-                        currencyCode = "USD",
-                    )
-                )
-                .build()
-                .asCommonConfiguration(),
-            linkConfiguration = null,
-            cardFundingFilter = DefaultCardFundingFilter,
-            googlePayDisplayItems = displayItems,
-        )
-
-        assertThat(
-            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
-        ).isEqualTo(displayItems)
-    }
-
-    @Test
-    fun `On Google Pay selection without displayItems, should return empty displayItems`() {
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                        countryCode = "US",
-                        currencyCode = "USD",
-                    )
-                )
-                .build()
-                .asCommonConfiguration(),
-            linkConfiguration = null,
-            cardFundingFilter = DefaultCardFundingFilter,
-        )
-
-        assertThat(
-            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
-        ).isEmpty()
     }
 
     @Test

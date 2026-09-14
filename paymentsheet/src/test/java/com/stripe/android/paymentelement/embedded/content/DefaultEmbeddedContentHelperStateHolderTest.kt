@@ -5,7 +5,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -17,17 +16,14 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
         stateHolder.state.test {
             assertThat(awaitItem()).isNull()
             val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-            val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
             val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
             stateHolder.dataLoaded(
                 paymentMethodMetadata = paymentMethodMetadata,
-                appearance = appearance,
                 embeddedViewDisplaysMandateText = true,
                 configuration = configuration,
             )
             val state = awaitItem()
             assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-            assertThat(state?.appearance).isEqualTo(appearance)
             assertThat(state?.embeddedViewDisplaysMandateText).isTrue()
             assertThat(state?.configuration).isEqualTo(configuration)
         }
@@ -42,7 +38,6 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             repeat(2) {
                 stateHolder.dataLoaded(
                     paymentMethodMetadata = args.paymentMethodMetadata,
-                    appearance = args.appearance,
                     embeddedViewDisplaysMandateText = args.embeddedViewDisplaysMandateText,
                     configuration = args.configuration,
                 )
@@ -61,7 +56,6 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
     fun `clearEmbeddedContent resets state to null`() = testScenario {
         stateHolder.dataLoaded(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
             embeddedViewDisplaysMandateText = true,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         )
@@ -79,7 +73,6 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             set(
                 EmbeddedContentHelperStateHolder.STATE_KEY_EMBEDDED_CONTENT,
                 EmbeddedContentHelperStateFactory.create(
-                    appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = false,
                 )
             )

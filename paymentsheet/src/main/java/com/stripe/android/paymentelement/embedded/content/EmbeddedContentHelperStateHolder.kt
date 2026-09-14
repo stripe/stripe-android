@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -16,7 +15,6 @@ internal interface EmbeddedContentHelperStateHolder {
 
     fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
         configuration: EmbeddedPaymentElement.Configuration,
     )
@@ -26,7 +24,6 @@ internal interface EmbeddedContentHelperStateHolder {
     @Parcelize
     data class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val appearance: Embedded,
         val embeddedViewDisplaysMandateText: Boolean,
         val configuration: EmbeddedPaymentElement.Configuration,
     ) : Parcelable
@@ -50,14 +47,12 @@ internal class DefaultEmbeddedContentHelperStateHolder @Inject constructor(
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
         eventReporter.onShowNewPaymentOptions()
         val state = EmbeddedContentHelperStateHolder.State(
             paymentMethodMetadata = paymentMethodMetadata,
-            appearance = appearance,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             configuration = configuration,
         )

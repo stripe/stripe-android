@@ -1,30 +1,17 @@
 package com.stripe.android.view
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeJsonUtils
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
-import org.json.JSONObject
-import java.util.Scanner
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BecsDebitBanks(
-    internal val banks: List<Bank>,
-    private val shouldIncludeTestBank: Boolean = true
+    internal val banks: List<Bank> = DEFAULT_BANKS
 ) {
-    constructor(
-        context: Context,
-        shouldIncludeTestBank: Boolean = true
-    ) : this(
-        createBanksData(context),
-        shouldIncludeTestBank
-    )
-
     fun byPrefix(bsb: String): Bank? {
         return banks
-            .plus(listOfNotNull(STRIPE_TEST_BANK.takeIf { shouldIncludeTestBank }))
+            .plus(STRIPE_TEST_BANK)
             .firstOrNull {
                 bsb.startsWith(it.prefix)
             }
@@ -38,22 +25,157 @@ class BecsDebitBanks(
     ) : Parcelable
 
     private companion object {
-        private fun createBanksData(context: Context): List<Bank> {
-            return StripeJsonUtils.jsonObjectToMap(
-                JSONObject(readFile(context))
-            ).orEmpty().map { entry ->
-                Bank(
-                    prefix = entry.key,
-                    name = entry.value.toString()
-                )
-            }
-        }
-
-        private fun readFile(context: Context): String {
-            return Scanner(
-                context.resources.assets.open("au_becs_bsb.json")
-            ).useDelimiter("\\A").next()
-        }
+        private val DEFAULT_BANKS = listOf(
+            Bank("10", "BankSA (division of Westpac Bank)"),
+            Bank("11", "St George Bank (division of Westpac Bank)"),
+            Bank("12", "Bank of Queensland"),
+            Bank("14", "Rabobank"),
+            Bank("15", "Town & Country Bank"),
+            Bank("18", "Macquarie Bank"),
+            Bank("19", "Bank of Melbourne (division of Westpac Bank)"),
+            Bank("21", "JP Morgan Chase Bank"),
+            Bank("22", "BNP Paribas"),
+            Bank("23", "Bank of America"),
+            Bank("24", "Citibank"),
+            Bank("25", "BNP Paribas Securities"),
+            Bank("26", "Bankers Trust Australia (division of Westpac Bank)"),
+            Bank("29", "Bank of Tokyo-Mitsubishi"),
+            Bank("30", "Bankwest (division of Commonwealth Bank)"),
+            Bank("33", "St George Bank (division of Westpac Bank)"),
+            Bank("34", "HSBC Bank Australia"),
+            Bank("35", "Bank of China"),
+            Bank("40", "Commonwealth Bank of Australia"),
+            Bank("41", "Deutsche Bank"),
+            Bank("42", "Commonwealth Bank of Australia"),
+            Bank("45", "OCBC Bank"),
+            Bank("46", "Advance Bank (division of Westpac Bank)"),
+            Bank("47", "Challenge Bank (division of Westpac Bank)"),
+            Bank("48", "Suncorp-Metway"),
+            Bank("52", "Commonwealth Bank of Australia"),
+            Bank("55", "Bank of Melbourne (division of Westpac Bank)"),
+            Bank("57", "Australian Settlements"),
+            Bank("61", "Adelaide Bank (division of Bendigo and Adelaide Bank)"),
+            Bank("70", "Indue"),
+            Bank("73", "Westpac Banking Corporation"),
+            Bank("76", "Commonwealth Bank of Australia"),
+            Bank("80", "Cuscal"),
+            Bank("90", "Australia Post"),
+            Bank("311", "in1bank"),
+            Bank("313", "Bankmecu"),
+            Bank("323", "KEB Hana Bank"),
+            Bank("325", "Beyond Bank Australia"),
+            Bank("369", "BNK Banking Corporation Ltd"),
+            Bank("370", "Flash Partners Pty Ltd"),
+            Bank("392", "Fat Zebra Pty Ltd"),
+            Bank("432", "Standard Chartered Bank"),
+            Bank("510", "Citibank N.A."),
+            Bank("512", "Community First Credit Union"),
+            Bank("514", "QT Mutual Bank"),
+            Bank("517", "Australian Settlements Limited"),
+            Bank("533", "Bananacoast Community Credit Union"),
+            Bank("560", "Ebury Partners Australia Pty Ltd"),
+            Bank("585", "Bano"),
+            Bank("599", "Corporate Alliance"),
+            Bank("611", "Select Credit Union"),
+            Bank("630", "ABS Building Society"),
+            Bank("632", "B&E"),
+            Bank("633", "Bendigo Bank"),
+            Bank("634", "Uniting Financial Services"),
+            Bank("636", "Cuscal Limited"),
+            Bank("637", "Greater Building Society"),
+            Bank("638", "Heritage Bank"),
+            Bank("639", "Home Building Society (division of Bank of Queensland)"),
+            Bank("640", "Hume Bank"),
+            Bank("641", "IMB"),
+            Bank("642", "Australian Defence Credit Union"),
+            Bank("645", "Wide Bay Australia"),
+            Bank("646", "Maitland Mutual Building Society"),
+            Bank("647", "IMB"),
+            Bank("650", "Newcastle Permanent Building Society"),
+            Bank(
+                "653",
+                "Pioneer Permanent Building Society (division of Bank of Queensland)"
+            ),
+            Bank("654", "ECU Australia"),
+            Bank("655", "The Rock Building Society"),
+            Bank("656", "Wide Bay Australia"),
+            Bank("657", "Greater Building Society"),
+            Bank("659", "SGE Credit Union"),
+            Bank("664", "Suncorp-Metway"),
+            Bank("670", "Cuscal Limited"),
+            Bank("671", "Cuscal Limited"),
+            Bank("676", "Gateway Credit Union"),
+            Bank("680", "Greater Bank Limited"),
+            Bank("681", "CHINA EVERBRIGHT BANK CO., LTD."),
+            Bank("688", "International Bank of Australia"),
+            Bank("690", "Islamic Bank Australia"),
+            Bank("721", "Holiday Coast Credit Union"),
+            Bank("722", "Southern Cross Credit"),
+            Bank("723", "Heritage Isle Credit Union"),
+            Bank("724", "Railways Credit Union"),
+            Bank("725", "Judo Bank Pty Ltd"),
+            Bank("728", "Summerland Credit Union"),
+            Bank("771", "AFT AU PTY LTD"),
+            Bank("772", "Revolut Payments Australia Pty Ltd"),
+            Bank("774", "Wise Australia Pty Ltd"),
+            Bank("775", "Australian Settlements Limited"),
+            Bank("777", "Police & Nurse"),
+            Bank("812", "Teachers Mutual Bank"),
+            Bank("813", "Capricornian"),
+            Bank("814", "Credit Union Australia"),
+            Bank("815", "Police Bank"),
+            Bank("817", "Warwick Credit Union"),
+            Bank("818", "Bank of Communications"),
+            Bank("819", "Industrial & Commercial Bank of China"),
+            Bank("820", "Global Payments Australia 1 Pty Ltd"),
+            Bank("823", "Encompass Credit Union"),
+            Bank("824", "Sutherland Credit Union"),
+            Bank("825", "Big Sky Building Society"),
+            Bank("828", "China Merchants Bank, Sydney"),
+            Bank("833", "Defence Bank Limited"),
+            Bank("834", "Great Southern Business Bank"),
+            Bank("840", "Split Payments Pty Ltd"),
+            Bank("850", "PAYNOW TECHNOLOGY PTY LTD"),
+            Bank("855", "Strong Customer Authentication"),
+            Bank("880", "Heritage Bank"),
+            Bank("882", "Maritime Mining & Power Credit Union"),
+            Bank("888", "China Construction Bank Corporation"),
+            Bank("889", "DBS Bank Ltd."),
+            Bank("890", "Avenue Bank Ltd"),
+            Bank("898", "Agricultural Bank of China Limited"),
+            Bank("911", "Sumitomo Mitsui Banking Corporation"),
+            Bank("913", "State Street Bank & Trust Company"),
+            Bank("914", "Barclays Bank PLC"),
+            Bank("917", "Arab Bank Australia"),
+            Bank("918", "Mizuho Bank"),
+            Bank("922", "United Overseas Bank"),
+            Bank("923", "ING Bank"),
+            Bank("930", "Rabobank Australia"),
+            Bank("931", "Mega International Commercial Bank"),
+            Bank("932", "Community Mutual"),
+            Bank("935", "Royal Bank of Canada"),
+            Bank("936", "ING Bank"),
+            Bank("939", "AMP Bank"),
+            Bank("941", "Delphi Bank (division of Bendigo and Adelaide Bank)"),
+            Bank("942", "Bank of Sydney"),
+            Bank("943", "Taiwan Business Bank"),
+            Bank("944", "Members Equity Bank"),
+            Bank("946", "UBS AG"),
+            Bank("949", "State Bank of India"),
+            Bank("951", "BOQ Specialist Bank"),
+            Bank("952", "Royal Bank of Scotland"),
+            Bank("969", "Tyro Payments"),
+            Bank("980", "Bank of China"),
+            Bank("985", "HSBC Bank Australia"),
+            Bank("01", "Australia and New Zealand Banking Group"),
+            Bank("013943", "Australia and New Zealand Banking Group"),
+            Bank("03", "Westpac Banking Corporation"),
+            Bank("04", "Westpac Banking Corporation"),
+            Bank("06", "Commonwealth Bank of Australia"),
+            Bank("08", "National Australia Bank"),
+            Bank("09", "Reserve Bank of Australia"),
+            Bank("020", "The Northern Trust Company Australia"),
+        ).sortedByDescending { it.prefix.length }
 
         private val STRIPE_TEST_BANK = Bank(
             prefix = "00",

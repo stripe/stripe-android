@@ -24,7 +24,6 @@ internal data class GooglePayConfirmationOption(
         val cardBrandFilter: CardBrandFilter,
         val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String> = emptyList(),
-        val displayItems: List<GooglePayDisplayItem> = emptyList(),
         val isEmailRequired: Boolean = billingDetailsCollectionConfiguration.collectsEmail,
         val billingEmailOverride: String? = null,
         val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,

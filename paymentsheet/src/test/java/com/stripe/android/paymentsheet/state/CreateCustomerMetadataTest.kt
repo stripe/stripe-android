@@ -327,7 +327,6 @@ internal class CreateCustomerMetadataTest {
             return ElementsSession(
                 stripeIntent = stripeIntent,
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 externalPaymentMethodData = null,
                 orderedPaymentMethodTypesAndWallets = listOf("card"),
                 flags = emptyMap(),

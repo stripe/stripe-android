@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">캡처된 셀카</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">좋습니다! 이미지를 확인하는 중입니다....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Stripe는 사기 탐지를 개선하기 위해 귀하의 이미지를 귀하의 동의 하에 사용할 수 있습니다. 거부하더라도 인증에는 영향을 미치지 않습니다.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">셀카로 인증</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">셀카 1장 캡처됨</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

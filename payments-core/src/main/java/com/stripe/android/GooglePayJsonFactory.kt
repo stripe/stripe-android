@@ -200,6 +200,7 @@ class GooglePayJsonFactory internal constructor(
         merchantInfo: MerchantInfo,
         billingAddressParameters: BillingAddressParameters? = null,
         shippingAddressParameters: ShippingAddressParameters? = null,
+        hasDynamicCallbacks: Boolean = false,
         isEmailRequired: Boolean = false,
         allowCreditCards: Boolean? = null,
     ): JSONObject {
@@ -227,6 +228,19 @@ class GooglePayJsonFactory internal constructor(
                     )
                 }
 
+                if (hasDynamicCallbacks) {
+                    val intents = listOfNotNull(
+                        "SHIPPING_ADDRESS".takeIf { shippingAddressParameters?.isRequired == true },
+                    )
+
+                    if (intents.isNotEmpty()) {
+                        put(
+                            "callbackIntents",
+                            JSONArray(intents)
+                        )
+                    }
+                }
+
                 put(
                     "merchantInfo",
                     JSONObject().apply {
@@ -245,7 +259,7 @@ class GooglePayJsonFactory internal constructor(
             }
     }
 
-    private fun createTransactionInfo(
+    internal fun createTransactionInfo(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()
@@ -406,15 +420,23 @@ class GooglePayJsonFactory internal constructor(
 
     @Parcelize
     @Poko
-    class TransactionInfo internal constructor(
-        internal val currencyCode: String,
-        internal val totalPriceStatus: TotalPriceStatus,
-        internal val countryCode: String?,
-        internal val transactionId: String?,
-        internal val totalPrice: Long?,
-        internal val totalPriceLabel: String?,
-        internal val checkoutOption: CheckoutOption?,
-        internal val displayItems: List<DisplayItem> = emptyList(),
+    class TransactionInfo @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val currencyCode: String,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceStatus: TotalPriceStatus,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val countryCode: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val transactionId: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPrice: Long?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceLabel: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val checkoutOption: CheckoutOption?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayItems: List<DisplayItem> = emptyList(),
     ) : Parcelable {
 
         /**

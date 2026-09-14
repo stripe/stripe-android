@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailConfig
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
@@ -180,7 +180,7 @@ internal class AccountPreviewScreenshotTest {
     )
 
     private val sameAsShippingElement = SameAsShippingElement(
-        identifier = IdentifierSpec.SameAsShipping,
+        identifier = FormFieldId.SameAsShipping,
         controller = SameAsShippingController(false),
     )
 

@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -57,9 +57,9 @@ internal fun PaymentMethodForm(
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     completeFormValues: Flow<FormFieldValues?>,
-    hiddenIdentifiers: Set<IdentifierSpec>,
+    hiddenIdentifiers: Set<FormFieldId>,
     elements: List<FormElement>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(paymentMethodCode) {

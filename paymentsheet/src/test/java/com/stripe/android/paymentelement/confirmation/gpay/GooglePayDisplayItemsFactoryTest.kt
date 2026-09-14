@@ -15,11 +15,13 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class GooglePayDisplayItemsFactoryTest {
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+
     @Test
     fun `returns empty list when checkoutSessionResponse is null`() {
         val metadata = PaymentMethodMetadataFactory.create()
 
-        val result = GooglePayDisplayItemsFactory.create(metadata)
+        val result = GooglePayDisplayItemsFactory.create(metadata, context)
 
         assertThat(result).isEmpty()
     }
@@ -227,9 +229,7 @@ class GooglePayDisplayItemsFactoryTest {
             ),
         )
 
-        return GooglePayDisplayItemsFactory.create(metadata).map { displayItem ->
-            displayItem.resolve(ApplicationProvider.getApplicationContext<Context>())
-        }
+        return GooglePayDisplayItemsFactory.create(metadata, context)
     }
 
     private companion object {

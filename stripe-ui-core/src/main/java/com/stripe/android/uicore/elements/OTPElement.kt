@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.mapNotNull
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class OTPElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     override val controller: OTPController
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
         return controller.fieldValue.mapAsStateFlow {
             listOf(identifier to FormFieldEntry(it, it.length == controller.otpLength))
         }

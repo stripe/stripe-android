@@ -29,6 +29,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SESSION_RESULT
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.testing.CleanupTestRule
@@ -214,6 +215,68 @@ class IdentityAnalyticsRequestFactoryTest {
             argWhere {
                 it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
                     it.params.toMap()[PARAM_ARB_ID] == USER_SESSION_ID &&
+                    it.params.toMap()[PARAM_EXPERIMENT_RETRIEVED] == EXP1
+            }
+        )
+    }
+
+    @Test
+    fun testSelfieScreenPresentedLogs3DFaceCaptureExperimentExposure() = runBlocking {
+        factory.verificationPage = mock<VerificationPage> {
+            on { userSessionId }.thenReturn(USER_SESSION_ID)
+            on { experiments }.thenReturn(
+                listOf(
+                    VerificationPageStaticContentExperiment(
+                        experimentName = IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT,
+                        eventName = EVENT_SCREEN_PRESENTED,
+                        eventMetadata = mapOf(
+                            PARAM_SCREEN_NAME to IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
+                        )
+                    )
+                )
+            )
+            on { livemode }.thenReturn(true)
+        }
+
+        factory.screenPresented(
+            IdentityScanState.ScanType.SELFIE,
+            IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
+        )
+
+        verify(mockIdentityRepository).sendAnalyticsRequest(
+            argWhere {
+                it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
+                    it.params.toMap()[PARAM_ARB_ID] == USER_SESSION_ID &&
+                    it.params.toMap()[PARAM_EXPERIMENT_RETRIEVED] ==
+                    IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
+            }
+        )
+    }
+
+    @Test
+    fun testExperimentWithEmptyMetadataMatchesEvent() = runBlocking {
+        factory.verificationPage = mock<VerificationPage> {
+            on { userSessionId }.thenReturn(USER_SESSION_ID)
+            on { experiments }.thenReturn(
+                listOf(
+                    VerificationPageStaticContentExperiment(
+                        experimentName = EXP1,
+                        eventName = EVENT_SCREEN_PRESENTED,
+                        eventMetadata = emptyMap()
+                    )
+                )
+            )
+            on { livemode }.thenReturn(true)
+        }
+
+        factory.screenPresented(
+            IdentityScanState.ScanType.DOC_FRONT,
+            TEST_SCREEN_NAME
+        )
+
+        verify(mockIdentityRepository).sendAnalyticsRequest(
+            argWhere {
+                it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
                     it.params.toMap()[PARAM_EXPERIMENT_RETRIEVED] == EXP1
             }
         )

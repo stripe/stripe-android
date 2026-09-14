@@ -15,8 +15,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.H6Text
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
@@ -27,8 +27,8 @@ import com.stripe.android.uicore.utils.collectAsState
 fun CardDetailsSectionElementUI(
     enabled: Boolean,
     controller: CardDetailsSectionController,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId>,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
@@ -39,7 +39,7 @@ fun CardDetailsSectionElementUI(
         SectionElementUI(
             enabled = enabled,
             element = SectionElement(
-                IdentifierSpec.Generic("credit_details"),
+                FormFieldId.Generic("credit_details"),
                 listOf(controller.cardDetailsElement),
                 SectionController(
                     null,

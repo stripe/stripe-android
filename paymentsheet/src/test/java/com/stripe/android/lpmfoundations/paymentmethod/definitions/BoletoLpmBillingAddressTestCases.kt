@@ -4,21 +4,22 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val boletoNoBillingAddressRawValues = mapOf(
-    IdentifierSpec.Generic("boleto[tax_id]") to "123.456.789-09",
+    FormFieldId.Generic("boleto[tax_id]") to "123.456.789-09",
 )
 
 private val boletoWithBillingAddressRawValues = boletoNoBillingAddressRawValues + mapOf(
-    IdentifierSpec.Name to "Jane Doe",
-    IdentifierSpec.Email to "jane@example.com",
-    IdentifierSpec.Line1 to "Avenida Paulista 123",
-    IdentifierSpec.Line2 to "Apto 45",
-    IdentifierSpec.City to "Sao Paulo",
-    IdentifierSpec.State to "SP",
-    IdentifierSpec.Country to "BR",
-    IdentifierSpec.PostalCode to "01311000",
+    FormFieldId.Name to "Jane Doe",
+    FormFieldId.Email to "jane@example.com",
+    FormFieldId.Line1 to "Avenida Paulista 123",
+    FormFieldId.Line2 to "Apto 45",
+    FormFieldId.City to "Sao Paulo",
+    FormFieldId.State to "SP",
+    FormFieldId.Country to "BR",
+    FormFieldId.PostalCode to "01311000",
 )
 
 private val boletoNoBillingAddressExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(
@@ -73,8 +74,12 @@ private val boletoWithBillingAddressExpectedPaymentMethodParams = PaymentMethodC
 internal val boletoTestCases = listOf(
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Never",
-        paymentMethodType = PaymentMethod.Type.Boleto,
-        mode = LpmBillingAddressBaselineMode.Never,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Boleto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = boletoNoBillingAddressRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = boletoNoBillingAddressExpectedPaymentMethodParams,
@@ -84,8 +89,12 @@ internal val boletoTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Automatic without tax",
-        paymentMethodType = PaymentMethod.Type.Boleto,
-        mode = LpmBillingAddressBaselineMode.AutomaticWithoutTax,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Boleto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = boletoWithBillingAddressRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = boletoWithBillingAddressExpectedPaymentMethodParams,
@@ -95,8 +104,12 @@ internal val boletoTestCases = listOf(
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Boleto Full",
-        paymentMethodType = PaymentMethod.Type.Boleto,
-        mode = LpmBillingAddressBaselineMode.Full,
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Boleto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
         rawValues = boletoWithBillingAddressRawValues,
         expectedParams = LpmBillingAddressFormParams(
             createParams = boletoWithBillingAddressExpectedPaymentMethodParams,

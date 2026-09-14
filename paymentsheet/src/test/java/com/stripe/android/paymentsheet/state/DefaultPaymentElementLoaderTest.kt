@@ -31,7 +31,6 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
@@ -154,7 +153,6 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
-                    sharedDataSpecs = emptyList(),
                     isGooglePayReady = true,
                     linkMode = null,
                     linkState = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession)),
@@ -2344,7 +2342,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -2369,7 +2367,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -5032,7 +5030,6 @@ internal class DefaultPaymentElementLoaderTest {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
             },
-            lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
             errorReporter = errorReporter,
@@ -5093,6 +5090,13 @@ internal class DefaultPaymentElementLoaderTest {
             customer = PaymentSheet.CustomerConfiguration(
                 id = "cus_123",
                 ephemeralKeySecret = "ek_123",
+            ),
+        )
+        private val CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
+            merchantDisplayName = "Some Name",
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "cuss_1",
             ),
         )
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -5176,7 +5180,6 @@ internal class DefaultPaymentElementLoaderTest {
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 stripeIntent = stripeIntent,
                 merchantCountry = null,
                 isGooglePayEnabled = true,

@@ -56,8 +56,8 @@ internal class StripePaymentControllerTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = context,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
     private val testDispatcher = StandardTestDispatcher()
 

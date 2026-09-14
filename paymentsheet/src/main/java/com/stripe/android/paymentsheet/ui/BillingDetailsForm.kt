@@ -9,7 +9,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -32,7 +32,7 @@ internal class BillingDetailsForm(
 ) {
     val nameElement: SimpleTextElement? = if (nameCollection == NameCollection.OutsideBillingDetailsForm) {
         SimpleTextElement(
-            identifier = IdentifierSpec.Name,
+            identifier = FormFieldId.Name,
             controller = NameConfig.createController(billingDetails?.name)
         )
     } else {
@@ -40,7 +40,7 @@ internal class BillingDetailsForm(
     }
 
     private val cardBillingAddressElement: BillingAddressElement = BillingAddressElement(
-        identifier = IdentifierSpec.BillingAddress,
+        identifier = FormFieldId.BillingAddress,
         sameAsShippingElement = null,
         shippingValuesMap = null,
         countryCodes = allowedBillingCountries,
@@ -86,20 +86,20 @@ internal class BillingDetailsForm(
         ) { nameFormFields, addressFormFields, hiddenIdentifiers ->
             val name = when (nameCollection) {
                 NameCollection.InBillingDetailsForm ->
-                    addressFormFields.valueOrNull(IdentifierSpec.Name, hiddenIdentifiers)
+                    addressFormFields.valueOrNull(FormFieldId.Name, hiddenIdentifiers)
                 NameCollection.OutsideBillingDetailsForm ->
-                    nameFormFields.find { it.first == IdentifierSpec.Name }?.second
+                    nameFormFields.find { it.first == FormFieldId.Name }?.second
                 NameCollection.Disabled -> null
             }
 
-            val email = addressFormFields.valueOrNull(IdentifierSpec.Email, hiddenIdentifiers)
-            val phone = addressFormFields.valueOrNull(IdentifierSpec.Phone, hiddenIdentifiers)
-            val line1 = addressFormFields.valueOrNull(IdentifierSpec.Line1, hiddenIdentifiers)
-            val line2 = addressFormFields.valueOrNull(IdentifierSpec.Line2, hiddenIdentifiers)
-            val city = addressFormFields.valueOrNull(IdentifierSpec.City, hiddenIdentifiers)
-            val postalCode = addressFormFields.valueOrNull(IdentifierSpec.PostalCode, hiddenIdentifiers)
-            val country = addressFormFields.valueOrNull(IdentifierSpec.Country, hiddenIdentifiers)
-            val state = addressFormFields.valueOrNull(IdentifierSpec.State, hiddenIdentifiers)
+            val email = addressFormFields.valueOrNull(FormFieldId.Email, hiddenIdentifiers)
+            val phone = addressFormFields.valueOrNull(FormFieldId.Phone, hiddenIdentifiers)
+            val line1 = addressFormFields.valueOrNull(FormFieldId.Line1, hiddenIdentifiers)
+            val line2 = addressFormFields.valueOrNull(FormFieldId.Line2, hiddenIdentifiers)
+            val city = addressFormFields.valueOrNull(FormFieldId.City, hiddenIdentifiers)
+            val postalCode = addressFormFields.valueOrNull(FormFieldId.PostalCode, hiddenIdentifiers)
+            val country = addressFormFields.valueOrNull(FormFieldId.Country, hiddenIdentifiers)
+            val state = addressFormFields.valueOrNull(FormFieldId.State, hiddenIdentifiers)
             BillingDetailsFormState(
                 name = name,
                 email = email,
@@ -114,35 +114,35 @@ internal class BillingDetailsForm(
         }.flowOn(Dispatchers.Main)
     }
 
-    private fun List<Pair<IdentifierSpec, FormFieldEntry>>.valueOrNull(
-        identifierSpec: IdentifierSpec,
-        hiddenIdentifiers: Set<IdentifierSpec>
+    private fun List<Pair<FormFieldId, FormFieldEntry>>.valueOrNull(
+        formFieldId: FormFieldId,
+        hiddenIdentifiers: Set<FormFieldId>
     ): FormFieldEntry? {
-        if (hiddenIdentifiers.contains(identifierSpec)) return null
+        if (hiddenIdentifiers.contains(formFieldId)) return null
         return firstOrNull {
-            it.first == identifierSpec
+            it.first == formFieldId
         }?.second
     }
 
     private fun rawAddressValues(
         billingDetails: PaymentMethod.BillingDetails?,
-    ): Map<IdentifierSpec, String?> {
+    ): Map<FormFieldId, String?> {
         val address = billingDetails?.address
 
         return listOfNotNull(
-            (IdentifierSpec.Name to billingDetails?.name).takeIf {
+            (FormFieldId.Name to billingDetails?.name).takeIf {
                 nameCollection == NameCollection.InBillingDetailsForm
             },
-            IdentifierSpec.Line1 to address?.line1,
-            IdentifierSpec.Line2 to address?.line2,
-            IdentifierSpec.State to address?.state,
-            IdentifierSpec.City to address?.city,
-            IdentifierSpec.Country to address?.country,
-            IdentifierSpec.PostalCode to address?.postalCode,
-            (IdentifierSpec.Email to billingDetails?.email).takeIf {
+            FormFieldId.Line1 to address?.line1,
+            FormFieldId.Line2 to address?.line2,
+            FormFieldId.State to address?.state,
+            FormFieldId.City to address?.city,
+            FormFieldId.Country to address?.country,
+            FormFieldId.PostalCode to address?.postalCode,
+            (FormFieldId.Email to billingDetails?.email).takeIf {
                 collectEmail
             },
-            (IdentifierSpec.Phone to billingDetails?.phone).takeIf {
+            (FormFieldId.Phone to billingDetails?.phone).takeIf {
                 collectPhone
             },
         ).toMap()

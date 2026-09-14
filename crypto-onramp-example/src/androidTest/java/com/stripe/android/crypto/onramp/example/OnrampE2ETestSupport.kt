@@ -165,14 +165,28 @@ internal class OnrampE2EPage(
     }
 
     fun collectKycInfo(user: FreshOnrampUser) {
-        val address = TestKycAddress.forCountry(user.country)
+        val country = user.country.uppercase()
+        val address = TestKycAddress.forCountry(country)
+        val residence = when (country) {
+            "US" -> "United States"
+            "CA" -> "Canada"
+            "CO" -> "Colombia"
+            "PH" -> "Philippines"
+            else -> "European Union"
+        }
 
         clickTag(KYC_SECTION_TAG)
+        if (country != "US") {
+            clickTag(KYC_RESIDENCE_DROPDOWN_TAG)
+            clickText(residence)
+        }
         replaceTag(KYC_FIRST_NAME_TAG, TEST_KYC_FIRST_NAME)
         replaceTag(KYC_LAST_NAME_TAG, TEST_KYC_LAST_NAME)
-        replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
-        replaceTag(KYC_BIRTH_CITY_TAG, address.city)
-        replaceTag(KYC_NATIONALITIES_TAG, user.country)
+        if (residence == "European Union") {
+            replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
+            replaceTag(KYC_BIRTH_CITY_TAG, address.city)
+            replaceTag(KYC_NATIONALITIES_TAG, user.country)
+        }
         replaceTag(KYC_ADDRESS_LINE_1_TAG, TEST_KYC_ADDRESS_LINE_1)
         replaceTag(KYC_ADDRESS_CITY_TAG, address.city)
         replaceTag(KYC_ADDRESS_STATE_TAG, address.state)
@@ -207,7 +221,7 @@ internal class OnrampE2EPage(
             IDENTITY_FAILED_BUTTON_TAG,
             timeoutMs = 30.seconds.inWholeMilliseconds,
         )
-        waitForSnackbar("Identity Verification failed: Failure from test mode")
+        waitForSnackbar("Identity Verification failed: Something went wrong. Please try again later.")
         waitForTag(LOGIN_EMAIL_TAG)
     }
 
@@ -613,6 +627,24 @@ private data class TestKycAddress(
                     state = "",
                     country = "MT",
                     postalCode = "VLT 1117",
+                )
+                "CA" -> TestKycAddress(
+                    city = "Toronto",
+                    state = "ON",
+                    country = "CA",
+                    postalCode = "M5V 3L9",
+                )
+                "CO" -> TestKycAddress(
+                    city = "Bogota",
+                    state = "Bogota",
+                    country = "CO",
+                    postalCode = "110111",
+                )
+                "PH" -> TestKycAddress(
+                    city = "Manila",
+                    state = "Metro Manila",
+                    country = "PH",
+                    postalCode = "1000",
                 )
                 else -> TestKycAddress(
                     city = "San Francisco",

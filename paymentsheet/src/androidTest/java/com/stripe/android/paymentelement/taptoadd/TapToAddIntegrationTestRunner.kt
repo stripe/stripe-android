@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -15,6 +16,7 @@ internal fun runTapToAddIntegrationTest(
     networkRule: NetworkRule,
     composeTestRule: ComposeTestRule,
     integrationType: TapToAddIntegrationType,
+    apiConfigurationTestType: ApiConfigurationTestType,
     createIntentCallback: CreateIntentCallback,
     createCardPresentCallback: CreateCardPresentSetupIntentCallback,
     resultCallback: TapToAddResultTestCallback,
@@ -23,6 +25,7 @@ internal fun runTapToAddIntegrationTest(
     integrationType.runner.run(
         networkRule = networkRule,
         composeTestRule = composeTestRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = createIntentCallback,
         createCardPresentSetupIntentCallback = createCardPresentCallback,
         resultCallback = resultCallback,
@@ -35,6 +38,7 @@ internal sealed class TapToAddIntegrationTestRunner {
     fun run(
         networkRule: NetworkRule,
         composeTestRule: ComposeTestRule,
+        apiConfigurationTestType: ApiConfigurationTestType,
         createIntentCallback: CreateIntentCallback,
         createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
         resultCallback: TapToAddResultTestCallback,
@@ -47,6 +51,7 @@ internal sealed class TapToAddIntegrationTestRunner {
         runTest(
             networkRule = networkRule,
             composeTestRule = composeTestRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             integrationBuilder = integrationBuilder,
             resultCallback = resultCallback,
             block = block,
@@ -56,6 +61,7 @@ internal sealed class TapToAddIntegrationTestRunner {
     protected abstract fun runTest(
         networkRule: NetworkRule,
         composeTestRule: ComposeTestRule,
+        apiConfigurationTestType: ApiConfigurationTestType,
         integrationBuilder: TapToAddIntegrationBuilder,
         resultCallback: TapToAddResultTestCallback,
         block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
@@ -65,12 +71,14 @@ internal sealed class TapToAddIntegrationTestRunner {
         override fun runTest(
             networkRule: NetworkRule,
             composeTestRule: ComposeTestRule,
+            apiConfigurationTestType: ApiConfigurationTestType,
             integrationBuilder: TapToAddIntegrationBuilder,
             resultCallback: TapToAddResultTestCallback,
             block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
         ) {
             runPaymentSheetTest(
                 networkRule = networkRule,
+                apiConfigurationTestType = apiConfigurationTestType,
                 builder = {
                     integrationBuilder.applyToPaymentSheetBuilder(this)
                 },
@@ -87,12 +95,14 @@ internal sealed class TapToAddIntegrationTestRunner {
         override fun runTest(
             networkRule: NetworkRule,
             composeTestRule: ComposeTestRule,
+            apiConfigurationTestType: ApiConfigurationTestType,
             integrationBuilder: TapToAddIntegrationBuilder,
             resultCallback: TapToAddResultTestCallback,
             block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
         ) {
             runFlowControllerTest(
                 networkRule = networkRule,
+                apiConfigurationTestType = apiConfigurationTestType,
                 callConfirmOnPaymentOptionCallback = false,
                 builder = {
                     integrationBuilder.applyToFlowControllerBuilder(this)
@@ -117,12 +127,14 @@ internal sealed class TapToAddIntegrationTestRunner {
         override fun runTest(
             networkRule: NetworkRule,
             composeTestRule: ComposeTestRule,
+            apiConfigurationTestType: ApiConfigurationTestType,
             integrationBuilder: TapToAddIntegrationBuilder,
             resultCallback: TapToAddResultTestCallback,
             block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
         ) {
             runEmbeddedPaymentElementTest(
                 networkRule = networkRule,
+                apiConfigurationTestType = apiConfigurationTestType,
                 builder = {
                     integrationBuilder.applyToEmbeddedBuilder(this)
                 },

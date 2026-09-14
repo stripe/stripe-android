@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -40,6 +41,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )

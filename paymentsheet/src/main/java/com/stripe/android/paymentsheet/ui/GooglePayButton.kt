@@ -41,7 +41,8 @@ internal fun GooglePayButton(
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter,
-    additionalEnabledNetworks: List<String>
+    additionalEnabledNetworks: List<String>,
+    theme: GooglePayButtonTheme? = null,
 ) {
     val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
@@ -69,10 +70,10 @@ internal fun GooglePayButton(
         }
     }
 
-    val buttonTheme = if (MaterialTheme.stripeThemeIsDark) {
-        ButtonTheme.Light
+    val buttonTheme = theme ?: if (MaterialTheme.stripeThemeIsDark) {
+        GooglePayButtonTheme.Light
     } else {
-        ButtonTheme.Dark
+        GooglePayButtonTheme.Dark
     }
 
     when (state) {
@@ -165,7 +166,7 @@ const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
 
 internal const val GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG = "google-pay-primary-button"
 
-private enum class ButtonTheme(val value: Int) {
+internal enum class GooglePayButtonTheme(val value: Int) {
     Dark(ButtonConstants.ButtonTheme.DARK),
     Light(ButtonConstants.ButtonTheme.LIGHT),
 }
@@ -189,7 +190,7 @@ private fun PayButton(
     onClick: () -> Unit,
     allowedPaymentMethods: String,
     modifier: Modifier = Modifier,
-    theme: ButtonTheme = ButtonTheme.Dark,
+    theme: GooglePayButtonTheme = GooglePayButtonTheme.Dark,
     type: ButtonType = ButtonType.Buy,
     height: Dp? = null,
     radius: Dp = 100.dp,

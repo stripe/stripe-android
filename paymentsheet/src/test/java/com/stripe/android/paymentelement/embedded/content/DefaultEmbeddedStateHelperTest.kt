@@ -32,20 +32,19 @@ import kotlin.test.assertFailsWith
 
 internal class DefaultEmbeddedStateHelperTest {
     @Test
-    fun `setting state correctly sets appearance`() = testScenario {
-        setState {
-            appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = Embedded(
-                        Embedded.RowStyle.FlatWithRadio.default
-                    )
-                )
+    fun `setting state forwards configured appearance`() = testScenario {
+        val appearance = PaymentSheet.Appearance(
+            embeddedAppearance = Embedded(
+                Embedded.RowStyle.FlatWithRadio.default
             )
+        )
+        setState {
+            appearance(appearance)
         }
 
         confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(contentStateHolder.dataLoadedTurbine.awaitItem().appearance)
-            .isEqualTo(Embedded(Embedded.RowStyle.FlatWithRadio.default))
+        assertThat(contentStateHolder.dataLoadedTurbine.awaitItem().configuration.appearance)
+            .isEqualTo(appearance)
     }
 
     @Test

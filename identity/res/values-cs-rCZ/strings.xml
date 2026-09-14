@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Pořízené snímky selfie</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Skvělé! Probíhá kontrola obrázků....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">S vaším svolením může společnost Stripe použít vaše obrázky ke zlepšení detekce podvodů. Odmítnutí nemá vliv na vaše ověření.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Ověřit pomocí selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">pořízeno jedno selfie</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

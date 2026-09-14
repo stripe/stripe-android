@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.stripeColors
@@ -19,7 +19,7 @@ import com.stripe.android.uicore.utils.collectAsState
 fun BsbElementUI(
     enabled: Boolean,
     element: BsbElement,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     val validationMessage by element.controller.validationMessage.collectAsState()

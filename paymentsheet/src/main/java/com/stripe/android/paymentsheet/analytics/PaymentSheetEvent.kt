@@ -250,13 +250,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
-    class LpmSerializeFailureEvent(
-        val errorMessage: String?
-    ) : PaymentSheetEvent() {
-        override val eventName: String = "luxe_serialize_failure"
-        override val params: Map<String, Any?> = mapOf(FIELD_ERROR_MESSAGE to errorMessage)
-    }
-
     class AutofillEvent(
         type: String,
     ) : PaymentSheetEvent() {

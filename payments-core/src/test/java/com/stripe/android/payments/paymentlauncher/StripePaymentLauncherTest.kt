@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.util.Base64
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,8 +18,12 @@ class StripePaymentLauncherTest {
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
     private val paymentLauncher = StripePaymentLauncher(
-        publishableKeyProvider = { PUBLISHABLE_KEY },
-        stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
+        apiConfigurationProvider = {
+            ApiConfiguration.State(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+            )
+        },
         hostActivityLauncher = mockHostActivityLauncher,
         enableLogging = false,
         productUsage = mock(),

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -49,9 +50,9 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
 
@@ -136,7 +137,7 @@ internal fun SelectPaymentMethod(
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(
         modifier = modifier
@@ -214,7 +215,7 @@ internal fun AddPaymentMethod(
     userFacingLogger: UserFacingLogger,
     displayForm: Boolean,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
@@ -338,7 +339,7 @@ private fun UpdatePaymentMethod(
     viewState: CustomerSheetViewState.UpdatePaymentMethod,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(modifier) {
         viewState.updatePaymentMethodInteractor.screenTitle?.let {

@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Λήψεις selfie</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Τέλεια. Ελέγχουμε τις εικόνες σας....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Με την άδειά σας, η Stripe μπορεί να χρησιμοποιήσει τις εικόνες σας για να βελτιώσει τον εντοπισμό απάτης. Η απόρριψη δεν επηρεάζει την επαλήθευσή σας.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Επαληθεύστε με μια σέλφι</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">έγινε λήψη μιας selfie</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

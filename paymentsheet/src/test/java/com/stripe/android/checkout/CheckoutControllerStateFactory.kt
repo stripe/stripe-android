@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -19,18 +19,16 @@ import com.stripe.android.testing.FakeErrorReporter
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutControllerStateFactory {
     fun create(
-        configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
+        configuration: CheckoutController.Configuration.State = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages: Map<String, Bitmap>? = null,
-        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
+        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration: CommonConfiguration = CheckoutCommonConfigurationFactory(appName = "Example, Inc.").create(
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = collectedDetails,
-        ),
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -41,8 +39,8 @@ internal object CheckoutControllerStateFactory {
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfiguration,
-            commonConfiguration = commonConfiguration,
             paymentSelection = paymentSelection,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,

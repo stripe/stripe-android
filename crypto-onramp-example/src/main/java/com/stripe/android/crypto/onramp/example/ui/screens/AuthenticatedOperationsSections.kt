@@ -611,7 +611,7 @@ internal fun PaymentSection(
 
     SamsungPayButton(
         enabled = samsungPayIsReady,
-        onClick = { onCollectPayment(samsungPaySelection()) },
+        onClick = { onCollectPayment(samsungPaySelection(sourceCurrency)) },
         modifier = Modifier
             .testTag(COLLECT_SAMSUNG_PAY_BUTTON_TAG)
             .padding(bottom = 8.dp)
@@ -620,9 +620,9 @@ internal fun PaymentSection(
     Spacer(modifier = Modifier.height(32.dp))
 }
 
-private fun samsungPaySelection(): PaymentMethodSelection.SamsungPay {
+private fun samsungPaySelection(sourceCurrency: SourceCurrency): PaymentMethodSelection.SamsungPay {
     return PaymentMethodSelection.SamsungPay(
-        currencyCode = "USD",
+        currencyCode = sourceCurrency.value.uppercase(),
         amount = 199L,
         orderNumber = "onramp-example-order",
     )
@@ -677,8 +677,7 @@ private fun SourceCurrencySelector(
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 8.dp)
     )
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
@@ -687,7 +686,7 @@ private fun SourceCurrencySelector(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .selectable(
                         selected = currency == sourceCurrency,
                         onClick = { onSelectSourceCurrency(currency) },
@@ -698,7 +697,7 @@ private fun SourceCurrencySelector(
                     selected = currency == sourceCurrency,
                     onClick = null
                 )
-                Text("${currency.symbol} ${currency.value.uppercase()}")
+                Text(currency.displayName)
             }
         }
     }

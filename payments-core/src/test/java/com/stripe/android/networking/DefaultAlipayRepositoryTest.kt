@@ -89,6 +89,21 @@ internal class DefaultAlipayRepositoryTest {
                 REQUEST_OPTIONS
             )
         }
+
+        assertThat(exception.message)
+            .isEqualTo("Unable to authenticate Payment Intent with Alipay SDK")
+    }
+
+    @Test
+    fun `authenticate() should throw exception when alipay redirect data is null`() = runTest {
+        val exception = assertFailsWith<RuntimeException> {
+            repository.authenticate(
+                PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA,
+                createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
+                REQUEST_OPTIONS
+            )
+        }
+
         assertThat(exception.message)
             .isEqualTo("Unable to authenticate Payment Intent with Alipay SDK")
     }

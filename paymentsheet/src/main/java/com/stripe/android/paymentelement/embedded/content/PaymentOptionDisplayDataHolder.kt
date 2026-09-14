@@ -35,6 +35,7 @@ internal class DefaultPaymentOptionDisplayDataHolder @Inject constructor(
                     _paymentOption.value = paymentOptionDisplayDataFactory.create(
                         selection = selection,
                         paymentMethodMetadata = state.paymentMethodMetadata,
+                        appearance = state.configuration.appearance,
                     )
                 }
             }

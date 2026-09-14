@@ -12,12 +12,17 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -143,9 +148,32 @@ internal class EmbeddedFormHelperFactoryTest {
         assertThat(cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isNull()
     }
 
+    @Test
+    fun `create wires autocomplete factory into full billing address form`() {
+        val autocompleteFactory = TestAutocompleteAddressInteractor.noOpFactory()
+        val formHelper = createFormHelper(
+            selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+            ),
+            autocompleteAddressInteractorFactory = autocompleteFactory,
+        )
+
+        val billingAddressElement = formHelper.formElementsForCode(PaymentMethod.Type.Card.code)
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<BillingAddressElement>()
+            .single()
+
+        assertThat(billingAddressElement.addressElement).isInstanceOf(AutocompleteAddressElement::class.java)
+    }
+
     private fun createFormHelper(
         selectionHolder: EmbeddedSelectionHolder,
         paymentMethodMetadata: PaymentMethodMetadata,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): FormHelper {
         val factory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -162,6 +190,7 @@ internal class EmbeddedFormHelperFactoryTest {
             automaticallyLaunchedCardScanFormDataHelper = null,
             tapToAddHelper = null,
             paymentMethodMessagePromotionsHelper = null,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             selectionUpdater = {},
         )
     }
@@ -206,6 +235,7 @@ internal class EmbeddedFormHelperFactoryTest {
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = null,
             paymentMethodMessagePromotionsHelper = null,
+            autocompleteAddressInteractorFactory = null,
             selectionUpdater = {},
         )
         return formHelper.formElementsForCode(PaymentMethod.Type.Card.code)

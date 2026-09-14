@@ -16,9 +16,7 @@ internal data class AdditionalKycRequirement(
     val description: String,
     val requestedBy: String,
     val awaitingActionFrom: String,
-    val requestedReasons: List<String>,
     val errors: List<AdditionalKycRequirementError>,
-    val submissionType: String,
     val document: AdditionalKycDocumentRequirement?,
     val questionnaire: AdditionalKycQuestionnaire?,
 ) : Parcelable
@@ -26,7 +24,7 @@ internal data class AdditionalKycRequirement(
 @Parcelize
 internal data class AdditionalKycRequirementError(
     val code: String,
-    val message: String,
+    val developerMessage: String,
 ) : Parcelable
 
 @Parcelize

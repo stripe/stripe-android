@@ -74,7 +74,7 @@ import com.stripe.android.payments.financialconnections.getIntentBuilder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -806,7 +806,7 @@ internal fun CardDetailsRecollectionForm(
             if (isCardExpired) {
                 add(
                     element = SimpleTextElement(
-                        identifier = IdentifierSpec.Generic("date"),
+                        identifier = FormFieldId.Generic("date"),
                         controller = expiryDateController
                     )
                 )
@@ -814,14 +814,14 @@ internal fun CardDetailsRecollectionForm(
 
             add(
                 element = CvcElement(
-                    _identifier = IdentifierSpec.CardCvc,
+                    _identifier = FormFieldId.CardCvc,
                     controller = cvcController
                 )
             )
         }
 
         RowElement(
-            _identifier = IdentifierSpec.Generic(paymentDetails.id),
+            _identifier = FormFieldId.Generic(paymentDetails.id),
             fields = rowFields,
             controller = RowController(rowFields)
         )

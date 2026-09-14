@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -27,6 +28,7 @@ internal class SepaMandateContract :
     @Parcelize
     internal data class Args(
         val merchantName: String,
+        val appearance: PaymentSheet.Appearance,
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(WalletButtonsPreview::class)
@@ -45,7 +44,7 @@ internal class WalletButtonsContent(
 
         // Render the wallet buttons and 2FA section if they exist
         if (state.hasContent) {
-            StripeTheme {
+            PaymentElementTheme(appearance = state.appearance) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {

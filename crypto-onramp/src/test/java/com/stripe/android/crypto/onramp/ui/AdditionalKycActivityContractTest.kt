@@ -63,9 +63,7 @@ class AdditionalKycActivityContractTest {
                         description = "screening_questions",
                         requestedBy = "swapped",
                         awaitingActionFrom = "user",
-                        requestedReasons = emptyList(),
                         errors = emptyList(),
-                        submissionType = "questionnaire",
                         document = null,
                         questionnaire = AdditionalKycQuestionnaire(
                             questions = listOf(

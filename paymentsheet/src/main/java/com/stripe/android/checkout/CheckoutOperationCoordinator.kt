@@ -54,31 +54,6 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    fun <T> runSynchronousMutation(
-        block: () -> Result<T>,
-    ): Result<T> {
-        return synchronized(admissionLock) {
-            when {
-                confirmationInFlight -> Result.failure(
-                    IllegalStateException("Cannot mutate checkout session while confirmation is in progress.")
-                )
-                pendingMutations > 0 -> Result.failure(
-                    IllegalStateException("Cannot mutate checkout session while another mutation is in progress.")
-                )
-                else -> {
-                    check(mutex.tryLock()) {
-                        "Checkout operation gate should be available after synchronous mutation admission."
-                    }
-                    try {
-                        block()
-                    } finally {
-                        mutex.unlock()
-                    }
-                }
-            }
-        }
-    }
-
     fun tryBeginConfirmation(
         arguments: () -> ConfirmationHandler.Args?,
     ): ConfirmationHandler.Args? {
@@ -101,14 +76,16 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
                 completeConfirmation { wasRestored ->
-                    when (val result = state.result) {
-                        is ConfirmationHandler.Result.Succeeded -> {
-                            result.metadata[CheckoutSessionResponseKey]?.let { response ->
-                                refreshSession { sessionRefresher.refresh(response) }
-                            }
+                    // A confirmation returning through an activity result has no fresh response to
+                    // commit, but the session changed server-side, so re-fetch it.
+                    val response = (state.result as? ConfirmationHandler.Result.Succeeded)
+                        ?.metadata?.get(CheckoutSessionResponseKey)
+                    refreshSession {
+                        if (response != null) {
+                            sessionRefresher.refresh(response)
+                        } else {
+                            sessionRefresher.refresh()
                         }
-
-                        else -> refreshSession { sessionRefresher.refresh() }
                     }
                     state.result.asCheckoutResult(wasRestored)
                 }

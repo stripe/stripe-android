@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -302,15 +303,6 @@ class DefaultEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_elements_session_load_failed")
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
-    }
-
-    @Test
-    fun `onLpmSpecFailure fires event`() = runScenario {
-        eventReporter.onLpmSpecFailure(errorMessage = "Failed to serialize LPM spec")
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "luxe_serialize_failure")
-        assertThat(request.params).containsEntry("error_message", "Failed to serialize LPM spec")
     }
 
     @Test
@@ -1345,6 +1337,33 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("selected_lpm", "google_pay")
         assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
+    fun `onPaymentFailure includes local error analytics values`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Checkout,
+                duration = 6.seconds,
+            )
+        )
+        val error = PaymentSheetConfirmationError.Stripe(
+            cause = LocalStripeException(
+                displayMessage = "The estimated total changed.",
+                analyticsValue = "checkoutSessionTotalChanged",
+                errorCode = "checkout_session_total_changed",
+            )
+        )
+
+        eventReporter.onPaymentFailure(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            error = error,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("error_message", "checkoutSessionTotalChanged")
+        assertThat(request.params).containsEntry("error_code", "checkout_session_total_changed")
     }
 
     @Test

@@ -60,7 +60,6 @@ internal class FakeElementsSessionRepository(
             Result.success(
                 ElementsSession(
                     linkSettings = linkSettings,
-                    paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
                     isGooglePayEnabled = isGooglePayEnabled,

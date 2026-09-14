@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     label: ResolvableString,
     addressInputMode: AddressInputMode,
     inlineAutocompleteHandler: InlineAutocompleteHandler?,
@@ -30,7 +30,7 @@ class AddressTextFieldElement(
 
     val inlineQuery: StateFlow<String> get() = controller.inlineQuery
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> {
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> {
         return MutableStateFlow(listOf(identifier))
     }
 }

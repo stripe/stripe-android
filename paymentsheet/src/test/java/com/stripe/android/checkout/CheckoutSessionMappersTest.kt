@@ -61,6 +61,16 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `maps collected email over customerEmail`() {
+        val session = createSession(
+            customerEmail = "checkout@example.com",
+            collectedEmail = "collected@example.com",
+        )
+
+        assertThat(session.email).isEqualTo("collected@example.com")
+    }
+
+    @Test
     fun `null customerEmail maps to null`() {
         val session = createSession(customerEmail = null)
         assertThat(session.email).isNull()
@@ -307,6 +317,7 @@ class CheckoutSessionMappersTest {
         liveMode: Boolean = false,
         currency: String = "usd",
         customerEmail: String? = null,
+        collectedEmail: String? = null,
         taxStatus: CheckoutSessionResponse.TaxStatus = CheckoutSessionResponse.TaxStatus.READY,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
@@ -325,6 +336,7 @@ class CheckoutSessionMappersTest {
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
         ).asCheckoutSession(
+            collectedEmail = collectedEmail,
             flagImages = null,
             paymentOptionDisplayData = null,
             availableExpressButtonTypes = emptyList(),

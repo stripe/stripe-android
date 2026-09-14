@@ -1,18 +1,12 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.checkout.injection.AppName
-import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
-import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview as PaymentSheetCardFundingFilteringPrivatePreview
 
-@OptIn(
-    CheckoutSessionPreview::class,
-    CardFundingFilteringPrivatePreview::class,
-    PaymentSheetCardFundingFilteringPrivatePreview::class,
-)
+@OptIn(CheckoutSessionPreview::class)
 internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
     @AppName private val appName: String,
 ) {
@@ -27,19 +21,22 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
                 configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(
-                configuration.toBillingDetailsCollectionConfiguration(checkoutSessionResponse)
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration()
             )
             .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
             .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
-            .allowedCardFundingTypes(configuration.paymentElementConfiguration.allowedCardFundingTypes.asPaymentSheet())
+            .cardBrandAcceptance(configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet())
             .opensCardScannerAutomatically(
                 configuration.paymentElementConfiguration.opensCardScannerAutomatically
             )
             .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
             .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
-            .googlePay(configuration.toGooglePayConfiguration(checkoutSessionResponse))
+            .googlePay(configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse))
+            .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
             .defaultBillingDetails(collectedDetails.toBillingDetails(checkoutSessionResponse))
             .shippingDetails(collectedDetails.toShippingDetails())
+            .allowsDelayedPaymentMethods(true)
+            .allowsPaymentMethodsRequiringShippingAddress(true)
             .build()
     }
 }

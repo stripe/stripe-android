@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">入力した IBAN が無効です。\"%s\" はサポートされている国コードではありません。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBANコードの先頭には 2 文字の国コードを入力してください。</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL銀行</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK コードの入力に不備があります。</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Klarna での後払いにします。</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">電話番号</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">NICEPAY による支払いを確定すると、%s が規約に従って今後の支払いをこの決済手段に請求することを許可することになります。</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">カード名義人</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">支払い方法を選択してください:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->

@@ -21,7 +21,6 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.link.LinkController
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -54,6 +53,7 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -109,6 +109,10 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class ExpressCheckoutElement(
+            override val commonConfiguration: CommonConfiguration
+        ) : Configuration
     }
 
     sealed class InitializationMode : Parcelable {
@@ -261,7 +265,6 @@ internal interface PaymentElementLoader {
 internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
-    private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: LoadingEventReporter,
     private val errorReporter: ErrorReporter,
@@ -319,7 +322,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
 
-        val isGooglePaySupportedOnDevice = async {
+        // Give immediately available results a chance to complete before later load work checks isCompleted.
+        val isGooglePaySupportedOnDevice = async(start = CoroutineStart.UNDISPATCHED) {
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
             ) {
@@ -556,15 +560,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
-        val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
-
-        if (sharedDataSpecsResult.failedToParseServerResponse) {
-            eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
-        }
-
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
         )
@@ -601,7 +596,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
             linkStateResult = linkStateResult,
@@ -623,6 +617,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement,
             is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.Embedded ->
                 if (

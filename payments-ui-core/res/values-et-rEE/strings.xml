@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">Sisestatud IBAN on kehtetu, \"%s\" ei ole toetatud riigikood.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEALi pank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Teie BLIK-kood on puudulik.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Makske hiljem Klarnaga.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">NICEPAY kaudu makse kinnitamisega lubate ettevõttel %s debiteerida edaspidi makseid sellelt makseviisilt vastavalt nende tingimustele.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nimi kaardil</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Valige, kuidas soovite maksta:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->

@@ -41,7 +41,9 @@ internal fun NewPaymentMethodRowButton(
         onClick = {
             displayablePaymentMethod.onClick()
         },
-        modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
+        modifier = modifier.testTag(
+            "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.syntheticCode}"
+        ),
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = displayablePaymentMethod.promotionProvider,

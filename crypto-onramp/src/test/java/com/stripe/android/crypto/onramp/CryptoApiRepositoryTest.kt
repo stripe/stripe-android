@@ -59,6 +59,7 @@ class CryptoApiRepositoryTest {
     )
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
+    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
     fun testGrantingPartnerMerchantPermissionsSucceeds() {
@@ -124,19 +125,18 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun `retrieve crypto customer includes additional KYC requirements`() = runTest {
+    fun `retrieve additional KYC requirements uses dedicated endpoint`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             """
                 {
-                    "id": "crc_123",
                     "requirements": {
                         "entries": [
                             {
                                 "description": "proof_of_address",
                                 "requested_by": "swapped",
                                 "awaiting_action_from": "user",
-                                "submission_type": "document",
+                                "errors": [],
                                 "document": {
                                     "accepted_subtypes": [
                                         {
@@ -155,23 +155,19 @@ class CryptoApiRepositoryTest {
             """.trimIndent(),
             emptyMap()
         )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>())).thenReturn(stripeResponse)
 
-        val result = cryptoApiRepository.retrieveCryptoCustomer(
-            cryptoCustomerId = "crc_123",
+        val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
             consumerSessionClientSecret = "test-secret",
         )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
         assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
-        assertThat(apiRequest.baseUrl).isEqualTo("https://api.stripe.com/v1/crypto/customers/crc_123")
-        assertThat(apiRequest.params).isEqualTo(
-            mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret"))
-        )
-        val customer = result.getOrThrow()
-        assertThat(customer.id).isEqualTo("crc_123")
-        assertThat(requireNotNull(customer.requirements).entries.single().description)
+        assertThat(apiRequest.url).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
+        val response = result.getOrThrow()
+        assertThat(response.requirements.entries.single().description)
             .isEqualTo("proof_of_address")
     }
 
@@ -305,22 +301,22 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveMissingIdentifiers(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
             assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
                 .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrThrow().identifiers)
@@ -455,20 +451,20 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/crs_carf_declaration")
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
             assertThat(result.getOrThrow().text)
                 .isEqualTo("I confirm this declaration.")
             assertThat(result.getOrThrow().version)
@@ -655,7 +651,7 @@ class CryptoApiRepositoryTest {
             assertThat(params["first_name"]).isEqualTo("Test")
             assertThat(params["last_name"]).isEqualTo("User")
             assertThat(params["id_number_last4"]).isEqualTo("7777")
-            assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+            assertThat(params["id_type"]).isEqualTo("social_security_number")
             assertThat(dobValue["day"]).isEqualTo("1")
             assertThat(dobValue["month"]).isEqualTo("3")
             assertThat(dobValue["year"]).isEqualTo("1975")
@@ -1080,7 +1076,7 @@ class CryptoApiRepositoryTest {
         assertThat(params["first_name"]).isEqualTo("Test")
         assertThat(params["last_name"]).isEqualTo("User")
         assertThat(params["id_number"]).isEqualTo("999-88-7777")
-        assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+        assertThat(params["id_type"]).isEqualTo("social_security_number")
         assertThat(dobValue["day"]).isEqualTo("1")
         assertThat(dobValue["month"]).isEqualTo("3")
         assertThat(dobValue["year"]).isEqualTo("1975")

@@ -38,7 +38,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
-import com.stripe.android.crypto.onramp.model.RetrieveCryptoCustomerResponse
+import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
 import com.stripe.android.crypto.onramp.model.SamsungPayTokenParams
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
@@ -118,21 +118,15 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     /**
-     * Retrieves the current crypto customer, including any additional KYC requirements.
+     * Retrieves the current additional KYC requirements.
      */
-    suspend fun retrieveCryptoCustomer(
-        cryptoCustomerId: String,
+    suspend fun retrieveAdditionalKycRequirements(
         consumerSessionClientSecret: String,
-    ): Result<RetrieveCryptoCustomerResponse> {
-        val request = apiRequestFactory.createGet(
-            url = getCustomerUrl(cryptoCustomerId),
-            options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
-        )
-
-        return execute(
-            request = request,
-            responseSerializer = RetrieveCryptoCustomerResponse.serializer(),
+    ): Result<RetrieveAdditionalKycRequirementsResponse> {
+        return executeConsumerAuthenticatedGet(
+            url = additionalKycRequirementsUrl,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            responseSerializer = RetrieveAdditionalKycRequirementsResponse.serializer(),
         )
     }
 
@@ -141,15 +135,13 @@ internal class CryptoApiRepository @Inject constructor(
      */
     suspend fun fulfillAdditionalKycRequirement(
         liquidityProvider: String,
-        submissionType: String,
-        documents: List<AdditionalKycDocumentSubmissionRequest>?,
+        documents: List<AdditionalKycDocumentSubmissionRequest>,
         questionnaire: AdditionalKycQuestionnaireSubmissionRequest?,
         consumerSessionClientSecret: String,
     ): Result<AdditionalKycSubmissionResponse> {
         val request = FulfillAdditionalKycRequirementRequest(
             credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
             liquidityProvider = liquidityProvider,
-            submissionType = submissionType,
             documents = documents,
             questionnaire = questionnaire,
         )
@@ -210,14 +202,9 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun retrieveMissingIdentifiers(
         consumerSessionClientSecret: String
     ): Result<ComplianceIdentifierRequirements> {
-        val request = apiRequestFactory.createGet(
+        return executeConsumerAuthenticatedGet(
             url = identifierRequirementsUrl,
-            options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
-        )
-
-        return execute(
-            request = request,
+            consumerSessionClientSecret = consumerSessionClientSecret,
             responseSerializer = ComplianceIdentifierRequirementsResponse.serializer()
         ).mapCatching { it.toComplianceIdentifierRequirements() }
     }
@@ -240,14 +227,9 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun retrieveUserAttestation(
         consumerSessionClientSecret: String
     ): Result<UserAttestation> {
-        val request = apiRequestFactory.createGet(
+        return executeConsumerAuthenticatedGet(
             url = userAttestationUrl,
-            options = buildRequestOptions(),
-            params = credentialsParams(consumerSessionClientSecret).toMap(),
-        )
-
-        return execute(
-            request = request,
+            consumerSessionClientSecret = consumerSessionClientSecret,
             responseSerializer = UserAttestationResponse.serializer()
         ).map { it.toUserAttestation() }
     }
@@ -538,6 +520,25 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
+    private suspend fun <Response> executeConsumerAuthenticatedGet(
+        url: String,
+        consumerSessionClientSecret: String,
+        responseSerializer: KSerializer<Response>,
+    ): Result<Response> {
+        val request = ConsumerAuthenticatedGetRequest(
+            request = apiRequestFactory.createGet(
+                url = url,
+                options = buildRequestOptions(),
+            ),
+            consumerSessionClientSecret = consumerSessionClientSecret,
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = responseSerializer,
+        )
+    }
+
     private suspend fun <Response> executeDelete(
         url: String,
         paramsJson: JsonObject,
@@ -656,11 +657,10 @@ internal class CryptoApiRepository @Inject constructor(
             get() = getApiUrl("crypto/internal/customers")
 
         /**
-         * @return `https://api.stripe.com/v1/crypto/customers/:id`
+         * @return `https://api.stripe.com/v1/crypto/internal/kyc_requirements`
          */
-        internal fun getCustomerUrl(cryptoCustomerId: String): String {
-            return getApiUrl("crypto/customers/$cryptoCustomerId")
-        }
+        internal val additionalKycRequirementsUrl: String
+            get() = getApiUrl("crypto/internal/kyc_requirements")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/fulfill_additional_kyc_requirement`
@@ -749,5 +749,24 @@ internal class CryptoApiRepository @Inject constructor(
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
         }
+    }
+}
+
+private class ConsumerAuthenticatedGetRequest(
+    private val request: ApiRequest,
+    consumerSessionClientSecret: String,
+) : StripeRequest() {
+    override val method: Method = request.method
+    override val mimeType: MimeType = request.mimeType
+    override val retryResponseCodes: Iterable<Int> = request.retryResponseCodes
+    override val url: String = request.url
+    override val headers: Map<String, String> = request.headers + mapOf(
+        HEADER_CONSUMER_AUTH_TOKEN to consumerSessionClientSecret,
+    )
+
+    override fun toString(): String = request.toString()
+
+    private companion object {
+        private const val HEADER_CONSUMER_AUTH_TOKEN = "Stripe-Consumer-Auth-Token"
     }
 }

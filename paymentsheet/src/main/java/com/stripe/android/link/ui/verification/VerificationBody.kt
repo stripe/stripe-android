@@ -53,7 +53,7 @@ import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
@@ -421,7 +421,7 @@ private fun Preview() {
                         )
                     ),
                     otpElement = OTPElement(
-                        identifier = IdentifierSpec.Generic("otp"),
+                        identifier = FormFieldId.Generic("otp"),
                         controller = OTPController(),
                     ),
                     onBack = {},

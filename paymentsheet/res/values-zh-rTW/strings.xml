@@ -83,6 +83,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_internal_error_message">出錯了。請嘗試另一張銀行卡。</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">不支援銀行卡。請嘗試使用另一張銀行卡。</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">請重試。</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">用 Link 支付</string>
   <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->

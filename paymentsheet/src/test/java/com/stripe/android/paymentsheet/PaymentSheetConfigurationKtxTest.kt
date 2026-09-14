@@ -404,7 +404,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
-    fun `'validate' should fail when using CheckoutSession mode with null email`() {
+    fun `'validate' should succeed when using CheckoutSession mode with null email`() {
         val configWithoutEmail = configuration.newBuilder()
             .customer(null)
             .defaultBillingDetails(null)
@@ -418,17 +418,11 @@ class PaymentSheetConfigurationKtxTest {
             ),
         )
 
-        assertFailsWith(
-            IllegalArgumentException::class,
-            message = "configuration.defaultBillingDetails.email must be set when using CheckoutSession" +
-                " initialization mode."
-        ) {
-            configWithoutEmail.validate(
-                initializationMode = checkoutSessionMode,
-                isLiveMode = false,
-                callbackIdentifier = ""
-            )
-        }
+        configWithoutEmail.validate(
+            initializationMode = checkoutSessionMode,
+            isLiveMode = false,
+            callbackIdentifier = ""
+        )
     }
 
     @Test

@@ -45,7 +45,6 @@ internal class CheckoutSessionLoaderTest {
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 merchantCountry = null,
                 isGooglePayEnabled = true,

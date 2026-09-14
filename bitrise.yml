@@ -78,7 +78,7 @@ workflows:
           title: Run static analysis, unit, and screenshot tests
           timeout: 1200
           inputs:
-            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources runUnitAndScreenshotTests --init-script build-configuration/unit-test-init.gradle --continue
+            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources runUnitAndScreenshotTests :paymentsheet-example:testBaseDebugUnitTest --init-script build-configuration/unit-test-init.gradle --continue
       - bundle::export_unit_test_results:
           title: Export unit & screenshot test results
           inputs:

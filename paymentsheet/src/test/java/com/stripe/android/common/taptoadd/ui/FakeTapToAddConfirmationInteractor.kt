@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +85,7 @@ internal class FakeTapToAddConfirmationInteractor(
             initialValue = initialValue,
         )
         val cvcElement = CvcElement(
-            _identifier = IdentifierSpec.CardCvc,
+            _identifier = FormFieldId.CardCvc,
             controller = cvcController,
         )
 

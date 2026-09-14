@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.ParameterDestination
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -24,7 +24,7 @@ class FieldValuesToParamsMapConverter {
          * This function will convert fieldValuePairs to PaymentMethodCreateParams.
          */
         fun transformToPaymentMethodCreateParams(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            fieldValuePairs: Map<FormFieldId, FormFieldEntry>,
             code: PaymentMethodCode,
             requiresMandate: Boolean,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
@@ -33,7 +33,7 @@ class FieldValuesToParamsMapConverter {
             val fieldValuePairsForCreateParams = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Params
             }.filterNot { entry ->
-                entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
+                entry.key == FormFieldId.SaveForFutureUse || entry.key == FormFieldId.CardBrand
             }
             return transformToParamsMap(
                 fieldValuePairsForCreateParams,
@@ -55,13 +55,13 @@ class FieldValuesToParamsMapConverter {
         }
 
         private fun createBillingDetails(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            fieldValuePairs: Map<FormFieldId, FormFieldEntry>,
         ): PaymentMethod.BillingDetails? {
             val billingDetails = PaymentMethod.BillingDetails.Builder()
 
-            billingDetails.setName(fieldValuePairs[IdentifierSpec.Name]?.value)
-            billingDetails.setEmail(fieldValuePairs[IdentifierSpec.Email]?.value)
-            billingDetails.setPhone(fieldValuePairs[IdentifierSpec.Phone]?.value)
+            billingDetails.setName(fieldValuePairs[FormFieldId.Name]?.value)
+            billingDetails.setEmail(fieldValuePairs[FormFieldId.Email]?.value)
+            billingDetails.setPhone(fieldValuePairs[FormFieldId.Phone]?.value)
             billingDetails.setAddress(createAddress(fieldValuePairs))
 
             val builtBillingDetails = billingDetails.build()
@@ -73,16 +73,16 @@ class FieldValuesToParamsMapConverter {
         }
 
         private fun createAddress(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            fieldValuePairs: Map<FormFieldId, FormFieldEntry>,
         ): Address {
             val address = Address.Builder()
 
-            address.setLine1(fieldValuePairs[IdentifierSpec.Line1]?.value)
-            address.setLine2(fieldValuePairs[IdentifierSpec.Line2]?.value)
-            address.setCity(fieldValuePairs[IdentifierSpec.City]?.value)
-            address.setState(fieldValuePairs[IdentifierSpec.State]?.value)
-            address.setCountry(fieldValuePairs[IdentifierSpec.Country]?.value)
-            address.setPostalCode(fieldValuePairs[IdentifierSpec.PostalCode]?.value)
+            address.setLine1(fieldValuePairs[FormFieldId.Line1]?.value)
+            address.setLine2(fieldValuePairs[FormFieldId.Line2]?.value)
+            address.setCity(fieldValuePairs[FormFieldId.City]?.value)
+            address.setState(fieldValuePairs[FormFieldId.State]?.value)
+            address.setCountry(fieldValuePairs[FormFieldId.Country]?.value)
+            address.setPostalCode(fieldValuePairs[FormFieldId.PostalCode]?.value)
 
             return address.build()
         }
@@ -93,7 +93,7 @@ class FieldValuesToParamsMapConverter {
         @Suppress("ReturnCount")
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun transformToPaymentMethodOptionsParams(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            fieldValuePairs: Map<FormFieldId, FormFieldEntry>,
             code: PaymentMethodCode,
             setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
         ): PaymentMethodOptionsParams? {
@@ -107,13 +107,13 @@ class FieldValuesToParamsMapConverter {
                     )
                 }
                 PaymentMethod.Type.Blik.code -> {
-                    val blikCode = fieldValuePairsForOptions[IdentifierSpec.BlikCode]?.value
+                    val blikCode = fieldValuePairsForOptions[FormFieldId.BlikCode]?.value
                     blikCode?.let {
                         PaymentMethodOptionsParams.Blik(it)
                     }
                 }
                 PaymentMethod.Type.Konbini.code -> {
-                    val confirmationNumber = fieldValuePairsForOptions[IdentifierSpec.KonbiniConfirmationNumber]?.value
+                    val confirmationNumber = fieldValuePairsForOptions[FormFieldId.KonbiniConfirmationNumber]?.value
                     confirmationNumber?.let {
                         PaymentMethodOptionsParams.Konbini(confirmationNumber)
                     }
@@ -134,7 +134,7 @@ class FieldValuesToParamsMapConverter {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun transformToPaymentMethodExtraParams(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            fieldValuePairs: Map<FormFieldId, FormFieldEntry>,
             code: PaymentMethodCode,
         ): PaymentMethodExtraParams? {
             val fieldValuePairsForExtras = fieldValuePairs.filter { entry ->
@@ -142,25 +142,25 @@ class FieldValuesToParamsMapConverter {
             }
             return when (code) {
                 PaymentMethod.Type.BacsDebit.code -> PaymentMethodExtraParams.BacsDebit(
-                    confirmed = fieldValuePairsForExtras[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
+                    confirmed = fieldValuePairsForExtras[FormFieldId.BacsDebitConfirmed]?.value?.toBoolean()
                 )
                 PaymentMethod.Type.Card.code -> PaymentMethodExtraParams.Card(
                     setAsDefault =
-                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean(),
-                    phoneNumberCountry = fieldValuePairsForExtras[IdentifierSpec.PhoneNumberCountry]?.value,
-                    fromValidatedScan = fieldValuePairsForExtras[IdentifierSpec.CardValidatedScan]?.value?.toBoolean(),
+                    fieldValuePairsForExtras[FormFieldId.SetAsDefaultPaymentMethod]?.value?.toBoolean(),
+                    phoneNumberCountry = fieldValuePairsForExtras[FormFieldId.PhoneNumberCountry]?.value,
+                    fromValidatedScan = fieldValuePairsForExtras[FormFieldId.CardValidatedScan]?.value?.toBoolean(),
                 )
                 PaymentMethod.Type.Link.code -> PaymentMethodExtraParams.Link(
                     setAsDefault =
-                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                    fieldValuePairsForExtras[FormFieldId.SetAsDefaultPaymentMethod]?.value?.toBoolean()
                 )
                 PaymentMethod.Type.USBankAccount.code -> PaymentMethodExtraParams.USBankAccount(
                     setAsDefault =
-                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                    fieldValuePairsForExtras[FormFieldId.SetAsDefaultPaymentMethod]?.value?.toBoolean()
                 )
                 PaymentMethod.Type.SepaDebit.code -> PaymentMethodExtraParams.SepaDebit(
                     setAsDefault =
-                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                    fieldValuePairsForExtras[FormFieldId.SetAsDefaultPaymentMethod]?.value?.toBoolean()
                 )
                 else -> null
             }
@@ -171,10 +171,10 @@ class FieldValuesToParamsMapConverter {
          * according to their keys.
          *
          * @param: formFieldValues: These are the fields and their values and based on the algorithm of this function
-         * will be put into a map according to the IdentifierSpec keys.
+         * will be put into a map according to the FormFieldId keys.
          */
         private fun transformToParamsMap(
-            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            fieldValuePairs: Map<FormFieldId, FormFieldEntry>,
             code: PaymentMethodCode
         ): MutableMap<String, Any?> {
             val destMap = mutableMapOf<String, Any?>()

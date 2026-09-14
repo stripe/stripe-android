@@ -106,8 +106,8 @@ internal class AdditionalKycStateHolderTest {
         val submission = stateHolder.createSubmission()
 
         assertThat(submission?.liquidityProvider).isEqualTo("swapped")
-        assertThat(submission?.submissionType).isEqualTo("questionnaire")
-        assertThat(submission?.documents).isNull()
+        assertThat(submission?.questionnaire).isNotNull()
+        assertThat(submission?.documents).isEmpty()
         assertThat(submission?.questionnaire?.answers).hasSize(1)
         assertThat(submission?.questionnaire?.answers?.single()?.questionId)
             .isEqualTo("purchase_purpose")
@@ -153,7 +153,7 @@ internal class AdditionalKycStateHolderTest {
 
         val submission = stateHolder.createSubmission()
 
-        assertThat(submission?.submissionType).isEqualTo("document")
+        assertThat(submission?.documents).isNotEmpty()
         assertThat(submission?.documents?.map { document -> document.documentType })
             .containsExactly("source_of_funds")
         assertThat(submission?.documents?.map { document -> document.documentSubtype })
@@ -450,9 +450,7 @@ internal class AdditionalKycStateHolderTest {
                 description = "screening_questions",
                 requestedBy = "swapped",
                 awaitingActionFrom = "user",
-                requestedReasons = listOf("kyc_step_up"),
                 errors = emptyList(),
-                submissionType = "questionnaire",
                 document = null,
                 questionnaire = AdditionalKycQuestionnaire(
                     questions = listOf(
@@ -488,14 +486,12 @@ internal class AdditionalKycStateHolderTest {
                 description = "proof_of_address",
                 requestedBy = "swapped",
                 awaitingActionFrom = "user",
-                requestedReasons = listOf("kyc_step_up"),
                 errors = listOf(
                     AdditionalKycRequirementError(
                         code = "document_too_old",
-                        message = "The previous document was too old",
+                        developerMessage = "The previous document was too old",
                     )
                 ),
-                submissionType = "document",
                 document = AdditionalKycDocumentRequirement(
                     acceptedSubtypes = listOf(
                         AdditionalKycDocumentSubtype(

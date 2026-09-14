@@ -52,8 +52,6 @@
   <string name="stripe_iban_invalid_country">Podany IBAN jest nieprawidłowy. „%s” nie jest prawidłowym kodem kraju.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL Bank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Kod BLIK jest niekompletny.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Zapłać później za pomocą Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Potwierdzając płatność za pomocą NICEPAY, zezwalasz %s na obciążanie tej metody płatności za przyszłe płatności zgodnie z ich warunkami.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Imię i nazwisko na karcie</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Wybierz, jak chcesz zapłacić:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank - Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->

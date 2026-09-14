@@ -238,6 +238,10 @@
   <string name="stripe_selfie_captures">Capturi de tip selfie</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
   <string name="stripe_selfie_checking_images">Excelent! Vă verificăm imaginile....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Cu permisiunea dvs., Stripe vă poate utiliza imaginile pentru a îmbunătăți detectarea de fraudă. Refuzul nu vă va afecta verificarea.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verificați cu un selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">un selfie captat</string>
   <!-- Status text instructing the user to turn left for selfie capture -->

@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,7 +57,7 @@ internal class InputAddressViewModel @Inject constructor(
         }
     )
 
-    private var previousUserInput: Map<IdentifierSpec, String?>? = if (initialInputsAreTheSame) {
+    private var previousUserInput: Map<FormFieldId, String?>? = if (initialInputsAreTheSame) {
         null
     } else {
         initialShippingAddress
@@ -190,21 +190,21 @@ internal class InputAddressViewModel @Inject constructor(
         val formValues = addressFormController.getCurrentFormValues()
 
         return AddressDetails(
-            name = formValues[IdentifierSpec.Name]?.value,
+            name = formValues[FormFieldId.Name]?.value,
             address = PaymentSheet.Address(
-                city = formValues[IdentifierSpec.City]?.value,
-                country = formValues[IdentifierSpec.Country]?.value,
-                line1 = formValues[IdentifierSpec.Line1]?.value,
-                line2 = formValues[IdentifierSpec.Line2]?.value,
-                postalCode = formValues[IdentifierSpec.PostalCode]?.value,
-                state = formValues[IdentifierSpec.State]?.value
+                city = formValues[FormFieldId.City]?.value,
+                country = formValues[FormFieldId.Country]?.value,
+                line1 = formValues[FormFieldId.Line1]?.value,
+                line2 = formValues[FormFieldId.Line2]?.value,
+                postalCode = formValues[FormFieldId.PostalCode]?.value,
+                state = formValues[FormFieldId.State]?.value
             ),
-            phoneNumber = formValues[IdentifierSpec.Phone]?.value
+            phoneNumber = formValues[FormFieldId.Phone]?.value
         )
     }
 
     fun clickPrimaryButton(
-        completedFormValues: Map<IdentifierSpec, FormFieldEntry>?,
+        completedFormValues: Map<FormFieldId, FormFieldEntry>?,
         checkboxChecked: Boolean
     ) {
         if (completedFormValues == null) {
@@ -214,16 +214,16 @@ internal class InputAddressViewModel @Inject constructor(
         _formEnabled.value = false
         dismissWithAddress(
             AddressDetails(
-                name = completedFormValues?.get(IdentifierSpec.Name)?.value,
+                name = completedFormValues?.get(FormFieldId.Name)?.value,
                 address = PaymentSheet.Address(
-                    city = completedFormValues?.get(IdentifierSpec.City)?.value,
-                    country = completedFormValues?.get(IdentifierSpec.Country)?.value,
-                    line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
-                    line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
-                    postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
-                    state = completedFormValues?.get(IdentifierSpec.State)?.value
+                    city = completedFormValues?.get(FormFieldId.City)?.value,
+                    country = completedFormValues?.get(FormFieldId.Country)?.value,
+                    line1 = completedFormValues?.get(FormFieldId.Line1)?.value,
+                    line2 = completedFormValues?.get(FormFieldId.Line2)?.value,
+                    postalCode = completedFormValues?.get(FormFieldId.PostalCode)?.value,
+                    state = completedFormValues?.get(FormFieldId.State)?.value
                 ),
-                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
+                phoneNumber = completedFormValues?.get(FormFieldId.Phone)?.value,
                 isCheckboxSelected = checkboxChecked
             )
         )

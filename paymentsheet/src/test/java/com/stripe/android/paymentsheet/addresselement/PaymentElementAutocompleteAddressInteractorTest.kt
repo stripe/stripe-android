@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -76,12 +76,12 @@ class PaymentElementAutocompleteAddressInteractorTest {
         assertThat(expandFormEvent.values).isNotNull()
         assertThat(expandFormEvent.values).containsExactlyEntriesIn(
             mapOf(
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "Apt 4B",
-                IdentifierSpec.City to "San Francisco",
-                IdentifierSpec.State to "CA",
-                IdentifierSpec.PostalCode to "94105",
-                IdentifierSpec.Country to "US",
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "Apt 4B",
+                FormFieldId.City to "San Francisco",
+                FormFieldId.State to "CA",
+                FormFieldId.PostalCode to "94105",
+                FormFieldId.Country to "US",
             )
         )
     }
@@ -112,12 +112,12 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         assertThat(valuesEvent.values).containsExactlyEntriesIn(
             mapOf(
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "Apt 4B",
-                IdentifierSpec.City to "San Francisco",
-                IdentifierSpec.State to "CA",
-                IdentifierSpec.PostalCode to "94105",
-                IdentifierSpec.Country to "US",
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "Apt 4B",
+                FormFieldId.City to "San Francisco",
+                FormFieldId.State to "CA",
+                FormFieldId.PostalCode to "94105",
+                FormFieldId.Country to "US",
             )
         )
     }
@@ -295,7 +295,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor when proxy flag is on with repository`() = test { scenario ->
+    fun `Factory creates inline interactor without launcher when proxy flag is on with repository`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
@@ -304,7 +304,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
+            launcher = null,
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),

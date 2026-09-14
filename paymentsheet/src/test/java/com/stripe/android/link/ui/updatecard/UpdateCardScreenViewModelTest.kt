@@ -22,7 +22,7 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.BillingAddressElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -177,7 +177,7 @@ class UpdateCardScreenViewModelTest {
                     val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
 
                     val doesNotHavePhoneElement = addressFields.none { element ->
-                        element.identifier == IdentifierSpec.Phone
+                        element.identifier == FormFieldId.Phone
                     }
 
                     assertThat(doesNotHavePhoneElement).isTrue()
@@ -223,7 +223,7 @@ class UpdateCardScreenViewModelTest {
                     val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
 
                     val hasPhoneElement = addressFields.any { element ->
-                        element.identifier == IdentifierSpec.Phone
+                        element.identifier == FormFieldId.Phone
                     }
 
                     assertThat(hasPhoneElement).isTrue()
@@ -269,12 +269,12 @@ class UpdateCardScreenViewModelTest {
                     val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
 
                     val hasCountryElement = addressFields.any {
-                        it.identifier == IdentifierSpec.Country
+                        it.identifier == FormFieldId.Country
                     }
 
                     val hasPostalCodeElement = addressFields.any {
                         it is RowElement && it.fields.any {
-                            it.identifier == IdentifierSpec.PostalCode
+                            it.identifier == FormFieldId.PostalCode
                         }
                     }
 

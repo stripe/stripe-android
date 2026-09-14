@@ -9,11 +9,13 @@ import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateA
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
+import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedWalletsHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodVerticalLayoutInteractorFactory
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -28,6 +30,11 @@ internal interface PaymentElementModule {
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     @Binds
+    fun bindsEmbeddedPaymentOptionsPresenter(
+        presenter: DefaultEmbeddedPaymentOptionsPresenter,
+    ): EmbeddedPaymentOptionsPresenter
+
+    @Binds
     fun bindsEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
         factory: DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
     ): EmbeddedPaymentMethodVerticalLayoutInteractorFactory
@@ -40,7 +47,7 @@ internal interface PaymentElementModule {
 
     @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
-        handler: DefaultEmbeddedRowSelectionImmediateActionHandler
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
@@ -63,7 +70,6 @@ internal interface PaymentElementModule {
                 state?.let {
                     EmbeddedContentHelperStateHolder.State(
                         paymentMethodMetadata = it.paymentMethodMetadata,
-                        appearance = it.embeddedConfiguration.appearance.embeddedAppearance,
                         embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
                         configuration = it.embeddedConfiguration,
                     )

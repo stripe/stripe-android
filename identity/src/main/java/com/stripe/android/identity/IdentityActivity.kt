@@ -178,7 +178,7 @@ internal class IdentityActivity :
             var topBarState by remember {
                 mutableStateOf(IdentityTopBarState.GO_BACK)
             }
-            IdentityTheme {
+            IdentityTheme(brandColor = starterArgs.brandColor) {
                 IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     fallbackUrlLauncher = this,

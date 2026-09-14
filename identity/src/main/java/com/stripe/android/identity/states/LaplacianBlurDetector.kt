@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.renderscript.Allocation
+import android.renderscript.BaseObj
 import android.renderscript.Element
 import android.renderscript.RenderScript
+import android.renderscript.Script
 import android.renderscript.ScriptIntrinsicBlur
 import android.renderscript.ScriptIntrinsicColorMatrix
 import android.renderscript.ScriptIntrinsicConvolve3x3
@@ -23,8 +25,18 @@ internal class LaplacianBlurDetector @Inject constructor(
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) {
 
-    private val renderScript by lazy {
+    private val renderScriptDelegate = lazy {
         RenderScript.create(context)
+    }
+    private val renderScript by renderScriptDelegate
+
+    /**
+     * Release the underlying [RenderScript] context. No-op if a blur score was never calculated.
+     */
+    fun destroy() {
+        if (renderScriptDelegate.isInitialized()) {
+            renderScript.destroy()
+        }
     }
 
     /**
@@ -38,26 +50,33 @@ internal class LaplacianBlurDetector @Inject constructor(
      */
     @Suppress("LongMethod")
     fun calculateBlurOutput(sourceBitmap: Bitmap): Float {
+        val renderScriptResources = RenderScriptResources()
+        val intermediateBitmaps = mutableListOf<Bitmap>()
         try {
             // First apply a soft blur to smoothen out visual artifacts
             val smootherBitmap = createBitmap(
                 sourceBitmap.width,
                 sourceBitmap.height,
                 sourceBitmap.config.orDefault()
-            )
-            val blurIntrinsic =
+            ).also(intermediateBitmaps::add)
+            val blurIntrinsic = renderScriptResources.track(
                 ScriptIntrinsicBlur.create(renderScript, Element.RGBA_8888(renderScript))
-            val source = Allocation.createFromBitmap(
-                renderScript,
-                sourceBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SHARED
             )
-            val blurTargetAllocation = Allocation.createFromBitmap(
-                renderScript,
-                smootherBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SHARED
+            val source = renderScriptResources.track(
+                Allocation.createFromBitmap(
+                    renderScript,
+                    sourceBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SHARED
+                )
+            )
+            val blurTargetAllocation = renderScriptResources.track(
+                Allocation.createFromBitmap(
+                    renderScript,
+                    smootherBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SHARED
+                )
             )
             blurIntrinsic.apply {
                 setRadius(1f)
@@ -72,22 +91,28 @@ internal class LaplacianBlurDetector @Inject constructor(
                 sourceBitmap.width,
                 sourceBitmap.height,
                 sourceBitmap.config.orDefault()
+            ).also(intermediateBitmaps::add)
+            val smootherInput = renderScriptResources.track(
+                Allocation.createFromBitmap(
+                    renderScript,
+                    smootherBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SHARED
+                )
             )
-            val smootherInput = Allocation.createFromBitmap(
-                renderScript,
-                smootherBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SHARED
-            )
-            val greyscaleTargetAllocation = Allocation.createFromBitmap(
-                renderScript,
-                greyscaleBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SHARED
+            val greyscaleTargetAllocation = renderScriptResources.track(
+                Allocation.createFromBitmap(
+                    renderScript,
+                    greyscaleBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SHARED
+                )
             )
 
             // Inverts and greyscales the image
-            val colorIntrinsic = ScriptIntrinsicColorMatrix.create(renderScript)
+            val colorIntrinsic = renderScriptResources.track(
+                ScriptIntrinsicColorMatrix.create(renderScript)
+            )
             colorIntrinsic.setGreyscale()
             colorIntrinsic.forEach(smootherInput, greyscaleTargetAllocation)
             greyscaleTargetAllocation.copyTo(greyscaleBitmap)
@@ -98,22 +123,27 @@ internal class LaplacianBlurDetector @Inject constructor(
                 sourceBitmap.width,
                 sourceBitmap.height,
                 sourceBitmap.config.orDefault()
+            ).also(intermediateBitmaps::add)
+            val greyscaleInput = renderScriptResources.track(
+                Allocation.createFromBitmap(
+                    renderScript,
+                    greyscaleBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SHARED
+                )
             )
-            val greyscaleInput = Allocation.createFromBitmap(
-                renderScript,
-                greyscaleBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SHARED
-            )
-            val edgesTargetAllocation = Allocation.createFromBitmap(
-                renderScript,
-                edgesBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SHARED
+            val edgesTargetAllocation = renderScriptResources.track(
+                Allocation.createFromBitmap(
+                    renderScript,
+                    edgesBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SHARED
+                )
             )
 
-            val convolve =
+            val convolve = renderScriptResources.track(
                 ScriptIntrinsicConvolve3x3.create(renderScript, Element.U8_4(renderScript))
+            )
             convolve.setInput(greyscaleInput)
             convolve.setCoefficients(CLASSIC_MATRIX) // Or use others
             convolve.forEach(edgesTargetAllocation)
@@ -128,6 +158,9 @@ internal class LaplacianBlurDetector @Inject constructor(
                 overrideMessage = "Failed to calculate blur score"
             )
             return DEFAULT_SCORE
+        } finally {
+            renderScriptResources.destroyAll()
+            intermediateBitmaps.forEach(Bitmap::recycle)
         }
     }
 
@@ -170,5 +203,34 @@ internal class LaplacianBlurDetector @Inject constructor(
 
         private const val DEFAULT_SCORE = 1.0f
         private const val COLOR_MAX = 0xFF
+    }
+
+    private class RenderScriptResources {
+        private val scripts = mutableListOf<Script>()
+        private val allocations = mutableListOf<Allocation>()
+        private val types = mutableListOf<BaseObj>()
+
+        fun <T : Script> track(script: T): T {
+            scripts.add(script)
+            return script
+        }
+
+        fun track(allocation: Allocation): Allocation {
+            types.add(allocation.type)
+            allocations.add(allocation)
+            return allocation
+        }
+
+        fun destroyAll() {
+            scripts.destroyAll()
+            allocations.destroyAll()
+            types.destroyAll()
+        }
+
+        private fun <T : BaseObj> List<T>.destroyAll() {
+            for (index in lastIndex downTo 0) {
+                runCatching { get(index).destroy() }
+            }
+        }
     }
 }

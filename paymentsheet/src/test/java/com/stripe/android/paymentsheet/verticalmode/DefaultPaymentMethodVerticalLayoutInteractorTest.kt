@@ -38,7 +38,7 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -1002,15 +1002,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     first.run {
                         assertThat(fieldValuePairs).isEqualTo(
                             mapOf(
-                                IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
-                                IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
-                                IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
-                                IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
-                                IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
-                                IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
-                                IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
-                                IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
-                                IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                                FormFieldId.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                                FormFieldId.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                                FormFieldId.Phone to FormFieldEntry("+13105551234", isComplete = true),
+                                FormFieldId.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
+                                FormFieldId.Line2 to FormFieldEntry("456", isComplete = true),
+                                FormFieldId.City to FormFieldEntry("San Francisco", isComplete = true),
+                                FormFieldId.State to FormFieldEntry("CA", isComplete = true),
+                                FormFieldId.Country to FormFieldEntry("US", isComplete = true),
+                                FormFieldId.PostalCode to FormFieldEntry("94111", isComplete = true),
                             )
                         )
                         assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)

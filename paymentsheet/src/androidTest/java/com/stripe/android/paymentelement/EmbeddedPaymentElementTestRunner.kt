@@ -12,13 +12,13 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -28,6 +28,7 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
     val paymentOptionTurbine: ReceiveTurbine<EmbeddedPaymentElement.PaymentOptionDisplayData?>,
     private val countDownLatch: CountDownLatch,
+    private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -35,11 +36,11 @@ internal class EmbeddedPaymentElementTestRunnerContext(
         ),
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
+        val configurationBuilder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .configurationMutator()
         embeddedPaymentElement.configure(
             intentConfiguration = intentConfiguration,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .configurationMutator()
-                .build()
+            configuration = configurationBuilder.build()
         )
     }
 
@@ -67,6 +68,7 @@ internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
+    apiConfigurationTestType: ApiConfigurationTestType = ApiConfigurationTestType.PaymentConfigurationOnly,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
@@ -81,6 +83,7 @@ internal fun runEmbeddedPaymentElementTest(
         builder = builder,
         successTimeoutSeconds = successTimeoutSeconds,
         rowSelectionCalls = rowSelectionCalls,
+        apiConfigurationTestType = apiConfigurationTestType,
         block = block,
     )
 }
@@ -89,6 +92,7 @@ internal fun runEmbeddedPaymentElementTest(
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     builderInstance: EmbeddedPaymentElement.Builder,
+    apiConfigurationTestType: ApiConfigurationTestType = ApiConfigurationTestType.PaymentConfigurationOnly,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
@@ -147,6 +151,7 @@ internal fun runEmbeddedPaymentElementTest(
         countDownLatchTimeoutSeconds = successTimeoutSeconds,
         makeEmbeddedPaymentElement = factory,
         rowSelectionCalls = rowSelectionCalls,
+        apiConfigurationTestType = apiConfigurationTestType,
         block = block,
     )
 }
@@ -157,12 +162,13 @@ private fun runEmbeddedPaymentElementTestInternal(
     countDownLatchTimeoutSeconds: Long,
     makeEmbeddedPaymentElement: (ComponentActivity) -> EmbeddedPaymentElement,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
+    apiConfigurationTestType: ApiConfigurationTestType,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -184,6 +190,7 @@ private fun runEmbeddedPaymentElementTestInternal(
                     rowSelectionCalls = rowSelectionCalls,
                     paymentOptionTurbine = paymentOptionTurbine,
                     countDownLatch = countDownLatch,
+                    apiConfigurationTestType = apiConfigurationTestType,
                 )
                 block(testContext)
 

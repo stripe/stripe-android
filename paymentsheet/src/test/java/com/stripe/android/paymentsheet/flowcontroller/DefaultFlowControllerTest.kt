@@ -26,6 +26,7 @@ import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
@@ -1268,6 +1269,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirm() with default sepa saved payment method should show sepa mandate`() = confirmationTest {
+        val appearance = PaymentSheet.Appearance()
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         val flowController = createFlowController(
             paymentSelection = paymentSelection,
@@ -1280,12 +1282,18 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .allowsDelayedPaymentMethods(true)
+                .appearance(appearance)
                 .build()
         )
 
         flowController.confirm()
 
-        verify(sepaMandateActivityLauncher).launch(any())
+        verify(sepaMandateActivityLauncher).launch(
+            SepaMandateContract.Args(
+                merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                appearance = appearance,
+            )
+        )
 
         flowController.onSepaMandateResult(SepaMandateResult.Acknowledged)
 
@@ -2513,7 +2521,12 @@ internal class DefaultFlowControllerTest {
             flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
-            linkGateFactory = FakeLinkGate.Factory(linkGate),
+            linkPaymentMethodSelectionLauncher = LinkPaymentMethodSelectionLauncher(
+                launcher = flowControllerLinkPaymentLauncher,
+                linkGateFactory = FakeLinkGate.Factory(linkGate),
+                linkAccountHolder = linkAccountHolder,
+                statusBarColor = viewModel.statusBarColor,
+            ),
             confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 listOf(KLARNA_PROMOTION)

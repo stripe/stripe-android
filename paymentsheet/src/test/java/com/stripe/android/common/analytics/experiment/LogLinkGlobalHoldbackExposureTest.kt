@@ -485,7 +485,6 @@ class LogLinkGlobalHoldbackExposureTest {
             orderedPaymentMethodTypesAndWallets = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
             customPaymentMethods = emptyList(),
             externalPaymentMethodData = null,
-            paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap(),
             experimentsData = experimentsData,

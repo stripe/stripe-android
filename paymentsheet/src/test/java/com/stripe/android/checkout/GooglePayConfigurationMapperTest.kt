@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
@@ -10,9 +11,11 @@ internal class GooglePayConfigurationMapperTest {
 
     @Test
     fun `default owned config maps to PaymentSheet defaults`() {
-        val mapped = GooglePayConfiguration(
-            GooglePayConfiguration.Environment.Test,
-        ).build().asPaymentSheet(merchantCountry = "US")
+        val mapped = GooglePayConfiguration().build().asPaymentSheet(
+            merchantCountry = "US",
+            liveMode = false,
+            isDebugBuild = false,
+        )
 
         assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
         assertThat(mapped.countryCode).isEqualTo("US")
@@ -21,14 +24,16 @@ internal class GooglePayConfigurationMapperTest {
 
     @Test
     fun `all fields map 1 to 1`() {
-        val mapped = GooglePayConfiguration(
-            GooglePayConfiguration.Environment.Production,
-        )
+        val mapped = GooglePayConfiguration()
             .label("Total")
             .buttonType(GooglePayConfiguration.ButtonType.Checkout)
             .additionalEnabledNetworks(listOf("INTERAC"))
             .build()
-            .asPaymentSheet(merchantCountry = "CA")
+            .asPaymentSheet(
+                merchantCountry = "CA",
+                liveMode = true,
+                isDebugBuild = false,
+            )
 
         assertThat(mapped.environment)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
@@ -40,14 +45,27 @@ internal class GooglePayConfigurationMapperTest {
     }
 
     @Test
+    fun `live mode maps to test environment in debug builds`() {
+        val mapped = GooglePayConfiguration().build().asPaymentSheet(
+            merchantCountry = "US",
+            liveMode = true,
+            isDebugBuild = true,
+        )
+
+        assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
+    }
+
+    @Test
     fun `every button type maps to the matching PaymentSheet value`() {
         GooglePayConfiguration.ButtonType.entries.forEach { buttonType ->
-            val mapped = GooglePayConfiguration(
-                GooglePayConfiguration.Environment.Test,
-            )
+            val mapped = GooglePayConfiguration()
                 .buttonType(buttonType)
                 .build()
-                .asPaymentSheet(merchantCountry = "US")
+                .asPaymentSheet(
+                    merchantCountry = "US",
+                    liveMode = false,
+                    isDebugBuild = false,
+                )
 
             assertThat(mapped.buttonType.name).isEqualTo(buttonType.name)
         }

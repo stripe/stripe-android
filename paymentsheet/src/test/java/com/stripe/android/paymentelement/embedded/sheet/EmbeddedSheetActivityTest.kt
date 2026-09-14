@@ -266,6 +266,7 @@ internal class EmbeddedSheetActivityTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                         .build(),
+                    productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
                     statusBarColor = null,
                     selection = selection,
@@ -273,7 +274,7 @@ internal class EmbeddedSheetActivityTest {
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                         paymentMethods = paymentMethods,
                     ),
-                    promotion = null,
+                    promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Manage,
                 ),
             )

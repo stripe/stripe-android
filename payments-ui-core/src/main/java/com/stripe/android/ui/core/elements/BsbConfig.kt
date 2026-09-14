@@ -22,7 +22,9 @@ import com.stripe.android.R as StripeR
  * a six-digit number used to identify the individual branch of an Australian financial institution
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig {
+class BsbConfig(
+    private val banks: BecsDebitBanks
+) : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "bsb"
 
@@ -81,9 +83,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
             )
         }
 
-        val bank = banks.firstOrNull {
-            input.startsWith(it.prefix)
-        }
+        val bank = banks.byPrefix(input)
 
         if (bank == null || input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(

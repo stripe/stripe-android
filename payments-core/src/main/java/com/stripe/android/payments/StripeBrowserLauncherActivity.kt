@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePaddingRelative
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -28,17 +29,24 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  * See [BrowserCapabilities] and [PaymentBrowserAuthContract.Args.hasDefaultReturnUrl].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
+    private val args: PaymentBrowserAuthContract.Args? by lazy {
+        PaymentBrowserAuthContract.parseArgs(intent)
+    }
+
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory()
+        StripeBrowserLauncherViewModel.Factory(requireNotNull(args))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentBrowserAuthContract.parseArgs(intent)
+        val args = args
         if (args == null) {
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { ApiConfiguration.State("", null) },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
                 )
@@ -70,14 +78,20 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { args.apiConfiguration },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
                 )
             finishWithFailure(args)
         } catch (e: SecurityException) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { args.apiConfiguration },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),

@@ -37,7 +37,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         val state = stateHolder.state ?: return
         val response = fetchResponse(
             state.checkoutSessionResponse.id,
-            state.configuration.adaptivePricingAllowed,
+            state.configuration.currencySelectorElementConfiguration != null,
         ).getOrThrow()
 
         refresh(response)

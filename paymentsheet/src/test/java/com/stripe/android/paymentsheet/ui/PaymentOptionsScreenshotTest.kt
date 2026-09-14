@@ -2,22 +2,35 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 class PaymentOptionsScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule()
+
+    @get:Rule
+    val scopedThemePaparazziRule = PaparazziRule(
+        SystemAppearance.entries,
+        includeStripeTheme = false,
+    )
 
     @Test
     fun testWidthLessThanScreen() {
@@ -138,6 +151,30 @@ class PaymentOptionsScreenshotTest {
     }
 
     @Test
+    fun testAutomaticTheme() {
+        snapshotWithAppearance(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun testAlwaysLightTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        )
+    }
+
+    @Test
+    fun testAlwaysDarkTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        )
+    }
+
+    @Test
+    fun testCustomAppearanceTheme() {
+        snapshotWithAppearance(PaymentSheetAppearance.CrazyAppearance.appearance)
+    }
+
+    @Test
     fun testOnelink() {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
@@ -191,6 +228,26 @@ class PaymentOptionsScreenshotTest {
             ),
         ),
     )
+
+    private fun snapshotWithAppearance(appearance: PaymentSheet.Appearance) {
+        scopedThemePaparazziRule.snapshot {
+            PaymentElementTheme(appearance = appearance) {
+                Surface(color = MaterialTheme.colors.surface) {
+                    SavedPaymentMethodTabLayoutUI(
+                        paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
+                        selectedPaymentOptionsItem = paymentOptionsItemsWithDefaultCard.first(),
+                        linkBrand = LinkBrand.Link,
+                        isEditing = false,
+                        isProcessing = false,
+                        onAddCardPressed = {},
+                        onItemSelected = {},
+                        onModifyItem = {},
+                        scrollState = rememberLazyListState(),
+                    )
+                }
+            }
+        }
+    }
 
     private fun createSavedPaymentMethodTabLayoutUiScreenshot(
         paymentOptionsItems: List<PaymentOptionsItem>,

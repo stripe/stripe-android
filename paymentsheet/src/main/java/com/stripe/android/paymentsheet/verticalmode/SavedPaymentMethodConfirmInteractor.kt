@@ -20,6 +20,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -27,6 +28,8 @@ import javax.inject.Inject
 
 internal interface SavedPaymentMethodConfirmInteractor {
     val state: StateFlow<State>
+
+    fun close()
 
     data class State(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
@@ -55,7 +58,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     val processing: StateFlow<Boolean>,
     val updateSelection: (PaymentSelection.Saved) -> Unit,
     val paymentMethodMetadata: PaymentMethodMetadata,
-    val coroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope,
 ) : SavedPaymentMethodConfirmInteractor {
     private val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = displayName,
@@ -80,12 +83,14 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         initialSelection.withLinkState(it)
     }
 
-    init {
-        coroutineScope.launch {
-            selection.collectLatest {
-                updateSelection(it)
-            }
+    private val updateSelectionJob: Job = coroutineScope.launch {
+        selection.collectLatest {
+            updateSelection(it)
         }
+    }
+
+    override fun close() {
+        updateSelectionJob.cancel()
     }
 
     companion object {

@@ -2,7 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata

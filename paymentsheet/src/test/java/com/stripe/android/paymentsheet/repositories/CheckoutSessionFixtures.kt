@@ -109,40 +109,6 @@ internal object CheckoutSessionFixtures {
               ],
               "type": "deferred_intent"
             },
-            "payment_method_specs": [
-              {
-                "async": false,
-                "fields": [],
-                "type": "card"
-              },
-              {
-                "async": false,
-                "fields": [],
-                "selector_icon": {
-                  "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp@3x-a89c5d8d0651cae2a511bb49a6be1cfc.png",
-                  "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp-981164a833e417d28a8ac2684fda2324.svg"
-                },
-                "type": "cashapp"
-              },
-              {
-                "async": false,
-                "fields": [],
-                "selector_icon": {
-                  "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-alipay@3x-d216a94882c3c5422274faaec75a3c81.png",
-                  "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/alipay-22c167d415e209c71b2ac68b7fbc9f43.svg"
-                },
-                "type": "alipay"
-              },
-              {
-                "async": false,
-                "fields": [],
-                "selector_icon": {
-                  "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-wechat-pay@3x-ce6c167dcedb7faa3510e7f912518ead.png",
-                  "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-wechat-pay-f62a5a27f646cb5f596c610475d14444.svg"
-                },
-                "type": "wechat_pay"
-              }
-            ],
             "session_id": "elements_session_1nWWJQ3A6yS",
             "unactivated_payment_method_types": [],
             "unverified_payment_methods_on_domain": [
