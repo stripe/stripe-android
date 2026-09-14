@@ -2,7 +2,6 @@ package com.stripe.android.cards
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -47,20 +46,18 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     @JvmOverloads
     constructor(
         context: Context,
+        publishableKeySupplier: () -> String,
         productUsageTokens: Set<String> = emptySet()
     ) : this(
         context = context,
         productUsageTokens = productUsageTokens,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-        apiConfigurationProvider = context.applicationContext.let { appContext ->
-            Provider {
-                val configuration = PaymentConfiguration.getInstance(appContext)
-                ApiConfiguration.State(
-                    publishableKey = configuration.publishableKey,
-                    stripeAccountId = configuration.stripeAccountId,
-                )
-            }
+        apiConfigurationProvider = {
+            ApiConfiguration.State(
+                publishableKey = publishableKeySupplier(),
+                stripeAccountId = null,
+            )
         },
     )
 
