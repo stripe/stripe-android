@@ -7,6 +7,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAppearance
+import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkColors
+import com.stripe.android.link.theme.LinkShapes
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -17,7 +21,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-internal class OnrampThemeTest {
+internal class LinkThemeIntegrationTest {
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -46,14 +50,14 @@ internal class OnrampThemeTest {
             .darkColors(LinkAppearance.Colors().primary(Color.Blue).contentOnPrimary(Color.White))
             .primaryButton(LinkAppearance.PrimaryButton().heightDp(64f).cornerRadiusDp(20f))
             .build()
-        var actualColors: OnrampColors? = null
-        var actualShapes: OnrampShapes? = null
+        var actualColors: LinkColors? = null
+        var actualShapes: LinkShapes? = null
         var actualUiMode: Int? = null
 
         composeRule.setContent {
-            DefaultOnrampTheme(appearance) {
-                actualColors = OnrampTheme.colors
-                actualShapes = OnrampTheme.shapes
+            DefaultLinkTheme(appearance) {
+                actualColors = LinkTheme.colors
+                actualShapes = LinkTheme.shapes
                 actualUiMode = LocalContext.current.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
             }
         }

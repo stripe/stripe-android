@@ -1,8 +1,10 @@
 package com.stripe.android.link.theme
 
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 
-internal object LinkTheme {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object LinkTheme {
 
     val typography: LinkTypography
         @Composable

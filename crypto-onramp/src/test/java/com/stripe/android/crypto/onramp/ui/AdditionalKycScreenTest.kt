@@ -61,7 +61,7 @@ internal class AdditionalKycScreenTest {
         composeRule.onNodeWithTag(additionalKycQuestionTag("purchase_purpose"))
             .performTextReplacement("For investment")
         composeRule.onNodeWithTag(additionalKycQuestionTag("funding_sources")).assertDoesNotExist()
-        composeRule.onNodeWithTag(PrimaryButtonTag).assertIsNotEnabled()
+        composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
 
         assertThat(changedAnswer).isEqualTo("purchase_purpose" to "For investment")
     }
@@ -171,9 +171,9 @@ internal class AdditionalKycScreenTest {
             canSubmit = false,
         ),
     ) {
-        composeRule.onNodeWithTag(PrimaryButtonTag).assertIsNotEnabled()
+        composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
         composeRule.onNodeWithTag(
-            testTag = ProgressIndicatorTestTag,
+            testTag = "CircularProgressIndicator",
             useUnmergedTree = true,
         ).assertIsDisplayed()
     }
