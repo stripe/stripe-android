@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
@@ -35,10 +36,11 @@ internal class CheckoutStateLoader @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ) {
+        val normalizedConfiguration = configuration.normalizeShippingDefaults(checkoutSessionResponse)
         commit(
-            configuration = configuration,
+            configuration = normalizedConfiguration,
             response = checkoutSessionResponse,
-            collectedDetails = configuration.asInitialCollectedDetails(),
+            collectedDetails = normalizedConfiguration.asInitialCollectedDetails(),
             carryForward = CarryForward.initial(),
         )
     }
@@ -210,5 +212,24 @@ private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): 
         email = defaults.email,
         shippingName = defaults.shippingDetails?.name,
         shippingAddress = defaults.shippingDetails?.address,
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutController.Configuration.State.normalizeShippingDefaults(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): CheckoutController.Configuration.State {
+    if (shippingAddressElementConfiguration == null) {
+        return this
+    }
+
+    val shippingDetails = defaults.shippingDetails ?: return this
+    val shippingAddress = shippingDetails.address ?: return this
+    if (checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess) {
+        return this
+    }
+
+    return copy(
+        defaults = defaults.copy(shippingDetails = null),
     )
 }

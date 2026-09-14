@@ -104,14 +104,13 @@ class CheckoutController @Inject internal constructor(
             return integrationLaunchedFailure()
         }
         return operationCoordinator.runMutation {
-            var configurationState = configuration.build()
+            val configurationState = configuration.build()
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                configurationState = configurationState.normalizeShippingDefaults(response)
                 val defaultBillingAddress = configurationState.defaults.billingDetails?.address
                 if (defaultBillingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
