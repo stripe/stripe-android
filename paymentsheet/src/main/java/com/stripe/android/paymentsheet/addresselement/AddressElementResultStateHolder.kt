@@ -8,11 +8,11 @@ import javax.inject.Singleton
 
 @Singleton
 internal class AddressElementResultStateHolder @Inject constructor() {
-    private val _result = MutableStateFlow<AddressLauncherResult?>(null)
+    private val _result = MutableStateFlow<AddressElementActivityContract.Result?>(null)
 
-    val result: StateFlow<AddressLauncherResult?> = _result.asStateFlow()
+    val result: StateFlow<AddressElementActivityContract.Result?> = _result.asStateFlow()
 
-    fun setResult(result: AddressLauncherResult) {
+    fun setResult(result: AddressElementActivityContract.Result) {
         _result.compareAndSet(expect = null, update = result)
     }
 }

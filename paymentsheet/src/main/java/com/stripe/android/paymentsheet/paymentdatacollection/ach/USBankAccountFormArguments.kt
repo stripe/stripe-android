@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ClientAttributionMetadata
@@ -66,6 +67,7 @@ internal class USBankAccountFormArguments(
     val sellerBusinessName: String?,
     val forceSetupFutureUseBehavior: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val apiConfiguration: ApiConfiguration.State,
 ) {
     companion object {
         fun create(

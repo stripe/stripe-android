@@ -169,6 +169,7 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.robolectric
     testImplementation testLibs.espresso.core
+    testImplementation testLibs.turbine
 
     androidTestImplementation project(':payments-ui-core')
     androidTestImplementation project(':payments-core-testing')

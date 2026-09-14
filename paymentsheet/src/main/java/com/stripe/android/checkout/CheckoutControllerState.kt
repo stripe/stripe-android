@@ -25,6 +25,7 @@ internal data class CheckoutControllerState(
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
+    val linkEagerPresentationSuppressed: Boolean,
 ) : Parcelable {
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,

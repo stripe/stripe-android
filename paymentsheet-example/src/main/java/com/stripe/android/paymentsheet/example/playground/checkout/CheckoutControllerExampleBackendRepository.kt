@@ -1,89 +1,41 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.content.Context
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.fuel.core.requests.suspendable
-import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
+import com.stripe.android.createPaymentMethod
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
-import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 
 internal class CheckoutControllerExampleBackendRepository(
     private val applicationContext: Context,
 ) {
-    private val json = Json { ignoreUnknownKeys = true }
     private val defaultBackendUrl = Settings(applicationContext).playgroundBackendUrl
 
     suspend fun fetchCheckoutSession(
-        request: CheckoutControllerExampleRequest,
+        settings: CheckoutPlaygroundSettings.Snapshot,
         backendUrl: String?,
-    ): kotlin.Result<CheckoutControllerExampleBackendResponse> {
-        val apiResponse = withContext(Dispatchers.IO) {
-            Fuel.post(checkoutSessionUrl(defaultBackendUrl, backendUrl, request.endpoint))
-                .jsonBody(request.body.toString())
-                .suspendable()
-                .awaitModel(CheckoutResponse.serializer(), json)
-        }
-
-        return when (apiResponse) {
-            is Result.Failure -> {
-                kotlin.Result.failure(apiResponse.getException().withBackendMessage(json))
-            }
-            is Result.Success -> {
-                val response = apiResponse.value
-
-                withContext(Dispatchers.IO) {
-                    PaymentConfiguration.init(applicationContext, response.publishableKey)
-                }
-
-                val clientSecret = response.checkoutSessionClientSecret
-                    ?: return kotlin.Result.failure(
-                        IllegalStateException("No checkout session client secret in response")
-                    )
-
-                kotlin.Result.success(
-                    CheckoutControllerExampleBackendResponse(
-                        clientSecret = clientSecret,
-                        customerId = response.customerId,
-                    )
-                )
-            }
-        }
+    ): Result<CheckoutControllerExampleBackendResponse> = runCatching {
+        val merchant = settings.backendMerchant()
+        val backend = PlaygroundBackend(
+            baseUrl = backendUrl ?: defaultBackendUrl,
+            merchant = merchant.value,
+        )
+        val publishableKey = backend.fetchPublishableKey()
+        PaymentConfiguration.init(applicationContext, publishableKey)
+        val stripe = Stripe(applicationContext, publishableKey)
+        CheckoutSessionFactory(
+            backend = backend,
+            paymentMethodCreator = PlaygroundPaymentMethodCreator { params ->
+                stripe.createPaymentMethod(params).id
+            },
+        ).create(settings)
     }
 }
 
-internal data class CheckoutControllerExampleBackendResponse(
-    val clientSecret: String,
-    val customerId: String?,
-)
-
-internal fun checkoutSessionUrl(
-    defaultBackendUrl: String,
-    customBackendUrl: String?,
-    endpoint: String,
-): String {
-    return (customBackendUrl ?: defaultBackendUrl) + endpoint
+internal fun CheckoutPlaygroundSettings.Snapshot.backendMerchant(): Merchant {
+    val session = CheckoutPlaygroundDefinitions.session
+    return if (this[session.automaticTax]) Merchant.US_TAX else this[session.merchant]
 }
-
-internal fun FuelError.withBackendMessage(json: Json): Throwable {
-    val message = parseCheckoutSessionError(json, errorData)
-
-    return message?.let { IllegalStateException(it, this) } ?: this
-}
-
-internal fun parseCheckoutSessionError(json: Json, errorData: ByteArray): String? {
-    return runCatching {
-        json.decodeFromString<CheckoutSessionErrorResponse>(errorData.decodeToString()).error
-    }.getOrNull()
-}
-
-@kotlinx.serialization.Serializable
-private data class CheckoutSessionErrorResponse(
-    val error: String,
-)

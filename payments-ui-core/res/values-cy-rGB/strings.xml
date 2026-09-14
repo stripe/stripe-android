@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Prynu nawr neu dalu wedyn gyda <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Talu mewn <num_installments/> rhandaliad di-log o <installment_price/> gyda <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d taliad di-log o %2$s</string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Drwy gadarnhau eich taliad gydag AmazonPay, rydych chi\'n caniatáu i %s godi tâl ar eich cyfrif AmazonPay ar gyfer taliadau yn y dyfodol yn unol â\'u telerau.</string>
+  <!-- Text for back button -->
+  <string name="stripe_back">Yn ôl</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Mae rhif eich cyfrif yn anghyflawn.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Cyfrif banc</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Rwy\'n deall y bydd Stripe yn casglu Debydau Uniongyrchol ar ran %s ac yn cadarnhau mai fi yw deiliad y cyfrif a\'r unig berson sydd ei angen i awdurdodi debydau o\'r cyfrif hwn.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Codi didoli</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="stripe_billing_details">Cyfeiriad bilio</string>
+  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
+  <string name="stripe_card_brand_icons_content_description">Cardiau y mae modd delio â nhw: %1$s</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(ddim yn cael ei dderbyn)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ddim yn cael ei dderbyn)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Tapiwch neu rhowch hyn â llaw</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Drwy barhau, rydych chi\'n awdurdodi %1$s i ddebydu eich cyfrif Cash App ar gyfer y taliad hwn a thaliadau eraill yn y dyfodol yn unol â thelerau %2$s, nes caiff yr awdurdodiad hwn ei ddirymu. Gallwch newid hyn unrhyw bryd yn eich Gosodiadau Cash App.</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Manylion cyswllt</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Parhau</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">Banc EPS</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">Mae\'r IBAN a roddwyd yn anghyflawn.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">Mae\'r IBAN a roddwyd yn annilys, does dim modd delio â\'r cod gwlad \"%s\".</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">Dylai eich IBAN ddechrau gyda chod dwy lythyren y wlad.</string>
+  <string name="stripe_invalid_email_address">Cyfeiriad e-bost annilys: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">ID UPI annilys</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Prynu nawr neu dalu wedyn gyda Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Drwy fynd ymlaen i Klarna, rydych chi\'n caniatáu i %1$s godi tâl ar eich cyfrif Klarna ar gyfer taliadau yn y dyfodol yn unol â\'u telerau a thelerau Klarna. Gallwch newid hyn ar unrhyw adeg yn eich ap Klarna neu drwy gysylltu â %2$s.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Talu wedyn gyda Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Ffôn</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Drwy gadarnhau eich taliad gyda NICEPAY, rydych chi’n caniatáu i %s godi tâl ar y dull talu hwn ar gyfer taliadau yn y dyfodol yn unol â’u telerau.</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Enw ar y cerdyn</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Dewiswch sut rydych chi eisiau talu:</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Banc Przelewy24</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_pay_button_amount">Talu %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Banc</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">Cerdyn debyd neu gredyd</string>
+  <!-- Label of a button displayed below a card entry form that saves the card details -->
+  <string name="stripe_paymentsheet_add_card">Ychwanegu cerdyn</string>
+  <!-- Title shown above a view allowing the customer to save a card. -->
+  <string name="stripe_paymentsheet_add_new_card">Ychwanegu cerdyn newydd</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Manylion y cerdyn</string>
+  <!-- Title shown above a view allowing the customer to save a US bank account. -->
+  <string name="stripe_paymentsheet_add_us_bank_account">Ychwanegu cyfrif banc UDA</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debyd Uniongyrchol AU BECS</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Cerdyn</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">Debyd SEPA</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">Drwy gadarnhau eich taliad gyda PayPal, rydych chi\'n caniatáu i %s godi tâl ar eich cyfrif PayPal ar gyfer taliadau yn y dyfodol yn unol â\'u telerau.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Drwy barhau, rydych chi\'n awdurdodi %1$s i ddebydu eich Balans Satispay yn awtomatig ar sail gylchol yn unol â\'ch cynllun prynu neu danysgrifio.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Cadw ar gyfer taliadau %s yn y dyfodol</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Cadw\'r manylion talu gyda %s ar gyfer pryniannau yn y dyfodol</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Sganio cerdyn</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Clirio’r cerdyn a sganiwyd</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Drwy roi eich manylion talu a chadarnhau\'r taliad hwn, rydych chi\'n awdurdodi (A) %s a Stripe, ein darparwr gwasanaethau talu, i anfon cyfarwyddiadau i\'ch banc i ddebydu eich cyfrif a (B) eich banc i ddebydu eich cyfrif yn unol â\'r cyfarwyddiadau hynny. Fel rhan o\'ch hawliau, mae gennych chi hawl i gael ad-daliad gan eich banc yn unol â thelerau ac amodau eich cytundeb â\'ch banc. Rhaid hawlio ad-daliad cyn pen 8 wythnos i\'r dyddiad y cafodd eich cyfrif ei ddebydu. Caiff eich hawliau eu hesbonio mewn datganiad y gallwch ei gael gan eich banc. Rydych chi\'n cytuno i gael hysbysiadau ynghylch debydau yn y dyfodol hyd at 2 ddiwrnod cyn iddynt ddigwydd.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Gosod fel dull talu diofyn</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_setup_button_label">Gosod</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Drwy barhau, rydych chi’n awdurdodi %1$s i ddebydu eich Balans Twint yn awtomatig ar sail gylchol yn unol â’ch cynllun prynu neu danysgrifio.</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="stripe_upi_id_label">ID UPI</string>
+</resources>

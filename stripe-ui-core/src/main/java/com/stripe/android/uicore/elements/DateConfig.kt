@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
@@ -23,7 +22,7 @@ class DateConfig : TextFieldConfig {
     override val visualTransformation = ExpiryDateVisualTransformation()
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val enforceLeftToRightTextDirection: Boolean = true
     override val shouldAnnounceFieldValue = false
     override val shouldAnnounceLabel = false
     override val optional: Boolean = false

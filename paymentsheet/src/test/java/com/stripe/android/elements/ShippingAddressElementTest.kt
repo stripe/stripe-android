@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNT
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CompletableDeferred
@@ -39,6 +38,10 @@ import javax.inject.Provider
 internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    private val configuredCheckoutConfiguration = CheckoutController.Configuration()
+        .shippingAddressElement(ShippingAddressElement.Configuration())
+        .build()
 
     @Test
     fun `present before checkout configuration reports and does not launch`() = runScenario(configured = false) {
@@ -56,6 +59,26 @@ internal class ShippingAddressElementTest {
         activityLauncher.launchCalls.expectNoEvents()
         paymentConfiguration.getCalls.expectNoEvents()
     }
+
+    @Test
+    fun `present without shipping address element configuration reports and does not launch`() =
+        runScenario(
+            configuration = CheckoutController.Configuration().build(),
+        ) {
+            shippingAddressElement.present()
+
+            val call = errorReporter.awaitCall()
+            assertThat(call.errorEvent).isEqualTo(
+                ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+            )
+            assertThat(call.errorEvent.eventName).isEqualTo(
+                "checkout.shipping_address_element.present.not_configured"
+            )
+            assertThat(call.stripeException).isNull()
+            assertThat(call.additionalNonPiiParams).isEmpty()
+            activityLauncher.launchCalls.expectNoEvents()
+            paymentConfiguration.getCalls.expectNoEvents()
+        }
 
     @Test
     fun `present launches a blank address form with hosted autocomplete`() = runScenario {
@@ -112,7 +135,7 @@ internal class ShippingAddressElementTest {
         assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
-        registration.dispatch(AddressLauncherResult.Canceled())
+        registration.dispatch(AddressElementActivityContract.Result.Canceled)
         paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         shippingAddressElement.present()
@@ -139,9 +162,7 @@ internal class ShippingAddressElementTest {
             ),
         )
         registration.dispatch(
-            AddressLauncherResult.Succeeded(
-                addressDetails,
-            )
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
         )
 
         assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
@@ -170,7 +191,6 @@ internal class ShippingAddressElementTest {
         val commitResult = CompletableDeferred<Result<Unit>>()
 
         runScenario(
-            configured = true,
             commitShippingAddress = FakeCommitShippingAddress(commitResult),
         ) {
             shippingAddressElement.present()
@@ -178,7 +198,7 @@ internal class ShippingAddressElementTest {
             assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
             registration.dispatch(
-                AddressLauncherResult.Succeeded(
+                AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                     AddressDetails(
                         name = "Jenny Rosen",
                         address = PaymentSheet.Address(
@@ -188,7 +208,7 @@ internal class ShippingAddressElementTest {
                             postalCode = "94103",
                             state = "CA",
                         ),
-                    )
+                    ),
                 )
             )
             commitShippingAddress.calls.awaitItem()
@@ -212,7 +232,7 @@ internal class ShippingAddressElementTest {
         activityLauncher.launchCalls.awaitItem()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
-        registration.dispatch(AddressLauncherResult.Canceled())
+        registration.dispatch(AddressElementActivityContract.Result.Canceled)
 
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
         commitShippingAddress.calls.expectNoEvents()
@@ -225,14 +245,14 @@ internal class ShippingAddressElementTest {
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(
-            AddressLauncherResult.Succeeded(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                 AddressDetails(
                     name = "Missing country",
                     address = PaymentSheet.Address(
                         line1 = "510 Townsend St",
                         country = " ",
                     ),
-                )
+                ),
             )
         )
 
@@ -254,7 +274,7 @@ internal class ShippingAddressElementTest {
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.expectNoEvents()
 
-        recreated.registration.dispatch(AddressLauncherResult.Canceled())
+        recreated.registration.dispatch(AddressElementActivityContract.Result.Canceled)
         assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
 
         recreated.shippingAddressElement.present()
@@ -272,18 +292,10 @@ internal class ShippingAddressElementTest {
 
     private fun runScenario(
         configured: Boolean = true,
-        block: suspend Scenario.() -> Unit,
-    ) = runScenario(
-        configured = configured,
-        commitShippingAddress = FakeCommitShippingAddress(
+        configuration: CheckoutController.Configuration.State = configuredCheckoutConfiguration,
+        commitShippingAddress: FakeCommitShippingAddress = FakeCommitShippingAddress(
             CompletableDeferred(Result.success(Unit)),
         ),
-        block = block,
-    )
-
-    private fun runScenario(
-        configured: Boolean,
-        commitShippingAddress: FakeCommitShippingAddress,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -291,7 +303,9 @@ internal class ShippingAddressElementTest {
             savedStateHandle = savedStateHandle,
         )
         if (configured) {
-            stateHolder.state = CheckoutControllerStateFactory.create()
+            stateHolder.state = CheckoutControllerStateFactory.create(
+                configuration = configuration,
+            )
         }
         val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         val paymentConfiguration = RecordingProvider(
@@ -314,7 +328,7 @@ internal class ShippingAddressElementTest {
                 errorReporter = errorReporter,
             )
             val registration = activityResultCaller.registerCalls.awaitItem()
-            assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract)
+            assertThat(registration.contract).isSameInstanceAs(AddressElementActivityContract.CheckoutShipping)
             return ElementScenario(
                 shippingAddressElement = shippingAddressElement,
                 activityResultCaller = activityResultCaller,
@@ -366,12 +380,12 @@ internal class ShippingAddressElementTest {
     }
 
     private class RecordingActivityResultLauncher :
-        ActivityResultLauncher<AddressElementActivityContract.Args>() {
+        ActivityResultLauncher<AddressElementActivityContract.Args.CheckoutShipping>() {
         val launchCalls = Turbine<LaunchCall>()
         val unregisterCalls = Turbine<Unit>()
 
         override fun launch(
-            input: AddressElementActivityContract.Args,
+            input: AddressElementActivityContract.Args.CheckoutShipping,
             options: ActivityOptionsCompat?,
         ) {
             launchCalls.add(LaunchCall(input))
@@ -381,8 +395,9 @@ internal class ShippingAddressElementTest {
             unregisterCalls.add(Unit)
         }
 
-        override val contract: ActivityResultContract<AddressElementActivityContract.Args, *>
-            get() = AddressElementActivityContract
+        override val contract:
+            ActivityResultContract<AddressElementActivityContract.Args.CheckoutShipping, *>
+            get() = AddressElementActivityContract.CheckoutShipping
     }
 
     private class RecordingProvider<T>(
@@ -401,13 +416,14 @@ internal class ShippingAddressElementTest {
         val callback: ActivityResultCallback<*>,
     ) {
         @Suppress("UNCHECKED_CAST")
-        fun dispatch(result: AddressLauncherResult) {
-            (callback as ActivityResultCallback<AddressLauncherResult>).onActivityResult(result)
+        fun dispatch(result: AddressElementActivityContract.CheckoutShippingResult) {
+            (callback as ActivityResultCallback<AddressElementActivityContract.CheckoutShippingResult>)
+                .onActivityResult(result)
         }
     }
 
     private data class LaunchCall(
-        val input: AddressElementActivityContract.Args,
+        val input: AddressElementActivityContract.Args.CheckoutShipping,
     )
 
     private data class ElementScenario(

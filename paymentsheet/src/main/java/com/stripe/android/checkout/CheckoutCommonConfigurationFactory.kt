@@ -23,7 +23,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         checkoutSessionResponse = checkoutSessionResponse,
         collectedDetails = collectedDetails,
         googlePayConfiguration =
-            configuration.toExpressCheckoutElementGooglePayConfiguration(checkoutSessionResponse),
+            configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
             checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),

@@ -39,13 +39,17 @@ class InputAddressViewModelTest {
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        argsFactory:
+            (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
+                AddressElementActivityContract.Args.Standalone(
+                    publishableKey = "pk_123",
+                    config = currentConfig,
+                )
+            },
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
-                publishableKey = "pk_123",
-                config = config,
-            ),
+            argsFactory(config),
             navigator,
             resultStateHolder,
             eventReporter,
@@ -194,7 +198,7 @@ class InputAddressViewModelTest {
         )
 
         assertThat(resultStateHolder.result.value)
-            .isEqualTo(AddressLauncherResult.Succeeded(expectedAddress))
+            .isEqualTo(AddressElementActivityContract.Result.StandaloneSucceeded(expectedAddress))
         assertThat(viewModel.formEnabled.value).isFalse()
         verify(eventReporter).onCompleted(
             country = eq("US"),
@@ -987,6 +991,35 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `standalone save emits standalone success`() {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
+    fun `checkout shipping save emits checkout success without performing additional work`() {
+        val viewModel = createViewModel(
+            argsFactory = { config ->
+                AddressElementActivityContract.Args.CheckoutShipping(
+                    publishableKey = "pk_123",
+                    config = config,
+                )
+            },
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
     fun `isInlineAutocompleteEnabled is always true`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
@@ -1002,7 +1035,7 @@ class InputAddressViewModelTest {
         autocompleteCountries: Set<String> = emptySet(),
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
+            AddressElementActivityContract.Args.Standalone(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration.Builder()
                     .googlePlacesApiKey(googlePlacesApiKey)
@@ -1060,4 +1093,30 @@ class InputAddressViewModelTest {
 
     private fun createShowState(isChecked: Boolean) =
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
+
+    private companion object {
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "+14155551212",
+            isCheckboxSelected = true,
+        )
+        val COMPLETED_FORM_VALUES = mapOf(
+            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+            FormFieldId.City to FormFieldEntry("San Francisco", true),
+            FormFieldId.Country to FormFieldEntry("US", true),
+            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
+            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
+            FormFieldId.Phone to FormFieldEntry("+14155551212", true),
+            FormFieldId.PostalCode to FormFieldEntry("94103", true),
+            FormFieldId.State to FormFieldEntry("CA", true),
+        )
+    }
 }

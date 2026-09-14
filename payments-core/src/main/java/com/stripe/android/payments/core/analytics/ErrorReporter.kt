@@ -209,8 +209,14 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        HCAPTCHA_UNEXPECTED_FAILURE(
+            eventName = "elements.captcha.passive.unexpected_failure"
+        ),
         INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED(
             eventName = "intent_confirmation_challenge.challenge_cancellation_request_failed"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
+            eventName = "intent_confirmation_handler.attestation.failed_to_prepare"
         ),
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED(
             eventName = "intent_confirmation_handler.attestation.request_token_failed"
@@ -327,9 +333,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED(
             partialEventName = "intent_confirmation_handler.attestation.invoked_when_disabled"
         ),
-        INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
-            partialEventName = "intent_confirmation_handler.attestation.failed_to_prepare"
-        ),
         INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
             partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
         ),
@@ -341,9 +344,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT(
             partialEventName = "intent_confirmation_challenge.attestation.no_attestation_result"
-        ),
-        HCAPTCHA_UNEXPECTED_FAILURE(
-            partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
         PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
             partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"

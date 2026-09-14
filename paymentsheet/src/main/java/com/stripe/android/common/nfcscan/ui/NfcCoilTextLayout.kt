@@ -101,7 +101,7 @@ private fun MeasureScope.placeCoilTextElements(
 
     return layout(containerWidthPx, containerHeightPx) {
         if (instructionPlaceable.width > 0 && instructionPlaceable.height > 0) {
-            instructionPlaceable.placeRelative(
+            instructionPlaceable.place(
                 x = clampedTextX(
                     placeable = instructionPlaceable,
                     coilCenterX = coilCenterX,
@@ -118,7 +118,7 @@ private fun MeasureScope.placeCoilTextElements(
                     instructionPlaceable.height +
                     ErrorTextTopSpacing.roundToPx()
 
-                placeable.placeRelative(
+                placeable.place(
                     x = clampedTextX(
                         placeable = placeable,
                         coilCenterX = coilCenterX,

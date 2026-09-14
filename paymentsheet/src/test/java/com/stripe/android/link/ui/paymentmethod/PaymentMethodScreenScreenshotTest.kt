@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -27,7 +28,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 
 internal class PaymentMethodScreenScreenshotTest {
-    private val paparazziRule = PaparazziRule()
+    private val paparazziRule = PaparazziRule(LayoutDirection.entries)
 
     private val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableKlarnaFormRemoval,

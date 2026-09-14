@@ -311,6 +311,7 @@ class CheckoutController @Inject internal constructor(
                 registryOwner = activity,
             ),
             lifecycleOwner = activity,
+            activityResultRegistry = activity.activityResultRegistry,
             statusBarColor = StatusBarCompat.color(activity),
         )
         subcomponent.initializer.initialize()
@@ -900,6 +901,10 @@ class CheckoutController @Inject internal constructor(
                  * The customer's full name.
                  */
                 val name: String?,
+                /**
+                 * The customer's phone number.
+                 */
+                val phone: String?,
             ) {
                 /**
                  * A billing address.

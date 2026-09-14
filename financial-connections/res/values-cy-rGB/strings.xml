@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Cysylltu cyfrifon</string>
+  <string name="stripe_account_picker_cta_link_singular">Cysylltu cyfrif</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Aeth rhywbeth o\'i le wrth gael gafael ar eich cyfrif %1$s</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Daethom o hyd i %1$s cyfrif %2$s ond dim ond cyfrifon cyfredol neu gynilo y gallwch eu cysylltu â %3$s. Ceisiwch ddewis banc arall.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Daethom o hyd i %1$s cyfrif %2$s ond dim ond cyfrifon cyfredol neu gynilo y gallwch eu cysylltu â %3$s. Ceisiwch ddewis banc arall.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Dim cyfrifon talu ar gael</string>
+  <string name="stripe_account_picker_multiselect_account">Dewis cyfrifon</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Wrthi\'n nôl cyfrifon...</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Dewis cyfrif</string>
+  <string name="stripe_accounts_error_desc_manualentry">Rhowch eich manylion banc â llaw neu ddewis banc arall.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Dewiswch fanc arall.</string>
+  <string name="stripe_accounts_error_desc_retry">Dewiswch fanc arall neu roi cynnig arall arni.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Rhowch eich manylion banc â llaw</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Rhowch eich manylion banc â llaw neu ddewis banc arall.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Doedd dim modd cael mynediad at rif eich cyfrif ar hyn o bryd</string>
+  <string name="stripe_close_dialog_networking_desc">Os gwnewch chi ganslo nawr, bydd eich cyfrif yn cael ei gysylltu â %1$s ond ni fydd yn cael ei gadw gyda Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Os gwnewch chi ganslo nawr, bydd eich cyfrif yn cael ei gysylltu â\'r busnes hwn ond ni fydd yn cael ei gadw gyda Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Os ydych chi’n canslo nawr, bydd eich cyfrif yn cael ei gysylltu â’r busnes hwn ond ni chaiff ei gadw i %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Os ydych chi’n canslo nawr, bydd eich cyfrif yn cael ei gysylltu â %1$s ond ni chaiff ei gadw i %2$s.</string>
+  <string name="stripe_error_cta_close">Cau</string>
+  <string name="stripe_error_cta_manual_entry">Rhoi\'r manylion banc â llaw</string>
+  <string name="stripe_error_cta_retry">Rhowch gynnig arall arni</string>
+  <string name="stripe_error_cta_select_another_bank">Dewis banc arall</string>
+  <string name="stripe_error_generic_desc">Does dim modd cysylltu eich cyfrif ar hyn o bryd. Rhowch gynnig arall arni yn nes ymlaen.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Aeth rhywbeth o\'i le</string>
+  <string name="stripe_error_planned_downtime_desc">Dylai\'r gwaith cynnal a chadw ddod i ben am %1$s. Dewiswch fanc arall neu roi cynnig arall arni yn nes ymlaen.</string>
+  <string name="stripe_error_planned_downtime_title">Mae %1$s yn gwneud gwaith cynnal a chadw</string>
+  <string name="stripe_error_unplanned_downtime_desc">Dewiswch fanc arall neu roi cynnig arall arni yn nes ymlaen.</string>
+  <string name="stripe_error_unplanned_downtime_title">Dydy %1$s ddim ar gael ar hyn o bryd</string>
+  <string name="stripe_exit_modal_cta_accept">Iawn, gadael</string>
+  <string name="stripe_exit_modal_cta_cancel">Canslo</string>
+  <string name="stripe_exit_modal_desc">Fydd eich cyfrif banc ddim yn cael ei gysylltu â %1$s a bydd yr holl gynnydd yn cael ei golli.</string>
+  <string name="stripe_exit_modal_desc_no_business">Fydd eich cyfrif banc ddim yn cael ei gysylltu â\'r busnes hwn a bydd yr holl gynnydd yn cael ei golli.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Gadael heb gysylltu?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Rhowch rif eich cyfrif a\'ch rhif llwybro</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Ddim yn gweld eich banc?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Ceisiwch chwilio am fanc arall</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Ceisiwch chwilio am fanc arall neu </string>
+  <string name="stripe_institutionpicker_pane_error_title">Dim canlyniadau</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Dewiswch gyfrif banc</string>
+  <string name="stripe_institutionpicker_search_more_title">Chwilio am ragor o fanciau</string>
+  <string name="stripe_link_stepup_verification_desc">Rhowch y cod a anfonwyd i %1$s. Rydyn ni\'n gofyn am y cam ychwanegol hwn o bryd i\'w gilydd i gadw eich cyfrif yn ddiogel.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Ailanfon y cod</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Dilyswch eich cyfeiriad e-bost</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Arhoswch, bron yno</string>
+  <string name="stripe_manualentry_account">Rhif y cyfrif</string>
+  <string name="stripe_manualentry_accountconfirm">Cadarnhewch rif y cyfrif</string>
+  <string name="stripe_manualentry_cta">Cyflwyno</string>
+  <string name="stripe_manualentry_microdeposits_desc">Bydd eich manylion banc yn cael eu dilysu drwy dalu micro-adneuon i mewn i\'ch cyfrif, fel arfer o fewn 1–2 ddiwrnod busnes. Dim ond cyfrifon cyfredol y mae modd delio â nhw.</string>
+  <string name="stripe_manualentry_routing">Rhif llwybro</string>
+  <string name="stripe_manualentry_test_banner">Defnyddio cyfrif prawf</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Rhoi\'r manylion banc</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Canslo</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Parhau gyda Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Parhau gyda %1$s</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Dim nawr</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Defnyddio\'r wybodaeth rydych chi wedi\'i chadw\'n flaenorol gyda\'ch cyfrif Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Defnyddiwch yr wybodaeth rydych wedi’i chadw’n barod gyda’ch cyfrif %1$s.</string>
+  <string name="stripe_networking_link_login_warmup_title">Parhau gyda Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Parhau gyda %1$s</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Dim nawr</string>
+  <string name="stripe_networking_save_to_link_verification_title">Cadarnhewch mai chi sydd yno</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">Cyfeiriad e-bost</string>
+  <string name="stripe_networking_verification_desc">Rhowch y cod a anfonwyd i %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Cadarnhewch mai chi sydd yno</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Canslo</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Dewis banc gwahanol</string>
+  <string name="stripe_search">Chwilio</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Cafodd eich cyfrifon eu cysylltu, ond doedd dim modd eu cadw gyda Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Roedd eich cyfrifon wedi cysylltu ond methwyd eu cadw gyda %1$s.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Cafodd eich cyfrif ei gysylltu, ond doedd dim modd ei gadw gyda Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Roedd eich cyfrif wedi cysylltu ond methwyd ei gadw gyda %1$s.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Cafodd eich cyfrifon eu cysylltu a\'u cadw gyda Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Cafodd eich cyfrifon eu cysylltu a’u cadw gyda %1$s.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Cafodd eich cyfrif ei gysylltu a\'i gadw gyda Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Cafodd eich cyfrif ei gysylltu a’i gadw gyda %1$s.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Gallwch ddisgwyl derbyn micro-adneuon i\'r cyfrif sy\'n gorffen gyda ••••%1$s yn yr 1-2 ddiwrnod nesaf, ac e-bost gyda chyfarwyddiadau pellach.</string>
+  <string name="stripe_success_pane_desc_plural">Cafodd eich cyfrifon eu cysylltu</string>
+  <string name="stripe_success_pane_desc_singular">Cafodd eich cyfrif ei gysylltu</string>
+  <string name="stripe_success_pane_done">Wedi gorffen</string>
+  <string name="stripe_success_pane_done_with_merchant">Yn ôl i %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Llwyddiant</string>
+  <string name="stripe_success_pane_title_microdeposits">Bron yno</string>
+  <string name="stripe_validation_account_confirm_mismatch">Dydy eich rhifau cyfrif ddim yn cyfateb.</string>
+  <string name="stripe_validation_account_required">Mae angen rhif cyfrif.</string>
+  <string name="stripe_validation_account_too_long">Rhif cyfrif banc annilys: rhaid iddo gynnwys dim mwy na 17 digid.</string>
+  <string name="stripe_validation_no_us_routing">Rhif llwybro annilys.</string>
+  <string name="stripe_validation_routing_required">Mae angen rhif llwybro.</string>
+  <string name="stripe_validation_routing_too_short">Rhowch 9 digid ar gyfer eich rhif llwybro.</string>
+  <string name="stripe_verification.codeExpiredEmail">Mae\'n ymddangos nad yw\'r cod dilysu a roddwyd yn ddilys dim mwy. Cliciwch “Ailanfon y cod” a rhoi cynnig arall arni, neu </string>
+  <string name="stripe_verification.codeExpiredSms">Mae\'n ymddangos nad yw\'r cod dilysu a roddwyd yn ddilys dim mwy. Rhowch gynnig arall arni, neu </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Yn anffodus, wnaeth y cod ddim gweithio. Gwnewch yn siŵr ei fod yn gywir a rhoi cynnig arall arni.</string>
+  <string name="stripe_verification.inTestMode">Rydych chi yn y modd prawf.</string>
+  <string name="stripe_verification.useTestCode">Defnyddio cod prawf</string>
+</resources>
