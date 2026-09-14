@@ -152,7 +152,6 @@ internal class CryptoApiRepository @Inject constructor(
         return executeConsumerAuthenticatedGet(
             url = identifierRequirementsUrl,
             consumerSessionClientSecret = consumerSessionClientSecret,
-            params = emptyMap<String, Any?>(),
             responseSerializer = ComplianceIdentifierRequirementsResponse.serializer()
         ).mapCatching { it.toComplianceIdentifierRequirements() }
     }
@@ -178,7 +177,6 @@ internal class CryptoApiRepository @Inject constructor(
         return executeConsumerAuthenticatedGet(
             url = userAttestationUrl,
             consumerSessionClientSecret = consumerSessionClientSecret,
-            params = emptyMap<String, Any?>(),
             responseSerializer = UserAttestationResponse.serializer()
         ).map { it.toUserAttestation() }
     }
@@ -503,7 +501,7 @@ internal class CryptoApiRepository @Inject constructor(
     private suspend fun <Response> executeConsumerAuthenticatedGet(
         url: String,
         consumerSessionClientSecret: String,
-        params: Map<String, *>,
+        params: Map<String, *> = emptyMap<String, Any?>(),
         responseSerializer: KSerializer<Response>,
     ): Result<Response> {
         val request = ConsumerAuthenticatedGetRequest(
