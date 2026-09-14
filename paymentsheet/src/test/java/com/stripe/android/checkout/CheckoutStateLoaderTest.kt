@@ -171,7 +171,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial clears an invalid shipping default from configuration and collected details`() = runScenario {
+    fun `loadInitial clears an invalid shipping default from collected details`() = runScenario {
         val configuration = CheckoutController.Configuration()
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
@@ -189,7 +189,8 @@ internal class CheckoutStateLoaderTest {
         )
 
         val state = requireNotNull(stateHolder.state)
-        assertThat(state.configuration.defaults.shippingDetails).isNull()
+        assertThat(state.configuration.defaults.shippingDetails?.name).isEqualTo("John Shipping")
+        assertThat(state.configuration.defaults.shippingDetails?.address?.country).isEqualTo("DE")
         assertThat(state.collectedDetails.shippingName).isNull()
         assertThat(state.collectedDetails.shippingAddress).isNull()
     }

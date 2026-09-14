@@ -36,11 +36,10 @@ internal class CheckoutStateLoader @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ) {
-        val normalizedConfiguration = configuration.normalizeShippingDefaults(checkoutSessionResponse)
         commit(
-            configuration = normalizedConfiguration,
+            configuration = configuration,
             response = checkoutSessionResponse,
-            collectedDetails = normalizedConfiguration.asInitialCollectedDetails(),
+            collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
             carryForward = CarryForward.initial(),
         )
     }
@@ -207,29 +206,18 @@ internal class CheckoutStateLoader @Inject constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): CheckoutCollectedDetails {
+private fun CheckoutController.Configuration.State.asInitialCollectedDetails(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): CheckoutCollectedDetails {
+    val shippingDetails = defaults.shippingDetails?.takeIf { details ->
+        val shippingAddress = details.address
+        shippingAddressElementConfiguration == null ||
+            shippingAddress == null ||
+            checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess
+    }
     return CheckoutCollectedDetails(
         email = defaults.email,
-        shippingName = defaults.shippingDetails?.name,
-        shippingAddress = defaults.shippingDetails?.address,
-    )
-}
-
-@OptIn(CheckoutSessionPreview::class)
-private fun CheckoutController.Configuration.State.normalizeShippingDefaults(
-    checkoutSessionResponse: CheckoutSessionResponse,
-): CheckoutController.Configuration.State {
-    if (shippingAddressElementConfiguration == null) {
-        return this
-    }
-
-    val shippingDetails = defaults.shippingDetails ?: return this
-    val shippingAddress = shippingDetails.address ?: return this
-    if (checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess) {
-        return this
-    }
-
-    return copy(
-        defaults = defaults.copy(shippingDetails = null),
+        shippingName = shippingDetails?.name,
+        shippingAddress = shippingDetails?.address,
     )
 }
