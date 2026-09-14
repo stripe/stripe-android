@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
@@ -651,7 +652,6 @@ internal class AttestationConfirmationDefinitionTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         coroutineScope: CoroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         workContext: CoroutineContext = UnconfinedTestDispatcher(),
-        publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage,
         eventsReporter: AttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter(),
         isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
@@ -663,7 +663,6 @@ internal class AttestationConfirmationDefinitionTest {
             integrityRequestManager = integrityRequestManager,
             coroutineScope = coroutineScope,
             workContext = workContext,
-            publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
             attestationAnalyticsEventsReporter = eventsReporter,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
@@ -696,7 +695,8 @@ internal class AttestationConfirmationDefinitionTest {
         private fun confirmationParametersWithAttestation(enabled: Boolean) = CONFIRMATION_PARAMETERS.copy(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
-                attestOnIntentConfirmation = enabled
+                attestOnIntentConfirmation = enabled,
+                apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = launcherArgs.publishableKey),
             )
         )
     }
