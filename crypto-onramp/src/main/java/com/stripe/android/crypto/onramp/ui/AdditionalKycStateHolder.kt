@@ -9,17 +9,6 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissi
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
-import com.stripe.android.link.onramp.ui.AdditionalKycCollectionPage
-import com.stripe.android.link.onramp.ui.AdditionalKycDocumentSlotState
-import com.stripe.android.link.onramp.ui.AdditionalKycDocumentState
-import com.stripe.android.link.onramp.ui.AdditionalKycDocumentSubtypeState
-import com.stripe.android.link.onramp.ui.AdditionalKycPendingRequirementState
-import com.stripe.android.link.onramp.ui.AdditionalKycPendingRequirementStatus
-import com.stripe.android.link.onramp.ui.AdditionalKycQuestionState
-import com.stripe.android.link.onramp.ui.AdditionalKycRequirementType
-import com.stripe.android.link.onramp.ui.AdditionalKycScreenState
-import com.stripe.android.link.onramp.ui.AdditionalKycSubmissionState
-import com.stripe.android.link.onramp.ui.AdditionalKycValidationError
 import java.io.File
 import java.util.Locale
 

@@ -29,6 +29,11 @@ dependencies {
 
     ksp libs.daggerCompiler
 
+    debugImplementation libs.compose.uiTestManifest
+
+    testImplementation project(":payments-core-testing")
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.espresso.core
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.lifecycle
@@ -50,6 +55,12 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
     }
 
     kotlin {

@@ -1,4 +1,4 @@
-package com.stripe.android.link.onramp.ui
+package com.stripe.android.crypto.onramp.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -9,8 +9,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.ui.PrimaryButtonTag
-import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

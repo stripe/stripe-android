@@ -8,11 +8,6 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementError
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
-import com.stripe.android.link.onramp.ui.AdditionalKycCollectionPage
-import com.stripe.android.link.onramp.ui.AdditionalKycPendingRequirementStatus
-import com.stripe.android.link.onramp.ui.AdditionalKycRequirementType
-import com.stripe.android.link.onramp.ui.AdditionalKycSubmissionState
-import com.stripe.android.link.onramp.ui.AdditionalKycValidationError
 import org.junit.Test
 import java.io.File
 

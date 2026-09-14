@@ -24,8 +24,6 @@ import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandler
 import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandlerRegistry
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.link.LinkAppearance
-import com.stripe.android.link.onramp.ui.AdditionalKycScreen
-import com.stripe.android.link.onramp.ui.AdditionalKycSubmissionState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

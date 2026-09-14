@@ -1,7 +1,6 @@
-package com.stripe.android.link.onramp.ui
+package com.stripe.android.crypto.onramp.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,17 +48,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.R
+import com.stripe.android.crypto.onramp.ui.theme.DefaultOnrampTheme
+import com.stripe.android.crypto.onramp.ui.theme.OnrampTheme
 import com.stripe.android.link.LinkAppearance
-import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.ui.PrimaryButton
-import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.paymentsheet.R
 import java.util.Locale
 
 @Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun AdditionalKycScreen(
+internal fun AdditionalKycScreen(
     appearance: LinkAppearance.State?,
     state: AdditionalKycScreenState,
     onClose: () -> Unit,
@@ -88,16 +84,16 @@ fun AdditionalKycScreen(
         }
     }
 
-    DefaultLinkTheme(appearance = appearance) {
+    DefaultOnrampTheme(appearance = appearance) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.20f))
+                .background(OnrampTheme.colors.surfaceBackdrop.copy(alpha = 0.20f))
                 .statusBarsPadding()
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = LinkTheme.colors.surfacePrimary,
+                color = OnrampTheme.colors.surfacePrimary,
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 elevation = 8.dp,
             ) {
@@ -220,7 +216,7 @@ private fun SheetHandle() {
                 .width(36.dp)
                 .height(4.dp)
                 .background(
-                    color = LinkTheme.colors.borderDefault,
+                    color = OnrampTheme.colors.borderDefault,
                     shape = RoundedCornerShape(2.dp),
                 )
         )
@@ -271,7 +267,7 @@ private fun HeaderIcon(
         modifier = Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(LinkTheme.colors.surfacePrimary)
+            .background(OnrampTheme.colors.surfacePrimary)
             .clickable(onClick = onClick)
             .testTag(testTag),
         contentAlignment = Alignment.Center,
@@ -279,7 +275,7 @@ private fun HeaderIcon(
         Icon(
             painter = painterResource(iconRes),
             contentDescription = contentDescription,
-            tint = LinkTheme.colors.iconPrimary,
+            tint = OnrampTheme.colors.iconPrimary,
             modifier = Modifier.size(20.dp),
         )
     }
@@ -297,7 +293,7 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .background(LinkTheme.colors.surfaceSecondary, CircleShape),
+                .background(OnrampTheme.colors.surfaceSecondary, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -309,7 +305,7 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
                     }
                 ),
                 contentDescription = null,
-                tint = LinkTheme.colors.iconPrimary,
+                tint = OnrampTheme.colors.iconPrimary,
                 modifier = Modifier.size(28.dp),
             )
         }
@@ -320,8 +316,8 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
             } else {
                 stringResource(R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_title)
             },
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
+            style = OnrampTheme.typography.title,
+            color = OnrampTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
@@ -331,8 +327,8 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
             } else {
                 stringResource(R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_message)
             },
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary,
+            style = OnrampTheme.typography.body,
+            color = OnrampTheme.colors.textTertiary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(72.dp))
@@ -359,8 +355,8 @@ private fun QuestionnaireContent(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
                     text = question.prompt,
-                    style = LinkTheme.typography.detail,
-                    color = LinkTheme.colors.textPrimary,
+                    style = OnrampTheme.typography.detail,
+                    color = OnrampTheme.colors.textPrimary,
                 )
                 OutlinedTextField(
                     value = question.answer,
@@ -369,7 +365,7 @@ private fun QuestionnaireContent(
                         .fillMaxWidth()
                         .testTag(additionalKycQuestionTag(question.id)),
                     label = { Text(stringResource(R.string.stripe_link_onramp_additional_kyc_answer)) },
-                    textStyle = LinkTheme.typography.body,
+                    textStyle = OnrampTheme.typography.body,
                     singleLine = false,
                     minLines = 1,
                     maxLines = 3,
@@ -380,14 +376,14 @@ private fun QuestionnaireContent(
                     ),
                     shape = RoundedCornerShape(12.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = LinkTheme.colors.textPrimary,
-                        cursorColor = LinkTheme.colors.textPrimary,
-                        focusedBorderColor = LinkTheme.colors.borderSelected,
-                        unfocusedBorderColor = LinkTheme.colors.surfaceSecondary,
-                        errorBorderColor = LinkTheme.colors.borderCritical,
-                        backgroundColor = LinkTheme.colors.surfaceSecondary,
-                        focusedLabelColor = LinkTheme.colors.textTertiary,
-                        unfocusedLabelColor = LinkTheme.colors.textTertiary,
+                        textColor = OnrampTheme.colors.textPrimary,
+                        cursorColor = OnrampTheme.colors.textPrimary,
+                        focusedBorderColor = OnrampTheme.colors.borderSelected,
+                        unfocusedBorderColor = OnrampTheme.colors.surfaceSecondary,
+                        errorBorderColor = OnrampTheme.colors.borderCritical,
+                        backgroundColor = OnrampTheme.colors.surfaceSecondary,
+                        focusedLabelColor = OnrampTheme.colors.textTertiary,
+                        unfocusedLabelColor = OnrampTheme.colors.textTertiary,
                     ),
                 )
             }
@@ -404,8 +400,8 @@ private fun ScreenTitle(requirementType: AdditionalKycRequirementType) {
             stringResource(R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_title)
         },
         modifier = Modifier.fillMaxWidth(),
-        style = LinkTheme.typography.title,
-        color = LinkTheme.colors.textPrimary,
+        style = OnrampTheme.typography.title,
+        color = OnrampTheme.colors.textPrimary,
         textAlign = TextAlign.Center,
     )
 }
@@ -428,8 +424,8 @@ private fun DocumentOverviewContent(
         ScreenTitle(state.requirementType)
         Text(
             text = stringResource(R.string.stripe_link_onramp_additional_kyc_funding_sources_prompt),
-            style = LinkTheme.typography.detail,
-            color = LinkTheme.colors.textPrimary,
+            style = OnrampTheme.typography.detail,
+            color = OnrampTheme.colors.textPrimary,
         )
         SourceDocumentsCard(
             groups = groups,
@@ -449,7 +445,7 @@ private fun SourceDocumentsCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(24.dp))
+            .background(OnrampTheme.colors.surfaceSecondary, RoundedCornerShape(24.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         groups.values.forEach { slots ->
@@ -463,8 +459,8 @@ private fun SourceDocumentsCard(
             ) {
                 Text(
                     text = first.selectedSubtypeLabel.orEmpty(),
-                    style = LinkTheme.typography.detail,
-                    color = LinkTheme.colors.textTertiary,
+                    style = OnrampTheme.typography.detail,
+                    color = OnrampTheme.colors.textTertiary,
                 )
                 slots.forEach { slot ->
                     Row(
@@ -474,7 +470,7 @@ private fun SourceDocumentsCard(
                         Row(
                             modifier = Modifier
                                 .padding(top = 4.dp)
-                                .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(6.dp))
+                                .background(OnrampTheme.colors.surfaceTertiary, RoundedCornerShape(6.dp))
                                 .padding(horizontal = 6.dp, vertical = 3.dp)
                                 .weight(1f, fill = false),
                             verticalAlignment = Alignment.CenterVertically,
@@ -488,8 +484,8 @@ private fun SourceDocumentsCard(
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = slot.fileName.orEmpty(),
-                                style = LinkTheme.typography.detail,
-                                color = LinkTheme.colors.textPrimary,
+                                style = OnrampTheme.typography.detail,
+                                color = OnrampTheme.colors.textPrimary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -503,7 +499,7 @@ private fun SourceDocumentsCard(
                 Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(LinkTheme.colors.borderDefault)
+                    .background(OnrampTheme.colors.borderDefault)
             )
         }
         Row(
@@ -517,13 +513,13 @@ private fun SourceDocumentsCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(12.dp)),
+                    .background(OnrampTheme.colors.surfaceTertiary, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.stripe_link_add),
                     contentDescription = null,
-                    tint = LinkTheme.colors.iconPrimary,
+                    tint = OnrampTheme.colors.iconPrimary,
                     modifier = Modifier.size(20.dp),
                 )
             }
@@ -531,8 +527,8 @@ private fun SourceDocumentsCard(
             Text(
                 text = stringResource(R.string.stripe_link_onramp_additional_kyc_add_documents),
                 modifier = Modifier.weight(1f),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
+                style = OnrampTheme.typography.body,
+                color = OnrampTheme.colors.textPrimary,
             )
             ChevronRight()
         }
@@ -544,7 +540,7 @@ private fun ChevronRight() {
     Icon(
         painter = painterResource(R.drawable.stripe_link_chevron_right_kyc),
         contentDescription = null,
-        tint = LinkTheme.colors.iconTertiary,
+        tint = OnrampTheme.colors.iconTertiary,
         modifier = Modifier.size(20.dp),
     )
 }
@@ -581,8 +577,8 @@ private fun DocumentEditorContent(
             Text(
                 text = stringResource(R.string.stripe_link_onramp_additional_kyc_proof_of_address_upload_message),
                 modifier = Modifier.fillMaxWidth(),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textTertiary,
+                style = OnrampTheme.typography.body,
+                color = OnrampTheme.colors.textTertiary,
                 textAlign = TextAlign.Center,
             )
         }
@@ -638,7 +634,7 @@ private fun DocumentTypeField(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
+            .background(OnrampTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .testTag(additionalKycSubtypePickerTag(slot.index)),
@@ -649,21 +645,21 @@ private fun DocumentTypeField(
             } else {
                 stringResource(R.string.stripe_link_onramp_additional_kyc_funds_source)
             },
-            style = LinkTheme.typography.caption,
-            color = LinkTheme.colors.textTertiary,
+            style = OnrampTheme.typography.caption,
+            color = OnrampTheme.colors.textTertiary,
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = slot.selectedSubtypeLabel
                     ?: stringResource(R.string.stripe_link_onramp_additional_kyc_select_document_type),
                 modifier = Modifier.weight(1f),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
+                style = OnrampTheme.typography.body,
+                color = OnrampTheme.colors.textPrimary,
             )
             Icon(
                 painter = painterResource(R.drawable.stripe_link_chevron_down),
                 contentDescription = null,
-                tint = LinkTheme.colors.iconPrimary,
+                tint = OnrampTheme.colors.iconPrimary,
                 modifier = Modifier.size(12.dp),
             )
         }
@@ -678,7 +674,7 @@ private fun UploadDocumentControl(
     enabled: Boolean,
     onChooseFile: (slotIndex: Int) -> Unit,
 ) {
-    val borderColor = LinkTheme.colors.textTertiary
+    val borderColor = OnrampTheme.colors.textTertiary
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -690,12 +686,12 @@ private fun UploadDocumentControl(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isUploading) {
-            Text("◔", style = LinkTheme.typography.title, color = LinkTheme.colors.textBrand)
+            Text("◔", style = OnrampTheme.typography.title, color = OnrampTheme.colors.textBrand)
         } else {
             Icon(
                 painter = painterResource(R.drawable.stripe_link_upload),
                 contentDescription = null,
-                tint = if (enabled) LinkTheme.colors.iconPrimary else LinkTheme.colors.iconTertiary,
+                tint = if (enabled) OnrampTheme.colors.iconPrimary else OnrampTheme.colors.iconTertiary,
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -707,8 +703,8 @@ private fun UploadDocumentControl(
                 } else {
                     stringResource(R.string.stripe_link_onramp_additional_kyc_upload_document)
                 },
-                style = LinkTheme.typography.body,
-                color = if (enabled || isUploading) LinkTheme.colors.textPrimary else LinkTheme.colors.textTertiary,
+                style = OnrampTheme.typography.body,
+                color = if (enabled || isUploading) OnrampTheme.colors.textPrimary else OnrampTheme.colors.textTertiary,
             )
             Text(
                 text = if (isUploading) {
@@ -716,8 +712,8 @@ private fun UploadDocumentControl(
                 } else {
                     stringResource(R.string.stripe_link_onramp_additional_kyc_file_requirements)
                 },
-                style = LinkTheme.typography.caption,
-                color = LinkTheme.colors.textTertiary,
+                style = OnrampTheme.typography.caption,
+                color = OnrampTheme.colors.textTertiary,
             )
         }
     }
@@ -731,7 +727,7 @@ private fun UploadedFileCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
+            .background(OnrampTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -746,21 +742,21 @@ private fun UploadedFileCard(
             Text(
                 text = slot.fileName.orEmpty(),
                 modifier = Modifier.testTag(additionalKycFileNameTag(slot.index)),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
+                style = OnrampTheme.typography.body,
+                color = OnrampTheme.colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = stringResource(R.string.stripe_link_onramp_additional_kyc_uploaded),
-                style = LinkTheme.typography.caption,
-                color = LinkTheme.colors.textTertiary,
+                style = OnrampTheme.typography.caption,
+                color = OnrampTheme.colors.textTertiary,
             )
         }
         Icon(
             painter = painterResource(R.drawable.stripe_link_trash),
             contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_remove_file),
-            tint = LinkTheme.colors.iconPrimary,
+            tint = OnrampTheme.colors.iconPrimary,
             modifier = Modifier
                 .size(16.dp)
                 .clickable { onRemoveFile(slot.index) }
@@ -778,7 +774,7 @@ private fun FileErrorCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LinkTheme.colors.textCritical.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
+            .background(OnrampTheme.colors.textCritical.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp, vertical = 14.dp)
             .testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
         verticalAlignment = Alignment.CenterVertically,
@@ -794,21 +790,21 @@ private fun FileErrorCard(
             Text(
                 text = state.validationFileName
                     ?: stringResource(R.string.stripe_link_onramp_additional_kyc_selected_document),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
+                style = OnrampTheme.typography.body,
+                color = OnrampTheme.colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = validationErrorMessage(state.validationError, state.document?.maxFileSizeMegabytes),
-                style = LinkTheme.typography.caption,
-                color = LinkTheme.colors.textCritical,
+                style = OnrampTheme.typography.caption,
+                color = OnrampTheme.colors.textCritical,
             )
         }
         Icon(
             painter = painterResource(R.drawable.stripe_link_trash),
             contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_remove_file),
-            tint = LinkTheme.colors.iconPrimary,
+            tint = OnrampTheme.colors.iconPrimary,
             modifier = Modifier
                 .size(16.dp)
                 .clickable { onRemoveFile(slotIndex) },
@@ -833,8 +829,8 @@ private fun InlineUploadError() {
         Spacer(Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.stripe_link_onramp_additional_kyc_upload_failed),
-            style = LinkTheme.typography.caption,
-            color = LinkTheme.colors.textCritical,
+            style = OnrampTheme.typography.caption,
+            color = OnrampTheme.colors.textCritical,
         )
     }
 }
@@ -899,8 +895,8 @@ private fun DocumentInstructions(
 private fun SectionHeading(textRes: Int) {
     Text(
         text = stringResource(textRes),
-        style = LinkTheme.typography.bodyEmphasized,
-        color = LinkTheme.colors.textPrimary,
+        style = OnrampTheme.typography.bodyEmphasized,
+        color = OnrampTheme.colors.textPrimary,
     )
 }
 
@@ -909,13 +905,13 @@ private fun BulletList(items: List<String>) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         items.forEach { item ->
             Row {
-                Text("•", style = LinkTheme.typography.detail, color = LinkTheme.colors.textPrimary)
+                Text("•", style = OnrampTheme.typography.detail, color = OnrampTheme.colors.textPrimary)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = item,
                     modifier = Modifier.weight(1f),
-                    style = LinkTheme.typography.detail,
-                    color = LinkTheme.colors.textPrimary,
+                    style = OnrampTheme.typography.detail,
+                    color = OnrampTheme.colors.textPrimary,
                 )
             }
         }
@@ -934,13 +930,13 @@ private fun SubmittedContent() {
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .background(LinkTheme.colors.surfaceSecondary, CircleShape),
+                .background(OnrampTheme.colors.surfaceSecondary, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.stripe_link_clock),
                 contentDescription = null,
-                tint = LinkTheme.colors.iconPrimary,
+                tint = OnrampTheme.colors.iconPrimary,
                 modifier = Modifier.size(28.dp),
             )
         }
@@ -948,15 +944,15 @@ private fun SubmittedContent() {
         Text(
             text = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_title),
             modifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
+            style = OnrampTheme.typography.title,
+            color = OnrampTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_review_message),
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary,
+            style = OnrampTheme.typography.body,
+            color = OnrampTheme.colors.textTertiary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(72.dp))
@@ -975,28 +971,28 @@ private fun UnavailableContent() {
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .background(LinkTheme.colors.textCritical, CircleShape),
+                .background(OnrampTheme.colors.textCritical, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.stripe_link_error_template),
                 contentDescription = null,
-                tint = LinkTheme.colors.iconWhite,
+                tint = OnrampTheme.colors.iconWhite,
                 modifier = Modifier.size(28.dp),
             )
         }
         Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.stripe_link_onramp_additional_kyc_something_went_wrong),
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
+            style = OnrampTheme.typography.title,
+            color = OnrampTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.stripe_link_onramp_additional_kyc_try_again_later),
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary,
+            style = OnrampTheme.typography.body,
+            color = OnrampTheme.colors.textTertiary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(72.dp))
@@ -1029,8 +1025,8 @@ private fun DocumentTypeSelector(
             Text(
                 text = stringResource(R.string.stripe_link_onramp_additional_kyc_document_type),
                 modifier = Modifier.weight(1f),
-                style = LinkTheme.typography.bodyEmphasized,
-                color = LinkTheme.colors.textPrimary,
+                style = OnrampTheme.typography.bodyEmphasized,
+                color = OnrampTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
             )
             HeaderIcon(
@@ -1077,15 +1073,15 @@ private fun DocumentTypeSelector(
                     Column(Modifier.padding(top = 10.dp)) {
                         Text(
                             text = subtype.label,
-                            style = LinkTheme.typography.bodyEmphasized,
-                            color = LinkTheme.colors.textPrimary,
+                            style = OnrampTheme.typography.bodyEmphasized,
+                            color = OnrampTheme.colors.textPrimary,
                         )
                         if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
                             proofOfAddressSubtypeDescription(subtype.id, subtype.label)?.let { description ->
                                 Text(
                                     text = description,
-                                    style = LinkTheme.typography.detail,
-                                    color = LinkTheme.colors.textTertiary,
+                                    style = OnrampTheme.typography.detail,
+                                    color = OnrampTheme.colors.textTertiary,
                                 )
                             }
                         }
@@ -1224,8 +1220,7 @@ private fun Modifier.dashedBorder(color: androidx.compose.ui.graphics.Color): Mo
     )
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AdditionalKycScreenState(
+internal data class AdditionalKycScreenState(
     val page: AdditionalKycCollectionPage,
     val requirementType: AdditionalKycRequirementType,
     val errorMessages: List<String>,
@@ -1246,8 +1241,7 @@ data class AdditionalKycScreenState(
     val completedDocumentCount: Int,
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class AdditionalKycCollectionPage {
+internal enum class AdditionalKycCollectionPage {
     Context,
     Questionnaire,
     DocumentOverview,
@@ -1257,43 +1251,37 @@ enum class AdditionalKycCollectionPage {
     Unavailable,
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AdditionalKycPendingRequirementState(
+internal data class AdditionalKycPendingRequirementState(
     val requirementType: AdditionalKycRequirementType,
     val status: AdditionalKycPendingRequirementStatus,
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class AdditionalKycPendingRequirementStatus {
+internal enum class AdditionalKycPendingRequirementStatus {
     WaitingForReview,
     Processing,
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class AdditionalKycSubmissionState {
+internal enum class AdditionalKycSubmissionState {
     Collecting,
     Submitting,
     Failed,
     Submitted,
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class AdditionalKycRequirementType {
+internal enum class AdditionalKycRequirementType {
     ProofOfAddress,
     SourceOfFunds,
     AdditionalVerification,
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AdditionalKycQuestionState(
+internal data class AdditionalKycQuestionState(
     val id: String,
     val prompt: String,
     val answer: String,
     val required: Boolean,
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AdditionalKycDocumentState(
+internal data class AdditionalKycDocumentState(
     val acceptedFormats: List<String>,
     val instructions: List<String>,
     val maxFileSizeMegabytes: Int?,
@@ -1303,8 +1291,7 @@ data class AdditionalKycDocumentState(
     val slots: List<AdditionalKycDocumentSlotState>,
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AdditionalKycDocumentSlotState(
+internal data class AdditionalKycDocumentSlotState(
     val index: Int,
     val subtypes: List<AdditionalKycDocumentSubtypeState>,
     val selectedSubtypeId: String?,
@@ -1312,15 +1299,13 @@ data class AdditionalKycDocumentSlotState(
     val fileName: String?,
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AdditionalKycDocumentSubtypeState(
+internal data class AdditionalKycDocumentSubtypeState(
     val id: String,
     val label: String,
     val isEnabled: Boolean,
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class AdditionalKycValidationError {
+internal enum class AdditionalKycValidationError {
     MissingRequiredAnswers,
     MissingDocumentType,
     MissingDocuments,
