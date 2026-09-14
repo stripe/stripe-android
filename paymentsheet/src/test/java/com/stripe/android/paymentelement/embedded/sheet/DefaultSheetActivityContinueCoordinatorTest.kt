@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -133,10 +132,6 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            clientParams = ElementsSessionClientParams(
-                mobileAppId = "com.stripe.android.paymentsheet.test",
-                mobileSessionIdProvider = { "test_session" },
-            ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
