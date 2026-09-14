@@ -144,7 +144,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
             productUsageTokens = productUsageTokens,
             requestSurface = requestSurface,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            publishableKeyProvider = publishableKeyProvider,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
