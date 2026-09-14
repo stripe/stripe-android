@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -44,7 +45,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -127,7 +127,6 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         ElementsSessionClientParamsModule::class,
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
-        ApiConfigurationFromNamedModule::class,
         GooglePayLauncherModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
     ]
@@ -214,6 +213,14 @@ internal interface PaymentElementConfirmationTestModule {
             publishableKey = "pk_123",
             stripeAccountId = null,
         )
+
+        @Provides
+        fun providesApiConfiguration(config: PaymentConfiguration): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
+        }
 
         @Provides
         @Named(PUBLISHABLE_KEY)

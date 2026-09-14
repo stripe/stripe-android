@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -45,7 +46,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiConfigurationFromNamedModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
@@ -131,7 +131,6 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
         ElementsSessionClientParamsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         ExtendedPaymentElementConfirmationTestModule::class,
-        ApiConfigurationFromNamedModule::class,
         GooglePayLauncherModule::class,
         PaymentOptionCardArtModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
@@ -219,6 +218,14 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
             publishableKey = "pk_123",
             stripeAccountId = null,
         )
+
+        @Provides
+        fun providesApiConfiguration(config: PaymentConfiguration): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
+        }
 
         @Provides
         @Named(PUBLISHABLE_KEY)
