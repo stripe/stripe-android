@@ -28,14 +28,14 @@ class DefaultConnectionsEventReportTest {
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
         packageInfo = application.packageManager.getPackageInfo(application.packageName, 0),
-        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         networkTypeProvider = { "5G" },
     )
 
     private val eventReporter = DefaultFinancialConnectionsEventReporter(
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        testDispatcher
+        testDispatcher,
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
     )
 
     private val financialConnectionsSession = FinancialConnectionsSession(

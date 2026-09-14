@@ -38,7 +38,10 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
         confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Nothing> {
         val error = IllegalStateException("CardArtPrefetchConfirmationDefinition should not be used for confirmation")
-        errorReporter.report(UnexpectedErrorEvent.CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION)
+        errorReporter.report(
+            UnexpectedErrorEvent.CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION,
+            publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
+        )
         return ConfirmationDefinition.Action.Fail(
             cause = error,
             message = "CardArtPrefetchConfirmationDefinition should not be used for confirmation".resolvableString,
@@ -52,7 +55,10 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
         confirmationOption: ConfirmationHandler.Option,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
-        errorReporter.report(UnexpectedErrorEvent.CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION)
+        errorReporter.report(
+            UnexpectedErrorEvent.CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION,
+            publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
+        )
     }
 
     override fun createLauncher(
@@ -67,7 +73,10 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
         launcherArgs: Nothing,
         result: Nothing,
     ): ConfirmationDefinition.Result {
-        errorReporter.report(UnexpectedErrorEvent.CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION)
+        errorReporter.report(
+            UnexpectedErrorEvent.CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION,
+            publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
+        )
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = confirmationOption,
             arguments = confirmationArgs,

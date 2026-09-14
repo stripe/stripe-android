@@ -35,7 +35,6 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     context: Context,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
-        PaymentConfiguration.getInstance(context).publishableKey,
         setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
@@ -45,7 +44,10 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
             GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT = true
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit
+                    PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit,
+                    publishableKey = runCatching {
+                        PaymentConfiguration.getInstance(context).publishableKey
+                    }.getOrNull(),
                 )
             )
         }

@@ -62,7 +62,8 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                     attestationAnalyticsEventsReporter.prepareFailed(error)
                     errorReporter.report(
                         ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
-                        stripeException = StripeException.create(error)
+                        stripeException = StripeException.create(error),
+                        publishableKey = publishableKeyProvider(),
                     )
                 }
         }
@@ -99,7 +100,8 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             }
             AttestationActivityResult.NoResult -> {
                 errorReporter.report(
-                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT
+                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT,
+                    publishableKey = publishableKeyProvider(),
                 )
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),
@@ -143,7 +145,8 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         val error = IllegalArgumentException("Attestation is not enabled on intent confirmation")
         errorReporter.report(
             UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED,
-            stripeException = StripeException.create(error)
+            stripeException = StripeException.create(error),
+            publishableKey = publishableKeyProvider(),
         )
 
         return ConfirmationDefinition.Action.Fail(

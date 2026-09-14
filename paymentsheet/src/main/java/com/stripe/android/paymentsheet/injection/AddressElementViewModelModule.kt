@@ -93,6 +93,7 @@ internal class AddressElementViewModelModule {
                 context,
                 it,
                 errorReporter = ErrorReporter.createFallbackInstance(context),
+                publishableKey = args.publishableKey,
             )
         }
     }

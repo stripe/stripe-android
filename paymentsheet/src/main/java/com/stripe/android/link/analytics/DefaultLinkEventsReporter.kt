@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -11,6 +12,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -22,11 +24,15 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val logger: Logger,
     private val durationProvider: DurationProvider,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : LinkEventsReporter {
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
 
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_INVALID_SESSION_STATE)
+        errorReporter.report(
+            ErrorReporter.UnexpectedErrorEvent.LINK_INVALID_SESSION_STATE,
+            publishableKey = runCatching { publishableKeyProvider() }.getOrNull(),
+        )
         fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
 
@@ -148,14 +154,16 @@ internal class DefaultLinkEventsReporter @Inject constructor(
 
     private fun fireEvent(
         event: LinkEvent,
-        additionalParams: Map<String, Any>? = null
+        additionalParams: Map<String, Any>? = null,
     ) {
+        val publishableKey = runCatching { publishableKeyProvider() }.getOrNull()
         logger.debug("Link event: ${event.eventName} $additionalParams")
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event,
-                    additionalParams ?: emptyMap()
+                    additionalParams ?: emptyMap(),
+                    publishableKey = publishableKey,
                 )
             )
         }

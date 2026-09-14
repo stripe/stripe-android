@@ -160,8 +160,14 @@ internal class DefaultTapToAddCollectionHandler(
         customerMetadata: CustomerMetadata,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
-        val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent)
-        val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
+        val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(
+            setupIntent,
+            metadata.apiConfiguration.publishableKey,
+        )
+        val confirmedIntent = confirmSetupIntent(
+            setupIntentWithAttachedPaymentMethod,
+            metadata.apiConfiguration.publishableKey,
+        )
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata, metadata)
         val updatedPaymentMethod = updatePaymentMethod(paymentMethod, customerMetadata, metadata)
 
@@ -181,6 +187,7 @@ internal class DefaultTapToAddCollectionHandler(
 
     private suspend fun collectPaymentMethod(
         intent: SetupIntent,
+        publishableKey: String,
     ) = suspendCancellableCoroutine { continuation ->
         val cancellable = terminal().collectSetupIntentPaymentMethod(
             intent = intent,
@@ -192,6 +199,7 @@ internal class DefaultTapToAddCollectionHandler(
         continuation.handleCancellation(
             cancelable = cancellable,
             errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE,
+            publishableKey = publishableKey,
         )
     }
 
@@ -237,6 +245,7 @@ internal class DefaultTapToAddCollectionHandler(
 
     private suspend fun confirmSetupIntent(
         intent: SetupIntent,
+        publishableKey: String,
     ) = suspendCancellableCoroutine { continuation ->
         val cancellable = terminal().confirmSetupIntent(
             intent = intent,
@@ -246,6 +255,7 @@ internal class DefaultTapToAddCollectionHandler(
         continuation.handleCancellation(
             cancelable = cancellable,
             errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_CONFIRM_SETUP_INTENT_CANCEL_FAILURE,
+            publishableKey = publishableKey,
         )
     }
 
@@ -264,6 +274,7 @@ internal class DefaultTapToAddCollectionHandler(
     private fun CancellableContinuation<SetupIntent>.handleCancellation(
         cancelable: Cancelable,
         errorEvent: ErrorReporter.UnexpectedErrorEvent,
+        publishableKey: String,
     ) {
         invokeOnCancellation {
             cancelable.cancel(
@@ -279,6 +290,7 @@ internal class DefaultTapToAddCollectionHandler(
                             additionalNonPiiParams = mapOf(
                                 TERMINAL_ERROR_CODE_KEY to e.errorCode.toLogString()
                             ),
+                            publishableKey = publishableKey,
                         )
                     }
                 }
@@ -296,7 +308,8 @@ internal class DefaultTapToAddCollectionHandler(
                 errorReporter.report(
                     ErrorReporter
                         .UnexpectedErrorEvent
-                        .TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION
+                        .TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION,
+                    publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
                 )
 
                 throw IllegalStateException(

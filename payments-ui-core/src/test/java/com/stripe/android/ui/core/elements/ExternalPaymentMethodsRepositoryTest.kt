@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.Before
 import org.junit.Test
 
@@ -21,7 +22,10 @@ class ExternalPaymentMethodsRepositoryTest {
         val externalPaymentMethodData = null
         val expectedEpms = emptyList<ExternalPaymentMethodSpec>()
 
-        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
+        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            externalPaymentMethodData,
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
+        )
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -32,7 +36,10 @@ class ExternalPaymentMethodsRepositoryTest {
         val externalPaymentMethodData = ""
         val expectedEpms = emptyList<ExternalPaymentMethodSpec>()
 
-        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
+        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            externalPaymentMethodData,
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
+        )
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -43,7 +50,10 @@ class ExternalPaymentMethodsRepositoryTest {
         val externalPaymentMethodData = "invalid_input!!"
         val expectedEpms = emptyList<ExternalPaymentMethodSpec>()
 
-        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
+        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            externalPaymentMethodData,
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
+        )
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
         assertThat(errorReporter.getLoggedErrors())
@@ -55,7 +65,10 @@ class ExternalPaymentMethodsRepositoryTest {
         val externalPaymentMethodData = VENMO_EXTERNAL_PAYMENT_METHOD_DATA
         val expectedEpms = listOf(VENMO_EPM)
 
-        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
+        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            externalPaymentMethodData,
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
+        )
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -66,7 +79,10 @@ class ExternalPaymentMethodsRepositoryTest {
         val externalPaymentMethodData = PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA
         val expectedEpms = listOf(VENMO_EPM, PAYPAL_EPM)
 
-        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
+        val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+            externalPaymentMethodData,
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
+        )
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
         assertThat(errorReporter.getLoggedErrors()).isEmpty()

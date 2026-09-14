@@ -49,6 +49,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
                     stripeException = StripeException.create(it),
+                    publishableKey = null,
                 )
             return
         }
@@ -60,6 +61,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS,
                     stripeException = StripeException.create(it),
+                    publishableKey = null,
                 )
             return
         }

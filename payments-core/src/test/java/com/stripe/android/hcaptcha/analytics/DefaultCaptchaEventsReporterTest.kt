@@ -1,6 +1,8 @@
 package com.stripe.android.hcaptcha.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -236,12 +238,12 @@ internal class DefaultCaptchaEventsReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
             durationProvider = durationProvider,
-            errorReporter = fakeErrorReporter
+            errorReporter = fakeErrorReporter,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null),
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor, fakeErrorReporter)

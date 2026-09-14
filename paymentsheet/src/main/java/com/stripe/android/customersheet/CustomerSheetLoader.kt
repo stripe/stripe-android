@@ -127,7 +127,8 @@ internal class DefaultCustomerSheetLoader(
         ).onFailure {
             errorReporter.report(
                 errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND,
-                stripeException = StripeException.create(it)
+                stripeException = StripeException.create(it),
+                publishableKey = runCatching { apiConfigurationResolver.resolve(null).publishableKey }.getOrNull(),
             )
         }
     }

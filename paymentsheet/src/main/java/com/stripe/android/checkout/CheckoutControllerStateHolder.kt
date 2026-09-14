@@ -95,6 +95,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             errorReporter.report(
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SELECTION_SET_BEFORE_LOAD,
                 additionalNonPiiParams = mapOf("operation" to operation),
+                publishableKey = null,
             )
             null
         }

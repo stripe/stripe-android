@@ -1,9 +1,11 @@
 package com.stripe.android.attestation.analytics
 
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -11,6 +13,7 @@ internal class DefaultAttestationAnalyticsEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : AttestationAnalyticsEventsReporter {
 
     override fun prepare() {
@@ -53,11 +56,13 @@ internal class DefaultAttestationAnalyticsEventsReporter @Inject constructor(
         )
     }
 
-    private fun fireEvent(event: AttestationAnalyticsEvent) {
+    private fun fireEvent(event: AttestationAnalyticsEvent,) {
+        val publishableKey = runCatching { publishableKeyProvider() }.getOrNull()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,
-                additionalParams = event.params
+                additionalParams = event.params,
+                publishableKey = publishableKey,
             )
         )
     }

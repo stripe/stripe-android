@@ -139,11 +139,13 @@ internal class CustomerAdapterDataSource @Inject constructor(
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,
+                publishableKey = apiConfigurationProvider.get().publishableKey,
             )
         }.onFailure {
             errorReporter.report(
                 errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
-                stripeException = StripeException.create(it)
+                stripeException = StripeException.create(it),
+                publishableKey = apiConfigurationProvider.get().publishableKey,
             )
         }
     }
@@ -153,12 +155,14 @@ internal class CustomerAdapterDataSource @Inject constructor(
             .onSuccess {
                 errorReporter.report(
                     errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS,
+                    publishableKey = apiConfigurationProvider.get().publishableKey,
                 )
             }
             .onFailure { cause, _ ->
                 errorReporter.report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
-                    stripeException = StripeException.create(cause)
+                    stripeException = StripeException.create(cause),
+                    publishableKey = apiConfigurationProvider.get().publishableKey,
                 )
             }
             .toResult()

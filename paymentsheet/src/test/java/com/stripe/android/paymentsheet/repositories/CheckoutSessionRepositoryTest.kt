@@ -37,7 +37,6 @@ class CheckoutSessionRepositoryTest {
         analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test_123",
         ),
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { "acct_123" },

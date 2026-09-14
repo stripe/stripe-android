@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
@@ -68,10 +67,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
-                apiConfigurationProvider = { ApiConfiguration.State("", null) },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
+                    publishableKey = null,
                 )
             return
         }
@@ -100,10 +99,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfigurationProvider = { args.apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
+                    publishableKey = args.apiConfiguration.publishableKey,
                 )
             return
         }
@@ -147,11 +146,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (error != null) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfigurationProvider = { requireNotNull(_args).apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),
+                    publishableKey = _args?.apiConfiguration?.publishableKey,
                 )
             viewModel.logError()
             setResult(

@@ -42,7 +42,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = challengeResult.intentData.publishableKey,
                     )
                 )
             }
@@ -50,7 +51,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = challengeResult.intentData.publishableKey,
                     )
                 )
             }
@@ -58,25 +60,33 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeCanceled,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = challengeResult.intentData.publishableKey,
                     )
                 )
             }
             is ChallengeResult.ProtocolError -> {
                 analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeErrored,
+                        publishableKey = challengeResult.intentData.publishableKey,
+                    )
                 )
             }
             is ChallengeResult.RuntimeError -> {
                 analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeErrored,
+                        publishableKey = challengeResult.intentData.publishableKey,
+                    )
                 )
             }
             is ChallengeResult.Timeout -> {
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeTimedOut,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = challengeResult.intentData.publishableKey,
                     )
                 )
             }
@@ -85,7 +95,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.create3ds2Challenge(
                 PaymentAnalyticsEvent.Auth3ds2ChallengePresented,
-                challengeResult.initialUiType?.code.orEmpty()
+                challengeResult.initialUiType?.code.orEmpty(),
+                publishableKey = challengeResult.intentData.publishableKey,
             )
         )
 

@@ -15,6 +15,7 @@ internal class StripeGooglePayPaymentDataCallbacks(
     private val stringResolver: (ResolvableString) -> String,
     private val googlePayJsonFactory: GooglePayJsonFactory,
     private val errorReporter: ErrorReporter,
+    private val publishableKey: String,
 ) : BasePaymentDataCallbacks() {
     constructor(context: Context) : this(
         context = context,
@@ -36,6 +37,7 @@ internal class StripeGooglePayPaymentDataCallbacks(
             context = context,
             productUsage = emptySet(),
         ),
+        publishableKey = paymentConfiguration.publishableKey,
     )
 
     override fun onPaymentDataChanged(
@@ -48,6 +50,7 @@ internal class StripeGooglePayPaymentDataCallbacks(
             googlePayJsonFactory = googlePayJsonFactory,
             errorReporter = errorReporter,
             stringResolver = stringResolver,
+            publishableKey = publishableKey,
         )
     }
 }

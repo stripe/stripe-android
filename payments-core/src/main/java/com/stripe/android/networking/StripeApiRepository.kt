@@ -140,7 +140,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
         DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, requestSurface, analyticsRequestExecutor),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
+        PaymentAnalyticsRequestFactory(context, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
@@ -269,6 +269,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createPaymentIntentConfirmation(
                     paymentMethodType = paymentMethodType,
                     errorMessage = result.errorMessage(options),
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -309,7 +310,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.PaymentIntentRetrieve,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -342,7 +346,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRefresh)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.PaymentIntentRefresh,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -375,7 +382,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = SetupIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRefresh)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.SetupIntentRefresh,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -459,6 +469,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
                     paymentMethodType = confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
                     errorMessage = result.errorMessage(options),
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -499,7 +510,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = SetupIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.SetupIntentRetrieve,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -551,7 +565,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createSourceCreation(
                     sourceParams.type,
-                    sourceParams.attribution
+                    sourceParams.attribution,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -578,7 +593,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = SourceJsonParser(),
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SourceRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.SourceRetrieve,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -605,7 +623,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createPaymentMethodCreation(
                     paymentMethodCreateParams.code,
-                    productUsageTokens = paymentMethodCreateParams.attribution
+                    productUsageTokens = paymentMethodCreateParams.attribution,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -630,6 +649,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createPaymentMethodUpdate(
                     paymentMethodCode = paymentMethodUpdateParams.type.code,
                     productUsageTokens = paymentMethodUpdateParams.productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -698,7 +718,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createTokenCreation(
                     productUsageTokens = tokenParams.attribution,
-                    tokenType = tokenParams.tokenType
+                    tokenType = tokenParams.tokenType,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -726,6 +747,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.ConfirmationTokenCreate,
                     productUsageTokens = confirmationTokenParams.paymentMethodData?.attribution ?: emptySet(),
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -753,7 +775,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createAddSource(
                     productUsageTokens,
-                    sourceType
+                    sourceType,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -778,7 +801,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createDeleteSource(
-                    productUsageTokens
+                    productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -804,7 +828,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createAttachPaymentMethod(productUsageTokens)
+                paymentAnalyticsRequestFactory.createAttachPaymentMethod(
+                    productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -832,7 +859,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(
+                    productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -862,7 +892,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(
+                    productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -888,7 +921,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(
                         PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                        productUsageTokens = productUsageTokens
+                        productUsageTokens = productUsageTokens,
+                        publishableKey = publishableKeyProvider(),
                     )
                 )
             },
@@ -918,7 +952,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.CustomerRetrievePaymentMethod,
-                    productUsageTokens = productUsageTokens
+                    productUsageTokens = productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -947,7 +982,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = PaymentAnalyticsEvent.CustomerSetDefaultSource,
                     productUsageTokens = productUsageTokens,
-                    sourceType = sourceType
+                    sourceType = sourceType,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -974,7 +1010,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.CustomerSetShippingInfo,
-                    productUsageTokens = productUsageTokens
+                    productUsageTokens = productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -998,7 +1035,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.CustomerRetrieve,
-                    productUsageTokens = productUsageTokens
+                    productUsageTokens = productUsageTokens,
+                    publishableKey = publishableKeyProvider(),
                 )
             )
         }
@@ -1100,7 +1138,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             jsonParser = Stripe3ds2AuthResultJsonParser(),
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Start)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.Auth3ds2Start,
+                    publishableKey = publishableKeyProvider(),
+                )
             )
         }
     }
@@ -1184,7 +1225,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 jsonParser = RadarSessionWithHCaptchaJsonParser(),
             ) {
                 fireAnalyticsRequest(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.RadarSessionCreate,
+                        publishableKey = publishableKeyProvider(),
+                    )
                 )
             }
         }.getOrElse {
@@ -1224,7 +1268,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 jsonParser = RadarSessionWithHCaptchaJsonParser(),
             ) {
                 fireAnalyticsRequest(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.RadarSessionCreate,
+                        publishableKey = publishableKeyProvider(),
+                    )
                 )
             }
         }.getOrElse {
@@ -1917,7 +1964,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         event: PaymentAnalyticsEvent
     ) {
         fireAnalyticsRequest(
-            paymentAnalyticsRequestFactory.createRequest(event)
+            paymentAnalyticsRequestFactory.createRequest(event, publishableKey = publishableKeyProvider())
         )
     }
 

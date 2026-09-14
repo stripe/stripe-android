@@ -251,6 +251,7 @@ internal class GooglePayLauncherViewModel(
                     ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT,
                     StripeException.create(error),
                     additionalNonPiiParams = mapOf("request_code" to requestCode.toString()),
+                    publishableKey = requestOptions.apiKey,
                 )
                 Result.failure(error)
             }
@@ -287,7 +288,6 @@ internal class GooglePayLauncherViewModel(
 
             val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 application,
-                publishableKey,
                 productUsageTokens
             )
 

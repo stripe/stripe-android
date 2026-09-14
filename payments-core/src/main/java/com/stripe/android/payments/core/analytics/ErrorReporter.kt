@@ -3,13 +3,9 @@ package com.stripe.android.payments.core.analytics
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -24,44 +20,31 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ErrorReporter : FraudDetectionErrorReporter {
-
+interface ErrorReporter {
+    /**
+     * Reports an event using the operation's publishable key. Pass null only when credentials
+     * are unavailable, such as when an activity was launched without arguments.
+     */
     fun report(
         errorEvent: ErrorEvent,
         stripeException: StripeException? = null,
         additionalNonPiiParams: Map<String, String> = emptyMap(),
+        publishableKey: String?,
     )
 
-    override fun reportFraudDetectionError(error: StripeException) {
+    fun reportFraudDetectionError(error: StripeException, publishableKey: String?) {
         report(
             errorEvent = ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE,
             stripeException = error,
+            publishableKey = publishableKey,
         )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun createFallbackInstance(
-            context: Context,
-            productUsage: Set<String> = emptySet(),
-        ): ErrorReporter {
-            return createFallbackInstance(
-                context = context,
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
-                productUsage = productUsage,
-            )
-        }
-
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -69,16 +52,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
-            apiConfigurationProvider: Provider<ApiConfiguration.State>,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .factory()
                 .create(
                     context = context.applicationContext,
-                    apiConfigurationProvider = {
-                        apiConfigurationProvider.get()
-                    },
                     productUsage = productUsage,
                 )
                 .errorReporter
@@ -472,8 +451,6 @@ internal interface DefaultErrorReporterComponent {
             @BindsInstance
             context: Context,
             @BindsInstance
-            apiConfigurationProvider: () -> ApiConfiguration.State,
-            @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,
         ): DefaultErrorReporterComponent
@@ -508,11 +485,5 @@ internal interface DefaultErrorReporterModule {
         fun provideIoContext(): CoroutineContext {
             return Dispatchers.IO
         }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKeyProvider(
-            apiConfigurationProvider: () -> ApiConfiguration.State,
-        ): () -> String = { apiConfigurationProvider().publishableKey }
     }
 }

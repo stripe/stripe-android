@@ -1,5 +1,6 @@
 package com.stripe.android.hcaptcha.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -13,7 +14,8 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : CaptchaEventsReporter {
 
     override fun init(siteKey: String) {
@@ -38,10 +40,16 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
 
         when (error) {
             is HCaptchaException -> {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE)
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE,
+                    publishableKey = apiConfiguration.publishableKey,
+                )
             }
             else -> {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE,
+                    publishableKey = apiConfiguration.publishableKey,
+                )
             }
         }
 
@@ -70,7 +78,8 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,
-                additionalParams = event.params + additionalParams
+                additionalParams = event.params + additionalParams,
+                publishableKey = apiConfiguration.publishableKey,
             )
         )
     }

@@ -232,6 +232,7 @@ class PollingViewModelTest {
                 paymentMethodType = "blik",
                 lastKnownStatus = "RequiresAction",
                 timeLimitSeconds = 10,
+                publishableKey = DEFAULT_API_CONFIG.publishableKey,
             )
         )
     }
@@ -264,6 +265,7 @@ class PollingViewModelTest {
                 paymentMethodType = "paynow",
                 lastKnownStatus = "RequiresAction",
                 timeLimitSeconds = 10,
+                publishableKey = DEFAULT_API_CONFIG.publishableKey,
             )
         )
         pollingAnalyticsEventReporter.ensureAllEventsConsumed()
@@ -297,6 +299,7 @@ class PollingViewModelTest {
                 paymentMethodType = "promptpay",
                 lastKnownStatus = "RequiresAction",
                 timeLimitSeconds = 10,
+                publishableKey = DEFAULT_API_CONFIG.publishableKey,
             )
         )
         pollingAnalyticsEventReporter.ensureAllEventsConsumed()

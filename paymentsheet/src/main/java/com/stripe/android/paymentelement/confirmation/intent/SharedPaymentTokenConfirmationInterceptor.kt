@@ -84,6 +84,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE,
                 stripeException = StripeException.create(it),
+                publishableKey = requestOptions.apiKey,
             )
         }
 

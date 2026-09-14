@@ -1,6 +1,7 @@
 package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -37,13 +38,15 @@ object HCaptchaModule {
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         analyticsRequestFactory: AnalyticsRequestFactory,
         durationProvider: DurationProvider,
-        errorReporter: ErrorReporter
+        errorReporter: ErrorReporter,
+        apiConfiguration: ApiConfiguration.State,
     ): CaptchaEventsReporter {
         return DefaultCaptchaEventsReporter(
             analyticsRequestExecutor,
             analyticsRequestFactory,
             durationProvider,
-            errorReporter
+            errorReporter,
+            apiConfiguration = apiConfiguration,
         )
     }
 }

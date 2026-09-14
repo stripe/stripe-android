@@ -11,7 +11,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePaddingRelative
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -45,10 +44,10 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfigurationProvider = { ApiConfiguration.State("", null) },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
+                    publishableKey = null,
                 )
             return
         }
@@ -80,21 +79,21 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfigurationProvider = { args.apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
+                    publishableKey = args.apiConfiguration.publishableKey,
                 )
             finishWithFailure(args)
         } catch (e: SecurityException) {
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfigurationProvider = { args.apiConfiguration },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
                     stripeException = StripeException.create(e),
+                    publishableKey = args.apiConfiguration.publishableKey,
                 )
             finishWithFailure(args)
         }

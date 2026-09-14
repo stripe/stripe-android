@@ -187,7 +187,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
             )
             return
         }
@@ -223,7 +224,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
             )
             return
         }
@@ -253,7 +255,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
             )
             return
         }
@@ -290,7 +293,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
             val refreshedState = embeddedContentState.value
             if (refreshedState == null) {
                 errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                    ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                    publishableKey = null,
                 )
                 return@launch
             }

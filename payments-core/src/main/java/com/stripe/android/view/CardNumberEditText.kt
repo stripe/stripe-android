@@ -65,7 +65,6 @@ class CardNumberEditText internal constructor(
         defStyleAttr,
         Dispatchers.Main,
         Dispatchers.IO,
-        { PaymentConfiguration.getInstance(context).publishableKey },
         cardBrandFilter = DefaultCardBrandFilter
     )
 
@@ -75,7 +74,6 @@ class CardNumberEditText internal constructor(
         defStyleAttr: Int,
         uiContext: CoroutineContext,
         workContext: CoroutineContext,
-        publishableKeySupplier: () -> String,
         cardBrandFilter: CardBrandFilter
     ) : this(
         context,
@@ -87,8 +85,7 @@ class CardNumberEditText internal constructor(
         DefaultStaticCardAccountRanges(),
         DefaultAnalyticsRequestExecutor(),
         PaymentAnalyticsRequestFactory(
-            context,
-            publishableKeyProvider = publishableKeySupplier
+            context
         ),
         cardBrandFilter = cardBrandFilter
     )
@@ -317,7 +314,10 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.CardMetadataLoadedTooSlow,
+                publishableKey = runCatching { PaymentConfiguration.getInstance(context).publishableKey }.getOrNull(),
+            )
         )
     }
 

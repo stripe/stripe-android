@@ -159,7 +159,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context = ApplicationProvider.getApplicationContext(),
-                        publishableKey = "pk",
                     ),
                     publishableKeyProvider = { "pk" },
                     stripeAccountIdProvider = { null },

@@ -82,7 +82,8 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
                     .PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE,
                 additionalNonPiiParams = mapOf(
                     "error_message" to message.message
-                )
+                ),
+                publishableKey = paymentConfiguration.get().publishableKey,
             )
         } else {
             eventReporter.onLoadSucceeded(

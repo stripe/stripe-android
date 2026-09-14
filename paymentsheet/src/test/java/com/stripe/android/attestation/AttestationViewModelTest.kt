@@ -2,6 +2,7 @@ package com.stripe.android.attestation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
@@ -91,6 +92,7 @@ internal class AttestationViewModelTest {
         integrityRequestManager = integrityRequestManager,
         workContext = testDispatcher,
         attestationAnalyticsEventsReporter = attestationAnalyticsEventsReporter,
-        errorReporter = FakeErrorReporter()
+        errorReporter = FakeErrorReporter(),
+        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
     ).also { viewModelStoreRule.track(it) }
 }

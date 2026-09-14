@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -34,7 +35,7 @@ import kotlin.coroutines.CoroutineContext
 @Suppress("LargeClass", "TooManyFunctions")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
-    context: Context,
+    private val context: Context,
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
@@ -502,11 +503,15 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        val paymentMethodMetadata = paymentMethodMetadataProvider.get()
+        val publishableKey = paymentMethodMetadata?.apiConfiguration?.publishableKey
+            ?: runCatching { PaymentConfiguration.getInstance(context).publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadataProvider.get()),
+                    additionalParams = defaultParams(paymentMethodMetadata),
+                    publishableKey = publishableKey,
                 )
             )
         }
@@ -623,11 +628,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
     ) {
+        val publishableKey = paymentMethodMetadata?.apiConfiguration?.publishableKey
+            ?: runCatching { PaymentConfiguration.getInstance(context).publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+                    publishableKey = publishableKey,
                 )
             )
         }

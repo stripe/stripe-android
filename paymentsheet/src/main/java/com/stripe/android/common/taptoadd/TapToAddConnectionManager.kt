@@ -186,7 +186,8 @@ internal class DefaultTapToAddConnectionManager(
                     override fun onFailure(e: TerminalException) {
                         if (e.isAlreadyConnectedToReader()) {
                             errorReporter.report(
-                                ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS
+                                ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS,
+                                publishableKey = apiConfiguration.publishableKey,
                             )
 
                             continuation.resumeWith(Result.success(DiscoverCallResult.AlreadyConnected))
@@ -195,6 +196,7 @@ internal class DefaultTapToAddConnectionManager(
                                 error = e,
                                 errorEvent =
                                     ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
+                                publishableKey = apiConfiguration.publishableKey,
                             )
 
                             continuation.resumeWith(Result.failure(e))
@@ -203,7 +205,8 @@ internal class DefaultTapToAddConnectionManager(
 
                     override fun onSuccess() {
                         errorReporter.report(
-                            ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS
+                            ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS,
+                            publishableKey = apiConfiguration.publishableKey,
                         )
                     }
                 }
@@ -221,6 +224,7 @@ internal class DefaultTapToAddConnectionManager(
                                 error = e,
                                 errorEvent =
                                     ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE,
+                                publishableKey = apiConfiguration.publishableKey,
                             )
                         }
                     }
@@ -230,6 +234,7 @@ internal class DefaultTapToAddConnectionManager(
             reportError(
                 error = exception,
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
+                publishableKey = apiConfiguration.publishableKey,
             )
 
             continuation.resumeWith(Result.failure(exception))
@@ -246,6 +251,7 @@ internal class DefaultTapToAddConnectionManager(
             reportError(
                 error = exception,
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
+                publishableKey = config.apiConfiguration.publishableKey,
             )
 
             continuation.resumeWith(Result.failure(exception))
@@ -265,7 +271,8 @@ internal class DefaultTapToAddConnectionManager(
                 override fun onFailure(e: TerminalException) {
                     if (e.isAlreadyConnectedToReader()) {
                         errorReporter.report(
-                            ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS
+                            ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS,
+                            publishableKey = config.apiConfiguration.publishableKey,
                         )
 
                         continuation.resumeWith(Result.success(Unit))
@@ -273,6 +280,7 @@ internal class DefaultTapToAddConnectionManager(
                         reportError(
                             error = e,
                             errorEvent = ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
+                            publishableKey = config.apiConfiguration.publishableKey,
                         )
 
                         continuation.resumeWith(Result.failure(e))
@@ -281,7 +289,8 @@ internal class DefaultTapToAddConnectionManager(
 
                 override fun onSuccess(reader: Reader) {
                     errorReporter.report(
-                        ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS
+                        ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS,
+                        publishableKey = config.apiConfiguration.publishableKey,
                     )
 
                     continuation.resumeWith(Result.success(Unit))
@@ -313,6 +322,7 @@ internal class DefaultTapToAddConnectionManager(
     private fun reportError(
         error: Throwable,
         errorEvent: ErrorReporter.ErrorEvent?,
+        publishableKey: String,
     ) {
         val additionalParams = mutableMapOf<String, String>()
 
@@ -324,6 +334,7 @@ internal class DefaultTapToAddConnectionManager(
             errorReporter.report(
                 event,
                 StripeException.create(error),
+                publishableKey = publishableKey,
             )
         }
 

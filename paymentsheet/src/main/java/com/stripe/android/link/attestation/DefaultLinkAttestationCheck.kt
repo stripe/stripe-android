@@ -43,7 +43,8 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                 onFailure = { error ->
                     errorReporter.report(
                         errorEvent = ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
-                        stripeException = StripeException.create(error)
+                        stripeException = StripeException.create(error),
+                        publishableKey = linkConfiguration.apiConfiguration.publishableKey,
                     )
                     LinkAttestationCheck.Result.AttestationFailed(error)
                 }

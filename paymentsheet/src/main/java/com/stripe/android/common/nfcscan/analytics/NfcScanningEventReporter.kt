@@ -1,12 +1,14 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import com.stripe.android.common.nfcscan.scanner.NfcScanningError
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import javax.inject.Inject
+import javax.inject.Named
 
 internal interface NfcScanningEventReporter {
     /**
@@ -60,6 +62,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @EventPrefix private val eventPrefix: String,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : NfcScanningEventReporter {
     override fun onNfcScanStarted() {
         durationProvider.start(DurationProvider.Key.NfcScan)
@@ -113,8 +116,9 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     private fun fireEvent(
         eventName: String,
-        additionalParams: Map<String, Any?> = emptyMap()
+        additionalParams: Map<String, Any?> = emptyMap(),
     ) {
+        val publishableKey = runCatching { publishableKeyProvider() }.getOrNull()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = object : AnalyticsEvent {
@@ -122,6 +126,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
                         get() = eventPrefix + eventName
                 },
                 additionalParams = additionalParams,
+                publishableKey = publishableKey,
             )
         )
     }

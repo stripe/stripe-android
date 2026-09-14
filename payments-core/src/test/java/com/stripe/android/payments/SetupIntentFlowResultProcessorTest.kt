@@ -542,6 +542,7 @@ internal class SetupIntentFlowResultProcessorTest {
                     paymentMethodType = "swish",
                     lastKnownStatus = "RequiresAction",
                     timeLimitSeconds = REDUCED_POLLING_DURATION / 1000,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 )
             )
         }
