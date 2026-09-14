@@ -131,7 +131,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
-                    publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
+                    apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

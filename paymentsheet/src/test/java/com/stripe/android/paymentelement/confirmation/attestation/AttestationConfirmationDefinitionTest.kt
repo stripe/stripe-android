@@ -155,7 +155,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchAction.launcherArguments.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchAction.launcherArguments.productUsage).isEqualTo(launcherArgs.productUsage)
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
@@ -218,7 +218,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val launchCall = launcher.calls.awaitItem()
 
-        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchCall.input.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -237,7 +237,7 @@ internal class AttestationConfirmationDefinitionTest {
 
             val launchAction = action.asLaunch()
 
-            assertThat(launchAction.launcherArguments.publishableKey).isEqualTo(launcherArgs.publishableKey)
+            assertThat(launchAction.launcherArguments.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
             assertThat(launchAction.launcherArguments.productUsage).isEqualTo(launcherArgs.productUsage)
             assertThat(launchAction.receivesResultInProcess).isFalse()
         }
@@ -257,7 +257,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val launchCall = launcher.calls.awaitItem()
 
-        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchCall.input.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -688,7 +688,7 @@ internal class AttestationConfirmationDefinitionTest {
         )
 
         private val launcherArgs = AttestationActivityContract.Args(
-            publishableKey = "pk_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = setOf("PaymentSheet")
         )
 
@@ -696,7 +696,7 @@ internal class AttestationConfirmationDefinitionTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 attestOnIntentConfirmation = enabled,
-                apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = launcherArgs.publishableKey),
+                apiConfiguration = launcherArgs.apiConfiguration,
             )
         )
     }
