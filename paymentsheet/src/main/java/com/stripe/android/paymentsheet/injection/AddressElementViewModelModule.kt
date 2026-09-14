@@ -52,7 +52,12 @@ internal class AddressElementViewModelModule {
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        requestOptionsProvider = { ApiRequest.Options(apiKey = args.publishableKey) },
+        requestOptionsProvider = {
+            ApiRequest.Options(
+                apiKey = args.apiConfiguration.publishableKey,
+                stripeAccount = args.apiConfiguration.stripeAccountId,
+            )
+        },
     )
 
     @Provides

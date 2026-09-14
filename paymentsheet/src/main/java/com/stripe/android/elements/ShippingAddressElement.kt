@@ -11,6 +11,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -117,9 +118,13 @@ class ShippingAddressElement internal constructor(
         }
 
         shippingAddressElementStateHolder.isPresenting = true
+        val paymentConfiguration = paymentConfiguration.get()
         activityLauncher.launch(
             AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = paymentConfiguration.get().publishableKey,
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = paymentConfiguration.publishableKey,
+                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                ),
                 config = AddressLauncher.Configuration(
                     additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
