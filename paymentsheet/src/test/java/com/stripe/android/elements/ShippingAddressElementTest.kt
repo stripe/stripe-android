@@ -107,6 +107,7 @@ internal class ShippingAddressElementTest {
     @Test
     fun `present passes checkout session allowed shipping countries`() = runScenario {
         stateHolder.state = CheckoutControllerStateFactory.create(
+            configuration = configuredCheckoutConfiguration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 allowedShippingCountries = listOf("US", "CA"),
             ),
