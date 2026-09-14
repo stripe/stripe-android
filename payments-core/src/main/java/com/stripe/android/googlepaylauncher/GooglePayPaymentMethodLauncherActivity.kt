@@ -108,7 +108,10 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                 if (result != null) {
                     onGooglePayResult(result)
                 } else {
-                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA,
+                        publishableKey = args.apiConfiguration.publishableKey,
+                    )
                     updateResult(
                         GooglePayPaymentMethodLauncher.Result.Failed(
                             RuntimeException(
@@ -154,13 +157,15 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             additionalNonPiiParams = mapOf(
                 "status_message" to statusMessage,
                 "status_code" to statusCode,
-            )
+            ),
+            publishableKey = args.apiConfiguration.publishableKey,
         )
 
         if (!listOf(8, 10, 17, 20, 405, 409, 412).contains(status.statusCode)) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_STATUS_CODE,
-                additionalNonPiiParams = mapOf("status_code" to statusCode)
+                additionalNonPiiParams = mapOf("status_code" to statusCode),
+                publishableKey = args.apiConfiguration.publishableKey,
             )
         }
     }

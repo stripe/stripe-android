@@ -173,7 +173,6 @@ internal class SheetTaxRegionUpdaterTest {
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
             ),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { "acct_123" },

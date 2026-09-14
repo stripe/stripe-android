@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.core.graphics.drawable.toDrawable
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
@@ -29,6 +30,9 @@ internal class DefaultPaymentOptionCardArtDrawableLoader @Inject constructor(
                 errorReporter.report(
                     errorEvent = ExpectedErrorEvent.PAYMENT_OPTION_CARD_ART_LOAD_FAILURE,
                     stripeException = StripeException.create(error),
+                    publishableKey = runCatching {
+                        PaymentConfiguration.getInstance(context).publishableKey
+                    }.getOrNull(),
                 )
             }
             .getOrNull()

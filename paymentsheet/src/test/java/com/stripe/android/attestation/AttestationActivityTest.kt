@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.isInstanceOf
@@ -160,7 +161,8 @@ internal class AttestationActivityTest {
                     integrityRequestManager = integrityRequestManager,
                     workContext = testDispatcher,
                     attestationAnalyticsEventsReporter = eventsReporter,
-                    errorReporter = FakeErrorReporter()
+                    errorReporter = FakeErrorReporter(),
+                    publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
                 ) as T
             }
         }

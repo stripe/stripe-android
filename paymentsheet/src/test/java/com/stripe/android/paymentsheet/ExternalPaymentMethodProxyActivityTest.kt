@@ -9,6 +9,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -45,6 +46,7 @@ class ExternalPaymentMethodProxyActivityTest {
                 paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
                 type = expectedExternalPaymentMethodType,
                 billingDetails = expectedBillingDetails,
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             )
         )
 
@@ -73,6 +75,7 @@ class ExternalPaymentMethodProxyActivityTest {
                 paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
                 type = "external_fawry",
                 billingDetails = PaymentMethod.BillingDetails(),
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             )
         )
 
@@ -150,6 +153,7 @@ class ExternalPaymentMethodProxyActivityTest {
                 billingDetails = PaymentMethod.BillingDetails(
                     email = "email@email.com",
                 ),
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             ),
         )
 
@@ -160,6 +164,7 @@ class ExternalPaymentMethodProxyActivityTest {
                 billingDetails = PaymentMethod.BillingDetails(
                     email = "email2@email.com",
                 ),
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             ),
         )
 

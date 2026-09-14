@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.Address
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -20,6 +21,7 @@ internal fun createInlineAutocompletePlacesClient(
             context = context,
             googlePlacesApiKey = apiKey,
             errorReporter = errorReporter,
+            publishableKey = runCatching { PaymentConfiguration.getInstance(context).publishableKey }.getOrNull(),
         )
     }
 }

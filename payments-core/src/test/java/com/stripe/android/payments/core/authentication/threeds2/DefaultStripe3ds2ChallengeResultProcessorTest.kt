@@ -40,8 +40,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         analyticsRequests.add(it)
     }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context = application,
-        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
+        context = application
     )
 
     private val stripeRepository = FakeStripeRepository()

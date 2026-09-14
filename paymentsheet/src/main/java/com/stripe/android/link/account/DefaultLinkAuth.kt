@@ -188,7 +188,8 @@ internal class DefaultLinkAuth @Inject constructor(
             stripeException = LinkEventException(error),
             additionalNonPiiParams = mapOf(
                 "operation" to operation
-            )
+            ),
+            publishableKey = config.apiConfiguration.publishableKey,
         )
     }
 

@@ -58,7 +58,7 @@ constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
+        PaymentAnalyticsRequestFactory(context.applicationContext),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
@@ -306,7 +306,10 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthSourceStart,
+                publishableKey = publishableKeyProvider(),
+            )
         )
 
         stripeRepository.retrieveSource(
@@ -399,7 +402,10 @@ constructor(
         )
 
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthSourceResult,
+                publishableKey = publishableKeyProvider(),
+            )
         )
 
         return stripeRepository.retrieveSource(
@@ -479,7 +485,7 @@ constructor(
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(event)
+                paymentAnalyticsRequestFactory.createRequest(event, publishableKey = publishableKeyProvider())
             )
         }
     }

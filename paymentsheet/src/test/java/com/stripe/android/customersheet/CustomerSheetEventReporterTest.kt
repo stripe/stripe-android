@@ -65,13 +65,13 @@ class CustomerSheetEventReporterTest {
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
         packageInfo = application.packageInfo,
-        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         networkTypeProvider = { "5G" },
     )
     private val eventReporter = DefaultCustomerSheetEventReporter(
         analyticsRequestExecutor = analyticsRequestExecutor,
         analyticsRequestFactory = analyticsRequestFactory,
         workContext = testDispatcher,
+        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
     )
 
     @Test

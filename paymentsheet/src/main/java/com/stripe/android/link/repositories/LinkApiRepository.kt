@@ -252,7 +252,8 @@ internal class LinkApiRepository @Inject constructor(
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
-                StripeException.create(it)
+                StripeException.create(it),
+                publishableKey = apiConfiguration.publishableKey,
             )
         }
     }
@@ -302,7 +303,8 @@ internal class LinkApiRepository @Inject constructor(
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
-                StripeException.create(it)
+                StripeException.create(it),
+                publishableKey = apiConfiguration.publishableKey,
             )
         }
     }
@@ -331,7 +333,11 @@ internal class LinkApiRepository @Inject constructor(
             ) + allowRedisplay + billingPhone + paymentMethodParams + clientAttributionMetadataParams,
             requestOptions = buildRequestOptions(apiConfiguration),
         ).onFailure {
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE,
+                StripeException.create(it),
+                publishableKey = apiConfiguration.publishableKey,
+            )
         }.map { paymentMethod ->
             LinkPaymentDetails.Passthrough(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(

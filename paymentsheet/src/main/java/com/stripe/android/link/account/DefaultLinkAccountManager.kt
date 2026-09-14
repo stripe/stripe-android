@@ -133,12 +133,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onSuccess {
-            errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
+            errorReporter.report(
+                ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS,
+                publishableKey = config.apiConfiguration.publishableKey,
+            )
             Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
         }.onFailure { error ->
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE,
-                StripeException.create(error)
+                StripeException.create(error),
+                publishableKey = config.apiConfiguration.publishableKey,
             )
             Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
         }
@@ -225,11 +229,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     clientAttributionMetadata = config.clientAttributionMetadata,
                     apiConfiguration = config.apiConfiguration,
                 ).onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
+                    errorReporter.report(
+                        ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS,
+                        publishableKey = config.apiConfiguration.publishableKey,
+                    )
                 }
             }
         } else {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT,
+                publishableKey = config.apiConfiguration.publishableKey,
+            )
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
@@ -251,10 +261,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 customerEphemeralKey = customerEphemeralKey,
                 apiConfiguration = config.apiConfiguration,
             ).onSuccess {
-                errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
+                errorReporter.report(
+                    ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS,
+                    publishableKey = config.apiConfiguration.publishableKey,
+                )
             }
         } ?: run {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT,
+                publishableKey = config.apiConfiguration.publishableKey,
+            )
             Result.failure(
                 exception = IllegalStateException("A non-null Link account is needed to create payment details")
             )
@@ -292,7 +308,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 apiConfiguration = config.apiConfiguration,
             )
         } else {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT,
+                publishableKey = config.apiConfiguration.publishableKey,
+            )
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )

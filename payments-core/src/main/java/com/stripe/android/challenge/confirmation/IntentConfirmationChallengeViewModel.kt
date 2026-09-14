@@ -103,6 +103,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         if (intentId == null || clientSecret == null) {
             errorReporter.report(
                 errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE,
+                publishableKey = args.apiConfiguration.publishableKey,
             )
             return
         }
@@ -130,7 +131,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         cancellationResult.onFailure { error ->
             errorReporter.report(
                 errorEvent = ExpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED,
-                stripeException = StripeException.create(error)
+                stripeException = StripeException.create(error),
+                publishableKey = args.apiConfiguration.publishableKey,
             )
         }
     }

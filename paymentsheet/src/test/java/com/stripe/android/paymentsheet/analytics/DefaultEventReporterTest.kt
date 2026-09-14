@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -63,6 +64,33 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_init")
+    }
+
+    @Test
+    fun `queued events retain the publishable key captured from metadata`() = runScenario(deferAnalytics = true) {
+        val metadata = paymentMethodMetadataWithTestAnalyticsMetadata
+        paymentMethodMetadataStack.push(metadata)
+
+        eventReporter.onDismiss()
+
+        assertThat(paymentMethodMetadataStack).isEmpty()
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("publishable_key", metadata.apiConfiguration.publishableKey)
+    }
+
+    @Test
+    fun `forwarded analytics capture credentials before dispatch`() = runScenario(deferAnalytics = true) {
+        val metadata = paymentMethodMetadataWithTestAnalyticsMetadata
+        paymentMethodMetadataStack.push(metadata)
+        val event = object : AnalyticsEvent {
+            override val eventName: String = "test_event"
+        }
+
+        eventReporter.onAnalyticsEvent(event)
+
+        assertThat(paymentMethodMetadataStack).isEmpty()
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("publishable_key", metadata.apiConfiguration.publishableKey)
     }
 
     @Test
@@ -1503,15 +1531,19 @@ class DefaultEventReporterTest {
 
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
+        deferAnalytics: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val testDispatcher = UnconfinedTestDispatcher()
+        val testDispatcher = if (deferAnalytics) {
+            StandardTestDispatcher(testScheduler)
+        } else {
+            UnconfinedTestDispatcher(testScheduler)
+        }
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKey = "pk_test_123",
             defaultProductUsageTokens = setOf(""),
         )
 

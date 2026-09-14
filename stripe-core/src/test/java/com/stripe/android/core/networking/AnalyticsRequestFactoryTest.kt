@@ -4,8 +4,8 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.BuildConfig
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.reactnative.ReactNativeAnalytics
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.version.StripeSdkVersion
@@ -22,7 +22,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
 
     private val packageManager = mock<PackageManager>()
     private val packageName = "com.stripe.android.test"
-    private val apiKey = "pk_abc123"
+    private val apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
 
     private val mockEvent = object : AnalyticsEvent {
         override val eventName: String = "randomEvent"
@@ -30,16 +30,14 @@ class AnalyticsRequestFactoryTest : TestCase() {
 
     @Test
     fun `when publishable key is unavailable, create params with undefined key`() {
-        val exception = APIException(RuntimeException())
         val factory = AnalyticsRequestFactory(
             mock(),
             null,
             packageName,
-            { throw exception },
             { "5G" },
         )
 
-        val params = factory.createRequest(mockEvent, emptyMap()).params
+        val params = factory.createRequest(mockEvent, emptyMap(), publishableKey = null).params
 
         assertThat(params["publishable_key"])
             .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
@@ -47,16 +45,14 @@ class AnalyticsRequestFactoryTest : TestCase() {
 
     @Test
     fun `when publishable key is a user key, it is redacted`() {
-        val exception = APIException(RuntimeException())
         val factory = AnalyticsRequestFactory(
             mock(),
             null,
             packageName,
-            { "uk_123" },
             { "5G" },
         )
 
-        val params = factory.createRequest(mockEvent, emptyMap()).params
+        val params = factory.createRequest(mockEvent, emptyMap(), publishableKey = "uk_123").params
 
         assertThat(params["publishable_key"])
             .isEqualTo("[REDACTED_LIVE_KEY]")
@@ -77,10 +73,9 @@ class AnalyticsRequestFactoryTest : TestCase() {
             packageManager,
             packageInfo,
             packageName,
-            { apiKey },
             { "5G" },
         )
-        val params = factory.createRequest(mockEvent, emptyMap()).params
+        val params = factory.createRequest(mockEvent, emptyMap(), publishableKey = apiKey).params
 
         assertThat(apiKey).isEqualTo(params[AnalyticsFields.PUBLISHABLE_KEY])
         assertThat(Build.VERSION.SDK_INT).isEqualTo(params[AnalyticsFields.OS_VERSION])
@@ -105,7 +100,6 @@ class AnalyticsRequestFactoryTest : TestCase() {
             mock(),
             null,
             packageName,
-            { apiKey },
             { "5G" },
         )
         assertThat(factory.appDataParams()).isEmpty()
@@ -117,7 +111,6 @@ class AnalyticsRequestFactoryTest : TestCase() {
             null,
             null,
             "",
-            { apiKey },
             { "5G" },
         )
         assertThat(factory.appDataParams()).isEmpty()
@@ -131,7 +124,8 @@ class AnalyticsRequestFactoryTest : TestCase() {
 
         val request = factory.createRequest(
             mockEvent,
-            mapOf()
+            mapOf(),
+            publishableKey = apiKey,
         )
 
         assertThat(request.params[AnalyticsFields.PLUGIN_TYPE])
@@ -146,7 +140,6 @@ class AnalyticsRequestFactoryTest : TestCase() {
             packageManager = null,
             packageInfo = null,
             packageName = "",
-            publishableKeyProvider = { apiKey },
             networkTypeProvider = { "5G" },
         )
 
@@ -159,6 +152,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
                 val request = factory.createRequest(
                     event = event,
                     additionalParams = emptyMap(),
+                    publishableKey = apiKey,
                 )
                 assertThat(request.params).containsEntry("locale", locale.toString())
             }
@@ -168,7 +162,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
     @Test
     fun `react native fields are absent by default`() {
         val factory = createFakeAnalyticsRequestFactory()
-        val params = factory.createRequest(mockEvent, emptyMap()).params
+        val params = factory.createRequest(mockEvent, emptyMap(), publishableKey = apiKey).params
 
         assertThat(params).doesNotContainKey(AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE)
         assertThat(params).doesNotContainKey(AnalyticsFields.REACT_NATIVE_VERSION)
@@ -182,7 +176,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
 
         try {
             val factory = createFakeAnalyticsRequestFactory()
-            val params = factory.createRequest(mockEvent, emptyMap()).params
+            val params = factory.createRequest(mockEvent, emptyMap(), publishableKey = apiKey).params
 
             assertThat(params[AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE]).isEqualTo(false)
             assertThat(params[AnalyticsFields.REACT_NATIVE_VERSION]).isEqualTo("0.75.3")
@@ -192,6 +186,17 @@ class AnalyticsRequestFactoryTest : TestCase() {
         }
     }
 
+    @Test
+    fun `each request uses its supplied publishable key`() {
+        val factory = createFakeAnalyticsRequestFactory()
+
+        val first = factory.createRequest(mockEvent, emptyMap(), ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val second = factory.createRequest(mockEvent, emptyMap(), ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        assertThat(first.params[AnalyticsFields.PUBLISHABLE_KEY]).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        assertThat(second.params[AnalyticsFields.PUBLISHABLE_KEY]).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+    }
+
     private fun createFakeAnalyticsRequestFactory(
         pluginTypeProvider: Provider<String?> = Provider { null }
     ): AnalyticsRequestFactory {
@@ -199,7 +204,6 @@ class AnalyticsRequestFactoryTest : TestCase() {
             mock(),
             null,
             "fake_package",
-            { apiKey },
             { "5G" },
             pluginTypeProvider,
         )

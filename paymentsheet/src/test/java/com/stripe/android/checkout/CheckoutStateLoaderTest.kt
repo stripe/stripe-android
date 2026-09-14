@@ -424,8 +424,8 @@ internal class CheckoutStateLoaderTest {
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = application,
-                publishableKey = "pk_test_123",
             ),
+            context = application,
         )
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)

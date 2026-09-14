@@ -44,7 +44,8 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
         return if (externalPaymentMethodConfirmHandler == null) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL,
-                additionalNonPiiParams = mapOf("external_payment_method_type" to externalPaymentMethodType)
+                additionalNonPiiParams = mapOf("external_payment_method_type" to externalPaymentMethodType),
+                publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
             )
 
             val error = IllegalStateException(
@@ -84,7 +85,8 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
     ) {
         errorReporter.report(
             ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS,
-            additionalNonPiiParams = mapOf("external_payment_method_type" to confirmationOption.type)
+            additionalNonPiiParams = mapOf("external_payment_method_type" to confirmationOption.type),
+            publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
         )
 
         launcher.launch(
@@ -92,6 +94,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 type = confirmationOption.type,
                 billingDetails = confirmationOption.billingDetails,
+                publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
             )
         )
     }

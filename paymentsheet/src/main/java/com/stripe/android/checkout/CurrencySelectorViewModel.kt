@@ -25,6 +25,7 @@ internal class CurrencySelectorViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     savedStateHandle: SavedStateHandle,
+    private val publishableKey: String?,
 ) : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<ResolvableString?>(null)
@@ -59,6 +60,7 @@ internal class CurrencySelectorViewModel(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = event.params,
+                    publishableKey = publishableKey,
                 )
             )
         }
@@ -72,6 +74,7 @@ internal class CurrencySelectorViewModel(
         private val checkoutController: CheckoutController,
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+        private val stateHolder: CheckoutControllerStateHolder,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -89,6 +92,7 @@ internal class CurrencySelectorViewModel(
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
                 savedStateHandle = extras.createSavedStateHandle(),
+                publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
             ) as T
         }
     }

@@ -27,6 +27,7 @@ import com.google.android.libraries.places.internal.zzmy
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.uicore.elements.IsPlacesAvailable
 import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -58,6 +59,7 @@ class PlacesClientProxyTest {
             clientFactory = { mock() },
             initializer = { /* no-op */ },
             errorReporter = FakeErrorReporter(),
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
         )
 
         assertThat(client).isInstanceOf<DefaultPlacesClientProxy>()
@@ -77,6 +79,7 @@ class PlacesClientProxyTest {
             clientFactory = { mock() },
             initializer = { /* no-op */ },
             errorReporter = FakeErrorReporter(),
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
         )
 
         assertThat(client).isInstanceOf<UnsupportedPlacesClientProxy>()
@@ -95,6 +98,7 @@ class PlacesClientProxyTest {
             clientFactory = { mock() },
             initializer = { /* no-op */ },
             errorReporter = FakeErrorReporter(),
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
         )
 
         assertThat(client).isInstanceOf<UnsupportedPlacesClientProxy>()
@@ -129,6 +133,7 @@ class PlacesClientProxyTest {
                 clientFactory = { client },
                 initializer = { /* no-op */ },
                 errorReporter = FakeErrorReporter(),
+                publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
             )
 
             val predictions = proxy.findAutocompletePredictions(
@@ -166,6 +171,7 @@ class PlacesClientProxyTest {
                 clientFactory = { client },
                 initializer = { /* no-op */ },
                 errorReporter = FakeErrorReporter(),
+                publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
             )
 
             val place = proxy.fetchPlace(

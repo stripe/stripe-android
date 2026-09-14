@@ -21,29 +21,24 @@ internal object GooglePayPaymentDataCallbackHandler {
         onCompleteListener: OnCompleteListener<PaymentDataRequestUpdate>,
         googlePayJsonFactory: GooglePayJsonFactory,
         errorReporter: ErrorReporter,
-        stringResolver: (ResolvableString) -> String
+        stringResolver: (ResolvableString) -> String,
+        publishableKey: String?,
     ) {
         val selection = GooglePayPaymentDataUpdateCallbackRegistry.get()
 
-        if (request == null) {
+        if (request == null || selection == null) {
             handleUnexpectedError(
-                event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST,
+                event = if (request == null) {
+                    ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST
+                } else {
+                    ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK
+                },
                 googlePayJsonFactory = googlePayJsonFactory,
                 errorReporter = errorReporter,
                 stringResolver = stringResolver,
                 onCompleteListener = onCompleteListener,
+                publishableKey = publishableKey,
             )
-
-            return
-        } else if (selection == null) {
-            handleUnexpectedError(
-                event = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK,
-                googlePayJsonFactory = googlePayJsonFactory,
-                errorReporter = errorReporter,
-                stringResolver = stringResolver,
-                onCompleteListener = onCompleteListener,
-            )
-
             return
         }
 
@@ -58,6 +53,7 @@ internal object GooglePayPaymentDataCallbackHandler {
                     errorReporter = errorReporter,
                     stringResolver = stringResolver,
                     onCompleteListener = onCompleteListener,
+                    publishableKey = publishableKey,
                 )
 
                 return@launch
@@ -80,6 +76,7 @@ internal object GooglePayPaymentDataCallbackHandler {
                     errorReporter = errorReporter,
                     stringResolver = stringResolver,
                     onCompleteListener = onCompleteListener,
+                    publishableKey = publishableKey,
                 )
 
                 return@launch
@@ -112,10 +109,12 @@ internal object GooglePayPaymentDataCallbackHandler {
         googlePayJsonFactory: GooglePayJsonFactory,
         errorReporter: ErrorReporter,
         stringResolver: (ResolvableString) -> String,
+        publishableKey: String?,
     ) {
         errorReporter.report(
             errorEvent = event,
-            stripeException = throwable?.let { StripeException.create(it) }
+            stripeException = throwable?.let { StripeException.create(it) },
+            publishableKey = publishableKey,
         )
 
         onCompleteListener.complete(

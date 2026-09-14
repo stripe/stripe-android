@@ -2,12 +2,14 @@ package com.stripe.android.stripecardscan.cardscan
 
 import androidx.annotation.MainThread
 import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -16,7 +18,8 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    private val cardScanConfiguration: CardScanConfiguration
+    private val cardScanConfiguration: CardScanConfiguration,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : CardScanEventsReporter {
     private var hasLoggedMlKitFoundPan = false
     private var hasLoggedMlKitFoundExp = false
@@ -101,8 +104,9 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
 
     private fun fireEvent(
         eventName: String,
-        additionalParams: Map<String, Any> = emptyMap()
+        additionalParams: Map<String, Any> = emptyMap(),
     ) {
+        val publishableKey = runCatching { publishableKeyProvider() }.getOrNull()
         val baseParams = cardScanConfiguration.elementsSessionId?.let {
             mapOf(
                 "elements_session_id" to cardScanConfiguration.elementsSessionId
@@ -114,7 +118,8 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
                     override val eventName: String
                         get() = eventName
                 },
-                additionalParams = additionalParams + baseParams
+                additionalParams = additionalParams + baseParams,
+                publishableKey = publishableKey,
             )
         )
     }

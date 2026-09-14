@@ -95,7 +95,7 @@ internal class CardNumberEditTextTest {
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentAnalyticsRequestFactory(context)
 
     private val cardNumberEditText = CardNumberEditText(
         context,

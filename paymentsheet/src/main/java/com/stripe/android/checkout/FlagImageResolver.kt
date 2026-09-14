@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import android.graphics.Bitmap
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -20,6 +22,7 @@ internal class FlagImageResolver @Inject constructor(
     private val flagImageRepository: FlagImageRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val context: Context,
 ) {
     suspend fun resolve(
         response: CheckoutSessionResponse,
@@ -50,6 +53,9 @@ internal class FlagImageResolver @Inject constructor(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = event.params,
+                    publishableKey = runCatching {
+                        PaymentConfiguration.getInstance(context).publishableKey
+                    }.getOrNull(),
                 )
             )
         }

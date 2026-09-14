@@ -107,7 +107,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER,
             additionalNonPiiParams = mapOf(
                 FIELD_UNEXPECTED_TRIGGER_TYPE to trigger
-            )
+            ),
+            publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
         )
     }
 

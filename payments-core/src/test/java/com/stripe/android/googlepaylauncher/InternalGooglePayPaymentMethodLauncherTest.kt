@@ -153,7 +153,6 @@ class InternalGooglePayPaymentMethodLauncherTest {
             context = context,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = context,
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             ),
             analyticsRequestExecutor = analyticsRequestExecutor,
         )

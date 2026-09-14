@@ -171,7 +171,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
             )
             return
         }
@@ -207,7 +208,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
             )
             return
         }
@@ -237,7 +239,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         if (configuration == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL,
+                publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
             )
             return
         }

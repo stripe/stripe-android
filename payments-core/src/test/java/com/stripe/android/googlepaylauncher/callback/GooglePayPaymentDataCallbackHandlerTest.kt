@@ -232,6 +232,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
                 googlePayJsonFactory = JSON_FACTORY,
                 errorReporter = errorReporter,
                 stringResolver = { INTERNAL_ERROR_MESSAGE },
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             )
             testScope.advanceUntilIdle()
         }

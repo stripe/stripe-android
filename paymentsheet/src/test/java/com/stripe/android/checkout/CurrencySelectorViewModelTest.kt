@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -150,9 +151,9 @@ internal class CurrencySelectorViewModelTest {
             analyticsRequestExecutor = fakeAnalyticsRequestExecutor,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = application,
-                publishableKey = "pk_test_123",
             ),
             savedStateHandle = savedStateHandle,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         ).also { viewModelStoreRule.track(it) }
 
         Scenario(

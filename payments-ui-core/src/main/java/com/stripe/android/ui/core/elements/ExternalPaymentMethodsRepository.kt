@@ -7,7 +7,10 @@ import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExternalPaymentMethodsRepository @Inject constructor(private val errorReporter: ErrorReporter) {
-    fun getExternalPaymentMethodSpecs(externalPaymentMethodData: String?): List<ExternalPaymentMethodSpec> {
+    fun getExternalPaymentMethodSpecs(
+        externalPaymentMethodData: String?,
+        publishableKey: String,
+    ): List<ExternalPaymentMethodSpec> {
         if (externalPaymentMethodData.isNullOrEmpty()) {
             return emptyList()
         }
@@ -15,7 +18,8 @@ class ExternalPaymentMethodsRepository @Inject constructor(private val errorRepo
             .onFailure {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE,
-                    StripeException.create(it)
+                    StripeException.create(it),
+                    publishableKey = publishableKey,
                 )
             }
             .getOrElse { emptyList() }

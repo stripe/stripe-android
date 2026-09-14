@@ -115,7 +115,8 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         val error = IllegalArgumentException("Passive challenge params are null")
         errorReporter.report(
             ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL,
-            stripeException = StripeException.create(error)
+            stripeException = StripeException.create(error),
+            publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
         )
 
         return ConfirmationDefinition.Action.Fail(

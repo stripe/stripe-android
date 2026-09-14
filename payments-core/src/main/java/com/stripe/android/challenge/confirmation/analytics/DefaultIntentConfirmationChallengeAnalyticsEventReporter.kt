@@ -1,5 +1,6 @@
 package com.stripe.android.challenge.confirmation.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -11,6 +12,7 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : IntentConfirmationChallengeAnalyticsEventReporter {
 
     override fun onStart(captchaVendorName: String?) {
@@ -51,7 +53,8 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,
-                additionalParams = event.params
+                additionalParams = event.params,
+                publishableKey = apiConfiguration.publishableKey,
             )
         )
     }

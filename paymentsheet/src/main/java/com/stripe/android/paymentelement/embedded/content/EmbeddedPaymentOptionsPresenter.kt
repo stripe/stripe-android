@@ -21,14 +21,16 @@ internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
         val state = state.value
         if (state == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED,
+                publishableKey = state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
             )
             return
         }
         val launcher = sheetStateHolder.sheetLauncher
         if (launcher == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER,
+                publishableKey = state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
             )
             return
         }

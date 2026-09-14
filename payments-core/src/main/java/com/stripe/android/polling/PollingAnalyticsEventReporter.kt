@@ -7,7 +7,12 @@ import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PollingAnalyticsEventReporter {
-    fun onPollingTimedOut(paymentMethodType: String, lastKnownStatus: String?, timeLimitSeconds: Long)
+    fun onPollingTimedOut(
+        paymentMethodType: String,
+        lastKnownStatus: String?,
+        timeLimitSeconds: Long,
+        publishableKey: String,
+    )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -16,12 +21,18 @@ class DefaultPollingAnalyticsEventReporter @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory,
 ) : PollingAnalyticsEventReporter {
 
-    override fun onPollingTimedOut(paymentMethodType: String, lastKnownStatus: String?, timeLimitSeconds: Long) {
+    override fun onPollingTimedOut(
+        paymentMethodType: String,
+        lastKnownStatus: String?,
+        timeLimitSeconds: Long,
+        publishableKey: String,
+    ) {
         val event = PollingAnalyticsEvent.TimedOut(paymentMethodType, lastKnownStatus, timeLimitSeconds)
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,
                 additionalParams = event.params,
+                publishableKey = publishableKey,
             )
         )
     }

@@ -23,8 +23,11 @@ internal class WebLinkActivityContract @Inject internal constructor(
     private val errorReporter: ErrorReporter
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
+    private var publishableKey: String? = null
+
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
         val apiConfiguration = input.configuration.apiConfiguration
+        publishableKey = apiConfiguration.publishableKey
         val payload = PopupPayload.create(
             configuration = input.configuration,
             context = context,
@@ -114,7 +117,8 @@ internal class WebLinkActivityContract @Inject internal constructor(
         }.getOrElse { e ->
             errorReporter.report(
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI,
-                stripeException = FailedToParseLinkResultUriException(e)
+                stripeException = FailedToParseLinkResultUriException(e),
+                publishableKey = publishableKey,
             )
             null
         }

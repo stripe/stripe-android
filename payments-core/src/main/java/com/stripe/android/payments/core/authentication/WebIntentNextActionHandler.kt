@@ -118,7 +118,10 @@ internal class WebIntentNextActionHandler @Inject constructor(
         actionable: StripeIntent
     ): WebAuthParams {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthRedirect,
+                publishableKey = apiConfigProvider.get().publishableKey,
+            )
         )
         return if (actionable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
             WebAuthParams(
@@ -144,7 +147,10 @@ internal class WebIntentNextActionHandler @Inject constructor(
 
     private fun StripeIntent.NextActionData.AlipayRedirect.webAuthParams(): WebAuthParams {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthRedirect,
+                publishableKey = apiConfigProvider.get().publishableKey,
+            )
         )
 
         return WebAuthParams(

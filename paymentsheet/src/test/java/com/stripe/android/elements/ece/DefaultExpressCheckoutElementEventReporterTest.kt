@@ -156,7 +156,6 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null },
             ),

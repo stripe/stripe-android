@@ -153,6 +153,7 @@ internal class DefaultConfirmationHandler(
                         "Attempting to confirm intent for invalid confirmation option: $confirmationOption"
                     )
                 ),
+                publishableKey = arguments.paymentMethodMetadata.apiConfiguration.publishableKey,
             )
 
             onHandlerResult(

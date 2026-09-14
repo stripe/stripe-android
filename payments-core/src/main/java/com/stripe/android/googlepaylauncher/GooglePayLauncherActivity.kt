@@ -12,6 +12,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -99,7 +100,12 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                     val host = AuthActivityStarterHost.create(this)
                     viewModel.confirmStripeIntent(host, params)
                 } else {
-                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA,
+                        publishableKey = runCatching {
+                            PaymentConfiguration.getInstance(applicationContext).publishableKey
+                        }.getOrNull(),
+                    )
                     viewModel.updateResult(
                         GooglePayLauncher.Result.Failed(
                             RuntimeException(
@@ -126,7 +132,10 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                     additionalNonPiiParams = mapOf(
                         "status_message" to statusMessage,
                         "status_code" to statusCode,
-                    )
+                    ),
+                    publishableKey = runCatching {
+                        PaymentConfiguration.getInstance(applicationContext).publishableKey
+                    }.getOrNull(),
                 )
 
                 viewModel.updateResult(

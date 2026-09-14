@@ -37,7 +37,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         val confirmationArgs = operationCoordinator.tryBeginConfirmation {
             val state = stateHolder.state ?: run {
                 errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
+                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM,
+                    publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
                 )
                 return@tryBeginConfirmation null
             }
@@ -46,7 +47,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 expressButton = expressButton,
             ) ?: run {
                 errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+                    ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM,
+                    publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
                 )
                 null
             }

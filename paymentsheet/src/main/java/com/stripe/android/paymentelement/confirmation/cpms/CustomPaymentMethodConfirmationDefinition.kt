@@ -41,7 +41,8 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
         return if (confirmCustomPaymentMethodCallback == null) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.CUSTOM_PAYMENT_METHOD_CONFIRM_HANDLER_NULL,
-                additionalNonPiiParams = mapOf("custom_payment_method_type" to customPaymentMethodId)
+                additionalNonPiiParams = mapOf("custom_payment_method_type" to customPaymentMethodId),
+                publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
             )
 
             val error = IllegalStateException(
@@ -83,7 +84,8 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
             ErrorReporter.SuccessEvent.CUSTOM_PAYMENT_METHODS_LAUNCH_SUCCESS,
             additionalNonPiiParams = mapOf(
                 "custom_payment_method_type" to confirmationOption.customPaymentMethodType.id
-            )
+            ),
+            publishableKey = confirmationArgs.paymentMethodMetadata.apiConfiguration.publishableKey,
         )
 
         launcher.launch(

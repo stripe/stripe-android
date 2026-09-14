@@ -83,12 +83,16 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logStart() {
         fireAnalytics(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeStart)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds1ChallengeStart,
+                publishableKey = args.apiConfiguration.publishableKey,
+            )
         )
 
         fireAnalytics(
             paymentAnalyticsRequestFactory.createRequest(
-                PaymentAnalyticsEvent.AuthWithWebView
+                PaymentAnalyticsEvent.AuthWithWebView,
+                publishableKey = args.apiConfiguration.publishableKey,
             )
         )
     }
@@ -98,7 +102,10 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logError() {
         fireAnalytics(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeError)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds1ChallengeError,
+                publishableKey = args.apiConfiguration.publishableKey,
+            )
         )
     }
 
@@ -107,7 +114,10 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logComplete() {
         fireAnalytics(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeComplete)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds1ChallengeComplete,
+                publishableKey = args.apiConfiguration.publishableKey,
+            )
         )
     }
 
@@ -134,7 +144,6 @@ internal class PaymentAuthWebViewActivityViewModel(
                 DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
                 PaymentAnalyticsRequestFactory(
                     context = application,
-                    publishableKeyProvider = { args.apiConfiguration.publishableKey },
                     defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
                 )
             ) as T
