@@ -1,5 +1,13 @@
 package com.stripe.android.crypto.onramp.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -8,6 +16,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -178,30 +189,90 @@ internal class AdditionalKycScreenTest {
         ).assertIsDisplayed()
     }
 
+    @Test
+    fun `unavailable action closes instead of offering support`() = runScenario(
+        state = screenState(page = AdditionalKycCollectionPage.Unavailable),
+    ) {
+        composeRule.onNodeWithText("Contact support").assertDoesNotExist()
+        composeRule.onNodeWithText("Close").performClick()
+        assertThat(closed).isTrue()
+        assertThat(submitted).isFalse()
+    }
+
+    @Test
+    fun `large text introduction scrolls while continue remains visible`() = runScenario(
+        state = screenState(page = AdditionalKycCollectionPage.Context),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithText("Tell us about your source of funds")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        composeRule.onNodeWithText(
+            "We’re required to understand where your funds come from to enable spending over €1,000."
+        ).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Continue").assertIsDisplayed().performClick()
+        assertThat(continued).isTrue()
+    }
+
+    @Test
+    fun `large text submission message scrolls while done remains visible`() = runScenario(
+        state = screenState(page = AdditionalKycCollectionPage.Submitted),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithText("Submitted for review")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        composeRule.onNodeWithText(
+            "We’re reviewing your documents. We’ll let you know when verification is complete."
+        ).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Done").assertIsDisplayed()
+    }
+
+    @Test
+    fun `large text error message scrolls while close remains visible`() = runScenario(
+        state = screenState(page = AdditionalKycCollectionPage.Unavailable),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithText("Something went wrong")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        composeRule.onNodeWithText("Please try again later.").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Close").assertIsDisplayed()
+    }
+
     private fun runScenario(
         state: AdditionalKycScreenState,
+        fontScale: Float = 1f,
+        screenHeight: Dp = Dp.Infinity,
         block: TestScenario.() -> Unit,
     ) {
         val scenario = TestScenario()
         composeRule.setContent {
-            AdditionalKycScreen(
-                appearance = null,
-                state = state,
-                onClose = { scenario.closed = true },
-                onBack = { scenario.wentBack = true },
-                onQuestionAnswerChanged = { questionId, answer ->
-                    scenario.changedAnswer = questionId to answer
-                },
-                onDocumentSubtypeSelected = { slotIndex, subtypeId ->
-                    scenario.selectedSubtype = slotIndex to subtypeId
-                },
-                onChooseFile = { scenario.chosenFileSlot = it },
-                onRemoveFile = { scenario.removedFileSlot = it },
-                onAddDocuments = { scenario.addDocuments = true },
-                onEditDocuments = { scenario.editedDocumentSlot = it },
-                onSubmit = { scenario.submitted = true },
-                onContinue = { scenario.continued = true },
-            )
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
+                Box {
+                    Box(Modifier.heightIn(max = screenHeight)) {
+                        AdditionalKycScreen(
+                            appearance = null,
+                            state = state,
+                            onClose = { scenario.closed = true },
+                            onBack = { scenario.wentBack = true },
+                            onQuestionAnswerChanged = { questionId, answer ->
+                                scenario.changedAnswer = questionId to answer
+                            },
+                            onDocumentSubtypeSelected = { slotIndex, subtypeId ->
+                                scenario.selectedSubtype = slotIndex to subtypeId
+                            },
+                            onChooseFile = { scenario.chosenFileSlot = it },
+                            onRemoveFile = { scenario.removedFileSlot = it },
+                            onAddDocuments = { scenario.addDocuments = true },
+                            onEditDocuments = { scenario.editedDocumentSlot = it },
+                            onSubmit = { scenario.submitted = true },
+                            onContinue = { scenario.continued = true },
+                        )
+                    }
+                }
+            }
         }
         scenario.block()
     }

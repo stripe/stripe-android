@@ -5,12 +5,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,10 +46,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -95,7 +100,7 @@ internal fun AdditionalKycScreen(
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = LinkTheme.colors.surfacePrimary,
+                color = if (state.page.isMessage) messageSurfaceColor() else LinkTheme.colors.surfacePrimary,
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 elevation = 8.dp,
             ) {
@@ -285,56 +290,26 @@ private fun HeaderIcon(
 
 @Composable
 private fun ContextContent(requirementType: AdditionalKycRequirementType) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .background(LinkTheme.colors.surfaceSecondary, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(
-                    if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                        R.drawable.stripe_link_location
-                    } else {
-                        R.drawable.stripe_link_wallet
-                    }
-                ),
-                contentDescription = null,
-                tint = LinkTheme.colors.iconPrimary,
-                modifier = Modifier.size(28.dp),
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_of_address_context_title)
+    val isProofOfAddress = requirementType == AdditionalKycRequirementType.ProofOfAddress
+    MessageContent(
+        icon = if (isProofOfAddress) R.drawable.stripe_link_location else R.drawable.stripe_link_wallet,
+        title = stringResource(
+            if (isProofOfAddress) {
+                R.string.stripe_link_onramp_additional_kyc_proof_of_address_context_title
             } else {
-                stringResource(R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_title)
+                R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_title
             },
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_of_address_context_message)
+        ),
+        body = stringResource(
+            if (isProofOfAddress) {
+                R.string.stripe_link_onramp_additional_kyc_proof_of_address_context_message
             } else {
-                stringResource(R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_message)
+                R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_message
             },
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(72.dp))
-    }
+        ),
+        isError = false,
+        titleModifier = Modifier,
+    )
 }
 
 @Composable
@@ -922,84 +897,88 @@ private fun BulletList(items: List<String>) {
 
 @Composable
 private fun SubmittedContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .background(LinkTheme.colors.surfaceSecondary, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.stripe_link_clock),
-                contentDescription = null,
-                tint = LinkTheme.colors.iconPrimary,
-                modifier = Modifier.size(28.dp),
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_title),
-            modifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_review_message),
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(72.dp))
-    }
+    MessageContent(
+        icon = R.drawable.stripe_link_clock,
+        title = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_title),
+        body = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_review_message),
+        isError = false,
+        titleModifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
+    )
 }
 
 @Composable
 private fun UnavailableContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(
+    MessageContent(
+        icon = R.drawable.stripe_link_error_template,
+        title = stringResource(R.string.stripe_link_onramp_additional_kyc_something_went_wrong),
+        body = stringResource(R.string.stripe_link_onramp_additional_kyc_try_again_later),
+        isError = true,
+        titleModifier = Modifier,
+    )
+}
+
+@Composable
+private fun MessageContent(
+    icon: Int,
+    title: String,
+    body: String,
+    isError: Boolean,
+    titleModifier: Modifier,
+) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .size(64.dp)
-                .background(LinkTheme.colors.textCritical, CircleShape),
-            contentAlignment = Alignment.Center,
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                painter = painterResource(R.drawable.stripe_link_error_template),
-                contentDescription = null,
-                tint = LinkTheme.colors.iconWhite,
-                modifier = Modifier.size(28.dp),
+            Box(
+                modifier = Modifier.size(64.dp).background(
+                    color = if (isError) MessageErrorBackground else LinkTheme.colors.surfaceSecondary,
+                    shape = CircleShape,
+                ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = if (isError) Color.White else LinkTheme.colors.textPrimary,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = title,
+                modifier = titleModifier.semantics { heading() },
+                style = LinkTheme.typography.title.copy(fontSize = 28.sp, lineHeight = 36.sp),
+                color = LinkTheme.colors.textPrimary,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = body,
+                style = LinkTheme.typography.body.copy(fontSize = 18.sp, lineHeight = 28.sp),
+                color = if (LinkTheme.colors.isDark) MessageDarkSecondaryText else LinkTheme.colors.textTertiary,
+                textAlign = TextAlign.Center,
             )
         }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.stripe_link_onramp_additional_kyc_something_went_wrong),
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.stripe_link_onramp_additional_kyc_try_again_later),
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(72.dp))
     }
 }
+
+@Composable
+private fun messageSurfaceColor(): Color =
+    if (LinkTheme.colors.isDark) MessageDarkSurface else LinkTheme.colors.surfacePrimary
+
+private val AdditionalKycCollectionPage.isMessage: Boolean
+    get() = this in setOf(
+        AdditionalKycCollectionPage.Context,
+        AdditionalKycCollectionPage.Submitted,
+        AdditionalKycCollectionPage.Pending,
+        AdditionalKycCollectionPage.Unavailable,
+    )
 
 @Composable
 @Suppress("LongMethod")
@@ -1133,7 +1112,7 @@ private fun AdditionalKycPrimaryButton(
     val isSourceEditor = isDocumentEditor &&
         state.requirementType == AdditionalKycRequirementType.SourceOfFunds
     val label = when {
-        isUnavailable -> stringResource(R.string.stripe_link_onramp_additional_kyc_contact_support)
+        isUnavailable -> stringResource(R.string.stripe_link_onramp_additional_kyc_close)
         isSubmitted || isPending -> stringResource(R.string.stripe_link_onramp_additional_kyc_done)
         isSourceEditor -> stringResource(
             if (editingDocumentCount == 1) {
@@ -1172,7 +1151,12 @@ private fun AdditionalKycPrimaryButton(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(
+                start = 20.dp,
+                end = 20.dp,
+                top = if (state.page.isMessage) 20.dp else 12.dp,
+                bottom = if (state.page.isMessage) 16.dp else 12.dp,
+            )
     ) {
         PrimaryButton(
             label = label,
@@ -1351,3 +1335,9 @@ internal const val ADDITIONAL_KYC_SUBMIT_BUTTON_TAG = "AdditionalKycSubmitButton
 internal const val ADDITIONAL_KYC_VALIDATION_ERROR_TAG = "AdditionalKycValidationError"
 internal const val ADDITIONAL_KYC_SUBMISSION_ERROR_TAG = "AdditionalKycSubmissionError"
 internal const val ADDITIONAL_KYC_SUBMITTED_TITLE_TAG = "AdditionalKycSubmittedTitle"
+
+private val MessageErrorBackground = Color(0xFFE61947)
+
+private val MessageDarkSecondaryText = Color(0xFFD4D4D4)
+
+private val MessageDarkSurface = Color(0xFF1C1C1E)

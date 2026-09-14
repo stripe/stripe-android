@@ -42,8 +42,6 @@
   <string name="stripe_link_onramp_additional_kyc_criteria_value">Contains a balance or financial value</string>
   <!-- Common name requirement for source of funds documents -->
   <string name="stripe_link_onramp_additional_kyc_criteria_name">Document must include your name</string>
-  <!-- Button text on the generic additional KYC error screen -->
-  <string name="stripe_link_onramp_additional_kyc_contact_support">Contact support</string>
   <!-- Label above the proof of address document subtype control and subtype selector -->
   <string name="stripe_link_onramp_additional_kyc_document_type">Document type</string>
   <!-- Heading above accepted source of funds documents -->
