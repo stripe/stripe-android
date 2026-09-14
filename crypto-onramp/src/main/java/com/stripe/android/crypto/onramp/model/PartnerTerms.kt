@@ -55,6 +55,8 @@ internal data class PartnerTermsResponse(
 
 @Serializable
 internal data class ConfirmPartnerTermsRequest(
+    @SerialName("credentials")
+    val credentials: CryptoCustomerRequestParams.Credentials,
     @SerialName("declaration_id")
     val declarationId: String,
 )

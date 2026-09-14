@@ -65,7 +65,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
-import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -213,18 +212,14 @@ internal class CryptoApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         declarationId: String,
     ): Result<Unit> {
-        val params = ConfirmPartnerTermsRequest(declarationId = declarationId)
-        val request = ConsumerAuthenticatedRequest(
-            request = apiRequestFactory.createPost(
-                url = partnerTermsUrl,
-                options = buildRequestOptions(),
-                params = Json.encodeToJsonElement(params).jsonObject.toMap(),
-            ),
-            consumerSessionClientSecret = consumerSessionClientSecret,
+        val params = ConfirmPartnerTermsRequest(
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
+            declarationId = declarationId,
         )
 
-        return execute(
-            request = request,
+        return executePost(
+            url = partnerTermsUrl,
+            paramsJson = Json.encodeToJsonElement(params).jsonObject,
             responseSerializer = Unit.serializer(),
         )
     }
@@ -511,7 +506,7 @@ internal class CryptoApiRepository @Inject constructor(
         params: Map<String, *>,
         responseSerializer: KSerializer<Response>,
     ): Result<Response> {
-        val request = ConsumerAuthenticatedRequest(
+        val request = ConsumerAuthenticatedGetRequest(
             request = apiRequestFactory.createGet(
                 url = url,
                 options = buildRequestOptions(),
@@ -730,7 +725,7 @@ internal class CryptoApiRepository @Inject constructor(
     }
 }
 
-private class ConsumerAuthenticatedRequest(
+private class ConsumerAuthenticatedGetRequest(
     private val request: ApiRequest,
     consumerSessionClientSecret: String,
 ) : StripeRequest() {
@@ -741,11 +736,6 @@ private class ConsumerAuthenticatedRequest(
     override val headers: Map<String, String> = request.headers + mapOf(
         HEADER_CONSUMER_AUTH_TOKEN to consumerSessionClientSecret,
     )
-
-    override var postHeaders: Map<String, String>? = request.postHeaders
-    override val shouldCache: Boolean = request.shouldCache
-
-    override fun writePostBody(outputStream: OutputStream) = request.writePostBody(outputStream)
 
     override fun toString(): String = request.toString()
 
