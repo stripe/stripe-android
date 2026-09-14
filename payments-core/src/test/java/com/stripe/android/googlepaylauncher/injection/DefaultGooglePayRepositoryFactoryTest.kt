@@ -3,12 +3,15 @@ package com.stripe.android.googlepaylauncher.injection
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
@@ -34,17 +37,25 @@ internal class DefaultGooglePayRepositoryFactoryTest {
     )
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private var capturedRequest: IsReadyToPayRequest? = null
+    private val googlePayConfig = GooglePayConfig(
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        connectedAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+    )
+    private val requests = Turbine<IsReadyToPayRequest>()
 
     @Before
     fun setup() {
-        PaymentConfiguration.init(context, "pk_123")
+        PaymentConfiguration.init(
+            context = context,
+            publishableKey = "pk_payment_configuration",
+            stripeAccountId = "acct_payment_configuration",
+        )
         GooglePayRepository.googlePayAvailabilityClientFactory =
             object : GooglePayAvailabilityClient.Factory {
                 override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
                     return object : GooglePayAvailabilityClient {
                         override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
-                            capturedRequest = request
+                            requests.add(request)
                             return true
                         }
                     }
@@ -54,24 +65,44 @@ internal class DefaultGooglePayRepositoryFactoryTest {
 
     @After
     fun tearDown() {
+        PaymentConfiguration.clearInstance()
         GooglePayRepository.resetFactory()
-        capturedRequest = null
     }
 
     @Test
     fun `when allowNoExistingPaymentMethodForGooglePay is disabled, existingPaymentMethodRequired should be true`() =
-        runScenario(allowNoExistingPaymentMethodForGooglePay = false) {
-            assertThat(existingPaymentMethodRequired()).isTrue()
+        runScenario(allowNoExistingPaymentMethodForGooglePay = false, googlePayConfig = googlePayConfig) {
+            val request = readyRequest()
+            assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()
         }
 
     @Test
     fun `when allowNoExistingPaymentMethodForGooglePay is enabled, existingPaymentMethodRequired should be false`() =
-        runScenario(allowNoExistingPaymentMethodForGooglePay = true) {
-            assertThat(existingPaymentMethodRequired()).isFalse()
+        runScenario(allowNoExistingPaymentMethodForGooglePay = true, googlePayConfig = googlePayConfig) {
+            assertThat(readyRequest().getBoolean("existingPaymentMethodRequired")).isFalse()
+        }
+
+    @Test
+    fun `uses credentials from GooglePayConfig constructed with PaymentConfiguration`() =
+        runScenario(allowNoExistingPaymentMethodForGooglePay = false, googlePayConfig = GooglePayConfig(context)) {
+            val request = readyRequest()
+            assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()
+            assertThat(tokenizationPublishableKey(request))
+                .isEqualTo("pk_payment_configuration/acct_payment_configuration")
+        }
+
+    @Test
+    fun `uses credentials from GooglePayConfig constructed with explicit credentials`() =
+        runScenario(allowNoExistingPaymentMethodForGooglePay = false, googlePayConfig = googlePayConfig) {
+            val request = readyRequest()
+            assertThat(request.getBoolean("existingPaymentMethodRequired")).isTrue()
+            assertThat(tokenizationPublishableKey(request))
+                .isEqualTo("${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}/${ApiKeyFixtures.FAKE_STRIPE_ACCOUNT}")
         }
 
     private fun runScenario(
         allowNoExistingPaymentMethodForGooglePay: Boolean,
+        googlePayConfig: GooglePayConfig,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         allowNoExistingPaymentMethodForGooglePayRule.setEnabled(allowNoExistingPaymentMethodForGooglePay)
@@ -85,25 +116,35 @@ internal class DefaultGooglePayRepositoryFactoryTest {
             environment = GooglePayEnvironment.Test,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            googlePayConfig = googlePayConfig,
         )
 
         Scenario(
             repository = repository,
         ).block()
+
+        requests.ensureAllEventsConsumed()
     }
 
     private inner class Scenario(
         private val repository: GooglePayRepository,
     ) {
-        suspend fun existingPaymentMethodRequired(): Boolean {
+        suspend fun readyRequest(): JSONObject {
             repository.isReady().test {
                 assertThat(awaitItem()).isTrue()
                 awaitComplete()
             }
 
-            assertThat(capturedRequest).isNotNull()
-            return JSONObject(capturedRequest!!.toJson())
-                .getBoolean("existingPaymentMethodRequired")
+            return JSONObject(requests.awaitItem().toJson())
+        }
+
+        fun tokenizationPublishableKey(request: JSONObject): String {
+            return request
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("tokenizationSpecification")
+                .getJSONObject("parameters")
+                .getString("stripe:publishableKey")
         }
     }
 }

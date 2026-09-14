@@ -77,7 +77,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -109,7 +109,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -141,7 +141,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -175,10 +175,12 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                    allowsDelayedPaymentMethods = true,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        allowsDelayedPaymentMethods = true,
+                    )
                 ),
             )
         }
@@ -216,7 +218,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -249,7 +251,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -284,7 +286,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -328,7 +330,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
@@ -347,7 +349,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -381,10 +383,12 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                    preferredNetworks = listOf(CardBrand.CartesBancaires)
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        preferredNetworks = listOf(CardBrand.CartesBancaires)
+                    )
                 ),
             )
         }
@@ -416,7 +420,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
@@ -437,7 +441,7 @@ internal class PaymentSheetTest(
                 testContext.presentPaymentSheet {
                     presentWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = defaultConfiguration,
+                        configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                     )
                 }
 
@@ -495,13 +499,15 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -561,19 +567,21 @@ internal class PaymentSheetTest(
                     ),
                     requireCvcRecollection = true,
                 ),
-                configuration = defaultConfiguration.newBuilder()
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                            id = "cus_1",
-                            clientSecret = "cuss_654321",
+                configuration = apiConfigurationTestType.applyTo(
+                    defaultConfiguration.newBuilder()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                                id = "cus_1",
+                                clientSecret = "cuss_654321",
+                            )
                         )
-                    )
-                    .link(
-                        PaymentSheet.LinkConfiguration.Builder()
-                            .display(PaymentSheet.LinkConfiguration.Display.Never)
-                            .build()
-                    )
-                    .build(),
+                        .link(
+                            PaymentSheet.LinkConfiguration.Builder()
+                                .display(PaymentSheet.LinkConfiguration.Display.Never)
+                                .build()
+                        )
+                        .build()
+                ),
             )
         }
 
@@ -631,18 +639,20 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -697,18 +707,20 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -759,18 +771,20 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -801,7 +815,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -848,13 +862,15 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = TestApiKeys.EPHEMERAL,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -905,7 +921,7 @@ internal class PaymentSheetTest(
                         setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                     )
                 ),
-                configuration = configurationWithTermsDisplayNever,
+                configuration = apiConfigurationTestType.applyTo(configurationWithTermsDisplayNever),
             )
         }
 
@@ -927,7 +943,7 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
@@ -961,7 +977,7 @@ internal class PaymentSheetTest(
                     ),
                     onBehalfOf = oboMerchantID
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -1004,17 +1020,19 @@ internal class PaymentSheetTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "uk_12345",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = "uk_12345",
+                            )
+                        )
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
