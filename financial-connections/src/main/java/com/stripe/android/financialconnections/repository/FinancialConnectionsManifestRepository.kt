@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -190,7 +191,8 @@ internal interface FinancialConnectionsManifestRepository {
             provideApiRequestOptions: ProvideApiRequestOptions,
             logger: Logger,
             locale: Locale,
-            initialSync: SynchronizeSessionResponse?
+            initialSync: SynchronizeSessionResponse?,
+            eventContext: FinancialConnectionsEventContext
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
                 requestExecutor,
@@ -198,7 +200,8 @@ internal interface FinancialConnectionsManifestRepository {
                 provideApiRequestOptions,
                 locale,
                 logger,
-                initialSync
+                initialSync,
+                eventContext
             )
     }
 }
@@ -209,7 +212,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
     val provideApiRequestOptions: ProvideApiRequestOptions,
     val locale: Locale,
     val logger: Logger,
-    initialSync: SynchronizeSessionResponse?
+    initialSync: SynchronizeSessionResponse?,
+    private val eventContext: FinancialConnectionsEventContext
 ) : FinancialConnectionsManifestRepository {
 
     /**
@@ -220,9 +224,14 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     private val cachedSynchronizeSessionResponseFlow = MutableStateFlow(initialSync)
 
+    init {
+        initialSync?.manifest?.let(eventContext::update)
+    }
+
     private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse?
         get() = cachedSynchronizeSessionResponseFlow.value
         set(value) {
+            value?.manifest?.let(eventContext::update)
             cachedSynchronizeSessionResponseFlow.value = value
         }
 
@@ -275,7 +284,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
             ).filterNotNullValues()
         ),
         SynchronizeSessionResponse.serializer()
-    ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
+    ).also {
+        require(it.manifest.id.isNotBlank()) { "Financial Connections session ID is missing" }
+        updateCachedSynchronizeSessionResponse("get/fetch", it)
+    }
 
     override suspend fun markConsentAcquired(
         clientSecret: String

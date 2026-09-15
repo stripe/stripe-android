@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -33,6 +34,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
 
     private val mockRequestExecutor = mock<FinancialConnectionsRequestExecutor>()
     private val apiRequestFactory = mock<ApiRequest.Factory>()
+    private val eventContext = FinancialConnectionsEventContext(null)
 
     private fun buildRepository(
         initialSync: SynchronizeSessionResponse? = null
@@ -46,7 +48,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         },
         logger = Logger.noop(),
         initialSync = initialSync,
-        locale = Locale.US
+        locale = Locale.US,
+        eventContext = eventContext
     )
 
     @Test
@@ -79,6 +82,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
+            assertThat(eventContext.manifest?.id).isEqualTo(ApiKeyFixtures.syncResponse().manifest.id)
         }
 
     @Test
@@ -97,6 +101,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                 )
 
             assertThat(returnedManifest).isEqualTo(initialSync)
+            assertThat(eventContext.manifest).isEqualTo(initialSync.manifest)
             verifyNoInteractions(mockRequestExecutor)
         }
 

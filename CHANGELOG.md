@@ -6,6 +6,7 @@ NEXT_VERSION_BUMP: PATCH
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 * [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+* [ADDED] Added `financialConnectionsSessionId` to Financial Connections events. Events are emitted after the session ID is available.
 
 ## 23.20.0 - 2026-09-21
 
