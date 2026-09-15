@@ -21,7 +21,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
-internal fun interface AddressElementPrimaryButtonAction {
+internal interface AddressElementPrimaryButtonAction {
     suspend operator fun invoke(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result>
