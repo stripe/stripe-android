@@ -462,7 +462,6 @@ class CryptoApiRepositoryTest {
             """
                 {
                     "required": true,
-                    "partner": "swapped",
                     "declaration": {
                         "id": "copt_decl_123",
                         "type": "transaction_terms",
@@ -490,7 +489,6 @@ class CryptoApiRepositoryTest {
         assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
             .isEqualTo("test-secret")
         val terms = result.getOrThrow() as PartnerTerms.Required
-        assertThat(terms.partner).isEqualTo("swapped")
         assertThat(terms.declaration.id).isEqualTo("copt_decl_123")
         assertThat(terms.declaration.type).isEqualTo(PartnerDeclarationType.TransactionTerms)
         assertThat(terms.declaration.text).isEqualTo("Please accept these terms.")

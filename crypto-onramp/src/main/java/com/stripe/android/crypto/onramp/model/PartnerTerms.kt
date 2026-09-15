@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 internal sealed interface PartnerTerms {
     data class Required(
-        val partner: String,
         val declaration: Declaration,
     ) : PartnerTerms
 
@@ -38,7 +37,6 @@ internal data class RetrievePartnerTermsRequest(
 @Serializable
 internal data class PartnerTermsResponse(
     val required: Boolean,
-    val partner: String? = null,
     val declaration: PartnerTerms.Declaration? = null,
 ) {
     fun toPartnerTerms(): PartnerTerms {
@@ -47,7 +45,6 @@ internal data class PartnerTermsResponse(
         }
 
         return PartnerTerms.Required(
-            partner = requireNotNull(partner),
             declaration = requireNotNull(declaration),
         )
     }

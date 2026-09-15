@@ -378,7 +378,6 @@ class OnrampPresenterCoordinatorTest {
         whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
             OnrampStartPartnerTermsResult.PresentationRequired(
                 terms = PartnerTerms.Required(
-                    partner = "swapped",
                     declaration = PartnerTerms.Declaration(
                         id = "copt_decl_123",
                         type = declarationType,
@@ -414,7 +413,6 @@ class OnrampPresenterCoordinatorTest {
         whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
             OnrampStartPartnerTermsResult.PresentationRequired(
                 terms = PartnerTerms.Required(
-                    partner = "swapped",
                     declaration = PartnerTerms.Declaration(
                         id = "copt_decl_123",
                         type = declarationType,
@@ -444,7 +442,6 @@ class OnrampPresenterCoordinatorTest {
         whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
             OnrampStartPartnerTermsResult.PresentationRequired(
                 terms = PartnerTerms.Required(
-                    partner = "swapped",
                     declaration = PartnerTerms.Declaration(
                         id = "copt_decl_456",
                         type = declarationType,
@@ -480,7 +477,6 @@ class OnrampPresenterCoordinatorTest {
         whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
             OnrampStartPartnerTermsResult.PresentationRequired(
                 terms = PartnerTerms.Required(
-                    partner = "swapped",
                     declaration = PartnerTerms.Declaration(
                         id = "copt_decl_456",
                         type = declarationType,

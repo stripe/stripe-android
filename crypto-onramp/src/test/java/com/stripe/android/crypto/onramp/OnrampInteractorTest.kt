@@ -1027,7 +1027,6 @@ class OnrampInteractorTest {
     fun testStartTermsAndConditionsRequiresPresentation() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val termsAndConditions = PartnerTerms.Required(
-            partner = "swapped",
             declaration = PartnerTerms.Declaration(
                 id = "copt_decl_123",
                 type = PartnerDeclarationType.TransactionTerms,
@@ -1083,7 +1082,6 @@ class OnrampInteractorTest {
     fun testStartTermsOfServiceRequiresPresentation() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val termsOfService = PartnerTerms.Required(
-            partner = "swapped",
             declaration = PartnerTerms.Declaration(
                 id = "copt_decl_456",
                 type = PartnerDeclarationType.TermsOfService,
