@@ -217,9 +217,17 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton ignores a second click after first submission completes`() = runTest {
-        val primaryButtonAction = RecordingPrimaryButtonAction { addressDetails ->
-            Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails))
+    fun `clickPrimaryButton accepts a second click when first submission fails`() = runTest {
+        val results = ArrayDeque<Result<AddressElementActivityContract.Result>>(
+            listOf(
+                Result.failure(IllegalStateException("first submission failed")),
+                Result.success(
+                    AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+                ),
+            )
+        )
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            results.removeFirst()
         }
         val eventReporter = FakeAddressLauncherEventReporter()
         val viewModel = createViewModel(
@@ -229,18 +237,21 @@ class InputAddressViewModelTest {
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
-        assertThat(viewModel.formEnabled.value).isFalse()
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
-        val firstCompletion = eventReporter.completedCalls.awaitItem()
-        assertThat(firstCompletion.country).isEqualTo("US")
+        assertThat(viewModel.formEnabled.value).isTrue()
+        eventReporter.completedCalls.expectNoEvents()
+        assertThat(resultStateHolder.result.value).isNull()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
         assertThat(resultStateHolder.result.value).isEqualTo(
             AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
         )
 
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
         primaryButtonAction.calls.expectNoEvents()
-        eventReporter.completedCalls.expectNoEvents()
         primaryButtonAction.validate()
         eventReporter.validate()
     }
