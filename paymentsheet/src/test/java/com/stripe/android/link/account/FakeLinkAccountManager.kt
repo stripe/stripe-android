@@ -42,6 +42,14 @@ internal open class FakeLinkAccountManager(
         )
     )
     var signupResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var restoreConsumerSessionResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+
+    data class RestoreConsumerSessionCall(
+        val consumerSessionClientSecret: String,
+        val consumerPublishableKey: String?,
+    )
+
+    val restoreConsumerSessionTurbine = Turbine<RestoreConsumerSessionCall>()
 
     data class SignUpCall(
         val email: String,
@@ -133,7 +141,7 @@ internal open class FakeLinkAccountManager(
     private val lookupByLinkAuthTokenTurbine = Turbine<LookupCallByLinkAuthToken>()
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
-    private val startVerificationTurbine = Turbine<Boolean>()
+    val startVerificationTurbine = Turbine<Boolean>()
     private val createPaymentDetailsFromPaymentMethodTurbine = Turbine<CreatePaymentDetailsFromPaymentMethodCall>()
 
     internal data class CreatePaymentDetailsFromPaymentMethodCall(
@@ -206,6 +214,19 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
         return refreshConsumerResult
+    }
+
+    override suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<LinkAccount> {
+        restoreConsumerSessionTurbine.add(
+            RestoreConsumerSessionCall(
+                consumerSessionClientSecret = consumerSessionClientSecret,
+                consumerPublishableKey = consumerPublishableKey,
+            )
+        )
+        return restoreConsumerSessionResult
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
@@ -343,6 +364,7 @@ internal open class FakeLinkAccountManager(
     fun ensureAllEventsConsumed() {
         createPaymentDetailsFromPaymentMethodTurbine.ensureAllEventsConsumed()
         lookupByAuthIntentTurbine.ensureAllEventsConsumed()
+        restoreConsumerSessionTurbine.ensureAllEventsConsumed()
     }
 
     private fun ConsumerPaymentDetails.toLinkPaymentMethod(): List<LinkPaymentMethod.ConsumerPaymentDetails> =

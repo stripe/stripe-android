@@ -201,7 +201,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testRegisterLinkUserIsSuccessful() = runTest {
-        whenever(linkController.registerConsumer(any(), any(), any(), any())).thenReturn(
+        whenever(linkController.registerConsumer(any(), any(), any(), any(), any())).thenReturn(
             LinkController.RegisterConsumerResult.Success
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
@@ -220,7 +220,13 @@ class OnrampInteractorTest {
             )
         )
         assert(result is OnrampRegisterLinkUserResult.Completed)
-        verify(linkController).registerConsumer("email", "phone", "US", "Test User")
+        verify(linkController).registerConsumer(
+            "email",
+            "phone",
+            "US",
+            "Test User",
+            LinkController.RegisterConsumerConsentAction.Implied,
+        )
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkRegistrationCompleted)
     }
@@ -1915,6 +1921,7 @@ class OnrampInteractorTest {
         sessionState = LinkController.SessionState.LoggedIn,
         consumerSessionClientSecret = "secret_123",
         linkSessionKey = "lsk_123",
+        consumerPublishableKey = "pk_consumer_123",
     )
 
     private fun mockLinkAccountWithoutSecret(): LinkController.LinkAccount = LinkController.LinkAccount(
@@ -1923,6 +1930,7 @@ class OnrampInteractorTest {
         sessionState = LinkController.SessionState.LoggedIn,
         consumerSessionClientSecret = null,
         linkSessionKey = null,
+        consumerPublishableKey = null,
     )
 
     private fun createConfigurationState(

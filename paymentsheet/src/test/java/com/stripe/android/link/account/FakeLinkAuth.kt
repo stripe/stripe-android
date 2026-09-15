@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import app.cash.turbine.Turbine
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSessionLookup
@@ -73,10 +74,18 @@ internal class FakeLinkAuth : LinkAuth {
         return signupResult
     }
 
+    val refreshConsumerCalls = Turbine<RefreshConsumerCall>()
+
+    data class RefreshConsumerCall(
+        val consumerSessionClientSecret: String,
+        val supportedVerificationTypes: List<String>?
+    )
+
     override suspend fun refreshConsumer(
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionRefresh> {
+        refreshConsumerCalls.add(RefreshConsumerCall(consumerSessionClientSecret, supportedVerificationTypes))
         return refreshConsumerResult
     }
 

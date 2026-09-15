@@ -11,4 +11,5 @@ internal enum class SignUpConsentAction {
     DefaultOptInWithNonePrefilled,
     SignUpOptInMobileChecked,
     SignUpOptInMobilePrechecked,
+    EnteredPhoneNumberEmailClickedSaveWithLinkIdentity,
 }

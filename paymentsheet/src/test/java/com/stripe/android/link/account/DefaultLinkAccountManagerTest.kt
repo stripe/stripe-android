@@ -1251,6 +1251,49 @@ class DefaultLinkAccountManagerTest {
         assertThat(account?.linkBrand).isNull()
     }
 
+    @Test
+    fun `restoreConsumerSession() refreshes the session and sets it as the account with the given key`() =
+        runSuspendTest {
+            val linkAuth = FakeLinkAuth()
+            val accountManager = accountManager(linkAuth = linkAuth)
+
+            val result = accountManager.restoreConsumerSession(
+                consumerSessionClientSecret = "secret_123",
+                consumerPublishableKey = "pk_consumer_123",
+            )
+
+            assertThat(linkAuth.refreshConsumerCalls.awaitItem().consumerSessionClientSecret)
+                .isEqualTo("secret_123")
+            assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.CONSUMER_SESSION.emailAddress)
+            val account = accountManager.linkAccountInfo.value.account
+            assertThat(account?.email).isEqualTo(TestFactory.CONSUMER_SESSION.emailAddress)
+            assertThat(account?.consumerPublishableKey).isEqualTo("pk_consumer_123")
+            linkAuth.refreshConsumerCalls.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `restoreConsumerSession() on refresh failure reports it, returns failure and sets no account`() =
+        runSuspendTest {
+            val linkAuth = FakeLinkAuth()
+            val linkEventsReporter = AccountManagerEventsReporter()
+            val error = IllegalStateException("Session expired")
+            linkAuth.refreshConsumerResult = Result.failure(error)
+            val accountManager = accountManager(linkAuth = linkAuth, linkEventsReporter = linkEventsReporter)
+
+            val result = accountManager.restoreConsumerSession(
+                consumerSessionClientSecret = "secret_123",
+                consumerPublishableKey = null,
+            )
+
+            assertThat(linkAuth.refreshConsumerCalls.awaitItem().consumerSessionClientSecret)
+                .isEqualTo("secret_123")
+            assertThat(linkEventsReporter.awaitRefreshFailureCall()).isEqualTo(error)
+            assertThat(result.exceptionOrNull()).isEqualTo(error)
+            assertThat(accountManager.linkAccountInfo.value.account).isNull()
+            linkAuth.refreshConsumerCalls.ensureAllEventsConsumed()
+            linkEventsReporter.ensureAllEventsConsumed()
+        }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()
     }
@@ -1339,11 +1382,20 @@ class DefaultLinkAccountManagerTest {
 
 private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
     private val lookupFailureTurbine = Turbine<Throwable>()
+    private val refreshFailureTurbine = Turbine<Throwable>()
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) = Unit
     override fun onSignupCompleted(isInline: Boolean) = Unit
     override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
     override fun onAccountLookupFailure(error: Throwable) {
         lookupFailureTurbine.add(error)
+    }
+
+    override fun onAccountRefreshFailure(error: Throwable) {
+        refreshFailureTurbine.add(error)
+    }
+
+    suspend fun awaitRefreshFailureCall(): Throwable {
+        return refreshFailureTurbine.awaitItem()
     }
 
     override fun onAccountLookupComplete() = Unit
@@ -1359,5 +1411,6 @@ private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
 
     fun ensureAllEventsConsumed() {
         lookupFailureTurbine.ensureAllEventsConsumed()
+        refreshFailureTurbine.ensureAllEventsConsumed()
     }
 }
