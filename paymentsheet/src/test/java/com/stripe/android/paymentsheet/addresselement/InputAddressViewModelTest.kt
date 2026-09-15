@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -17,6 +19,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -214,19 +217,74 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton ignores a second click when form is disabled`() = runTest {
+    fun `clickPrimaryButton ignores a second click after first submission completes`() = runTest {
+        val primaryButtonAction = RecordingPrimaryButtonAction { addressDetails ->
+            Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails))
+        }
         val eventReporter = FakeAddressLauncherEventReporter()
-        val viewModel = createViewModel(eventReporter = eventReporter)
+        val viewModel = createViewModel(
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+        )
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         val firstCompletion = eventReporter.completedCalls.awaitItem()
         assertThat(firstCompletion.country).isEqualTo("US")
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
+        primaryButtonAction.calls.expectNoEvents()
         eventReporter.completedCalls.expectNoEvents()
+        primaryButtonAction.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `clickPrimaryButton ignores a second click while first submission is in flight`() = runTest {
+        val primaryButtonResult = CompletableDeferred<Result<AddressElementActivityContract.Result>>()
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            primaryButtonResult.await()
+        }
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = createViewModel(
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+        )
+        val controller = (
+            (viewModel.addressFormController.elements.single() as SectionElement).fields.single()
+                as AutocompleteAddressElement
+            ).sectionFieldErrorController()
+
+        controller.validationMessage.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(viewModel.formEnabled.value).isFalse()
+
+            viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = true)
+
+            primaryButtonAction.calls.expectNoEvents()
+            eventReporter.completedCalls.expectNoEvents()
+            expectNoEvents()
+            assertThat(resultStateHolder.result.value).isNull()
+
+            primaryButtonResult.complete(
+                Result.success(
+                    AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+                )
+            )
+            eventReporter.completedCalls.awaitItem()
+        }
+
+        primaryButtonAction.validate()
         eventReporter.validate()
     }
 
@@ -1157,5 +1215,23 @@ private class FakeAddressElementPrimaryButtonAction(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result> {
         return Result.success(action(addressDetails))
+    }
+}
+
+private class RecordingPrimaryButtonAction(
+    private val action: suspend (AddressDetails) -> Result<AddressElementActivityContract.Result>,
+) : AddressElementPrimaryButtonAction {
+    private val _calls = Turbine<AddressDetails>()
+    val calls: ReceiveTurbine<AddressDetails> = _calls
+
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        _calls.add(addressDetails)
+        return action(addressDetails)
+    }
+
+    fun validate() {
+        _calls.ensureAllEventsConsumed()
     }
 }
