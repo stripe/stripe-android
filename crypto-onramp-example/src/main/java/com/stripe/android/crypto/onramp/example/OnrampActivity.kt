@@ -40,7 +40,8 @@ internal class OnrampActivity : ComponentActivity() {
                 onSubmitAddress = { address ->
                     onrampPresenter.verifyKycInfo(address)
                 },
-                onVerifyKyc = { onrampPresenter.verifyKycInfo() }
+                onVerifyKyc = { onrampPresenter.verifyKycInfo() },
+                onFulfillAdditionalKycRequirement = onrampPresenter::fulfillAdditionalKycRequirement,
             )
         }
     }

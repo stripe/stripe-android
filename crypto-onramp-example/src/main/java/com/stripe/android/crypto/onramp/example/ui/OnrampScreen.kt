@@ -33,6 +33,7 @@ internal fun OnrampScreen(
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onVerifyKyc: () -> Unit,
+    onFulfillAdditionalKycRequirement: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -98,6 +99,7 @@ internal fun OnrampScreen(
                     onWalletOwnershipSignatureChange = viewModel::updateWalletOwnershipSignatureInput,
                     onCollectKyc = viewModel::collectKycInfo,
                     onVerifyKyc = onVerifyKyc,
+                    onFulfillAdditionalKycRequirement = onFulfillAdditionalKycRequirement,
                     onStartVerification = onStartVerification,
                     onShowUserAttestation = onShowUserAttestation,
                     onCollectPayment = onCollectPayment,
