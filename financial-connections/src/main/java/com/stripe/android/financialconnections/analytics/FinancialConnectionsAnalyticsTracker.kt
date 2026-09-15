@@ -1,13 +1,10 @@
 package com.stripe.android.financialconnections.analytics
 
-import android.content.Context
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.networking.AnalyticsRequestV2Executor
-import com.stripe.android.core.networking.AnalyticsRequestV2Factory
-import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter.Companion.EVENTS_TO_EMIT
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.exception.AppInitializationError
@@ -16,13 +13,13 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 /**
  * Event tracker for Financial Connections.
  */
 internal interface FinancialConnectionsAnalyticsTracker {
     fun track(event: FinancialConnectionsAnalyticsEvent)
+    fun emitEvent(name: Name, metadata: Metadata)
 }
 
 internal fun FinancialConnectionsAnalyticsTracker.logError(
@@ -52,7 +49,7 @@ internal fun FinancialConnectionsAnalyticsTracker.logError(
  *
  * @see [com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter]
  */
-private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
+private fun FinancialConnectionsAnalyticsTracker.emitPublicClientErrorEventIfNeeded(error: Throwable) {
     val isStripeErrorWithEvents = (error as? StripeException)
         ?.stripeError?.extraFields
         ?.get(EVENTS_TO_EMIT)
@@ -62,7 +59,7 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
     if (isStripeErrorWithEvents.not()) {
         when (error) {
             // client-specific error: flow was launched without a browser installed.
-            is AppInitializationError -> FinancialConnections.emitEvent(
+            is AppInitializationError -> emitEvent(
                 name = FinancialConnectionsEvent.Name.ERROR,
                 metadata = FinancialConnectionsEvent.Metadata(
                     errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
@@ -70,7 +67,7 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
             )
 
             // any non-backend error should be emitted as an unexpected error.
-            else -> FinancialConnections.emitEvent(
+            else -> emitEvent(
                 name = FinancialConnectionsEvent.Name.ERROR,
                 metadata = FinancialConnectionsEvent.Metadata(
                     errorCode = ErrorCode.UNEXPECTED_ERROR
@@ -82,46 +79,19 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
     private val getOrFetchSync: GetOrFetchSync,
-    private val configuration: FinancialConnectionsSheetConfiguration,
-    private val locale: Locale,
-    context: Context,
-    private val requestExecutor: AnalyticsRequestV2Executor,
+    private val analyticsSender: FinancialConnectionsAnalyticsEventSender,
+    private val eventEmitter: FinancialConnectionsEventEmitter,
 ) : FinancialConnectionsAnalyticsTracker {
-
-    private val requestFactory = AnalyticsRequestV2Factory(
-        context = context,
-        clientId = CLIENT_ID,
-        origin = ORIGIN
-    )
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun track(event: FinancialConnectionsAnalyticsEvent) {
         GlobalScope.launch(Dispatchers.IO) {
-            val request = requestFactory.createRequest(
-                eventName = event.eventName,
-                additionalParams = event.params.orEmpty() + commonParams(),
-                includeSDKParams = true,
-            )
-            requestExecutor.enqueue(request)
+            analyticsSender.send(event, getOrFetchSync().manifest)
         }
     }
 
-    private suspend fun commonParams(): Map<String, String?> {
-        val manifest = getOrFetchSync().manifest
-        return mapOf(
-            "las_id" to manifest.id,
-            "key" to configuration.publishableKey,
-            "stripe_account" to configuration.stripeAccountId,
-            "navigator_language" to locale.toLanguageTag(),
-            "is_webview" to false.toString(),
-            "livemode" to manifest.livemode.toString(),
-            "product" to manifest.product.value,
-            "is_stripe_direct" to manifest.isStripeDirect.toString(),
-            "single_account" to manifest.singleAccount.toString(),
-            "allow_manual_entry" to manifest.allowManualEntry.toString(),
-            "app_verification_enabled" to manifest.appVerificationEnabled.toString(),
-            "account_holder_id" to manifest.accountholderToken,
-        )
+    override fun emitEvent(name: Name, metadata: Metadata) {
+        eventEmitter.emit(name, metadata)
     }
 
     internal companion object {

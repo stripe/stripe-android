@@ -8,6 +8,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import com.stripe.attestation.AttestationError
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 
 /**
  * Event definitions for Financial Connections.
@@ -19,6 +22,23 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
 ) {
 
     val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
+
+    class ExternalOnEventEmitted(
+        event: FinancialConnectionsEvent
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "external_on_event.emitted",
+        params = mapOf(
+            "event_payload" to buildJsonObject {
+                put("name", event.name.value)
+                put("financialConnectionsSessionId", event.financialConnectionsSessionId)
+                putJsonObject("metadata") {
+                    put("institutionName", event.metadata.institutionName)
+                    put("manualEntry", event.metadata.manualEntry)
+                    put("errorCode", event.metadata.errorCode?.value)
+                }
+            }.toString()
+        )
+    )
 
     class PaneLaunched(
         pane: Pane,
