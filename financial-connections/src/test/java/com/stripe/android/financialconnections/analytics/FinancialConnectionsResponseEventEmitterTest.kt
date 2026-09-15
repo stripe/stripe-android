@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.FinancialConnections
@@ -56,6 +57,40 @@ class FinancialConnectionsResponseEventEmitterTest {
                 name = Name.ERROR,
                 metadata = Metadata(
                     errorCode = ErrorCode.INSTITUTION_UNAVAILABLE_PLANNED
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `emitIfPresent - no_eligible_accounts error event`() {
+        val response = StripeResponse(
+            code = 400,
+            body = """
+            {
+                "error": {
+                    "extra_fields": {
+                        "events_to_emit": [
+                            {
+                                "type": "error",
+                                "error": {
+                                    "error_code": "no_eligible_accounts"
+                                }
+                            }
+                         ]
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        emitter.emitIfPresent(response)
+
+        assertThat(liveEvents).containsExactly(
+            FinancialConnectionsEvent(
+                name = Name.ERROR,
+                metadata = Metadata(
+                    errorCode = ErrorCode.NO_ELIGIBLE_ACCOUNTS
                 )
             )
         )
