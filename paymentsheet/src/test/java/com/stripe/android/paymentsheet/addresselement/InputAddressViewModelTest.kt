@@ -40,6 +40,9 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
+        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
+            AddressElementActivityContract.Result.StandaloneSucceeded(it)
+        },
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
@@ -54,6 +57,7 @@ class InputAddressViewModelTest {
             resultStateHolder,
             eventReporter,
             placesClient = null,
+            primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1004,6 +1008,9 @@ class InputAddressViewModelTest {
     @Test
     fun `checkout shipping save emits checkout success without performing additional work`() {
         val viewModel = createViewModel(
+            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
+                AddressElementActivityContract.Result.CheckoutShippingSucceeded(it)
+            },
             argsFactory = { config ->
                 AddressElementActivityContract.Args.CheckoutShipping(
                     publishableKey = "pk_123",
@@ -1049,6 +1056,9 @@ class InputAddressViewModelTest {
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
+            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
+                AddressElementActivityContract.Result.StandaloneSucceeded(it)
+            },
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1118,5 +1128,15 @@ class InputAddressViewModelTest {
             FormFieldId.PostalCode to FormFieldEntry("94103", true),
             FormFieldId.State to FormFieldEntry("CA", true),
         )
+    }
+}
+
+private class FakeAddressElementPrimaryButtonAction(
+    private val action: (AddressDetails) -> AddressElementActivityContract.Result,
+) : AddressElementPrimaryButtonAction {
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(action(addressDetails))
     }
 }
