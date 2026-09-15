@@ -101,7 +101,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_bizum_confirm_payment,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    requestOptions = requestOptions,
                     qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
