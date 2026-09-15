@@ -214,6 +214,7 @@ internal class InputAddressViewModel @Inject constructor(
         completedFormValues: Map<FormFieldId, FormFieldEntry>?,
         checkboxChecked: Boolean
     ) {
+        if (!_formEnabled.value) return
         if (completedFormValues == null) {
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
