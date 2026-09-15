@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'subprocess'
+require 'open3'
 
 require_relative 'common'
 
@@ -30,9 +30,9 @@ def update_pay_server_docs()
           /sdk-version: [.\d]+/,
           "sdk-version: #{@version}",
         )
-        execute_or_fail("git -C #{mint_repo} add #{constants_file}")
+        add_pay_server_constants(mint_repo, constants_file)
         switch_to_new_branch(pay_server_branch, mint_base_ref, repo: mint_repo)
-        execute_or_fail("git -C #{mint_repo} add #{constants_file}")
+        add_pay_server_constants(mint_repo, constants_file)
         execute_or_fail("git -C #{mint_repo} commit -m \"Update Android Payments SDK version to #{@version}\"")
     rescue
         execute("git -C #{mint_repo} restore #{constants_file}")
@@ -62,4 +62,20 @@ end
 
 private def pay_server_branch
     "release-android-payments-sdk-#{@version}"
+end
+
+private def add_pay_server_constants(mint_repo, constants_file)
+    command = ["git", "-C", mint_repo, "add", constants_file]
+    puts "Executing #{command.join(' ')}..."
+
+    stdout, stderr, status = Open3.capture3(*command)
+    $stdout.print(stdout)
+    $stderr.print(stderr)
+
+    unless status.success?
+        if stderr.include?("The following paths are ignored by one of your .gitignore files")
+            rputs "Tip: Run `cd ~/stripe/mint && pay gitfs add pay-server/docs`, then retry this step."
+        end
+        raise "Failed to execute #{command.join(' ')}"
+    end
 end

@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
@@ -59,7 +58,6 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             stripeRepository: StripeRepository,
-            paymentConfiguration: PaymentConfiguration,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             userFacingLogger: UserFacingLogger,
@@ -71,7 +69,6 @@ internal interface TapToAddCollectionHandler {
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
                     stripeRepository = stripeRepository,
-                    paymentConfiguration = paymentConfiguration,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
                     userFacingLogger = userFacingLogger,
                     errorReporter = errorReporter,
@@ -88,7 +85,6 @@ internal interface TapToAddCollectionHandler {
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: PaymentConfiguration,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
     private val userFacingLogger: UserFacingLogger,
@@ -116,6 +112,7 @@ internal class DefaultTapToAddCollectionHandler(
         connectionManager.connect(
             config = TapToAddConnectionManager.ConnectionConfig(
                 merchantDisplayName = metadata.merchantName,
+                apiConfiguration = metadata.apiConfiguration,
             ),
         )
 
@@ -165,7 +162,7 @@ internal class DefaultTapToAddCollectionHandler(
         val setupIntent = retrieveSetupIntent(clientSecret)
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
-        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
+        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata, metadata)
         val updatedPaymentMethod = updatePaymentMethod(paymentMethod, customerMetadata, metadata)
 
         return validatePaymentMethod(updatedPaymentMethod, metadata)
@@ -216,7 +213,7 @@ internal class DefaultTapToAddCollectionHandler(
                         address = billingDetails.address?.asAddressModel()
                     )
                 ),
-                options = getApiOptions(customerMetadata),
+                options = getApiOptions(customerMetadata, metadata),
             ).getOrThrow()
         } ?: paymentMethod
     }
@@ -292,6 +289,7 @@ internal class DefaultTapToAddCollectionHandler(
     private suspend fun fetchPaymentMethod(
         intent: SetupIntent,
         customerMetadata: CustomerMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata
     ): PaymentMethod {
         val paymentMethodId = intent.paymentMethodId
             ?: run {
@@ -317,7 +315,7 @@ internal class DefaultTapToAddCollectionHandler(
         return stripeRepository.retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
             cardPresentPaymentMethodId = paymentMethodId,
             customerId = customerId,
-            options = getApiOptions(customerMetadata)
+            options = getApiOptions(customerMetadata, paymentMethodMetadata)
         ).getOrThrow()
     }
 
@@ -345,7 +343,10 @@ internal class DefaultTapToAddCollectionHandler(
         }
     }
 
-    private fun getApiOptions(customerMetadata: CustomerMetadata): ApiRequest.Options {
+    private fun getApiOptions(
+        customerMetadata: CustomerMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata
+    ): ApiRequest.Options {
         val ephemeralKeySecret = when (customerMetadata) {
             is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
             is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.ephemeralKeySecret
@@ -356,7 +357,7 @@ internal class DefaultTapToAddCollectionHandler(
 
         return ApiRequest.Options(
             apiKey = ephemeralKeySecret,
-            stripeAccount = paymentConfiguration.stripeAccountId,
+            stripeAccount = paymentMethodMetadata.apiConfiguration.stripeAccountId,
         )
     }
 

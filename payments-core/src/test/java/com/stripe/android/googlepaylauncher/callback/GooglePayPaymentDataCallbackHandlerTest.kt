@@ -1,15 +1,12 @@
 package com.stripe.android.googlepaylauncher.callback
 
-import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.callback.IntermediatePaymentData
-import com.google.android.gms.wallet.callback.OnCompleteListener
 import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
-import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallbackRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -84,6 +81,42 @@ class GooglePayPaymentDataCallbackHandlerTest {
         assertThat(transactionInfo.getString("currencyCode")).isEqualTo("USD")
         assertThat(transactionInfo.getString("totalPriceStatus")).isEqualTo("FINAL")
         assertThat(transactionInfo.getString("totalPrice")).isEqualTo("10.99")
+    }
+
+    @Test
+    fun `invalid intermediate payment data reports parsing failure and stops callback`() = runScenario(
+        callbackResult = { error("Should not be called!") }
+    ) {
+        onPaymentDataChanged(malformedRequest())
+
+        val report = errorReporter.awaitCall()
+        assertThat(report.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE)
+        assertThat(report.stripeException).isNotNull()
+        assertErrorUpdate(listener.completions.awaitItem())
+    }
+
+    @Test
+    fun `response serialization failure reports parsing failure and stops flow`() = runScenario(
+        callbackResult = {
+            GooglePayPaymentDataUpdateResponse(
+                newTransactionInfo = GooglePayJsonFactory.TransactionInfo(
+                    currencyCode = "not-a-currency",
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+                    totalPrice = 1099,
+                ),
+                error = null,
+            )
+        }
+    ) {
+        onPaymentDataChanged(request())
+
+        assertThat(callback.updates.awaitItem()).isNotNull()
+        val report = errorReporter.awaitCall()
+        assertThat(report.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE)
+        assertThat(report.stripeException).isNotNull()
+        assertErrorUpdate(listener.completions.awaitItem())
     }
 
     @Test
@@ -204,35 +237,6 @@ class GooglePayPaymentDataCallbackHandlerTest {
         }
     }
 
-    private class FakeGooglePayPaymentDataUpdateCallback(
-        private val result: (GooglePayPaymentDataUpdate) -> GooglePayPaymentDataUpdateResponse,
-    ) : GooglePayPaymentDataUpdateCallback {
-        val updates = Turbine<GooglePayPaymentDataUpdate>()
-
-        override suspend fun onPaymentDataChanged(
-            update: GooglePayPaymentDataUpdate,
-        ): GooglePayPaymentDataUpdateResponse {
-            updates.add(update)
-            return result(update)
-        }
-
-        fun ensureAllEventsConsumed() {
-            updates.ensureAllEventsConsumed()
-        }
-    }
-
-    private class FakeOnCompleteListener : OnCompleteListener<PaymentDataRequestUpdate> {
-        val completions = Turbine<PaymentDataRequestUpdate>()
-
-        override fun complete(result: PaymentDataRequestUpdate) {
-            completions.add(result)
-        }
-
-        fun ensureAllEventsConsumed() {
-            completions.ensureAllEventsConsumed()
-        }
-    }
-
     private companion object {
         const val CALLBACK_KEY = "callback-key"
         const val INTERNAL_ERROR_MESSAGE = "An internal error occurred."
@@ -265,6 +269,12 @@ class GooglePayPaymentDataCallbackHandlerTest {
                     }
                     """.trimIndent()
                 )
+            }
+        }
+
+        fun malformedRequest(): IntermediatePaymentData {
+            return mock<IntermediatePaymentData>().also {
+                whenever(it.toJson()).thenReturn("not-json")
             }
         }
     }

@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Оплатить позже через систему Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Телефон</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Подтверждая платеж через NICEPAY, вы тем самым разрешаете %s списывать средства с этого способа оплаты для будущих платежей согласно условиям компании.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Имя и фамилия, указанные на карте</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Выберите способ оплаты:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Банк Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -107,8 +111,6 @@
   <string name="stripe_scan_card">Сканировать карту</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Сбросить данные отсканированной карты</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Указав свои платежные данные и подтвердив платеж, вы уполномочиваете (A) %s и Stripe, нашего поставщика платежных услуг, на отправку вашему банку инструкций на списание средств с вашего счета и (B) ваш банк на списание средств с вашего счета согласно данным инструкциям. Вы имеете право на возврат средств от вашего банка согласно положениям и условиям Вашего соглашения с банком. Подать заявку на возврат средств следует в течение 8 недель с даты списания средств с вашего счета. Ваши права объясняются в выписке, которую вы можете получить в своем банке. Вы даете согласие на получение уведомлений о будущих дебетованиях в срок до 2 дней до их поступления.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

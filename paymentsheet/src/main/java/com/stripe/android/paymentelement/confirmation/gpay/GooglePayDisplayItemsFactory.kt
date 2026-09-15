@@ -26,46 +26,44 @@ internal object GooglePayDisplayItemsFactory {
     ): List<GooglePayJsonFactory.DisplayItem> {
         val items = mutableListOf<GooglePayJsonFactory.DisplayItem>()
 
-        items += response.lineItems.map { it.asDisplayItem(context) }
-
-        response.totalSummary?.let { summary ->
-            items += summary.subtotalDisplayItem(context)
-            items += summary.discountAmounts.map { it.asDisplayItem(context) }
-            items += summary.taxAmounts.map { it.asDisplayItem(context) }
-            items += summary.estimatedTotalLineItem(context)
-        }
+        items += response.checkoutItems.flatMap { it.oneTimePrice.items }.map { it.asDisplayItem(context) }
+        items += response.subtotalDisplayItem(context)
+        items += response.recurringDetails?.totalDiscountAmounts.orEmpty().map { it.asDisplayItem(context) }
+        items += response.recurringDetails?.totalTaxAmounts.orEmpty().map { it.asDisplayItem(context) }
+        items += response.estimatedTotalLineItem(context)
 
         return items
     }
 
-    private fun CheckoutSessionResponse.TotalSummaryResponse.subtotalDisplayItem(
+    private fun CheckoutSessionResponse.subtotalDisplayItem(
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
             label = R.string.stripe_google_pay_cost_excluding_tax.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
-            price = subtotal,
+            price = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.subtotal } },
         )
     }
 
-    private fun CheckoutSessionResponse.TotalSummaryResponse.estimatedTotalLineItem(
+    private fun CheckoutSessionResponse.estimatedTotalLineItem(
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
             label = R.string.stripe_google_pay_estimated_total.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-            price = totalAmountDue,
+            price = amount,
         )
     }
 
-    private fun CheckoutSessionResponse.LineItem.asDisplayItem(
+    private fun CheckoutSessionResponse.OneTimePriceItem.asDisplayItem(
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
+        val name = price.product.name
         val label = if (quantity > 1) "$name x$quantity" else name
         return GooglePayJsonFactory.DisplayItem(
             label = label.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-            price = unitAmount ?: total,
+            price = subtotal,
         )
     }
 
@@ -73,7 +71,7 @@ internal object GooglePayDisplayItemsFactory {
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
-            label = displayName.resolvableString.resolve(context),
+            label = (displayName ?: coupon.name ?: coupon.code).resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
             price = -amount,
         )
@@ -83,7 +81,7 @@ internal object GooglePayDisplayItemsFactory {
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
-            label = displayName.resolvableString.resolve(context),
+            label = taxRate.displayName.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.TAX,
             price = amount,
         )

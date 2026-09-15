@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
@@ -62,7 +63,7 @@ internal class IntentConfirmationChallengeActivityTest {
                 IntentConfirmationChallengeArgs::class.java
             )
         }
-        assertThat(intentArgs?.publishableKey).isEqualTo(args.publishableKey)
+        assertThat(intentArgs?.apiConfiguration).isEqualTo(args.apiConfiguration)
         assertThat(intentArgs?.intent).isEqualTo(args.intent)
     }
 
@@ -251,7 +252,7 @@ internal class IntentConfirmationChallengeActivityTest {
 
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
-            publishableKey = "pk_test_123",
+            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
             productUsage = listOf("PaymentSheet"),
             captchaVendorName = "hcaptcha"

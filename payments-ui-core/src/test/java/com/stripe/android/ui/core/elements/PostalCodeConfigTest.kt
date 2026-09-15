@@ -13,6 +13,26 @@ import com.stripe.android.uicore.R as UiCoreR
 
 class PostalCodeConfigTest {
     @Test
+    fun `US postal code enforces left-to-right text direction`() {
+        assertThat(createConfigForCountry("US").enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
+    fun `CA postal code enforces left-to-right text direction`() {
+        assertThat(createConfigForCountry("CA").enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
+    fun `GB postal code enforces left-to-right text direction`() {
+        assertThat(createConfigForCountry("GB").enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
+    fun `other postal code does not enforce left-to-right text direction`() {
+        assertThat(createConfigForCountry("IN").enforceLeftToRightTextDirection).isFalse()
+    }
+
+    @Test
     fun `verify US config uses proper keyboard capitalization & keyboard type`() {
         with(createConfigForCountry("US")) {
             Truth.assertThat(capitalization).isEqualTo(KeyboardCapitalization.None)

@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Betal senere med Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Ved at bekræfte din betaling med NICEPAY tillader du, at %s debiterer denne betalingsmetode for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Kortholderens navn</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Vælg, hvordan du vil betale:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -109,8 +113,6 @@
   <string name="stripe_scan_card">Scan kort</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Ryd scannet kort</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Ved at give dine betalingsoplysninger og bekræfte denne betaling giver du (A) %s og Stripe, vores betalingstjenesteudbyder, tilladelse til at sende instruktioner til din bank om at debitere din konto og (B) din bank til at debitere din konto i overensstemmelse med disse instruktioner. Som en del af dine rettigheder har du ret til en refusion fra din bank under vilkårene og betingelserne i din aftale med din bank. Der skal kræves refusion inden for 8 uger fra den dato, hvor din konto blev debiteret. Dine rettigheder forklares i en erklæring, som du kan få fra din bank. Du accepterer at modtage underretninger om fremtidig debitering op til to dage før de opstår.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

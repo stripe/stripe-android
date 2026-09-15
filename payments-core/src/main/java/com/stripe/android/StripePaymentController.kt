@@ -115,7 +115,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            publishableKeyProvider = { apiConfigProvider.get().publishableKey },
+            apiConfigurationState = apiConfigProvider.get(),
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
@@ -200,7 +200,14 @@ constructor(
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
     ): Result<PaymentIntentResult> {
-        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+        val params = if (confirmPaymentIntentParams.returnUrl == null) {
+            // return_url is no longer used by is still required by the backend
+            confirmPaymentIntentParams.copy(returnUrl = "stripe://return_url")
+        } else {
+            confirmPaymentIntentParams
+        }
+
+        val paymentIntentResult = confirmPaymentIntent(params, requestOptions)
 
         return paymentIntentResult.mapResult { paymentIntent ->
             authenticateAlipay(

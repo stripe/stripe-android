@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Paga después con Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Teléfono</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Si confirmas tu pago con NICEPAY, permites que %s efectúe cobros para pagos futuros a este método de pago conforme a las condiciones estipuladas.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nombre del titular de la tarjeta</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Selecciona cómo quieres pagar:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banco Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -109,8 +113,6 @@
   <string name="stripe_scan_card">Escanear tarjeta</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Borrar tarjeta escaneada</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Al suministrar tus datos de pago y confirmar el pago, autorizas (A) a %s y a Stripe, nuestro proveedor de servicios de pago, a enviar instrucciones a tu banco para que efectúe débitos en tu cuenta y (B) al banco a que efectúe los débitos en tu cuenta siguiendo esas instrucciones. Como parte de tus prerrogativas, tienes derecho a un rembolso del banco conforme a los términos y condiciones del contrato suscripto con dicha entidad. La solicitud de rembolso deberá efectuarse dentro de las 8 semanas posteriores a la fecha en que se efectuó el débito en tu cuenta. Tus derechos se explican en una declaración que puedes solicitarle a tu banco. Aceptas recibir notificaciones sobre próximos débitos con hasta 2 días de antelación a que estos ocurran.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

@@ -44,7 +44,6 @@ internal fun ConfirmationControls(
         ) { Text("Clear") }
         Button(
             onClick = onSelectPaymentMethod,
-            enabled = !isUpdating,
             modifier = Modifier.weight(1f),
         ) { Text("Select") }
     }

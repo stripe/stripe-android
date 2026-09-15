@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -26,6 +25,7 @@ import javax.inject.Provider
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
+    val resultStateHolder: AddressElementResultStateHolder,
     private val eventReporter: AddressLauncherEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
@@ -212,25 +212,36 @@ internal class InputAddressViewModel @Inject constructor(
             return
         }
         _formEnabled.value = false
-        dismissWithAddress(
-            AddressDetails(
-                name = completedFormValues?.get(FormFieldId.Name)?.value,
-                address = PaymentSheet.Address(
-                    city = completedFormValues?.get(FormFieldId.City)?.value,
-                    country = completedFormValues?.get(FormFieldId.Country)?.value,
-                    line1 = completedFormValues?.get(FormFieldId.Line1)?.value,
-                    line2 = completedFormValues?.get(FormFieldId.Line2)?.value,
-                    postalCode = completedFormValues?.get(FormFieldId.PostalCode)?.value,
-                    state = completedFormValues?.get(FormFieldId.State)?.value
-                ),
-                phoneNumber = completedFormValues?.get(FormFieldId.Phone)?.value,
-                isCheckboxSelected = checkboxChecked
-            )
+        val addressDetails = AddressDetails(
+            name = completedFormValues[FormFieldId.Name]?.value,
+            address = PaymentSheet.Address(
+                city = completedFormValues[FormFieldId.City]?.value,
+                country = completedFormValues[FormFieldId.Country]?.value,
+                line1 = completedFormValues[FormFieldId.Line1]?.value,
+                line2 = completedFormValues[FormFieldId.Line2]?.value,
+                postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
+                state = completedFormValues[FormFieldId.State]?.value
+            ),
+            phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
+            isCheckboxSelected = checkboxChecked
+        )
+        completeWithAddress(
+            addressDetails = addressDetails,
+            result = when (args) {
+                is AddressElementActivityContract.Args.Standalone -> {
+                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+                }
+                is AddressElementActivityContract.Args.CheckoutShipping -> {
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+                }
+            },
         )
     }
 
-    @VisibleForTesting
-    fun dismissWithAddress(addressDetails: AddressDetails) {
+    private fun completeWithAddress(
+        addressDetails: AddressDetails,
+        result: AddressElementActivityContract.Result,
+    ) {
         addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
@@ -238,9 +249,7 @@ internal class InputAddressViewModel @Inject constructor(
                 editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
-        navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
-        )
+        resultStateHolder.setResult(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {

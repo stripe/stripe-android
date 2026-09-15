@@ -17,6 +17,7 @@ internal class FakeAvailableExpressButtonTypesFactory(
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata?,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
+        requiresShippingAddress: Boolean,
     ): List<ExpressButtonType> {
         return availableExpressButtonTypes
     }

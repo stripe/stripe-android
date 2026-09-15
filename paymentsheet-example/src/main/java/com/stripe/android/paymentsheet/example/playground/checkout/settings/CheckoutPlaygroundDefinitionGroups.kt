@@ -13,7 +13,6 @@ internal class CheckoutContactDetailsDefinitions(
     val enabled = boolean(
         key = "$key.enabled",
         displayName = "Provide details",
-        defaultValue = false,
     )
     val name = optionalText(
         key = "$key.name",
@@ -31,7 +30,6 @@ internal class CheckoutAddressDefinitions(key: String) {
     val enabled = boolean(
         key = "$key.enabled",
         displayName = "Provide address",
-        defaultValue = false,
     )
     val country = text(
         key = "$key.country",
@@ -168,10 +166,10 @@ internal class CheckoutPrimaryButtonColorsDefinitions(
 internal class CheckoutGooglePayDefinitions<DisplayType : Enum<DisplayType>, ButtonTypeValue : Enum<ButtonTypeValue>>(
     key: String,
     displayName: String,
-    defaultDisplay: DisplayType,
     displayOptions: List<DisplayType>,
-    defaultButtonType: ButtonTypeValue,
     buttonTypeOptions: List<ButtonTypeValue>,
+    defaultDisplay: DisplayType = displayOptions.first { it.name == "Automatic" },
+    defaultButtonType: ButtonTypeValue = buttonTypeOptions.first { it.name == "Pay" },
 ) {
     val display = choice(
         key = "$key.display",

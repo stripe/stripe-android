@@ -23,7 +23,13 @@ internal data class EmbeddedActivityArgs(
     val customerState: CustomerState?,
     val promotions: List<PaymentMethodMessagePromotion>,
     val launchMode: EmbeddedLaunchMode,
+    val presentationState: PresentationState,
 ) : Parcelable {
+    internal enum class PresentationState {
+        Loading,
+        Ready,
+    }
+
     companion object {
         internal const val EXTRA_ARGS: String = "extra_activity_args"
 

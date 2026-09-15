@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -62,8 +63,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
     @Test
     fun `state propagates shipping address requirement to Google Pay button`() = runScenario(
-        configuration = ExpressCheckoutElement.Configuration()
-            .shippingAddressRequired(true),
+        requiresShippingAddress = true,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
         ),
@@ -255,6 +255,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         },
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        requiresShippingAddress: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeExpressCheckoutElementEventReporter()
@@ -266,6 +267,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
                 savedStateHandle = savedStateHandle,
                 configuration = configuration,
+                requiresShippingAddress = requiresShippingAddress,
             )
 
             DefaultExpressCheckoutElementInteractor(
@@ -296,6 +298,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         availableExpressButtonTypes: List<ExpressButtonType>,
         savedStateHandle: SavedStateHandle,
         configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
+        requiresShippingAddress: Boolean = false,
     ): CheckoutControllerStateHolder {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -312,6 +315,9 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         stateHolder.state = CheckoutControllerStateFactory.create(
             expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
             configuration = configurationBuilder.build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                requiresShippingAddress = requiresShippingAddress,
+            ),
         )
 
         return stateHolder

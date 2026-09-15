@@ -19,6 +19,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -161,8 +162,12 @@ internal suspend fun createIntentConfirmationInterceptor(
                         context = ApplicationProvider.getApplicationContext(),
                         publishableKey = "pk",
                     ),
-                    publishableKeyProvider = { "pk" },
-                    stripeAccountIdProvider = { null },
+                    apiRequestOptionsProvider = {
+                        ApiRequest.Options(
+                            apiKey = DEFAULT_API_CONFIG.publishableKey,
+                            stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                        )
+                    },
                 )
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,

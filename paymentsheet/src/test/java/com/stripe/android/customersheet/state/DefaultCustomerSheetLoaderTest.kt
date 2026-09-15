@@ -27,6 +27,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -39,6 +40,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -449,6 +451,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
+                apiConfigurationProvider = { DEFAULT_API_CONFIG },
             )
         )
 
@@ -856,7 +859,8 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            apiConfigurationResolver = FakeApiConfigurationResolver(),
         )
     }
 

@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Pay later with Klarna</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Phone</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">By confirming your payment with NICEPAY, you allow %s to charge this payment method for future payments in accordance with their terms.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Name on card</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Select how you want to pay:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -109,8 +113,6 @@
   <string name="stripe_scan_card">Scan card</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Clear scanned card</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

@@ -133,7 +133,7 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             ),
         ) {
-            page.waitForText("···· 4242")
+            page.waitForText("\u2066···· 4242\u2069")
         }
     }
 

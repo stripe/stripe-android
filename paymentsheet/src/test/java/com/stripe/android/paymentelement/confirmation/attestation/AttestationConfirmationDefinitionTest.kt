@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
@@ -154,7 +155,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchAction.launcherArguments.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchAction.launcherArguments.productUsage).isEqualTo(launcherArgs.productUsage)
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
@@ -217,7 +218,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val launchCall = launcher.calls.awaitItem()
 
-        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchCall.input.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -236,7 +237,7 @@ internal class AttestationConfirmationDefinitionTest {
 
             val launchAction = action.asLaunch()
 
-            assertThat(launchAction.launcherArguments.publishableKey).isEqualTo(launcherArgs.publishableKey)
+            assertThat(launchAction.launcherArguments.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
             assertThat(launchAction.launcherArguments.productUsage).isEqualTo(launcherArgs.productUsage)
             assertThat(launchAction.receivesResultInProcess).isFalse()
         }
@@ -256,7 +257,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val launchCall = launcher.calls.awaitItem()
 
-        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchCall.input.apiConfiguration).isEqualTo(launcherArgs.apiConfiguration)
         assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
@@ -316,6 +317,30 @@ internal class AttestationConfirmationDefinitionTest {
         )
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
+    }
+
+    @Test
+    fun `'toResult' should report and continue without token for NoResult`() = runTest {
+        val fakeErrorReporter = FakeErrorReporter()
+        val definition = createAttestationConfirmationDefinition(errorReporter = fakeErrorReporter)
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = launcherArgs,
+            result = AttestationActivityResult.NoResult,
+        ).asNextStep()
+
+        assertThat(result.confirmationOption).isEqualTo(
+            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+                confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
+            )
+        )
+        assertThat(result.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(fakeErrorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent
+                .INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT
+        )
     }
 
     @Test
@@ -518,7 +543,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val call = fakeErrorReporter.awaitCall()
         assertThat(call.errorEvent).isEqualTo(
-            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE
+            ErrorReporter.ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE
         )
         assertThat(call.stripeException?.message).isEqualTo("Preparation failed")
     }
@@ -627,7 +652,6 @@ internal class AttestationConfirmationDefinitionTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         coroutineScope: CoroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         workContext: CoroutineContext = UnconfinedTestDispatcher(),
-        publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage,
         eventsReporter: AttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter(),
         isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
@@ -639,7 +663,6 @@ internal class AttestationConfirmationDefinitionTest {
             integrityRequestManager = integrityRequestManager,
             coroutineScope = coroutineScope,
             workContext = workContext,
-            publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
             attestationAnalyticsEventsReporter = eventsReporter,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
@@ -665,14 +688,15 @@ internal class AttestationConfirmationDefinitionTest {
         )
 
         private val launcherArgs = AttestationActivityContract.Args(
-            publishableKey = "pk_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = setOf("PaymentSheet")
         )
 
         private fun confirmationParametersWithAttestation(enabled: Boolean) = CONFIRMATION_PARAMETERS.copy(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
-                attestOnIntentConfirmation = enabled
+                attestOnIntentConfirmation = enabled,
+                apiConfiguration = launcherArgs.apiConfiguration,
             )
         )
     }

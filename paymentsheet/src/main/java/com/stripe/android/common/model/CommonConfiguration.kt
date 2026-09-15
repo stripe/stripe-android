@@ -3,6 +3,7 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -42,6 +43,7 @@ internal data class CommonConfiguration(
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
+    val apiConfiguration: ApiConfiguration.State? = null,
 ) : Parcelable {
 
     fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
@@ -303,6 +305,10 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
     allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+    apiConfiguration = ApiConfiguration.State(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+    ),
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

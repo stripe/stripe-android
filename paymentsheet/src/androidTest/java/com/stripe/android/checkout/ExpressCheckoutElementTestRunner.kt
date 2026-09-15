@@ -13,6 +13,7 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
@@ -34,7 +35,11 @@ internal fun runExpressCheckoutElementTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
 
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
+        PaymentConfiguration.init(
+            ApplicationProvider.getApplicationContext(),
+            TestApiKeys.PUBLISHABLE,
+            TestApiKeys.ACCOUNT,
+        )
         val controller: CheckoutController = CheckoutController.Builder(
             application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = SavedStateHandle(),

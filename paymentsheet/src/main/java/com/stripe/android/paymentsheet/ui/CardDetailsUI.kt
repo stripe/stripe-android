@@ -43,6 +43,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as CoreR
 
 @Composable
@@ -197,7 +198,10 @@ private fun CardNumberField(
     isFirstField: Boolean,
 ) {
     CommonTextField(
-        value = "•••• •••• •••• ${last4 ?: "••••"}",
+        value = stringResource(
+            PaymentSheetR.string.stripe_paymentsheet_update_card_number,
+            last4 ?: "••••",
+        ),
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         shape = if (isFirstField) {
             MaterialTheme.shapes.small.copy(

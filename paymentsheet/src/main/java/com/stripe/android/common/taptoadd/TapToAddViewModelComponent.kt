@@ -66,6 +66,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -94,6 +95,7 @@ import javax.inject.Singleton
         DefaultIntentConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
         PaymentConfigurationModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,

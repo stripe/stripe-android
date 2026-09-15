@@ -6,6 +6,7 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
 import org.junit.Test
@@ -42,9 +43,9 @@ internal class IntentConfirmationChallengeActivityContractTest {
         }
 
     @Test
-    fun `createIntent passes publishableKey`() =
+    fun `createIntent passes apiConfiguration`() =
         runCreateIntentScenario { args ->
-            assertThat(args?.publishableKey).isEqualTo(PUBLISHABLE_KEY)
+            assertThat(args?.apiConfiguration).isEqualTo(API_CONFIGURATION)
         }
 
     @Test
@@ -149,7 +150,7 @@ internal class IntentConfirmationChallengeActivityContractTest {
         val result = contract.createIntent(
             ApplicationProvider.getApplicationContext(),
             IntentConfirmationChallengeActivityContract.Args(
-                publishableKey = PUBLISHABLE_KEY,
+                apiConfiguration = API_CONFIGURATION,
                 productUsage = PRODUCT_USAGE,
                 intent = stripeIntent
             )
@@ -167,7 +168,7 @@ internal class IntentConfirmationChallengeActivityContractTest {
     }
 
     private companion object {
-        const val PUBLISHABLE_KEY = "pk_test_123"
+        val API_CONFIGURATION = ApiConfiguration.State("pk_test_123", "acct_123")
         val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }

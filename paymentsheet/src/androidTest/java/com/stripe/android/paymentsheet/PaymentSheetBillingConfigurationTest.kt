@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
@@ -55,7 +56,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -129,7 +130,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()

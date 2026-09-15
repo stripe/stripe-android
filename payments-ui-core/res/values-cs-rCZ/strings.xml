@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Zaplaťte později pomocí Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Potvrzením platby přes službu NICEPAY povolujete %s strhávat prostřednictvím tohoto způsobu platby budoucí platby v souladu s jejími podmínkami.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Jméno na kartě</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Vyberte, jak chcete platit:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -109,8 +113,6 @@
   <string name="stripe_scan_card">Naskenovat kartu</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Vymazat naskenovanou kartu</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Tím, že zadáte informace o platbě a potvrdíte tuto platbu, udělujete společnosti (A) %s a Stripe, našemu poskytovateli platebních služeb, oprávnění zaslat do vaší banky pokyny k zatížení vašeho účtu a (B) vaší bance zatížit váš účet na základě těchto pokynů. V rámci svých práv máte nárok na refundaci od banky na základě smluvních podmínek vaší smlouvy s bankou. Refundaci je nutné nárokovat během 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat od banky.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

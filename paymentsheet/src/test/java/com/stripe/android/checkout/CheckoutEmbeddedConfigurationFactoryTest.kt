@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
+import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration as PaymentElementGooglePayConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
@@ -121,13 +122,24 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps googlePayConfiguration using the checkout session country`() {
-        val configuration = controllerConfiguration(
-            googlePayConfiguration = GooglePayConfiguration()
-                .label("Total")
-                .buttonType(GooglePayConfiguration.ButtonType.Checkout)
-                .additionalEnabledNetworks(listOf("INTERAC")),
-        )
+    fun `maps payment element googlePayConfiguration using the checkout session country`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().googlePayConfiguration(
+                    PaymentElementGooglePayConfiguration()
+                        .label("PE total")
+                        .buttonType(PaymentElementGooglePayConfiguration.ButtonType.Buy)
+                        .additionalEnabledNetworks(listOf("INTERAC"))
+                )
+            )
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration().googlePayConfiguration(
+                    GooglePayConfiguration()
+                        .label("ECE total")
+                        .buttonType(GooglePayConfiguration.ButtonType.Donate)
+                )
+            )
+            .build()
 
         val result = factory().create(
             configuration = configuration,
@@ -142,9 +154,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         assertThat(googlePay.environment)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
         assertThat(googlePay.countryCode).isEqualTo("GB")
-        assertThat(googlePay.label).isEqualTo("Total")
+        assertThat(googlePay.label).isEqualTo("PE total")
         assertThat(googlePay.buttonType)
-            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
         assertThat(googlePay.additionalEnabledNetworks).containsExactly("INTERAC")
     }
 
@@ -220,17 +232,22 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `maps googlePay regardless of ECE display setting`() {
+    fun `leaves googlePay null when payment element display is Never`() {
         val result = factory().create(
-            configuration = controllerConfiguration(
-                googlePayConfiguration = GooglePayConfiguration()
-                    .display(GooglePayConfiguration.Display.Never),
-            ),
+            configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().googlePayConfiguration(
+                        PaymentElementGooglePayConfiguration()
+                            .display(PaymentElementGooglePayConfiguration.Display.Never)
+                    )
+                )
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.googlePay).isNotNull()
+        assertThat(result.googlePay).isNull()
     }
 
     @Test
@@ -275,7 +292,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the collected billing email over the checkout session customer email`() {
+    fun `sources the collected email over the checkout session customer email`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
@@ -286,24 +303,31 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `populates billing details from the session data`() {
+    fun `populates billing details from configuration defaults`() {
         val result = factory().create(
-            configuration = controllerConfiguration(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = collectedDetails(
-                billingName = "Jane Billing",
-                billingAddress = Address.State(
-                    city = "Denver",
-                    country = "US",
-                    line1 = "123 Main St",
-                    line2 = "Apt 4",
-                    postalCode = "80202",
-                    state = "CO",
-                ),
-            ),
+            configuration = CheckoutController.Configuration()
+                .defaults(
+                    CheckoutController.Configuration.Defaults().billingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("Jane Billing")
+                            .address(
+                                CheckoutController.Address()
+                                    .city("Denver")
+                                    .country("US")
+                                    .line1("123 Main St")
+                                    .line2("Apt 4")
+                                    .postalCode("80202")
+                                    .state("CO"),
+                            ),
+                    ),
+                )
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
+            collectedDetails = collectedDetails(),
         )
 
         val billingDetails = requireNotNull(result.defaultBillingDetails)
+        assertThat(billingDetails.email).isEqualTo("checkout@example.com")
         assertThat(billingDetails.name).isEqualTo("Jane Billing")
         val address = requireNotNull(billingDetails.address)
         assertThat(address.city).isEqualTo("Denver")
@@ -358,35 +382,25 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
-        googlePayConfiguration: GooglePayConfiguration? = null,
     ): CheckoutController.Configuration.State {
-        val builder = CheckoutController.Configuration()
+        return CheckoutController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
                     .appearance(appearance)
             )
-        if (googlePayConfiguration != null) {
-            builder.expressCheckoutElement(
-                ExpressCheckoutElement.Configuration().googlePayConfiguration(googlePayConfiguration)
-            )
-        }
-        return builder.build()
+            .build()
     }
 
     private fun collectedDetails(
         email: String? = null,
         shippingName: String? = null,
-        billingName: String? = null,
         shippingAddress: Address.State? = null,
-        billingAddress: Address.State? = null,
     ): CheckoutCollectedDetails {
         return CheckoutCollectedDetails(
             email = email,
             shippingName = shippingName,
-            billingName = billingName,
             shippingAddress = shippingAddress,
-            billingAddress = billingAddress,
         )
     }
 }

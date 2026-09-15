@@ -25,7 +25,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -33,20 +32,26 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
+    private val resultStateHolder = AddressElementResultStateHolder()
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        argsFactory:
+            (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
+                AddressElementActivityContract.Args.Standalone(
+                    publishableKey = "pk_123",
+                    config = currentConfig,
+                )
+            },
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
-                publishableKey = "pk_123",
-                config = config,
-            ),
+            argsFactory(config),
             navigator,
+            resultStateHolder,
             eventReporter,
             placesClient = null,
         ).also { viewModelStoreRule.track(it) }
@@ -164,7 +169,20 @@ class InputAddressViewModelTest {
         }
 
     @Test
-    fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
+    fun `clickPrimaryButton publishes a succeeded result when form is valid`() = runTest(UnconfinedTestDispatcher()) {
+        val completedFormValues = mapOf(
+            FormFieldId.Line1 to FormFieldEntry(value = "99 Broadway St", isComplete = true),
+            FormFieldId.City to FormFieldEntry(value = "Seattle", isComplete = true),
+            FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+        )
+        val expectedAddress = AddressDetails(
+            address = PaymentSheet.Address(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US",
+            ),
+            isCheckboxSelected = true,
+        )
         val viewModel = createViewModel(
             AddressDetails(
                 address = PaymentSheet.Address(
@@ -174,15 +192,14 @@ class InputAddressViewModelTest {
                 )
             )
         )
-        viewModel.dismissWithAddress(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = "99 Broadway St",
-                    city = "Seattle",
-                    country = "US"
-                )
-            )
+        viewModel.clickPrimaryButton(
+            completedFormValues = completedFormValues,
+            checkboxChecked = true,
         )
+
+        assertThat(resultStateHolder.result.value)
+            .isEqualTo(AddressElementActivityContract.Result.StandaloneSucceeded(expectedAddress))
+        assertThat(viewModel.formEnabled.value).isFalse()
         verify(eventReporter).onCompleted(
             country = eq("US"),
             autocompleteResultSelected = eq(true),
@@ -954,7 +971,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton with null triggers validation errors without dismissing`() = runTest {
+    fun `clickPrimaryButton with null triggers validation errors without a result`() = runTest {
         val viewModel = createViewModel()
 
         val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
@@ -970,7 +987,36 @@ class InputAddressViewModelTest {
 
         assertThat(controller.validationMessage.value).isNotNull()
         assertThat(viewModel.formEnabled.value).isTrue()
-        verify(navigator, never()).dismiss(any())
+        assertThat(resultStateHolder.result.value).isNull()
+    }
+
+    @Test
+    fun `standalone save emits standalone success`() {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
+    fun `checkout shipping save emits checkout success without performing additional work`() {
+        val viewModel = createViewModel(
+            argsFactory = { config ->
+                AddressElementActivityContract.Args.CheckoutShipping(
+                    publishableKey = "pk_123",
+                    config = config,
+                )
+            },
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
+        )
     }
 
     @Test
@@ -989,7 +1035,7 @@ class InputAddressViewModelTest {
         autocompleteCountries: Set<String> = emptySet(),
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
+            AddressElementActivityContract.Args.Standalone(
                 publishableKey = "pk_123",
                 config = AddressLauncher.Configuration.Builder()
                     .googlePlacesApiKey(googlePlacesApiKey)
@@ -997,6 +1043,7 @@ class InputAddressViewModelTest {
                     .build(),
             ),
             navigator,
+            resultStateHolder,
             eventReporter,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
@@ -1046,4 +1093,30 @@ class InputAddressViewModelTest {
 
     private fun createShowState(isChecked: Boolean) =
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
+
+    private companion object {
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "+14155551212",
+            isCheckboxSelected = true,
+        )
+        val COMPLETED_FORM_VALUES = mapOf(
+            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+            FormFieldId.City to FormFieldEntry("San Francisco", true),
+            FormFieldId.Country to FormFieldEntry("US", true),
+            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
+            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
+            FormFieldId.Phone to FormFieldEntry("+14155551212", true),
+            FormFieldId.PostalCode to FormFieldEntry("94103", true),
+            FormFieldId.State to FormFieldEntry("CA", true),
+        )
+    }
 }

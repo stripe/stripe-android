@@ -34,7 +34,7 @@ internal interface IntentConfirmationChallengeNextActionStarter {
                 target = IntentConfirmationChallengeActivity::class.java,
                 extras = IntentConfirmationChallengeActivity.getBundle(
                     args = IntentConfirmationChallengeArgs(
-                        publishableKey = args.publishableKey,
+                        apiConfiguration = args.apiConfiguration,
                         intent = args.intent,
                         productUsage = args.productUsage.toList(),
                         captchaVendorName = nextActionData?.stripeJs?.captchaVendorName

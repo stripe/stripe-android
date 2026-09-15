@@ -42,10 +42,9 @@ import javax.inject.Singleton
 )
 @Singleton
 internal interface EmbeddedSheetComponent {
+    val viewModel: EmbeddedSheetViewModel
     val selectionHolder: EmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
-
-    fun inject(activity: EmbeddedSheetActivity)
 
     @Component.Factory
     interface Factory {

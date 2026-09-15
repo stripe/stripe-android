@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Klarna로 나중에 결제</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">전화번호</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">NICEPAY로 결제를 확인하면 %s에서 해당 약관에 따라 향후 결제에 대해 이 결제 방식으로 대금 청구하는 것을 허용하시는 것입니다.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">카드 명의자</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">원하는 결제 방식 선택:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 은행</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -107,8 +111,6 @@
   <string name="stripe_scan_card">카드 스캔</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">스캔한 카드 지우기</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) %s 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

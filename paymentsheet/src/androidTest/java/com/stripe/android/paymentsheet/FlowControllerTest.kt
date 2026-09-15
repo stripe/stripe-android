@@ -48,6 +48,7 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runMultipleFlowControllerInstancesTest
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
@@ -366,7 +367,7 @@ internal class FlowControllerTest(
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE)
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
@@ -455,13 +456,13 @@ internal class FlowControllerTest(
         fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
             scenario.onActivity {
-                PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE)
+                PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
 
                 @Suppress("Deprecation")
                 val unsynchronizedController = PaymentSheet.FlowController.create(
                     activity = it,
                     paymentOptionCallback = { paymentOption ->
-                        assertThat(paymentOption?.label).endsWith("4242")
+                        assertThat(paymentOption?.label).isEqualTo("···· 4242".withLtrIsolate())
                         paymentOptionCallbackCountDownLatch.countDown()
                     },
                     paymentResultCallback = {
@@ -507,7 +508,8 @@ internal class FlowControllerTest(
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
-                    assertThat(flowController.getPaymentOption()?.label).endsWith("4242")
+                    assertThat(flowController.getPaymentOption()?.label)
+                        .isEqualTo("···· 4242".withLtrIsolate())
                     configureCallbackCountDownLatch.countDown()
                 }
             )
@@ -523,7 +525,7 @@ internal class FlowControllerTest(
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE)
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
@@ -938,7 +940,7 @@ internal class FlowControllerTest(
         ).performClick()
 
         val paymentOption = testContext.configureCallbackTurbine.awaitItem()
-        assertThat(paymentOption?.label).endsWith("4242")
+        assertThat(paymentOption?.label).isEqualTo("···· 4242".withLtrIsolate())
         assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
         page.fillCvcRecollection("123")

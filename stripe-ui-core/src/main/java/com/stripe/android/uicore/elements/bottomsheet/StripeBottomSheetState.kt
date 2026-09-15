@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import com.stripe.android.uicore.BuildConfig
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -47,9 +49,13 @@ class StripeBottomSheetState internal constructor(
     var skipHideAnimation: Boolean = false
 
     suspend fun show() {
-        repeatUntilSucceededOrLimit(10) {
-            // Showing the bottom sheet can be interrupted.
-            // We keep trying until it's fully displayed.
+        repeatUntilSucceededOrLimit(
+            limit = 10,
+            hasSucceeded = { modalBottomSheetState.isVisible },
+        ) {
+            // Showing the bottom sheet can be interrupted, and a content size change on the
+            // final animation frame can leave the sheet at a stale offset without ever
+            // becoming visible. We keep trying until it's fully displayed.
             modalBottomSheetState.show()
         }
 
@@ -73,12 +79,13 @@ class StripeBottomSheetState internal constructor(
         // a CancellationException.
         keyboardHandler.dismiss()
 
-        if (modalBottomSheetState.isVisible) {
-            repeatUntilSucceededOrLimit(10) {
-                // Hiding the bottom sheet can be interrupted.
-                // We keep trying until it's fully hidden.
-                modalBottomSheetState.hide()
-            }
+        repeatUntilSucceededOrLimit(
+            limit = 10,
+            hasSucceeded = { !modalBottomSheetState.isVisible },
+        ) {
+            // Hiding the bottom sheet can be interrupted.
+            // We keep trying until it's fully hidden.
+            modalBottomSheetState.hide()
         }
     }
 
@@ -91,16 +98,17 @@ class StripeBottomSheetState internal constructor(
 
 private suspend fun repeatUntilSucceededOrLimit(
     limit: Int,
-    block: suspend () -> Unit
+    hasSucceeded: () -> Boolean,
+    block: suspend () -> Unit,
 ) {
     var counter = 0
-    while (counter < limit) {
+    while (counter < limit && !hasSucceeded()) {
         try {
             block()
-            break
         } catch (ignored: CancellationException) {
-            counter += 1
+            currentCoroutineContext().ensureActive()
         }
+        counter += 1
     }
 }
 

@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainHeader
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -442,7 +443,10 @@ internal class PaymentSheetTest(
 
                 networkRule.enqueue(
                     method("GET"),
-                    path("edge-internal/card-metadata")
+                    path("edge-internal/card-metadata"),
+                    header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+                    doesNotContainHeader("Stripe-Account"),
+                    applyDefaultAuthorization = false,
                 ) { response ->
                     response.testBodyFromFile("card-metadata-get.json")
                 }

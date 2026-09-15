@@ -100,7 +100,7 @@ internal object CheckoutLpmScenarios {
             ),
             regionalLeaf(
                 "korea", "Korea", Merchant.US, Currency.KRW,
-                PaymentMethod.Type.Card, PaymentMethod.Type.KrCard,
+                PaymentMethod.Type.Card, PaymentMethod.Type.KakaoPay, PaymentMethod.Type.KrCard,
                 PaymentMethod.Type.NaverPay, PaymentMethod.Type.Payco,
             ),
             regionalLeaf(

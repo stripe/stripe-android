@@ -156,16 +156,12 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         isLiveMode: Boolean = false,
     ): DefaultCreateCardPresentSetupIntentCallbackRetriever {
-        val apiKey = if (isLiveMode) LIVE_PUBLISHABLE_KEY else ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        val apiKey = if (isLiveMode) ApiKeyFixtures.FAKE_LIVE_KEY else ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
 
         return DefaultCreateCardPresentSetupIntentCallbackRetriever(
             errorReporter = errorReporter,
             requestOptionsProvider = { ApiRequest.Options(apiKey = apiKey) },
             createCardPresentSetupIntentCallbackProvider = callbackProvider,
         )
-    }
-
-    private companion object {
-        const val LIVE_PUBLISHABLE_KEY = "pk_live_123"
     }
 }

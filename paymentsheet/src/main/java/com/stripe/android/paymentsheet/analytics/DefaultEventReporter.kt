@@ -634,13 +634,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
+        val executor = analyticsRequestV2Executor
         val request = analyticsRequestV2Factory.createRequest(
             eventName = event.eventName,
             additionalParams = defaultParams(paymentMethodMetadataProvider.get()) + event.params,
         )
 
         CoroutineScope(workContext).launch {
-            analyticsRequestV2Executor.enqueue(request)
+            executor.enqueue(request)
         }
     }
 

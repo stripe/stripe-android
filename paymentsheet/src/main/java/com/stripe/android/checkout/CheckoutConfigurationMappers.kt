@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.elements.CheckoutGooglePayConfiguration.Display as GooglePayDisplay
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.toBillingDetailsCollectionConfiguration():
@@ -31,7 +32,7 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
         checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
             configuration.googlePayConfiguration.asPaymentSheet(
                 merchantCountry = merchantCountry,
-                liveMode = checkoutSessionResponse.liveMode,
+                liveMode = checkoutSessionResponse.livemode,
                 isDebugBuild = BuildConfig.DEBUG,
             )
         }
@@ -41,27 +42,27 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
 internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
-    checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
-        paymentElementConfiguration.googlePayConfiguration.asPaymentSheet(
-            merchantCountry = merchantCountry,
-            liveMode = checkoutSessionResponse.liveMode,
-            isDebugBuild = BuildConfig.DEBUG,
-        )
-    }
+    paymentElementConfiguration.googlePayConfiguration
+        .takeIf { it.display == GooglePayDisplay.Automatic }
+        ?.let { configuration ->
+            checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
+                configuration.asPaymentSheet(
+                    merchantCountry = merchantCountry,
+                    liveMode = checkoutSessionResponse.livemode,
+                    isDebugBuild = BuildConfig.DEBUG,
+                )
+            }
+        }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutCollectedDetails.toBillingDetails(
+internal fun CheckoutController.Configuration.State.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
+    collectedEmail: String?,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
-    address = billingAddress?.asPaymentSheet(),
-    email = resolveEmail(checkoutSessionResponse),
-    name = billingName,
+    address = defaults.billingDetails?.address?.asPaymentSheet(),
+    email = collectedEmail ?: checkoutSessionResponse.customerEmail,
+    name = defaults.billingDetails?.name,
 )
-
-@OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutCollectedDetails.resolveEmail(
-    response: CheckoutSessionResponse,
-): String? = email ?: response.customerEmail
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutCollectedDetails.toShippingDetails(): AddressDetails = AddressDetails(

@@ -31,6 +31,13 @@ class PostalCodeConfig(
         CountryPostalFormat.Other -> KeyboardType.Text
     }
 
+    override val enforceLeftToRightTextDirection: Boolean = when (format) {
+        CountryPostalFormat.US,
+        CountryPostalFormat.CA,
+        CountryPostalFormat.GB -> true
+        CountryPostalFormat.Other -> false
+    }
+
     override val debugLabel: String = "postal_code_text"
     override val visualTransformation: VisualTransformation =
         PostalCodeVisualTransformation(format)

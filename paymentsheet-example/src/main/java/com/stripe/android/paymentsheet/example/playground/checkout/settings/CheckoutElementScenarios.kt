@@ -85,7 +85,9 @@ internal object CheckoutElementScenarios {
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never
             },
         )
-        set(controller.express.shippingRequired, shipping)
+        if (shipping) {
+            set(session.shippingAddressCollection, true)
+        }
     }
 
     private fun CheckoutPlaygroundPresetBuilder.showWalletsInExpressOnly() {

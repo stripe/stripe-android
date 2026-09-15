@@ -67,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Makske hiljem Klarnaga.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">NICEPAY kaudu makse kinnitamisega lubate ettevõttel %s debiteerida edaspidi makseid sellelt makseviisilt vastavalt nende tingimustele.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nimi kaardil</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Valige, kuidas soovite maksta:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -109,8 +113,6 @@
   <string name="stripe_scan_card">Skanni kaart</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Eemalda skannitud kaart</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet %s ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

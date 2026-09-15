@@ -11,9 +11,9 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +30,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentType
@@ -38,7 +37,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -47,6 +45,7 @@ import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.withLtrDirectionEnforcedIfNeeded
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
@@ -140,67 +139,66 @@ fun PhoneNumberElementUI(
         }
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        CompatTextField(
-            value = value,
-            onValueChange = controller::onValueChange,
-            modifier = modifier
-                .fillMaxWidth()
-                .bringIntoViewRequester(bringIntoViewRequester)
-                .focusRequester(focusRequester)
-                .semantics {
-                    contentType = ContentType.PhoneNumberNational
+    CompatTextField(
+        value = value,
+        onValueChange = controller::onValueChange,
+        modifier = modifier
+            .fillMaxWidth()
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .focusRequester(focusRequester)
+            .semantics {
+                contentType = ContentType.PhoneNumberNational
+            }
+            .onFocusEvent {
+                if (it.isFocused) {
+                    coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
                 }
-                .onFocusEvent {
-                    if (it.isFocused) {
-                        coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
-                    }
+            }
+            .onFocusChanged {
+                if (hasFocus != it.isFocused) {
+                    controller.onFocusChange(it.isFocused)
                 }
-                .onFocusChanged {
-                    if (hasFocus != it.isFocused) {
-                        controller.onFocusChange(it.isFocused)
-                    }
-                    hasFocus = it.isFocused
-                }
-                .testTag(PHONE_NUMBER_TEXT_FIELD_TAG),
-            enabled = enabled,
-            isError = shouldShowError != null,
-            label = {
-                FormLabel(
-                    text = if (controller.showOptionalLabel) {
-                        stringResource(
-                            R.string.stripe_form_label_optional,
-                            label.resolve()
-                        )
-                    } else {
+                hasFocus = it.isFocused
+            }
+            .testTag(PHONE_NUMBER_TEXT_FIELD_TAG),
+        enabled = enabled,
+        isError = shouldShowError != null,
+        label = {
+            FormLabel(
+                text = if (controller.showOptionalLabel) {
+                    stringResource(
+                        R.string.stripe_form_label_optional,
                         label.resolve()
-                    }
-                )
-            },
-            placeholder = {
-                Text(text = placeholder)
-            },
-            leadingIcon = countryDropdown,
-            trailingIcon = trailingIcon,
-            visualTransformation = visualTransformation,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Phone,
-                imeAction = imeAction
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    focusManager.moveFocusSafely(FocusDirection.Next)
-                },
-                onDone = {
-                    focusManager.clearFocus(true)
+                    )
+                } else {
+                    label.resolve()
                 }
-            ),
-            singleLine = true,
-            colors = colors,
-            errorMessage = null,
-            contentPadding = textFieldInsets.asPaddingValues(),
-        )
-    }
+            )
+        },
+        placeholder = {
+            Text(text = placeholder)
+        },
+        leadingIcon = countryDropdown,
+        trailingIcon = trailingIcon,
+        visualTransformation = visualTransformation,
+        textStyle = LocalTextStyle.current.withLtrDirectionEnforcedIfNeeded(controller),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Phone,
+            imeAction = imeAction
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                focusManager.moveFocusSafely(FocusDirection.Next)
+            },
+            onDone = {
+                focusManager.clearFocus(true)
+            }
+        ),
+        singleLine = true,
+        colors = colors,
+        errorMessage = null,
+        contentPadding = textFieldInsets.asPaddingValues(),
+    )
 
     if (requestFocusWhenShown) {
         LaunchedEffect(Unit) {

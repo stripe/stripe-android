@@ -126,7 +126,7 @@ class CustomerSheetTest {
             assertThat(paymentMethodSelection.paymentOption.paymentMethodType)
                 .isEqualTo("card")
             assertThat(paymentMethodSelection.paymentOption.label)
-                .isEqualTo("···· 4242")
+                .isEqualTo("\u2066···· 4242\u2069")
         }
 
     @Test

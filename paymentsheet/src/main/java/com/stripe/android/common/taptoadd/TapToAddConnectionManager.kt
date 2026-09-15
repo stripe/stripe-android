@@ -2,7 +2,7 @@ package com.stripe.android.common.taptoadd
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
@@ -30,14 +30,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
     /**
      * Indicates if the device has the support required to use the on-device NFC reader
      */
-    val isSupported: Boolean
+    fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean
 
     /**
      * Connects to the NFC reader. Successful completion of this function indicates a successful connection while
@@ -48,7 +47,8 @@ internal interface TapToAddConnectionManager {
     suspend fun connect(config: ConnectionConfig)
 
     data class ConnectionConfig(
-        val merchantDisplayName: String?
+        val merchantDisplayName: String?,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     companion object {
@@ -58,7 +58,6 @@ internal interface TapToAddConnectionManager {
             errorReporter: ErrorReporter,
             applicationContext: Context,
             logger: Logger,
-            paymentConfiguration: Provider<PaymentConfiguration>,
             workContext: CoroutineContext,
             callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
@@ -68,7 +67,6 @@ internal interface TapToAddConnectionManager {
                     tapToAddConnectionManager = DefaultTapToAddConnectionManager(
                         applicationContext = applicationContext,
                         workContext = workContext,
-                        paymentConfiguration = paymentConfiguration,
                         errorReporter = errorReporter,
                         terminalWrapper = terminalWrapper,
                         logger = logger,
@@ -89,45 +87,45 @@ internal interface TapToAddConnectionManager {
 internal class DefaultTapToAddConnectionManager(
     private val applicationContext: Context,
     private val workContext: CoroutineContext,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
     private val callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
-    isSimulatedProvider: TapToAddIsSimulatedProvider,
+    private val isSimulatedProvider: TapToAddIsSimulatedProvider,
 ) : TapToAddConnectionManager, TerminalListener, TapToPayReaderListener {
     private var connectionTask: CompletableDeferred<Unit>? = null
 
-    private val discoveryConfiguration by lazy {
-        DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulatedProvider.get())
-    }
-
     private val connectionTaskLock = Mutex()
 
-    override val isSupported: Boolean
-        get() {
-            if (!callbackRetriever.hasCallback()) {
-                return false
-            }
+    private fun discoveryConfiguration(
+        apiConfiguration: ApiConfiguration.State
+    ): DiscoveryConfiguration.TapToPayDiscoveryConfiguration {
+        return DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulatedProvider.get(apiConfiguration))
+    }
 
-            initializeIfNeeded()
-
-            return terminal().supportsReadersOfType(
-                deviceType = DeviceType.TAP_TO_PAY_DEVICE,
-                discoveryConfiguration = discoveryConfiguration,
-            ).isSupported
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean {
+        if (!callbackRetriever.hasCallback()) {
+            return false
         }
+
+        initializeIfNeeded(apiConfiguration)
+
+        return terminal().supportsReadersOfType(
+            deviceType = DeviceType.TAP_TO_PAY_DEVICE,
+            discoveryConfiguration = discoveryConfiguration(apiConfiguration),
+        ).isSupported
+    }
 
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) = withContext(workContext) {
         runCatching {
-            when (val connectSetupResult = setup()) {
+            when (val connectSetupResult = setup(config.apiConfiguration)) {
                 is ConnectSetupResult.AlreadyConnected -> Unit
                 is ConnectSetupResult.ExistingTask -> connectSetupResult.task.await()
                 is ConnectSetupResult.NotSupported -> {
                     throw IllegalStateException("Tap to Add is not supported by this device!")
                 }
                 is ConnectSetupResult.CanStart -> {
-                    val discoverReadersResult = discoverReaders()
+                    val discoverReadersResult = discoverReaders(config.apiConfiguration)
 
                     if (discoverReadersResult is DiscoverCallResult.CollectedReaders) {
                         connectReader(discoverReadersResult.readers, config)
@@ -152,13 +150,13 @@ internal class DefaultTapToAddConnectionManager(
         )
     }
 
-    private suspend fun setup(): ConnectSetupResult {
+    private suspend fun setup(apiConfiguration: ApiConfiguration.State): ConnectSetupResult {
         return connectionTaskLock.withLock {
             connectionTask?.let {
                 return@withLock ConnectSetupResult.ExistingTask(it)
             }
 
-            if (!isSupported) {
+            if (!isSupported(apiConfiguration)) {
                 return@withLock ConnectSetupResult.NotSupported
             }
 
@@ -173,10 +171,12 @@ internal class DefaultTapToAddConnectionManager(
     }
 
     @SuppressLint("MissingPermission")
-    private suspend fun discoverReaders() = suspendCancellableCoroutine { continuation ->
+    private suspend fun discoverReaders(
+        apiConfiguration: ApiConfiguration.State
+    ) = suspendCancellableCoroutine { continuation ->
         try {
             val cancellable = terminal().discoverReaders(
-                config = discoveryConfiguration,
+                config = discoveryConfiguration(apiConfiguration),
                 discoveryListener = object : DiscoveryListener {
                     override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
                         continuation.resumeWith(Result.success(DiscoverCallResult.CollectedReaders(readers)))
@@ -290,13 +290,13 @@ internal class DefaultTapToAddConnectionManager(
         )
     }
 
-    private fun initializeIfNeeded() {
+    private fun initializeIfNeeded(apiConfiguration: ApiConfiguration.State) {
         if (!terminalWrapper.isInitialized()) {
             terminalWrapper.initTerminal(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        callback.onSuccess(paymentConfiguration.get().publishableKey)
+                        callback.onSuccess(apiConfiguration.publishableKey)
                     }
                 },
                 listener = this,
@@ -344,7 +344,7 @@ internal class DefaultTapToAddConnectionManager(
 }
 
 internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager {
-    override val isSupported: Boolean = false
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean = false
 
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         // No-op
@@ -355,7 +355,11 @@ internal class TapToAddRetriableConnectionManager(
     private val tapToAddConnectionManager: TapToAddConnectionManager,
     private val fatalErrorChecker: TapToAddFatalErrorChecker,
     private val retryDelaySupplier: RetryDelaySupplier,
-) : TapToAddConnectionManager by tapToAddConnectionManager {
+) : TapToAddConnectionManager {
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean {
+        return tapToAddConnectionManager.isSupported(apiConfiguration)
+    }
+
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         var retriesRemaining = MAX_RETRIES
 

@@ -6,8 +6,6 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -16,6 +14,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -95,6 +94,7 @@ class USBankAccountFormViewModelTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        apiConfiguration = DEFAULT_API_CONFIG,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -158,7 +158,12 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel()
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.handlePrimaryButtonClick()
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+                eq(DEFAULT_API_CONFIG.publishableKey),
+                eq(DEFAULT_API_CONFIG.stripeAccountId),
+                any(),
+                any(),
+            )
         }
 
     @Test
@@ -2124,14 +2129,9 @@ class USBankAccountFormViewModelTest {
         args: USBankAccountFormViewModel.Args = defaultArgs,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
-        val paymentConfiguration = PaymentConfiguration(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            STRIPE_ACCOUNT_ID
-        )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).also { viewModelStoreRule.track(it) }
@@ -2194,7 +2194,6 @@ class USBankAccountFormViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
-        const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
         const val CUSTOMER_PHONE = "+13105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(

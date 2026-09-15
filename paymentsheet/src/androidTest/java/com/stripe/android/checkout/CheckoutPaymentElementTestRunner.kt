@@ -15,6 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.runBlocking
@@ -65,7 +66,11 @@ internal fun runCheckoutPaymentElementTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
 
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), "pk_test_123")
+        PaymentConfiguration.init(
+            ApplicationProvider.getApplicationContext(),
+            TestApiKeys.PUBLISHABLE,
+            TestApiKeys.ACCOUNT,
+        )
         val controller: CheckoutController = CheckoutController.Builder(
             application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = SavedStateHandle(),

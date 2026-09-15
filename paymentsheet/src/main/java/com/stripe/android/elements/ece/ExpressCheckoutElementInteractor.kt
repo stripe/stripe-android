@@ -70,7 +70,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = paymentMethodMetadata,
                         googlePayConfiguration = expressButtonType.googlePayConfiguration,
-                        shippingAddressRequired = configuration.shippingAddressRequired,
+                        shippingAddressRequired = state.checkoutSessionResponse.requiresShippingAddress,
                         buttonTheme = configuration.appearance.buttonTheme,
                     )
                 }
