@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
@@ -49,7 +50,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             error("Should not be called!")
         }
@@ -67,7 +68,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             error("Should not be called!")
         }
@@ -97,7 +98,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             error("Should not be called!")
         }
@@ -105,7 +106,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "CA",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             error("Should not be called!")
         }
@@ -150,7 +151,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             error("Should not be called!")
         }
@@ -177,7 +178,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             error("Should not be called!")
         }
@@ -208,7 +209,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             capturedResult = it
         }
@@ -249,7 +250,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             capturedResult = it
         }
@@ -289,7 +290,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             callbackCalledCount++
         }
@@ -365,7 +366,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "US",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             firstReceivedResult = it
         }
@@ -373,7 +374,7 @@ class DefaultAutocompleteLauncherTest {
         launcher.launch(
             country = "CA",
             googlePlacesApiKey = "test-api-key",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
         ) {
             secondReceivedResult = it
         }

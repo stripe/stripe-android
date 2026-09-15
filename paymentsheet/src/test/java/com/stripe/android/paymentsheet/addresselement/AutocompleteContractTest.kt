@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract.EXTRA_ARGS
 import org.junit.Test
@@ -74,7 +75,7 @@ class AutocompleteContractTest {
         val args = AutocompleteContract.Args(
             id = "123",
             googlePlacesApiKey = "gp_123",
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = DEFAULT_API_CONFIG,
             country = "US",
             appearanceContext = appearanceContext,
         )

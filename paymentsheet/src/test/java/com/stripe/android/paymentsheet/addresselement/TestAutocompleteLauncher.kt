@@ -5,9 +5,6 @@ import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
-
-internal val TEST_API_CONFIGURATION = DEFAULT_API_CONFIG
 
 internal class TestAutocompleteLauncher private constructor() : AutocompleteActivityLauncher {
     private val launchCalls = Turbine<LaunchCall>()

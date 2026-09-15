@@ -13,7 +13,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -156,15 +155,15 @@ internal class ShippingAddressElementTest {
 
         registration.dispatch(AddressElementActivityContract.Result.Canceled)
         apiConfigurationProvider.value = DEFAULT_API_CONFIG.copy(
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = null,
+            publishableKey = "pk_new",
+            stripeAccountId = "acct_new",
         )
 
         shippingAddressElement.present()
 
         val secondLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(secondLaunch.input.apiConfiguration.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(secondLaunch.input.apiConfiguration.stripeAccountId).isNull()
+        assertThat(secondLaunch.input.apiConfiguration.publishableKey).isEqualTo("pk_new")
+        assertThat(secondLaunch.input.apiConfiguration.stripeAccountId).isEqualTo("acct_new")
         assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
