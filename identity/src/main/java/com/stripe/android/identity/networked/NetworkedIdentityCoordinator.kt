@@ -120,6 +120,11 @@ internal class NetworkedIdentityCoordinator(
         }
     }
 
+    fun resendOtp() {
+        if (state.value !is NetworkedIdentityState.AwaitingOtp) return
+        startVerification(isResendingSmsCode = true)
+    }
+
     fun selectDocument(documentId: String) {
         val selection = state.value as? NetworkedIdentityState.SelectDocument ?: return
         if (selection.documents.none { it.id == documentId }) return
@@ -145,21 +150,28 @@ internal class NetworkedIdentityCoordinator(
         authSessionSecrets = authSessionSecrets.appending(lookup.authSessionClientSecret)
         redactedPhoneNumber = lookup.session.redactedFormattedPhoneNumber
         knownSmsIds = lookup.session.smsIds()
-        startFreshVerification()
+        startVerification(isResendingSmsCode = false)
     }
 
-    private fun startFreshVerification() {
+    private fun startVerification(isResendingSmsCode: Boolean) {
         val requestCredentials = credentials ?: return fallBack(NetworkedIdentityFallbackReason.Unavailable)
         val requestSecrets = authSessionSecrets
         val previousSmsIds = knownSmsIds
+        val resendSmsId = activeSmsId.takeIf { isResendingSmsCode }
         activeSmsId = null
-        mutableState.value = NetworkedIdentityState.OtpStartPending
+        mutableState.value = if (isResendingSmsCode) {
+            otpGeneration += 1
+            NetworkedIdentityState.OtpResendPending(redactedPhoneNumber, otpGeneration)
+        } else {
+            NetworkedIdentityState.OtpStartPending
+        }
         requestScope.launch {
             if (flowEnded) return@launch
             val result = repository.startVerification(
                 credentials = requestCredentials,
                 locale = locale,
                 accountPhoneNumber = null,
+                isResendingSmsCode = isResendingSmsCode,
                 authSessionSecrets = requestSecrets
             )
             if (flowEnded) {
@@ -172,17 +184,11 @@ internal class NetworkedIdentityCoordinator(
                         fallBack(NetworkedIdentityFallbackReason.Unavailable)
                         return@success
                     }
-                    val freshSessions = response.session.verificationSessions.filter {
-                        it.type == NetworkedIdentityVerificationType.SMS &&
-                            it.state == NetworkedIdentityVerificationState.STARTED &&
-                            !it.id.isNullOrBlank() && it.id !in previousSmsIds
-                    }
+                    val startedSmsId = startedSmsId(response.session, previousSmsIds, resendSmsId)
                     knownSmsIds = knownSmsIds + response.session.smsIds()
-                    // #TODO - Networked Identity: Confirm fresh SMS ID semantics for first start,
-                    // expiry restart, and resend. Recycled or ambiguous IDs intentionally fail closed.
-                    if (freshSessions.size == 1) {
-                        activeSmsId = freshSessions.single().id
-                        otpGeneration += 1
+                    if (startedSmsId != null) {
+                        activeSmsId = startedSmsId
+                        if (!isResendingSmsCode) otpGeneration += 1
                         mutableState.value = awaitingOtp(invalidCode = false)
                     } else {
                         fallBack(NetworkedIdentityFallbackReason.Unavailable)
@@ -199,8 +205,25 @@ internal class NetworkedIdentityCoordinator(
         }
     }
 
-    // #TODO - Networked Identity: Explicit resend needs confirmed NI request parameters and SMS ID
-    // replacement semantics; the existing Link is_resend_sms_code precedent is not that guarantee.
+    private fun startedSmsId(
+        session: NetworkedIdentityConsumerSession,
+        previousSmsIds: Set<String>,
+        resendSmsId: String?
+    ): String? {
+        val startedSessions = session.verificationSessions.filter {
+            it.type == NetworkedIdentityVerificationType.SMS &&
+                it.state == NetworkedIdentityVerificationState.STARTED && !it.id.isNullOrBlank()
+        }
+        val freshSessions = startedSessions.filter { it.id !in previousSmsIds }
+        val eligibleSessions = if (freshSessions.isEmpty() && resendSmsId != null) {
+            startedSessions.filter { it.id == resendSmsId }
+        } else {
+            freshSessions
+        }
+        // #TODO - Networked Identity: Verify resend's retained/replacement SMS ID behavior against the
+        // web flow and an NI-enabled backend. Initial and expired-code starts still require a new ID.
+        return eligibleSessions.singleOrNull()?.id
+    }
 
     private fun loadDocuments() {
         val requestCredentials = credentials ?: return fallBack(NetworkedIdentityFallbackReason.Unavailable)
@@ -226,7 +249,7 @@ internal class NetworkedIdentityCoordinator(
     private fun handleConfirmationError(error: Throwable) {
         when (error.consumerErrorCode) {
             INVALID_CODE -> mutableState.value = awaitingOtp(invalidCode = true)
-            VERIFICATION_EXPIRED -> startFreshVerification()
+            VERIFICATION_EXPIRED -> startVerification(isResendingSmsCode = false)
             SESSION_EXPIRED -> requireReauthentication()
             else -> fallBack(NetworkedIdentityFallbackReason.Unavailable)
         }

@@ -8,8 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class VerificationPageNetworkingData(
-    // #TODO - Networked Identity: Merchant email needs the SDK verification_page field contract
-    // and an email-screen design decision; do not assume the public provided_details.email shape.
     val features: VerificationPageNetworkingFeatures?
 ) : Parcelable
 

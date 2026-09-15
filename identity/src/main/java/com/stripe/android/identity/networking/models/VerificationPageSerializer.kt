@@ -24,7 +24,16 @@ internal object VerificationPageSerializer :
         val normalizedNetworkingData = networkingData?.let {
             JsonObject(it + ("features" to normalizedFeatures))
         } ?: page["networking_data"] ?: JsonNull
-        return JsonObject(page + ("networking_data" to normalizedNetworkingData))
+        val providedDetails = page["provided_details"] as? JsonObject
+        val normalizedProvidedDetails = providedDetails?.let {
+            JsonObject(mapOf("email" to JsonNull) + it)
+        } ?: page["provided_details"] ?: JsonNull
+        return JsonObject(
+            page + mapOf(
+                "networking_data" to normalizedNetworkingData,
+                "provided_details" to normalizedProvidedDetails
+            )
+        )
     }
 
     private val optionalFeatureNames = listOf(

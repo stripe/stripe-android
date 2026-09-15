@@ -16,6 +16,27 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 internal class NetworkedIdentityViewModelTest {
     @Test
+    fun `cleared ViewModel still logs out credentials from pending resend`() = runNetworkedIdentityScenario {
+        val store = ViewModelStore()
+        store.put("networked", NetworkedIdentityViewModel(coordinator))
+        awaitOtp()
+        val resend = resendOtp()
+        store.clear()
+        runCurrent()
+        assertThat(repository.logoutCalls.awaitItem().credentials.sessionClientSecret).isEqualTo("session_started")
+        resend.response.complete(
+            Result.success(niResponse(clientSecret = "late_resend", authSessionClientSecret = "late_auth"))
+        )
+        runCurrent()
+        val logout = repository.logoutCalls.awaitItem()
+        assertThat(logout.credentials.sessionClientSecret).isEqualTo("late_resend")
+        assertThat(logout.authSessionSecrets).containsExactly("auth_lookup", "auth_started", "late_auth").inOrder()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        cancellations.expectNoEvents()
+        fallbacks.expectNoEvents()
+    }
+
+    @Test
     fun `Activity recreation retains flow until permanent destruction`() = runNetworkedIdentityScenario {
         val creations = Turbine<Unit>()
         val factory = object : ViewModelProvider.Factory {

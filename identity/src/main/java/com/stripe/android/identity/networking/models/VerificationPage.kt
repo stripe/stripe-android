@@ -67,7 +67,9 @@ internal data class VerificationPage(
     @SerialName("skip_success_page")
     val skipSuccessPage: Boolean = false,
     @SerialName("networking_data")
-    val networkingData: VerificationPageNetworkingData?
+    val networkingData: VerificationPageNetworkingData?,
+    @SerialName("provided_details")
+    val providedDetails: VerificationPageProvidedDetails?
 ) : Parcelable {
     @Serializable
     internal enum class Status {

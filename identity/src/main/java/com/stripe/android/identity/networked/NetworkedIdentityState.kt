@@ -14,6 +14,10 @@ internal sealed interface NetworkedIdentityState {
         val redactedPhoneNumber: String,
         val otpGeneration: Int
     ) : NetworkedIdentityState
+    data class OtpResendPending(
+        val redactedPhoneNumber: String,
+        val otpGeneration: Int
+    ) : NetworkedIdentityState
     data object ReauthenticationRequired : NetworkedIdentityState
     data object DocumentsPending : NetworkedIdentityState
     data class SelectDocument(

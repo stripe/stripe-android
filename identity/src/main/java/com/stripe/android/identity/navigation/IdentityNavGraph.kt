@@ -79,6 +79,8 @@ internal fun IdentityNavGraph(
     val coroutineScope = rememberCoroutineScope()
     // #TODO - Networked Identity: Keep NI out of this graph until merchant publishable-key delivery,
     // clone/attach and save-consent APIs, and the host entry point after required disclosure are defined.
+    // At that entry point pass VerificationPage.providedDetails?.email to the NI screen;
+    // supplied-email auto-lookup remains provisional pending design and live backend validation.
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
     }

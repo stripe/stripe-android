@@ -5,6 +5,30 @@ import org.junit.Test
 
 internal class NetworkedIdentityCleanupTest {
     @Test
+    fun `late resend after cancellation logs out rotated credentials`() = runNetworkedIdentityScenario {
+        awaitOtp()
+        val resend = resendOtp()
+        coordinator.cancel()
+        coordinator.resendOtp()
+        cancellations.awaitItem()
+        runCurrent()
+        assertThat(repository.logoutCalls.awaitItem().credentials.sessionClientSecret).isEqualTo("session_started")
+        resend.response.complete(
+            Result.success(
+                niResponse(clientSecret = "session_resent_after_cancel", authSessionClientSecret = "auth_late")
+            )
+        )
+        runCurrent()
+        val logout = repository.logoutCalls.awaitItem()
+        assertThat(logout.credentials.sessionClientSecret).isEqualTo("session_resent_after_cancel")
+        assertThat(logout.authSessionSecrets).containsExactly("auth_lookup", "auth_started", "auth_late").inOrder()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        repository.startCalls.expectNoEvents()
+        cancellations.expectNoEvents()
+        fallbacks.expectNoEvents()
+    }
+
+    @Test
     fun `consumer secret updates and auth secrets remain nonempty unique and ordered`() = runNetworkedIdentityScenario(
         authSessionSecrets = listOf("", "seed", "seed", " ")
     ) {

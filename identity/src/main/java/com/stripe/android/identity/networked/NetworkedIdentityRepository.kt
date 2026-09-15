@@ -12,6 +12,7 @@ internal interface NetworkedIdentityRepository {
         credentials: NetworkedIdentityCredentials,
         locale: String,
         accountPhoneNumber: String?,
+        isResendingSmsCode: Boolean,
         authSessionSecrets: List<String>,
     ): Result<NetworkedIdentitySessionResponse>
 

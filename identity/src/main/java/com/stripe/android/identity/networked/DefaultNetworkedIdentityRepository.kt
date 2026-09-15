@@ -63,6 +63,7 @@ internal class DefaultNetworkedIdentityRepository(
         credentials: NetworkedIdentityCredentials,
         locale: String,
         accountPhoneNumber: String?,
+        isResendingSmsCode: Boolean,
         authSessionSecrets: List<String>,
     ): Result<NetworkedIdentitySessionResponse> = post(
         path = "consumers/sessions/start_verification",
@@ -71,7 +72,7 @@ internal class DefaultNetworkedIdentityRepository(
             "type" to "SMS",
             "locale" to locale,
             "account_phone_number" to accountPhoneNumber,
-        ),
+        ) + if (isResendingSmsCode) mapOf("is_resend_sms_code" to true) else emptyMap(),
         retryServerError = false,
         parse = NetworkedIdentityJsonParser::sessionResponse,
     )

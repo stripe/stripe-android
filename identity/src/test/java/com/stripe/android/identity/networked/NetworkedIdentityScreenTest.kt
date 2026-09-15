@@ -33,6 +33,10 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.TestApplication
@@ -78,6 +82,110 @@ internal class NetworkedIdentityScreenTest {
         composeRule.onNodeWithTag(NI_EMAIL_TAG).performTextReplacement("jane@example.com")
         composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsEnabled().performClick()
         assertThat(emailSubmissions.awaitItem()).isEqualTo("jane@example.com")
+    }
+
+    @Test
+    fun `valid supplied email is trimmed for automatic sign-in`() = runScenario(
+        providedEmailAddress = "  consumer@example.com\n",
+        expectedProvidedEmail = "consumer@example.com",
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertTextContains("consumer@example.com")
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsEnabled()
+    }
+
+    @Test
+    fun `provided email waits until resumed and does not repeat on the next resume`() = runScenario(
+        providedEmailAddress = "consumer@example.com",
+        initialLifecycleState = Lifecycle.State.STARTED,
+    ) {
+        firstAppearances.expectNoEvents()
+        updateLifecycle(Lifecycle.State.RESUMED)
+        assertThat(firstAppearances.awaitItem()).isEqualTo("consumer@example.com")
+        updateLifecycle(Lifecycle.State.STARTED)
+        updateLifecycle(Lifecycle.State.RESUMED)
+        firstAppearances.expectNoEvents()
+    }
+
+    @Test
+    fun `cancellation before resume suppresses automatic sign-in`() = runScenario(
+        providedEmailAddress = "consumer@example.com",
+        initialLifecycleState = Lifecycle.State.STARTED,
+    ) {
+        firstAppearances.expectNoEvents()
+        updateState(NetworkedIdentityState.Cancelled)
+        updateLifecycle(Lifecycle.State.RESUMED)
+        assertThat(firstAppearances.awaitItem()).isNull()
+        emailSubmissions.expectNoEvents()
+    }
+
+    @Test
+    fun `invalid supplied email stays editable without automatic sign-in`() = runScenario(
+        providedEmailAddress = "not-an-email",
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertIsEnabled().assertTextContains("not-an-email")
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `blank supplied email stays editable without automatic sign-in`() = runScenario(
+        providedEmailAddress = " \n ",
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertIsEnabled().assertTextEquals("Email", "")
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `sanitized supplied email requires explicit review and submission`() = runScenario(
+        providedEmailAddress = "john doe@example.com",
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertTextContains("johndoe@example.com")
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsEnabled().performClick()
+        assertThat(emailSubmissions.awaitItem()).isEqualTo("johndoe@example.com")
+    }
+
+    @Test
+    fun `internal newline in supplied email does not silently choose another account`() = runScenario(
+        providedEmailAddress = "john\ndoe@example.com",
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertTextContains("johndoe@example.com")
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsEnabled()
+    }
+
+    @Test
+    fun `changed supplied email prop does not replace initial field or repeat automatic sign-in`() = runScenario(
+        providedEmailAddress = "first@example.com",
+        expectedProvidedEmail = "first@example.com",
+    ) {
+        composeRule.runOnIdle { providedEmailAddress = "different@example.com" }
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertTextContains("first@example.com")
+        firstAppearances.expectNoEvents()
+    }
+
+    @Test
+    fun `supplied email cannot trigger automatic sign-in in terminal state`() = runScenario(
+        initialState = NetworkedIdentityState.Cancelled,
+        providedEmailAddress = "consumer@example.com",
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertDoesNotExist()
+        emailSubmissions.expectNoEvents()
+    }
+
+    @Test
+    fun `supplied email cannot automatically retry after reauthentication`() = runScenario(
+        providedEmailAddress = "consumer@example.com",
+        expectedProvidedEmail = "consumer@example.com",
+    ) {
+        updateState(NetworkedIdentityState.ReauthenticationRequired)
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertTextEquals("Email", "")
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsNotEnabled()
+        firstAppearances.expectNoEvents()
+        composeRule.runOnIdle { visible = false }
+        composeRule.waitForIdle()
+        composeRule.runOnIdle { visible = true }
+        composeRule.waitForIdle()
+        assertThat(firstAppearances.awaitItem()).isNull()
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertTextEquals("Email", "")
+        emailSubmissions.expectNoEvents()
     }
 
     @Test
@@ -132,6 +240,47 @@ internal class NetworkedIdentityScreenTest {
         initialState = NetworkedIdentityState.OtpConfirmPending("(***) *** **34", otpGeneration = 1),
     ) {
         composeRule.onNodeWithTag("OTP-0").assertIsNotEnabled()
+        composeRule.onNodeWithTag(NI_LOADING_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(NI_RESEND_TAG).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `resend clears partial OTP and disables entry until a fresh response`() = runScenario(
+        initialState = awaitingOtp(),
+    ) {
+        composeRule.onNodeWithTag("OTP-0").performTextInput("123")
+        composeRule.onNodeWithTag("OTP-2").assertTextEquals("3")
+        composeRule.onNodeWithTag(NI_RESEND_TAG).assertIsEnabled().performClick()
+        resends.awaitItem()
+        updateState(NetworkedIdentityState.OtpResendPending("(***) *** **34", otpGeneration = 2))
+        composeRule.onNodeWithTag("OTP-0").assertTextEquals("").assertIsNotEnabled()
+        composeRule.onNodeWithTag("OTP-1").assertTextEquals("").assertIsNotEnabled()
+        composeRule.onNodeWithTag("OTP-2").assertTextEquals("").assertIsNotEnabled()
+        composeRule.onNodeWithTag(NI_RESEND_TAG).assertIsNotEnabled().performClick()
+        composeRule.onNodeWithTag(NI_LOADING_TAG).assertIsDisplayed()
+        resends.expectNoEvents()
+        otpSubmissions.expectNoEvents()
+        updateState(awaitingOtp(generation = 2))
+        composeRule.onNodeWithTag("OTP-0").assertTextEquals("").assertIsEnabled()
+        composeRule.onNodeWithTag(NI_RESEND_TAG).assertIsEnabled()
+    }
+
+    @Test
+    fun `resend clears invalid-code feedback while retaining manual capture`() = runScenario(
+        initialState = awaitingOtp(invalidCode = true),
+    ) {
+        composeRule.onNodeWithTag(NI_ERROR_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(NI_RESEND_TAG).performClick()
+        resends.awaitItem()
+        updateState(NetworkedIdentityState.OtpResendPending("(***) *** **34", otpGeneration = 2))
+        composeRule.onNodeWithTag(NI_ERROR_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(NI_MANUAL_TAG).assertIsEnabled().performClick()
+        manualCapture.awaitItem()
+    }
+
+    @Test
+    fun `initial SMS sending disables resend`() = runScenario(initialState = NetworkedIdentityState.OtpStartPending) {
+        composeRule.onNodeWithTag(NI_RESEND_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(NI_LOADING_TAG).assertIsDisplayed()
     }
 
@@ -216,6 +365,7 @@ internal class NetworkedIdentityScreenTest {
         cancellations.expectNoEvents()
         composeRule.runOnIdle { visible = true }
         composeRule.onNodeWithTag("OTP-0").assertTextEquals("")
+        assertThat(firstAppearances.awaitItem()).isNull()
         cancellations.expectNoEvents()
     }
 
@@ -229,21 +379,31 @@ internal class NetworkedIdentityScreenTest {
     private fun runScenario(
         initialState: NetworkedIdentityState = NetworkedIdentityState.CollectEmail,
         height: Dp = 700.dp,
+        providedEmailAddress: String? = null,
+        expectedProvidedEmail: String? = null,
+        initialLifecycleState: Lifecycle.State = Lifecycle.State.RESUMED,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val scenario = Scenario(initialState)
+        val scenario = Scenario(initialState, providedEmailAddress)
+        scenario.updateLifecycle(initialLifecycleState)
         composeRule.setContent {
             scenario.backDispatcher = requireNotNull(LocalOnBackPressedDispatcherOwner.current).onBackPressedDispatcher
             StripeTheme {
                 // StripeTheme marks Robolectric as inspection mode. Exercise runtime focus behavior
                 // here; visual tests retain inspection mode so previews never open the keyboard.
-                CompositionLocalProvider(LocalInspectionMode provides false) {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides false,
+                    LocalLifecycleOwner provides scenario.lifecycleOwner,
+                ) {
                     Box(Modifier.height(height)) {
                         if (!scenario.visible) return@Box
                         NetworkedIdentityScreen(
                             state = scenario.state,
+                            providedEmailAddress = scenario.providedEmailAddress,
+                            onFirstAppearance = scenario.firstAppearances::add,
                             onSubmitEmail = scenario.emailSubmissions::add,
                             onSubmitOtp = scenario.otpSubmissions::add,
+                            onResendOtp = { scenario.resends.add(Unit) },
                             onSelectDocument = scenario.documentSelections::add,
                             onManualCapture = { scenario.manualCapture.add(Unit) },
                             onCancel = { scenario.cancellations.add(Unit) },
@@ -252,16 +412,26 @@ internal class NetworkedIdentityScreenTest {
                 }
             }
         }
+        composeRule.waitForIdle()
+        if (initialLifecycleState == Lifecycle.State.RESUMED) {
+            assertThat(scenario.firstAppearances.awaitItem()).isEqualTo(expectedProvidedEmail)
+        } else {
+            scenario.firstAppearances.expectNoEvents()
+        }
         scenario.block()
         scenario.ensureAllEventsConsumed()
     }
 
-    private inner class Scenario(initialState: NetworkedIdentityState) {
+    private inner class Scenario(initialState: NetworkedIdentityState, initialProvidedEmailAddress: String?) {
+        val lifecycleOwner = TestLifecycleOwner()
         var state by mutableStateOf(initialState)
+        var providedEmailAddress by mutableStateOf(initialProvidedEmailAddress)
         var visible by mutableStateOf(true)
         lateinit var backDispatcher: OnBackPressedDispatcher
         val emailSubmissions = Turbine<String>()
         val otpSubmissions = Turbine<String>()
+        val resends = Turbine<Unit>()
+        val firstAppearances = Turbine<String?>()
         val documentSelections = Turbine<String>()
         val manualCapture = Turbine<Unit>()
         val cancellations = Turbine<Unit>()
@@ -271,13 +441,24 @@ internal class NetworkedIdentityScreenTest {
             composeRule.waitForIdle()
         }
 
+        fun updateLifecycle(state: Lifecycle.State) {
+            composeRule.runOnIdle { lifecycleOwner.lifecycle.currentState = state }
+            composeRule.waitForIdle()
+        }
+
         fun ensureAllEventsConsumed() {
             emailSubmissions.ensureAllEventsConsumed()
             otpSubmissions.ensureAllEventsConsumed()
+            resends.ensureAllEventsConsumed()
+            firstAppearances.ensureAllEventsConsumed()
             documentSelections.ensureAllEventsConsumed()
             manualCapture.ensureAllEventsConsumed()
             cancellations.ensureAllEventsConsumed()
         }
+    }
+
+    private class TestLifecycleOwner : LifecycleOwner {
+        override val lifecycle = LifecycleRegistry(this)
     }
 
     private companion object {

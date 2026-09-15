@@ -60,6 +60,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.withResumed
 import com.stripe.android.identity.R
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.elements.EmailConfig
@@ -77,17 +79,38 @@ import com.stripe.android.uicore.utils.collectAsState
  * Standalone reuse UI. The owner retains the coordinator across configuration changes and explicitly
  * abandons it on permanent dismissal. Composition disposal is not a flow cancellation signal.
  * No input, OTP, or credentials are placed in saved instance state.
+ * Bind [onFirstAppearance] to [NetworkedIdentityViewModel.onFirstAppearance] so the provided-email
+ * opportunity is consumed once per flow, including across configuration changes.
  */
 @Composable
 internal fun NetworkedIdentityScreen(
     state: NetworkedIdentityState,
+    providedEmailAddress: String?,
+    onFirstAppearance: (String?) -> Unit,
     onSubmitEmail: (String) -> Unit,
     onSubmitOtp: (String) -> Unit,
+    onResendOtp: () -> Unit,
     onSelectDocument: (String) -> Unit,
     onManualCapture: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    val emailController = remember { EmailConfig.createController(initialValue = null) }
+    val initialProvidedEmail = remember { providedEmailAddress?.trim() }
+    val emailController = remember { EmailConfig.createController(initialValue = initialProvidedEmail) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val currentState by rememberUpdatedState(state)
+    val currentOnFirstAppearance by rememberUpdatedState(onFirstAppearance)
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.withResumed {
+            val candidate = initialProvidedEmail?.takeIf {
+                currentState == NetworkedIdentityState.CollectEmail && emailController.isComplete.value &&
+                    emailController.fieldValue.value == it
+            }
+            // #TODO - Networked Identity: Confirm provisional supplied-email screen behavior with design.
+            // The ViewModel consumes this opportunity once across recreation, including a null candidate.
+            // Sanitization must never silently change which account is used for automatic sign-in.
+            currentOnFirstAppearance(candidate)
+        }
+    }
     LaunchedEffect(state) {
         if (state is NetworkedIdentityState.ReauthenticationRequired || state.isTerminal) {
             emailController.onValueChange("")
@@ -98,6 +121,7 @@ internal fun NetworkedIdentityScreen(
         emailController = emailController,
         onSubmitEmail = onSubmitEmail,
         onSubmitOtp = onSubmitOtp,
+        onResendOtp = onResendOtp,
         onSelectDocument = onSelectDocument,
         onManualCapture = onManualCapture,
         onCancel = onCancel,
@@ -112,6 +136,7 @@ internal fun NetworkedIdentityScreenContent(
     emailController: TextFieldController,
     onSubmitEmail: (String) -> Unit,
     onSubmitOtp: (String) -> Unit,
+    onResendOtp: () -> Unit,
     onSelectDocument: (String) -> Unit,
     onManualCapture: () -> Unit,
     onCancel: () -> Unit,
@@ -178,6 +203,10 @@ internal fun NetworkedIdentityScreenContent(
                     onSubmitEmail = {
                         focusManager.clearFocus(force = true)
                         onSubmitEmail(it)
+                    },
+                    onResendOtp = {
+                        focusManager.clearFocus(force = true)
+                        onResendOtp()
                     },
                     onManualCapture = {
                         focusManager.clearFocus(force = true)
@@ -250,17 +279,10 @@ private fun NetworkedIdentityBody(
             NetworkedIdentityLoading(stringResource(R.string.stripe_identity_link_sending))
         }
         is NetworkedIdentityState.AwaitingOtp,
-        is NetworkedIdentityState.OtpConfirmPending -> {
-            val awaiting = state as? NetworkedIdentityState.AwaitingOtp
-            val confirming = state as? NetworkedIdentityState.OtpConfirmPending
+        is NetworkedIdentityState.OtpConfirmPending,
+        is NetworkedIdentityState.OtpResendPending -> {
             // Keep one call site so the entered value survives pending/invalid transitions.
-            NetworkedIdentityOtp(
-                redactedPhoneNumber = awaiting?.redactedPhoneNumber ?: requireNotNull(confirming).redactedPhoneNumber,
-                otpGeneration = awaiting?.otpGeneration ?: requireNotNull(confirming).otpGeneration,
-                invalidCode = awaiting?.invalidCode == true,
-                submitting = confirming != null,
-                onSubmitOtp = onSubmitOtp,
-            )
+            NetworkedIdentityOtp(state = state, onSubmitOtp = onSubmitOtp)
         }
         NetworkedIdentityState.DocumentsPending -> {
             NetworkedIdentityLoading(stringResource(R.string.stripe_identity_link_documents_loading))
@@ -284,12 +306,30 @@ private fun NetworkedIdentityBody(
 }
 
 @Composable
+private fun NetworkedIdentityOtp(state: NetworkedIdentityState, onSubmitOtp: (String) -> Unit) {
+    val awaiting = state as? NetworkedIdentityState.AwaitingOtp
+    val confirming = state as? NetworkedIdentityState.OtpConfirmPending
+    val resending = state as? NetworkedIdentityState.OtpResendPending
+    NetworkedIdentityOtp(
+        redactedPhoneNumber = awaiting?.redactedPhoneNumber ?: confirming?.redactedPhoneNumber
+            ?: requireNotNull(resending).redactedPhoneNumber,
+        otpGeneration = awaiting?.otpGeneration ?: confirming?.otpGeneration
+            ?: requireNotNull(resending).otpGeneration,
+        invalidCode = awaiting?.invalidCode == true,
+        submitting = confirming != null,
+        resending = resending != null,
+        onSubmitOtp = onSubmitOtp,
+    )
+}
+
+@Composable
 @Suppress("LongMethod")
 private fun NetworkedIdentityOtp(
     redactedPhoneNumber: String,
     otpGeneration: Int,
     invalidCode: Boolean,
     submitting: Boolean,
+    resending: Boolean,
     onSubmitOtp: (String) -> Unit,
 ) {
     val element = remember(otpGeneration) {
@@ -300,15 +340,16 @@ private fun NetworkedIdentityOtp(
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     val inspection = LocalInspectionMode.current
+    val pending = submitting || resending
 
-    LaunchedEffect(otpGeneration, invalidCode) {
+    LaunchedEffect(otpGeneration, invalidCode, pending) {
         if (invalidCode) element.controller.reset()
-        if (!inspection && !submitting) focusRequester.requestFocus()
+        if (!inspection && !pending) focusRequester.requestFocus()
     }
     // Submission is driven by a completed value changing, so returning an invalid-code response
     // cannot resubmit the old code. The coordinator also rejects duplicate pending requests.
     LaunchedEffect(otp) {
-        if (otp.length == element.controller.otpLength && !submitting) {
+        if (otp.length == element.controller.otpLength && !pending) {
             focusManager.clearFocus(force = true)
             currentOnSubmitOtp(otp)
         }
@@ -316,7 +357,7 @@ private fun NetworkedIdentityOtp(
     BodyText(stringResource(R.string.stripe_identity_link_otp_body, redactedPhoneNumber))
     Spacer(Modifier.height(32.dp))
     OTPElementUI(
-        enabled = !submitting,
+        enabled = !pending,
         element = element,
         modifier = Modifier.testTag(NI_OTP_TAG),
         boxShape = RoundedCornerShape(12.dp),
@@ -344,9 +385,13 @@ private fun NetworkedIdentityOtp(
                 .semantics { liveRegion = LiveRegionMode.Assertive },
         )
     }
-    if (submitting) {
+    if (pending) {
         Spacer(Modifier.height(16.dp))
-        NetworkedIdentityLoading(stringResource(R.string.stripe_identity_link_confirming))
+        NetworkedIdentityLoading(
+            stringResource(
+                if (resending) R.string.stripe_identity_link_sending else R.string.stripe_identity_link_confirming
+            )
+        )
     }
 }
 
@@ -407,6 +452,7 @@ private fun NetworkedIdentityActions(
     state: NetworkedIdentityState,
     emailController: TextFieldController,
     onSubmitEmail: (String) -> Unit,
+    onResendOtp: () -> Unit,
     onManualCapture: () -> Unit,
 ) {
     if (state.isEmail) {
@@ -435,13 +481,15 @@ private fun NetworkedIdentityActions(
         }
         Spacer(Modifier.height(8.dp))
     }
-    val plain = state is NetworkedIdentityState.AwaitingOtp ||
-        state is NetworkedIdentityState.OtpConfirmPending || state is NetworkedIdentityState.OtpStartPending
+    if (state.isOtp) {
+        NetworkedIdentityResendButton(state = state, onResendOtp = onResendOtp)
+        Spacer(Modifier.height(8.dp))
+    }
     TextButton(
         onClick = onManualCapture,
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor = if (plain) Color.Transparent else MaterialTheme.stripeColors.component,
+            backgroundColor = if (state.isOtp) Color.Transparent else MaterialTheme.stripeColors.component,
             contentColor = MaterialTheme.colors.onSurface,
         ),
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(NI_MANUAL_TAG),
@@ -454,6 +502,22 @@ private fun NetworkedIdentityActions(
     }
     // #TODO - Networked Identity: add progression only after the clone/attach endpoint, auth,
     // association-token lifetime and Identity submission contract are defined. Selection is not success.
+}
+
+@Composable
+private fun NetworkedIdentityResendButton(state: NetworkedIdentityState, onResendOtp: () -> Unit) {
+    TextButton(
+        onClick = onResendOtp,
+        enabled = state is NetworkedIdentityState.AwaitingOtp,
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = MaterialTheme.stripeColors.component,
+            contentColor = MaterialTheme.colors.onSurface,
+        ),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(NI_RESEND_TAG),
+    ) {
+        Text(stringResource(R.string.stripe_identity_link_resend), fontWeight = FontWeight.SemiBold)
+    }
 }
 
 @Composable
@@ -487,6 +551,10 @@ private val NetworkedIdentityState.isEmail: Boolean
     get() = this is NetworkedIdentityState.CollectEmail || this is NetworkedIdentityState.LookupPending ||
         this is NetworkedIdentityState.ReauthenticationRequired
 
+private val NetworkedIdentityState.isOtp: Boolean
+    get() = this is NetworkedIdentityState.AwaitingOtp || this is NetworkedIdentityState.OtpConfirmPending ||
+        this is NetworkedIdentityState.OtpStartPending || this is NetworkedIdentityState.OtpResendPending
+
 private val NetworkedIdentityState.title: Int
     get() = when (this) {
         NetworkedIdentityState.CollectEmail,
@@ -494,6 +562,7 @@ private val NetworkedIdentityState.title: Int
         NetworkedIdentityState.ReauthenticationRequired -> R.string.stripe_identity_link_reauth_title
         is NetworkedIdentityState.AwaitingOtp,
         is NetworkedIdentityState.OtpConfirmPending,
+        is NetworkedIdentityState.OtpResendPending,
         NetworkedIdentityState.OtpStartPending -> R.string.stripe_identity_link_otp_title
         else -> R.string.stripe_identity_link_documents_title
     }
@@ -507,6 +576,7 @@ internal const val NI_EMAIL_TAG = "NetworkedIdentityEmail"
 internal const val NI_OTP_TAG = "NetworkedIdentityOtp"
 internal const val NI_ERROR_TAG = "NetworkedIdentityError"
 internal const val NI_CONTINUE_TAG = "NetworkedIdentityContinue"
+internal const val NI_RESEND_TAG = "NetworkedIdentityResend"
 internal const val NI_MANUAL_TAG = "NetworkedIdentityManual"
 internal const val NI_CLOSE_TAG = "NetworkedIdentityClose"
 internal const val NI_LOADING_TAG = "NetworkedIdentityLoading"

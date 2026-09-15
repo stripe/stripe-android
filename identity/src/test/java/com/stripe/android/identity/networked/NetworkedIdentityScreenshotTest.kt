@@ -13,7 +13,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Android equivalents of the five iOS NI references. Pixel 6 is the repository's supported
+ * Android equivalents of the six iOS NI references. Pixel 6 is the repository's supported
  * Paparazzi device; fixed viewport height exercises centered content, footer and scrolling.
  */
 internal class NetworkedIdentityScreenshotTest {
@@ -41,6 +41,14 @@ internal class NetworkedIdentityScreenshotTest {
             redactedPhoneNumber = "(***) *** **34",
             invalidCode = true,
             otpGeneration = 1,
+        )
+    )
+
+    @Test
+    fun resendingOtp() = snapshot(
+        NetworkedIdentityState.OtpResendPending(
+            redactedPhoneNumber = "(***) *** **34",
+            otpGeneration = 2,
         )
     )
 
@@ -82,6 +90,7 @@ internal class NetworkedIdentityScreenshotTest {
                     emailController = emailController,
                     onSubmitEmail = {},
                     onSubmitOtp = {},
+                    onResendOtp = {},
                     onSelectDocument = {},
                     onManualCapture = {},
                     onCancel = {},

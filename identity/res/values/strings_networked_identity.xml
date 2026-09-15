@@ -4,6 +4,7 @@
     <string name="stripe_identity_link_email_title">Continue with Link</string>
     <string name="stripe_identity_link_email_body">Sign in to use a saved ID.</string>
     <string name="stripe_identity_link_continue">Continue</string>
+    <string name="stripe_identity_link_resend">Resend code</string>
     <string name="stripe_identity_link_manual">Manually verify identity</string>
     <string name="stripe_identity_link_otp_title">Confirm it\'s you</string>
     <string name="stripe_identity_link_otp_body">Enter the code sent to %1$s.</string>

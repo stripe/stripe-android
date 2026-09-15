@@ -2,12 +2,14 @@ package com.stripe.android.identity.networked
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -189,6 +191,7 @@ internal class DefaultNetworkedIdentityRepositoryTest {
             credentials = credentials,
             locale = "fr-CA",
             accountPhoneNumber = "+15555551234",
+            isResendingSmsCode = false,
             authSessionSecrets = listOf("auth_1", "", "auth_1", "auth_2"),
         ).getOrThrow()
 
@@ -209,7 +212,7 @@ internal class DefaultNetworkedIdentityRepositoryTest {
     fun `start omits absent phone cookies and resend flag`() = runScenario {
         network.respond(sessionResponse())
 
-        repository.startVerification(credentials, "en-US", null, emptyList()).getOrThrow()
+        repository.startVerification(credentials, "en-US", null, false, emptyList()).getOrThrow()
 
         assertThat(request("consumers/sessions/start_verification", consumer = true).body()).containsExactly(
             "credentials[consumer_session_client_secret]" to "css_request",
@@ -217,6 +220,30 @@ internal class DefaultNetworkedIdentityRepositoryTest {
             "type" to "SMS",
             "locale" to "en-US",
         )
+    }
+
+    @Test
+    fun `explicit SMS resend includes flag and preserves consumer auth and cookies`() = runScenario {
+        network.respond(sessionResponse())
+
+        val response = repository.startVerification(
+            credentials = credentials,
+            locale = "en-US",
+            accountPhoneNumber = null,
+            isResendingSmsCode = true,
+            authSessionSecrets = listOf("auth_1"),
+        ).getOrThrow()
+
+        assertThat(request("consumers/sessions/start_verification", consumer = true).body()).containsExactly(
+            "credentials[consumer_session_client_secret]" to "css_request",
+            "request_surface" to "web_identity_product",
+            "type" to "SMS",
+            "locale" to "en-US",
+            "is_resend_sms_code" to "true",
+            "cookies[verification_session_client_secrets][]" to "auth_1",
+        )
+        assertThat(response.session.clientSecret).isEqualTo("css_response")
+        assertThat(response.authSessionClientSecret).isEqualTo("auth_response")
     }
 
     @Test
@@ -258,7 +285,7 @@ internal class DefaultNetworkedIdentityRepositoryTest {
         json.getJSONObject("consumer_session").put("client_secret", JSONObject.NULL)
         network.respond(json)
 
-        assertThat(repository.startVerification(credentials, "en-US", null, emptyList()).isFailure).isTrue()
+        assertThat(repository.startVerification(credentials, "en-US", null, false, emptyList()).isFailure).isTrue()
 
         request("consumers/sessions/start_verification", consumer = true)
     }
@@ -537,6 +564,10 @@ internal class DefaultNetworkedIdentityRepositoryTest {
                 assertThat(it.headers["Stripe-Account"]).isEqualTo(if (consumer) null else "acct_merchant")
                 assertThat(it.headers).doesNotContainKey("Cookie")
                 assertThat(it.headers).doesNotContainKey("X-Stripe-Identity-Client-Version")
+                assertThat(it.headers["Stripe-Version"]).isEqualTo(ApiVersion.get().code)
+                val userAgent = JSONObject(requireNotNull(it.headers["X-Stripe-User-Agent"]))
+                assertThat(userAgent.getString("bindings_version")).isEqualTo(StripeSdkVersion.VERSION_NAME)
+                assertThat(userAgent.getString("lang")).isEqualTo("kotlin")
                 assertThat(it.postHeaders?.get("Content-Type")).startsWith("application/x-www-form-urlencoded")
                 assertThat(it.retryResponseCodes).isEmpty()
                 assertThat(it.shouldCache).isFalse()

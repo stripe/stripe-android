@@ -21,9 +21,17 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         credentials: NetworkedIdentityCredentials,
         locale: String,
         accountPhoneNumber: String?,
+        isResendingSmsCode: Boolean,
         authSessionSecrets: List<String>
     ): Result<NetworkedIdentitySessionResponse> {
-        val call = StartCall(credentials, locale, accountPhoneNumber, authSessionSecrets, CompletableDeferred())
+        val call = StartCall(
+            credentials,
+            locale,
+            accountPhoneNumber,
+            isResendingSmsCode,
+            authSessionSecrets,
+            CompletableDeferred()
+        )
         startCalls.add(call)
         return call.response.await()
     }
@@ -92,6 +100,7 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         val credentials: NetworkedIdentityCredentials,
         val locale: String,
         val accountPhoneNumber: String?,
+        val isResendingSmsCode: Boolean,
         val authSessionSecrets: List<String>,
         val response: CompletableDeferred<Result<NetworkedIdentitySessionResponse>>
     )

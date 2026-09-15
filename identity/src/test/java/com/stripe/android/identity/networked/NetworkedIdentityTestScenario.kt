@@ -67,6 +67,12 @@ internal data class NetworkedIdentityTestScenario(
         return repository.confirmCalls.awaitItem()
     }
 
+    suspend fun resendOtp(): FakeNetworkedIdentityRepository.StartCall {
+        coordinator.resendOtp()
+        runCurrent()
+        return repository.startCalls.awaitItem()
+    }
+
     suspend fun loadDocuments(): FakeNetworkedIdentityRepository.DocumentCall {
         awaitOtp()
         confirmOtp().response.complete(
