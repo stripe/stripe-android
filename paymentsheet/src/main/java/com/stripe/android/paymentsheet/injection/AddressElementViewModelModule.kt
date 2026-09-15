@@ -100,6 +100,12 @@ internal class AddressElementViewModelModule {
         }
     }
 
+    @Provides
+    @Singleton
+    fun provideApiConfiguration(
+        args: AddressElementActivityContract.Args
+    ) = args.apiConfiguration
+
     @Module
     interface Bindings {
         @Binds

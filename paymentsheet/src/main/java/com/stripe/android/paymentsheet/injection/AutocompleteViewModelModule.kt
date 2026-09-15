@@ -50,6 +50,12 @@ internal interface AutocompleteViewModelModule {
         ): AutocompleteViewModel.Args = AutocompleteViewModel.Args(args.country)
 
         @Provides
+        @Singleton
+        fun provideApiConfiguration(
+            args: AutocompleteContract.Args
+        ) = args.apiConfiguration
+
+        @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 

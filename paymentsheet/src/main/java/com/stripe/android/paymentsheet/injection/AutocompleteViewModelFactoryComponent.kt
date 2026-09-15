@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.ApiConfigurationToNamedModule
@@ -32,7 +31,6 @@ internal interface AutocompleteViewModelFactoryComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance args: AutocompleteContract.Args,
-            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): AutocompleteViewModelFactoryComponent
     }
 }

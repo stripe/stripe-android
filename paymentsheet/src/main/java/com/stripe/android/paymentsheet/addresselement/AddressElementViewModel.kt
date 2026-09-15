@@ -28,7 +28,6 @@ internal class AddressElementViewModel @Inject internal constructor(
                 .create(
                     context = applicationSupplier(),
                     starterArgs = args,
-                    apiConfiguration = args.apiConfiguration,
                 )
                 .addressElementViewModel as T
         }
