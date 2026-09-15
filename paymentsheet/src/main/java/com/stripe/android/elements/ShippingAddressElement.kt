@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
@@ -36,7 +35,7 @@ internal fun interface CommitShippingAddress {
 class ShippingAddressElement internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val commitShippingAddress: CommitShippingAddress,
     private val stateHolder: CheckoutControllerStateHolder,
@@ -47,7 +46,7 @@ class ShippingAddressElement internal constructor(
     internal constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
-        paymentConfiguration: Provider<PaymentConfiguration>,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @ViewModelScope coroutineScope: CoroutineScope,
         checkoutController: CheckoutController,
         stateHolder: CheckoutControllerStateHolder,
@@ -56,7 +55,7 @@ class ShippingAddressElement internal constructor(
     ) : this(
         activityResultCaller = activityResultCaller,
         lifecycleOwner = lifecycleOwner,
-        paymentConfiguration = paymentConfiguration,
+        apiConfigurationProvider = apiConfigurationProvider,
         coroutineScope = coroutineScope,
         commitShippingAddress = CommitShippingAddress(checkoutController::commitShippingAddress),
         stateHolder = stateHolder,
@@ -118,13 +117,9 @@ class ShippingAddressElement internal constructor(
         }
 
         shippingAddressElementStateHolder.isPresenting = true
-        val paymentConfiguration = paymentConfiguration.get()
         activityLauncher.launch(
             AddressElementActivityContract.Args.CheckoutShipping(
-                apiConfiguration = ApiConfiguration.State(
-                    publishableKey = paymentConfiguration.publishableKey,
-                    stripeAccountId = paymentConfiguration.stripeAccountId,
-                ),
+                apiConfiguration = apiConfigurationProvider.get(),
                 config = AddressLauncher.Configuration(
                     additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,

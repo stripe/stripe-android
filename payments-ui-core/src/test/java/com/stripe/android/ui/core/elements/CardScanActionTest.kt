@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
@@ -133,6 +134,7 @@ internal class CardScanActionTest {
         }
 
         val action = CardScanAction(
+            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,

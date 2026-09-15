@@ -20,7 +20,7 @@ class PaymentConfigurationTestRule(
         PaymentConfiguration.clearInstance()
     }
 
-    private companion object {
+    companion object {
         const val PUBLISHABLE_KEY = "pk_test_123"
         const val STRIPE_ACCOUNT = "acct_123"
     }

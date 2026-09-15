@@ -50,7 +50,6 @@ class AddressElementViewModelModuleTest {
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
 
         assertThat(placesClient).isNull()
