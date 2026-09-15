@@ -221,7 +221,8 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(viewModel.formEnabled.value).isFalse()
-        assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
+        val firstCompletion = eventReporter.completedCalls.awaitItem()
+        assertThat(firstCompletion.country).isEqualTo("US")
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
