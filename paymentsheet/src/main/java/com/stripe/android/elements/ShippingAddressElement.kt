@@ -125,6 +125,8 @@ class ShippingAddressElement internal constructor(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                     ),
                     billingAddress = null,
+                    allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
+                        ?: emptySet(),
                     useStripeHostedAutocomplete = true,
                 ),
             )

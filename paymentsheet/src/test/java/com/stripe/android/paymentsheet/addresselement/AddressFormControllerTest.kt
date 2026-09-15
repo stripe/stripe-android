@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
@@ -74,6 +75,18 @@ class AddressFormControllerTest {
                 field.identifier == FormFieldId.Country
             }
         ).isTrue()
+    }
+
+    @Test
+    fun `Allowed countries are applied to the country field`() = addressElementTest(
+        launcherConfig = AddressLauncher.Configuration(
+            allowedCountries = setOf("US", "CA"),
+        ),
+    ) {
+        val element = awaitItem()
+
+        assertThat(element.countryElement.controller.displayItems)
+            .isEqualTo(CountryConfig(setOf("US", "CA")).displayItems)
     }
 
     @Test
