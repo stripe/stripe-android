@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -19,6 +20,9 @@ import org.robolectric.annotation.Config
 internal class FinancialConnectionsThemeTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
