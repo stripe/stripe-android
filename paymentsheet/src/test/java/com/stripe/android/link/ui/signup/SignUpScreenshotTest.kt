@@ -95,6 +95,7 @@ internal class SignUpScreenshotTest(
                                             requiresNameCollection = requiresNameCollection,
                                             canEditEmail = true,
                                             linkBrand = LinkBrand.Link,
+                                            authenticationContent = null,
                                             signUpState = signUpState,
                                             isSubmitting = isSubmitting,
                                             errorMessage = errorMessage,

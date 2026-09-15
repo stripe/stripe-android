@@ -24,7 +24,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.theme.isDarkTheme
-import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.toSignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.link.ui.wallet.makeFallbackCardName
 import com.stripe.android.link.utils.isLinkAuthorizationError
@@ -95,6 +95,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 },
                 consumerSessionClientSecret = account.clientSecret,
                 linkSessionKey = account.linkSessionKey,
+                consumerPublishableKey = account.consumerPublishableKey,
             )
         }
     }
@@ -281,26 +282,31 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun authenticate(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
-        email: String?
+        email: String?,
+        phoneNumber: String?,
+        content: LinkController.AuthenticationContent?,
     ) {
-        performAuthentication(launcher, email, existingOnly = false)
+        performAuthentication(launcher, email, phoneNumber, content, existingOnly = false)
     }
 
     fun authenticateExistingConsumer(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String
     ) {
-        performAuthentication(launcher, email, existingOnly = true)
+        performAuthentication(launcher, email, phoneNumber = null, content = null, existingOnly = true)
     }
 
     private fun performAuthentication(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
+        phoneNumber: String?,
+        content: LinkController.AuthenticationContent?,
         existingOnly: Boolean
     ) {
         present(
             launcher = launcher,
             email = email,
+            phoneNumber = phoneNumber,
             onConfigurationError = { error ->
                 _authenticationResultFlow.tryEmit(
                     LinkController.AuthenticationResult.Failed(error)
@@ -312,7 +318,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
                 } else {
-                    LinkLaunchMode.Authentication(existingOnly = existingOnly)
+                    LinkLaunchMode.Authentication(existingOnly = existingOnly, content = content)
                 }
             }
         )
@@ -571,6 +577,60 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
+    suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): LinkController.RestoreConsumerSessionResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.restoreConsumerSession(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    consumerPublishableKey = consumerPublishableKey,
+                )
+            }
+            .fold(
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.RestoreConsumerSessionResult.Success
+                },
+                onFailure = {
+                    LinkController.RestoreConsumerSessionResult.Failed(it)
+                }
+            )
+    }
+
+    suspend fun startVerification(isResendSmsCode: Boolean): LinkController.StartVerificationResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.startVerification(isResendSmsCode = isResendSmsCode)
+            }
+            .fold(
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.StartVerificationResult.Success
+                },
+                onFailure = {
+                    LinkController.StartVerificationResult.Failed(it)
+                }
+            )
+    }
+
+    suspend fun confirmVerification(code: String): LinkController.ConfirmVerificationResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.confirmVerification(code = code, consentGranted = null)
+            }
+            .fold(
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.ConfirmVerificationResult.Success
+                },
+                onFailure = {
+                    LinkController.ConfirmVerificationResult.Failed(it)
+                }
+            )
+    }
+
     suspend fun logOut(): LinkController.LogOutResult {
         return requireLinkComponent()
             .mapCatching { component ->
@@ -626,6 +686,7 @@ internal class LinkControllerInteractor @Inject constructor(
         phone: String,
         country: String,
         name: String?,
+        consentAction: LinkController.RegisterConsumerConsentAction,
     ): LinkController.RegisterConsumerResult {
         return requireLinkComponent()
             .flatMapCatching {
@@ -635,7 +696,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     country = country,
                     countryInferringMethod = "PHONE_NUMBER",
                     name = name,
-                    consentAction = SignUpConsentAction.Implied
+                    consentAction = consentAction.toSignUpConsentAction()
                 ).toResult()
             }
             .fold(

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.LinkController
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -106,7 +107,7 @@ internal fun SignUpBody(
     }
 
     ScrollableTopLevelColumn {
-        SignUpHeader(linkBrand = signUpScreenState.linkBrand)
+        SignUpHeader(signUpScreenState.linkBrand, signUpScreenState.authenticationContent)
         StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
                 canEditForm = signUpScreenState.canEditForm,
@@ -270,9 +271,12 @@ private fun SecondaryFields(
 }
 
 @Composable
-private fun ColumnScope.SignUpHeader(linkBrand: LinkBrand) {
+private fun ColumnScope.SignUpHeader(
+    linkBrand: LinkBrand,
+    content: LinkController.AuthenticationContent?,
+) {
     Text(
-        text = stringResource(R.string.stripe_link_sign_up_header_v2),
+        text = content?.title ?: stringResource(R.string.stripe_link_sign_up_header_v2),
         modifier = Modifier
             .testTag(SIGN_UP_HEADER_TAG)
             .padding(vertical = 4.dp),
@@ -281,7 +285,7 @@ private fun ColumnScope.SignUpHeader(linkBrand: LinkBrand) {
         color = LinkTheme.colors.textPrimary
     )
     Text(
-        text = stringResource(
+        text = content?.subtitle ?: stringResource(
             R.string.stripe_link_sign_up_message_v2_with_brand,
             linkBrand.brandName(),
         ),
@@ -407,6 +411,7 @@ private fun SignUpScreenLoadingPreview() {
                 requiresNameCollection = true,
                 canEditEmail = true,
                 linkBrand = LinkBrand.Link,
+                authenticationContent = null,
             ),
             onSignUpClick = {},
             onSuggestedEmailClick = {}
@@ -429,6 +434,7 @@ private fun SignUpScreenPreview() {
                 requiresNameCollection = true,
                 canEditEmail = true,
                 linkBrand = LinkBrand.Link,
+                authenticationContent = null,
             ),
             onSignUpClick = {},
             onSuggestedEmailClick = {}

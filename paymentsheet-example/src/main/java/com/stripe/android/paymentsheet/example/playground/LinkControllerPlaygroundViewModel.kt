@@ -99,7 +99,8 @@ internal class LinkControllerPlaygroundViewModel(
                 email = email,
                 phone = phone,
                 country = country,
-                name = name
+                name = name,
+                consentAction = LinkController.RegisterConsumerConsentAction.Implied,
             )
             state.update { it.copy(registerConsumerResult = result) }
         }

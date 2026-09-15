@@ -224,6 +224,7 @@ internal class OnrampInteractor @Inject constructor(
             phone = info.phone,
             country = info.country,
             name = info.fullName,
+            consentAction = LinkController.RegisterConsumerConsentAction.Implied,
         )
 
         return when (result) {
