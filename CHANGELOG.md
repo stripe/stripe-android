@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.18.1 - 2026-09-15
+
 ### All SDKs
 * [ADDED] Added Welsh (United Kingdom) localization.
 * [ADDED] Added Arabic (Saudi Arabia) localization.
