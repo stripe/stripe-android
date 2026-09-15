@@ -18,9 +18,9 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
-import javax.inject.Provider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import javax.inject.Provider
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
