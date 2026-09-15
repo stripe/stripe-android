@@ -373,9 +373,7 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         data object BlikAuthorize : NextActionData()
 
-        /**
-         * The customer must authorize the payment out of band, such as in their mobile banking app.
-         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data object AwaitAuthorization : NextActionData()
 

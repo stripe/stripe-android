@@ -3584,17 +3584,6 @@ public abstract class com/stripe/android/model/StripeIntent$NextActionData : com
 	public static final field $stable I
 }
 
-public final class com/stripe/android/model/StripeIntent$NextActionData$AwaitAuthorization : com/stripe/android/model/StripeIntent$NextActionData {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/model/StripeIntent$NextActionData$AwaitAuthorization;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/model/StripeIntent$NextActionData$BlikAuthorize : com/stripe/android/model/StripeIntent$NextActionData {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
