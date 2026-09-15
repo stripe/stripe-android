@@ -728,6 +728,7 @@ internal class DefaultSheetActivityStateHolderTest {
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            showsWalletsHeader = { false },
         )
     }
 

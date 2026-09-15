@@ -148,6 +148,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            walletsHeaderProvider = javax.inject.Provider { error("Not expected") },
         )
         val manageInteractorFactory = FakeInitialScreenManageInteractorFactory()
         val updateInteractorFactory = FakeInitialScreenUpdateInteractorFactory()

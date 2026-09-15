@@ -263,6 +263,7 @@ internal class FormActivityScreenShotTest {
                 Column {
                     FormScreenContent(
                         interactor = interactor,
+                        showsWalletsHeader = false,
                         onClick = {},
                         onProcessingCompleted = {},
                         state = state.copy(isEnabled = enabled),
