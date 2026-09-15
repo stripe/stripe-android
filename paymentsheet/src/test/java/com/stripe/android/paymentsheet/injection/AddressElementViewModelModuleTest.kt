@@ -20,10 +20,31 @@ class AddressElementViewModelModuleTest {
     fun `providePrimaryButtonAction returns standalone success`() = runTest {
         val address = AddressDetails()
 
-        val result = module.providePrimaryButtonAction()(address)
+        val result = module.providePrimaryButtonAction(
+            args = AddressElementActivityContract.Args.Standalone(
+                publishableKey = "pk_123",
+                config = AddressLauncher.Configuration(),
+            ),
+        )(address)
 
         assertThat(result.getOrNull()).isEqualTo(
             AddressElementActivityContract.Result.StandaloneSucceeded(address)
+        )
+    }
+
+    @Test
+    fun `providePrimaryButtonAction returns checkout shipping success`() = runTest {
+        val address = AddressDetails()
+
+        val result = module.providePrimaryButtonAction(
+            args = AddressElementActivityContract.Args.CheckoutShipping(
+                publishableKey = "pk_123",
+                config = AddressLauncher.Configuration(),
+            ),
+        )(address)
+
+        assertThat(result.getOrNull()).isEqualTo(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(address)
         )
     }
 

@@ -232,26 +232,16 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
-        when (args) {
-            is AddressElementActivityContract.Args.Standalone -> {
-                viewModelScope.launch {
-                    primaryButtonAction(addressDetails).fold(
-                        onSuccess = { result ->
-                            completeWithAddress(
-                                addressDetails = addressDetails,
-                                result = result,
-                            )
-                        },
-                        onFailure = { _formEnabled.value = true },
+        viewModelScope.launch {
+            primaryButtonAction(addressDetails).fold(
+                onSuccess = { result ->
+                    completeWithAddress(
+                        addressDetails = addressDetails,
+                        result = result,
                     )
-                }
-            }
-            is AddressElementActivityContract.Args.CheckoutShipping -> {
-                completeWithAddress(
-                    addressDetails = addressDetails,
-                    result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails),
-                )
-            }
+                },
+                onFailure = { _formEnabled.value = true },
+            )
         }
     }
 

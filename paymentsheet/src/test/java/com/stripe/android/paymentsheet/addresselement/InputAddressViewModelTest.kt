@@ -1008,6 +1008,9 @@ class InputAddressViewModelTest {
     @Test
     fun `checkout shipping save emits checkout success without performing additional work`() {
         val viewModel = createViewModel(
+            primaryButtonAction = AddressElementPrimaryButtonAction {
+                Result.success(AddressElementActivityContract.Result.CheckoutShippingSucceeded(it))
+            },
             argsFactory = { config ->
                 AddressElementActivityContract.Args.CheckoutShipping(
                     publishableKey = "pk_123",

@@ -46,12 +46,24 @@ internal class AddressElementViewModelModule {
 
     @Provides
     @Singleton
-    internal fun providePrimaryButtonAction(): AddressElementPrimaryButtonAction =
-        AddressElementPrimaryButtonAction { addressDetails ->
-            Result.success(
-                AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
-            )
+    internal fun providePrimaryButtonAction(
+        args: AddressElementActivityContract.Args,
+    ): AddressElementPrimaryButtonAction = when (args) {
+        is AddressElementActivityContract.Args.Standalone -> {
+            AddressElementPrimaryButtonAction { addressDetails ->
+                Result.success(
+                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+                )
+            }
         }
+        is AddressElementActivityContract.Args.CheckoutShipping -> {
+            AddressElementPrimaryButtonAction { addressDetails ->
+                Result.success(
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+                )
+            }
+        }
+    }
 
     @Provides
     @Named(PUBLISHABLE_KEY)
