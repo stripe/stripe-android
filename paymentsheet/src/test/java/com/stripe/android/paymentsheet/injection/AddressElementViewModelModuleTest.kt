@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
