@@ -1,5 +1,7 @@
 package com.stripe.android.googlepaylauncher.injection
 
+import com.stripe.android.GooglePayConfig
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.DefaultPaymentsClientFactory
@@ -44,6 +46,14 @@ internal abstract class GooglePayPaymentMethodLauncherModule {
     ): ErrorReporter
 
     companion object {
+        @Provides
+        fun provideGooglePayConfig(apiConfiguration: ApiConfiguration.State): GooglePayConfig {
+            return GooglePayConfig(
+                publishableKey = apiConfiguration.publishableKey,
+                connectedAccountId = apiConfiguration.stripeAccountId,
+            )
+        }
+
         @Provides
         @Singleton
         fun providePaymentsClient(
