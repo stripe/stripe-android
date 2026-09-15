@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -22,7 +23,7 @@ import kotlinx.parcelize.Parcelize
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     private val paymentLauncherFactory:
-        (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher,
+        (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?, ApiConfiguration.State) -> PaymentLauncher,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
     ActivityResultLauncher<PaymentLauncherContract.Args>,
@@ -92,7 +93,11 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
-        val paymentLauncher = paymentLauncherFactory(launcher, confirmationArgs.statusBarColor)
+        val paymentLauncher = paymentLauncherFactory(
+            launcher,
+            confirmationArgs.statusBarColor,
+            confirmationArgs.paymentMethodMetadata.apiConfiguration,
+        )
         when (arguments) {
             is Args.Confirm -> launchConfirm(paymentLauncher, arguments.confirmNextParams)
             is Args.NextAction -> paymentLauncher.handleNextActionForStripeIntent(arguments.intent)

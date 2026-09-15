@@ -2,10 +2,8 @@ package com.stripe.android.paymentelement.confirmation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -198,7 +196,6 @@ internal fun createTestConfirmationHandlerFactory(
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     linkLauncher: LinkPaymentLauncher,
-    paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
     errorReporter: ErrorReporter
 ): ConfirmationHandler.Factory {
@@ -207,14 +204,9 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentLauncherFactory = { launcher, _ ->
+                    paymentLauncherFactory = { launcher, _, apiConfiguration ->
                         stripePaymentLauncherAssistedFactory.create(
-                            apiConfigurationProvider = {
-                                ApiConfiguration.State(
-                                    publishableKey = paymentConfiguration.publishableKey,
-                                    stripeAccountId = paymentConfiguration.stripeAccountId,
-                                )
-                            },
+                            apiConfigurationProvider = { apiConfiguration },
                             hostActivityLauncher = launcher,
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,
