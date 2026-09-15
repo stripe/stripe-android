@@ -11,7 +11,7 @@ NEXT_VERSION_BUMP: PATCH
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
 ### AddressElement
-* [FIXED] Prevented duplicate address submissions while the form is disabled.
+* [FIXED][14564](https://github.com/stripe/stripe-android/pull/14564) Prevented duplicate address submissions while the form is disabled.
 
 ## 23.18.0 - 2026-09-08
 
