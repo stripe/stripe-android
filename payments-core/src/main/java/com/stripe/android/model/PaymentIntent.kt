@@ -176,6 +176,9 @@ constructor(
             is StripeIntent.NextActionData.SwishRedirect -> {
                 StripeIntent.NextActionType.SwishRedirect
             }
+            is StripeIntent.NextActionData.AwaitAuthorization -> {
+                StripeIntent.NextActionType.AwaitAuthorization
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             null -> {
