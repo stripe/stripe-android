@@ -2,6 +2,7 @@
 
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+* [ADDED] Added support for Bizum.
 
 ## 23.19.0 - 2026-09-15
 
@@ -15,7 +16,6 @@ NEXT_VERSION_BUMP: PATCH
 ## 23.18.0 - 2026-09-08
 
 ### PaymentSheet
-* [ADDED] Added support for Bizum.
 * [ADDED] Added support for SeQura.
 * [ADDED] Added support for PAYCO.
 * [ADDED] Added support for Korean cards.
