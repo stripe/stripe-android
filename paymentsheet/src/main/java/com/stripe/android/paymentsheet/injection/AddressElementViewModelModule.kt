@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -19,6 +18,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -44,21 +44,14 @@ internal class AddressElementViewModelModule {
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
-    @Named(PUBLISHABLE_KEY)
-    @Singleton
-    fun providesPublishableKey(
-        args: AddressElementActivityContract.Args
-    ): String = args.publishableKey
-
-    @Provides
     @Singleton
     fun provideStripeAutocompleteRepository(
         stripeNetworkClient: StripeNetworkClient,
-        args: AddressElementActivityContract.Args,
+        requestOptionsProvider: Provider<ApiRequest.Options>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        publishableKeyProvider = { args.publishableKey },
+        requestOptionsProvider = requestOptionsProvider,
     )
 
     @Provides
@@ -96,6 +89,12 @@ internal class AddressElementViewModelModule {
             )
         }
     }
+
+    @Provides
+    @Singleton
+    fun provideApiConfiguration(
+        args: AddressElementActivityContract.Args
+    ) = args.apiConfiguration
 
     @Module
     interface Bindings {
