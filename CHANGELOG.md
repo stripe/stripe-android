@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.19.0 - 2026-09-15
 
 ### All SDKs
 * [ADDED] Added Welsh (United Kingdom) localization.
