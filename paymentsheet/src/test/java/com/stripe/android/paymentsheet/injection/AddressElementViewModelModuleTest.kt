@@ -57,14 +57,16 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideStripeAutocompleteRepository uses the API configuration from the activity args`() = runTest {
+    fun `provideStripeAutocompleteRepository uses the provided request options`() = runTest {
         val networkClient = FakeStripeNetworkClient()
         val repository = module.provideStripeAutocompleteRepository(
             stripeNetworkClient = networkClient,
-            args = AddressElementActivityContract.Args.CheckoutShipping(
-                apiConfiguration = DEFAULT_API_CONFIG,
-                config = null,
-            ),
+            requestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
+            },
         )
 
         val result = repository.findAutocompletePredictions(

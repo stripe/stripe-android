@@ -48,16 +48,11 @@ internal class AddressElementViewModelModule {
     @Singleton
     fun provideStripeAutocompleteRepository(
         stripeNetworkClient: StripeNetworkClient,
-        args: AddressElementActivityContract.Args,
+        requestOptionsProvider: Provider<ApiRequest.Options>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        requestOptionsProvider = {
-            ApiRequest.Options(
-                apiKey = args.apiConfiguration.publishableKey,
-                stripeAccount = args.apiConfiguration.stripeAccountId,
-            )
-        },
+        requestOptionsProvider = requestOptionsProvider,
     )
 
     @Provides
