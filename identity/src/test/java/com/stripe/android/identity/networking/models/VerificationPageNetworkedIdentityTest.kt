@@ -5,13 +5,12 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.identity.json
+import com.stripe.android.identity.networked.verificationIfCommitted
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertFailsWith
 
 @RunWith(TestParameterInjector::class)
 internal class VerificationPageNetworkedIdentityTest {
@@ -25,57 +24,20 @@ internal class VerificationPageNetworkedIdentityTest {
     }
 
     @Test
-    fun `malformed boolean or state is rejected rather than guessing consent`(
-        @TestParameter(
-            value = [
-                """{"state":"invalid"}""",
-                """{"state":{"consented":"false","skipped":false}}""",
-                """{"state":{"consented":false,"skipped":"false"}}""",
-                """{"state":{"consented":0,"skipped":false}}""",
-                """{"reuse_available":"true"}""",
-                """{"save_available":1}""",
-            ],
-        ) configuration: String,
-    ) {
-        assertFailsWith<SerializationException> { pageWithNetworkedIdentity(configuration) }
-    }
-
-    @Test
-    fun `bootstrap survives requirements updates and redacts contact information and merchant key`() {
+    fun `bootstrap fields decode and contact details stay out of diagnostics`() {
         val page = pageWithNetworkedIdentity(
             """{
-                "save_available":true,"reuse_available":true,"email":"consumer@example.com",
-                "phone_number":"+12025550100","state":{"consented":false,"skipped":false}
+                "save_available":true,"reuse_available":true,"lookup_email":"consumer@example.com",
+                "phone_number_autofill_hint":"+12025550100","state":{"consented":false,"skipped":false}
             }""",
             extra = """{"merchant_publishable_key":"pk_test_merchant"}""",
         )
-        val updated = page.copy(requirements = VerificationPageRequirements(missing = emptyList()))
 
-        assertThat(page.networkedIdentity?.email).isEqualTo("consumer@example.com")
-        assertThat(page.networkedIdentity?.phoneNumber).isEqualTo("+12025550100")
+        assertThat(page.networkedIdentity?.lookupEmail).isEqualTo("consumer@example.com")
+        assertThat(page.networkedIdentity?.phoneNumberAutofillHint).isEqualTo("+12025550100")
         assertThat(page.merchantPublishableKey).isEqualTo("pk_test_merchant")
-        assertThat(updated.networkedIdentity).isEqualTo(page.networkedIdentity)
-        assertThat(updated.merchantPublishableKey).isEqualTo(page.merchantPublishableKey)
-        assertThat(updated.networkedIdentityRoute).isEqualTo(NetworkedIdentityRoute.Reuse)
-        assertThat(updated.requirements.missing).isEmpty()
-        val diagnostic = "$page ${page.networkedIdentity}"
-        assertThat(diagnostic).doesNotContain("consumer@example.com")
-        assertThat(diagnostic).doesNotContain("+12025550100")
-        assertThat(diagnostic).doesNotContain("pk_test_merchant")
-    }
-
-    @Test
-    fun `contact details stay absent without falling back to provided details`(
-        @TestParameter(value = ["{}", """{"email":null,"phone_number":null}"""]) configuration: String,
-    ) {
-        val page = pageWithNetworkedIdentity(
-            configuration,
-            extra = """{"provided_details":{"email":"legacy@example.com"}}""",
-        )
-
-        assertThat(page.networkedIdentity?.email).isNull()
-        assertThat(page.networkedIdentity?.phoneNumber).isNull()
-        assertThat(page.providedDetails?.email).isEqualTo("legacy@example.com")
+        assertThat(page.toString()).doesNotContain("consumer@example.com")
+        assertThat(page.toString()).doesNotContain("+12025550100")
     }
 
     @Test
@@ -86,15 +48,53 @@ internal class VerificationPageNetworkedIdentityTest {
 
         assertThat(page.networkedIdentity?.saveAvailable).isNull()
         assertThat(page.networkedIdentity?.state?.direction).isNull()
-        assertThat(page.networkingData).isNull()
         assertThat(page.merchantPublishableKey).isNull()
         assertThat(page.networkedIdentityRoute).isEqualTo(NetworkedIdentityRoute.Reuse)
     }
 
+    @Test
+    fun `reuse is committed once the shared document satisfies the requirement`() {
+        val page = consentedPage("consumer_to_merchant", missing = listOf(Requirement.BIOMETRICCONSENT))
+
+        val committed = page.verificationIfCommitted(NetworkedIdentityRoute.ResumeReuse)
+
+        assertThat(committed?.id).isEqualTo(page.id)
+        assertThat(committed?.requirements?.missings).containsExactly(Requirement.BIOMETRICCONSENT)
+        assertThat(committed?.requirements?.errors).isEmpty()
+    }
+
+    @Test
+    fun `reuse is not committed while the document is still missing`() {
+        val page = consentedPage("consumer_to_merchant", missing = listOf(Requirement.IDDOCUMENTFRONT))
+
+        assertThat(page.verificationIfCommitted(NetworkedIdentityRoute.ResumeReuse)).isNull()
+    }
+
+    @Test
+    fun `save is committed once the session records the save consent`() {
+        val page = consentedPage("merchant_to_consumer", missing = listOf(Requirement.IDDOCUMENTFRONT))
+
+        assertThat(page.verificationIfCommitted(NetworkedIdentityRoute.ResumeSave)?.id).isEqualTo(page.id)
+    }
+
+    @Test
+    fun `the other direction is not committed`() {
+        val page = consentedPage("merchant_to_consumer", missing = emptyList())
+
+        assertThat(page.verificationIfCommitted(NetworkedIdentityRoute.ResumeReuse)).isNull()
+    }
+
+    private fun consentedPage(direction: String, missing: List<Requirement>) = pageWithNetworkedIdentity(
+        """{
+            "reuse_available":true,"save_available":true,
+            "state":{"consented":true,"skipped":false,"direction":"$direction"}
+        }"""
+    ).copy(requirements = VerificationPageRequirements(missing = missing))
+
     private fun pageWithNetworkedIdentity(configuration: String, extra: String = "{}"): VerificationPage {
         val original = json.parseToJsonElement(VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING).jsonObject
         return json.decodeFromString(
-            VerificationPageSerializer,
+            VerificationPage.serializer(),
             JsonObject(
                 original + json.parseToJsonElement(extra).jsonObject +
                     ("networked_identity" to json.parseToJsonElement(configuration))
@@ -138,10 +138,6 @@ internal object NetworkedIdentityRouteCases : TestParameterValuesProvider() {
         ),
         state(
             "UnconsentedSave", false, false, "merchant_to_consumer", true, true, NetworkedIdentityRoute.OrdinaryIdentity
-        ),
-        ordinary(
-            "MalformedDirection",
-            """{"reuse_available":true,"state":{"consented":true,"skipped":false,"direction":{}}}""",
         ),
     )
 

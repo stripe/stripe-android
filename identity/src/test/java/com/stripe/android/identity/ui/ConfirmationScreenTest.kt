@@ -6,16 +6,22 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.networked.FakeNetworkedIdentityLinkSession
+import com.stripe.android.identity.networked.NetworkedIdentityViewModel
+import com.stripe.android.identity.networked.niConfig
+import com.stripe.android.identity.networked.niViewModel
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentTextPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,14 +74,34 @@ class ConfirmationScreenTest {
         }
     }
 
+    @Test
+    fun `saving to Link starts from the save card`() {
+        val linkSession = FakeNetworkedIdentityLinkSession()
+        testConfirmationScreen(niViewModel(linkSession = linkSession)) {
+            onNodeWithTag(LINK_SAVE_BUTTON_TAG).performScrollTo().performClick()
+
+            runBlocking { linkSession.configureCalls.awaitItem() }
+        }
+        linkSession.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `save isn't offered when the verification doesn't allow it`() {
+        testConfirmationScreen(niViewModel(config = niConfig(saveAvailable = false))) {
+            onNodeWithTag(LINK_SAVE_CARD_TAG).assertDoesNotExist()
+        }
+    }
+
     private fun testConfirmationScreen(
+        networkedIdentityViewModel: NetworkedIdentityViewModel? = null,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         composeTestRule.setContent {
             ConfirmationScreen(
                 mockNavController,
                 mockIdentityViewModel,
-                mockVerificationFlowFinishable
+                mockVerificationFlowFinishable,
+                networkedIdentityViewModel
             )
         }
         with(composeTestRule, testBlock)

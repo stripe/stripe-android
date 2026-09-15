@@ -1,337 +1,572 @@
 package com.stripe.android.identity.networked
 
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.identity.networking.models.NetworkedIdentityRoute
 import org.junit.Test
 
+@Suppress("LargeClass")
 internal class NetworkedIdentityCoordinatorTest {
+
     @Test
-    fun `blank email does not start lookup`() = runNetworkedIdentityScenario {
-        coordinator.submitEmail("  ")
+    fun `start without a merchant publishable key falls back`() = runNetworkedIdentityScenario(
+        config = niConfig(merchantPublishableKey = null)
+    ) {
+        coordinator.startReuse()
+
+        assertFallback()
+    }
+
+    @Test
+    fun `Link configuration failure falls back`() = runNetworkedIdentityScenario {
+        coordinator.startReuse()
         runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.CollectEmail)
-        repository.lookupCalls.expectNoEvents()
+        val configure = linkSession.configureCalls.awaitItem()
+        assertThat(configure.merchantPublishableKey).isEqualTo("pk_test_merchant")
+
+        configure.response.complete(Result.failure(IllegalStateException("Link is not available")))
+
+        assertFallback()
     }
 
     @Test
-    fun `invalid email does not start lookup`() = runNetworkedIdentityScenario {
-        coordinator.submitEmail("person@example")
+    fun `Link's own screens sign the user in with the known email and phone`() = runNetworkedIdentityScenario(
+        config = niConfig(merchantEmail = "merchant@example.com", phoneNumberAutofillHint = "+15555551234")
+    ) {
+        startAndConfigure()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.LinkAuthentication)
+        assertThat(coordinator.state.value.presentsIdentitySheet).isFalse()
+        val linkUI = linkSession.linkUICalls.awaitItem()
+        assertThat(linkUI.email).isEqualTo("merchant@example.com")
+        assertThat(linkUI.phoneNumber).isEqualTo("+15555551234")
+        assertThat(linkUI.mode).isEqualTo(NetworkedIdentityMode.Reuse)
+
+        linkUI.response.complete(Result.success(niAccount(isVerified = true)))
         runCurrent()
-        repository.lookupCalls.expectNoEvents()
-    }
 
-    @Test
-    fun `pending lookup ignores duplicate email submission`() = runNetworkedIdentityScenario {
-        coordinator.state.test {
-            assertThat(awaitItem()).isEqualTo(NetworkedIdentityState.CollectEmail)
-            coordinator.submitEmail(" person@example.com ")
-            assertThat(awaitItem()).isEqualTo(NetworkedIdentityState.LookupPending)
-            coordinator.submitEmail("other@example.com")
-            runCurrent()
-            val lookup = repository.lookupCalls.awaitItem()
-            assertThat(lookup.email).isEqualTo("person@example.com")
-            repository.lookupCalls.expectNoEvents()
-            lookup.response.complete(Result.success(NetworkedIdentityLookup.NotFound(null)))
-            runCurrent()
-            assertThat(awaitItem()).isEqualTo(
-                NetworkedIdentityState.FullCaptureFallback(NetworkedIdentityFallbackReason.NoLinkAccount)
-            )
-            assertThat(fallbacks.awaitItem()).isEqualTo(NetworkedIdentityFallbackReason.NoLinkAccount)
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `lookup failure requests unavailable fallback`() = runNetworkedIdentityScenario {
-        coordinator.submitEmail("person@example.com")
-        runCurrent()
-        repository.lookupCalls.awaitItem().response.complete(Result.failure(IllegalStateException()))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable, expectLogout = false)
-    }
-
-    @Test
-    fun `historical verified SMS still requires a fresh SMS`() = runNetworkedIdentityScenario {
-        val start = startEmail(niFound(niSession(verificationSessions = listOf(niSms("old", VERIFIED)))))
-        assertThat(start.credentials.sessionClientSecret).isEqualTo("session_lookup")
-        assertThat(start.credentials.publishableKey).isEqualTo("pk_consumer")
-        assertThat(start.locale).isEqualTo("en-US")
-        assertThat(start.accountPhoneNumber).isNull()
-        assertThat(start.isResendingSmsCode).isFalse()
-        repository.documentCalls.expectNoEvents()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.OtpStartPending)
-        start.response.complete(
-            Result.success(niResponse(verificationSessions = listOf(niSms("old", VERIFIED), niSms())))
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.DocumentsPending)
+        assertThat(repository.documentCalls.awaitItem().credentials).isEqualTo(
+            NetworkedIdentityCredentials(publishableKey = "pk_consumer", sessionClientSecret = "session_secret")
         )
+    }
+
+    @Test
+    fun `a failed Link sign-in falls back`() = runNetworkedIdentityScenario {
+        startAndConfigure()
+
+        linkSession.linkUICalls.awaitItem().response.complete(Result.failure(IllegalStateException("Attestation")))
+
+        assertFallback()
+    }
+
+    @Test
+    fun `handed-in session is not used before the user starts`() = runNetworkedIdentityScenario(
+        handoff = niHandoff()
+    ) {
         runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Idle)
+    }
+
+    @Test
+    fun `verified handed-in session skips signing in and loads documents`() = runNetworkedIdentityScenario(
+        handoff = niHandoff()
+    ) {
+        startAndConfigure()
+        val restore = linkSession.restoreCalls.awaitItem()
+        assertThat(restore.credentials).isEqualTo(
+            NetworkedIdentityCredentials(publishableKey = "pk_consumer_handoff", sessionClientSecret = "handoff_secret")
+        )
+
+        restore.response.complete(Result.success(niAccount(isVerified = true)))
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.DocumentsPending)
+        assertThat(repository.documentCalls.awaitItem().credentials.sessionClientSecret).isEqualTo("session_secret")
+    }
+
+    @Test
+    fun `unverified handed-in session signs in with Link's screens using its email`() = runNetworkedIdentityScenario(
+        handoff = niHandoff()
+    ) {
+        startAndConfigure()
+        linkSession.restoreCalls.awaitItem().response.complete(Result.success(niAccount(isVerified = false)))
+        runCurrent()
+
+        assertThat(linkSession.linkUICalls.awaitItem().email).isEqualTo("person@example.com")
+    }
+
+    @Test
+    fun `expired handed-in session signs in with Link's screens using its email`() = runNetworkedIdentityScenario(
+        handoff = niHandoff()
+    ) {
+        startAndConfigure()
+        linkSession.restoreCalls.awaitItem().response.complete(Result.failure(IllegalStateException("expired")))
+        runCurrent()
+
+        assertThat(linkSession.linkUICalls.awaitItem().email).isEqualTo("person@example.com")
+    }
+
+    @Test
+    fun `single eligible document is preselected but not shared`() = runNetworkedIdentityScenario {
+        reachDocuments(listOf(niDocument("document_1")))
+
         assertThat(coordinator.state.value).isEqualTo(
-            NetworkedIdentityState.AwaitingOtp("(***) ***-1234", false, 1)
+            NetworkedIdentityState.SelectDocument(listOf(niDocument("document_1")), selectedDocumentId = "document_1")
         )
-        repository.documentCalls.expectNoEvents()
     }
 
     @Test
-    fun `start without an SMS ID fails closed`() = assertStartRejected(listOf(niSms(id = null)))
+    fun `several eligible documents need a selection before sharing`() = runNetworkedIdentityScenario {
+        reachDocuments(listOf(niDocument("document_1"), niDocument("document_2")))
+        assertThat((coordinator.state.value as NetworkedIdentityState.SelectDocument).selectedDocumentId).isNull()
 
-    @Test
-    fun `start with an empty SMS ID fails closed`() = assertStartRejected(listOf(niSms(id = "")))
-
-    @Test
-    fun `start with a recycled SMS ID fails closed`() = assertStartRejected(
-        sessions = listOf(niSms("historical")),
-        knownSessions = listOf(niSms("historical", VERIFIED))
-    )
-
-    @Test
-    fun `start with ambiguous fresh SMS IDs fails closed`() = assertStartRejected(
-        listOf(niSms("fresh_1"), niSms("fresh_2"))
-    )
-
-    @Test
-    fun `start with duplicate fresh SMS records fails closed`() = assertStartRejected(listOf(niSms(), niSms()))
-
-    @Test
-    fun `unknown verification type cannot authenticate`() = assertStartRejected(
-        listOf(niSms(type = NetworkedIdentityVerificationType.UNKNOWN))
-    )
-
-    @Test
-    fun `unknown verification state cannot authenticate`() = assertStartRejected(
-        listOf(niSms(state = NetworkedIdentityVerificationState.UNKNOWN))
-    )
-
-    @Test
-    fun `start with a blank rotated secret fails closed`() = runNetworkedIdentityScenario {
-        startEmail().response.complete(Result.success(niResponse(clientSecret = "")))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
-    }
-
-    @Test
-    fun `lookup with a blank consumer key fails closed`() = runNetworkedIdentityScenario {
-        coordinator.submitEmail("person@example.com")
+        coordinator.shareSelectedDocument()
         runCurrent()
-        repository.lookupCalls.awaitItem().response.complete(Result.success(niFound().copy(publishableKey = "")))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable, expectLogout = false)
-        repository.startCalls.expectNoEvents()
+        coordinator.selectDocument("document_2")
+
+        assertThat((coordinator.state.value as NetworkedIdentityState.SelectDocument).selectedDocumentId)
+            .isEqualTo("document_2")
     }
 
     @Test
-    fun `wrong verified ID cannot load documents`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(
-            Result.success(niResponse(verificationSessions = listOf(niSms("historical", VERIFIED), niSms())))
+    fun `sharing attaches the selected document and waits for continue`() = runNetworkedIdentityScenario {
+        reachDocuments()
+
+        coordinator.shareSelectedDocument()
+        runCurrent()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SharingDocument(niDocument()))
+        val token = repository.tokenCalls.awaitItem()
+        assertThat(token.documentId).isEqualTo("document_1")
+        assertThat(token.verificationSessionId).isEqualTo("vs_target")
+        token.response.complete(Result.success(NetworkedIdentityAssociationToken("token_1")))
+        runCurrent()
+        val attach = actions.attachCalls.awaitItem()
+        assertThat(attach.associationToken).isEqualTo("token_1")
+        attach.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.DocumentShared(niDocument()))
+        outcomes.expectNoEvents()
+
+        coordinator.continueAfterSuccess()
+
+        assertThat(outcomes.awaitItem())
+            .isEqualTo(NetworkedIdentityOutcome.DocumentShared)
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Idle)
+    }
+
+    @Test
+    fun `a failed attach falls back without replaying the token or skipping`() = runNetworkedIdentityScenario {
+        reachDocuments()
+
+        coordinator.shareSelectedDocument()
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("token_1"))
         )
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
-        repository.documentCalls.expectNoEvents()
+        runCurrent()
+        actions.attachCalls.awaitItem().response.complete(Result.failure(IllegalStateException("Attach failed.")))
+
+        assertFallback()
     }
 
     @Test
-    fun `verified active ID of wrong type cannot load documents`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(
-            Result.success(
-                niResponse(
-                    verificationSessions = listOf(
-                        niSms(state = VERIFIED, type = NetworkedIdentityVerificationType.EMAIL)
-                    )
-                )
-            )
+    fun `a rejected attach is retried once with a fresh token`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        shareWithToken("token_1")
+
+        actions.attachCalls.awaitItem().response.complete(Result.failure(apiException(statusCode = 400)))
+        runCurrent()
+        actions.committedChecks.awaitItem().also {
+            assertThat(it.route).isEqualTo(NetworkedIdentityRoute.ResumeReuse)
+        }.response.complete(Result.success(null))
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("token_2"))
         )
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
-        repository.documentCalls.expectNoEvents()
+        runCurrent()
+        val retry = actions.attachCalls.awaitItem()
+        assertThat(retry.associationToken).isEqualTo("token_2")
+        retry.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.DocumentShared(niDocument()))
     }
 
     @Test
-    fun `invalid OTP length does not submit`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        coordinator.submitOtp("12345")
+    fun `a lost attach response continues when the session shows the attachment`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        shareWithToken("token_1")
+
+        actions.attachCalls.awaitItem().response.complete(Result.failure(APIConnectionException("Lost.")))
         runCurrent()
-        repository.confirmCalls.expectNoEvents()
-        assertThat(coordinator.state.value).isInstanceOf(NetworkedIdentityState.AwaitingOtp::class.java)
+        actions.committedChecks.awaitItem().response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.DocumentShared(niDocument()))
+        repository.tokenCalls.expectNoEvents()
     }
 
     @Test
-    fun `nondigit OTP does not submit`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        coordinator.submitOtp("12345a")
-        runCurrent()
-        repository.confirmCalls.expectNoEvents()
-    }
+    fun `an attach whose session can't be read back falls back without another token`() =
+        runNetworkedIdentityScenario {
+            reachDocuments()
+            shareWithToken("token_1")
 
-    @Test
-    fun `pending confirmation ignores duplicate submissions`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        val confirm = confirmOtp()
-        coordinator.submitOtp("654321")
-        coordinator.resendOtp()
-        runCurrent()
-        repository.confirmCalls.expectNoEvents()
-        repository.startCalls.expectNoEvents()
-        assertThat(confirm.code).isEqualTo("123456")
-        confirm.response.complete(Result.failure(niError("consumer_verification_code_invalid")))
-        runCurrent()
-    }
+            actions.attachCalls.awaitItem().response.complete(Result.failure(APIConnectionException("Lost.")))
+            runCurrent()
+            actions.committedChecks.awaitItem().response.complete(Result.failure(APIConnectionException("Lost.")))
 
-    @Test
-    fun `invalid code returns editable OTP and permits retry`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        coordinator.state.test {
-            val initial = awaitItem() as NetworkedIdentityState.AwaitingOtp
-            coordinator.submitOtp("111111")
-            assertThat(awaitItem()).isInstanceOf(NetworkedIdentityState.OtpConfirmPending::class.java)
-            runCurrent()
-            repository.confirmCalls.awaitItem().response.complete(
-                Result.failure(niError("consumer_verification_code_invalid"))
-            )
-            runCurrent()
-            val invalid = awaitItem() as NetworkedIdentityState.AwaitingOtp
-            assertThat(invalid.invalidCode).isTrue()
-            assertThat(invalid.otpGeneration).isEqualTo(initial.otpGeneration)
-            coordinator.submitOtp("222222")
-            assertThat(awaitItem()).isInstanceOf(NetworkedIdentityState.OtpConfirmPending::class.java)
-            runCurrent()
-            val retry = repository.confirmCalls.awaitItem()
-            assertThat(retry.code).isEqualTo("222222")
-            retry.response.complete(Result.failure(niError("consumer_verification_code_invalid")))
-            runCurrent()
-            assertThat(awaitItem()).isEqualTo(invalid)
-            ensureAllEventsConsumed()
+            assertFallback()
+            repository.tokenCalls.expectNoEvents()
         }
+
+    @Test
+    fun `an attach failing twice falls back`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        shareWithToken("token_1")
+
+        actions.attachCalls.awaitItem().response.complete(Result.failure(apiException(statusCode = 429)))
+        runCurrent()
+        actions.committedChecks.awaitItem().response.complete(Result.success(null))
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("token_2"))
+        )
+        runCurrent()
+        actions.attachCalls.awaitItem().response.complete(Result.failure(APIConnectionException("Lost.")))
+        runCurrent()
+        actions.committedChecks.awaitItem().response.complete(Result.success(null))
+
+        assertFallback()
     }
 
     @Test
-    fun `expired verification restarts SMS and changes OTP generation`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(Result.failure(niError("consumer_verification_expired")))
-        runCurrent()
-        val restart = repository.startCalls.awaitItem()
-        assertThat(restart.credentials.sessionClientSecret).isEqualTo("session_started")
-        assertThat(restart.isResendingSmsCode).isFalse()
-        restart.response.complete(Result.success(niResponse(verificationSessions = listOf(niSms("replacement")))))
-        runCurrent()
-        assertThat((coordinator.state.value as NetworkedIdentityState.AwaitingOtp).otpGeneration).isEqualTo(2)
+    fun `unavailable Networked Identity falls back without retrying`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        shareWithToken("token_1")
+
+        actions.attachCalls.awaitItem().response.complete(
+            Result.failure(apiException(statusCode = 400, code = "networked_identity_unavailable"))
+        )
+
+        assertFallback()
+        actions.committedChecks.expectNoEvents()
+        repository.tokenCalls.expectNoEvents()
     }
 
     @Test
-    fun `expired verification restart rejects the previous active ID`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(Result.failure(niError("consumer_verification_expired")))
-        runCurrent()
-        repository.startCalls.awaitItem().response.complete(Result.success(niResponse()))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
+    fun `a mismatched session falls back without retrying`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        shareWithToken("token_1")
+
+        actions.attachCalls.awaitItem().response.complete(Result.failure(apiException(statusCode = 404)))
+
+        assertFallback()
+        actions.committedChecks.expectNoEvents()
     }
 
     @Test
-    fun `start session expiry requires explicit email sign in again`() = runNetworkedIdentityScenario {
-        startEmail().response.complete(Result.failure(niError("consumer_session_expired")))
+    fun `a lost save response continues when the session shows the save`() = runNetworkedIdentityScenario(
+        config = niConfig(route = NetworkedIdentityRoute.Save)
+    ) {
+        startAndConfigure(NetworkedIdentityMode.Save)
+        signInWithLink()
+        repository.saveTokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("save_token"))
+        )
         runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.ReauthenticationRequired)
-        coordinator.submitOtp("123456")
+
+        actions.prepareSaveCalls.awaitItem().response.complete(Result.failure(apiException(statusCode = 502)))
         runCurrent()
-        repository.confirmCalls.expectNoEvents()
+        actions.committedChecks.awaitItem().also {
+            assertThat(it.route).isEqualTo(NetworkedIdentityRoute.ResumeSave)
+        }.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SavePrepared)
+        assertThat(coordinator.entry.value.offersSave).isFalse()
+        repository.saveTokenCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `no eligible documents falls back to capture`() = runNetworkedIdentityScenario {
+        reachDocuments(listOf(niDocument().copy(liveCaptured = false)))
+
+        assertFallback()
+    }
+
+    @Test
+    fun `save signs in with Link's screens then prepares the save`() = runNetworkedIdentityScenario(
+        config = niConfig(route = NetworkedIdentityRoute.Save, merchantEmail = "person@example.com")
+    ) {
+        startAndConfigure(NetworkedIdentityMode.Save)
+        val linkUI = linkSession.linkUICalls.awaitItem()
+        assertThat(linkUI.email).isEqualTo("person@example.com")
+        assertThat(linkUI.mode).isEqualTo(NetworkedIdentityMode.Save)
+        linkUI.response.complete(Result.success(niAccount(isVerified = true)))
+        runCurrent()
+
+        val saveToken = repository.saveTokenCalls.awaitItem()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SavePending)
+        assertThat(saveToken.credentials.sessionClientSecret).isEqualTo("session_secret")
+        assertThat(saveToken.verificationSessionId).isEqualTo("vs_target")
+        saveToken.response.complete(Result.success(NetworkedIdentityAssociationToken("save_token")))
+        runCurrent()
+        val prepare = actions.prepareSaveCalls.awaitItem()
+        assertThat(prepare.associationToken).isEqualTo("save_token")
+        prepare.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SavePrepared)
+        assertThat(coordinator.entry.value.offersSave).isFalse()
+        outcomes.expectNoEvents()
+
+        coordinator.continueAfterSuccess()
+
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.SavePrepared)
+    }
+
+    @Test
+    fun `a failed save keeps the sheet open until it is closed`() = runNetworkedIdentityScenario(
+        config = niConfig(route = NetworkedIdentityRoute.Save)
+    ) {
+        startAndConfigure(NetworkedIdentityMode.Save)
+        signInWithLink()
+
+        repository.saveTokenCalls.awaitItem().response.complete(Result.failure(IllegalStateException("Save failed.")))
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SaveFailed("Save failed."))
+        outcomes.expectNoEvents()
+
         coordinator.cancel()
-        cancellations.awaitItem()
         runCurrent()
-        repository.logoutCalls.expectNoEvents()
+
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.Cancelled)
     }
 
     @Test
-    fun `confirm session expiry clears credentials and retains auth secrets`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(Result.failure(niError("consumer_session_expired")))
+    fun `cancel reports cancellation and a new attempt can start`() = runNetworkedIdentityScenario {
+        startAndConfigure()
+        linkSession.linkUICalls.awaitItem()
+
+        coordinator.cancel()
         runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.ReauthenticationRequired)
-        coordinator.submitEmail("new@example.com")
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.Cancelled)
+
+        coordinator.startReuse()
         runCurrent()
-        val lookup = repository.lookupCalls.awaitItem()
-        assertThat(lookup.authSessionSecrets).containsExactly("auth_lookup", "auth_started").inOrder()
-        lookup.response.complete(Result.success(niFound()))
-        runCurrent()
-        repository.startCalls.awaitItem().response.complete(Result.success(niResponse()))
-        runCurrent()
-        assertThat((coordinator.state.value as NetworkedIdentityState.AwaitingOtp).otpGeneration).isEqualTo(2)
+
+        // Link stays configured, and the Link session is never logged out.
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.LinkAuthentication)
+        linkSession.linkUICalls.awaitItem()
     }
 
     @Test
-    fun `maximum verification attempts requests ordinary capture`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(Result.failure(niError("consumer_verification_max_attempts_exceeded")))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
+    fun `responses from a cancelled attempt are ignored`() = runNetworkedIdentityScenario {
+        startAndConfigure()
+        val linkUI = linkSession.linkUICalls.awaitItem()
+        coordinator.cancel()
+        runCurrent()
+        outcomes.awaitItem()
+
+        linkUI.response.complete(Result.success(niAccount(isVerified = true)))
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
     }
 
     @Test
-    fun `unrecognized confirmation failure requests unavailable fallback`() = runNetworkedIdentityScenario {
-        awaitOtp()
-        confirmOtp().response.complete(Result.failure(IllegalStateException()))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
+    fun `manual capture records the skip and continues with manual capture`() = runNetworkedIdentityScenario {
+        startAndConfigure()
+        linkSession.linkUICalls.awaitItem()
+
+        coordinator.chooseManualCapture()
+        runCurrent()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SkipPending)
+        actions.skipCalls.awaitItem().response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Idle)
+        assertThat(coordinator.entry.value.reuseAvailable).isFalse()
     }
 
     @Test
-    fun `confirmation rotates secret before loading eligible documents in order`() = runNetworkedIdentityScenario {
-        val list = loadDocuments()
-        assertThat(list.credentials.sessionClientSecret).isEqualTo("session_confirmed")
-        list.response.complete(
-            Result.success(
-                listOf(
-                    niDocument("expired").copy(expirationDate = 100),
-                    niDocument("second"),
-                    niDocument("unknown").copy(documentType = NetworkedIdentityDocumentType.UNKNOWN),
-                    niDocument("first")
-                )
+    fun `failed skip still continues with ordinary verification`() = runNetworkedIdentityScenario {
+        coordinator.chooseManualCapture()
+        runCurrent()
+        actions.skipCalls.awaitItem().response.complete(Result.failure(IllegalStateException("Skip failed.")))
+        runCurrent()
+
+        // The choice isn't recorded, but the user isn't blocked from verifying.
+        assertThat(outcomes.awaitItem())
+            .isEqualTo(NetworkedIdentityOutcome.Fallback)
+        assertThat(coordinator.entry.value.reuseAvailable).isTrue()
+    }
+
+    @Test
+    fun `manual capture waits for an issued attachment before skipping`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        coordinator.shareSelectedDocument()
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("token_1"))
+        )
+        runCurrent()
+        val attach = actions.attachCalls.awaitItem()
+
+        coordinator.chooseManualCapture()
+        runCurrent()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SkipPending)
+        actions.skipCalls.expectNoEvents()
+        outcomes.expectNoEvents()
+
+        attach.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+        actions.skipCalls.awaitItem().response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
+        assertThat(coordinator.entry.value.offersSave).isFalse()
+    }
+
+    @Test
+    fun `closing during an issued attachment still updates the host requirements`() =
+        runNetworkedIdentityScenario {
+            reachDocuments()
+            coordinator.shareSelectedDocument()
+            runCurrent()
+            repository.tokenCalls.awaitItem().response.complete(
+                Result.success(NetworkedIdentityAssociationToken("token_1"))
             )
+            runCurrent()
+            val attach = actions.attachCalls.awaitItem()
+
+            coordinator.cancel()
+            attach.response.complete(Result.success(niActionPageData()))
+            runCurrent()
+
+            assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+            assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+            assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.Cancelled)
+            // An attached ID is already in Link, so saving isn't offered.
+            assertThat(coordinator.entry.value.offersSave).isFalse()
+        }
+
+    @Test
+    fun `an attachment the host rejects isn't shared`() = runNetworkedIdentityScenario(hostAcceptsUpdates = false) {
+        reachDocuments()
+        shareWithToken("token_1")
+        actions.attachCalls.awaitItem().response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+
+        assertFallback()
+        assertThat(coordinator.entry.value.reuseAvailable).isTrue()
+    }
+
+    @Test
+    fun `reopening Link waits for the previous write before attaching again`() = runNetworkedIdentityScenario {
+        reachDocuments()
+        coordinator.shareSelectedDocument()
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("token_1"))
         )
         runCurrent()
-        val state = coordinator.state.value as NetworkedIdentityState.SelectDocument
-        assertThat(state.documents.map { it.id }).containsExactly("second", "first").inOrder()
-        assertThat(state.selectedDocumentId).isNull()
-    }
-
-    @Test
-    fun `selection can change without association or verification completion`() = runNetworkedIdentityScenario {
-        loadDocuments().response.complete(Result.success(listOf(niDocument("one"), niDocument("two"))))
+        val firstAttach = actions.attachCalls.awaitItem()
+        coordinator.cancel()
         runCurrent()
-        coordinator.selectDocument("one")
-        assertThat((coordinator.state.value as NetworkedIdentityState.SelectDocument).selectedDocumentId)
-            .isEqualTo("one")
-        coordinator.selectDocument("missing")
-        assertThat((coordinator.state.value as NetworkedIdentityState.SelectDocument).selectedDocumentId)
-            .isEqualTo("one")
-        coordinator.selectDocument("two")
-        assertThat((coordinator.state.value as NetworkedIdentityState.SelectDocument).selectedDocumentId)
-            .isEqualTo("two")
-        repository.unsupportedCalls.expectNoEvents()
-        fallbacks.expectNoEvents()
-        cancellations.expectNoEvents()
-    }
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.Cancelled)
 
-    @Test
-    fun `no eligible documents requests ordinary capture`() = runNetworkedIdentityScenario {
-        loadDocuments().response.complete(Result.success(listOf(niDocument().copy(liveCaptured = null))))
-        assertFallback(NetworkedIdentityFallbackReason.NoReusableDocuments)
-    }
-
-    @Test
-    fun `document list failure requests unavailable fallback`() = runNetworkedIdentityScenario {
-        loadDocuments().response.complete(Result.failure(IllegalStateException()))
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
-    }
-
-    private fun assertStartRejected(
-        sessions: List<NetworkedIdentityVerificationSession>,
-        knownSessions: List<NetworkedIdentityVerificationSession> = emptyList()
-    ) = runNetworkedIdentityScenario {
-        startEmail(niFound(niSession(verificationSessions = knownSessions))).response.complete(
-            Result.success(niResponse(verificationSessions = sessions))
+        coordinator.startReuse()
+        runCurrent()
+        repository.documentCalls.awaitItem().response.complete(Result.success(listOf(niDocument("document_2"))))
+        runCurrent()
+        coordinator.shareSelectedDocument()
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(
+            Result.success(NetworkedIdentityAssociationToken("token_2"))
         )
-        assertFallback(NetworkedIdentityFallbackReason.Unavailable)
-        repository.confirmCalls.expectNoEvents()
-        repository.documentCalls.expectNoEvents()
+        runCurrent()
+        actions.attachCalls.expectNoEvents()
+
+        firstAttach.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+        val secondAttach = actions.attachCalls.awaitItem()
+        assertThat(secondAttach.associationToken).isEqualTo("token_2")
+        secondAttach.response.complete(Result.success(niActionPageData()))
+        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.DocumentShared(niDocument("document_2")))
     }
 
-    private companion object {
-        val VERIFIED = NetworkedIdentityVerificationState.VERIFIED
+    @Test
+    fun `save after no reusable documents uses the same authenticated account`() = runNetworkedIdentityScenario {
+        reachDocuments(emptyList())
+        assertFallback()
+
+        coordinator.startSave()
+        runCurrent()
+
+        // No second configure, lookup or code: the signed-in account saves right away.
+        repository.saveTokenCalls.awaitItem()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SavePending)
     }
+
+    @Test
+    fun `dismissing Link's screens cancels`() = runNetworkedIdentityScenario(
+        config = niConfig(route = NetworkedIdentityRoute.Save)
+    ) {
+        startAndConfigure(NetworkedIdentityMode.Save)
+        val linkUI = linkSession.linkUICalls.awaitItem()
+        // Without a known email, Link's screens ask for it.
+        assertThat(linkUI.email).isNull()
+
+        linkUI.response.complete(Result.success(null))
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.Cancelled)
+    }
+
+    @Test
+    fun `abandon stops without reporting an outcome`() = runNetworkedIdentityScenario {
+        startAndConfigure()
+        linkSession.linkUICalls.awaitItem()
+
+        coordinator.abandon()
+        runCurrent()
+
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        outcomes.expectNoEvents()
+    }
+
+    private suspend fun NetworkedIdentityTestScenario.shareWithToken(token: String) {
+        coordinator.shareSelectedDocument()
+        runCurrent()
+        repository.tokenCalls.awaitItem().response.complete(Result.success(NetworkedIdentityAssociationToken(token)))
+        runCurrent()
+    }
+
+    private fun apiException(statusCode: Int, code: String? = null) = APIException(
+        stripeError = StripeError(type = "invalid_request_error", code = code),
+        statusCode = statusCode,
+    )
 }
-
-internal fun niError(code: String) = InvalidRequestException(stripeError = StripeError(code = code))
