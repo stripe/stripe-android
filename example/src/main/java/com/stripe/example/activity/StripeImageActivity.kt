@@ -8,11 +8,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
+import com.stripe.example.R
 
 class StripeImageActivity : AppCompatActivity() {
     private val LocalStripeImageLoader = staticCompositionLocalOf<StripeImageLoader> {
@@ -34,15 +34,15 @@ class StripeImageActivity : AppCompatActivity() {
                 Column {
                     Html(
                         imageLoader = mapOf(
-                            "affirm" to EmbeddableImage.Drawable(
-                                R.drawable.stripe_ic_affirm_logo_day,
-                                R.string.stripe_paymentsheet_payment_method_affirm
+                            "card" to EmbeddableImage.Drawable(
+                                R.drawable.ic_credit_card,
+                                R.string.create_card_payment_method
                             )
                         ),
                         html = """
                             HTML with single local image
                             <br/>
-                            Local image <img src="affirm"/>.
+                            Local image <img src="card"/>.
                             <br/>
                         """.trimIndent(),
                         color = MaterialTheme.colors.onSurface,
@@ -50,15 +50,15 @@ class StripeImageActivity : AppCompatActivity() {
                     )
                     Html(
                         imageLoader = mapOf(
-                            "affirm" to EmbeddableImage.Drawable(
-                                R.drawable.stripe_ic_affirm_logo_day,
-                                R.string.stripe_paymentsheet_payment_method_affirm
+                            "card" to EmbeddableImage.Drawable(
+                                R.drawable.ic_credit_card,
+                                R.string.create_card_payment_method
                             )
                         ),
                         html = """
                             HTML with local and remote images
                             <br/>
-                            Local image <img src="affirm"/>.
+                            Local image <img src="card"/>.
                             <br/>
                             Unknown remote image <img src="https://qa-b.stripecdn.com/unknown_image.png"/>
                             <br/>

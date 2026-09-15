@@ -63,6 +63,12 @@ android {
         minSdkVersion 24
     }
 
+    lint {
+        // TODO: Remove after the detector fix is available in a stable Lifecycle release.
+        // https://android.googlesource.com/platform/frameworks/support/+/539d2158df61136305be2bd94eebe48fc4a96477
+        disable 'NullSafeMutableLiveData'
+    }
+
     sourceSets {
         main {
             assets {

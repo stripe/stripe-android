@@ -57,8 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkControllerPreview
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.ui.core.R
 
 @Composable
 internal fun LinkControllerUi(
@@ -487,7 +487,7 @@ private fun PaymentMethodButton(
                 } else {
                     Icon(
                         modifier = Modifier.size(iconSize),
-                        painter = painterResource(R.drawable.stripe_ic_paymentsheet_pm_card),
+                        painter = painterResource(R.drawable.ic_payment_method_card),
                         contentDescription = null,
                         tint = contentColor,
                     )
