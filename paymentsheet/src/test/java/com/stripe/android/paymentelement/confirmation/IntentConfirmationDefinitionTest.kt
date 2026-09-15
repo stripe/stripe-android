@@ -2,10 +2,12 @@ package com.stripe.android.paymentelement.confirmation
 
 import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -477,12 +479,14 @@ class IntentConfirmationDefinitionTest {
     }
 
     @Test
-    fun `On 'launch', should build payment launcher using 'statusBarColor' from confirmation args`() {
+    fun `On 'launch', should build payment launcher using configuration and status bar color from confirmation args`() {
         var capturedStatusBarColor: Int? = null
+        var capturedApiConfiguration: ApiConfiguration.State? = null
 
         val definition = createIntentConfirmationDefinition(
-            paymentLauncherFactory = { _, statusBarColor ->
+            paymentLauncherFactory = { _, statusBarColor, apiConfiguration ->
                 capturedStatusBarColor = statusBarColor
+                capturedApiConfiguration = apiConfiguration
                 FakePaymentLauncher()
             },
         )
@@ -498,6 +502,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         assertThat(capturedStatusBarColor).isEqualTo(0x00FF00)
+        assertThat(capturedApiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -591,8 +596,9 @@ class IntentConfirmationDefinitionTest {
                 }
             },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
-        paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher =
-            { _, _ -> paymentLauncher },
+        paymentLauncherFactory:
+        (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?, ApiConfiguration.State) -> PaymentLauncher =
+            { _, _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
