@@ -125,6 +125,7 @@ internal class ShippingAddressElementTest {
     @Test
     fun `present prefills the form with the checkout session shipping address`() = runScenario {
         stateHolder.state = CheckoutControllerStateFactory.create(
+            configuration = configuredCheckoutConfiguration,
             collectedDetails = CheckoutCollectedDetails(
                 email = null,
                 shippingName = "Jenny Rosen",
