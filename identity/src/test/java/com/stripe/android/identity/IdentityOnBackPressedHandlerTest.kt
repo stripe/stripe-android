@@ -133,6 +133,20 @@ class IdentityOnBackPressedHandlerTest {
     }
 
     @Test
+    fun testBackPressOnConsentPageAfterNetworkedIdentitySubmitted() = runBlocking {
+        whenever(mockIdentityViewModel.isVerificationPageSubmitted).thenReturn(true)
+        val mockDestination = mock<NavDestination> {
+            on { route } doReturn ConsentDestination.ROUTE.route
+        }
+        handler.updateState(destination = mockDestination, args = null)
+
+        handler.handleOnBackPressed()
+
+        verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
+        verify(mockFlowFinishable).finishWithResult(eq(IdentityVerificationSheet.VerificationFlowResult.Completed))
+    }
+
+    @Test
     fun testBackPressOnErrorPageWithArgShouldFail() = runBlocking {
         val mockDestination = mock<NavDestination> {
             on { route } doReturn ErrorDestination.ROUTE.route

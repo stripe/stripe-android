@@ -14,6 +14,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.BASE_URL
 import com.stripe.android.identity.networking.IDENTITY_STRIPE_API_VERSION_WITH_BETA_HEADER
 import com.stripe.android.identity.networking.IDENTITY_VERIFICATION_PAGES
+import com.stripe.android.identity.networking.SUPPORTS_NETWORKED_IDENTITY
 import com.stripe.android.identity.networking.models.VerificationPageData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +45,9 @@ internal class DefaultNetworkedIdentityActions(
     override suspend fun skip(): Result<VerificationPageData> = post(action = "skip", params = emptyMap())
 
     private suspend fun post(action: String, params: Map<String, String>): Result<VerificationPageData> {
+        if (!SUPPORTS_NETWORKED_IDENTITY) {
+            return Result.failure(IllegalStateException("Networked Identity requires the v8 VerificationPages API."))
+        }
         // #TODO - Networked Identity: Confirm these draft v8 paths and VerificationPageData response before rollout.
         val request = NetworkedIdentityActionRequest(
             apiRequestFactory.createPost(

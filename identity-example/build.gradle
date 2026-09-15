@@ -61,6 +61,7 @@ android {
 
 dependencies {
     implementation project(':identity')
+    implementation project(':paymentsheet')
     implementation project(':stripe-core')
     implementation project(':stripe-ui-core')
 

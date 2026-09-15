@@ -19,6 +19,7 @@ internal class IdentityVerificationSheetContract :
         val brandLogo: Uri,
         val brandColor: Int?,
         val biometricConsent: IdentityVerificationSheet.Configuration.BiometricConsentConfiguration?,
+        val networkedIdentity: IdentityVerificationSheet.Configuration.NetworkedIdentityOptions?,
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {

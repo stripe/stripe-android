@@ -48,10 +48,10 @@ internal fun InitialLoadingScreen(
                 fallbackUrlLauncher.launchFallbackUrl(it.fallbackUrl)
             } else if (!it.livemode) {
                 navController.navigateTo(DebugDestination)
-            } else {
-                if (!identityViewModel.tryNavigateToNetworkedIdentity(it, null, navController)) {
-                    navController.navigateTo(it.requirements.missing.nextDestination(context))
-                }
+            } else if (!identityViewModel.resumeNetworkedIdentity(navController)) {
+                navController.navigateTo(
+                    it.requirements.missing.nextDestination(context)
+                )
             }
         }
     }

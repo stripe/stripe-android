@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material.MaterialTheme
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.example.ui.ExampleScreen
 
@@ -31,6 +32,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Networked Identity reuses Link, which needs native Link.
+        FeatureFlags.nativeLinkEnabled.setEnabled(true)
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
