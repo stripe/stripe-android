@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
+import com.stripe.android.connect.webview.StripeConnectWebViewLayout
 
 internal class PayoutsView internal constructor(
     context: Context,
@@ -18,6 +19,7 @@ internal class PayoutsView internal constructor(
         attrs = attrs,
         defStyleAttr = defStyleAttr,
         embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
+        webViewLayout = StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE,
         embeddedComponentManager = embeddedComponentManager,
         listener = listener,
         props = EmptyProps,
