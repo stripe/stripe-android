@@ -1,9 +1,5 @@
 package com.stripe.android.lpm
 
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
@@ -44,8 +40,7 @@ internal class TestBizum : BasePlaygroundTest() {
                 phoneNumber = "600000001",
             ),
             populateCustomLpmFields = {
-                rules.compose.onNode(hasTestTag("DropDown:tiny")).performClick()
-                rules.compose.onNode(hasText("Spain", substring = true)).performScrollTo().performClick()
+                populateCountryCodeSelector("Spain")
                 populatePhoneNumber()
             },
         )

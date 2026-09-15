@@ -400,6 +400,8 @@ internal class Selectors(
 
     fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
 
+    fun getCountryCode() = composeTestRule.onNode(hasTestTag("DropDown:tiny"))
+
     fun getAuBsb() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
