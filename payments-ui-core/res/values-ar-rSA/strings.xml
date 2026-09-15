@@ -113,8 +113,6 @@
   <string name="stripe_scan_card">امسح البطاقة ضوئيًا</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">إزالة البطاقة التي تم مسحها ضوئيًا</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">بتقديم معلومات الدفع الخاصة بك وتأكيد هذه الدفعة، أنت تفوض (أ) %s وStripe، مزود خدمة الدفع لدينا، بإرسال تعليمات إلى البنك الذي تتعامل معه لخصم المبلغ من حسابك و(ب) البنك الذي تتعامل معه لخصم المبلغ من حسابك وفقًا لتلك التعليمات. كجزء من حقوقك، يحق لك استرداد الأموال من مصرفك بموجب شروط وأحكام اتفاقيتك مع مصرفك. تجب المطالبة باسترداد الأموال في غضون 8 أسابيع تبدأ من التاريخ الذي تم فيه الخصم من حسابك. يتم شرح حقوقك في بيان يمكنك الحصول عليه من مصرفك. أنت توافق على تلقي إشعارات بالخصومات المستقبلية قبل يومين من حدوثها.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
