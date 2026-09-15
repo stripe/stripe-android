@@ -40,6 +40,9 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
+        primaryButtonAction: AddressElementPrimaryButtonAction = AddressElementPrimaryButtonAction {
+            Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(it))
+        },
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
@@ -54,6 +57,7 @@ class InputAddressViewModelTest {
             resultStateHolder,
             eventReporter,
             placesClient = null,
+            primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1049,6 +1053,9 @@ class InputAddressViewModelTest {
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
+            primaryButtonAction = AddressElementPrimaryButtonAction {
+                Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(it))
+            },
         ).also { viewModelStoreRule.track(it) }
     }
 

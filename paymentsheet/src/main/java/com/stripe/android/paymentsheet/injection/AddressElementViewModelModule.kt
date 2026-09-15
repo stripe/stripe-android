@@ -7,6 +7,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButtonAction
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
@@ -42,6 +43,15 @@ internal class AddressElementViewModelModule {
     @Named(PRODUCT_USAGE)
     @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
+
+    @Provides
+    @Singleton
+    internal fun providePrimaryButtonAction(): AddressElementPrimaryButtonAction =
+        AddressElementPrimaryButtonAction { addressDetails ->
+            Result.success(
+                AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+            )
+        }
 
     @Provides
     @Named(PUBLISHABLE_KEY)

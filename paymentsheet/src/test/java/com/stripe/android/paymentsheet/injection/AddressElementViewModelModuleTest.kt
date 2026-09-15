@@ -3,16 +3,29 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
 
 class AddressElementViewModelModuleTest {
     private val module = AddressElementViewModelModule()
+
+    @Test
+    fun `providePrimaryButtonAction returns standalone success`() = runTest {
+        val address = AddressDetails()
+
+        val result = module.providePrimaryButtonAction()(address)
+
+        assertThat(result.getOrNull()).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(address)
+        )
+    }
 
     @Test
     fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
