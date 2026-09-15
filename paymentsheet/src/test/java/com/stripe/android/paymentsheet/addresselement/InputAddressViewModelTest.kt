@@ -8,6 +8,7 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
@@ -19,6 +20,7 @@ import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -32,6 +34,7 @@ import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CompletableDeferred
+import javax.inject.Provider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -75,7 +78,6 @@ class InputAddressViewModelTest {
             eventReporter,
             placesClient = null,
             primaryButtonAction = primaryButtonAction,
-            taxRegionUpdater = createTaxRegionUpdater(),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -97,8 +99,12 @@ class InputAddressViewModelTest {
                     context = ApplicationProvider.getApplicationContext(),
                     publishableKey = "pk_test_123",
                 ),
-                publishableKeyProvider = { "pk_test_123" },
-                stripeAccountIdProvider = { "acct_123" },
+                apiRequestOptionsProvider = Provider {
+                    ApiRequest.Options(
+                        apiKey = "pk_test_123",
+                        stripeAccount = "acct_123",
+                    )
+                },
             ),
         )
     }
@@ -1125,6 +1131,24 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `failed primary button action re-enables the form without a result`() = runTest {
+        val viewModel = createViewModel(
+            primaryButtonAction = object : AddressElementPrimaryButtonAction {
+                override suspend fun invoke(
+                    addressDetails: AddressDetails,
+                ): Result<AddressElementActivityContract.Result> {
+                    return Result.failure(IllegalStateException("failed"))
+                }
+            },
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(resultStateHolder.result.value).isNull()
+    }
+
+    @Test
     fun `checkout shipping save updates tax from submitted address and returns updated response`() =
         runCheckoutSaveScenario {
             networkRule.checkoutUpdate(
@@ -1189,17 +1213,20 @@ class InputAddressViewModelTest {
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
         )
+        val argsFactory: (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { config ->
+            AddressElementActivityContract.Args.CheckoutShipping(
+                publishableKey = "pk_123",
+                config = config,
+                checkoutSessionResponse = response,
+            )
+        }
+        val primaryButtonAction = AddressElementViewModelModule().providePrimaryButtonAction(
+            args = argsFactory(AddressLauncher.Configuration()),
+            taxRegionUpdater = Provider { createTaxRegionUpdater() },
+        )
         val viewModel = createViewModel(
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
-                AddressElementActivityContract.Result.CheckoutShippingSucceeded(it)
-            },
-            argsFactory = { config ->
-                AddressElementActivityContract.Args.CheckoutShipping(
-                    publishableKey = "pk_123",
-                    config = config,
-                    checkoutSessionResponse = response,
-                )
-            },
+            primaryButtonAction = primaryButtonAction,
+            argsFactory = argsFactory,
         )
         CheckoutSaveScenario(viewModel, response).block()
     }
@@ -1242,7 +1269,6 @@ class InputAddressViewModelTest {
             primaryButtonAction = FakeAddressElementPrimaryButtonAction {
                 AddressElementActivityContract.Result.StandaloneSucceeded(it)
             },
-            taxRegionUpdater = createTaxRegionUpdater(),
         ).also { viewModelStoreRule.track(it) }
     }
 
