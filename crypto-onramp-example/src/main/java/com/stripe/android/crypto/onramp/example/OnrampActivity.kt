@@ -37,6 +37,8 @@ internal class OnrampActivity : ComponentActivity() {
                 onCollectPayment = onrampPresenter::collectPaymentMethod,
                 onStartVerification = onrampPresenter::verifyIdentity,
                 onShowUserAttestation = onrampPresenter::presentUserAttestation,
+                onShowTermsAndConditions = onrampPresenter::presentTermsAndConditionsIfNeeded,
+                onShowTermsOfService = onrampPresenter::presentTermsOfServiceIfNeeded,
                 onSubmitAddress = { address ->
                     onrampPresenter.verifyKycInfo(address)
                 },

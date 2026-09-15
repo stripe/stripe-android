@@ -48,6 +48,8 @@ import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
 import com.stripe.android.crypto.onramp.example.START_IDENTITY_VERIFICATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.TERMS_AND_CONDITIONS_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.TERMS_OF_SERVICE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.WALLET_ADDRESS_TAG
 import com.stripe.android.crypto.onramp.example.WALLET_NETWORK_DROPDOWN_TAG
@@ -542,6 +544,38 @@ internal fun VerificationSection(
             .padding(bottom = 24.dp)
     ) {
         Text("User Attestation")
+    }
+}
+
+@Composable
+internal fun PartnerTermsSection(
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
+) {
+    Text(
+        text = "Partner Terms",
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
+
+    Button(
+        onClick = onShowTermsOfService,
+        modifier = Modifier
+            .testTag(TERMS_OF_SERVICE_BUTTON_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    ) {
+        Text("Terms of Service")
+    }
+
+    Button(
+        onClick = onShowTermsAndConditions,
+        modifier = Modifier
+            .testTag(TERMS_AND_CONDITIONS_BUTTON_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+        Text("Terms and Conditions")
     }
 }
 
