@@ -87,6 +87,8 @@ internal class ShippingAddressElementTest {
 
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(launch.input.checkoutSessionResponse)
+            .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -179,13 +181,15 @@ internal class ShippingAddressElementTest {
                 state = "CA",
             ),
         )
+        val updatedResponse = CheckoutSessionResponseFactory.create(amount = 2000L)
         registration.dispatch(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails, updatedResponse)
         )
 
         assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
             FakeCommitShippingAddress.Call(
                 name = addressDetails.name,
+                checkoutSessionResponse = updatedResponse,
                 address = CheckoutController.Address.State(
                     city = "San Francisco",
                     country = "US",
@@ -205,6 +209,72 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
+    fun `successful result forwards the original response when tax is unchanged`() = runScenario {
+        shippingAddressElement.present()
+        val originalResponse = activityLauncher.launchCalls.awaitItem().input.checkoutSessionResponse
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        val address = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                country = "US",
+                line1 = "510 Townsend St",
+                postalCode = "94103",
+            ),
+        )
+
+        registration.dispatch(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(address, originalResponse)
+        )
+
+        assertThat(commitShippingAddress.calls.awaitItem().checkoutSessionResponse)
+            .isSameInstanceAs(originalResponse)
+    }
+
+    @Test
+    fun `unchanged address and response are committed exactly once`() = runScenario {
+        val existingAddress = CheckoutController.Address.State(
+            city = null,
+            country = "US",
+            line1 = "510 Townsend St",
+            line2 = null,
+            postalCode = "94103",
+            state = null,
+        )
+        stateHolder.state = requireNotNull(stateHolder.state).let { state ->
+            state.copy(
+                collectedDetails = state.collectedDetails.copy(
+                    shippingName = "Jenny Rosen",
+                    shippingAddress = existingAddress,
+                ),
+            )
+        }
+        shippingAddressElement.present()
+        val originalResponse = activityLauncher.launchCalls.awaitItem().input.checkoutSessionResponse
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        val address = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                country = "US",
+                line1 = "510 Townsend St",
+                postalCode = "94103",
+            ),
+        )
+
+        registration.dispatch(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(address, originalResponse)
+        )
+
+        assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
+            FakeCommitShippingAddress.Call(
+                name = address.name,
+                address = existingAddress,
+                checkoutSessionResponse = originalResponse,
+            )
+        )
+        commitShippingAddress.calls.expectNoEvents()
+    }
+
+    @Test
     fun `successful result suppresses presentation until commit completes`() {
         val commitResult = CompletableDeferred<Result<Unit>>()
 
@@ -217,7 +287,8 @@ internal class ShippingAddressElementTest {
 
             registration.dispatch(
                 AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                    AddressDetails(
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    address = AddressDetails(
                         name = "Jenny Rosen",
                         address = PaymentSheet.Address(
                             city = "San Francisco",
@@ -264,7 +335,8 @@ internal class ShippingAddressElementTest {
 
         registration.dispatch(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                AddressDetails(
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                address = AddressDetails(
                     name = "Missing country",
                     address = PaymentSheet.Address(
                         line1 = "510 Townsend St",

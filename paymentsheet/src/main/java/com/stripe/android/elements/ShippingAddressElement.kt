@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -27,6 +28,7 @@ internal fun interface CommitShippingAddress {
     suspend operator fun invoke(
         name: String?,
         address: CheckoutController.Address.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
     ): Result<Unit>
 }
 
@@ -79,6 +81,7 @@ class ShippingAddressElement internal constructor(
                                 commitShippingAddress(
                                     result.address.name,
                                     address,
+                                    result.checkoutSessionResponse,
                                 )
                             } finally {
                                 shippingAddressElementStateHolder.isPresenting = false
@@ -120,6 +123,7 @@ class ShippingAddressElement internal constructor(
         activityLauncher.launch(
             AddressElementActivityContract.Args.CheckoutShipping(
                 publishableKey = paymentConfiguration.get().publishableKey,
+                checkoutSessionResponse = state.checkoutSessionResponse,
                 config = AddressLauncher.Configuration(
                     additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
