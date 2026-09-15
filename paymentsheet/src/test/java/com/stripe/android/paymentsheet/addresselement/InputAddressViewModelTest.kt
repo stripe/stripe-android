@@ -8,6 +8,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -43,6 +44,7 @@ class InputAddressViewModelTest {
         primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
+        eventReporter: AddressLauncherEventReporter = this.eventReporter,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
@@ -209,6 +211,22 @@ class InputAddressViewModelTest {
             autocompleteResultSelected = eq(true),
             editDistance = eq(0)
         )
+    }
+
+    @Test
+    fun `clickPrimaryButton ignores a second click when form is disabled`() = runTest {
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        eventReporter.completedCalls.expectNoEvents()
+        eventReporter.validate()
     }
 
     @Test
