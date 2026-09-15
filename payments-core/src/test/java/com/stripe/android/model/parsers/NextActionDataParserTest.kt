@@ -12,6 +12,22 @@ import kotlin.test.Test
 internal class NextActionDataParserTest {
 
     @Test
+    fun `parse with mb_way_await_authorization creates MbWayAwaitAuthorization`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "mb_way_await_authorization",
+                "mb_way_await_authorization": {}
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isEqualTo(StripeIntent.NextActionData.MbWayAwaitAuthorization)
+    }
+
+    @Test
     fun `parse with intent_confirmation_challenge type should create IntentConfirmationChallenge`() {
         val nextActionJson = JSONObject(
             """

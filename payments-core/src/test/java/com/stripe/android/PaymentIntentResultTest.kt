@@ -139,6 +139,33 @@ class PaymentIntentResultTest {
     }
 
     @Test
+    fun outcome_whenMbWayAwaitsAuthorization_shouldReturnCanceled() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethod(
+                id = "pm_mb_way",
+                created = 500L,
+                liveMode = false,
+                type = PaymentMethod.Type.MbWay,
+                code = "mb_way",
+            ),
+            isLiveMode = false,
+            id = "pi_mb_way",
+            currency = "eur",
+            countryCode = "PT",
+            paymentMethodTypes = listOf("mb_way"),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.MbWayAwaitAuthorization,
+        )
+
+        assertThat(PaymentIntentResult(paymentIntent).outcome)
+            .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+    }
+
+    @Test
     fun `should parcelize correctly`() {
         ParcelUtils.verifyParcelRoundtrip(
             PaymentIntentResult(

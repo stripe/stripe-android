@@ -20,6 +20,8 @@ private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
 private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
+private const val MB_WAY_TIME_LIMIT_IN_SECONDS = 4 * 60
+private const val MB_WAY_INITIAL_DELAY_IN_SECONDS = 0
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -88,6 +90,17 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
                     requestOptions = requestOptions,
                     qrCodeUrl = getQrCodeForPromptPay(actionable),
+                    paymentMethodType = paymentMethodType.code,
+                )
+            PaymentMethod.Type.MbWay ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = MB_WAY_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = MB_WAY_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_mb_way_confirm_payment,
+                    requestOptions = requestOptions,
+                    qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
             else ->
