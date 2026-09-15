@@ -1172,7 +1172,7 @@ class TapToAddCollectionHandlerTest {
 
         override fun hasCallback(): Boolean = callbackResult.isSuccess
 
-        override suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback {
+        override suspend fun waitForCallback(isLiveMode: Boolean): CreateCardPresentSetupIntentCallback {
             waitForCallbackCalls.add(Unit)
             return callbackResult.getOrThrow()
         }

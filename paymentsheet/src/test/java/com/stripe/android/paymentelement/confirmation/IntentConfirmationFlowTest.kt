@@ -277,6 +277,7 @@ internal class IntentConfirmationFlowTest {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(
                         integrationMetadata = integrationMetadata,

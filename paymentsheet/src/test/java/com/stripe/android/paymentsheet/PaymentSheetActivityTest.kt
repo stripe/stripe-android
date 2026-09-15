@@ -1315,6 +1315,7 @@ internal class PaymentSheetActivityTest {
                             integrationMetadata: IntegrationMetadata,
                             customerMetadata: CustomerMetadata?,
                             clientAttributionMetadata: ClientAttributionMetadata,
+                            isLiveMode: Boolean,
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor
                         }
