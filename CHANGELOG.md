@@ -1,6 +1,6 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### All SDKs
@@ -8,6 +8,7 @@ NEXT_VERSION_BUMP: PATCH
 * [ADDED] Added Arabic (Saudi Arabia) localization.
 
 ### PaymentSheet
+* [ADDED] Added support for MB WAY payments.
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
 ## 23.18.0 - 2026-09-08

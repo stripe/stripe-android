@@ -106,7 +106,8 @@ sealed interface StripeIntent : StripeModel {
         DisplayMultibancoDetails("multibanco_display_details"),
         DisplayPayNowDetails("paynow_display_qr_code"),
         DisplayPromptPayDetails("promptpay_display_qr_code"),
-        SwishRedirect("swish_handle_redirect_or_display_qr_code");
+        SwishRedirect("swish_handle_redirect_or_display_qr_code"),
+        MbWayAwaitAuthorization("mb_way_await_authorization");
 
         @Keep
         override fun toString(): String {
@@ -371,6 +372,12 @@ sealed interface StripeIntent : StripeModel {
 
         @Parcelize
         data object BlikAuthorize : NextActionData()
+
+        /**
+         * The customer must authorize the payment in the MB WAY app.
+         */
+        @Parcelize
+        data object MbWayAwaitAuthorization : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
