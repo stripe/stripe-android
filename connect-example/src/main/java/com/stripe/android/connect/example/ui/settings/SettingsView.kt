@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 @Suppress("LongMethod")
@@ -51,7 +50,7 @@ fun SettingsView(
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_back),
+                    painter = painterResource(R.drawable.ic_arrow_back),
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -67,7 +66,7 @@ fun SettingsView(
                 },
             ) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
+                    painter = painterResource(R.drawable.ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }

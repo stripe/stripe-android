@@ -33,7 +33,6 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.settings.SettingsDropdownField
 import com.stripe.android.connect.example.ui.settings.SettingsNavigationItem
 import com.stripe.android.connect.example.ui.settings.SettingsSectionHeader
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 fun AppearanceView(
@@ -83,7 +82,7 @@ private fun AppearancePickerView(
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
+                    painter = painterResource(R.drawable.ic_close),
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -94,7 +93,7 @@ private fun AppearancePickerView(
                 onClick = onSave,
             ) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
+                    painter = painterResource(R.drawable.ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }
@@ -156,7 +155,7 @@ private fun CustomThemeView(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_back),
+                    painter = painterResource(R.drawable.ic_arrow_back),
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -164,7 +163,7 @@ private fun CustomThemeView(
         actions = {
             IconButton(onClick = onSave) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
+                    painter = painterResource(R.drawable.ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }

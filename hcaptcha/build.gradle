@@ -70,7 +70,8 @@ def generateHtmlClass = tasks.register("generateJavaClassFromStaticHtml") {
 android.sourceSets.main.kotlin.srcDirs += hcaptchaGenBaseDir
 
 tasks.configureEach {
-    if (name.startsWith("compile") && name.contains("Kotlin")) {
+    if ((name.startsWith("compile") && name.contains("Kotlin")) ||
+            (name.startsWith("extract") && name.endsWith("Annotations"))) {
         dependsOn(generateHtmlClass)
     }
 }
