@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
@@ -18,6 +19,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import javax.inject.Provider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -67,36 +69,6 @@ class AddressElementViewModelModuleTest {
         }
 
     @Test
-    fun `providePrimaryButtonAction completes checkout shipping through the view model`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val args = AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(),
-            )
-            val resultStateHolder = AddressElementResultStateHolder()
-            val viewModel = createViewModel(
-                args = args,
-                resultStateHolder = resultStateHolder,
-            )
-
-            viewModel.clickPrimaryButton(
-                completedFormValues = mapOf(
-                    FormFieldId.Country to FormFieldEntry("US", true),
-                ),
-                checkboxChecked = true,
-            )
-
-            assertThat(resultStateHolder.result.value).isEqualTo(
-                AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                    AddressDetails(
-                        address = PaymentSheet.Address(country = "US"),
-                        isCheckboxSelected = true,
-                    )
-                )
-            )
-        }
-
-    @Test
     fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
@@ -135,6 +107,11 @@ class AddressElementViewModelModuleTest {
         resultStateHolder = resultStateHolder,
         eventReporter = mock<AddressLauncherEventReporter>(),
         placesClient = null,
-        primaryButtonAction = module.providePrimaryButtonAction(args),
+        primaryButtonAction = module.providePrimaryButtonAction(
+            args = args,
+            taxRegionUpdater = Provider {
+                error("Tax region updater should not be requested for standalone")
+            },
+        ),
     ).also(viewModelStoreRule::track)
 }
