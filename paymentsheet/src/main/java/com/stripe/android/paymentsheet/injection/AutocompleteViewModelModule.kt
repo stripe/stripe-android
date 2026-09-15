@@ -67,10 +67,7 @@ internal interface AutocompleteViewModelModule {
         ): PlacesClientProxy = PlacesClientProxy.create(
             context = context,
             googlePlacesApiKey = args.googlePlacesApiKey,
-            errorReporter = ErrorReporter.createFallbackInstance(
-                context = context,
-                apiConfigurationProvider = { args.apiConfiguration }
-            ),
+            errorReporter = ErrorReporter.createFallbackInstance(context),
         )
 
         @Provides
