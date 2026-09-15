@@ -19,6 +19,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -86,7 +87,7 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
 
         val launch = activityLauncher.launchCalls.awaitItem()
-        assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(launch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -150,16 +151,17 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
 
         val firstLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(firstLaunch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(AddressElementActivityContract.Result.Canceled)
-        paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
         shippingAddressElement.present()
 
         val secondLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(secondLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        assertThat(secondLaunch.input.apiConfiguration.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(secondLaunch.input.apiConfiguration.stripeAccountId).isNull()
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -327,7 +329,7 @@ internal class ShippingAddressElementTest {
         }
         val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
         val paymentConfiguration = RecordingProvider(
-            PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            PaymentConfiguration(DEFAULT_API_CONFIG.publishableKey, DEFAULT_API_CONFIG.stripeAccountId),
         )
         val errorReporter = FakeErrorReporter()
         val coroutineScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
