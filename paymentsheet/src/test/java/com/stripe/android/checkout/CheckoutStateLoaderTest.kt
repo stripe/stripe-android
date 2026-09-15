@@ -11,6 +11,7 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -167,6 +168,31 @@ internal class CheckoutStateLoaderTest {
                 shippingAddress = CheckoutController.Address().country("US").city("Seattle").build(),
             ),
         )
+    }
+
+    @Test
+    fun `loadInitial clears an invalid shipping default from collected details`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .shippingAddressElement(ShippingAddressElement.Configuration())
+            .defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(CheckoutController.Address().country("DE")),
+                ),
+            )
+            .build()
+
+        loader.loadInitial(
+            configuration = configuration,
+            checkoutSessionResponse = response(allowedShippingCountries = listOf("US", "CA")),
+        )
+
+        val state = requireNotNull(stateHolder.state)
+        assertThat(state.configuration.defaults.shippingDetails?.name).isEqualTo("John Shipping")
+        assertThat(state.configuration.defaults.shippingDetails?.address?.country).isEqualTo("DE")
+        assertThat(state.collectedDetails.shippingName).isNull()
+        assertThat(state.collectedDetails.shippingAddress).isNull()
     }
 
     @Test
@@ -358,7 +384,11 @@ internal class CheckoutStateLoaderTest {
 
     private fun response(
         merchantCountry: String? = "US",
-    ) = CheckoutSessionResponseFactory.create(merchantCountry = merchantCountry)
+        allowedShippingCountries: List<String>? = null,
+    ) = CheckoutSessionResponseFactory.create(
+        merchantCountry = merchantCountry,
+        allowedShippingCountries = allowedShippingCountries,
+    )
 
     private fun savedCustomer() = CustomerState(
         paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),

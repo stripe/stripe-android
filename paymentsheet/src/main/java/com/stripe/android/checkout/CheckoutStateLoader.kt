@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
@@ -38,7 +39,7 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
-            collectedDetails = configuration.asInitialCollectedDetails(),
+            collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
             carryForward = CarryForward.initial(),
         )
     }
@@ -205,10 +206,18 @@ internal class CheckoutStateLoader @Inject constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutController.Configuration.State.asInitialCollectedDetails(): CheckoutCollectedDetails {
+private fun CheckoutController.Configuration.State.asInitialCollectedDetails(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): CheckoutCollectedDetails {
+    val shippingDetails = defaults.shippingDetails?.takeIf { details ->
+        val shippingAddress = details.address
+        shippingAddressElementConfiguration == null ||
+            shippingAddress == null ||
+            checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess
+    }
     return CheckoutCollectedDetails(
         email = defaults.email,
-        shippingName = defaults.shippingDetails?.name,
-        shippingAddress = defaults.shippingDetails?.address,
+        shippingName = shippingDetails?.name,
+        shippingAddress = shippingDetails?.address,
     )
 }
