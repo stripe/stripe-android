@@ -44,6 +44,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
             return
         }
 
+        disableAutofillForUserKey()
+
         starterArgs.configuration.appearance.parseAppearance()
 
         if (!applicationIsTaskOwner()) {

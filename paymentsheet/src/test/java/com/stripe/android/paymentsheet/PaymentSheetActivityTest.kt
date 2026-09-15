@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import android.os.Build
+import android.view.View
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -224,6 +225,34 @@ internal class PaymentSheetActivityTest {
             composeTestRule
                 .onNodeWithTag(BottomSheetContentTestTag)
                 .assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `user key excludes activity hierarchy from autofill`() {
+        PaymentConfiguration.init(context, "uk_test_123")
+
+        activityScenario().launch(intent).onActivity { activity ->
+            assertThat(activity.window.decorView.importantForAutofill)
+                .isEqualTo(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS)
+        }
+    }
+
+    @Test
+    fun `publishable key leaves activity hierarchy autofill importance unchanged`() {
+        activityScenario().launch(intent).onActivity { activity ->
+            assertThat(activity.window.decorView.importantForAutofill)
+                .isEqualTo(View.IMPORTANT_FOR_AUTOFILL_AUTO)
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.M])
+    fun `user key does not access autofill APIs before Android O`() {
+        PaymentConfiguration.init(context, "uk_test_123")
+
+        activityScenario().launch(intent).onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
         }
     }
 
