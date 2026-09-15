@@ -42,6 +42,41 @@ interface IdentityVerificationSheet {
         var biometricConsent: BiometricConsentConfiguration? = null
 
         /**
+         * Networked Identity options for Stripe SDK modules and internal testing.
+         */
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var networkedIdentity: NetworkedIdentityOptions? = null
+
+        /**
+         * A Link consumer session started outside Identity, e.g. by crypto onramp. It only lets the user
+         * skip signing in to Link; Networked Identity still starts from an explicit user action.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class LinkSessionHandoff(
+            val email: String,
+            val consumerSessionClientSecret: String,
+            val consumerPublishableKey: String,
+        ) : Parcelable {
+            override fun toString(): String = "LinkSessionHandoff([redacted])"
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class NetworkedIdentityOptions(
+            val linkSessionHandoff: LinkSessionHandoff?,
+            /** Debug-only until the VerificationPage returns it. */
+            val debugMerchantPublishableKey: String?,
+            /** Debug-only until the VerificationPage returns it. */
+            val debugProvidedEmail: String?,
+            /** Debug-only route override: "reuse", "save", "none", or null to use the VerificationPage. */
+            val debugRoute: String?,
+            /** Debug-only: return sample saved documents, since test-mode Link accounts have none. */
+            val debugSeedSavedDocuments: Boolean,
+        ) : Parcelable
+
+        /**
          * Configuration for the biometric consent screen's header.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

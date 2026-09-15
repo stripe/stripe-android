@@ -4,7 +4,6 @@
     <string name="stripe_identity_link_email_title">Continue with Link</string>
     <string name="stripe_identity_link_email_body">Sign in to use a saved ID.</string>
     <string name="stripe_identity_link_continue">Continue</string>
-    <string name="stripe_identity_link_resend">Resend code</string>
     <string name="stripe_identity_link_manual">Manually verify identity</string>
     <string name="stripe_identity_link_otp_title">Confirm it\'s you</string>
     <string name="stripe_identity_link_otp_body">Enter the code sent to %1$s.</string>
@@ -20,4 +19,28 @@
     <string name="stripe_identity_link_skipping">Continuing without Link</string>
     <string name="stripe_identity_link_continuing">Continuing…</string>
     <string name="stripe_identity_link_document_number">%1$s %2$s</string>
+    <string name="stripe_identity_link_save_body">To save this ID, sign in or create an account.</string>
+    <string name="stripe_identity_link_preparing">Connecting to Link…</string>
+    <string name="stripe_identity_link_resend">Resend code</string>
+    <string name="stripe_identity_link_share">Share ID</string>
+    <string name="stripe_identity_link_sharing">Sharing your ID…</string>
+    <string name="stripe_identity_link_shared_title">You shared your ID</string>
+    <string name="stripe_identity_link_shared_body">This ID will be used for your verification.</string>
+    <string name="stripe_identity_link_saving">Saving your ID…</string>
+    <string name="stripe_identity_link_saved_title">Success</string>
+    <string name="stripe_identity_link_saved_body">Your credentials were saved with Link.</string>
+    <string name="stripe_identity_link_continue_with_link">Continue with Link</string>
+    <string name="stripe_identity_link_manual_instead">Manually verify instead</string>
+    <string name="stripe_identity_link_saved_id">Saved ID</string>
+    <string name="stripe_identity_link_saved_id_with_email">Saved ID · %1$s</string>
+    <string name="stripe_identity_link_dismiss">Dismiss</string>
+    <string name="stripe_identity_link_save_card_title">Secure 1-click verification with Link</string>
+    <string name="stripe_identity_link_save_button">Save ID with Link</string>
+    <string name="stripe_identity_link_saved_card">Saved to Link</string>
+    <string name="stripe_identity_link_save_failed_title">Couldn\'t save your ID</string>
+    <string name="stripe_identity_link_save_failed_body">Something went wrong while saving your ID to Link. Your verification isn\'t affected.</string>
+    <string name="stripe_identity_link_close">Close</string>
+    <string name="stripe_identity_link_account_with_email">Link account · %1$s</string>
+    <string name="stripe_identity_link_saved_item_id">ID document</string>
+    <string name="stripe_identity_link_saved_item_selfie">Selfie photo</string>
 </resources>

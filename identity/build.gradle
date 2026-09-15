@@ -11,6 +11,8 @@ dependencies {
     implementation project(":stripe-core")
     implementation project(":stripe-ui-core")
     implementation project(":ml-core:default")
+    // Networked Identity reuses Link's login and session through LinkController.
+    implementation project(":paymentsheet")
 
     implementation libs.accompanist.materialThemeAdapter
     implementation libs.androidx.activity

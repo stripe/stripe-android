@@ -12,25 +12,19 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.withResumed
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
@@ -39,7 +33,10 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
-import com.stripe.android.identity.networked.NetworkedIdentityScreen
+import com.stripe.android.identity.networked.NetworkedIdentityMode
+import com.stripe.android.identity.networked.NetworkedIdentityOutcome
+import com.stripe.android.identity.networked.rememberNetworkedIdentityViewModel
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.ui.BottomSheet
 import com.stripe.android.identity.ui.ConfirmationScreen
@@ -84,31 +81,33 @@ internal fun IdentityNavGraph(
     onNavControllerCreated: (NavController) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val showingNetworkedIdentity = backStackEntry?.destination?.route == NetworkedIdentityDestination.ROUTE.route
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, navController) {
-        identityViewModel.detachNetworkedIdentityNavigation(navController)
-        val observer = LifecycleEventObserver { _, _ ->
-            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                identityViewModel.attachNetworkedIdentityNavigation(navController)
-            } else {
-                identityViewModel.detachNetworkedIdentityNavigation(navController)
+    val networkedIdentityViewModel = rememberNetworkedIdentityViewModel(identityViewModel)
+    LaunchedEffect(networkedIdentityViewModel) {
+        networkedIdentityViewModel?.outcomes?.collect { outcome ->
+            when (outcome) {
+                is NetworkedIdentityOutcome.DocumentShared ->
+                    identityViewModel.continueWithSharedDocument(outcome.attached, navController)
+                is NetworkedIdentityOutcome.Fallback ->
+                    if (networkedIdentityViewModel.mode.value == NetworkedIdentityMode.Reuse) {
+                        // Continuing on the intro without Link is the same as accepting consent.
+                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                            navController,
+                            CollectedDataParam(biometricConsent = true),
+                            ConsentDestination.ROUTE.route
+                        )
+                    }
+                NetworkedIdentityOutcome.Saved,
+                NetworkedIdentityOutcome.Cancelled -> Unit
             }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            identityViewModel.detachNetworkedIdentityNavigation(navController)
         }
     }
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
     }
     Scaffold(
-        contentWindowInsets = if (showingNetworkedIdentity) WindowInsets(0, 0, 0, 0) else WindowInsets.systemBars,
+        contentWindowInsets = WindowInsets.systemBars,
         topBar = {
-            if (!showingNetworkedIdentity) IdentityTopAppBar(topBarState, onTopBarNavigationClick)
+            IdentityTopAppBar(topBarState, onTopBarNavigationClick)
         }
     ) { contentPadding ->
         NavHost(
@@ -116,9 +115,6 @@ internal fun IdentityNavGraph(
             modifier = Modifier.padding(contentPadding),
             startDestination = InitialLoadingDestination.destinationRoute.route
         ) {
-            screen(NetworkedIdentityDestination.ROUTE) {
-                NetworkedIdentityHostScreen(identityViewModel, navController)
-            }
             screen(DebugDestination.ROUTE) {
                 DebugScreen(
                     navController = navController,
@@ -143,7 +139,8 @@ internal fun IdentityNavGraph(
             screen(ConsentDestination.ROUTE) {
                 ConsentScreen(
                     navController = navController,
-                    identityViewModel = identityViewModel
+                    identityViewModel = identityViewModel,
+                    networkedIdentityViewModel = networkedIdentityViewModel
                 )
             }
             screen(DocWarmupDestination.ROUTE) {
@@ -202,7 +199,8 @@ internal fun IdentityNavGraph(
                 ConfirmationScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    verificationFlowFinishable = verificationFlowFinishable
+                    verificationFlowFinishable = verificationFlowFinishable,
+                    networkedIdentityViewModel = networkedIdentityViewModel
                 )
             }
             screen(CountryNotListedDestination.ROUTE) {
@@ -371,39 +369,6 @@ internal fun IdentityNavGraph(
             }
         }
     }
-}
-
-@Composable
-private fun NetworkedIdentityHostScreen(identityViewModel: IdentityViewModel, navController: NavController) {
-    val viewModel = identityViewModel.networkedIdentityViewModel
-    if (viewModel == null) {
-        // A new process has no Link credentials. Bootstrap again and let server state decide the route.
-        LaunchedEffect(Unit) { navController.navigateReplacingIdentityStack(InitialLoadingDestination) }
-        return
-    }
-    val state by viewModel.state.collectAsState()
-    val event by identityViewModel.networkedIdentityEvent.collectAsState()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(event, lifecycleOwner) {
-        event?.let {
-            lifecycleOwner.lifecycle.withResumed {
-                identityViewModel.consumeNetworkedIdentityEvent(it, navController)
-            }
-        }
-    }
-    NetworkedIdentityScreen(
-        state = state,
-        providedEmailAddress = identityViewModel.verificationPage.value?.data?.networkedIdentity?.email,
-        supportsDocumentAttachment = viewModel.supportsDocumentAttachment,
-        onFirstAppearance = viewModel::onFirstAppearance,
-        onSubmitEmail = viewModel::submitEmail,
-        onSubmitOtp = viewModel::submitOtp,
-        onResendOtp = viewModel::resendOtp,
-        onSelectDocument = viewModel::selectDocument,
-        onContinueWithDocument = viewModel::continueWithSelectedDocument,
-        onManualCapture = viewModel::useManualCapture,
-        onCancel = viewModel::cancel,
-    )
 }
 
 @ExperimentalMaterialApi

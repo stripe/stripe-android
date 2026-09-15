@@ -49,9 +49,9 @@ internal fun InitialLoadingScreen(
             } else if (!it.livemode) {
                 navController.navigateTo(DebugDestination)
             } else {
-                if (!identityViewModel.tryNavigateToNetworkedIdentity(it, null, navController)) {
-                    navController.navigateTo(it.requirements.missing.nextDestination(context))
-                }
+                navController.navigateTo(
+                    it.requirements.missing.nextDestination(context)
+                )
             }
         }
     }

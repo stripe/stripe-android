@@ -16,44 +16,7 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 internal class NetworkedIdentityViewModelTest {
     @Test
-    fun `cleared ViewModel ignores a late attachment completion`() = runNetworkedIdentityScenario(withActions = true) {
-        val store = ViewModelStore()
-        store.put("networked", NetworkedIdentityViewModel(coordinator))
-        val attachment = beginAttachment()
-        store.clear()
-        runCurrent()
-        repository.logoutCalls.awaitItem()
-        attachment.response.complete(Result.success(niActionPageData()))
-        runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
-        cancellations.expectNoEvents()
-        completions.expectNoEvents()
-        actions.skipCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `cleared ViewModel still logs out credentials from pending resend`() = runNetworkedIdentityScenario {
-        val store = ViewModelStore()
-        store.put("networked", NetworkedIdentityViewModel(coordinator))
-        awaitOtp()
-        val resend = resendOtp()
-        store.clear()
-        runCurrent()
-        assertThat(repository.logoutCalls.awaitItem().credentials.sessionClientSecret).isEqualTo("session_started")
-        resend.response.complete(
-            Result.success(niResponse(clientSecret = "late_resend", authSessionClientSecret = "late_auth"))
-        )
-        runCurrent()
-        val logout = repository.logoutCalls.awaitItem()
-        assertThat(logout.credentials.sessionClientSecret).isEqualTo("late_resend")
-        assertThat(logout.authSessionSecrets).containsExactly("auth_lookup", "auth_started", "late_auth").inOrder()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
-        cancellations.expectNoEvents()
-        fallbacks.expectNoEvents()
-    }
-
-    @Test
-    fun `Activity recreation retains flow until permanent destruction`() = runNetworkedIdentityScenario {
+    fun `Activity recreation retains the attempt until permanent destruction`() = runNetworkedIdentityScenario {
         val creations = Turbine<Unit>()
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -65,73 +28,53 @@ internal class NetworkedIdentityViewModelTest {
         val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup()
         val original = ViewModelProvider(activity.get(), factory)[NetworkedIdentityViewModel::class.java]
         creations.awaitItem()
-        awaitOtp()
+        original.startReuse()
+        runCurrent()
+        linkSession.configureCalls.awaitItem().response.complete(Result.success(Unit))
+        runCurrent()
 
         activity.recreate()
         val retained = ViewModelProvider(activity.get(), factory)[NetworkedIdentityViewModel::class.java]
         assertThat(retained).isSameInstanceAs(original)
-        assertThat(retained.state.value).isInstanceOf(NetworkedIdentityState.AwaitingOtp::class.java)
+        assertThat(retained.state.value).isEqualTo(NetworkedIdentityState.CollectEmail)
         creations.expectNoEvents()
-        repository.logoutCalls.expectNoEvents()
 
         activity.pause().stop().destroy()
         runCurrent()
-        assertThat(repository.logoutCalls.awaitItem().credentials.sessionClientSecret).isEqualTo("session_started")
         assertThat(retained.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
-        cancellations.expectNoEvents()
-        fallbacks.expectNoEvents()
+        outcomes.expectNoEvents()
         creations.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `cleared ViewModel still cleans up a late lookup success`() = runNetworkedIdentityScenario {
+    fun `cleared ViewModel ignores a late response`() = runNetworkedIdentityScenario {
         val store = ViewModelStore()
         val viewModel = NetworkedIdentityViewModel(coordinator)
         store.put("networked", viewModel)
-        viewModel.submitEmail("person@example.com")
+        viewModel.startReuse()
         runCurrent()
-        val lookup = repository.lookupCalls.awaitItem()
+        val configure = linkSession.configureCalls.awaitItem()
+
         store.clear()
         assertThat(viewModel.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
-        lookup.response.complete(Result.success(niFound()))
+        configure.response.complete(Result.success(Unit))
         runCurrent()
-        val logout = repository.logoutCalls.awaitItem()
-        assertThat(logout.credentials.sessionClientSecret).isEqualTo("session_lookup")
-        assertThat(logout.authSessionSecrets).containsExactly("auth_lookup")
-        repository.startCalls.expectNoEvents()
-        cancellations.expectNoEvents()
-        fallbacks.expectNoEvents()
+
+        assertThat(viewModel.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        outcomes.expectNoEvents()
     }
 
     @Test
-    fun `cleared ViewModel cleans current and late confirmation credentials`() = runNetworkedIdentityScenario {
-        val store = ViewModelStore()
-        store.put("networked", NetworkedIdentityViewModel(coordinator))
-        awaitOtp()
-        val confirm = confirmOtp()
-        store.clear()
-        runCurrent()
-        assertThat(repository.logoutCalls.awaitItem().credentials.sessionClientSecret).isEqualTo("session_started")
-        confirm.response.complete(
-            Result.success(niResponse(clientSecret = "late_rotation", authSessionClientSecret = "late_auth"))
-        )
-        runCurrent()
-        val logout = repository.logoutCalls.awaitItem()
-        assertThat(logout.credentials.sessionClientSecret).isEqualTo("late_rotation")
-        assertThat(logout.authSessionSecrets).containsExactly("auth_lookup", "auth_started", "late_auth").inOrder()
-        cancellations.expectNoEvents()
-        fallbacks.expectNoEvents()
-    }
-
-    @Test
-    fun `explicit external dismissal abandons a retained owner`() = runNetworkedIdentityScenario {
+    fun `screen actions drive the attempt`() = runNetworkedIdentityScenario {
         val viewModel = NetworkedIdentityViewModel(coordinator)
-        awaitOtp()
-        viewModel.abandon()
+        viewModel.startReuse()
         runCurrent()
-        repository.logoutCalls.awaitItem()
-        assertThat(viewModel.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
-        cancellations.expectNoEvents()
-        fallbacks.expectNoEvents()
+        linkSession.configureCalls.awaitItem().response.complete(Result.success(Unit))
+        runCurrent()
+
+        viewModel.screenActions().onSubmitEmail("person@example.com")
+        runCurrent()
+
+        assertThat(linkSession.lookupCalls.awaitItem().email).isEqualTo("person@example.com")
     }
 }
