@@ -22,6 +22,8 @@ private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
 private const val BIZUM_TIME_LIMIT_IN_SECONDS = 70 * 60
 private const val BIZUM_INITIAL_DELAY_IN_SECONDS = 5
+private const val MB_WAY_TIME_LIMIT_IN_SECONDS = 4 * 60
+private const val MB_WAY_INITIAL_DELAY_IN_SECONDS = 0
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -103,12 +105,31 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
+            PaymentMethod.Type.MbWay -> createMbWayArgs(actionable, host, requestOptions, paymentMethodType)
             else ->
                 error(
                     "Received invalid payment method type " +
                         "${paymentMethodType.code} in PollingAuthenticator"
                 )
         }
+    }
+
+    private fun createMbWayArgs(
+        actionable: StripeIntent,
+        host: AuthActivityStarterHost,
+        requestOptions: ApiRequest.Options,
+        paymentMethodType: PaymentMethod.Type,
+    ): PollingContract.Args {
+        return PollingContract.Args(
+            clientSecret = requireNotNull(actionable.clientSecret),
+            statusBarColor = host.statusBarColor,
+            timeLimitInSeconds = MB_WAY_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = MB_WAY_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_mb_way_confirm_payment,
+            requestOptions = requestOptions,
+            qrCodeUrl = null,
+            paymentMethodType = paymentMethodType.code,
+        )
     }
 
     private fun getQrCodeForPayNow(actionable: StripeIntent): String {
