@@ -241,6 +241,7 @@ internal class AutocompleteViewModel @Inject constructor(
                         .build(
                             application = extras.requireApplication(),
                             args = args,
+                            apiConfiguration = args.apiConfiguration,
                         )
                         .autocompleteViewModel as T
                 }

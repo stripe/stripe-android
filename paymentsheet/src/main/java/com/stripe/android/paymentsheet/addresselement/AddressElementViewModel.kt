@@ -23,10 +23,12 @@ internal class AddressElementViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val args = starterArgsSupplier()
             return DaggerAddressElementViewModelFactoryComponent.factory()
                 .create(
                     context = applicationSupplier(),
-                    starterArgs = starterArgsSupplier(),
+                    starterArgs = args,
+                    apiConfiguration = args.apiConfiguration,
                 )
                 .addressElementViewModel as T
         }
