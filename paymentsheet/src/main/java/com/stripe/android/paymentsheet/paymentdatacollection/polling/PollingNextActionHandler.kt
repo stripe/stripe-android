@@ -20,8 +20,6 @@ private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
 private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
-
-// Keep in sync with Bizum's server-side authorization timeout.
 private const val BIZUM_TIME_LIMIT_IN_SECONDS = 70 * 60
 private const val BIZUM_INITIAL_DELAY_IN_SECONDS = 5
 
