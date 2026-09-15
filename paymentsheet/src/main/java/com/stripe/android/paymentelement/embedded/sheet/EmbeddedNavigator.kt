@@ -23,10 +23,13 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
+import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
@@ -129,6 +132,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.SavedPaymentMethodConfirm -> Unit
             is Screen.VerticalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
             is Screen.HorizontalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
+            is Screen.HorizontalSavedPaymentOptions -> eventReporter.onShowExistingPaymentOptions()
         }
     }
 
@@ -140,6 +144,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.SavedPaymentMethodConfirm -> Unit
             is Screen.VerticalPaymentOptions -> Unit
             is Screen.HorizontalPaymentOptions -> Unit
+            is Screen.HorizontalSavedPaymentOptions -> Unit
         }
     }
 
@@ -403,6 +408,60 @@ internal class EmbeddedNavigator private constructor(
                 AddPaymentMethod(interactor = interactor)
                 val state by sheetActivityState.collectAsState()
                 USBankAccountMandate(state)
+                FormActivityError(state)
+                Spacer(Modifier.height(40.dp))
+                FormActivityPrimaryButton(
+                    state = state,
+                    onClick = onContinueClick,
+                    onDisabledClick = onPrimaryButtonDisabledClick,
+                )
+                PaymentSheetContentPadding()
+            }
+
+            override fun close() {
+                interactor.close()
+            }
+        }
+
+        class HorizontalSavedPaymentOptions(
+            private val interactor: SelectSavedPaymentMethodsInteractor,
+            private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val onContinueClick: () -> Unit,
+            private val onPrimaryButtonDisabledClick: () -> Unit,
+        ) : Screen(), Closeable {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+                return interactor.state.mapAsStateFlow { state ->
+                    PaymentSheetTopBarStateFactory.create(
+                        isLiveMode = interactor.isLiveMode,
+                        editable = PaymentSheetTopBarState.Editable.Maybe(
+                            isEditing = state.isEditing,
+                            canEdit = state.canEdit,
+                            onEditIconPressed = {
+                                interactor.handleViewAction(
+                                    SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit
+                                )
+                            },
+                        ),
+                    )
+                }
+            }
+
+            override fun title(): StateFlow<ResolvableString?> = stateFlowOf(
+                R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+            )
+
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return sheetActivityState.mapAsStateFlow { it.isProcessing }
+            }
+
+            @Composable
+            override fun Content() {
+                SavedPaymentMethodTabLayoutUI(
+                    interactor = interactor,
+                    cvcRecollectionState = CvcRecollectionState.NotRequired,
+                    modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
+                )
+                val state by sheetActivityState.collectAsState()
                 FormActivityError(state)
                 Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
