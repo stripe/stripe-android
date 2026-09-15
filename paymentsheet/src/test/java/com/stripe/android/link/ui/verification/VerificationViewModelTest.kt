@@ -254,7 +254,7 @@ internal class VerificationViewModelTest {
             var resultCaptured: LinkActivityResult? = null
             val dismissWithResult = { result: LinkActivityResult -> resultCaptured = result }
             val viewModel = createViewModel(
-                linkLaunchMode = LinkLaunchMode.Authentication(),
+                linkLaunchMode = LinkLaunchMode.Authentication(content = null),
                 dismissWithResult = dismissWithResult
             )
             viewModel.onVerificationCodeEntered("123456")

@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAction
@@ -16,6 +15,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.SheetCornerRadius
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
@@ -71,7 +71,7 @@ internal fun FullScreenContent(
     EventReporterProvider(eventReporter) {
         ElementsBottomSheetLayout(
             state = bottomSheetState,
-            cornerRadius = 24.dp,
+            cornerRadius = SheetCornerRadius,
             onDismissed = dismiss,
         ) {
             LinkContent(
@@ -100,7 +100,7 @@ internal fun FullScreenContent(
         linkContentBottomSheetContent?.let { content ->
             ElementsBottomSheetLayout(
                 state = linkContentBottomSheetState,
-                cornerRadius = 24.dp,
+                cornerRadius = SheetCornerRadius,
                 onDismissed = { linkContentBottomSheetContent = null },
                 content = {
                     DefaultLinkTheme {

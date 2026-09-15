@@ -37,6 +37,7 @@ internal val LocalLinkShapes = staticCompositionLocalOf<LinkShapes> {
 internal val MinimumTouchTargetSize = 48.dp
 internal val AppBarHeight = 70.dp
 internal val HorizontalPadding = 20.dp
+internal val SheetCornerRadius = 24.dp
 
 @Composable
 internal fun DefaultLinkTheme(
