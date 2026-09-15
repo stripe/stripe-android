@@ -147,6 +147,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = com.stripe.android.link.account.LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
 

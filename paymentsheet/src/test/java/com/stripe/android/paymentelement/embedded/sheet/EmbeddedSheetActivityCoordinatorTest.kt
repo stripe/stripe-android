@@ -288,6 +288,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
                 selection = null,
                 previousNewSelections = Bundle(),
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
                 promotions = emptyList(),
                 launchMode = launchMode,
                 presentationState = presentationState,
