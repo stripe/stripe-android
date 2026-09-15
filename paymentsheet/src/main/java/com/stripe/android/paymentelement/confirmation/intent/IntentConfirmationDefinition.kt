@@ -47,6 +47,7 @@ internal class IntentConfirmationDefinition(
                 integrationMetadata = paymentMethodMetadata.integrationMetadata,
                 customerMetadata = paymentMethodMetadata.customerMetadata,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                isLiveMode = paymentMethodMetadata.apiConfiguration.isLiveMode(),
             )
         } catch (e: CallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(

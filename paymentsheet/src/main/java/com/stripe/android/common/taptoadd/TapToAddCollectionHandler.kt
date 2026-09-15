@@ -117,7 +117,9 @@ internal class DefaultTapToAddCollectionHandler(
         )
 
         val callback = try {
-            createCardPresentSetupIntentCallbackRetriever.waitForCallback()
+            createCardPresentSetupIntentCallbackRetriever.waitForCallback(
+                isLiveMode = metadata.apiConfiguration.isLiveMode()
+            )
         } catch (error: CallbackNotFoundException) {
             userFacingLogger.logWarningWithoutPii(
                 "createCardPresentSetupIntentCallback was not defined! Please provide the callback to use tap to add!"
