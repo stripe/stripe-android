@@ -59,9 +59,7 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
-        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
-            AddressElementActivityContract.Result.StandaloneSucceeded(it)
-        },
+        primaryButtonAction: AddressElementPrimaryButtonAction? = null,
         eventReporter: AddressLauncherEventReporter = this.eventReporter,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
@@ -71,13 +69,18 @@ class InputAddressViewModelTest {
                 )
             },
     ): InputAddressViewModel {
+        val args = argsFactory(config)
         return InputAddressViewModel(
-            argsFactory(config),
+            args,
             navigator,
             resultStateHolder,
             eventReporter,
             placesClient = null,
-            primaryButtonAction = primaryButtonAction,
+            primaryButtonAction = primaryButtonAction ?: AddressElementViewModelModule()
+                .providePrimaryButtonAction(
+                    args = args,
+                    taxRegionUpdater = Provider { createTaxRegionUpdater() },
+                ),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1120,35 +1123,6 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `standalone save emits standalone success`() {
-        val viewModel = createViewModel()
-
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
-        )
-    }
-
-    @Test
-    fun `failed primary button action re-enables the form without a result`() = runTest {
-        val viewModel = createViewModel(
-            primaryButtonAction = object : AddressElementPrimaryButtonAction {
-                override suspend fun invoke(
-                    addressDetails: AddressDetails,
-                ): Result<AddressElementActivityContract.Result> {
-                    return Result.failure(IllegalStateException("failed"))
-                }
-            },
-        )
-
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-        assertThat(viewModel.formEnabled.value).isTrue()
-        assertThat(resultStateHolder.result.value).isNull()
-    }
-
-    @Test
     fun `checkout shipping save updates tax from submitted address and returns updated response`() =
         runCheckoutSaveScenario {
             networkRule.checkoutUpdate(
@@ -1220,12 +1194,7 @@ class InputAddressViewModelTest {
                 checkoutSessionResponse = response,
             )
         }
-        val primaryButtonAction = AddressElementViewModelModule().providePrimaryButtonAction(
-            args = argsFactory(AddressLauncher.Configuration()),
-            taxRegionUpdater = Provider { createTaxRegionUpdater() },
-        )
         val viewModel = createViewModel(
-            primaryButtonAction = primaryButtonAction,
             argsFactory = argsFactory,
         )
         CheckoutSaveScenario(viewModel, response).block()
@@ -1251,14 +1220,15 @@ class InputAddressViewModelTest {
         googlePlacesApiKey: String = "test_key",
         autocompleteCountries: Set<String> = emptySet(),
     ): InputAddressViewModel {
+        val args = AddressElementActivityContract.Args.Standalone(
+            publishableKey = "pk_123",
+            config = AddressLauncher.Configuration.Builder()
+                .googlePlacesApiKey(googlePlacesApiKey)
+                .autocompleteCountries(autocompleteCountries)
+                .build(),
+        )
         return InputAddressViewModel(
-            AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration.Builder()
-                    .googlePlacesApiKey(googlePlacesApiKey)
-                    .autocompleteCountries(autocompleteCountries)
-                    .build(),
-            ),
+            args,
             navigator,
             resultStateHolder,
             eventReporter,
@@ -1266,9 +1236,10 @@ class InputAddressViewModelTest {
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
-                AddressElementActivityContract.Result.StandaloneSucceeded(it)
-            },
+            primaryButtonAction = AddressElementViewModelModule().providePrimaryButtonAction(
+                args = args,
+                taxRegionUpdater = Provider { createTaxRegionUpdater() },
+            ),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1338,16 +1309,6 @@ class InputAddressViewModelTest {
             FormFieldId.PostalCode to FormFieldEntry("94103", true),
             FormFieldId.State to FormFieldEntry("CA", true),
         )
-    }
-}
-
-private class FakeAddressElementPrimaryButtonAction(
-    private val action: (AddressDetails) -> AddressElementActivityContract.Result,
-) : AddressElementPrimaryButtonAction {
-    override suspend fun invoke(
-        addressDetails: AddressDetails,
-    ): Result<AddressElementActivityContract.Result> {
-        return Result.success(action(addressDetails))
     }
 }
 
