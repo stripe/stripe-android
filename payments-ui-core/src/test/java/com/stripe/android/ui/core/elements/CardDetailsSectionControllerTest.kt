@@ -8,6 +8,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.ApiKeyFixtures
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -84,7 +85,10 @@ class CardDetailsSectionControllerTest {
     }
 
     private fun createController() = CardDetailsSectionController(
-        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = context,
+            publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        ),
         initialValues = emptyMap(),
         coroutineScope = coroutineScope,
         collectName = false,
