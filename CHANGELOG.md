@@ -4,6 +4,10 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED] Added support for Bizum.
 
+### Financial Connections
+* [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
+* [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+
 ## 23.19.0 - 2026-09-15
 
 ### All SDKs
@@ -14,9 +18,6 @@ NEXT_VERSION_BUMP: PATCH
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
 ## 23.18.0 - 2026-09-08
-
-### Financial Connections
-* [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 
 ### PaymentSheet
 * [ADDED] Added support for SeQura.
