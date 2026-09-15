@@ -36,6 +36,7 @@ internal fun ExpressCheckoutElementContent(
         interactor = interactor,
         googlePayButton = { button, onPressed ->
             GooglePayButton(
+                apiConfiguration = button.apiConfiguration,
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = button.allowCreditCards,
                 buttonType = button.googlePayButtonType,

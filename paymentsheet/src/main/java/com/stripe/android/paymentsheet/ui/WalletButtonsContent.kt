@@ -77,6 +77,7 @@ internal class WalletButtonsContent(
         state.walletButtons.forEach { button ->
             when (button) {
                 is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
+                    apiConfiguration = button.apiConfiguration,
                     state = PrimaryButton.State.Ready,
                     allowCreditCards = button.allowCreditCards,
                     buttonType = button.googlePayButtonType,
