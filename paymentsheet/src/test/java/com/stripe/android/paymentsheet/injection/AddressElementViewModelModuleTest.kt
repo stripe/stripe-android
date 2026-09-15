@@ -20,12 +20,12 @@ import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import javax.inject.Provider
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 class AddressElementViewModelModuleTest {
