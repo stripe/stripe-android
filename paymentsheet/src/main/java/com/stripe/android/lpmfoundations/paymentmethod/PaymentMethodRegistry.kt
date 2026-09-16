@@ -38,6 +38,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PaycoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.QrisDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ScalapayDefinition
@@ -93,6 +94,7 @@ internal object PaymentMethodRegistry {
         PayPayDefinition,
         PaycoDefinition,
         PromptPayDefinition,
+        QrisDefinition,
         RevolutPayDefinition,
         SatispayDefinition,
         ScalapayDefinition,
