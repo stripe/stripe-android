@@ -111,6 +111,9 @@ NEXT_VERSION_BUMP: PATCH
 ### CustomerSheet
 * [FIXED][13383](https://github.com/stripe/stripe-android/issues/13383) `CustomerSheet` no longer reports a failure when the sheet is torn down by the OS without returning a result (e.g. when a `singleTask` host activity is relaunched). The result callback is now a no-op in that case, leaving the merchant's state unchanged.
 
+### Payments
+* [FIXED][13354](https://github.com/stripe/stripe-android/pull/13354) Fixed an issue where `PersonTokenParams.Verification` sent the `document` and `additionalDocument` fields to the Stripe API under each other's keys.
+
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
