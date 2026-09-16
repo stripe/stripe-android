@@ -48,6 +48,9 @@ internal class FakeEventReporter : EventReporter {
     private val _showNewPaymentOptionsCalls = Turbine<Unit>()
     val showNewPaymentOptionsCalls: ReceiveTurbine<Unit> = _showNewPaymentOptionsCalls
 
+    private val _showExistingPaymentOptionsCalls = Turbine<Unit>()
+    val showExistingPaymentOptionsCalls: ReceiveTurbine<Unit> = _showExistingPaymentOptionsCalls
+
     private val _showManageSavedPaymentMethods = Turbine<Unit>()
     val showManageSavedPaymentMethods: ReceiveTurbine<Unit> = _showManageSavedPaymentMethods
 
@@ -118,6 +121,7 @@ internal class FakeEventReporter : EventReporter {
         _setAsDefaultPaymentMethodSucceededCalls.ensureAllEventsConsumed()
         _showEditablePaymentOptionCalls.ensureAllEventsConsumed()
         _hideEditablePaymentOptionCalls.ensureAllEventsConsumed()
+        _showExistingPaymentOptionsCalls.ensureAllEventsConsumed()
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
@@ -147,6 +151,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onShowExistingPaymentOptions() {
+        _showExistingPaymentOptionsCalls.add(Unit)
     }
 
     override fun onShowManageSavedPaymentMethods() {
