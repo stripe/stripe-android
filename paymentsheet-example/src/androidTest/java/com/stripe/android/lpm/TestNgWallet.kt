@@ -33,5 +33,4 @@ internal class TestNgWallet : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
 }
