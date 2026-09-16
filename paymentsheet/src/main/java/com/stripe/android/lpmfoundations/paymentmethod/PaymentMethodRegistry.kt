@@ -28,6 +28,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefini
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MonduDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgBankTransferDefinition
@@ -90,6 +91,7 @@ internal object PaymentMethodRegistry {
         KrCardDefinition,
         MoMoDefinition,
         MobilePayDefinition,
+        MonduDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
         NgBankTransferDefinition,
