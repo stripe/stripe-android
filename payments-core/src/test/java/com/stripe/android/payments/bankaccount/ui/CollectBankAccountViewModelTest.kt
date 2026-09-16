@@ -172,7 +172,10 @@ class CollectBankAccountViewModelTest {
         )
         viewEffect.test {
             // Given
-            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
+            givenCreateAccountSessionForPaymentIntentReturns(
+                result = Result.success(financialConnectionsSession),
+                hostedSurface = null,
+            )
 
             // When
             buildViewModel(
@@ -230,18 +233,23 @@ class CollectBankAccountViewModelTest {
             consent = "fccons_123",
             collectedAt = 1_725_000_000L,
         )
+        val configuration = CollectBankAccountConfiguration.InstantDebits(
+            email = email,
+            elementsSessionContext = null,
+        )
         viewEffect.test {
-            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
+            givenCreateAccountSessionForPaymentIntentReturns(
+                result = Result.success(financialConnectionsSession),
+                configuration = configuration,
+                hostedSurface = null,
+            )
 
             buildViewModel(
                 viewEffect,
                 paymentIntentConfiguration(
                     preCollectedConsent = preCollectedConsent,
                     hostedSurface = null,
-                    configuration = CollectBankAccountConfiguration.InstantDebits(
-                        email = email,
-                        elementsSessionContext = null,
-                    ),
+                    configuration = configuration,
                 )
             )
 
@@ -484,7 +492,12 @@ class CollectBankAccountViewModelTest {
     }
 
     private fun givenCreateAccountSessionForPaymentIntentReturns(
-        result: Result<FinancialConnectionsSession>
+        result: Result<FinancialConnectionsSession>,
+        configuration: CollectBankAccountConfiguration = CollectBankAccountConfiguration.USBankAccount(
+            name = name,
+            email = email,
+        ),
+        hostedSurface: String? = "payment_element",
     ) {
         createFinancialConnectionsSession.stub {
             on {
@@ -492,11 +505,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     stripeAccountId = stripeAccountId,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name = name,
-                        email = email
-                    ),
-                    hostedSurface = "payment_element"
+                    configuration = configuration,
+                    hostedSurface = hostedSurface,
                 )
             }.doReturn(result)
         }
