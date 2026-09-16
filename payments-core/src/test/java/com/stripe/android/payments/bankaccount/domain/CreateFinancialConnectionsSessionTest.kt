@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
@@ -25,6 +26,8 @@ class CreateFinancialConnectionsSessionTest {
     private val createFinancialConnectionsSession = CreateFinancialConnectionsSession(stripeRepository)
 
     private val customerName = "name"
+    private val customerAddress = AddressFixtures.ADDRESS
+    private val customerPhone = "5555555555"
     private val linkedAccountSession = FinancialConnectionsSession(
         "session_secret",
         "session_id"
@@ -45,7 +48,9 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
-                        email = null
+                        email = null,
+                        address = customerAddress,
+                        phone = customerPhone,
                     ),
                     hostedSurface = "payment_element",
                     stripeAccountId = null
@@ -59,6 +64,8 @@ class CreateFinancialConnectionsSessionTest {
                     customerName = customerName,
                     hostedSurface = "payment_element",
                     customerEmailAddress = null,
+                    customerAddress = customerAddress,
+                    customerPhone = customerPhone,
                     linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
@@ -98,6 +105,8 @@ class CreateFinancialConnectionsSessionTest {
                     customerName = customerName,
                     hostedSurface = "payment_element",
                     customerEmailAddress = null,
+                    customerAddress = null,
+                    customerPhone = null,
                     linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
@@ -148,7 +157,9 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
-                        email = null
+                        email = null,
+                        address = customerAddress,
+                        phone = customerPhone,
                     ),
                     stripeAccountId = stripeAccountId,
                     hostedSurface = "payment_element"
@@ -161,6 +172,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null,
+                    customerAddress = customerAddress,
+                    customerPhone = customerPhone,
                     hostedSurface = "payment_element",
                     linkMode = null,
                 ),
@@ -202,6 +215,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null,
+                    customerAddress = null,
+                    customerPhone = null,
                     hostedSurface = "payment_element",
                     linkMode = null,
                 ),

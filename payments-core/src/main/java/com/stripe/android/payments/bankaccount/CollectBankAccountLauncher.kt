@@ -10,6 +10,7 @@ import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.model.Address
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -163,9 +164,13 @@ sealed interface CollectBankAccountConfiguration : Parcelable {
 
     @Parcelize
     @Poko
-    class USBankAccount(
+    class USBankAccount @JvmOverloads constructor(
         val name: String,
-        val email: String?
+        val email: String?,
+        /** Billing address associated with the bank account. */
+        val address: Address? = null,
+        /** Billing phone number associated with the bank account. */
+        val phone: String? = null,
     ) : CollectBankAccountConfiguration
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

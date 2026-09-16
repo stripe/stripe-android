@@ -127,6 +127,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     clientSecret = clientSecret,
                     customerName = name,
                     customerEmailAddress = email,
+                    customerAddress = address,
+                    customerPhone = phone,
                     hostedSurface = hostedSurface,
                     linkMode = null,
                 )
@@ -137,6 +139,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     clientSecret = clientSecret,
                     customerName = name,
                     customerEmailAddress = email,
+                    customerAddress = null,
+                    customerPhone = null,
                     hostedSurface = hostedSurface,
                     linkMode = elementsSessionContext?.linkMode,
                 )

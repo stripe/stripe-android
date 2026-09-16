@@ -2302,6 +2302,8 @@ internal class StripeApiRepositoryTest {
         val id = "pi_1234"
         val customerName = "John Doe"
         val customerEmailAddress = "johndoe@gmail.com"
+        val customerAddress = AddressFixtures.ADDRESS
+        val customerPhone = "5555555555"
         create().createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = id,
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
@@ -2309,6 +2311,8 @@ internal class StripeApiRepositoryTest {
                 customerName = customerName,
                 hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress,
+                customerAddress = customerAddress,
+                customerPhone = customerPhone,
                 linkMode = LinkMode.Passthrough,
             ),
             DEFAULT_OPTIONS
@@ -2329,7 +2333,52 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
                     assertThat(this["name"]).isEqualTo(customerName)
+                    assertThat(this["email"]).isEqualTo(customerEmailAddress)
+                    assertThat(this["phone"]).isEqualTo(customerPhone)
+                    withNestedParams("address") {
+                        assertThat(this["city"]).isEqualTo(customerAddress.city)
+                        assertThat(this["country"]).isEqualTo(customerAddress.country)
+                        assertThat(this["line1"]).isEqualTo(customerAddress.line1)
+                        assertThat(this["line2"]).isEqualTo(customerAddress.line2)
+                        assertThat(this["postal_code"]).isEqualTo(customerAddress.postalCode)
+                        assertThat(this["state"]).isEqualTo(customerAddress.state)
+                    }
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `paymentIntentsFinancialConnectionsSession() for ACH omits null address and phone`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentIntentFixtures.PI_LINK_ACCOUNT_SESSION_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().createPaymentIntentFinancialConnectionsSession(
+            paymentIntentId = "pi_1234",
+            params = CreateFinancialConnectionsSessionParams.USBankAccount(
+                clientSecret = "",
+                customerName = "name",
+                customerEmailAddress = null,
+                customerAddress = null,
+                customerPhone = null,
+                hostedSurface = "payment_element",
+                linkMode = null,
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+        params.withNestedParams("payment_method_data") {
+            withNestedParams("billing_details") {
+                assertThat(this).doesNotContainKey("address")
+                assertThat(this).doesNotContainKey("phone")
             }
         }
     }
@@ -2394,6 +2443,8 @@ internal class StripeApiRepositoryTest {
         val id = "seti_1234"
         val customerName = "John Doe"
         val customerEmailAddress = "johndoe@gmail.com"
+        val customerAddress = AddressFixtures.ADDRESS
+        val customerPhone = "5555555555"
         create().createSetupIntentFinancialConnectionsSession(
             setupIntentId = id,
             params = CreateFinancialConnectionsSessionParams.USBankAccount(
@@ -2401,6 +2452,8 @@ internal class StripeApiRepositoryTest {
                 customerName = customerName,
                 hostedSurface = "payment_element",
                 customerEmailAddress = customerEmailAddress,
+                customerAddress = customerAddress,
+                customerPhone = customerPhone,
                 linkMode = null,
             ),
             DEFAULT_OPTIONS
@@ -2422,6 +2475,16 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
                     assertThat(this["name"]).isEqualTo(customerName)
+                    assertThat(this["email"]).isEqualTo(customerEmailAddress)
+                    assertThat(this["phone"]).isEqualTo(customerPhone)
+                    withNestedParams("address") {
+                        assertThat(this["city"]).isEqualTo(customerAddress.city)
+                        assertThat(this["country"]).isEqualTo(customerAddress.country)
+                        assertThat(this["line1"]).isEqualTo(customerAddress.line1)
+                        assertThat(this["line2"]).isEqualTo(customerAddress.line2)
+                        assertThat(this["postal_code"]).isEqualTo(customerAddress.postalCode)
+                        assertThat(this["state"]).isEqualTo(customerAddress.state)
+                    }
                 }
             }
         }

@@ -38,6 +38,8 @@ sealed interface CreateFinancialConnectionsSessionParams {
         val clientSecret: String,
         val customerName: String,
         val customerEmailAddress: String?,
+        val customerAddress: Address?,
+        val customerPhone: String?,
         val hostedSurface: String?,
         val linkMode: LinkMode?,
     ) : CreateFinancialConnectionsSessionParams {
@@ -45,7 +47,9 @@ sealed interface CreateFinancialConnectionsSessionParams {
             val paymentMethod = PaymentMethodCreateParams.createUSBankAccount(
                 billingDetails = PaymentMethod.BillingDetails(
                     name = customerName,
-                    email = customerEmailAddress
+                    email = customerEmailAddress,
+                    address = customerAddress,
+                    phone = customerPhone,
                 )
             )
             return mapOf(
