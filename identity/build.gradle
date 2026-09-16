@@ -57,6 +57,7 @@ dependencies {
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
+    testImplementation testLibs.testParameterInjector
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 }
@@ -64,6 +65,8 @@ dependencies {
 android {
     defaultConfig {
         minSdkVersion 24
+        buildConfigField 'boolean', 'NETWORKED_IDENTITY_PREVIEW',
+            (providers.gradleProperty('stripeIdentityNetworkedPreview').orNull == 'true').toString()
     }
 
     sourceSets {
@@ -86,6 +89,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
         compose true
     }

@@ -132,9 +132,12 @@ internal fun DebugScreen(
             FinishMobileFlowWithResultSection(verificationFlowFinishable)
             Divider(modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)))
             PreviewUserExperienceSection {
-                val destination = verificationPage.requirements.missing.nextDestination(context)
                 identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
-                navController.navigateTo(destination)
+                coroutineScope.launch {
+                    if (!identityViewModel.tryNavigateToNetworkedIdentity(verificationPage, null, navController)) {
+                        navController.navigateTo(verificationPage.requirements.missing.nextDestination(context))
+                    }
+                }
             }
         }
     }

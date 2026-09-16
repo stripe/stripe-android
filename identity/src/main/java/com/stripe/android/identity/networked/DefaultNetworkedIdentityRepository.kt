@@ -110,6 +110,18 @@ internal class DefaultNetworkedIdentityRepository(
         parse = NetworkedIdentityJsonParser::associationToken,
     )
 
+    // #TODO - Networked Identity: Confirm the draft save-token endpoint before rollout.
+    override suspend fun createSaveAssociationToken(
+        credentials: NetworkedIdentityCredentials,
+        verificationSessionId: String,
+    ): Result<NetworkedIdentityAssociationToken> = post(
+        path = "consumers/identity_documents/save_association_token",
+        options = credentials.requestOptions(),
+        params = credentials.params() + ("verification_session" to verificationSessionId),
+        retryServerError = false,
+        parse = NetworkedIdentityJsonParser::associationToken,
+    )
+
     override suspend fun logout(
         credentials: NetworkedIdentityCredentials,
         authSessionSecrets: List<String>,

@@ -29,6 +29,11 @@ internal interface NetworkedIdentityRepository {
         documentId: String,
     ): Result<NetworkedIdentityAssociationToken>
 
+    suspend fun createSaveAssociationToken(
+        credentials: NetworkedIdentityCredentials,
+        verificationSessionId: String,
+    ): Result<NetworkedIdentityAssociationToken>
+
     suspend fun logout(
         credentials: NetworkedIdentityCredentials,
         authSessionSecrets: List<String>,

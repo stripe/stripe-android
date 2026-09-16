@@ -69,8 +69,14 @@ internal data class VerificationPage(
     @SerialName("networking_data")
     val networkingData: VerificationPageNetworkingData?,
     @SerialName("provided_details")
-    val providedDetails: VerificationPageProvidedDetails?
+    val providedDetails: VerificationPageProvidedDetails?,
+    @SerialName("merchant_publishable_key")
+    val merchantPublishableKey: String?,
+    @SerialName("networked_identity")
+    val networkedIdentity: VerificationPageNetworkedIdentity?
 ) : Parcelable {
+    override fun toString(): String = "VerificationPage(status=$status, submitted=$submitted)"
+
     @Serializable
     internal enum class Status {
         @SerialName("canceled")

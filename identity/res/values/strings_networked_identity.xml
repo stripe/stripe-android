@@ -16,5 +16,8 @@
     <string name="stripe_identity_link_documents_title">Choose a saved ID</string>
     <string name="stripe_identity_link_documents_body">Select an ID to continue.</string>
     <string name="stripe_identity_link_documents_loading">Loading your saved IDs…</string>
+    <string name="stripe_identity_link_attaching">Reusing your identity document</string>
+    <string name="stripe_identity_link_skipping">Continuing without Link</string>
+    <string name="stripe_identity_link_continuing">Continuing…</string>
     <string name="stripe_identity_link_document_number">%1$s %2$s</string>
 </resources>

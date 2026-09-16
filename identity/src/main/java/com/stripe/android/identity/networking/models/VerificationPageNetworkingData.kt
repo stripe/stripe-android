@@ -26,23 +26,16 @@ internal data class VerificationPageNetworkingFeatures(
     val consumerReuseEnabled: Boolean?,
     @SerialName("consumer_reuse_possible")
     val consumerReusePossible: Boolean?
-) : Parcelable {
-    val route: NetworkedIdentityRoute
-        get() = when {
-            viCompatible != true || viMerchantEligible != true || viMerchantEnabled != true ->
-                NetworkedIdentityRoute.OrdinaryIdentity
-            consumerReuseEnabled == true && consumerReusePossible == true -> NetworkedIdentityRoute.Reuse
-            consumerSaveEnabled == true -> NetworkedIdentityRoute.Save
-            else -> NetworkedIdentityRoute.OrdinaryIdentity
-        }
-}
+) : Parcelable
 
 internal enum class NetworkedIdentityRoute {
     OrdinaryIdentity,
     Reuse,
-    Save
+    Save,
+    ResumeReuse,
+    ResumeSave
 }
 
 /** Eligibility alone never enables an unfinished merchant-facing flow. */
 internal val VerificationPage.networkedIdentityRoute: NetworkedIdentityRoute
-    get() = networkingData?.features?.route ?: NetworkedIdentityRoute.OrdinaryIdentity
+    get() = networkedIdentity?.route ?: NetworkedIdentityRoute.OrdinaryIdentity

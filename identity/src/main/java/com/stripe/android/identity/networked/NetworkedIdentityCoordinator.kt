@@ -2,6 +2,7 @@ package com.stripe.android.identity.networked
 
 import androidx.annotation.MainThread
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.uicore.elements.EmailConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,19 +13,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 /**
- * Standalone preparation for document reuse. Selecting a document is not Identity verification.
+ * Link authentication, saved-document selection, and preview Identity actions. The host remains
+ * responsible for processing server requirements and submitting the Identity verification.
  * All actions and request completions run on the main dispatcher supplied by the owner.
  */
 @MainThread
 internal class NetworkedIdentityCoordinator(
     private val repository: NetworkedIdentityRepository,
     private val documentRequirements: NetworkedIdentityDocumentRequirements,
+    private val actions: NetworkedIdentityActions?,
     private val locale: String,
     initialAuthSessionSecrets: List<String>,
     private val currentTimeSeconds: () -> Long,
     dispatcher: CoroutineDispatcher,
     onCancel: () -> Unit,
-    onFallback: (NetworkedIdentityFallbackReason) -> Unit
+    onFallback: (NetworkedIdentityFallbackReason) -> Unit,
+    onComplete: (Result<VerificationPageData>) -> Unit
 ) {
     // Deliberately independent of viewModelScope: logout and responses carrying rotated credentials
     // must finish after onCleared. Completing this job on exit lets existing children drain.
@@ -32,6 +36,7 @@ internal class NetworkedIdentityCoordinator(
     private val requestScope = CoroutineScope(requestJob + dispatcher)
     private val mutableState = MutableStateFlow<NetworkedIdentityState>(NetworkedIdentityState.CollectEmail)
     val state = mutableState.asStateFlow()
+    val supportsDocumentAttachment = actions != null
 
     private var credentials: NetworkedIdentityCredentials? = null
     private var authSessionSecrets = initialAuthSessionSecrets.filter { it.isNotBlank() }.distinct()
@@ -41,6 +46,7 @@ internal class NetworkedIdentityCoordinator(
     private var otpGeneration = 0
     private var cancelCallback: (() -> Unit)? = onCancel
     private var fallbackCallback: ((NetworkedIdentityFallbackReason) -> Unit)? = onFallback
+    private var completionCallback: ((Result<VerificationPageData>) -> Unit)? = onComplete
     private var callbackDelivered = false
 
     fun submitEmail(email: String) {
@@ -55,9 +61,9 @@ internal class NetworkedIdentityCoordinator(
         val requestSecrets = authSessionSecrets
         mutableState.value = NetworkedIdentityState.LookupPending
         requestScope.launch {
-            if (flowEnded) return@launch
+            if (linkRequestsObsolete) return@launch
             val result = repository.lookup(normalizedEmail, requestSecrets)
-            if (flowEnded) {
+            if (linkRequestsObsolete) {
                 val found = result.getOrNull() as? NetworkedIdentityLookup.Found
                 if (found != null) {
                     logOut(
@@ -91,9 +97,9 @@ internal class NetworkedIdentityCoordinator(
         val requestSecrets = authSessionSecrets
         mutableState.value = NetworkedIdentityState.OtpConfirmPending(redactedPhoneNumber, otpGeneration)
         requestScope.launch {
-            if (flowEnded) return@launch
+            if (linkRequestsObsolete) return@launch
             val result = repository.confirmVerification(requestCredentials, code, requestSecrets)
-            if (flowEnded) {
+            if (linkRequestsObsolete) {
                 logOutLateResponse(result, requestCredentials, requestSecrets)
                 return@launch
             }
@@ -129,12 +135,61 @@ internal class NetworkedIdentityCoordinator(
         val selection = state.value as? NetworkedIdentityState.SelectDocument ?: return
         if (selection.documents.none { it.id == documentId }) return
         mutableState.value = selection.copy(selectedDocumentId = documentId)
-        // #TODO - Networked Identity: Clone/attach endpoint, association-token linkage/lifetime,
-        // auth, response, errors, and retry/idempotency rules are required before submitting reuse.
+        // Selection does not attach the document. The user must explicitly continue.
+    }
+
+    fun continueWithSelectedDocument() {
+        val identityActions = actions ?: return
+        val selection = state.value as? NetworkedIdentityState.SelectDocument ?: return
+        val selectedDocument = selection.documents.firstOrNull { it.id == selection.selectedDocumentId } ?: return
+        val requestCredentials = credentials
+        if (requestCredentials == null ||
+            documentRequirements.filter(listOf(selectedDocument), currentTimeSeconds()).isEmpty()
+        ) {
+            fallBack(NetworkedIdentityFallbackReason.Unavailable)
+            return
+        }
+        mutableState.value = NetworkedIdentityState.AttachmentPending
+        requestScope.launch {
+            if (state.value != NetworkedIdentityState.AttachmentPending) return@launch
+            // Mint only after explicit Continue and redeem once. Never retain tokens in screen state.
+            val token = repository.createAssociationToken(requestCredentials, selectedDocument.id)
+                .getOrNull()?.associationToken
+            if (state.value != NetworkedIdentityState.AttachmentPending) return@launch
+            if (token.isNullOrBlank()) {
+                finishAction(actionFailure(NetworkedIdentityActionException.Reason.TokenUnavailable))
+                return@launch
+            }
+            val result = identityActions.attachDocument(token)
+            if (state.value != NetworkedIdentityState.AttachmentPending) return@launch
+            if (result.exceptionOrNull()?.consumerErrorCode == NETWORKED_IDENTITY_UNAVAILABLE) {
+                fallBack(NetworkedIdentityFallbackReason.Unavailable)
+            } else {
+                finishAction(result.sanitized(NetworkedIdentityActionException.Reason.AttachmentFailed))
+            }
+            // #TODO - Networked Identity: Define approved fresh-token recovery and ambiguous
+            // redemption errors before adding recovery. Never automatically replay an association token.
+        }
     }
 
     fun useManualCapture() {
-        if (!flowEnded) fallBack(NetworkedIdentityFallbackReason.UserSelectedManualCapture)
+        if (flowEnded || state.value == NetworkedIdentityState.AttachmentPending ||
+            state.value == NetworkedIdentityState.SkipPending
+        ) {
+            return
+        }
+        val identityActions = actions
+        if (identityActions == null) {
+            fallBack(NetworkedIdentityFallbackReason.UserSelectedManualCapture)
+            return
+        }
+        mutableState.value = NetworkedIdentityState.SkipPending
+        requestScope.launch {
+            if (state.value != NetworkedIdentityState.SkipPending) return@launch
+            val result = identityActions.skip()
+            if (state.value != NetworkedIdentityState.SkipPending) return@launch
+            finishAction(result.sanitized(NetworkedIdentityActionException.Reason.SkipFailed))
+        }
     }
 
     fun cancel() = endAsCancelled(notifyHost = true)
@@ -166,7 +221,7 @@ internal class NetworkedIdentityCoordinator(
             NetworkedIdentityState.OtpStartPending
         }
         requestScope.launch {
-            if (flowEnded) return@launch
+            if (linkRequestsObsolete) return@launch
             val result = repository.startVerification(
                 credentials = requestCredentials,
                 locale = locale,
@@ -174,7 +229,7 @@ internal class NetworkedIdentityCoordinator(
                 isResendingSmsCode = isResendingSmsCode,
                 authSessionSecrets = requestSecrets
             )
-            if (flowEnded) {
+            if (linkRequestsObsolete) {
                 logOutLateResponse(result, requestCredentials, requestSecrets)
                 return@launch
             }
@@ -229,9 +284,9 @@ internal class NetworkedIdentityCoordinator(
         val requestCredentials = credentials ?: return fallBack(NetworkedIdentityFallbackReason.Unavailable)
         mutableState.value = NetworkedIdentityState.DocumentsPending
         requestScope.launch {
-            if (flowEnded) return@launch
+            if (linkRequestsObsolete) return@launch
             val result = repository.listDocuments(requestCredentials)
-            if (flowEnded) return@launch
+            if (linkRequestsObsolete) return@launch
             result.fold(
                 onSuccess = { documents ->
                     val eligible = documentRequirements.filter(documents, currentTimeSeconds())
@@ -280,12 +335,26 @@ internal class NetworkedIdentityCoordinator(
             }
         }
         requestJob.complete()
-        // #TODO - Networked Identity: Dedicated skip/manual endpoint and timing remain unspecified.
-        // Link logout is only local-session cleanup, not a save-consent mutation or document deletion.
+        // Automatic unavailability is not an explicit skip. Only useManualCapture persists that
+        // choice through Identity actions; cancellation never records consent or deletes documents.
+        // #TODO - Networked Identity: Reconcile pre-capture versus post-capture save opt-in before
+        // orchestrating save_association_token and prepare_document_save. Backend saving is asynchronous.
+    }
+
+    private fun finishAction(result: Result<VerificationPageData>) {
+        val checkedResult = if (result.getOrNull()?.let { it.id != actions?.verificationSessionId } == true) {
+            actionFailure(NetworkedIdentityActionException.Reason.UnexpectedSession)
+        } else {
+            result
+        }
+        clearAndLogOut()
+        mutableState.value = NetworkedIdentityState.Completed
+        if (!callbackDelivered) deliverCallback { completionCallback?.invoke(checkedResult) }
+        requestJob.complete()
     }
 
     private fun endAsCancelled(notifyHost: Boolean) {
-        if (state.value == NetworkedIdentityState.Cancelled) return
+        if (state.value == NetworkedIdentityState.Cancelled || state.value == NetworkedIdentityState.Completed) return
         clearAndLogOut()
         mutableState.value = NetworkedIdentityState.Cancelled
         if (notifyHost && !callbackDelivered) {
@@ -325,6 +394,7 @@ internal class NetworkedIdentityCoordinator(
     private fun releaseCallbacks() {
         cancelCallback = null
         fallbackCallback = null
+        completionCallback = null
     }
 
     private fun awaitingOtp(invalidCode: Boolean) = NetworkedIdentityState.AwaitingOtp(
@@ -353,7 +423,18 @@ internal class NetworkedIdentityCoordinator(
 
     private val flowEnded: Boolean
         get() = state.value == NetworkedIdentityState.Cancelled ||
-            state.value is NetworkedIdentityState.FullCaptureFallback
+            state.value is NetworkedIdentityState.FullCaptureFallback ||
+            state.value == NetworkedIdentityState.Completed
+
+    private val linkRequestsObsolete: Boolean
+        get() = flowEnded || state.value == NetworkedIdentityState.SkipPending
+
+    private fun actionFailure(reason: NetworkedIdentityActionException.Reason): Result<VerificationPageData> =
+        Result.failure(NetworkedIdentityActionException(reason))
+
+    private fun Result<VerificationPageData>.sanitized(
+        reason: NetworkedIdentityActionException.Reason
+    ): Result<VerificationPageData> = if (isFailure) actionFailure(reason) else this
 
     private val Throwable.consumerErrorCode: String?
         get() = (this as? StripeException)?.stripeError?.code
@@ -371,5 +452,6 @@ internal class NetworkedIdentityCoordinator(
         const val INVALID_CODE = "consumer_verification_code_invalid"
         const val VERIFICATION_EXPIRED = "consumer_verification_expired"
         const val SESSION_EXPIRED = "consumer_session_expired"
+        const val NETWORKED_IDENTITY_UNAVAILABLE = "networked_identity_unavailable"
     }
 }

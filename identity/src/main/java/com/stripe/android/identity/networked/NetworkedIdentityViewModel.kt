@@ -12,6 +12,7 @@ internal class NetworkedIdentityViewModel(
     private var hasAppeared = false
 
     val state = coordinator.state
+    val supportsDocumentAttachment = coordinator.supportsDocumentAttachment
 
     /** The nullable candidate has already passed the UI's exact-match email validation. */
     fun onFirstAppearance(emailAddress: String?) {
@@ -29,6 +30,8 @@ internal class NetworkedIdentityViewModel(
     fun resendOtp() = coordinator.resendOtp()
 
     fun selectDocument(documentId: String) = coordinator.selectDocument(documentId)
+
+    fun continueWithSelectedDocument() = coordinator.continueWithSelectedDocument()
 
     fun useManualCapture() = coordinator.useManualCapture()
 

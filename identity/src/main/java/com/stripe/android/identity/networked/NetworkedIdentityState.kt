@@ -24,6 +24,11 @@ internal sealed interface NetworkedIdentityState {
         val documents: List<NetworkedIdentityDocument>,
         val selectedDocumentId: String?
     ) : NetworkedIdentityState
+    data object AttachmentPending : NetworkedIdentityState
+    data object SkipPending : NetworkedIdentityState
+
+    /** The host must still process server requirements and normal Identity submission. */
+    data object Completed : NetworkedIdentityState
     data class FullCaptureFallback(val reason: NetworkedIdentityFallbackReason) : NetworkedIdentityState
     data object Cancelled : NetworkedIdentityState
 }
@@ -33,4 +38,14 @@ internal enum class NetworkedIdentityFallbackReason {
     NoReusableDocuments,
     Unavailable,
     UserSelectedManualCapture
+}
+
+/** Sanitized errors contain neither backend messages nor the original credential-bearing cause. */
+internal class NetworkedIdentityActionException(val reason: Reason) : Exception(reason.name) {
+    enum class Reason {
+        TokenUnavailable,
+        AttachmentFailed,
+        SkipFailed,
+        UnexpectedSession
+    }
 }

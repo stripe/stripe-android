@@ -354,6 +354,61 @@ internal class DefaultNetworkedIdentityRepositoryTest {
     }
 
     @Test
+    fun `save association token uses consumer auth and identifies target verification session`() = runScenario {
+        network.respond(JSONObject().put("association_token", "save_secret"))
+
+        val result = repository.createSaveAssociationToken(credentials, "vs_target").getOrThrow()
+
+        val request = request("consumers/identity_documents/save_association_token", consumer = true)
+        assertThat(request.body()).containsExactlyElementsIn(consumerBody() + ("verification_session" to "vs_target"))
+        assertThat(result.associationToken).isEqualTo("save_secret")
+        assertThat(result.toString()).doesNotContain("save_secret")
+    }
+
+    @Test
+    fun `save association token does not retry a server failure`() = runScenario {
+        network.respond(JSONObject(), code = 500)
+
+        val error = repository.createSaveAssociationToken(credentials, "vs_target").exceptionOrNull() as APIException
+
+        request("consumers/identity_documents/save_association_token", consumer = true)
+        assertThat(error.statusCode).isEqualTo(500)
+    }
+
+    @Test
+    fun `save association token does not retry rate limiting`() = runScenario {
+        network.respond(JSONObject(), code = 429)
+
+        val error = repository.createSaveAssociationToken(credentials, "vs_target").exceptionOrNull() as APIException
+
+        request("consumers/identity_documents/save_association_token", consumer = true)
+        assertThat(error.statusCode).isEqualTo(429)
+    }
+
+    @Test
+    fun `save association token does not retry ambiguous transport failure`() = runScenario {
+        network.responses.add(Result.failure(IOException("save_secret vs_target css_request")))
+
+        val error = repository.createSaveAssociationToken(credentials, "vs_target").exceptionOrNull()
+
+        request("consumers/identity_documents/save_association_token", consumer = true)
+        assertThat(error).isInstanceOf(APIConnectionException::class.java)
+        assertThat(error?.cause).isNull()
+        assertThat(error?.stackTraceToString()).doesNotContain("save_secret")
+        assertThat(error?.stackTraceToString()).doesNotContain("vs_target")
+        assertThat(error?.stackTraceToString()).doesNotContain("css_request")
+    }
+
+    @Test
+    fun `save association token rejects blank tokens`() = runScenario {
+        network.respond(JSONObject().put("association_token", " "))
+
+        assertThat(repository.createSaveAssociationToken(credentials, "vs_target").isFailure).isTrue()
+
+        request("consumers/identity_documents/save_association_token", consumer = true)
+    }
+
+    @Test
     fun `list rejects an empty document ID`() = runScenario {
         network.respond(JSONObject().put("data", JSONArray().put(documentJson("", "passport"))))
 

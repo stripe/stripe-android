@@ -8,6 +8,7 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
     val startCalls = Turbine<StartCall>()
     val confirmCalls = Turbine<ConfirmCall>()
     val documentCalls = Turbine<DocumentCall>()
+    val associationTokenCalls = Turbine<AssociationTokenCall>()
     val logoutCalls = Turbine<LogoutCall>()
     val unsupportedCalls = Turbine<String>()
 
@@ -71,8 +72,17 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         credentials: NetworkedIdentityCredentials,
         documentId: String
     ): Result<NetworkedIdentityAssociationToken> {
-        unsupportedCalls.add("createAssociationToken")
-        return Result.failure(IllegalStateException("Unexpected association token"))
+        val call = AssociationTokenCall(credentials, documentId, CompletableDeferred())
+        associationTokenCalls.add(call)
+        return call.response.await()
+    }
+
+    override suspend fun createSaveAssociationToken(
+        credentials: NetworkedIdentityCredentials,
+        verificationSessionId: String
+    ): Result<NetworkedIdentityAssociationToken> {
+        unsupportedCalls.add("createSaveAssociationToken")
+        return Result.failure(IllegalStateException("Unexpected save association token"))
     }
 
     override suspend fun extendSession(
@@ -87,6 +97,7 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         startCalls.ensureAllEventsConsumed()
         confirmCalls.ensureAllEventsConsumed()
         documentCalls.ensureAllEventsConsumed()
+        associationTokenCalls.ensureAllEventsConsumed()
         logoutCalls.ensureAllEventsConsumed()
         unsupportedCalls.ensureAllEventsConsumed()
     }
@@ -113,6 +124,11 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
     data class DocumentCall(
         val credentials: NetworkedIdentityCredentials,
         val response: CompletableDeferred<Result<List<NetworkedIdentityDocument>>>
+    )
+    data class AssociationTokenCall(
+        val credentials: NetworkedIdentityCredentials,
+        val documentId: String,
+        val response: CompletableDeferred<Result<NetworkedIdentityAssociationToken>>
     )
     data class LogoutCall(val credentials: NetworkedIdentityCredentials, val authSessionSecrets: List<String>)
 }

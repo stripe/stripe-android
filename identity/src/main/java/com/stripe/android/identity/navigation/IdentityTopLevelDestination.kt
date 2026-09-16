@@ -80,13 +80,25 @@ internal fun NavBackStackEntry?.getBooleanArgument(argName: String) =
  */
 internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) {
     navigate(destination.routeWithArgs) {
-        destination.popUpToParam?.let {
-            popUpTo(it.route) { inclusive = it.inclusive }
+        if (currentDestination?.route == NetworkedIdentityDestination.ROUTE.route) {
+            popUpTo(graph.id)
+        } else {
+            destination.popUpToParam?.let {
+                popUpTo(it.route) { inclusive = it.inclusive }
+            }
         }
     }
 }
 
+/** NI has no editable predecessor, and completed NI must not remain reachable with Back. */
+internal fun NavController.navigateReplacingIdentityStack(destination: IdentityTopLevelDestination) {
+    navigate(destination.routeWithArgs) {
+        popUpTo(graph.id)
+    }
+}
+
 internal fun String.routeToScreenName(): String = when (this) {
+    NetworkedIdentityDestination.ROUTE.route -> "networked_identity"
     ConsentDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
     DocWarmupDestination.ROUTE.route ->

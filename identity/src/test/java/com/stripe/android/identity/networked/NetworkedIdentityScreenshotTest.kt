@@ -13,7 +13,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Android equivalents of the six iOS NI references. Pixel 6 is the repository's supported
+ * Android equivalents of the eight iOS NI references. Pixel 6 is the repository's supported
  * Paparazzi device; fixed viewport height exercises centered content, footer and scrolling.
  */
 internal class NetworkedIdentityScreenshotTest {
@@ -81,6 +81,12 @@ internal class NetworkedIdentityScreenshotTest {
         )
     )
 
+    @Test
+    fun attachingSavedDocument() = snapshot(NetworkedIdentityState.AttachmentPending)
+
+    @Test
+    fun skippingNetworkedIdentity() = snapshot(NetworkedIdentityState.SkipPending)
+
     private fun snapshot(state: NetworkedIdentityState, email: String = "") {
         paparazziRule.snapshot {
             val emailController = remember { EmailConfig.createController(initialValue = email) }
@@ -88,10 +94,12 @@ internal class NetworkedIdentityScreenshotTest {
                 NetworkedIdentityScreenContent(
                     state = state,
                     emailController = emailController,
+                    supportsDocumentAttachment = true,
                     onSubmitEmail = {},
                     onSubmitOtp = {},
                     onResendOtp = {},
                     onSelectDocument = {},
+                    onContinueWithDocument = {},
                     onManualCapture = {},
                     onCancel = {},
                 )

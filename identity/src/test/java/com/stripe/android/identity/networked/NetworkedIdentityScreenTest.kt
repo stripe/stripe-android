@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
@@ -331,6 +332,84 @@ internal class NetworkedIdentityScreenTest {
     }
 
     @Test
+    fun `attachment requires selection and explicit Continue`() = runScenario(
+        initialState = NetworkedIdentityState.SelectDocument(DOCUMENTS, selectedDocumentId = null),
+        supportsDocumentAttachment = true,
+    ) {
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsNotEnabled()
+        composeRule.onNodeWithTag(NI_DOCUMENT_TAG_PREFIX + "passport").performClick()
+        assertThat(documentSelections.awaitItem()).isEqualTo("passport")
+        documentContinues.expectNoEvents()
+        updateState(NetworkedIdentityState.SelectDocument(DOCUMENTS, selectedDocumentId = "passport"))
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertIsEnabled().performClick()
+        documentContinues.awaitItem()
+        updateState(NetworkedIdentityState.AttachmentPending)
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertDoesNotExist()
+        documentContinues.expectNoEvents()
+    }
+
+    @Test
+    fun `pending attachment announces status and prevents competing actions`() = runScenario(
+        initialState = NetworkedIdentityState.AttachmentPending,
+        supportsDocumentAttachment = true,
+    ) {
+        composeRule.onNodeWithTag(NI_LOADING_TAG)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals("Reusing your identity document")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        composeRule.onNodeWithTag(NI_TITLE_TAG).assertTextEquals("Reusing your identity document")
+        composeRule.onNodeWithTag(NI_MANUAL_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(NI_DOCUMENT_TAG_PREFIX + "passport").assertDoesNotExist()
+        composeRule.onNodeWithTag(NI_CLOSE_TAG).assertIsEnabled().performClick()
+        cancellations.awaitItem()
+    }
+
+    @Test
+    fun `skipping during document loading exposes a new accessible status`() = runScenario(
+        initialState = NetworkedIdentityState.DocumentsPending,
+        supportsDocumentAttachment = true,
+    ) {
+        composeRule.onNodeWithTag(NI_BODY_TAG).assertTextEquals("Loading your saved IDs…")
+        updateState(NetworkedIdentityState.SkipPending)
+        composeRule.onNodeWithTag(NI_LOADING_TAG)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals("Continuing without Link")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        composeRule.onNodeWithTag(NI_TITLE_TAG).assertTextEquals("Continuing without Link")
+        composeRule.onNodeWithTag(NI_MANUAL_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertDoesNotExist()
+        composeRule.runOnIdle { backDispatcher.onBackPressed() }
+        cancellations.awaitItem()
+    }
+
+    @Test
+    fun `completed action waits for host continuation with close and back disabled`() = runScenario(
+        initialState = NetworkedIdentityState.AttachmentPending,
+        supportsDocumentAttachment = true,
+    ) {
+        updateState(NetworkedIdentityState.Completed)
+        composeRule.onNodeWithTag(NI_LOADING_TAG).assertContentDescriptionEquals("Continuing…")
+        composeRule.onNodeWithTag(NI_CLOSE_TAG).assertIsNotEnabled().performClick()
+        composeRule.runOnIdle { backDispatcher.onBackPressed() }
+        composeRule.onNodeWithTag(NI_MANUAL_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(NI_CONTINUE_TAG).assertDoesNotExist()
+        cancellations.expectNoEvents()
+        manualCapture.expectNoEvents()
+        documentContinues.expectNoEvents()
+    }
+
+    @Test
+    fun `completed action does not automatically sign in when recomposed`() = runScenario(
+        initialState = NetworkedIdentityState.Completed,
+        providedEmailAddress = "consumer@example.com",
+        supportsDocumentAttachment = true,
+    ) {
+        composeRule.onNodeWithTag(NI_EMAIL_TAG).assertDoesNotExist()
+        emailSubmissions.expectNoEvents()
+    }
+
+    @Test
     fun `manual capture remains reachable in a short viewport`() = runScenario(height = 360.dp) {
         composeRule.onNodeWithTag(NI_EMAIL_TAG).performScrollTo().performTextReplacement("jane@example.com")
         composeRule.onNodeWithTag(NI_MANUAL_TAG).assertIsDisplayed().performClick()
@@ -380,6 +459,7 @@ internal class NetworkedIdentityScreenTest {
         initialState: NetworkedIdentityState = NetworkedIdentityState.CollectEmail,
         height: Dp = 700.dp,
         providedEmailAddress: String? = null,
+        supportsDocumentAttachment: Boolean = false,
         expectedProvidedEmail: String? = null,
         initialLifecycleState: Lifecycle.State = Lifecycle.State.RESUMED,
         block: suspend Scenario.() -> Unit,
@@ -400,11 +480,13 @@ internal class NetworkedIdentityScreenTest {
                         NetworkedIdentityScreen(
                             state = scenario.state,
                             providedEmailAddress = scenario.providedEmailAddress,
+                            supportsDocumentAttachment = supportsDocumentAttachment,
                             onFirstAppearance = scenario.firstAppearances::add,
                             onSubmitEmail = scenario.emailSubmissions::add,
                             onSubmitOtp = scenario.otpSubmissions::add,
                             onResendOtp = { scenario.resends.add(Unit) },
                             onSelectDocument = scenario.documentSelections::add,
+                            onContinueWithDocument = { scenario.documentContinues.add(Unit) },
                             onManualCapture = { scenario.manualCapture.add(Unit) },
                             onCancel = { scenario.cancellations.add(Unit) },
                         )
@@ -433,6 +515,7 @@ internal class NetworkedIdentityScreenTest {
         val resends = Turbine<Unit>()
         val firstAppearances = Turbine<String?>()
         val documentSelections = Turbine<String>()
+        val documentContinues = Turbine<Unit>()
         val manualCapture = Turbine<Unit>()
         val cancellations = Turbine<Unit>()
 
@@ -452,6 +535,7 @@ internal class NetworkedIdentityScreenTest {
             resends.ensureAllEventsConsumed()
             firstAppearances.ensureAllEventsConsumed()
             documentSelections.ensureAllEventsConsumed()
+            documentContinues.ensureAllEventsConsumed()
             manualCapture.ensureAllEventsConsumed()
             cancellations.ensureAllEventsConsumed()
         }

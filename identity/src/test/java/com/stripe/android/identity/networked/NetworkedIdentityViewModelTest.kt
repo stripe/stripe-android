@@ -16,6 +16,22 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 internal class NetworkedIdentityViewModelTest {
     @Test
+    fun `cleared ViewModel ignores a late attachment completion`() = runNetworkedIdentityScenario(withActions = true) {
+        val store = ViewModelStore()
+        store.put("networked", NetworkedIdentityViewModel(coordinator))
+        val attachment = beginAttachment()
+        store.clear()
+        runCurrent()
+        repository.logoutCalls.awaitItem()
+        attachment.response.complete(Result.success(niActionPageData()))
+        runCurrent()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
+        cancellations.expectNoEvents()
+        completions.expectNoEvents()
+        actions.skipCalls.expectNoEvents()
+    }
+
+    @Test
     fun `cleared ViewModel still logs out credentials from pending resend`() = runNetworkedIdentityScenario {
         val store = ViewModelStore()
         store.put("networked", NetworkedIdentityViewModel(coordinator))

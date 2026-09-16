@@ -51,6 +51,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
@@ -86,11 +87,13 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun NetworkedIdentityScreen(
     state: NetworkedIdentityState,
     providedEmailAddress: String?,
+    supportsDocumentAttachment: Boolean,
     onFirstAppearance: (String?) -> Unit,
     onSubmitEmail: (String) -> Unit,
     onSubmitOtp: (String) -> Unit,
     onResendOtp: () -> Unit,
     onSelectDocument: (String) -> Unit,
+    onContinueWithDocument: () -> Unit,
     onManualCapture: () -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -119,10 +122,12 @@ internal fun NetworkedIdentityScreen(
     NetworkedIdentityScreenContent(
         state = state,
         emailController = emailController,
+        supportsDocumentAttachment = supportsDocumentAttachment,
         onSubmitEmail = onSubmitEmail,
         onSubmitOtp = onSubmitOtp,
         onResendOtp = onResendOtp,
         onSelectDocument = onSelectDocument,
+        onContinueWithDocument = onContinueWithDocument,
         onManualCapture = onManualCapture,
         onCancel = onCancel,
     )
@@ -134,10 +139,12 @@ internal fun NetworkedIdentityScreen(
 internal fun NetworkedIdentityScreenContent(
     state: NetworkedIdentityState,
     emailController: TextFieldController,
+    supportsDocumentAttachment: Boolean,
     onSubmitEmail: (String) -> Unit,
     onSubmitOtp: (String) -> Unit,
     onResendOtp: () -> Unit,
     onSelectDocument: (String) -> Unit,
+    onContinueWithDocument: () -> Unit,
     onManualCapture: () -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -146,8 +153,10 @@ internal fun NetworkedIdentityScreenContent(
         focusManager.clearFocus(force = true)
         onCancel()
     }
-    BackHandler(enabled = !state.isTerminal, onBack = dismiss)
-    if (state.isTerminal) return
+    BackHandler(enabled = !state.isDismissed) {
+        if (state != NetworkedIdentityState.Completed) dismiss()
+    }
+    if (state.isDismissed) return
 
     val title = stringResource(state.title)
     val neutral = MaterialTheme.colors.onSurface.copy(alpha = 0.05f)
@@ -167,7 +176,10 @@ internal fun NetworkedIdentityScreenContent(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .semantics { paneTitle = title }
             ) {
-                NetworkedIdentityHeader(onCancel = dismiss)
+                NetworkedIdentityHeader(
+                    onCancel = dismiss,
+                    enabled = state != NetworkedIdentityState.Completed,
+                )
                 BoxWithConstraints(modifier = Modifier.weight(1f)) {
                     Column(
                         modifier = Modifier
@@ -197,9 +209,10 @@ internal fun NetworkedIdentityScreenContent(
                         )
                     }
                 }
-                NetworkedIdentityActions(
+                NetworkedIdentityButtons(
                     state = state,
                     emailController = emailController,
+                    supportsDocumentAttachment = supportsDocumentAttachment,
                     onSubmitEmail = {
                         focusManager.clearFocus(force = true)
                         onSubmitEmail(it)
@@ -207,6 +220,10 @@ internal fun NetworkedIdentityScreenContent(
                     onResendOtp = {
                         focusManager.clearFocus(force = true)
                         onResendOtp()
+                    },
+                    onContinueWithDocument = {
+                        focusManager.clearFocus(force = true)
+                        onContinueWithDocument()
                     },
                     onManualCapture = {
                         focusManager.clearFocus(force = true)
@@ -219,7 +236,7 @@ internal fun NetworkedIdentityScreenContent(
 }
 
 @Composable
-private fun NetworkedIdentityHeader(onCancel: () -> Unit) {
+private fun NetworkedIdentityHeader(onCancel: () -> Unit, enabled: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -230,7 +247,11 @@ private fun NetworkedIdentityHeader(onCancel: () -> Unit) {
             contentDescription = stringResource(R.string.stripe_identity_link),
             modifier = Modifier.width(72.dp).height(24.dp),
         )
-        IconButton(onClick = onCancel, modifier = Modifier.size(48.dp).testTag(NI_CLOSE_TAG)) {
+        IconButton(
+            onClick = onCancel,
+            enabled = enabled,
+            modifier = Modifier.size(48.dp).testTag(NI_CLOSE_TAG),
+        ) {
             Icon(
                 painter = painterResource(R.drawable.stripe_close),
                 contentDescription = stringResource(R.string.stripe_description_close),
@@ -287,6 +308,9 @@ private fun NetworkedIdentityBody(
         NetworkedIdentityState.DocumentsPending -> {
             NetworkedIdentityLoading(stringResource(R.string.stripe_identity_link_documents_loading))
         }
+        NetworkedIdentityState.AttachmentPending,
+        NetworkedIdentityState.SkipPending,
+        NetworkedIdentityState.Completed -> NetworkedIdentityActionLoading(stringResource(state.title))
         is NetworkedIdentityState.SelectDocument -> {
             BodyText(stringResource(R.string.stripe_identity_link_documents_body))
             Spacer(Modifier.height(16.dp))
@@ -448,13 +472,23 @@ private fun NetworkedIdentityDocumentRow(
 }
 
 @Composable
-private fun NetworkedIdentityActions(
+private fun NetworkedIdentityButtons(
     state: NetworkedIdentityState,
     emailController: TextFieldController,
+    supportsDocumentAttachment: Boolean,
     onSubmitEmail: (String) -> Unit,
     onResendOtp: () -> Unit,
+    onContinueWithDocument: () -> Unit,
     onManualCapture: () -> Unit,
 ) {
+    if (state.isActionPending || state == NetworkedIdentityState.Completed) return
+    if (state is NetworkedIdentityState.SelectDocument && supportsDocumentAttachment) {
+        NetworkedIdentityDocumentContinueButton(
+            enabled = state.selectedDocumentId != null,
+            onContinue = onContinueWithDocument,
+        )
+        Spacer(Modifier.height(8.dp))
+    }
     if (state.isEmail) {
         val email by emailController.fieldValue.collectAsState()
         val complete by emailController.isComplete.collectAsState()
@@ -500,8 +534,38 @@ private fun NetworkedIdentityActions(
             textAlign = TextAlign.Center,
         )
     }
-    // #TODO - Networked Identity: add progression only after the clone/attach endpoint, auth,
-    // association-token lifetime and Identity submission contract are defined. Selection is not success.
+}
+
+@Composable
+private fun NetworkedIdentityDocumentContinueButton(enabled: Boolean, onContinue: () -> Unit) {
+    Button(
+        onClick = onContinue,
+        enabled = enabled,
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.onSurface,
+            contentColor = MaterialTheme.colors.surface,
+        ),
+        elevation = null,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(NI_CONTINUE_TAG),
+    ) {
+        Text(stringResource(R.string.stripe_identity_link_continue), fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun NetworkedIdentityActionLoading(label: String) {
+    CircularProgressIndicator(
+        modifier = Modifier
+            .size(24.dp)
+            .testTag(NI_LOADING_TAG)
+            .semantics {
+                contentDescription = label
+                liveRegion = LiveRegionMode.Polite
+            },
+        color = MaterialTheme.colors.onSurface,
+        strokeWidth = 2.dp,
+    )
 }
 
 @Composable
@@ -545,7 +609,13 @@ private fun BodyText(text: String) {
 }
 
 private val NetworkedIdentityState.isTerminal: Boolean
+    get() = isDismissed || this == NetworkedIdentityState.Completed
+
+private val NetworkedIdentityState.isDismissed: Boolean
     get() = this is NetworkedIdentityState.FullCaptureFallback || this is NetworkedIdentityState.Cancelled
+
+private val NetworkedIdentityState.isActionPending: Boolean
+    get() = this == NetworkedIdentityState.AttachmentPending || this == NetworkedIdentityState.SkipPending
 
 private val NetworkedIdentityState.isEmail: Boolean
     get() = this is NetworkedIdentityState.CollectEmail || this is NetworkedIdentityState.LookupPending ||
@@ -560,6 +630,9 @@ private val NetworkedIdentityState.title: Int
         NetworkedIdentityState.CollectEmail,
         NetworkedIdentityState.LookupPending -> R.string.stripe_identity_link_email_title
         NetworkedIdentityState.ReauthenticationRequired -> R.string.stripe_identity_link_reauth_title
+        NetworkedIdentityState.AttachmentPending -> R.string.stripe_identity_link_attaching
+        NetworkedIdentityState.SkipPending -> R.string.stripe_identity_link_skipping
+        NetworkedIdentityState.Completed -> R.string.stripe_identity_link_continuing
         is NetworkedIdentityState.AwaitingOtp,
         is NetworkedIdentityState.OtpConfirmPending,
         is NetworkedIdentityState.OtpResendPending,

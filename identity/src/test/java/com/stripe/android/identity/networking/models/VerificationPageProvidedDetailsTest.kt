@@ -85,7 +85,10 @@ internal class VerificationPageProvidedDetailsTest {
             JsonObject(
                 original + mapOf(
                     "provided_details" to json.parseToJsonElement(providedDetails),
-                    "networking_data" to networkingData
+                    "networking_data" to networkingData,
+                    "networked_identity" to json.parseToJsonElement(
+                        """{"reuse_available":true,"state":{"consented":false,"skipped":false}}"""
+                    )
                 )
             ).toString()
         )
