@@ -64,6 +64,14 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
+        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        if (supportedPaymentMethodTypes.size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty() &&
+            selectionHolder.selection.value == null
+        ) {
+            return listOf(formScreenFactory.createFormScreen(supportedPaymentMethodTypes.first()))
+        }
+
         val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
         val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
         val formHelper = createFormHelper(formHelperScope)

@@ -8,6 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -78,9 +79,12 @@ internal class EmbeddedInitialScreenFactoryTest {
     }
 
     @Test
-    fun `create returns vertical payment options screen for vertical layout`() = runScenario(
+    fun `create returns vertical payment options screen for vertical layout with multiple PMs`() = runScenario(
         launchMode = EmbeddedLaunchMode.PaymentOptions,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
     ) {
