@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: PATCH
 * [Added] Naira bank transfer support in PaymentSheet.
 * [Added] Touch 'n Go support in PaymentSheet.
 * [Added] TrueMoney support in PaymentSheet.
+* [Added] Naira Wallet support in PaymentSheet.
 * [Added] GoPay support in PaymentSheet.
 * [Added] MoMo support in PaymentSheet.
 * [Added] GCash support in PaymentSheet.

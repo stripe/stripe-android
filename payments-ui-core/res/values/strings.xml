@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[By confirming your payment, you agree that your transaction will be handled by Global Stack Services Limited as merchant of record and in accordance with their <a href="%s">terms</a>.]]></string>
   <!-- TrueMoney mandate. %s is the merchant name. -->
   <string name="stripe_truemoney_mandate">By confirming your payment with TrueMoney, you allow %s to charge your TrueMoney account for future payments in accordance with their terms.</string>
   <!-- Touch 'n Go mandate. %s is the merchant name. -->
