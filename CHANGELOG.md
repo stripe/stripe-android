@@ -22,6 +22,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14585](https://github.com/stripe/stripe-android/pull/14585) Added Naira Card API bindings and PaymentSheet support.
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira Bank Transfer API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14594](https://github.com/stripe/stripe-android/pull/14594) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14592](https://github.com/stripe/stripe-android/pull/14592) Added Naira Wallet API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28

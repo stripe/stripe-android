@@ -34,6 +34,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefin
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgBankTransferDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgUssdDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgWalletDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
@@ -94,6 +95,7 @@ internal object PaymentMethodRegistry {
         NgBankTransferDefinition,
         NgCardDefinition,
         NgUssdDefinition,
+        NgWalletDefinition,
         OxxoDefinition,
         P24Definition,
         PayByBankDefinition,
