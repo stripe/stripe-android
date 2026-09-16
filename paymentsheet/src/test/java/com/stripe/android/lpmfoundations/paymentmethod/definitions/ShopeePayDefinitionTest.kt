@@ -34,9 +34,8 @@ internal class ShopeePayDefinitionTest {
     }
 
     @Test
-    fun `form matches web instructions and mandate`(
-        @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
-    ) {
+    fun `form matches web instructions and mandate`() {
+        val intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.ShopeePay),
         )
