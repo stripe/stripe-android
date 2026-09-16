@@ -31,5 +31,4 @@ internal class TestMondu : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
 }
