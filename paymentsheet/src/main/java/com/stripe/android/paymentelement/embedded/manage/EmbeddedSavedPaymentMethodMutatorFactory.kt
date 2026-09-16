@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -14,6 +15,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -22,7 +24,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
+internal class EmbeddedSavedPaymentMethodMutatorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
@@ -34,6 +36,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>,
     private val launchMode: EmbeddedLaunchMode,
+    private val linkAccountHolder: LinkAccountHolder,
 ) {
     fun createSavedPaymentMethodMutator(): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
@@ -63,9 +66,11 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _, _ ->
                 onUpdatePaymentMethod(displayableSavedPaymentMethod)
             },
-            isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
-            isNotPaymentFlow = false,
-            linkAccount = stateFlowOf(null), // Link is never enabled in the manage screen.
+            isLinkEnabled = stateFlowOf(
+                launchMode is EmbeddedLaunchMode.PaymentOptions && paymentMethodMetadata.shouldShowLinkButton
+            ),
+            isNotPaymentFlow = launchMode is EmbeddedLaunchMode.PaymentOptions,
+            linkAccount = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account },
         )
     }
 
