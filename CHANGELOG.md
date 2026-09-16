@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 * [Added] GoPay support in PaymentSheet.
 * [Added] MoMo support in PaymentSheet.
+* [Added] GCash support in PaymentSheet.
 * [ADDED] Added support for Bizum.
 
 ## 23.19.0 - 2026-09-15
