@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import android.content.Context
+import android.text.style.URLSpan
+import androidx.core.text.HtmlCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -86,7 +88,9 @@ internal class NgCardDefinitionTest {
         val notice = context.getString(R.string.stripe_ng_payment_mor_notice, NIGERIAN_PAYMENT_METHOD_TERMS_URL)
 
         assertThat(notice).contains("Global Stack Services Limited as merchant of record")
-        assertThat(notice).contains("""<a href="$NIGERIAN_PAYMENT_METHOD_TERMS_URL">terms of use</a>""")
+        val renderedNotice = HtmlCompat.fromHtml(notice, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val links = renderedNotice.getSpans(0, renderedNotice.length, URLSpan::class.java)
+        assertThat(links.map { it.url }).containsExactly(NIGERIAN_PAYMENT_METHOD_TERMS_URL)
         assertThat(notice).doesNotContain("%s")
     }
 }
