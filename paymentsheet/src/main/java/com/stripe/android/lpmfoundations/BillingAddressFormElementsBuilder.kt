@@ -25,10 +25,16 @@ internal class BillingAddressFormElementsBuilder(
     private val requireBillingAddressCollection: Boolean,
     private val fallbackCountryCodes: Set<String>,
     private val countryRequirement: CountryRequirement?,
+    private val countryRestriction: CountryRestriction?,
 ) {
-    private val resolvedInitialValues = countryRequirement?.applyTo(arguments.initialValues) ?: arguments.initialValues
-    private val fullAddressCountryCodes = countryRequirement?.allowedCountryCodes ?: fallbackCountryCodes
+    private val resolvedInitialValues = countryRequirement?.applyTo(arguments.initialValues)
+        ?: countryRestriction?.applyTo(arguments.initialValues)
+        ?: arguments.initialValues
+    private val fullAddressCountryCodes = countryRequirement?.allowedCountryCodes
+        ?: countryRestriction?.allowedCountryCodes
+        ?: fallbackCountryCodes
     private val automaticTaxCountryCodes = countryRequirement?.allowedCountryCodes
+        ?: countryRestriction?.allowedCountryCodes
         ?: arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
 
     fun build(): List<FormElement> {
@@ -131,5 +137,22 @@ internal data class CountryRequirement(
 ) {
     fun applyTo(initialValues: Map<FormFieldId, String?>): Map<FormFieldId, String?> {
         return initialValues + (FormFieldId.Country to initialValue)
+    }
+}
+
+internal data class CountryRestriction(
+    val allowedCountryCodes: Set<String>,
+    val defaultCountryCode: String?,
+) {
+    fun applyTo(initialValues: Map<FormFieldId, String?>): Map<FormFieldId, String?> {
+        return if (
+            initialValues[FormFieldId.Country] == null &&
+            defaultCountryCode != null &&
+            (allowedCountryCodes.isEmpty() || defaultCountryCode in allowedCountryCodes)
+        ) {
+            initialValues + (FormFieldId.Country to defaultCountryCode)
+        } else {
+            initialValues
+        }
     }
 }
