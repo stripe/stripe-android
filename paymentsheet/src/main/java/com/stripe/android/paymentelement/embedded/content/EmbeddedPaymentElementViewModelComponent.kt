@@ -220,14 +220,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        @EmbeddedVerticalProcessing
-        fun provideEmbeddedVerticalProcessing(
-            confirmationHandler: ConfirmationHandler,
-        ): StateFlow<Boolean> {
-            return confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming }
-        }
-
-        @Provides
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens(): Set<String> = setOf("EmbeddedPaymentElement")
 

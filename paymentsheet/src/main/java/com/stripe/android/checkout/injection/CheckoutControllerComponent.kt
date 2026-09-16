@@ -51,7 +51,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
-import com.stripe.android.paymentelement.embedded.content.EmbeddedVerticalProcessing
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
@@ -298,14 +297,6 @@ internal interface CheckoutControllerModule {
             stateHolder: CheckoutControllerStateHolder,
         ): PaymentMethodMetadata? {
             return stateHolder.state?.paymentMethodMetadata
-        }
-
-        @Provides
-        @EmbeddedVerticalProcessing
-        fun provideEmbeddedVerticalProcessing(
-            confirmationHandler: ConfirmationHandler,
-        ): StateFlow<Boolean> {
-            return confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming }
         }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)

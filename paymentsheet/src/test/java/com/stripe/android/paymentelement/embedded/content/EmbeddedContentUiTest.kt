@@ -9,7 +9,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -24,7 +23,6 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -179,7 +177,7 @@ internal class EmbeddedContentUiTest {
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
             eventReporter = eventReporter,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
-            processing = confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
+            confirmationHandler = confirmationHandler,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),

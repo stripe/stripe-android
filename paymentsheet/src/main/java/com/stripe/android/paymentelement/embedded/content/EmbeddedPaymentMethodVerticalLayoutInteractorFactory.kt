@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +37,7 @@ internal fun interface EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
-    @EmbeddedVerticalProcessing private val processing: StateFlow<Boolean>,
+    private val confirmationHandler: ConfirmationHandler,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
@@ -76,7 +78,9 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = processing,
+            processing = confirmationHandler.state.mapAsStateFlow {
+                it is ConfirmationHandler.State.Confirming
+            },
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
