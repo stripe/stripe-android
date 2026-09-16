@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -22,7 +24,9 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -157,8 +161,83 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `horizontal layout with wallets creates saved payment options screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+    }
+
+    @Test
+    fun `horizontal layout with only Link creates payment method options screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
+    fun `selecting Link from horizontal payment options header completes flow`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        val screen = factory.createInitialScreen().single()
+            as EmbeddedNavigator.Screen.HorizontalPaymentOptions
+
+        screen.walletsState.value!!.onLinkPressed()
+
+        assertThat(selectionHolder.selection.value)
+            .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `Link header is disabled while processing`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = true) }
+
+        val screen = factory.createInitialScreen().single()
+            as EmbeddedNavigator.Screen.HorizontalPaymentOptions
+
+        assertThat(screen.walletsState.value!!.buttonsEnabled).isFalse()
+    }
+
+    @Test
     fun `horizontal layout restores new selection over saved payment options screen`() = testScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         ),
         customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
@@ -172,6 +251,9 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(screens).hasSize(2)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
         assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+        assertThat(
+            (screens[1] as EmbeddedNavigator.Screen.HorizontalPaymentOptions).walletsState.value
+        ).isNull()
     }
 
     @Test
@@ -311,8 +393,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},
             onUpdatePaymentMethod = { _, _, _, _, _ -> },
-            isLinkEnabled = stateFlowOf(false),
-            isNotPaymentFlow = false,
+            isLinkEnabled = stateFlowOf(paymentMethodMetadata.shouldShowLinkButton),
+            isNotPaymentFlow = true,
             linkAccount = stateFlowOf(null),
         )
 

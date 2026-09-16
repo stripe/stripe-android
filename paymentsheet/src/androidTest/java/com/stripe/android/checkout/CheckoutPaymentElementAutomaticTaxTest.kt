@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.Turbine
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -19,6 +18,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -44,6 +44,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.ManagePage
+import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -69,6 +70,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
     private val managePage = ManagePage(testRules.compose)
+    private val savedPaymentMethodsPage = SavedPaymentMethodsPage(testRules.compose)
     private val verticalModePage = VerticalModePage(testRules.compose)
 
     @After
@@ -555,6 +557,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 verticalModePage.clickNewPaymentMethodButton("cashapp")
             }
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                openHorizontalPaymentMethodListFromWalletOptions()
                 val cashAppTag = TEST_TAG_LIST + "cashapp"
                 testRules.compose.onNodeWithTag(TEST_TAG_LIST, useUnmergedTree = true)
                     .performScrollToNode(hasTestTag(cashAppTag))
@@ -679,12 +682,28 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private fun preparePaymentOptionsScreen(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
     ) {
-        if (paymentMethodLayout == PaymentElement.Configuration.PaymentMethodLayout.Vertical) {
-            formPage.waitUntilVisible()
-            Espresso.pressBack()
-            formPage.waitUntilMissing()
+        when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> {
+                formPage.waitUntilVisible()
+                Espresso.pressBack()
+                formPage.waitUntilMissing()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                openHorizontalPaymentMethodListFromWalletOptions()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
+                error("Expected an explicit layout.")
+            }
         }
         waitForPaymentOptionsLayout(paymentMethodLayout)
+    }
+
+    private fun openHorizontalPaymentMethodListFromWalletOptions() {
+        // The checkout fixture enables Google Pay, and TestRules reports it as ready. Horizontal
+        // payment options therefore open on the wallet options screen rather than the payment
+        // method list. Selecting Add is an intentional step in that flow.
+        savedPaymentMethodsPage.clickNewCardButton()
+        waitForPaymentOptionsLayout(PaymentElement.Configuration.PaymentMethodLayout.Horizontal)
     }
 
     private fun waitForPaymentOptionsLayout(
