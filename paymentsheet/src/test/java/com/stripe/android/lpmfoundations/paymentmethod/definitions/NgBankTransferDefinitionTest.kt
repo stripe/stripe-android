@@ -1,8 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import android.content.Context
-import android.text.style.URLSpan
-import androidx.core.text.HtmlCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -19,19 +17,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 
 @RunWith(RobolectricTestParameterInjector::class)
-internal class NgCardDefinitionTest {
+internal class NgBankTransferDefinitionTest {
     @Test
     fun `supports the documented intent modes`(
         @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgCard),
+            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgBankTransfer),
         )
 
-        assertThat(NgCardDefinition.isSupported(metadata)).isEqualTo(true)
-        assertThat(NgCardDefinition.requiresMandate(metadata)).isEqualTo(
-            intentScenario != LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+        assertThat(NgBankTransferDefinition.isSupported(metadata)).isEqualTo(
+            intentScenario == LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         )
+        assertThat(NgBankTransferDefinition.requiresMandate(metadata)).isEqualTo(false)
     }
 
     @Test
@@ -39,9 +37,9 @@ internal class NgCardDefinitionTest {
         @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgCard),
+            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgBankTransfer),
         )
-        val formElements = NgCardDefinition.formElements(metadata)
+        val formElements = NgBankTransferDefinition.formElements(metadata)
 
         val notice = formElements.single() as MandateTextElement
         assertThat(notice.stringResId).isEqualTo(R.string.stripe_ng_payment_mor_notice)
@@ -51,21 +49,21 @@ internal class NgCardDefinitionTest {
     @Test
     fun `terms display never hides terms without changing confirmation requirements`() {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.SetupIntent
-                .stripeIntent(PaymentMethod.Type.NgCard),
-            termsDisplay = mapOf(PaymentMethod.Type.NgCard to PaymentSheet.TermsDisplay.NEVER),
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.NgBankTransfer),
+            termsDisplay = mapOf(PaymentMethod.Type.NgBankTransfer to PaymentSheet.TermsDisplay.NEVER),
         )
-        val formElements = NgCardDefinition.formElements(metadata)
+        val formElements = NgBankTransferDefinition.formElements(metadata)
 
         assertThat(formElements).isEmpty()
-        assertThat(NgCardDefinition.requiresMandate(metadata)).isEqualTo(true)
+        assertThat(NgBankTransferDefinition.requiresMandate(metadata)).isEqualTo(false)
     }
 
     @Test
     fun `collects configured contact information`() {
-        val formElements = NgCardDefinition.formElements(
+        val formElements = NgBankTransferDefinition.formElements(
             PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_card")),
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -81,7 +79,7 @@ internal class NgCardDefinitionTest {
 
     @Test
     fun `does not redisplay saved payment methods`() {
-        assertThat(NgCardDefinition.supportedAsSavedPaymentMethod).isFalse()
+        assertThat(NgBankTransferDefinition.supportedAsSavedPaymentMethod).isFalse()
     }
 
     @Test
@@ -90,9 +88,7 @@ internal class NgCardDefinitionTest {
         val notice = context.getString(R.string.stripe_ng_payment_mor_notice, NIGERIAN_PAYMENT_METHOD_TERMS_URL)
 
         assertThat(notice).contains("Global Stack Services Limited as merchant of record")
-        val renderedNotice = HtmlCompat.fromHtml(notice, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        val links = renderedNotice.getSpans(0, renderedNotice.length, URLSpan::class.java)
-        assertThat(links.map { it.url }).containsExactly(NIGERIAN_PAYMENT_METHOD_TERMS_URL)
+        assertThat(notice).contains("""<a href="$NIGERIAN_PAYMENT_METHOD_TERMS_URL">terms of use</a>""")
         assertThat(notice).doesNotContain("%s")
     }
 }

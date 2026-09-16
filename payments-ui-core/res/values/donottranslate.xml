@@ -56,4 +56,5 @@
     <string name="stripe_paymentsheet_payment_method_shopeepay">ShopeePay</string>
     <string name="stripe_paymentsheet_payment_method_qris">QRIS</string>
     <string name="stripe_paymentsheet_payment_method_ng_card">Naira card</string>
+    <string name="stripe_paymentsheet_payment_method_ng_bank_transfer">Naira bank transfer</string>
 </resources>
