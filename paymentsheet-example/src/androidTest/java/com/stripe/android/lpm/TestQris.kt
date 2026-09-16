@@ -33,5 +33,4 @@ internal class TestQris : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
 }
