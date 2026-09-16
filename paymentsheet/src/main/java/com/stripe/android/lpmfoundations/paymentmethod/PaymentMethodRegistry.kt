@@ -31,6 +31,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
@@ -88,6 +89,7 @@ internal object PaymentMethodRegistry {
         MobilePayDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
+        NgCardDefinition,
         OxxoDefinition,
         P24Definition,
         PayByBankDefinition,
