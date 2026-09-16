@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -41,7 +42,7 @@ internal class CardDetailsSectionElementUITest {
     }
 
     @Test
-    fun `section header hides while scanned card pill is shown and returns after clear`() {
+    fun `section header remains while scanned card pill is shown`() {
         runScenario(cardDetailsAction = null) {
             val cardInformation = context.getString(
                 R.string.stripe_paymentsheet_add_payment_method_card_information
@@ -50,7 +51,7 @@ internal class CardDetailsSectionElementUITest {
                 R.string.stripe_scanned_card_pill_clear_content_description
             )
 
-            composeTestRule.onNodeWithText(cardInformation).assertExists()
+            composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
 
             controller.onScannedCard(
                 ScannedCardDetails.Validated(
@@ -61,12 +62,12 @@ internal class CardDetailsSectionElementUITest {
             )
             composeTestRule.waitForIdle()
 
-            composeTestRule.onNodeWithText(cardInformation).assertDoesNotExist()
+            composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
 
             composeTestRule.onNodeWithContentDescription(clearScannedCard).performClick()
             composeTestRule.waitForIdle()
 
-            composeTestRule.onNodeWithText(cardInformation).assertExists()
+            composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
         }
     }
 
