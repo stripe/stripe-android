@@ -6,8 +6,10 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
+import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButtonAction
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
@@ -42,6 +44,19 @@ internal class AddressElementViewModelModule {
     @Named(PRODUCT_USAGE)
     @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
+
+    @Provides
+    @Singleton
+    internal fun providePrimaryButtonAction(
+        args: AddressElementActivityContract.Args,
+    ): AddressElementPrimaryButtonAction = when (args) {
+        is AddressElementActivityContract.Args.Standalone -> {
+            StandalonePrimaryButtonAction
+        }
+        is AddressElementActivityContract.Args.CheckoutShipping -> {
+            CheckoutShippingPrimaryButtonAction
+        }
+    }
 
     @Provides
     @Named(PUBLISHABLE_KEY)
@@ -101,5 +116,25 @@ internal class AddressElementViewModelModule {
     interface Bindings {
         @Binds
         fun bindsAddressElementNavigator(navigator: NavHostAddressElementNavigator): AddressElementNavigator
+    }
+}
+
+private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction {
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(
+            AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+        )
+    }
+}
+
+private object CheckoutShippingPrimaryButtonAction : AddressElementPrimaryButtonAction {
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+        )
     }
 }

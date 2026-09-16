@@ -21,6 +21,12 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
+internal interface AddressElementPrimaryButtonAction {
+    suspend operator fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result>
+}
+
 @Suppress("TooManyFunctions")
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
@@ -29,6 +35,7 @@ internal class InputAddressViewModel @Inject constructor(
     private val eventReporter: AddressLauncherEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
+    private val primaryButtonAction: AddressElementPrimaryButtonAction,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -225,17 +232,17 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
-        completeWithAddress(
-            addressDetails = addressDetails,
-            result = when (args) {
-                is AddressElementActivityContract.Args.Standalone -> {
-                    AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
-                }
-                is AddressElementActivityContract.Args.CheckoutShipping -> {
-                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
-                }
-            },
-        )
+        viewModelScope.launch {
+            primaryButtonAction(addressDetails).fold(
+                onSuccess = { result ->
+                    completeWithAddress(
+                        addressDetails = addressDetails,
+                        result = result,
+                    )
+                },
+                onFailure = { _formEnabled.value = true },
+            )
+        }
     }
 
     private fun completeWithAddress(
