@@ -20,6 +20,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14622](https://github.com/stripe/stripe-android/pull/14622) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support.
 * [ADDED][14585](https://github.com/stripe/stripe-android/pull/14585) Added Naira Card API bindings and PaymentSheet support.
+* [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira Bank Transfer API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28
