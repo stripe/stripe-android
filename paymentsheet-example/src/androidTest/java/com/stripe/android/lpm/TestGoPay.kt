@@ -3,6 +3,7 @@ package com.stripe.android.lpm
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.example.playground.settings.AmountSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -21,6 +22,7 @@ internal class TestGoPay : BasePlaygroundTest() {
     ) { settings ->
         settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.IDR
+        settings[AmountSettingsDefinition] = "10000000"
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
             PaymentMethod.Type.GoPay
