@@ -75,6 +75,41 @@ class CreateFinancialConnectionsSessionTest {
     }
 
     @Test
+    fun `forPaymentIntent maps internal billing address and phone`() = runTest {
+        val publishableKey = "publishable_key"
+        val clientSecret = "pi_1234_secret_5678"
+        givenCreateSessionWithPaymentIntentReturns { Result.success(linkedAccountSession) }
+
+        createFinancialConnectionsSession.forPaymentIntent(
+            publishableKey = publishableKey,
+            clientSecret = clientSecret,
+            configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                name = customerName,
+                email = null,
+                address = customerAddress,
+                phone = customerPhone,
+                elementsSessionContext = null,
+            ),
+            hostedSurface = "payment_element",
+            stripeAccountId = null,
+        )
+
+        verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
+            paymentIntentId = "pi_1234",
+            params = CreateFinancialConnectionsSessionParams.USBankAccount(
+                clientSecret = clientSecret,
+                customerName = customerName,
+                customerEmailAddress = null,
+                customerAddress = customerAddress,
+                customerPhone = customerPhone,
+                hostedSurface = "payment_element",
+                linkMode = null,
+            ),
+            requestOptions = ApiRequest.Options(publishableKey),
+        )
+    }
+
+    @Test
     fun `forPaymentIntent - given repository throws exception, results in internal error failure`() {
         runTest {
             // Given

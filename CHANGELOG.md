@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: MINOR
 ### Payments
 * [ADDED] Added optional billing address and phone fields to `CollectBankAccountConfiguration.USBankAccount`.
 
+### PaymentSheet
+* [FIXED] Include collected billing address and phone details when creating a US bank account.
+
 ## 23.19.0 - 2026-09-15
 
 ### All SDKs

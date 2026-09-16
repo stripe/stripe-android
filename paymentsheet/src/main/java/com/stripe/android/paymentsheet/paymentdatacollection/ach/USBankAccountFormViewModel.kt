@@ -580,6 +580,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return CollectBankAccountConfiguration.USBankAccountInternal(
             name = name.value,
             email = email.value,
+            address = address.value,
+            phone = phone.value,
             elementsSessionContext = makeElementsSessionContext(),
         )
     }

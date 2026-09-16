@@ -178,6 +178,8 @@ sealed interface CollectBankAccountConfiguration : Parcelable {
     data class USBankAccountInternal(
         val name: String,
         val email: String?,
+        val address: Address?,
+        val phone: String?,
         val elementsSessionContext: ElementsSessionContext?,
     ) : Parcelable, CollectBankAccountConfiguration
 

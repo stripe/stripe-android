@@ -893,6 +893,8 @@ class USBankAccountFormViewModelTest {
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
                     email = "email@email.com",
+                    address = null,
+                    phone = null,
                     elementsSessionContext = ElementsSessionContext(
                         amount = 5099,
                         currency = "usd",
@@ -943,6 +945,8 @@ class USBankAccountFormViewModelTest {
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
                     email = "email@email.com",
+                    address = null,
+                    phone = null,
                     elementsSessionContext = ElementsSessionContext(
                         amount = null,
                         currency = null,
@@ -1100,7 +1104,25 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Uses CollectBankAccountLauncher for ACH when not in Instant Debits flow`() {
-        val viewModel = createViewModel().apply {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        attachDefaultsToPaymentMethod = true,
+                        name = CollectionMode.Always,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "Some Name",
+                        email = "email@email.com",
+                        phone = CUSTOMER_PHONE,
+                        address = CUSTOMER_ADDRESS,
+                    ),
+                ),
+            ),
+        ).apply {
             this.collectBankAccountLauncher = mockCollectBankAccountLauncher
         }
 
@@ -1113,28 +1135,7 @@ class USBankAccountFormViewModelTest {
             publishableKey = any(),
             stripeAccountId = anyOrNull(),
             clientSecret = any(),
-            configuration = eq(
-                CollectBankAccountConfiguration.USBankAccountInternal(
-                    name = "Some Name",
-                    email = "email@email.com",
-                    elementsSessionContext = ElementsSessionContext(
-                        amount = 5099,
-                        currency = "usd",
-                        linkMode = null,
-                        billingDetails = ElementsSessionContext.BillingDetails(
-                            name = "Some Name",
-                            email = "email@email.com",
-                        ),
-                        prefillDetails = ElementsSessionContext.PrefillDetails(
-                            email = "email@email.com",
-                            phone = null,
-                            phoneCountryCode = "US",
-                        ),
-                        incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
-                    ),
-                )
-            ),
+            configuration = eq(achConfigurationWithBillingDetails()),
         )
     }
 
@@ -1969,6 +1970,40 @@ class USBankAccountFormViewModelTest {
             phoneErrorTurbine.cancelAndIgnoreRemainingEvents()
             addressErrorTurbine.cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    private fun achConfigurationWithBillingDetails(): CollectBankAccountConfiguration.USBankAccountInternal {
+        return CollectBankAccountConfiguration.USBankAccountInternal(
+            name = "Some Name",
+            email = "email@email.com",
+            address = CUSTOMER_ADDRESS.asAddressModel(),
+            phone = CUSTOMER_PHONE,
+            elementsSessionContext = ElementsSessionContext(
+                amount = 5099,
+                currency = "usd",
+                linkMode = null,
+                billingDetails = ElementsSessionContext.BillingDetails(
+                    name = "Some Name",
+                    email = "email@email.com",
+                    phone = CUSTOMER_PHONE,
+                    address = ElementsSessionContext.BillingDetails.Address(
+                        line1 = CUSTOMER_ADDRESS.line1,
+                        line2 = CUSTOMER_ADDRESS.line2,
+                        postalCode = CUSTOMER_ADDRESS.postalCode,
+                        city = CUSTOMER_ADDRESS.city,
+                        state = CUSTOMER_ADDRESS.state,
+                        country = CUSTOMER_ADDRESS.country,
+                    ),
+                ),
+                prefillDetails = ElementsSessionContext.PrefillDetails(
+                    email = "email@email.com",
+                    phone = CUSTOMER_PHONE,
+                    phoneCountryCode = "US",
+                ),
+                incentiveEligibilitySession = null,
+                allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+            ),
+        )
     }
 
     private fun testElementsSessionContextGeneration(
