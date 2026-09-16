@@ -1238,7 +1238,9 @@ class InputAddressViewModelTest {
             ),
             primaryButtonAction = AddressElementViewModelModule().providePrimaryButtonAction(
                 args = args,
-                taxRegionUpdater = Provider { createTaxRegionUpdater() },
+                taxRegionUpdater = Provider {
+                    error("Tax region updater should not be requested for standalone")
+                },
             ),
         ).also { viewModelStoreRule.track(it) }
     }
