@@ -20,6 +20,8 @@ private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
 private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
+private const val BIZUM_TIME_LIMIT_IN_SECONDS = 70 * 60
+private const val BIZUM_INITIAL_DELAY_IN_SECONDS = 5
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -64,7 +66,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_blik_confirm_payment,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    requestOptions = requestOptions,
                     qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
@@ -75,7 +77,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    requestOptions = requestOptions,
                     qrCodeUrl = getQrCodeForPayNow(actionable),
                     paymentMethodType = paymentMethodType.code,
                 )
@@ -86,8 +88,19 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
                     ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    stripeAccountId = requestOptions.stripeAccount,
+                    requestOptions = requestOptions,
                     qrCodeUrl = getQrCodeForPromptPay(actionable),
+                    paymentMethodType = paymentMethodType.code,
+                )
+            PaymentMethod.Type.Bizum ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_bizum_confirm_payment,
+                    requestOptions = requestOptions,
+                    qrCodeUrl = null,
                     paymentMethodType = paymentMethodType.code,
                 )
             else ->

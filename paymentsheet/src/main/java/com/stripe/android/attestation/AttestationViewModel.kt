@@ -62,7 +62,7 @@ internal class AttestationViewModel @Inject constructor(
                 DaggerAttestationComponent.factory()
                     .build(
                         application = app,
-                        publishableKeyProvider = { args.publishableKey },
+                        apiConfiguration = args.apiConfiguration,
                         productUsage = args.productUsage.toSet()
                     )
                     .attestationViewModel

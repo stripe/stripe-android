@@ -14,6 +14,7 @@ import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReport
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
@@ -80,7 +81,7 @@ internal class AttestationActivityTest {
             BundleCompat.getParcelable(it, AttestationActivity.EXTRA_ARGS, AttestationArgs::class.java)
         }
         assertThat(intentArgs).isEqualTo(args)
-        assertThat(intentArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(intentArgs?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(intentArgs?.productUsage).containsExactly("PaymentSheet")
     }
 
@@ -93,7 +94,7 @@ internal class AttestationActivityTest {
         val retrievedArgs = AttestationActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isEqualTo(args)
-        assertThat(retrievedArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(retrievedArgs?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -168,7 +169,7 @@ internal class AttestationActivityTest {
 
     companion object {
         private val args = AttestationArgs(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = listOf("PaymentSheet")
         )
     }

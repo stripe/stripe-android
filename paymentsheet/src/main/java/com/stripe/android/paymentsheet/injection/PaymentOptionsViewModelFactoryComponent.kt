@@ -18,13 +18,14 @@ import javax.inject.Singleton
     modules = [
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,
         PaymentSheetAutocompleteModule::class,
         ElementsSessionClientParamsModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        PaymentMethodMessagePromotionsExperimentHandlerModule::class
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

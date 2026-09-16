@@ -19,6 +19,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
@@ -39,6 +40,7 @@ import javax.inject.Singleton
         ExtendedPaymentElementConfirmationModule::class,
         TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
@@ -48,7 +50,7 @@ import javax.inject.Singleton
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
-        PaymentMethodMessagePromotionsExperimentHandlerModule::class
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface FlowControllerStateComponent {

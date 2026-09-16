@@ -48,8 +48,24 @@ internal class CheckoutPlaygroundSettings private constructor(
         definition: CheckoutPlaygroundSettingDefinition.Value<*>,
         value: String,
     ) {
-        _values.value += (definition to value)
-        persist(_values.value.serialized())
+        val updatedValues = _values.value.toMutableMap().apply {
+            applyValueChanged(definition, value)
+        }
+        _values.value = updatedValues
+        persist(updatedValues.serialized())
+    }
+
+    private fun <T> MutableMap<CheckoutPlaygroundSettingDefinition.Value<*>, String>.applyValueChanged(
+        definition: CheckoutPlaygroundSettingDefinition.Value<T>,
+        value: String,
+    ) {
+        this[definition] = value
+        definition.deserialize(value).getOrNull()?.let { deserializedValue ->
+            definition.onValueChanged(
+                SettingUpdateScope(values = this),
+                deserializedValue,
+            )
+        }
     }
 
     fun reset() {
@@ -123,6 +139,21 @@ internal class CheckoutPlaygroundSettings private constructor(
     private fun currentDefaults(): Map<CheckoutPlaygroundSettingDefinition.Value<*>, String> {
         val customerId = CheckoutPlaygroundDefinitions.session.customerId
         return definitionDefaults + (customerId to customerId.serialize(returningCustomerId))
+    }
+
+    private class SettingUpdateScope(
+        private val values: MutableMap<CheckoutPlaygroundSettingDefinition.Value<*>, String>,
+    ) : CheckoutPlaygroundSettingUpdateScope {
+        override fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T {
+            return definition.deserialize(requireNotNull(values[definition])).getOrThrow()
+        }
+
+        override fun <T> update(
+            definition: CheckoutPlaygroundSettingDefinition.Value<T>,
+            value: T,
+        ) {
+            values[definition] = definition.serialize(value)
+        }
     }
 
     @JvmInline

@@ -136,7 +136,6 @@ internal interface CustomerSheetTestHelper {
                 ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentConfiguration = paymentConfiguration,
                     bacsMandateConfirmationLauncherFactory = {
                         FakeBacsMandateConfirmationLauncher()
                     },

@@ -79,15 +79,25 @@ internal object CheckoutSessionDefinitions {
         },
         isApplicable = { settings -> !settings[automaticPaymentMethods] },
     )
-    val automaticTax = boolean(
+    val automaticTax: CheckoutPlaygroundSettingDefinition.Value<Boolean> = boolean(
         key = "session.automatic_tax",
         displayName = "Automatic tax",
+        onValueChanged = { enabled ->
+            if (enabled) {
+                update(merchant, Merchant.US_TAX)
+            }
+        },
     )
-    val adaptivePricingCountry = choice(
+    val adaptivePricingCountry: CheckoutPlaygroundSettingDefinition.Value<AdaptivePricingCountry> = choice(
         key = "session.adaptive_pricing_country",
         displayName = "Adaptive pricing country",
         options = AdaptivePricingCountry.entries.map { it.displayName to it },
         serialize = AdaptivePricingCountry::serializedValue,
+        onValueChanged = { country ->
+            country.testEmail?.let { email ->
+                update(customerEmail, email)
+            }
+        },
     )
     val shippingAddressCollection = boolean(
         key = "session.shipping_address_collection",
@@ -144,4 +154,8 @@ internal enum class AdaptivePricingCountry(
     None("Off", "", null),
     France("France", "FR", "FR"),
     Japan("Japan", "JP", "JP"),
+    ;
+
+    val testEmail: String?
+        get() = countryCode?.let { "test+location_${it.uppercase()}@example.com" }
 }

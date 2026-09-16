@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -54,6 +55,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(lastParams?.savedPaymentMethodSelectionId).isEqualTo("pm_123")
         assertThat(lastParams?.externalPaymentMethods).isEmpty()
         assertThat(lastParams?.customPaymentMethods).isEmpty()
+        assertThat(lastParams?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         val initializationMode = lastParams?.initializationMode
         assertThat(initializationMode).isInstanceOf(InitializationMode.DeferredIntent::class.java)
@@ -511,6 +513,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
                 onIntentConfiguration = onIntentConfiguration,
                 onProvidesCustomerSessionClientSecret = onCustomerSessionClientSecret,
             ),
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             timeProvider = timeProvider,
             workContext = coroutineContext,
         )

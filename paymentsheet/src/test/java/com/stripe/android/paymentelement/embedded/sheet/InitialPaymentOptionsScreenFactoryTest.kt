@@ -18,8 +18,10 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInt
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -39,8 +41,25 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `creates initial screen successfully with Google Pay ready`() = testScenario(
-        isGooglePayReady = true,
+    fun `vertical layout with one payment method and no saved methods opens form directly`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
+        val screens = factory.createInitialScreen()
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+    }
+
+    @Test
+    fun `vertical layout with one payment method and a saved method opens payment options`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
     ) {
         val screens = factory.createInitialScreen()
         assertThat(screens).hasSize(1)
@@ -77,7 +96,11 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `new selection requiring a form starts with the form on top of the back stack`() = testScenario {
+    fun `restored new selection starts with the form on top of the payment options back stack`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         val screens = factory.createInitialScreen()
@@ -171,9 +194,13 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     private fun testScenario(
         isGooglePayReady: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
             isGooglePayReady = isGooglePayReady,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
+        customerState: CustomerState? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -184,6 +211,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata),
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
         )
+        customerStateHolder.setCustomerState(customerState)
         val eventReporter = FakeEventReporter()
         val testScope = TestScope(UnconfinedTestDispatcher())
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()

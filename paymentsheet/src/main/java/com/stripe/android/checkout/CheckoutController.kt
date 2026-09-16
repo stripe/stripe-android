@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -56,6 +57,7 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val elementsSessionClientParams: ElementsSessionClientParams,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
@@ -108,6 +110,7 @@ class CheckoutController @Inject internal constructor(
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
+                clientParams = elementsSessionClientParams,
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
@@ -224,6 +227,7 @@ class CheckoutController @Inject internal constructor(
         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 checkoutSessionRepository.init(
+                    clientParams = elementsSessionClientParams,
                     sessionId = sessionId,
                     adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                 )
@@ -901,6 +905,10 @@ class CheckoutController @Inject internal constructor(
                  * The customer's full name.
                  */
                 val name: String?,
+                /**
+                 * The customer's phone number.
+                 */
+                val phone: String?,
             ) {
                 /**
                  * A billing address.

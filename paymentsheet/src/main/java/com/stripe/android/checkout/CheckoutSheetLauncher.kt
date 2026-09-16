@@ -6,6 +6,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -29,6 +30,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +57,7 @@ internal class CheckoutSheetLauncherState @Inject constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
+@CheckoutPresenterScope
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
@@ -72,6 +75,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -321,7 +325,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
         )

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
-import com.stripe.android.paymentsheet.example.playground.checkout.settings.AdaptivePricingCountry
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import kotlinx.serialization.json.JsonArray
@@ -46,9 +45,7 @@ internal object CheckoutSessionParamsFactory {
     fun resolvedEmail(settings: CheckoutPlaygroundSettings.Snapshot): String? {
         val session = CheckoutPlaygroundDefinitions.session
         return settings[session.adaptivePricingCountry]
-            .takeUnless { it == AdaptivePricingCountry.None }
-            ?.countryCode
-            ?.let { "test+location_${it.uppercase()}@example.com" }
+            .testEmail
             ?: settings[session.customerEmail].trim().ifEmpty { null }
     }
 

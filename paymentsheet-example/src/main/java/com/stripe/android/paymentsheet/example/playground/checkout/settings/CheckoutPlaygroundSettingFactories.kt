@@ -15,6 +15,7 @@ internal fun boolean(
     displayName: String,
     defaultValue: Boolean = false,
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
+    onValueChanged: CheckoutPlaygroundSettingUpdateScope.(Boolean) -> Unit = {},
     applyFeatureFlags: (Boolean) -> Unit = {},
 ) = choice(
     key = key,
@@ -22,6 +23,7 @@ internal fun boolean(
     defaultValue = defaultValue,
     options = listOf("On" to true, "Off" to false),
     isApplicable = isApplicable,
+    onValueChanged = onValueChanged,
     applyFeatureFlags = applyFeatureFlags,
 )
 
@@ -29,6 +31,7 @@ internal inline fun <reified T : Enum<T>> enumChoice(
     key: String,
     displayName: String,
     defaultValue: T,
+    noinline onValueChanged: CheckoutPlaygroundSettingUpdateScope.(T) -> Unit = {},
     noinline applyFeatureFlags: (T) -> Unit = {},
 ) = choice(
     key = key,
@@ -36,6 +39,7 @@ internal inline fun <reified T : Enum<T>> enumChoice(
     defaultValue = defaultValue,
     options = enumValues<T>().map { it.name to it },
     serialize = { it.name },
+    onValueChanged = onValueChanged,
     applyFeatureFlags = applyFeatureFlags,
 )
 
@@ -46,6 +50,7 @@ internal fun <T> choice(
     defaultValue: T = options.first().second,
     serialize: (T) -> String = { it.toString() },
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
+    onValueChanged: CheckoutPlaygroundSettingUpdateScope.(T) -> Unit = {},
     applyFeatureFlags: (T) -> Unit = {},
 ): CheckoutPlaygroundSettingDefinition.Value<T> {
     return value(
@@ -54,6 +59,7 @@ internal fun <T> choice(
         defaultValue = defaultValue,
         options = options,
         isApplicable = isApplicable,
+        onValueChanged = onValueChanged,
         applyFeatureFlags = applyFeatureFlags,
         encode = serialize,
         decode = { serialized ->
@@ -72,6 +78,7 @@ internal fun <T> value(
     isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean = { true },
     options: List<Pair<String, T>> = emptyList(),
     input: CheckoutPlaygroundSettingDefinition.Value.Input = CheckoutPlaygroundSettingDefinition.Value.Input.Text,
+    onValueChanged: CheckoutPlaygroundSettingUpdateScope.(T) -> Unit = {},
     applyFeatureFlags: (T) -> Unit = {},
     encode: (T) -> String,
     decode: (String) -> Result<T>,
@@ -87,6 +94,7 @@ internal fun <T> value(
     },
     input = input,
     isApplicable = isApplicable,
+    onValueChanged = onValueChanged,
     applyFeatureFlags = applyFeatureFlags,
     encode = encode,
     decode = decode,

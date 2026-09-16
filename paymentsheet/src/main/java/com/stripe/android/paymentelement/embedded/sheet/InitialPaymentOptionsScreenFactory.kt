@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -63,6 +64,14 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
+        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        if (supportedPaymentMethodTypes.size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty() &&
+            selectionHolder.selection.value == null
+        ) {
+            return listOf(formScreenFactory.createFormScreen(supportedPaymentMethodTypes.first()))
+        }
+
         val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
         val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
         val formHelper = createFormHelper(formHelperScope)
@@ -139,6 +148,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateSelection = { updatedSelection, _ ->
                 selectionHolder.setSelection(updatedSelection)
             },
+            verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
+                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                completionAction = null,
+            ),
             isCurrentScreen = isCurrentScreen(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
@@ -153,7 +166,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
                 shouldUpdateSelection(formHelper, paymentMethodCode)
             },
-            invokeRowSelectionCallback = null,
             displaysMandatesInFormScreen = false,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
