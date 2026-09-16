@@ -33,5 +33,4 @@ internal class TestNgBankTransfer : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
 }
