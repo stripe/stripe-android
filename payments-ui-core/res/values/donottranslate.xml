@@ -51,4 +51,5 @@
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
     <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>-->
     <string name="stripe_paymentsheet_payment_method_gopay">GoPay</string>
+    <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
 </resources>
