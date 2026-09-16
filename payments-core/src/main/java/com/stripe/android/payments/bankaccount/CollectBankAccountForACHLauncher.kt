@@ -46,7 +46,7 @@ internal class CollectBankAccountForACHLauncher(
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
                 financialConnectionsAvailability = financialConnectionsAvailability,
-                preCollectedConsent = preCollectedConsent
+                preCollectedConsent = preCollectedConsent.takeIf { hostedSurface == null }
             )
         )
     }
@@ -80,7 +80,7 @@ internal class CollectBankAccountForACHLauncher(
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
                 financialConnectionsAvailability = financialConnectionsAvailability,
-                preCollectedConsent = preCollectedConsent
+                preCollectedConsent = preCollectedConsent.takeIf { hostedSurface == null }
             )
         )
     }

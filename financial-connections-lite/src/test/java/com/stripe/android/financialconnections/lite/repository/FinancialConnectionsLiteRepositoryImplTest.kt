@@ -32,7 +32,10 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
 
         repository.synchronize(
             configuration = TextFixtures.configuration.copy(
-                preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+                preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+                    consent = "fccons_123",
+                    collectedAt = 1_725_000_000L,
+                )
             ),
             applicationId = "com.stripe.android.test"
         )
@@ -43,7 +46,12 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             params = paramsCaptor.capture(),
             shouldCache = eq(false)
         )
-        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(mapOf("consent" to "fccons_123"))
+        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
+            mapOf(
+                "consent" to "fccons_123",
+                "collected_at" to 1_725_000_000L,
+            )
+        )
     }
 
     @Test

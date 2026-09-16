@@ -46,7 +46,10 @@ internal class FinancialConnectionsLiteRepositoryImpl(
                 ),
                 PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                 PARAMS_PRE_COLLECTED_CONSENT to configuration.preCollectedConsent?.let {
-                    mapOf("consent" to it.consent)
+                    mapOf(
+                        "consent" to it.consent,
+                        "collected_at" to it.collectedAt,
+                    )
                 }
             ).filterNotNullValues()
         ),

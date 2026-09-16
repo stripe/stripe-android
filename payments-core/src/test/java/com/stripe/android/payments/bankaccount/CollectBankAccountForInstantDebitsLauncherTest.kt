@@ -42,9 +42,12 @@ class CollectBankAccountForInstantDebitsLauncherTest {
     }
 
     @Test
-    fun `presentWithPaymentIntent - passes preCollectedConsent through to Args when provided`() {
+    fun `presentWithPaymentIntent - ignores preCollectedConsent for hosted surface`() {
         val launcher = makeLauncher()
-        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
 
         launcher.presentWithPaymentIntent(
             publishableKey = PUBLISHABLE_KEY,
@@ -63,7 +66,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
                 attachToIntent = true,
                 hostedSurface = HOSTED_SURFACE,
                 financialConnectionsAvailability = Full,
-                preCollectedConsent = preCollectedConsent
+                preCollectedConsent = null
             )
         )
     }
@@ -94,9 +97,12 @@ class CollectBankAccountForInstantDebitsLauncherTest {
     }
 
     @Test
-    fun `presentWithSetupIntent - passes preCollectedConsent through to Args when provided`() {
+    fun `presentWithSetupIntent - ignores preCollectedConsent for hosted surface`() {
         val launcher = makeLauncher()
-        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
 
         launcher.presentWithSetupIntent(
             publishableKey = PUBLISHABLE_KEY,
@@ -115,7 +121,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
                 attachToIntent = true,
                 hostedSurface = HOSTED_SURFACE,
                 financialConnectionsAvailability = Full,
-                preCollectedConsent = preCollectedConsent
+                preCollectedConsent = null
             )
         )
     }

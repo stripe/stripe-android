@@ -166,13 +166,22 @@ class CollectBankAccountViewModelTest {
     @Test
     fun `init - when args has preCollectedConsent, passes it through to OpenConnectionsFlow`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
-        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
         viewEffect.test {
             // Given
             givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
 
             // When
-            buildViewModel(viewEffect, paymentIntentConfiguration(preCollectedConsent = preCollectedConsent))
+            buildViewModel(
+                viewEffect,
+                paymentIntentConfiguration(
+                    preCollectedConsent = preCollectedConsent,
+                    hostedSurface = null,
+                )
+            )
 
             // Then
             assertThat(awaitItem()).isEqualTo(
@@ -182,6 +191,67 @@ class CollectBankAccountViewModelTest {
                     stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
                     preCollectedConsent = preCollectedConsent,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when args is hosted, omits preCollectedConsent from OpenConnectionsFlow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+        viewEffect.test {
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
+
+            buildViewModel(
+                viewEffect,
+                paymentIntentConfiguration(preCollectedConsent = preCollectedConsent)
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
+                    preCollectedConsent = null,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when args is Instant Debits, omits preCollectedConsent from OpenConnectionsFlow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+        viewEffect.test {
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
+
+            buildViewModel(
+                viewEffect,
+                paymentIntentConfiguration(
+                    preCollectedConsent = preCollectedConsent,
+                    hostedSurface = null,
+                    configuration = CollectBankAccountConfiguration.InstantDebits(
+                        email = email,
+                        elementsSessionContext = null,
+                    ),
+                )
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -553,17 +623,19 @@ class CollectBankAccountViewModelTest {
     private fun paymentIntentConfiguration(
         attachToIntent: Boolean = true,
         preCollectedConsent: FinancialConnectionsPreCollectedConsent? = null,
+        hostedSurface: String? = "payment_element",
+        configuration: CollectBankAccountConfiguration = CollectBankAccountConfiguration.USBankAccount(
+            name,
+            email,
+        ),
     ): ForPaymentIntent {
         return ForPaymentIntent(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
-            configuration = CollectBankAccountConfiguration.USBankAccount(
-                name,
-                email
-            ),
+            configuration = configuration,
             attachToIntent = attachToIntent,
-            hostedSurface = "payment_element",
+            hostedSurface = hostedSurface,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             preCollectedConsent = preCollectedConsent
         )

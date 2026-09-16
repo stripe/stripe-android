@@ -78,7 +78,10 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher(
             financialConnectionsAvailability = Lite
         )
-        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
 
         launcher.presentWithPaymentIntent(
             publishableKey = PUBLISHABLE_KEY,
@@ -98,6 +101,36 @@ class CollectBankAccountForACHLauncherTest {
                 hostedSurface = null,
                 financialConnectionsAvailability = Lite,
                 preCollectedConsent = preCollectedConsent
+            )
+        )
+    }
+
+    @Test
+    fun `presentWithPaymentIntent - hosted surface omits preCollectedConsent`() {
+        val launcher = makeLauncher(hostedSurface = "payment_element")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+
+        launcher.presentWithPaymentIntent(
+            publishableKey = PUBLISHABLE_KEY,
+            clientSecret = CLIENT_SECRET,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            configuration = CONFIGURATION,
+            preCollectedConsent = preCollectedConsent,
+        )
+
+        verify(mockHostActivityLauncher).launch(
+            CollectBankAccountContract.Args.ForPaymentIntent(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+                clientSecret = CLIENT_SECRET,
+                configuration = CONFIGURATION,
+                attachToIntent = false,
+                hostedSurface = "payment_element",
+                financialConnectionsAvailability = Full,
+                preCollectedConsent = null,
             )
         )
     }
@@ -155,7 +188,10 @@ class CollectBankAccountForACHLauncherTest {
     @Test
     fun `presentWithSetupIntent - passes preCollectedConsent through to Args when provided`() {
         val launcher = makeLauncher()
-        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
 
         launcher.presentWithSetupIntent(
             publishableKey = PUBLISHABLE_KEY,
@@ -175,6 +211,36 @@ class CollectBankAccountForACHLauncherTest {
                 hostedSurface = null,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = preCollectedConsent
+            )
+        )
+    }
+
+    @Test
+    fun `presentWithSetupIntent - hosted surface omits preCollectedConsent`() {
+        val launcher = makeLauncher(hostedSurface = "payment_element")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+
+        launcher.presentWithSetupIntent(
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            clientSecret = CLIENT_SECRET,
+            configuration = CONFIGURATION,
+            preCollectedConsent = preCollectedConsent,
+        )
+
+        verify(mockHostActivityLauncher).launch(
+            CollectBankAccountContract.Args.ForSetupIntent(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+                clientSecret = CLIENT_SECRET,
+                configuration = CONFIGURATION,
+                attachToIntent = false,
+                hostedSurface = "payment_element",
+                financialConnectionsAvailability = Full,
+                preCollectedConsent = null,
             )
         )
     }

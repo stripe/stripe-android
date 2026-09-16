@@ -25,9 +25,6 @@ NEXT_VERSION_BUMP: PATCH
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.
 
-### Financial Connections
-* [ADDED] Added support for passing pre-collected consent evidence to `CollectBankAccountLauncher` and `FinancialConnectionsSheet` (private preview).
-
 ## 23.17.1 - 2026-08-31
 
 ### PaymentSheet

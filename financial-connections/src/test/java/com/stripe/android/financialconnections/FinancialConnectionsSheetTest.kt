@@ -20,7 +20,8 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                preCollectedConsent = null,
             )
         )
     }
@@ -40,7 +41,10 @@ class FinancialConnectionsSheetTest {
 
     @Test
     fun `present() with preCollectedConsent should launch with the given preCollectedConsent`() {
-        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
 
         financialConnectionsSheet.present(configuration, preCollectedConsent = preCollectedConsent)
 

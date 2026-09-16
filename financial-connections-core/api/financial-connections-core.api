@@ -1,11 +1,13 @@
 public final class com/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent : android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;J)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;
-	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;
+	public final fun component2 ()J
+	public final fun copy (Ljava/lang/String;J)Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;Ljava/lang/String;JILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCollectedAt ()J
 	public final fun getConsent ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -756,4 +758,3 @@ public abstract class com/stripe/android/financialconnections/model/PaymentAccou
 public final class com/stripe/android/financialconnections/model/PaymentAccount$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
-

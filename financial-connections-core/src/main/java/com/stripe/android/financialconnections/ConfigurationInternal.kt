@@ -14,7 +14,7 @@ data class FinancialConnectionsSheetConfiguration(
     val financialConnectionsSessionClientSecret: String,
     val publishableKey: String,
     val stripeAccountId: String? = null,
-    val preCollectedConsent: FinancialConnectionsPreCollectedConsent? = null,
+    val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
 ) : Parcelable
 
 /**

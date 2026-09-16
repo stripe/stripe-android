@@ -5,6 +5,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.IfMissingActiveAuthSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -26,6 +28,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.willSuspendableAnswer
 import java.util.Locale
+import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 internal class FinancialConnectionsManifestRepositoryImplTest {
@@ -110,7 +113,10 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             applicationId = "",
             supportsAppVerification = false,
             reFetchCondition = None::shouldReFetch,
-            preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
+            preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+                consent = "fccons_123",
+                collectedAt = 1_725_000_000L,
+            )
         )
 
         verify(apiRequestFactory).createPost(
@@ -119,7 +125,12 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             params = paramsCaptor.capture(),
             shouldCache = eq(false)
         )
-        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(mapOf("consent" to "fccons_123"))
+        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
+            mapOf(
+                "consent" to "fccons_123",
+                "collected_at" to 1_725_000_000L,
+            )
+        )
     }
 
     @Test
@@ -145,6 +156,95 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
 
+    @Test
+    fun `getOrFetchSession - failed initial request retries with same pre_collected_consent`() = runTest {
+        val request = mock<ApiRequest>()
+        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val preCollectedConsent = preCollectedConsent()
+        whenever(
+            apiRequestFactory.createPost(
+                url = any(),
+                options = any(),
+                params = any(),
+                shouldCache = eq(false),
+            )
+        ).thenReturn(request)
+        whenever(mockRequestExecutor.execute(any(), any<KSerializer<*>>()))
+            .thenThrow(IllegalStateException("network failure"))
+            .thenReturn(ApiKeyFixtures.syncResponse())
+        val repository = buildRepository()
+
+        assertFailsWith<IllegalStateException> {
+            repository.getOrSynchronizeFinancialConnectionsSession(
+                clientSecret = "",
+                applicationId = "",
+                supportsAppVerification = false,
+                reFetchCondition = None::shouldReFetch,
+                preCollectedConsent = preCollectedConsent,
+            )
+        }
+        repository.getOrSynchronizeFinancialConnectionsSession(
+            clientSecret = "",
+            applicationId = "",
+            supportsAppVerification = false,
+            reFetchCondition = None::shouldReFetch,
+            preCollectedConsent = preCollectedConsent,
+        )
+
+        verify(apiRequestFactory, times(2)).createPost(
+            url = any(),
+            options = any(),
+            params = paramsCaptor.capture(),
+            shouldCache = eq(false),
+        )
+        assertThat(paramsCaptor.allValues.map { it["pre_collected_consent"] }).containsExactly(
+            PRE_COLLECTED_CONSENT_PARAMS,
+            PRE_COLLECTED_CONSENT_PARAMS,
+        ).inOrder()
+    }
+
+    @Test
+    fun `getOrFetchSession - successful initial request then Always refetch omits evidence`() = runTest {
+        assertEvidenceOmittedOnRefetch(Always::shouldReFetch)
+    }
+
+    @Test
+    fun `getOrFetchSession - successful initial request then missing auth session refetch omits evidence`() = runTest {
+        assertEvidenceOmittedOnRefetch(IfMissingActiveAuthSession::shouldReFetch)
+    }
+
+    private suspend fun assertEvidenceOmittedOnRefetch(
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+    ) {
+        givenSyncSessionRequestReturnsAfterDelay(ApiKeyFixtures.syncResponse())
+        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val repository = buildRepository()
+
+        repository.getOrSynchronizeFinancialConnectionsSession(
+            clientSecret = "",
+            applicationId = "",
+            supportsAppVerification = false,
+            reFetchCondition = None::shouldReFetch,
+            preCollectedConsent = preCollectedConsent(),
+        )
+        repository.getOrSynchronizeFinancialConnectionsSession(
+            clientSecret = "",
+            applicationId = "",
+            supportsAppVerification = false,
+            reFetchCondition = reFetchCondition,
+            preCollectedConsent = preCollectedConsent(),
+        )
+
+        verify(apiRequestFactory, times(2)).createPost(
+            url = any(),
+            options = any(),
+            params = paramsCaptor.capture(),
+            shouldCache = eq(false),
+        )
+        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(PRE_COLLECTED_CONSENT_PARAMS)
+        assertThat(paramsCaptor.secondValue).doesNotContainKey("pre_collected_consent")
+    }
+
     /**
      * Simulates an API call to retrieve manifest that takes some time.
      */
@@ -164,5 +264,17 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             delay(100)
             syncResponse
         }
+    }
+
+    private fun preCollectedConsent() = FinancialConnectionsPreCollectedConsent(
+        consent = "fccons_123",
+        collectedAt = 1_725_000_000L,
+    )
+
+    private companion object {
+        val PRE_COLLECTED_CONSENT_PARAMS = mapOf(
+            "consent" to "fccons_123",
+            "collected_at" to 1_725_000_000L,
+        )
     }
 }
