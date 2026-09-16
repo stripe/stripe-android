@@ -1140,6 +1140,39 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `Does not attach restored address and phone when collection and defaults are disabled`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        attachDefaultsToPaymentMethod = false,
+                        phone = CollectionMode.Never,
+                        address = AddressCollectionMode.Never,
+                    ),
+                ),
+                savedPaymentMethod = savedPaymentMethodWithBillingDetails(),
+            ),
+        ).apply {
+            collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+        assertThat(viewModel.address.value).isNotNull()
+        assertThat(viewModel.phone.value).isNotNull()
+
+        viewModel.handlePrimaryButtonClick()
+
+        val configurationCaptor = argumentCaptor<CollectBankAccountConfiguration>()
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = configurationCaptor.capture(),
+        )
+        val configuration = configurationCaptor.firstValue as CollectBankAccountConfiguration.USBankAccountInternal
+        assertThat(configuration.address).isNull()
+        assertThat(configuration.phone).isNull()
+    }
+
+    @Test
     fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
@@ -1970,6 +2003,24 @@ class USBankAccountFormViewModelTest {
             phoneErrorTurbine.cancelAndIgnoreRemainingEvents()
             addressErrorTurbine.cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    private fun savedPaymentMethodWithBillingDetails(): PaymentSelection.New.USBankAccount {
+        return PaymentSelection.New.USBankAccount(
+            label = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "Some Name",
+                email = "email@email.com",
+                phone = CUSTOMER_PHONE,
+                address = CUSTOMER_ADDRESS.asAddressModel(),
+                saveForFutureUse = true,
+            ),
+            instantDebits = null,
+            screenState = BankFormScreenState(isPaymentFlow = true),
+        )
     }
 
     private fun achConfigurationWithBillingDetails(): CollectBankAccountConfiguration.USBankAccountInternal {

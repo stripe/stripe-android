@@ -577,11 +577,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccountInternal {
+        val attachDefaultsToPaymentMethod = collectionConfiguration.attachDefaultsToPaymentMethod
+
         return CollectBankAccountConfiguration.USBankAccountInternal(
             name = name.value,
             email = email.value,
-            address = address.value,
-            phone = phone.value,
+            address = address.value.takeIf { collectingAddress || attachDefaultsToPaymentMethod },
+            phone = phone.value.takeIf { collectingPhone || attachDefaultsToPaymentMethod },
             elementsSessionContext = makeElementsSessionContext(),
         )
     }
