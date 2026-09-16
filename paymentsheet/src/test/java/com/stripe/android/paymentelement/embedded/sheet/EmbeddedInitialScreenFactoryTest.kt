@@ -194,8 +194,8 @@ internal class EmbeddedInitialScreenFactoryTest {
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},
             onUpdatePaymentMethod = { _, _, _, _, _ -> },
-            isLinkEnabled = stateFlowOf(false),
-            isNotPaymentFlow = false,
+            isLinkEnabled = stateFlowOf(paymentMethodMetadata.shouldShowLinkButton),
+            isNotPaymentFlow = true,
             linkAccount = stateFlowOf(null),
         )
         val navigatorEventReporter = FakeEventReporter()
