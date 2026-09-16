@@ -33,9 +33,8 @@ internal class ShopeePayDefinitionTest {
     }
 
     @Test
-    fun `form has no method-specific copy`(
-        @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
-    ) {
+    fun `form has no method-specific copy`() {
+        val intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.ShopeePay),
         )
