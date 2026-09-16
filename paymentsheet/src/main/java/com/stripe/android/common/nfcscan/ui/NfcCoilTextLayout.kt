@@ -3,9 +3,13 @@ package com.stripe.android.common.nfcscan.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -41,8 +45,13 @@ internal fun NfcCoilTextLayout(
 ) {
     Layout(
         content = {
-            NfcCoilInstructionText(canShow)
-            ErrorBanner(error)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                NfcCoilInstructionText(canShow)
+                ErrorBanner(
+                    error = error,
+                    modifier = Modifier.padding(top = ErrorTextTopSpacing),
+                )
+            }
         },
     ) { measurables, constraints ->
         placeCoilTextElements(
@@ -84,50 +93,29 @@ private fun MeasureScope.placeCoilTextElements(
         maxWidth = (containerWidthPx - edgePaddingPx * 2).coerceAtLeast(0),
     )
 
-    val instructionPlaceable = measurables[0].measure(textConstraints)
-    val errorPlaceable = measurables.getOrNull(1)?.measure(textConstraints)
+    val textPlaceable = measurables.single().measure(textConstraints)
 
     val coilBoxLeft = ((containerWidthPx - coilSizePx) / 2f * (1f + horizontalBias)).roundToInt()
     val coilBoxTop = ((containerHeightPx - coilSizePx) / 2f * (1f + verticalBias)).roundToInt()
     val coilCenterX = coilBoxLeft + coilSizePx / 2
 
-    val instructionY = if (shouldRenderTextAboveCoil) {
-        val textBlockHeight = instructionPlaceable.height +
-            (errorPlaceable?.let { it.height + ErrorTextTopSpacing.roundToPx() } ?: 0)
-        coilBoxTop - aboveCoilPadding(deviceRotation).roundToPx() - textBlockHeight
+    val textY = if (shouldRenderTextAboveCoil) {
+        coilBoxTop - aboveCoilPadding(deviceRotation).roundToPx() - textPlaceable.height
     } else {
         coilBoxTop + coilSizePx + bottomCoilPadding(deviceRotation).roundToPx()
     }
 
     return layout(containerWidthPx, containerHeightPx) {
-        if (instructionPlaceable.width > 0 && instructionPlaceable.height > 0) {
-            instructionPlaceable.place(
+        if (textPlaceable.width > 0 && textPlaceable.height > 0) {
+            textPlaceable.place(
                 x = clampedTextX(
-                    placeable = instructionPlaceable,
+                    placeable = textPlaceable,
                     coilCenterX = coilCenterX,
                     containerWidthPx = containerWidthPx,
                     edgePaddingPx = edgePaddingPx,
                 ),
-                y = instructionY,
+                y = textY,
             )
-        }
-
-        errorPlaceable?.let { placeable ->
-            if (placeable.width > 0 && placeable.height > 0) {
-                val errorY = instructionY +
-                    instructionPlaceable.height +
-                    ErrorTextTopSpacing.roundToPx()
-
-                placeable.place(
-                    x = clampedTextX(
-                        placeable = placeable,
-                        coilCenterX = coilCenterX,
-                        containerWidthPx = containerWidthPx,
-                        edgePaddingPx = edgePaddingPx,
-                    ),
-                    y = errorY,
-                )
-            }
         }
     }
 }
