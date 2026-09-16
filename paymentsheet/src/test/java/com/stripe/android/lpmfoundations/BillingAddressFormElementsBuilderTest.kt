@@ -207,6 +207,38 @@ class BillingAddressFormElementsBuilderTest {
     }
 
     @Test
+    fun `country restriction overrides automatic tax countries and supplies a default`() {
+        val countryElement = billingAddressFormElementsBuilder(
+            arguments = arguments(
+                billingDetailsCollectionConfiguration = automaticAddressConfiguration(
+                    allowedCountries = setOf("US"),
+                ),
+                requiresBillingAddressForAutomaticTax = true,
+            ),
+            countryRestriction = CountryRestriction(
+                allowedCountryCodes = setOf("ID"),
+                defaultCountryCode = "ID",
+            ),
+        ).build().billingAddressElement().countryElement
+
+        assertThat(countryElement.controller.displayItems).containsExactly("🇮🇩 Indonesia")
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("ID")
+    }
+
+    @Test
+    fun `country restriction does not require standalone country collection`() {
+        val formElements = billingAddressFormElementsBuilder(
+            arguments = arguments(),
+            countryRestriction = CountryRestriction(
+                allowedCountryCodes = setOf("US"),
+                defaultCountryCode = "US",
+            ),
+        ).build()
+
+        assertThat(formElements).isEmpty()
+    }
+
+    @Test
     fun `full address falls back to fallback country codes`() {
         val addressElement = billingAddressFormElementsBuilder(
             arguments = arguments(
@@ -305,6 +337,7 @@ class BillingAddressFormElementsBuilderTest {
         fallbackCountryCodes: Set<String> =
             arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
         countryRequirement: CountryRequirement? = null,
+        countryRestriction: CountryRestriction? = null,
     ): BillingAddressFormElementsBuilder {
         return BillingAddressFormElementsBuilder(
             arguments = arguments,
@@ -312,6 +345,7 @@ class BillingAddressFormElementsBuilderTest {
             requireBillingAddressCollection = requireBillingAddressCollection,
             fallbackCountryCodes = fallbackCountryCodes,
             countryRequirement = countryRequirement,
+            countryRestriction = countryRestriction,
         )
     }
 
