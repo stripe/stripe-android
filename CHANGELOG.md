@@ -18,6 +18,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14621](https://github.com/stripe/stripe-android/pull/14621) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14622](https://github.com/stripe/stripe-android/pull/14622) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28
