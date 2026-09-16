@@ -106,6 +106,7 @@ internal interface PaymentElementModule {
 
         @Provides
         @Named(CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER)
+        @CheckoutPresenterScope
         fun provideCheckoutLinkPaymentLauncher(
             linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
             linkActivityContract: LinkActivityContract,
