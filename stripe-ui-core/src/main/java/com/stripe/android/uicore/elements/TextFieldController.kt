@@ -183,6 +183,7 @@ class SimpleTextFieldController(
 
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
+    private val focusAsk = MutableStateFlow(false)
 
     override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
@@ -244,6 +245,10 @@ class SimpleTextFieldController(
         _isValidating.value = isValidating
     }
 
+    fun requestFocus() {
+        focusAsk.value = true
+    }
+
     @Composable
     override fun ComposeUI(
         enabled: Boolean,
@@ -252,6 +257,8 @@ class SimpleTextFieldController(
         hiddenIdentifiers: Set<FormFieldId>,
         lastTextFieldIdentifier: FormFieldId?,
     ) {
+        val focusRequester = rememberTextFocusRequester(focusAsk)
+
         TextField(
             textFieldController = this,
             enabled = enabled,
@@ -261,6 +268,7 @@ class SimpleTextFieldController(
                 ImeAction.Next
             },
             modifier = modifier,
+            focusRequester = focusRequester,
             shouldAnnounceLabel = textFieldConfig.shouldAnnounceLabel,
             shouldAnnounceFieldValue = textFieldConfig.shouldAnnounceFieldValue
         )
