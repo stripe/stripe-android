@@ -758,3 +758,4 @@ public abstract class com/stripe/android/financialconnections/model/PaymentAccou
 public final class com/stripe/android/financialconnections/model/PaymentAccount$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
+
