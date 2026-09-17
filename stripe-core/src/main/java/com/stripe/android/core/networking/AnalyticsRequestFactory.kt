@@ -31,53 +31,30 @@ open class AnalyticsRequestFactory(
      */
     open fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
-    ): AnalyticsRequest {
-        return createRequest(
-            event = event,
-            additionalParams = additionalParams,
-            overridePublishableKey = null,
-        )
-    }
-
-    protected fun createRequestWithPublishableKey(
-        event: AnalyticsEvent,
         additionalParams: Map<String, Any?>,
-        publishableKey: String,
-    ): AnalyticsRequest {
-        return createRequest(
-            event = event,
-            additionalParams = additionalParams,
-            overridePublishableKey = publishableKey,
-        )
-    }
-
-    private fun createRequest(
-        event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>,
-        overridePublishableKey: String?,
+        publishableKeyOverride: String? = null,
     ): AnalyticsRequest {
         return AnalyticsRequest(
-            params = createParams(event, overridePublishableKey) + additionalParams,
+            params = createParams(event, publishableKeyOverride) + additionalParams,
             headers = RequestHeadersFactory.Analytics.create()
         )
     }
 
     private fun createParams(
         event: AnalyticsEvent,
-        overridePublishableKey: String?
+        publishableKeyOverride: String?
     ): Map<String, Any> {
-        return standardParams(overridePublishableKey) + appDataParams() + event.params()
+        return standardParams(publishableKeyOverride) + appDataParams() + event.params()
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
         return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
-    private fun standardParams(overridePublishableKey: String?): Map<String, Any> = mapOf(
+    private fun standardParams(publishableKeyOverride: String?): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            val publishableKey = overridePublishableKey ?: publishableKeyProvider.get()
+            val publishableKey = publishableKeyOverride ?: publishableKeyProvider.get()
             if (publishableKey.startsWith("uk_")) {
                 "[REDACTED_LIVE_KEY]"
             } else {

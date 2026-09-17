@@ -80,23 +80,13 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     override fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
+        additionalParams: Map<String, Any?>,
+        publishableKeyOverride: String?,
     ): AnalyticsRequest {
         return super.createRequest(
             event = event,
             additionalParams = createAdditionalParams(additionalParams),
-        )
-    }
-
-    fun createRequest(
-        event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>,
-        publishableKey: String,
-    ): AnalyticsRequest {
-        return createRequestWithPublishableKey(
-            event = event,
-            additionalParams = createAdditionalParams(additionalParams),
-            publishableKey = publishableKey,
+            publishableKeyOverride = publishableKeyOverride,
         )
     }
 

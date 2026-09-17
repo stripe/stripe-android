@@ -620,20 +620,12 @@ internal class DefaultEventReporter @Inject internal constructor(
     ) {
         CoroutineScope(workContext).launch {
             val additionalParams = defaultParams(paymentMethodMetadata) + event.params
-            val request = if (publishableKey != null) {
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = event,
-                    additionalParams = additionalParams,
-                    publishableKey = publishableKey,
-                )
-            } else {
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = event,
-                    additionalParams = additionalParams,
-                )
-            }
             analyticsRequestExecutor.executeAsync(
-                request
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = additionalParams,
+                    publishableKeyOverride = publishableKey,
+                )
             )
         }
     }
