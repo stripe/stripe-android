@@ -4951,8 +4951,8 @@ internal class DefaultPaymentElementLoaderTest {
         ).apply {
             runTest {
                 block()
-                eventReporter.validate()
             }
+            eventReporter.validate()
             customerRepository.ensureAllEventsConsumed()
         }
     }
