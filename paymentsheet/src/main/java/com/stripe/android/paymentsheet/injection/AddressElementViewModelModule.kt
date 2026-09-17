@@ -24,7 +24,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -48,7 +47,7 @@ internal class AddressElementViewModelModule {
     @OptIn(CheckoutSessionPreview::class)
     internal fun providePrimaryButtonAction(
         args: AddressElementActivityContract.Args,
-        taxRegionUpdater: Provider<CheckoutSessionTaxRegionUpdater>,
+        taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     ): AddressElementPrimaryButtonAction = when (args) {
         is AddressElementActivityContract.Args.Standalone -> {
             StandalonePrimaryButtonAction
@@ -128,12 +127,12 @@ private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction
 @OptIn(CheckoutSessionPreview::class)
 private class CheckoutShippingPrimaryButtonAction(
     private val checkoutSessionResponse: CheckoutSessionResponse,
-    private val taxRegionUpdater: Provider<CheckoutSessionTaxRegionUpdater>,
+    private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
 ) : AddressElementPrimaryButtonAction {
     override suspend fun invoke(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result> {
-        return taxRegionUpdater.get().updateServerStateIfNeeded(
+        return taxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = TaxAddressSource.SHIPPING,
             address = requireNotNull(addressDetails.address?.toCheckoutAddress()),

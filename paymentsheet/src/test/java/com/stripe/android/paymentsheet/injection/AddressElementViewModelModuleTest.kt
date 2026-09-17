@@ -65,6 +65,7 @@ class AddressElementViewModelModuleTest {
             val viewModel = createViewModel(
                 args = args,
                 resultStateHolder = resultStateHolder,
+                taxRegionUpdater = createTaxRegionUpdater(),
             )
 
             viewModel.clickPrimaryButton(
@@ -99,7 +100,7 @@ class AddressElementViewModelModuleTest {
             val viewModel = createViewModel(
                 args = args,
                 resultStateHolder = resultStateHolder,
-                taxRegionUpdater = Provider { createTaxRegionUpdater() },
+                taxRegionUpdater = createTaxRegionUpdater(),
             )
 
             viewModel.clickPrimaryButton(
@@ -136,7 +137,7 @@ class AddressElementViewModelModuleTest {
             val viewModel = createViewModel(
                 args = args,
                 resultStateHolder = resultStateHolder,
-                taxRegionUpdater = Provider { createTaxRegionUpdater() },
+                taxRegionUpdater = createTaxRegionUpdater(),
             )
 
             networkRule.checkoutUpdate(
@@ -202,9 +203,7 @@ class AddressElementViewModelModuleTest {
     private fun createViewModel(
         args: AddressElementActivityContract.Args,
         resultStateHolder: AddressElementResultStateHolder,
-        taxRegionUpdater: Provider<CheckoutSessionTaxRegionUpdater> = Provider {
-            error("Tax region updater should not be requested for standalone")
-        },
+        taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     ): InputAddressViewModel = InputAddressViewModel(
         args = args,
         navigator = mock<AddressElementNavigator>(),
