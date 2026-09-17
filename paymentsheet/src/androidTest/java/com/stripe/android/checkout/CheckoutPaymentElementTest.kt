@@ -265,24 +265,20 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() =
-        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks ->
-            val updateRequests = Turbine<Unit>()
+        runSavedPaymentMethodSelectionFromCashAppScenario {
             val releaseResponse = CountDownLatch(1)
-            enqueueTaxUpdate { response ->
-                updateRequests.add(Unit)
+            selectSavedPaymentMethod { response ->
                 check(releaseResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                     "Timed out waiting to release the Checkout Session update response."
                 }
                 automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
             }
 
-            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
-
             try {
                 withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                    updateRequests.awaitItem()
+                    selectionRequests.awaitItem()
                 }
-                updateRequests.expectNoEvents()
+                selectionRequests.expectNoEvents()
                 contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
                 contentPage.assertLpmIsEnabled("card", false)
                 contentPage.assertHasSelectedLpm("cashapp")
@@ -303,24 +299,20 @@ internal class CheckoutPaymentElementTest {
             } finally {
                 releaseResponse.countDown()
             }
-            updateRequests.ensureAllEventsConsumed()
         }
 
     @Test
     fun testSavedPaymentMethodSelectionFailureCanRetry() =
-        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks ->
-            val updateRequests = Turbine<Unit>()
+        runSavedPaymentMethodSelectionFromCashAppScenario {
             val releaseRetryResponse = CountDownLatch(1)
 
-            enqueueTaxUpdate { response ->
-                updateRequests.add(Unit)
+            selectSavedPaymentMethod { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
-            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
             withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                updateRequests.awaitItem()
+                selectionRequests.awaitItem()
             }
             waitForControllerUpdateToFinish(controller)
             contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
@@ -328,8 +320,7 @@ internal class CheckoutPaymentElementTest {
             contentPage.assertHasSelectedLpm("cashapp")
             callbacks.expectNoEvents()
 
-            enqueueTaxUpdate { response ->
-                updateRequests.add(Unit)
+            selectSavedPaymentMethod { response ->
                 check(releaseRetryResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                     "Timed out waiting to release the Checkout Session retry response."
                 }
@@ -339,11 +330,9 @@ internal class CheckoutPaymentElementTest {
                 ).invoke(response)
             }
 
-            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
-
             try {
                 withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                    updateRequests.awaitItem()
+                    selectionRequests.awaitItem()
                 }
                 callbacks.expectNoEvents()
                 releaseRetryResponse.countDown()
@@ -362,11 +351,10 @@ internal class CheckoutPaymentElementTest {
             } finally {
                 releaseRetryResponse.countDown()
             }
-            updateRequests.ensureAllEventsConsumed()
         }
 
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
-        block: suspend Scenario.(Turbine<Unit>) -> Unit,
+        block: suspend SavedPaymentMethodSelectionScenario.() -> Unit,
     ) {
         val callbacks = Turbine<Unit>()
         runAutomaticTaxTest(
@@ -380,10 +368,59 @@ internal class CheckoutPaymentElementTest {
             },
         ) {
             selectCashAppAndAwaitCallback(callbacks)
-            block(callbacks)
+            val scenario = SavedPaymentMethodSelectionScenario(
+                scenario = this,
+                callbacks = callbacks,
+            )
+            scenario.block()
+            scenario.selectionRequests.ensureAllEventsConsumed()
             callbacks.ensureAllEventsConsumed()
             markTestSucceeded()
         }
+    }
+
+    private inner class SavedPaymentMethodSelectionScenario(
+        private val scenario: Scenario,
+        val callbacks: Turbine<Unit>,
+    ) {
+        val selectionRequests = Turbine<Unit>()
+        val controller: CheckoutController
+            get() = scenario.controller
+
+        fun selectSavedPaymentMethod(responseFactory: (MockResponse) -> Unit) {
+            enqueueTaxUpdate { response ->
+                selectionRequests.add(Unit)
+                responseFactory(response)
+            }
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+        }
+    }
+
+    private suspend fun Scenario.selectCashAppAndAwaitCallback(
+        callbacks: Turbine<Unit>,
+    ) {
+        val initialTaxUpdateRequests = Turbine<Unit>()
+
+        contentPage.clickOnLpm("cashapp")
+        formPage.waitUntilVisible()
+
+        enqueueTaxUpdate { response ->
+            initialTaxUpdateRequests.add(Unit)
+            automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_COMPLETE,
+            )(response)
+        }
+        fillOutBillingDetails()
+        formPage.clickPrimaryButton()
+
+        withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+            initialTaxUpdateRequests.awaitItem()
+            callbacks.awaitItem()
+        }
+        assertThat(controller.session.value?.paymentOption?.paymentMethodType).isEqualTo("cashapp")
+        contentPage.assertHasSelectedLpm("cashapp")
+        initialTaxUpdateRequests.ensureAllEventsConsumed()
     }
 
     @Test
