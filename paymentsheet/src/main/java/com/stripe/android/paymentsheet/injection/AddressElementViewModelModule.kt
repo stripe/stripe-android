@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -15,7 +14,6 @@ import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavig
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
 import dagger.Module
@@ -37,16 +35,10 @@ internal class AddressElementViewModelModule {
     }
 
     @Provides
-    @Singleton
-    fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
-
-    @Provides
     @Named(PRODUCT_USAGE)
-    @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
-    @Singleton
     internal fun providePrimaryButtonAction(
         args: AddressElementActivityContract.Args,
     ): AddressElementPrimaryButtonAction = when (args) {
@@ -57,13 +49,6 @@ internal class AddressElementViewModelModule {
             CheckoutShippingPrimaryButtonAction
         }
     }
-
-    @Provides
-    @Named(PUBLISHABLE_KEY)
-    @Singleton
-    fun providesPublishableKey(
-        args: AddressElementActivityContract.Args
-    ): String = args.publishableKey
 
     @Provides
     @Singleton
