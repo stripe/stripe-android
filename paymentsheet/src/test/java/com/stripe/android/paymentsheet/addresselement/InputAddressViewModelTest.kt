@@ -44,15 +44,20 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
-        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction(),
+        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
+            AddressElementActivityContract.Result.StandaloneSucceeded(it)
+        },
         eventReporter: AddressLauncherEventReporter = this.eventReporter,
+        argsFactory:
+            (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
+                AddressElementActivityContract.Args.Standalone(
+                    publishableKey = "pk_123",
+                    config = currentConfig,
+                )
+            },
     ): InputAddressViewModel {
-        val args = AddressElementActivityContract.Args.Standalone(
-            publishableKey = "pk_123",
-            config = config,
-        )
         return InputAddressViewModel(
-            args,
+            argsFactory(config),
             navigator,
             resultStateHolder,
             eventReporter,
@@ -1078,6 +1083,17 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `standalone save emits standalone success`() {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
     fun `isInlineAutocompleteEnabled is always true`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
@@ -1092,15 +1108,14 @@ class InputAddressViewModelTest {
         googlePlacesApiKey: String = "test_key",
         autocompleteCountries: Set<String> = emptySet(),
     ): InputAddressViewModel {
-        val args = AddressElementActivityContract.Args.Standalone(
-            publishableKey = "pk_123",
-            config = AddressLauncher.Configuration.Builder()
-                .googlePlacesApiKey(googlePlacesApiKey)
-                .autocompleteCountries(autocompleteCountries)
-                .build(),
-        )
         return InputAddressViewModel(
-            args,
+            AddressElementActivityContract.Args.Standalone(
+                publishableKey = "pk_123",
+                config = AddressLauncher.Configuration.Builder()
+                    .googlePlacesApiKey(googlePlacesApiKey)
+                    .autocompleteCountries(autocompleteCountries)
+                    .build(),
+            ),
             navigator,
             resultStateHolder,
             eventReporter,
@@ -1108,7 +1123,9 @@ class InputAddressViewModelTest {
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction(),
+            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
+                AddressElementActivityContract.Result.StandaloneSucceeded(it)
+            },
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1181,12 +1198,14 @@ class InputAddressViewModelTest {
     }
 }
 
-private class FakeAddressElementPrimaryButtonAction : AddressElementPrimaryButtonAction {
+private class FakeAddressElementPrimaryButtonAction(
+    private val action: (AddressDetails) -> AddressElementActivityContract.Result,
+) : AddressElementPrimaryButtonAction {
     override suspend fun invoke(
         addressDetails: AddressDetails,
-    ): Result<AddressElementActivityContract.Result> = Result.success(
-        AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
-    )
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(action(addressDetails))
+    }
 }
 
 private class RecordingPrimaryButtonAction(
