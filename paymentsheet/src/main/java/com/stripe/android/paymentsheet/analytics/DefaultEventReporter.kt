@@ -4,7 +4,6 @@ import android.content.Context
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
-import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
@@ -620,13 +619,21 @@ internal class DefaultEventReporter @Inject internal constructor(
         publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
-            val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
-                (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
-            analyticsRequestExecutor.executeAsync(
+            val additionalParams = defaultParams(paymentMethodMetadata) + event.params
+            val request = if (publishableKey != null) {
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = additionalParams,
+                    publishableKey = publishableKey,
+                )
+            } else {
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = additionalParams,
                 )
+            }
+            analyticsRequestExecutor.executeAsync(
+                request
             )
         }
     }

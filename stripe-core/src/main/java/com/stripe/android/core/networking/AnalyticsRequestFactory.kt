@@ -33,26 +33,51 @@ open class AnalyticsRequestFactory(
         event: AnalyticsEvent,
         additionalParams: Map<String, Any?>
     ): AnalyticsRequest {
+        return createRequest(
+            event = event,
+            additionalParams = additionalParams,
+            overridePublishableKey = null,
+        )
+    }
+
+    protected fun createRequestWithPublishableKey(
+        event: AnalyticsEvent,
+        additionalParams: Map<String, Any?>,
+        publishableKey: String,
+    ): AnalyticsRequest {
+        return createRequest(
+            event = event,
+            additionalParams = additionalParams,
+            overridePublishableKey = publishableKey,
+        )
+    }
+
+    private fun createRequest(
+        event: AnalyticsEvent,
+        additionalParams: Map<String, Any?>,
+        overridePublishableKey: String?,
+    ): AnalyticsRequest {
         return AnalyticsRequest(
-            params = createParams(event) + additionalParams,
+            params = createParams(event, overridePublishableKey) + additionalParams,
             headers = RequestHeadersFactory.Analytics.create()
         )
     }
 
     private fun createParams(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
+        overridePublishableKey: String?
     ): Map<String, Any> {
-        return standardParams() + appDataParams() + event.params()
+        return standardParams(overridePublishableKey) + appDataParams() + event.params()
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
         return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
-    private fun standardParams(): Map<String, Any> = mapOf(
+    private fun standardParams(overridePublishableKey: String?): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            val publishableKey = publishableKeyProvider.get()
+            val publishableKey = overridePublishableKey ?: publishableKeyProvider.get()
             if (publishableKey.startsWith("uk_")) {
                 "[REDACTED_LIVE_KEY]"
             } else {

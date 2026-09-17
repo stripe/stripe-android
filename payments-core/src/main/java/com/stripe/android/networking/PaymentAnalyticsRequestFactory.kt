@@ -84,12 +84,28 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     ): AnalyticsRequest {
         return super.createRequest(
             event = event,
-            additionalParams = defaultProductUsageTokens
-                .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
-                .orEmpty()
-                .plus(additionalParams)
-                .plus(libraryParams()),
+            additionalParams = createAdditionalParams(additionalParams),
         )
+    }
+
+    fun createRequest(
+        event: AnalyticsEvent,
+        additionalParams: Map<String, Any?>,
+        publishableKey: String,
+    ): AnalyticsRequest {
+        return createRequestWithPublishableKey(
+            event = event,
+            additionalParams = createAdditionalParams(additionalParams),
+            publishableKey = publishableKey,
+        )
+    }
+
+    private fun createAdditionalParams(additionalParams: Map<String, Any?>): Map<String, Any?> {
+        return defaultProductUsageTokens
+            .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
+            .orEmpty()
+            .plus(additionalParams)
+            .plus(libraryParams())
     }
 
     private fun libraryParams(): Map<String, String> {
