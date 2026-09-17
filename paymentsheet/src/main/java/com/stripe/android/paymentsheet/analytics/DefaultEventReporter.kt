@@ -620,13 +620,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
-            initEventHelper.publishableKeyForInit(publishableKey, paymentMethodMetadata)?.let {
-                executeEvent(
-                    event = PaymentSheetEvent.Init(mode),
-                    paymentMethodMetadata = null,
-                    publishableKey = it,
-                )
-            }
             executeEvent(event, paymentMethodMetadata, publishableKey)
         }
     }

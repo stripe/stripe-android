@@ -40,7 +40,6 @@ internal interface LoadingEventReporter {
 
 @Suppress("TooManyFunctions")
 internal interface EventReporter : CardScanEventsReporter {
-
     /**
      * PaymentSheet has been dismissed by pressing the close button.
      */

@@ -203,7 +203,6 @@ internal class PaymentSheetViewModelTest {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
 
-        // Creating the view model should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
     }
 

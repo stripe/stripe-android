@@ -19,7 +19,7 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
     val elementsSessionLoadFailedTurbine: ReceiveTurbine<ElementsSessionLoadFailedCall> =
         _elementsSessionLoadFailedTurbine
 
-    fun validate() {
+    suspend fun validate() {
         _loadStartedTurbine.ensureAllEventsConsumed()
         _loadSucceededTurbine.ensureAllEventsConsumed()
         _loadFailedTurbine.ensureAllEventsConsumed()
