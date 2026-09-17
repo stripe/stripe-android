@@ -65,6 +65,83 @@ class CheckoutPlaygroundSettingsTest {
     }
 
     @Test
+    fun `custom credentials survive JSON round trip`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.Custom)
+        settings.update(session.customStripeApi, "example-api.tunnel.stripe.me")
+        settings.update(session.customSecretKey, "sk_test_custom")
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[session.customStripeApi]).isEqualTo("example-api.tunnel.stripe.me")
+        assertThat(restored[session.customSecretKey]).isEqualTo("sk_test_custom")
+        assertThat(restored[session.customPublishableKey]).isEqualTo("pk_test_custom")
+    }
+
+    @Test
+    fun `custom merchant requires custom credentials`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+
+        settings.update(session.merchant, Merchant.Custom)
+
+        assertThat(settings.validationErrors()).containsExactly(
+            session.customSecretKey,
+            "Required for custom merchant",
+            session.customPublishableKey,
+            "Required for custom merchant",
+        )
+    }
+
+    @Test
+    fun `standard merchant does not require custom credentials`() = runScenario {
+        assertThat(settings.validationErrors()).isEmpty()
+    }
+
+    @Test
+    fun `custom merchant with custom credentials is valid`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.Custom)
+        settings.update(session.customSecretKey, "sk_test_custom")
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        assertThat(settings.validationErrors()).isEmpty()
+    }
+
+    @Test
+    fun `leaving custom merchant clears custom credentials`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.Custom)
+        settings.update(session.customSecretKey, "sk_test_custom")
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        settings.update(session.merchant, Merchant.US)
+
+        assertThat(settings[session.customSecretKey]).isNull()
+        assertThat(settings[session.customPublishableKey]).isNull()
+    }
+
+    @Test
+    fun `changing custom secret key resets returning customer`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.customer, CheckoutCustomer.Returning)
+
+        settings.update(session.customSecretKey, "sk_test_custom")
+
+        assertThat(settings[session.customer]).isEqualTo(CheckoutCustomer.New)
+    }
+
+    @Test
+    fun `changing custom publishable key resets returning customer`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.customer, CheckoutCustomer.Returning)
+
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        assertThat(settings[session.customer]).isEqualTo(CheckoutCustomer.New)
+    }
+
+    @Test
     fun `unknown and invalid persisted values fall back to defaults`() = runScenario(
         json = """{"unknown":"value","currency.appearance.scale":"not-a-number"}"""
     ) {
