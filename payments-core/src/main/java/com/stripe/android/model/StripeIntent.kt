@@ -106,7 +106,8 @@ sealed interface StripeIntent : StripeModel {
         DisplayMultibancoDetails("multibanco_display_details"),
         DisplayPayNowDetails("paynow_display_qr_code"),
         DisplayPromptPayDetails("promptpay_display_qr_code"),
-        SwishRedirect("swish_handle_redirect_or_display_qr_code");
+        SwishRedirect("swish_handle_redirect_or_display_qr_code"),
+        AwaitAuthorization("await_authorization");
 
         @Keep
         override fun toString(): String {
@@ -371,6 +372,10 @@ sealed interface StripeIntent : StripeModel {
 
         @Parcelize
         data object BlikAuthorize : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data object AwaitAuthorization : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize

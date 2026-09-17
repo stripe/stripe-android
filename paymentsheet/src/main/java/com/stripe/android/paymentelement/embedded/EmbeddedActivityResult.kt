@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -20,6 +21,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
         val previousNewSelections: Bundle,
         val hasBeenConfirmed: Boolean,
         val customerState: CustomerState?,
+        val linkAccountInfo: LinkAccountUpdate.Value,
         val checkoutSessionResponse: CheckoutSessionResponse?,
         val shouldInvokeSelectionCallback: Boolean,
         override val launchMode: EmbeddedLaunchMode,
@@ -28,6 +30,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
     @Parcelize
     data class Cancelled(
         val customerState: CustomerState?,
+        val linkAccountInfo: LinkAccountUpdate.Value,
         override val launchMode: EmbeddedLaunchMode,
     ) : EmbeddedActivityResult
 
@@ -51,3 +54,10 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
         }
     }
 }
+
+internal val EmbeddedActivityResult.linkAccountInfoOrNull: LinkAccountUpdate.Value?
+    get() = when (this) {
+        is EmbeddedActivityResult.Complete -> linkAccountInfo
+        is EmbeddedActivityResult.Cancelled -> linkAccountInfo
+        is EmbeddedActivityResult.Error -> null
+    }

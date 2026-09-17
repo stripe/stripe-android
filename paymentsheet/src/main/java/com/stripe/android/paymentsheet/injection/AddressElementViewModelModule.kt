@@ -1,19 +1,19 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
+import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButtonAction
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
 import dagger.Module
@@ -35,20 +35,20 @@ internal class AddressElementViewModelModule {
     }
 
     @Provides
-    @Singleton
-    fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
-
-    @Provides
     @Named(PRODUCT_USAGE)
-    @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
-    @Named(PUBLISHABLE_KEY)
-    @Singleton
-    fun providesPublishableKey(
-        args: AddressElementActivityContract.Args
-    ): String = args.publishableKey
+    internal fun providePrimaryButtonAction(
+        args: AddressElementActivityContract.Args,
+    ): AddressElementPrimaryButtonAction = when (args) {
+        is AddressElementActivityContract.Args.Standalone -> {
+            StandalonePrimaryButtonAction
+        }
+        is AddressElementActivityContract.Args.CheckoutShipping -> {
+            CheckoutShippingPrimaryButtonAction
+        }
+    }
 
     @Provides
     @Singleton
@@ -101,5 +101,25 @@ internal class AddressElementViewModelModule {
     interface Bindings {
         @Binds
         fun bindsAddressElementNavigator(navigator: NavHostAddressElementNavigator): AddressElementNavigator
+    }
+}
+
+private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction {
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(
+            AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+        )
+    }
+}
+
+private object CheckoutShippingPrimaryButtonAction : AddressElementPrimaryButtonAction {
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+        )
     }
 }

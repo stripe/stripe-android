@@ -333,10 +333,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
-            clientParams = ElementsSessionClientParams(
-                mobileAppId = "com.stripe.android.test",
-                mobileSessionIdProvider = { "test_session" },
-            ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(

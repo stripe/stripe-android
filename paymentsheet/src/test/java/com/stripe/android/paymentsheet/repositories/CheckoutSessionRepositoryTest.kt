@@ -34,7 +34,6 @@ class CheckoutSessionRepositoryTest {
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
     private val repository = CheckoutSessionRepository(
-        clientParams = clientParams,
         stripeNetworkClient = DefaultStripeNetworkClient(),
         analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -61,6 +60,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
+            clientParams = clientParams,
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             adaptivePricingAllowed = true,
         )

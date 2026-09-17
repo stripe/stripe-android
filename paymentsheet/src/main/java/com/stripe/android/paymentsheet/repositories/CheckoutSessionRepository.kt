@@ -20,7 +20,6 @@ import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
-    private val clientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -52,6 +51,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun init(
+        clientParams: ElementsSessionClientParams,
         sessionId: String,
         adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> {

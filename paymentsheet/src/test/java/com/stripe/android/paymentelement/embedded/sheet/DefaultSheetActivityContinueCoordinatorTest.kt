@@ -9,6 +9,8 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -27,7 +29,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -117,6 +118,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             stateHolder = stateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = LAUNCH_MODE,
             coroutineScope = this,
         )
@@ -135,10 +137,6 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            clientParams = ElementsSessionClientParams(
-                mobileAppId = "com.stripe.android.paymentsheet.test",
-                mobileSessionIdProvider = { "test_session" },
-            ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -172,6 +170,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = checkoutSessionResponse,
                 shouldInvokeSelectionCallback = false,
                 launchMode = LAUNCH_MODE,

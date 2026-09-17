@@ -187,6 +187,7 @@ public final class com/stripe/android/core/model/StripeFileParams$FileLink : and
 public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
 	public static final field BusinessIcon Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field BusinessLogo Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field CryptoOnrampKycDocument Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field CustomerSignature Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field DisputeEvidence Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field IdentityDocument Lcom/stripe/android/core/model/StripeFilePurpose;

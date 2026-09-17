@@ -47,7 +47,6 @@ import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImp
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -78,7 +77,6 @@ internal suspend fun createIntentConfirmationInterceptor(
         intentCreateIntentWithConfirmationTokenCallback = intentCreationConfirmationTokenCallbackProvider,
         preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
         errorReporter = errorReporter,
-        requestOptionsProvider = { requestOptions },
     )
     return DefaultIntentConfirmationInterceptorFactory(
         deferredIntentCallbackRetriever = deferredIntentCallbackRetriever,
@@ -150,10 +148,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
                 val checkoutSessionRepository = CheckoutSessionRepository(
-                    clientParams = ElementsSessionClientParams(
-                        mobileAppId = "com.stripe.android.test",
-                        mobileSessionIdProvider = { "test_session" },
-                    ),
                     stripeNetworkClient = DefaultStripeNetworkClient(),
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -183,6 +177,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         integrationMetadata = integrationMetadata,
         customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        isLiveMode = requestOptions.apiKeyIsLiveMode,
     )
 }
 

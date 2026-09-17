@@ -23,6 +23,7 @@ import androidx.test.espresso.Espresso.pressBack
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -261,6 +262,7 @@ internal class EmbeddedSheetActivityTest {
                     selection = null,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
