@@ -15,6 +15,7 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.core.utils.FeatureFlags
@@ -122,7 +123,7 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testPaymentOptionsLaunchesLink() {
+    fun testPaymentOptionsBridgesLinkAccountStateThroughCheckout() {
         val checkoutInitResponse: (MockResponse) -> Unit = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.put("customer_email", "test@stripe.com")
@@ -157,10 +158,20 @@ internal class CheckoutPaymentElementTest {
             }
         }
 
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        lateinit var controller: CheckoutController
+
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
-            setup = { controller ->
+            setup = { configuredController ->
+                controller = configuredController
                 controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
         ) { context ->
@@ -168,7 +179,17 @@ internal class CheckoutPaymentElementTest {
             contentPage.assertHasSelectedLpm("link")
             context.presentPaymentOptions()
 
-            linkWalletPage.waitUntilVisible()
+            linkWalletPage.logOut()
+
+            verticalModePage.waitUntilVisible()
+            verticalModePage.assertLpmDoesNotExist("link")
+            Espresso.pressBack()
+            verticalModePage.waitUntilMissing()
+
+            networkRule.checkoutInit(responseFactory = checkoutInitResponse)
+            runBlocking {
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            }
             context.markTestSucceeded()
         }
     }

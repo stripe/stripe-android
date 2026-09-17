@@ -9,6 +9,8 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -116,6 +118,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             stateHolder = stateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = LAUNCH_MODE,
             coroutineScope = this,
         )
@@ -167,6 +170,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 previousNewSelections = selectionHolder.previousNewSelections,
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = checkoutSessionResponse,
                 shouldInvokeSelectionCallback = false,
                 launchMode = LAUNCH_MODE,
