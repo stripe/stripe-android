@@ -264,16 +264,18 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() =
-        runSavedPaymentMethodSelectionFromCashAppScenario {
-            val releaseResponse = CountDownLatch(1)
-            selectSavedPaymentMethod { response ->
-                check(releaseResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the Checkout Session update response."
-                }
-                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
-            }
-
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
+        val releaseResponse = CountDownLatch(1)
+        runSavedPaymentMethodSelectionFromCashAppScenario(
+            selectionResponses = listOf(
+                { response ->
+                    check(releaseResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                        "Timed out waiting to release the Checkout Session update response."
+                    }
+                    automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+                },
+            ),
+        ) {
             try {
                 withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
                     selectionRequests.awaitItem()
@@ -300,17 +302,28 @@ internal class CheckoutPaymentElementTest {
                 releaseResponse.countDown()
             }
         }
+    }
 
     @Test
-    fun testSavedPaymentMethodSelectionFailureCanRetry() =
-        runSavedPaymentMethodSelectionFromCashAppScenario {
-            val releaseRetryResponse = CountDownLatch(1)
-
-            selectSavedPaymentMethod { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
-
+    fun testSavedPaymentMethodSelectionFailureCanRetry() {
+        val releaseRetryResponse = CountDownLatch(1)
+        runSavedPaymentMethodSelectionFromCashAppScenario(
+            selectionResponses = listOf(
+                { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                },
+                { response ->
+                    check(releaseRetryResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                        "Timed out waiting to release the Checkout Session retry response."
+                    }
+                    automaticTaxResponseWithSavedPaymentMethod(
+                        UPDATED_TOTAL,
+                        TAX_STATUS_COMPLETE,
+                    ).invoke(response)
+                },
+            ),
+        ) {
             withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
                 selectionRequests.awaitItem()
             }
@@ -320,15 +333,7 @@ internal class CheckoutPaymentElementTest {
             contentPage.assertHasSelectedLpm("cashapp")
             callbacks.expectNoEvents()
 
-            selectSavedPaymentMethod { response ->
-                check(releaseRetryResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the Checkout Session retry response."
-                }
-                automaticTaxResponseWithSavedPaymentMethod(
-                    UPDATED_TOTAL,
-                    TAX_STATUS_COMPLETE,
-                ).invoke(response)
-            }
+            selectSavedPaymentMethod()
 
             try {
                 withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
@@ -352,8 +357,10 @@ internal class CheckoutPaymentElementTest {
                 releaseRetryResponse.countDown()
             }
         }
+    }
 
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
+        selectionResponses: List<(MockResponse) -> Unit>,
         block: suspend SavedPaymentMethodSelectionScenario.() -> Unit,
     ) {
         val callbacks = Turbine<Unit>()
@@ -371,8 +378,11 @@ internal class CheckoutPaymentElementTest {
             val scenario = SavedPaymentMethodSelectionScenario(
                 scenario = this,
                 callbacks = callbacks,
+                selectionResponses = selectionResponses,
             )
+            scenario.selectSavedPaymentMethod()
             scenario.block()
+            scenario.ensureAllResponsesConsumed()
             scenario.selectionRequests.ensureAllEventsConsumed()
             callbacks.ensureAllEventsConsumed()
             markTestSucceeded()
@@ -382,17 +392,31 @@ internal class CheckoutPaymentElementTest {
     private inner class SavedPaymentMethodSelectionScenario(
         private val scenario: Scenario,
         val callbacks: Turbine<Unit>,
+        private val selectionResponses: List<(MockResponse) -> Unit>,
     ) {
         val selectionRequests = Turbine<Unit>()
         val controller: CheckoutController
             get() = scenario.controller
 
-        fun selectSavedPaymentMethod(responseFactory: (MockResponse) -> Unit) {
+        private var nextResponseIndex = 0
+
+        fun selectSavedPaymentMethod() {
+            val responseFactory = checkNotNull(selectionResponses.getOrNull(nextResponseIndex)) {
+                "No response configured for saved payment method selection attempt ${nextResponseIndex + 1}."
+            }
+            nextResponseIndex += 1
             enqueueTaxUpdate { response ->
                 selectionRequests.add(Unit)
                 responseFactory(response)
             }
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+        }
+
+        fun ensureAllResponsesConsumed() {
+            check(nextResponseIndex == selectionResponses.size) {
+                "Expected ${selectionResponses.size} saved payment method selection attempts, " +
+                    "but ran $nextResponseIndex."
+            }
         }
     }
 
