@@ -751,19 +751,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun state_isProcessing_whenSavedPaymentMethodSelectionIsPending() {
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val selectionHandler = FakeVerticalPaymentSelectionHandler()
-        runScenario(verticalPaymentSelectionHandler = selectionHandler) {
-            assertThat(interactor.state.value.isProcessing).isFalse()
-
-            selectionHandler.stateSource.value = VerticalPaymentSelectionHandler.State.Selecting(selection)
-
-            assertThat(interactor.state.value.isProcessing).isTrue()
-        }
-    }
-
-    @Test
     fun stateDoesNotReturnWalletPaymentMethodsWhenInFlowControllerAndGooglePayIsNotAvailable() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -2151,10 +2138,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 }
 
 internal class FakeVerticalPaymentSelectionHandler : VerticalPaymentSelectionHandler {
-    val stateSource = MutableStateFlow<VerticalPaymentSelectionHandler.State>(
+    override val state = stateFlowOf<VerticalPaymentSelectionHandler.State>(
         VerticalPaymentSelectionHandler.State.Idle
     )
-    override val state = stateSource
     val selectCalls = Turbine<SelectCall>()
     val selectionCompleteCalls = Turbine<Unit>()
 
