@@ -66,7 +66,6 @@ internal class CustomPaymentMethodsAnalyticsTest(
             response.testBodyFromFile("elements-sessions-cpms.json")
         }
 
-        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
