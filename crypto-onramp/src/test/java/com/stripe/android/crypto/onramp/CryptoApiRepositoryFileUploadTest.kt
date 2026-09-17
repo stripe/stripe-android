@@ -32,7 +32,7 @@ class CryptoApiRepositoryFileUploadTest {
             )
         )
     ) {
-        val result = repository.uploadAdditionalKycDocument(file)
+        val result = repository.uploadAdditionalKycDocument(file, "lsk_test_123")
 
         assertThat(result.getOrThrow().id).isEqualTo("file_123")
         verify(stripeRepository).createFile(
@@ -44,8 +44,9 @@ class CryptoApiRepositoryFileUploadTest {
             ),
             requestOptions = eq(
                 ApiRequest.Options(
-                    apiKey = "pk_test_123",
+                    apiKey = "lsk_test_123",
                     stripeAccount = "acct_123",
+                    idempotencyKey = null,
                 )
             ),
         )
@@ -55,7 +56,7 @@ class CryptoApiRepositoryFileUploadTest {
     fun `file upload failure is propagated`() = runScenario(
         uploadResult = Result.failure(uploadError),
     ) {
-        val result = repository.uploadAdditionalKycDocument(file)
+        val result = repository.uploadAdditionalKycDocument(file, "lsk_test_123")
 
         assertThat(result.exceptionOrNull()).isSameInstanceAs(uploadError)
     }

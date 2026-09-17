@@ -156,13 +156,17 @@ internal class CryptoApiRepository @Inject constructor(
     /**
      * Uploads a document for an additional KYC requirement.
      */
-    suspend fun uploadAdditionalKycDocument(file: File): Result<StripeFile> {
+    suspend fun uploadAdditionalKycDocument(file: File, linkSessionKey: String): Result<StripeFile> {
         return stripeRepository.createFile(
             fileParams = StripeFileParams(
                 file = file,
                 purpose = StripeFilePurpose.CryptoOnrampKycDocument,
             ),
-            requestOptions = buildRequestOptions(),
+            requestOptions = ApiRequest.Options(
+                apiKey = linkSessionKey,
+                stripeAccount = stripeAccountIdProvider(),
+                idempotencyKey = null,
+            ),
         )
     }
 
