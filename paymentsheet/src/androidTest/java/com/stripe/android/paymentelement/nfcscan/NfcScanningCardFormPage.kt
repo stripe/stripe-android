@@ -36,6 +36,11 @@ internal class NfcScanningCardFormPage(
         composeTestRule.waitForIdle()
     }
 
+    fun fillName(name: String) {
+        composeTestRule.onNode(hasText("Name on card")).performTextReplacement(name)
+        composeTestRule.waitForIdle()
+    }
+
     fun assertScannedCardShown(
         lastFourDigits: String,
     ) {
@@ -53,6 +58,15 @@ internal class NfcScanningCardFormPage(
         composeTestRule.waitUntil(UI_TIMEOUT_MS) {
             composeTestRule.waitForIdle()
             composeTestRule.onAllNodes(hasText("CVC").and(isFocused()))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+    }
+
+    fun assertNameIsFocused() {
+        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
+            composeTestRule.waitForIdle()
+            composeTestRule.onAllNodes(hasText("Name on card").and(isFocused()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
