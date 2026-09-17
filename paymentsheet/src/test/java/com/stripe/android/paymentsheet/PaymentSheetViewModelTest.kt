@@ -199,7 +199,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `init should regenerate analytics session ID`() {
+    fun `creating viewmodel should regenerate analytics session ID`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
 
