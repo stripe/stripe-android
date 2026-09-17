@@ -181,6 +181,7 @@ class CheckoutController @Inject internal constructor(
     internal suspend fun commitShippingAddress(
         name: String?,
         address: Address.State,
+        updatedCheckoutSessionResponse: CheckoutSessionResponse,
     ): kotlin.Result<Unit> = withCheckoutState(
         additionalStateMutations = {
             copy(
@@ -191,7 +192,7 @@ class CheckoutController @Inject internal constructor(
             )
         },
     ) {
-        kotlin.Result.success(checkoutSessionResponse)
+        kotlin.Result.success(updatedCheckoutSessionResponse)
     }
 
     /**

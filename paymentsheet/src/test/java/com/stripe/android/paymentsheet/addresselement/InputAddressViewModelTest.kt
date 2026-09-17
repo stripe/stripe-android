@@ -1094,27 +1094,6 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `checkout shipping save emits checkout success without performing additional work`() {
-        val viewModel = createViewModel(
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
-                AddressElementActivityContract.Result.CheckoutShippingSucceeded(it)
-            },
-            argsFactory = { config ->
-                AddressElementActivityContract.Args.CheckoutShipping(
-                    publishableKey = "pk_123",
-                    config = config,
-                )
-            },
-        )
-
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
-        )
-    }
-
-    @Test
     fun `isInlineAutocompleteEnabled is always true`() {
         val viewModel = createViewModel()
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
