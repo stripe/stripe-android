@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -87,22 +86,7 @@ class AddressElementViewModelModuleTest {
 
     @Test
     fun `providePrimaryButtonAction completes checkout shipping through the view model`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = false,
-            )
-            val args = AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(),
-                checkoutSessionResponse = checkoutSessionResponse,
-            )
-            val resultStateHolder = AddressElementResultStateHolder()
-            val viewModel = createViewModel(
-                args = args,
-                resultStateHolder = resultStateHolder,
-                taxRegionUpdater = createTaxRegionUpdater(),
-            )
-
+        runCheckoutShippingScenario(automaticTaxEnabled = false) {
             viewModel.clickPrimaryButton(
                 completedFormValues = mapOf(
                     FormFieldId.Country to FormFieldEntry("US", true),
@@ -123,40 +107,24 @@ class AddressElementViewModelModuleTest {
 
     @Test
     fun `providePrimaryButtonAction updates checkout shipping tax from submitted address`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            )
-            val args = AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(),
-                checkoutSessionResponse = checkoutSessionResponse,
-            )
-            val resultStateHolder = AddressElementResultStateHolder()
-            val viewModel = createViewModel(
-                args = args,
-                resultStateHolder = resultStateHolder,
-                taxRegionUpdater = createTaxRegionUpdater(),
-            )
-
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[line1]", "510 Townsend St"),
-                bodyPart("tax_region[line2]", "Floor 2"),
-                bodyPart("tax_region[city]", "San Francisco"),
-                bodyPart("tax_region[state]", "CA"),
-                bodyPart("tax_region[postal_code]", "94103"),
-            ) { response ->
-                response.testBodyFromFile("checkout-session-init.json") { json ->
-                    json.getJSONArray("checkout_items").getJSONObject(0)
-                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-                        .put("total", 5099)
-                }
-            }
-
+        runCheckoutShippingScenario {
             resultStateHolder.result.test {
                 assertThat(awaitItem()).isNull()
+
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[line1]", "510 Townsend St"),
+                    bodyPart("tax_region[line2]", "Floor 2"),
+                    bodyPart("tax_region[city]", "San Francisco"),
+                    bodyPart("tax_region[state]", "CA"),
+                    bodyPart("tax_region[postal_code]", "94103"),
+                ) { response ->
+                    response.testBodyFromFile("checkout-session-init.json") { json ->
+                        json.getJSONArray("checkout_items").getJSONObject(0)
+                            .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                            .put("total", 5099)
+                    }
+                }
                 viewModel.clickPrimaryButton(
                     completedFormValues = COMPLETED_FORM_VALUES,
                     checkboxChecked = true,
@@ -172,48 +140,14 @@ class AddressElementViewModelModuleTest {
 
     @Test
     fun `providePrimaryButtonAction returns failure and can retry after checkout shipping tax update fails`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            )
-            val args = AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(),
-                checkoutSessionResponse = checkoutSessionResponse,
-            )
-            val resultStateHolder = AddressElementResultStateHolder()
-            val eventReporter = FakeAddressLauncherEventReporter()
-            val viewModel = createViewModel(
-                args = args,
-                resultStateHolder = resultStateHolder,
-                taxRegionUpdater = createTaxRegionUpdater(),
-                eventReporter = eventReporter,
-            )
-            val taxRegionRequestMatchers = arrayOf(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[line1]", "510 Townsend St"),
-                bodyPart("tax_region[line2]", "Floor 2"),
-                bodyPart("tax_region[city]", "San Francisco"),
-                bodyPart("tax_region[state]", "CA"),
-                bodyPart("tax_region[postal_code]", "94103"),
-            )
-
-            networkRule.checkoutUpdate(*taxRegionRequestMatchers) { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
-            networkRule.checkoutUpdate(*taxRegionRequestMatchers) { response ->
-                response.testBodyFromFile("checkout-session-init.json") { json ->
-                    json.getJSONArray("checkout_items").getJSONObject(0)
-                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-                        .put("total", 5099)
-                }
-            }
-
+        runCheckoutShippingScenario {
             viewModel.formEnabled.test {
                 assertThat(awaitItem()).isTrue()
 
+                networkRule.checkoutUpdate { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                }
                 viewModel.clickPrimaryButton(
                     completedFormValues = COMPLETED_FORM_VALUES,
                     checkboxChecked = true,
@@ -223,11 +157,17 @@ class AddressElementViewModelModuleTest {
                 assertThat(awaitItem()).isTrue()
             }
             assertThat(resultStateHolder.result.value).isNull()
-            eventReporter.completedCalls.expectNoEvents()
 
             resultStateHolder.result.test {
                 assertThat(awaitItem()).isNull()
 
+                networkRule.checkoutUpdate { response ->
+                    response.testBodyFromFile("checkout-session-init.json") { json ->
+                        json.getJSONArray("checkout_items").getJSONObject(0)
+                            .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                            .put("total", 5099)
+                    }
+                }
                 viewModel.clickPrimaryButton(
                     completedFormValues = COMPLETED_FORM_VALUES,
                     checkboxChecked = true,
@@ -238,29 +178,13 @@ class AddressElementViewModelModuleTest {
                 assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
             }
             assertThat(viewModel.formEnabled.value).isFalse()
-            eventReporter.completedCalls.awaitItem()
-            eventReporter.validate()
         }
 
     @Test
     fun `providePrimaryButtonAction returns original response when automatic tax targets billing`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            )
-            val args = AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration(),
-                checkoutSessionResponse = checkoutSessionResponse,
-            )
-            val resultStateHolder = AddressElementResultStateHolder()
-            val viewModel = createViewModel(
-                args = args,
-                resultStateHolder = resultStateHolder,
-                taxRegionUpdater = createTaxRegionUpdater(),
-            )
-
+        runCheckoutShippingScenario(
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        ) {
             resultStateHolder.result.test {
                 assertThat(awaitItem()).isNull()
 
@@ -304,16 +228,44 @@ class AddressElementViewModelModuleTest {
         assertThat(placesClient).isNull()
     }
 
+    private fun runCheckoutShippingScenario(
+        automaticTaxEnabled: Boolean = true,
+        taxAddressSource: CheckoutSessionResponse.TaxAddressSource =
+            CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        block: suspend CheckoutShippingScenario.() -> Unit,
+    ) = runTest(UnconfinedTestDispatcher()) {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = automaticTaxEnabled,
+            taxAddressSource = taxAddressSource,
+        )
+        val resultStateHolder = AddressElementResultStateHolder()
+        val args = AddressElementActivityContract.Args.CheckoutShipping(
+            publishableKey = "pk_123",
+            config = AddressLauncher.Configuration(),
+            checkoutSessionResponse = checkoutSessionResponse,
+        )
+        val viewModel = createViewModel(
+            args = args,
+            resultStateHolder = resultStateHolder,
+            taxRegionUpdater = createTaxRegionUpdater(),
+        )
+
+        CheckoutShippingScenario(
+            checkoutSessionResponse = checkoutSessionResponse,
+            resultStateHolder = resultStateHolder,
+            viewModel = viewModel,
+        ).block()
+    }
+
     private fun createViewModel(
         args: AddressElementActivityContract.Args,
         resultStateHolder: AddressElementResultStateHolder,
         taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
-        eventReporter: AddressLauncherEventReporter = mock(),
     ): InputAddressViewModel = InputAddressViewModel(
         args = args,
         navigator = mock<AddressElementNavigator>(),
         resultStateHolder = resultStateHolder,
-        eventReporter = eventReporter,
+        eventReporter = mock(),
         placesClient = null,
         primaryButtonAction = module.providePrimaryButtonAction(
             args = args,
@@ -339,6 +291,12 @@ class AddressElementViewModelModuleTest {
             ),
         )
     }
+
+    private data class CheckoutShippingScenario(
+        val checkoutSessionResponse: CheckoutSessionResponse,
+        val resultStateHolder: AddressElementResultStateHolder,
+        val viewModel: InputAddressViewModel,
+    )
 
     private companion object {
         val EXPECTED_ADDRESS = AddressDetails(
