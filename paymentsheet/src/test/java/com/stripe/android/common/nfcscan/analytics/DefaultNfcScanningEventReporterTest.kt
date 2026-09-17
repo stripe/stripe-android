@@ -1,6 +1,7 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.nfcscan.scanner.GenericNfcScanningError
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
@@ -151,11 +152,11 @@ internal class DefaultNfcScanningEventReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null },
             ),
             eventPrefix = "mc_",
+            publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         block(

@@ -73,7 +73,7 @@ class PaymentLauncherViewModelTest {
     private val nextActionHandlerRegistry = mock<PaymentNextActionHandlerRegistry>()
     private val defaultReturnUrl =
         DefaultReturnUrl.create(ApplicationProvider.getApplicationContext())
-    private val apiRequestOptions = mock<ApiRequest.Options>()
+    private val apiRequestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     private val authHost = mock<AuthActivityStarterHost>()
     private val paymentIntentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val setupIntentFlowResultProcessor = mock<SetupIntentFlowResultProcessor>()
@@ -177,7 +177,8 @@ class PaymentLauncherViewModelTest {
             createViewModel().confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
-                PaymentAnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
             verify(stripeApiRepository).confirmPaymentIntent(
                 argWhere {
@@ -210,7 +211,8 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
             verify(stripeApiRepository).confirmPaymentIntent(
                 argWhere {
@@ -244,7 +246,8 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
             verify(stripeApiRepository).confirmPaymentIntent(
                 argWhere {
@@ -275,7 +278,8 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                PaymentAnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
             verify(stripeApiRepository).confirmSetupIntent(
                 argWhere {
@@ -308,7 +312,8 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
             verify(stripeApiRepository).confirmSetupIntent(
                 argWhere {
@@ -333,7 +338,8 @@ class PaymentLauncherViewModelTest {
             createViewModel(isInstantApp = true).confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
-                PaymentAnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
             verify(stripeApiRepository).confirmPaymentIntent(
                 argWhere {
@@ -610,13 +616,15 @@ class PaymentLauncherViewModelTest {
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
             additionalParams = any(),
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
 
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
             additionalParams = argThat { params ->
                 params.containsKey("duration") && params["duration"] == 1L
-            }
+            },
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
     }
 
@@ -674,7 +682,8 @@ class PaymentLauncherViewModelTest {
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
             additionalParams = argThat { params ->
                 params["status"] == expectedStatus
-            }
+            },
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
     }
 
@@ -687,6 +696,7 @@ class PaymentLauncherViewModelTest {
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
             additionalParams = any(),
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
 
         val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
@@ -698,7 +708,8 @@ class PaymentLauncherViewModelTest {
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished),
             additionalParams = argThat { params ->
                 params.containsKey("duration") && params["duration"] == 1L
-            }
+            },
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
     }
 
@@ -763,7 +774,8 @@ class PaymentLauncherViewModelTest {
             eq(expectedEvent),
             additionalParams = argThat { params ->
                 params["status"] == expectedStatus
-            }
+            },
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
 
         // Try to send another result - should be blocked by guard
@@ -775,7 +787,8 @@ class PaymentLauncherViewModelTest {
         // Verify still only one finished event was sent
         verify(analyticsRequestFactory, times(1)).createRequest(
             eq(expectedEvent),
-            additionalParams = any()
+            additionalParams = any(),
+            publishableKey = eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         )
     }
 

@@ -11,7 +11,10 @@ import java.lang.IllegalArgumentException
 
 internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
     ActivityResultContract<ExternalPaymentMethodInput, PaymentResult>() {
+    private var publishableKey: String? = null
+
     override fun createIntent(context: Context, input: ExternalPaymentMethodInput): Intent {
+        publishableKey = input.publishableKey
         return Intent().setClass(
             context,
             ExternalPaymentMethodProxyActivity::class.java
@@ -41,7 +44,8 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
             else -> {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE,
-                    additionalNonPiiParams = mapOf("result_code" to resultCode.toString())
+                    additionalNonPiiParams = mapOf("result_code" to resultCode.toString()),
+                    publishableKey = publishableKey,
                 )
                 PaymentResult.Failed(
                     throwable = IllegalArgumentException(
@@ -57,4 +61,5 @@ internal data class ExternalPaymentMethodInput(
     val paymentElementCallbackIdentifier: String,
     val type: String,
     val billingDetails: PaymentMethod.BillingDetails?,
+    val publishableKey: String,
 )

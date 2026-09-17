@@ -6,6 +6,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -208,12 +209,12 @@ internal class DefaultCardScanEventsReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
             durationProvider = durationProvider,
-            cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
+            cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID),
+            publishableKeyProvider = { PaymentConfigurationTestRule.PUBLISHABLE_KEY },
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)

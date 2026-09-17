@@ -266,6 +266,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     TapToAddNextStep.Complete -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
+                            publishableKey = paymentMethodMetadata.value?.apiConfiguration?.publishableKey,
                         )
                     }
                     is TapToAddNextStep.Continue -> {

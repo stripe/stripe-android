@@ -17,7 +17,6 @@ open class AnalyticsRequestFactory(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
-    private val publishableKeyProvider: Provider<String>,
     private val networkTypeProvider: Provider<String?>,
     private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER,
 ) {
@@ -26,39 +25,40 @@ open class AnalyticsRequestFactory(
      * including common params + event-specific params defined in [AnalyticsEvent.params]
      *
      * @param additionalParams any extra parameters that should be sent with this event.
-     * Ensure this common parameters are not already included in [standardParams].
+     * Ensure these common parameters are not already included in [standardParams].
+     * @param publishableKey the key for this operation, or null when credentials are unavailable.
+     * User keys are redacted; this factory never looks up credentials.
      *
      */
     open fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
+        additionalParams: Map<String, Any?>,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return AnalyticsRequest(
-            params = createParams(event) + additionalParams,
+            params = createParams(event, publishableKey) + additionalParams,
             headers = RequestHeadersFactory.Analytics.create()
         )
     }
 
     private fun createParams(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
+        publishableKey: String?,
     ): Map<String, Any> {
-        return standardParams() + appDataParams() + event.params()
+        return standardParams(publishableKey) + appDataParams() + event.params()
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
         return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
-    private fun standardParams(): Map<String, Any> = mapOf(
+    private fun standardParams(publishableKey: String?): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
-        AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            val publishableKey = publishableKeyProvider.get()
-            if (publishableKey.startsWith("uk_")) {
-                "[REDACTED_LIVE_KEY]"
-            } else {
-                publishableKey
-            }
-        }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
+        AnalyticsFields.PUBLISHABLE_KEY to when {
+            publishableKey == null -> ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY
+            publishableKey.startsWith("uk_") -> "[REDACTED_LIVE_KEY]"
+            else -> publishableKey
+        },
         AnalyticsFields.OS_NAME to Build.VERSION.CODENAME,
         AnalyticsFields.OS_RELEASE to Build.VERSION.RELEASE,
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,

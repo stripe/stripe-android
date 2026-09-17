@@ -1,7 +1,6 @@
 package com.stripe.android.payments.core.authentication
 
 import android.content.Context
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
@@ -30,12 +29,10 @@ internal class VoucherNextActionHandler @Inject constructor(
         if (detailsData.hostedVoucherUrl == null) {
             ErrorReporter.createFallbackInstance(
                 context,
-                apiConfigurationProvider = {
-                    ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount)
-                },
             ).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
-                additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: ""))
+                additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: "")),
+                publishableKey = requestOptions.apiKey,
             )
             noOpIntentAuthenticator.performNextAction(
                 host,

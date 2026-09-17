@@ -60,7 +60,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
     private val cardFundingFilter: CardFundingFilter,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
-        PaymentConfiguration.getInstance(context).publishableKey,
         setOf(PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),

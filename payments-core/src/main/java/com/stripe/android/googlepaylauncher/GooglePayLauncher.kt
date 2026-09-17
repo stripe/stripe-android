@@ -47,7 +47,8 @@ class GooglePayLauncher internal constructor(
     private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor
+    analyticsRequestExecutor: AnalyticsRequestExecutor,
+    publishableKey: String?,
 ) {
     private var isReady = false
 
@@ -95,10 +96,10 @@ class GooglePayLauncher internal constructor(
         },
         PaymentAnalyticsRequestFactory(
             activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
             setOf(PRODUCT_USAGE)
         ),
-        DefaultAnalyticsRequestExecutor()
+        DefaultAnalyticsRequestExecutor(),
+        publishableKey = kotlin.runCatching { PaymentConfiguration.getInstance(activity).publishableKey }.getOrNull(),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -138,10 +139,10 @@ class GooglePayLauncher internal constructor(
         },
         PaymentAnalyticsRequestFactory(
             activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
             setOf(PRODUCT_USAGE)
         ),
-        DefaultAnalyticsRequestExecutor()
+        DefaultAnalyticsRequestExecutor(),
+        publishableKey = kotlin.runCatching { PaymentConfiguration.getInstance(activity).publishableKey }.getOrNull(),
     )
 
     /**
@@ -187,17 +188,22 @@ class GooglePayLauncher internal constructor(
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = fragment.requireContext(),
-            publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
             defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        publishableKey = kotlin.runCatching {
+            PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey
+        }.getOrNull(),
     )
 
     init {
         if (!HAS_SENT_INIT_ANALYTIC_EVENT) {
             HAS_SENT_INIT_ANALYTIC_EVENT = true
             analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayLauncherInit)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.GooglePayLauncherInit,
+                    publishableKey = publishableKey,
+                )
             )
         }
 
@@ -426,10 +432,10 @@ fun rememberGooglePayLauncher(
             },
             PaymentAnalyticsRequestFactory(
                 context,
-                PaymentConfiguration.getInstance(context).publishableKey,
                 setOf(GooglePayLauncher.PRODUCT_USAGE)
             ),
-            DefaultAnalyticsRequestExecutor()
+            DefaultAnalyticsRequestExecutor(),
+            publishableKey = runCatching { PaymentConfiguration.getInstance(context).publishableKey }.getOrNull(),
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -210,6 +211,7 @@ internal class CreateCustomerMetadataTest {
                 initializationMode = initializationMode,
                 configuration = configuration,
                 elementsSession = elementsSession,
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             )
         }
 

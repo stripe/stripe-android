@@ -38,13 +38,11 @@ internal interface CardScanModule {
         @Provides
         @Singleton
         internal fun provideAnalyticsRequestFactory(
-            application: Application,
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
+            application: Application
         ): AnalyticsRequestFactory = AnalyticsRequestFactory(
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = publishableKeyProvider,
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )
 

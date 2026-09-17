@@ -385,6 +385,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             configuration = configuration,
             elementsSession = elementsSession,
+            publishableKey = apiConfiguration.publishableKey,
         )
 
         val linkState = async {
@@ -403,7 +404,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val paymentMethodMetadata = async {
             val linkStateResult = linkState.await()
             val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD,
+                    publishableKey = apiConfiguration.publishableKey,
+                )
             } ?: false
 
             durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
@@ -573,7 +577,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         apiConfiguration: ApiConfiguration.State,
     ): PaymentMethodMetadata {
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
-            elementsSession.externalPaymentMethodData
+            elementsSession.externalPaymentMethodData,
+            publishableKey = apiConfiguration.publishableKey,
         )
 
         logIfMissingExternalPaymentMethods(

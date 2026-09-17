@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import android.content.Context
 import com.stripe.android.BuildConfig
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -63,6 +64,7 @@ internal interface AutocompleteViewModelModule {
             context = context,
             googlePlacesApiKey = args.googlePlacesApiKey,
             errorReporter = ErrorReporter.createFallbackInstance(context),
+            publishableKey = runCatching { PaymentConfiguration.getInstance(context).publishableKey }.getOrNull(),
         )
 
         @Provides

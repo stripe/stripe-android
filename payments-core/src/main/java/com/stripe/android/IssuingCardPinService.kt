@@ -374,7 +374,6 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     appInfo = appInfo,
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context,
-                        { publishableKey },
                         defaultProductUsageTokens = setOf("IssuingCardPinService")
                     )
                 ),

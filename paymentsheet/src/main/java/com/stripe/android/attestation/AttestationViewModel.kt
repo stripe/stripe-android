@@ -11,6 +11,7 @@ import com.stripe.android.attestation.AttestationActivity.Companion.getArgs
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
 import com.stripe.attestation.IntegrityRequestManager
@@ -18,13 +19,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class AttestationViewModel @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : ViewModel() {
     private val _result = MutableSharedFlow<AttestationActivityResult>(replay = 1)
     val result: Flow<AttestationActivityResult> = _result
@@ -44,7 +47,8 @@ internal class AttestationViewModel @Inject constructor(
             }.onFailure { error ->
                 errorReporter.report(
                     errorEvent = ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED,
-                    stripeException = StripeException.create(error)
+                    stripeException = StripeException.create(error),
+                    publishableKey = publishableKeyProvider(),
                 )
                 attestationAnalyticsEventsReporter.requestTokenFailed(error)
                 _result.emit(AttestationActivityResult.Failed)

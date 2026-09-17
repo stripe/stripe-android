@@ -18,6 +18,7 @@ class RealErrorReporter @Inject constructor(
         errorEvent: ErrorReporter.ErrorEvent,
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
+        publishableKey: String?,
     ) {
         val paramsFromStripeException = if (stripeException == null) {
             emptyMap()
@@ -26,7 +27,7 @@ class RealErrorReporter @Inject constructor(
         }
         val additionalParams = paramsFromStripeException + additionalNonPiiParams
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(errorEvent, additionalParams)
+            analyticsRequestFactory.createRequest(errorEvent, additionalParams, publishableKey)
         )
     }
 }

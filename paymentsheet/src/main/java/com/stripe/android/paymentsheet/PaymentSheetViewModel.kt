@@ -296,6 +296,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     is TapToAddNextStep.Continue -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
+                            publishableKey = paymentMethodMetadata.value?.apiConfiguration?.publishableKey,
                         )
                     }
                 }
@@ -616,7 +617,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
                 } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
 
-                errorReporter.report(event, StripeException.create(exception))
+                errorReporter.report(
+                    event,
+                    StripeException.create(exception),
+                    publishableKey = paymentMethodMetadata.apiConfiguration.publishableKey,
+                )
 
                 withContext(viewModelScope.coroutineContext) {
                     processConfirmationResult(

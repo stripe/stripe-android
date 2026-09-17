@@ -9,6 +9,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -116,7 +117,10 @@ internal class DefaultGooglePayRepository(
         }.getOrElse {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_JSON_REQUEST_PARSING,
-                StripeException.create(it)
+                StripeException.create(it),
+                publishableKey = runCatching {
+                    PaymentConfiguration.getInstance(context).publishableKey
+                }.getOrNull(),
             )
 
             logger.error("Google Pay json parsing failed.", it)
@@ -128,12 +132,20 @@ internal class DefaultGooglePayRepository(
             withTimeoutOrNull(30.seconds) {
                 googlePayAvailabilityClient.isReady(request)
             } ?: false.also {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_TIMEOUT)
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_TIMEOUT,
+                    publishableKey = runCatching {
+                        PaymentConfiguration.getInstance(context).publishableKey
+                    }.getOrNull(),
+                )
             }
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_API_CALL,
-                StripeException.create(it)
+                StripeException.create(it),
+                publishableKey = runCatching {
+                    PaymentConfiguration.getInstance(context).publishableKey
+                }.getOrNull(),
             )
 
             logger.error("Google Pay check failed.", it)

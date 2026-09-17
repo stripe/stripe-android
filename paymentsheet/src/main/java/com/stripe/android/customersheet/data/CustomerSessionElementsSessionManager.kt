@@ -115,7 +115,8 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
             errorReporter.report(
                 ErrorReporter
                     .UnexpectedErrorEvent
-                    .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+                    .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD,
+                publishableKey = apiConfigurationProvider.get().publishableKey,
             )
 
             throw IllegalStateException(
@@ -142,6 +143,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
             errorEvent = ErrorReporter
                 .SuccessEvent
                 .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS,
+            publishableKey = apiConfigurationProvider.get().publishableKey,
         )
     }
 
@@ -150,7 +152,8 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
             errorEvent = ErrorReporter
                 .ExpectedErrorEvent
                 .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_FAILURE,
-            stripeException = StripeException.create(cause)
+            stripeException = StripeException.create(cause),
+            publishableKey = apiConfigurationProvider.get().publishableKey,
         )
     }
 

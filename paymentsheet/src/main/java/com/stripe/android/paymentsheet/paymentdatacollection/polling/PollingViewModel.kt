@@ -153,6 +153,7 @@ internal class PollingViewModel @Inject constructor(
                 paymentMethodType = args.paymentMethodType,
                 lastKnownStatus = intentStatus?.name,
                 timeLimitSeconds = args.timeLimit.inWholeSeconds,
+                publishableKey = args.requestOptions.apiKey,
             )
             _uiState.update {
                 it.copy(pollingState = PollingState.Failed)

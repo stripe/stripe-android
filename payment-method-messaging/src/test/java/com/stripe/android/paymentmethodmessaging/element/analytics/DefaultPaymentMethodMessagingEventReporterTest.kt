@@ -23,6 +23,7 @@ import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEvent.Companion.PMME_LOAD_SUCCEEDED
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEvent.Companion.PMME_TAPPED
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -196,14 +197,14 @@ class DefaultPaymentMethodMessagingEventReporterTest {
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = { "pk_test_123" },
             networkTypeProvider = { "5G" },
         )
         val eventReporter = DefaultPaymentMethodMessagingEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            publishableKeyProvider = { PaymentConfigurationTestRule.PUBLISHABLE_KEY },
         )
         Scenario(
             eventReporter = eventReporter,

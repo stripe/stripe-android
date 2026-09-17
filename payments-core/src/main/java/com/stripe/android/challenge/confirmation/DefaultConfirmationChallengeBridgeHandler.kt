@@ -48,7 +48,8 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
         }.onFailure { error ->
             errorReporter.report(
                 UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS,
-                stripeException = StripeException.create(error)
+                stripeException = StripeException.create(error),
+                publishableKey = args.apiConfiguration.publishableKey,
             )
             _event.tryEmit(ConfirmationChallengeBridgeEvent.Error(BridgeException(error)))
         }
@@ -68,7 +69,8 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
         }.onFailure { error ->
             errorReporter.report(
                 UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS,
-                stripeException = StripeException.create(error)
+                stripeException = StripeException.create(error),
+                publishableKey = args.apiConfiguration.publishableKey,
             )
             _event.tryEmit(
                 ConfirmationChallengeBridgeEvent.Error(BridgeException(error))

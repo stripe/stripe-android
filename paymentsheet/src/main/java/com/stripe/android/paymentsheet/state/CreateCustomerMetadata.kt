@@ -28,6 +28,7 @@ internal class CreateCustomerMetadata @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        publishableKey: String,
     ): CustomerMetadata? {
         if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
             val customer = initializationMode.checkoutSessionResponse.customer ?: return null
@@ -54,7 +55,8 @@ internal class CreateCustomerMetadata @Inject constructor(
 
                     errorReporter.report(
                         ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                        StripeException.create(exception)
+                        StripeException.create(exception),
+                        publishableKey = publishableKey,
                     )
 
                     if (!elementsSession.stripeIntent.isLiveMode) {

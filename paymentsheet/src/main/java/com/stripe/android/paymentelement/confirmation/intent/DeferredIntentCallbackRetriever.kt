@@ -32,13 +32,13 @@ internal abstract class CallbackRetriever(
             while (true) {
                 delay(PROVIDER_FETCH_INTERVAL)
                 fetcher()?.let {
-                    errorReporter.report(neededWaitEvent)
+                    errorReporter.report(neededWaitEvent, publishableKey = requestOptionsProvider.get().apiKey)
                     return@withTimeoutOrNull it
                 }
             }
             null
         } ?: run {
-            errorReporter.report(notFoundEvent)
+            errorReporter.report(notFoundEvent, publishableKey = requestOptionsProvider.get().apiKey)
             throw CallbackNotFoundException(
                 message = notFoundMessage,
                 analyticsValue = analyticsValue,

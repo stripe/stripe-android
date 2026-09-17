@@ -54,18 +54,20 @@ interface PlacesClientProxy {
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
             initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
-            errorReporter: ErrorReporter
+            errorReporter: ErrorReporter,
+            publishableKey: String?,
         ): PlacesClientProxy {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isPlacesAvailable()) {
                 override ?: run {
                     initializer()
                     DefaultPlacesClientProxy(
                         clientFactory(context),
-                        errorReporter
+                        errorReporter,
+                        publishableKey = publishableKey,
                     )
                 }
             } else {
-                UnsupportedPlacesClientProxy(errorReporter)
+                UnsupportedPlacesClientProxy(errorReporter, publishableKey = publishableKey)
             }
         }
 
@@ -93,7 +95,8 @@ interface PlacesClientProxy {
 
 internal class DefaultPlacesClientProxy(
     private val client: PlacesClient,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    private val publishableKey: String?,
 ) : PlacesClientProxy {
     @Volatile
     private var token = AutocompleteSessionToken.newInstance()
@@ -117,7 +120,10 @@ internal class DefaultPlacesClientProxy(
                     .setTypesFilter(listOf(PlaceTypes.ADDRESS))
                     .build()
             ).await()
-            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
+            errorReporter.report(
+                ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS,
+                publishableKey = publishableKey,
+            )
             Result.success(
                 FindAutocompletePredictionsResponse(
                     autocompletePredictions = response.autocompletePredictions.map {
@@ -132,7 +138,8 @@ internal class DefaultPlacesClientProxy(
         } catch (e: Exception) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,
-                StripeException.create(e)
+                StripeException.create(e),
+                publishableKey = publishableKey,
             )
             Result.failure(
                 Exception("Could not find autocomplete predictions: ${e.message}")
@@ -153,7 +160,7 @@ internal class DefaultPlacesClientProxy(
                     )
                 )
             ).await()
-            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FETCH_PLACE_SUCCESS)
+            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FETCH_PLACE_SUCCESS, publishableKey = publishableKey)
             val place = Place(
                 response.place.addressComponents?.asList()?.map {
                     AddressComponent(
@@ -165,7 +172,11 @@ internal class DefaultPlacesClientProxy(
             )
             Result.success(place.transformGoogleToStripeAddress(locale))
         } catch (e: Exception) {
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR,
+                StripeException.create(e),
+                publishableKey = publishableKey,
+            )
             Result.failure(
                 Exception("Could not fetch place: ${e.message}")
             )
@@ -173,7 +184,10 @@ internal class DefaultPlacesClientProxy(
     }
 }
 
-internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
+internal class UnsupportedPlacesClientProxy(
+    val errorReporter: ErrorReporter,
+    private val publishableKey: String?,
+) : PlacesClientProxy {
     override fun resetSession() = Unit
 
     override suspend fun findAutocompletePredictions(
@@ -187,7 +201,10 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         if (BuildConfig.DEBUG) {
             throw exception
         }
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY)
+        errorReporter.report(
+            ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY,
+            publishableKey = publishableKey,
+        )
         return Result.failure(exception)
     }
 
@@ -198,7 +215,10 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         if (BuildConfig.DEBUG) {
             throw exception
         }
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY)
+        errorReporter.report(
+            ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY,
+            publishableKey = publishableKey,
+        )
         return Result.failure(exception)
     }
 }

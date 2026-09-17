@@ -262,7 +262,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                     }
                 } ?: run {
                     errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM
+                        ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM,
+                        publishableKey = this.arguments.value?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
                     )
                 }
             }
@@ -308,7 +309,8 @@ internal class DefaultWalletButtonsInteractor constructor(
             }
         } ?: run {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+                ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM,
+                publishableKey = this.arguments.value?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
             )
         }
     }

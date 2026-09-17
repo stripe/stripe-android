@@ -3,6 +3,7 @@ package com.stripe.android.link.analytics
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -67,13 +68,13 @@ class DefaultLinkEventsReporterTest {
         val linkEventsReporter = DefaultLinkEventsReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = application,
-                publishableKey = "pk_1234"
+                context = application
             ),
             errorReporter = FakeErrorReporter(),
             workContext = testScope.coroutineContext,
             logger = Logger.noop(),
-            durationProvider = FakeDurationProvider()
+            durationProvider = FakeDurationProvider(),
+            publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         testBlock(linkEventsReporter, analyticsRequestExecutor, testScope.testScheduler)

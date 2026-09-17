@@ -14,13 +14,15 @@ class FakeErrorReporter : ErrorReporter {
         errorEvent: ErrorReporter.ErrorEvent,
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
+        publishableKey: String?,
     ) {
         loggedErrors.add(errorEvent.eventName)
         calls.add(
             item = Call(
                 errorEvent = errorEvent,
                 stripeException = stripeException,
-                additionalNonPiiParams = additionalNonPiiParams
+                additionalNonPiiParams = additionalNonPiiParams,
+                publishableKey = publishableKey,
             )
         )
     }
@@ -44,6 +46,7 @@ class FakeErrorReporter : ErrorReporter {
     data class Call(
         val errorEvent: ErrorReporter.ErrorEvent,
         val stripeException: StripeException?,
-        val additionalNonPiiParams: Map<String, String>
+        val additionalNonPiiParams: Map<String, String>,
+        val publishableKey: String?,
     )
 }

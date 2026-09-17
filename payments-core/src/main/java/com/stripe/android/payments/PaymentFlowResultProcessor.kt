@@ -288,6 +288,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     paymentMethodType = originalIntent.paymentMethod?.type?.code ?: "unknown",
                     lastKnownStatus = lastObservedStatus?.name,
                     timeLimitSeconds = getPollingDurationForPaymentMethod(originalIntent) / 1000,
+                    publishableKey = apiConfigProvider.get().publishableKey,
                 )
             }
         }

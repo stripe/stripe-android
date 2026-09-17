@@ -88,6 +88,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
                     override val eventName: String = eventName
                 },
                 additionalParams = defaultParams() + additionalParams,
+                publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey,
             )
         )
     }

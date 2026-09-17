@@ -170,6 +170,9 @@ internal class CustomerSheetViewModel(
     )
 
     private val isConfiguredLiveMode = paymentConfiguration.isLiveMode()
+    private val publishableKey = paymentConfiguration.publishableKey
+    private val analyticsPublishableKey: String
+        get() = customerState.value.metadata?.apiConfiguration?.publishableKey ?: publishableKey
     private val isLiveMode
         get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
 
@@ -738,7 +741,8 @@ internal class CustomerSheetViewModel(
 
                 if (metadata == null) {
                     errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM
+                        ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM,
+                        publishableKey = analyticsPublishableKey,
                     )
 
                     _result.value = InternalCustomerSheetResult.Error(
@@ -1092,6 +1096,7 @@ internal class CustomerSheetViewModel(
             awaitPaymentMethodDataSource().retrievePaymentMethods().onSuccess { paymentMethods ->
                 errorReporter.report(
                     ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
+                    publishableKey = analyticsPublishableKey,
                 )
 
                 setCustomerState { state ->
@@ -1122,6 +1127,7 @@ internal class CustomerSheetViewModel(
                 errorReporter.report(
                     ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE,
                     StripeException.create(exception),
+                    publishableKey = analyticsPublishableKey,
                 )
 
                 onDismissed()
