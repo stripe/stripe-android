@@ -93,7 +93,7 @@ internal class ShippingAddressElementTest {
             .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
 
         val config = requireNotNull(launch.input.config)
-        assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
+        assertDefaultAppearance(config.appearance)
         assertThat(config.address).isNull()
         assertThat(config.allowedCountries).isEmpty()
         assertThat(config.buttonTitle).isNull()
@@ -554,6 +554,31 @@ internal class ShippingAddressElementTest {
         )
     }
 
+    private fun assertDefaultAppearance(appearance: PaymentSheet.Appearance) {
+        val defaults = PaymentSheet.Appearance()
+
+        assertThat(appearance.colorsLight).isEqualTo(defaults.colorsLight)
+        assertThat(appearance.colorsDark).isEqualTo(defaults.colorsDark)
+        assertThat(appearance.themeMode).isEqualTo(defaults.themeMode)
+        assertThat(appearance.primaryButton.colorsLight).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                defaults.primaryButton.colorsLight.background,
+                defaults.primaryButton.colorsLight.onBackground,
+                defaults.primaryButton.colorsLight.border,
+            )
+        )
+        assertThat(appearance.primaryButton.colorsDark).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                defaults.primaryButton.colorsDark.background,
+                defaults.primaryButton.colorsDark.onBackground,
+                defaults.primaryButton.colorsDark.border,
+            )
+        )
+        assertThat(appearance.primaryButton.shape).isEqualTo(defaults.primaryButton.shape)
+        assertThat(appearance.primaryButton.typography).isEqualTo(defaults.primaryButton.typography)
+        assertThat(appearance.formInsetValues).isEqualTo(defaults.formInsetValues)
+    }
+
     private fun assertFormColors(appearance: PaymentSheet.Appearance) {
         assertThat(appearance.colorsLight).isEqualTo(
             PaymentSheet.Colors(
@@ -590,16 +615,16 @@ internal class ShippingAddressElementTest {
     private fun assertPrimaryButton(appearance: PaymentSheet.Appearance) {
         assertThat(appearance.primaryButton.colorsLight).isEqualTo(
             PaymentSheet.PrimaryButtonColors(
-                background = Color.Green,
-                onBackground = Color.White,
-                border = Color.Black,
+                Color.Green,
+                Color.White,
+                Color.Black,
             )
         )
         assertThat(appearance.primaryButton.colorsDark).isEqualTo(
             PaymentSheet.PrimaryButtonColors(
-                background = Color.Blue,
-                onBackground = Color.Yellow,
-                border = Color.Red,
+                Color.Blue,
+                Color.Yellow,
+                Color.Red,
             )
         )
         assertThat(appearance.primaryButton.shape).isEqualTo(

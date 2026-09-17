@@ -88,10 +88,10 @@ private fun ShippingAddressElement.Configuration.Appearance.PrimaryButton.State.
 
 private fun ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.State.asPaymentSheet():
     PaymentSheet.PrimaryButtonColors = PaymentSheet.PrimaryButtonColors(
-        background = background,
-        onBackground = onBackground,
-        border = border,
-    )
+    background,
+    onBackground,
+    border,
+)
 
 private fun ShippingAddressElement.Configuration.Appearance.Insets.State.asPaymentSheet(): PaymentSheet.Insets =
     PaymentSheet.Insets(startDp, topDp, endDp, bottomDp)

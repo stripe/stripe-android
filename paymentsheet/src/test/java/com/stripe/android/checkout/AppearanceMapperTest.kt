@@ -23,8 +23,29 @@ class AppearanceMapperTest {
     @Test
     fun `default shipping address appearance maps to PaymentSheet defaults`() {
         val appearance = ShippingAddressElement.Configuration.Appearance()
+        val mapped = appearance.build().asPaymentSheet()
+        val defaults = PaymentSheet.Appearance()
 
-        assertThat(appearance.build().asPaymentSheet()).isEqualTo(PaymentSheet.Appearance())
+        assertThat(mapped.colorsLight).isEqualTo(defaults.colorsLight)
+        assertThat(mapped.colorsDark).isEqualTo(defaults.colorsDark)
+        assertThat(mapped.themeMode).isEqualTo(defaults.themeMode)
+        assertThat(mapped.primaryButton.colorsLight).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                defaults.primaryButton.colorsLight.background,
+                defaults.primaryButton.colorsLight.onBackground,
+                defaults.primaryButton.colorsLight.border,
+            )
+        )
+        assertThat(mapped.primaryButton.colorsDark).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                defaults.primaryButton.colorsDark.background,
+                defaults.primaryButton.colorsDark.onBackground,
+                defaults.primaryButton.colorsDark.border,
+            )
+        )
+        assertThat(mapped.primaryButton.shape).isEqualTo(defaults.primaryButton.shape)
+        assertThat(mapped.primaryButton.typography).isEqualTo(defaults.primaryButton.typography)
+        assertThat(mapped.formInsetValues).isEqualTo(defaults.formInsetValues)
     }
 
     @Test
