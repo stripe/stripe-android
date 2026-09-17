@@ -11,6 +11,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
 import com.stripe.android.checkout.CheckoutSessionRefresher
@@ -50,6 +51,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateA
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
+import com.stripe.android.paymentelement.embedded.content.EmbeddedHostProcessing
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
@@ -339,6 +341,14 @@ internal interface CheckoutControllerModule {
             stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<PaymentMethodMetadata?> {
             return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
+        }
+
+        @Provides
+        @EmbeddedHostProcessing
+        fun provideHostProcessing(
+            operationCoordinator: CheckoutOperationCoordinator,
+        ): StateFlow<Boolean> {
+            return operationCoordinator.isUpdating
         }
     }
 }

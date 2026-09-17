@@ -38,6 +38,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
@@ -45,6 +47,8 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
@@ -120,6 +124,52 @@ internal class CheckoutPaymentElementTest {
         }
 
         assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testPaymentMethodsAreDisabledWhileCheckoutUpdateIsInProgress() {
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            },
+        ) { context ->
+            runBlocking {
+                contentPage.assertLpmIsEnabled("card", isEnabled = true)
+
+                val holdResponse = CountDownLatch(1)
+                networkRule.checkoutUpdate(
+                    bodyPart("promotion_code", "10OFF"),
+                ) { response ->
+                    holdResponse.await(10, TimeUnit.SECONDS)
+                    response.testBodyFromFile("checkout-session-init.json") { json ->
+                        json.put("customer_email", "checkout@example.com")
+                        json.getJSONObject("elements_session").remove("link_settings")
+                    }
+                }
+
+                val update = async(Dispatchers.Main) {
+                    controller.applyPromotionCode("10OFF")
+                }
+                try {
+                    testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                        controller.isUpdating.value
+                    }
+                    contentPage.assertLpmIsEnabled("card", isEnabled = false)
+                } finally {
+                    holdResponse.countDown()
+                }
+
+                assertThat(update.await().isSuccess).isTrue()
+                testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                    !controller.isUpdating.value
+                }
+                contentPage.assertLpmIsEnabled("card", isEnabled = true)
+                context.markTestSucceeded()
+            }
+        }
     }
 
     @Test
