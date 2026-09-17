@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -219,6 +220,37 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `horizontal saved payment options selects saved method and continues`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        launchHorizontal(customerState = customerStateWith(paymentMethod)) { scenario ->
+            composeTestRule.onNodeWithTag(
+                "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 4242\u2069"
+            ).performClick()
+            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+                .performScrollTo()
+                .assertIsEnabled()
+                .performClick()
+            onIdle()
+
+            val result = EmbeddedSheetContract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            ) as EmbeddedActivityResult.Complete
+            assertThat(result.selection).isEqualTo(PaymentSelection.Saved(paymentMethod))
+        }
+    }
+
+    @Test
+    fun `horizontal saved payment options add opens payment method form`() {
+        launchHorizontal(customerState = customerStateWith(PaymentMethodFixtures.CARD_PAYMENT_METHOD)) {
+            composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
+                .performClick()
+
+            formPage.waitUntilVisible()
+        }
+    }
+
+    @Test
     fun `selecting saved payment method from manage returns to payment options`() {
         val paymentMethods = PaymentMethodFixtures.createCards(2)
 
@@ -384,6 +416,25 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         ).use { scenario ->
             block(scenario)
         }
+    }
+
+    private fun launchHorizontal(
+        customerState: CustomerState,
+        block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
+    ) = launch(
+        selection = null,
+        previousNewSelections = Bundle(),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = customerState,
+        block = block,
+    )
+
+    private fun customerStateWith(paymentMethod: PaymentMethod): CustomerState {
+        return PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(paymentMethod),
+        )
     }
 
     private fun createArgs(

@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -28,6 +29,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -128,7 +130,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `horizontal layout creates a single horizontal payment options screen`() = testScenario(
+    fun `horizontal layout without saved methods or wallets creates payment method options screen`() = testScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         ),
@@ -140,17 +142,36 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `horizontal layout stays a single screen even when a new selection would need a form`() = testScenario(
+    fun `horizontal layout with saved methods creates saved payment options screen`() = testScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
+        ),
+    ) {
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(1)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+    }
+
+    @Test
+    fun `horizontal layout restores new selection over saved payment options screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
         ),
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         val screens = factory.createInitialScreen()
 
-        assertThat(screens).hasSize(1)
-        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
     }
 
     @Test
@@ -277,6 +298,23 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
+        val savedPaymentMethodMutator = SavedPaymentMethodMutator(
+            paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
+            eventReporter = eventReporter,
+            coroutineScope = testScope,
+            workContext = testScope.coroutineContext,
+            uiContext = testScope.coroutineContext,
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
+            selection = selectionHolder.selection,
+            setSelection = selectionHolder::setSelection,
+            customerStateHolder = customerStateHolder,
+            prePaymentMethodRemoveActions = {},
+            postPaymentMethodRemoveActions = {},
+            onUpdatePaymentMethod = { _, _, _, _, _ -> },
+            isLinkEnabled = stateFlowOf(false),
+            isNotPaymentFlow = false,
+            linkAccount = stateFlowOf(null),
+        )
 
         val factory = InitialPaymentOptionsScreenFactory(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -294,6 +332,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            savedPaymentMethodMutator = savedPaymentMethodMutator,
         )
 
         Scenario(
