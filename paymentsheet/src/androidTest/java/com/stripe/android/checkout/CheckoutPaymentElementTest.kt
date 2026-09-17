@@ -219,20 +219,8 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
-        val callbacks = Turbine<Unit>()
-        runAutomaticTaxTest(
-            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
-            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
-                INITIAL_TOTAL,
-                TAX_STATUS_REQUIRES_LOCATION,
-            ),
-            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
-                callbacks.add(Unit)
-            },
-        ) {
-            selectCashAppAndAwaitCallback(callbacks)
-
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() =
+        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks ->
             val updateRequests = Turbine<Unit>()
             val releaseResponse = CountDownLatch(1)
             enqueueTaxUpdate { response ->
@@ -271,28 +259,13 @@ internal class CheckoutPaymentElementTest {
                 releaseResponse.countDown()
             }
             updateRequests.ensureAllEventsConsumed()
-            callbacks.ensureAllEventsConsumed()
-            markTestSucceeded()
         }
-    }
 
     @Test
-    fun testSavedPaymentMethodSelectionFailureCanRetry() {
-        val updateRequests = Turbine<Unit>()
-        val callbacks = Turbine<Unit>()
-        val releaseRetryResponse = CountDownLatch(1)
-
-        runAutomaticTaxTest(
-            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
-            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
-                INITIAL_TOTAL,
-                TAX_STATUS_REQUIRES_LOCATION,
-            ),
-            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
-                callbacks.add(Unit)
-            },
-        ) {
-            selectCashAppAndAwaitCallback(callbacks)
+    fun testSavedPaymentMethodSelectionFailureCanRetry() =
+        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks ->
+            val updateRequests = Turbine<Unit>()
+            val releaseRetryResponse = CountDownLatch(1)
 
             enqueueTaxUpdate { response ->
                 updateRequests.add(Unit)
@@ -344,6 +317,24 @@ internal class CheckoutPaymentElementTest {
                 releaseRetryResponse.countDown()
             }
             updateRequests.ensureAllEventsConsumed()
+        }
+
+    private fun runSavedPaymentMethodSelectionFromCashAppScenario(
+        block: suspend Scenario.(Turbine<Unit>) -> Unit,
+    ) {
+        val callbacks = Turbine<Unit>()
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbacks.add(Unit)
+            },
+        ) {
+            selectCashAppAndAwaitCallback(callbacks)
+            block(callbacks)
             callbacks.ensureAllEventsConsumed()
             markTestSucceeded()
         }
