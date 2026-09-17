@@ -63,6 +63,7 @@ internal class CardDetailsSectionElementUITest {
             composeTestRule.waitForIdle()
 
             composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
+            composeTestRule.onNodeWithText("Expires 06/30").assertIsDisplayed()
 
             composeTestRule.onNodeWithContentDescription(clearScannedCard).performClick()
             composeTestRule.waitForIdle()
