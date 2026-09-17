@@ -214,5 +214,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 ConsumerSignUpConsentAction.SignUpOptInMobileChecked
             SignUpConsentAction.SignUpOptInMobilePrechecked ->
                 ConsumerSignUpConsentAction.SignUpOptInMobilePrechecked
+            SignUpConsentAction.EnteredPhoneNumberEmailClickedSaveWithLinkIdentity ->
+                ConsumerSignUpConsentAction.EnteredPhoneNumberEmailClickedSaveWithLinkIdentity
         }
 }

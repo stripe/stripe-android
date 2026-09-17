@@ -80,6 +80,18 @@ internal interface LinkAccountManager {
     suspend fun refreshConsumer(): Result<ConsumerSessionRefresh>
 
     /**
+     * Restore a consumer session that was started outside of this Link instance, e.g. by another SDK
+     * module, and make it the current account. The session is refreshed to get its verification state.
+     *
+     * @param consumerSessionClientSecret The client secret of the consumer session to restore
+     * @param consumerPublishableKey The publishable key of the consumer account, if known
+     */
+    suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<LinkAccount>
+
+    /**
      * Registers the user for a new Link account.
      *
      * @param email The email for the new account

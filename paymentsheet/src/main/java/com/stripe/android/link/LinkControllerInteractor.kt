@@ -95,6 +95,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 },
                 consumerSessionClientSecret = account.clientSecret,
                 linkSessionKey = account.linkSessionKey,
+                consumerPublishableKey = account.consumerPublishableKey,
             )
         }
     }
@@ -571,6 +572,60 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
+    suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): LinkController.RestoreConsumerSessionResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.restoreConsumerSession(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    consumerPublishableKey = consumerPublishableKey,
+                )
+            }
+            .fold(
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.RestoreConsumerSessionResult.Success
+                },
+                onFailure = {
+                    LinkController.RestoreConsumerSessionResult.Failed(it)
+                }
+            )
+    }
+
+    suspend fun startVerification(isResendSmsCode: Boolean): LinkController.StartVerificationResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.startVerification(isResendSmsCode = isResendSmsCode)
+            }
+            .fold(
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.StartVerificationResult.Success
+                },
+                onFailure = {
+                    LinkController.StartVerificationResult.Failed(it)
+                }
+            )
+    }
+
+    suspend fun confirmVerification(code: String): LinkController.ConfirmVerificationResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.confirmVerification(code = code, consentGranted = null)
+            }
+            .fold(
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.ConfirmVerificationResult.Success
+                },
+                onFailure = {
+                    LinkController.ConfirmVerificationResult.Failed(it)
+                }
+            )
+    }
+
     suspend fun logOut(): LinkController.LogOutResult {
         return requireLinkComponent()
             .mapCatching { component ->
@@ -626,6 +681,7 @@ internal class LinkControllerInteractor @Inject constructor(
         phone: String,
         country: String,
         name: String?,
+        consentAction: LinkController.RegisterConsumerConsentAction,
     ): LinkController.RegisterConsumerResult {
         return requireLinkComponent()
             .flatMapCatching {
@@ -635,7 +691,12 @@ internal class LinkControllerInteractor @Inject constructor(
                     country = country,
                     countryInferringMethod = "PHONE_NUMBER",
                     name = name,
-                    consentAction = SignUpConsentAction.Implied
+                    consentAction = when (consentAction) {
+                        LinkController.RegisterConsumerConsentAction.Implied ->
+                            SignUpConsentAction.Implied
+                        LinkController.RegisterConsumerConsentAction.NetworkedIdentity ->
+                            SignUpConsentAction.EnteredPhoneNumberEmailClickedSaveWithLinkIdentity
+                    }
                 ).toResult()
             }
             .fold(

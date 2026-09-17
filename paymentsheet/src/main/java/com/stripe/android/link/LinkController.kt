@@ -106,6 +106,50 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Restore a Link consumer session that was started outside of this
+     * [LinkController], e.g. by another Stripe SDK module, without presenting any UI.
+     *
+     * The session is refreshed to get its current verification state. Check
+     * [State.internalLinkAccount] afterwards: [SessionState.LoggedIn] needs no further authentication,
+     * [SessionState.NeedsVerification] needs [startVerification] and [confirmVerification].
+     *
+     * @param consumerSessionClientSecret The client secret of the consumer session to restore.
+     * @param consumerPublishableKey The publishable key of the consumer account, if known.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): RestoreConsumerSessionResult {
+        return interactor.restoreConsumerSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consumerPublishableKey = consumerPublishableKey,
+        )
+    }
+
+    /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Send a one-time passcode to the current Link consumer, without
+     * presenting any UI. Use with [confirmVerification] to build a custom verification UI.
+     *
+     * @param isResendSmsCode Whether this call resends a previously sent code.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun startVerification(isResendSmsCode: Boolean): StartVerificationResult {
+        return interactor.startVerification(isResendSmsCode)
+    }
+
+    /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Confirm the one-time passcode the current Link consumer entered,
+     * without presenting any UI. [startVerification] must be called first.
+     *
+     * @param code The one-time passcode entered by the consumer.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun confirmVerification(code: String): ConfirmVerificationResult {
+        return interactor.confirmVerification(code)
+    }
+
+    /**
      * Update the phone number associated with the current Link consumer account.
      *
      * @param phoneNumber The new phone number to associate with the Link account, in E.164 format.
@@ -173,15 +217,16 @@ class LinkController @Inject internal constructor(
             .presenter
     }
 
-    // Crypto Onramp specific methods
+    // Crypto Onramp and Identity specific methods
 
     /**
-     * [CRYPTO ONRAMP ONLY] Register a new Link consumer account.
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Register a new Link consumer account.
      *
      * @param email The email address to register for the new Link consumer account.
      * @param phone The phone number associated with the new account.
      * @param country The country code for the new account, in ISO 3166-1 alpha-2 format.
      * @param name The name of the consumer. Optional, can be null.
+     * @param consentAction The consent the user gave to create the account, sent to the backend.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun registerConsumer(
@@ -189,12 +234,14 @@ class LinkController @Inject internal constructor(
         phone: String,
         country: String,
         name: String?,
+        consentAction: RegisterConsumerConsentAction,
     ): RegisterConsumerResult {
         return interactor.registerConsumer(
             email = email,
             phone = phone,
             country = country,
             name = name,
+            consentAction = consentAction,
         )
     }
 
@@ -439,10 +486,10 @@ class LinkController @Inject internal constructor(
             )
         }
 
-        // Crypto Onramp specific methods
+        // Crypto Onramp and Identity specific methods
 
         /**
-         * [CRYPTO ONRAMP ONLY] Authenticate with Link.
+         * [CRYPTO ONRAMP AND IDENTITY ONLY] Authenticate with Link.
          *
          * This will launch the Link activity where users can authenticate with their Link account.
          * The authentication flow will close after successful authentication instead of continuing
@@ -464,7 +511,7 @@ class LinkController @Inject internal constructor(
         }
 
         /**
-         * [CRYPTO ONRAMP ONLY] Authenticate with Link for existing consumers only.
+         * [CRYPTO ONRAMP AND IDENTITY ONLY] Authenticate with Link for existing consumers only.
          *
          * This will launch the Link activity where users can authenticate with their Link account.
          * Unlike [authenticate], this method will fail with [NoLinkAccountFoundException] if the
@@ -637,7 +684,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Result of authenticating with Link.
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of authenticating with Link.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AuthenticationResult {
@@ -665,7 +712,19 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Result of registering a new Link consumer account.
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] The consent a user gave when registering a Link consumer account.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class RegisterConsumerConsentAction {
+        /** Consent implied by using the integration. Used by crypto onramp. */
+        Implied,
+
+        /** The user entered their phone number and email and chose to save their ID with Link. */
+        NetworkedIdentity,
+    }
+
+    /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of registering a new Link consumer account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface RegisterConsumerResult {
@@ -763,6 +822,72 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of restoring a Link consumer session.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface RestoreConsumerSessionResult {
+
+        /**
+         * The session was restored. Check [State.internalLinkAccount] for its verification state.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : RestoreConsumerSessionResult
+
+        /**
+         * The session could not be restored, e.g. because it expired.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : RestoreConsumerSessionResult
+    }
+
+    /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of sending a one-time passcode.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface StartVerificationResult {
+
+        /**
+         * The code was sent.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : StartVerificationResult
+
+        /**
+         * An error occurred while sending the code.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : StartVerificationResult
+    }
+
+    /**
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of confirming a one-time passcode.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface ConfirmVerificationResult {
+
+        /**
+         * The consumer is verified.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : ConfirmVerificationResult
+
+        /**
+         * An error occurred, e.g. the code is invalid or expired.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : ConfirmVerificationResult
+    }
+
+    /**
      * Result of confirming a SetupIntent after payment method creation.
      */
     @LinkControllerPreview
@@ -818,7 +943,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authenticate] and
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Callback for receiving results from [Presenter.authenticate] and
      * [Presenter.authenticateExistingConsumer].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -842,6 +967,8 @@ class LinkController @Inject internal constructor(
      * @param sessionState The current session state of the Link account.
      * @param consumerSessionClientSecret The client secret for the consumer session, if available.
      * @param linkSessionKey The key for authenticating Link-scoped API requests, if available.
+     * @param consumerPublishableKey The publishable key of the consumer account, if available. Used to
+     * authenticate consumer API calls made outside of Link, e.g. by Identity.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -852,6 +979,7 @@ class LinkController @Inject internal constructor(
         val sessionState: SessionState,
         val consumerSessionClientSecret: String?,
         val linkSessionKey: String?,
+        val consumerPublishableKey: String?,
     ) : Parcelable
 
     /**
