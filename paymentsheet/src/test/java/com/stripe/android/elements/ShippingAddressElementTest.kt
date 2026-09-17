@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -590,16 +591,18 @@ internal class ShippingAddressElementTest {
     private fun assertPrimaryButton(appearance: PaymentSheet.Appearance) {
         assertThat(appearance.primaryButton.colorsLight).isEqualTo(
             PaymentSheet.PrimaryButtonColors(
-                background = Color.Green,
-                onBackground = Color.White,
-                border = Color.Black,
+                Color.Green,
+                Color.White,
+                Color.Black,
             )
         )
         assertThat(appearance.primaryButton.colorsDark).isEqualTo(
             PaymentSheet.PrimaryButtonColors(
-                background = Color.Blue,
-                onBackground = Color.Yellow,
-                border = Color.Red,
+                background = Color.Blue.toArgb(),
+                onBackground = Color.Yellow.toArgb(),
+                border = Color.Red.toArgb(),
+                successBackgroundColor = PaymentSheet.PrimaryButtonColors.defaultDark.successBackgroundColor,
+                onSuccessBackgroundColor = Color.Yellow.toArgb(),
             )
         )
         assertThat(appearance.primaryButton.shape).isEqualTo(

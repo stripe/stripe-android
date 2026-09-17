@@ -23,8 +23,11 @@ class AppearanceMapperTest {
     @Test
     fun `default shipping address appearance maps to PaymentSheet defaults`() {
         val appearance = ShippingAddressElement.Configuration.Appearance()
+        val mapped = appearance.build().asPaymentSheet()
 
-        assertThat(appearance.build().asPaymentSheet()).isEqualTo(PaymentSheet.Appearance())
+        assertThat(mapped).isEqualTo(PaymentSheet.Appearance())
+        assertThat(mapped.primaryButton.colorsDark.onSuccessBackgroundColor)
+            .isEqualTo(Color.Black.toArgb())
     }
 
     @Test
@@ -123,5 +126,24 @@ class AppearanceMapperTest {
         assertThat(mapped.formInsetValues.topDp).isEqualTo(2f)
         assertThat(mapped.formInsetValues.endDp).isEqualTo(3f)
         assertThat(mapped.formInsetValues.bottomDp).isEqualTo(4f)
+    }
+
+    @Test
+    fun `shipping address dark primary button maps custom foreground to success state`() {
+        val appearance = ShippingAddressElement.Configuration.Appearance()
+            .primaryButton(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton()
+                    .colorsDark(
+                        ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.dark()
+                            .onBackground(Color.Yellow)
+                    )
+            )
+
+        val colorsDark = appearance.build().asPaymentSheet().primaryButton.colorsDark
+
+        assertThat(colorsDark.onBackground).isEqualTo(Color.Yellow.toArgb())
+        assertThat(colorsDark.successBackgroundColor)
+            .isEqualTo(PaymentSheet.PrimaryButtonColors.defaultDark.successBackgroundColor)
+        assertThat(colorsDark.onSuccessBackgroundColor).isEqualTo(Color.Yellow.toArgb())
     }
 }

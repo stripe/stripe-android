@@ -460,6 +460,8 @@ class ShippingAddressElement internal constructor(
                     @ColorInt private var background: Int?,
                     @ColorInt private var onBackground: Int,
                     @ColorInt private var border: Int,
+                    @ColorInt private var successBackgroundColor: Int,
+                    @ColorInt private var onSuccessBackgroundColor: Int,
                 ) {
                     /** Sets the primary-button background color. */
                     fun background(@ColorInt value: Int?): Colors = apply { background = value }
@@ -468,7 +470,10 @@ class ShippingAddressElement internal constructor(
                     fun background(value: Color?): Colors = apply { background = value?.toArgb() }
 
                     /** Sets the content color used on the primary button. */
-                    fun onBackground(@ColorInt value: Int): Colors = apply { onBackground = value }
+                    fun onBackground(@ColorInt value: Int): Colors = apply {
+                        onBackground = value
+                        onSuccessBackgroundColor = value
+                    }
 
                     /** Sets the content color used on the primary button. */
                     fun onBackground(value: Color): Colors = onBackground(value.toArgb())
@@ -484,9 +489,17 @@ class ShippingAddressElement internal constructor(
                         @ColorInt val background: Int?,
                         @ColorInt val onBackground: Int,
                         @ColorInt val border: Int,
+                        @ColorInt val successBackgroundColor: Int,
+                        @ColorInt val onSuccessBackgroundColor: Int,
                     ) : Parcelable
 
-                    internal fun build(): State = State(background, onBackground, border)
+                    internal fun build(): State = State(
+                        background,
+                        onBackground,
+                        border,
+                        successBackgroundColor,
+                        onSuccessBackgroundColor,
+                    )
 
                     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     companion object {
@@ -497,6 +510,8 @@ class ShippingAddressElement internal constructor(
                             background = null,
                             onBackground = colors.onBackground.toArgb(),
                             border = colors.border.toArgb(),
+                            successBackgroundColor = colors.successBackground.toArgb(),
+                            onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
                         )
                     }
                 }

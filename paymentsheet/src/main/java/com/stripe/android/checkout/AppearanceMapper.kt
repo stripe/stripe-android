@@ -91,6 +91,8 @@ private fun ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors
         background = background,
         onBackground = onBackground,
         border = border,
+        successBackgroundColor = successBackgroundColor,
+        onSuccessBackgroundColor = onSuccessBackgroundColor,
     )
 
 private fun ShippingAddressElement.Configuration.Appearance.Insets.State.asPaymentSheet(): PaymentSheet.Insets =
