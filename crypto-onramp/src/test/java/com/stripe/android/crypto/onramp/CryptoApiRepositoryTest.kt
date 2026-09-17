@@ -125,6 +125,53 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
+    fun `retrieve additional KYC requirements uses dedicated endpoint`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "requirements": {
+                        "entries": [
+                            {
+                                "description": "proof_of_address",
+                                "requested_by": "swapped",
+                                "awaiting_action_from": "user",
+                                "errors": [],
+                                "document": {
+                                    "accepted_subtypes": [
+                                        {
+                                            "id": "utility_bill",
+                                            "label": "Utility bill"
+                                        }
+                                    ],
+                                    "accepted_formats": ["pdf", "jpeg", "png"],
+                                    "min_documents": 1,
+                                    "instructions": []
+                                }
+                            }
+                        ]
+                    }
+                }
+            """.trimIndent(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>())).thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
+            consumerSessionClientSecret = "test-secret",
+        )
+
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
+        assertThat(apiRequest.url).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
+        val response = result.getOrThrow()
+        assertThat(response.requirements.entries.single().description)
+            .isEqualTo("proof_of_address")
+    }
+
+    @Test
     fun testCollectKycDataSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(

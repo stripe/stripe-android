@@ -30,8 +30,8 @@ constructor(
     val filename: String? = null,
     /**
      * The purpose of the file. Possible values are `business_icon`, `business_logo`,
-     * `customer_signature`, `dispute_evidence`, `identity_document`, `pci_document`,
-     * or `tax_document_user_upload`.
+     * `crypto_onramp_kyc_document`, `customer_signature`, `dispute_evidence`, `identity_document`,
+     * `pci_document`, or `tax_document_user_upload`.
      *
      * [purpose](https://stripe.com/docs/api/files/object#file_object-purpose)
      */
