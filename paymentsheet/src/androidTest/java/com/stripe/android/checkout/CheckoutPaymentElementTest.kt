@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import app.cash.turbine.Turbine
+import app.cash.turbine.withTurbineTimeout
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
@@ -38,6 +40,11 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
@@ -45,6 +52,8 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
@@ -207,6 +216,249 @@ internal class CheckoutPaymentElementTest {
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
+        val releaseResponse = CountDownLatch(1)
+        runSavedPaymentMethodSelectionFromCashAppScenario(
+            selectionResponses = listOf(
+                { response ->
+                    check(releaseResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                        "Timed out waiting to release the Checkout Session update response."
+                    }
+                    automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+                },
+            ),
+        ) {
+            try {
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    selectionRequests.awaitItem()
+                }
+                selectionRequests.expectNoEvents()
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
+                contentPage.assertLpmIsEnabled("card", false)
+                contentPage.assertHasSelectedLpm("cashapp")
+                callbacks.expectNoEvents()
+                releaseResponse.countDown()
+
+                waitForSessionTotal(controller, UPDATED_TOTAL)
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+                contentPage.assertLpmIsEnabled("card", true)
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    callbacks.awaitItem()
+                    assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
+                        .isEqualTo(UPDATED_TOTAL.toDouble())
+                    assertThat(controller.session.value?.paymentOption?.paymentMethodType)
+                        .isEqualTo("card")
+                }
+            } finally {
+                releaseResponse.countDown()
+            }
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionFailureCanRetry() {
+        val releaseRetryResponse = CountDownLatch(1)
+        runSavedPaymentMethodSelectionFromCashAppScenario(
+            selectionResponses = listOf(
+                { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                },
+                { response ->
+                    check(releaseRetryResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                        "Timed out waiting to release the Checkout Session retry response."
+                    }
+                    automaticTaxResponseWithSavedPaymentMethod(
+                        UPDATED_TOTAL,
+                        TAX_STATUS_COMPLETE,
+                    ).invoke(response)
+                },
+            ),
+        ) {
+            withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                selectionRequests.awaitItem()
+            }
+            waitForControllerUpdateToFinish(controller)
+            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+            contentPage.assertLpmIsEnabled("card", true)
+            contentPage.assertHasSelectedLpm("cashapp")
+            callbacks.expectNoEvents()
+
+            selectSavedPaymentMethod()
+
+            try {
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    selectionRequests.awaitItem()
+                }
+                callbacks.expectNoEvents()
+                releaseRetryResponse.countDown()
+
+                waitForSessionTotal(controller, UPDATED_TOTAL)
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+                contentPage.assertLpmIsEnabled("card", true)
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    callbacks.awaitItem()
+                    assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
+                        .isEqualTo(UPDATED_TOTAL.toDouble())
+                    assertThat(controller.session.value?.paymentOption?.paymentMethodType)
+                        .isEqualTo("card")
+                }
+            } finally {
+                releaseRetryResponse.countDown()
+            }
+        }
+    }
+
+    private fun runSavedPaymentMethodSelectionFromCashAppScenario(
+        selectionResponses: List<(MockResponse) -> Unit>,
+        block: suspend SavedPaymentMethodSelectionScenario.() -> Unit,
+    ) {
+        val callbacks = Turbine<Unit>()
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbacks.add(Unit)
+            },
+        ) {
+            selectCashAppAndAwaitCallback(callbacks)
+            val scenario = SavedPaymentMethodSelectionScenario(
+                scenario = this,
+                callbacks = callbacks,
+                selectionResponses = selectionResponses,
+            )
+            scenario.selectSavedPaymentMethod()
+            scenario.block()
+            scenario.ensureAllResponsesConsumed()
+            scenario.selectionRequests.ensureAllEventsConsumed()
+            callbacks.ensureAllEventsConsumed()
+            markTestSucceeded()
+        }
+    }
+
+    private inner class SavedPaymentMethodSelectionScenario(
+        private val scenario: Scenario,
+        val callbacks: Turbine<Unit>,
+        private val selectionResponses: List<(MockResponse) -> Unit>,
+    ) {
+        val selectionRequests = Turbine<Unit>()
+        val controller: CheckoutController
+            get() = scenario.controller
+
+        private var nextResponseIndex = 0
+
+        fun selectSavedPaymentMethod() {
+            val responseFactory = checkNotNull(selectionResponses.getOrNull(nextResponseIndex)) {
+                "No response configured for saved payment method selection attempt ${nextResponseIndex + 1}."
+            }
+            nextResponseIndex += 1
+            enqueueTaxUpdate { response ->
+                selectionRequests.add(Unit)
+                responseFactory(response)
+            }
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+        }
+
+        fun ensureAllResponsesConsumed() {
+            check(nextResponseIndex == selectionResponses.size) {
+                "Expected ${selectionResponses.size} saved payment method selection attempts, " +
+                    "but ran $nextResponseIndex."
+            }
+        }
+    }
+
+    private suspend fun Scenario.selectCashAppAndAwaitCallback(
+        callbacks: Turbine<Unit>,
+    ) {
+        val initialTaxUpdateRequests = Turbine<Unit>()
+
+        contentPage.clickOnLpm("cashapp")
+        formPage.waitUntilVisible()
+
+        enqueueTaxUpdate { response ->
+            initialTaxUpdateRequests.add(Unit)
+            automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_COMPLETE,
+            )(response)
+        }
+        fillOutBillingDetails()
+        formPage.clickPrimaryButton()
+
+        withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+            initialTaxUpdateRequests.awaitItem()
+            callbacks.awaitItem()
+        }
+        assertThat(controller.session.value?.paymentOption?.paymentMethodType).isEqualTo("cashapp")
+        contentPage.assertHasSelectedLpm("cashapp")
+        initialTaxUpdateRequests.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionQueuesDuringControllerMutation() {
+        val callbacks = Turbine<Unit>()
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                callbacks.add(Unit)
+            },
+        ) {
+            val mutationRequestReceived = CountDownLatch(1)
+            val releaseMutationResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
+                mutationRequestReceived.countDown()
+                check(releaseMutationResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_REQUIRES_LOCATION)(response)
+            }
+            val mutationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            val mutation = mutationScope.async { controller.applyPromotionCode("10OFF") }
+            val selectionUpdateRequests = Turbine<Unit>()
+            enqueueTaxUpdate { response ->
+                selectionUpdateRequests.add(Unit)
+                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+            }
+
+            try {
+                assertThat(mutationRequestReceived.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)).isTrue()
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+                contentPage.assertLpmIsEnabled("card", true)
+
+                contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
+                contentPage.assertLpmIsEnabled("card", false)
+                selectionUpdateRequests.expectNoEvents()
+                callbacks.expectNoEvents()
+                releaseMutationResponse.countDown()
+
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    selectionUpdateRequests.awaitItem()
+                    callbacks.awaitItem()
+                }
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
+                contentPage.assertLpmIsEnabled("card", true)
+            } finally {
+                releaseMutationResponse.countDown()
+            }
+            runBlocking { mutation.await().getOrThrow() }
+            mutationScope.cancel()
+            selectionUpdateRequests.ensureAllEventsConsumed()
+            callbacks.ensureAllEventsConsumed()
+            markTestSucceeded()
+        }
     }
 
     @Test
@@ -380,22 +632,26 @@ internal class CheckoutPaymentElementTest {
     private fun runAutomaticTaxTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
         checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
+        rowSelectionBehavior = rowSelectionBehavior,
         block = block,
     )
 
     private fun runAutomaticTaxTest(
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         block: suspend Scenario.() -> Unit,
     ) {
         lateinit var controller: CheckoutController
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
+            rowSelectionBehavior = rowSelectionBehavior,
             setup = { configuredController ->
                 controller = configuredController
                 configuredController.configure(
@@ -532,6 +788,12 @@ internal class CheckoutPaymentElementTest {
         }
     }
 
+    private fun waitForControllerUpdateToFinish(controller: CheckoutController) {
+        testRules.compose.waitUntil(timeoutMillis = REQUEST_TIMEOUT_SECONDS * 1_000) {
+            !controller.isUpdating.value
+        }
+    }
+
     private fun automaticTaxResponse(
         total: Long,
         taxStatus: String,
@@ -550,10 +812,65 @@ internal class CheckoutPaymentElementTest {
         billingAddressCollection = "auto",
     )
 
+    private fun automaticTaxResponseWithSavedPaymentMethod(
+        total: Long,
+        taxStatus: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        billingAddressCollection = "auto",
+        jsonModifier = { json ->
+            json.put("account_settings", JSONObject("""{"country":"US"}"""))
+            json.put(
+                "customer",
+                JSONObject(
+                    """
+                    {
+                        "id": "cus_123",
+                        "payment_methods": [{
+                            "id": "$SAVED_PAYMENT_METHOD_ID",
+                            "object": "payment_method",
+                            "type": "card",
+                            "billing_details": {
+                                "address": {
+                                    "line1": "$BILLING_ADDRESS_LINE_ONE",
+                                    "city": "$BILLING_ADDRESS_CITY",
+                                    "state": "$BILLING_ADDRESS_STATE",
+                                    "country": "US",
+                                    "postal_code": "$BILLING_ADDRESS_ZIP"
+                                }
+                            },
+                            "card": {
+                                "brand": "visa",
+                                "exp_month": 12,
+                                "exp_year": 2034,
+                                "last4": "4242"
+                            }
+                        }],
+                        "can_detach_payment_method": true
+                    }
+                    """.trimIndent()
+                )
+            )
+        },
+    )
+
     private fun automaticTaxResponse(
         total: Long,
         taxStatus: String,
         billingAddressCollection: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        billingAddressCollection = billingAddressCollection,
+        jsonModifier = {},
+    )
+
+    private fun automaticTaxResponse(
+        total: Long,
+        taxStatus: String,
+        billingAddressCollection: String,
+        jsonModifier: (JSONObject) -> Unit,
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -579,6 +896,7 @@ internal class CheckoutPaymentElementTest {
             json.getJSONObject("server_built_elements_session_params")
                 .getJSONObject("deferred_intent")
                 .put("amount", total)
+            jsonModifier(json)
         }
     }
 
@@ -586,11 +904,14 @@ internal class CheckoutPaymentElementTest {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INITIAL_TOTAL = 5_099L
         const val UPDATED_TOTAL = 5_399L
+        const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
         const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
         const val BILLING_ADDRESS_CITY = "San Francisco"
         const val BILLING_ADDRESS_STATE = "CA"
         const val BILLING_ADDRESS_ZIP = "94103"
         const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
         const val TAX_STATUS_COMPLETE = "complete"
+        const val REQUEST_TIMEOUT_SECONDS = 5L
+        const val UPDATE_RESPONSE_TIMEOUT_SECONDS = 15L
     }
 }

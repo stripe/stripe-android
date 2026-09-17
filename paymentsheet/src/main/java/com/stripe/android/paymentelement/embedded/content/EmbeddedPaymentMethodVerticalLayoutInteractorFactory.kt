@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,10 +75,17 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
         )
+        val processing = combineAsStateFlow(
+            confirmationHandler.state,
+            verticalPaymentSelectionHandler.state,
+        ) { confirmationState, selectionState ->
+            confirmationState is ConfirmationHandler.State.Confirming ||
+                selectionState is VerticalPaymentSelectionHandler.State.Selecting
+        }
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
+            processing = processing,
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
