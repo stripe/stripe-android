@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
@@ -45,7 +46,7 @@ class PaymentOption internal constructor(
     val billingDetails: PaymentSheet.BillingDetails?,
     private val _shippingDetails: AddressDetails?,
     private val _labels: Labels,
-    private val imageLoader: suspend () -> Drawable,
+    private val imageLoader: suspend (isSystemDark: Boolean?) -> Drawable,
 ) {
 
     @Poko
@@ -89,7 +90,7 @@ class PaymentOption internal constructor(
         _shippingDetails = null,
         billingDetails = null,
         _labels = Labels(label = label),
-        imageLoader = errorImageLoader,
+        imageLoader = { errorImageLoader() },
     )
 
     /**
@@ -98,7 +99,8 @@ class PaymentOption internal constructor(
     val iconPainter: Painter
         @Composable
         get() {
-            val drawable = remember(this) { icon() }
+            val isSystemDark = isSystemInDarkTheme()
+            val drawable = remember(this) { icon(isSystemDark) }
             return rememberDrawablePainter(drawable)
         }
 
@@ -107,7 +109,13 @@ class PaymentOption internal constructor(
      */
     fun icon(): Drawable {
         return DelegateDrawable(
-            imageLoader = imageLoader,
+            imageLoader = { imageLoader(null) },
+        )
+    }
+
+    private fun icon(isSystemDark: Boolean?): Drawable {
+        return DelegateDrawable(
+            imageLoader = { imageLoader(isSystemDark) },
         )
     }
 }

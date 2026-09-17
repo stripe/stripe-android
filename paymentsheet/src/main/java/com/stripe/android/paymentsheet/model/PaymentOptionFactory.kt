@@ -33,13 +33,13 @@ internal class PaymentOptionFactory @Inject constructor(
             _labels = PaymentOptionLabelsFactory.create(context, selection, linkBrand),
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             _shippingDetails = selection.shippingDetails,
-            imageLoader = {
+            imageLoader = { isSystemDark: Boolean? ->
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = drawableResourceId,
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(context),
+                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(isSystemDark ?: context.isSystemDarkTheme()),
                 )
             },
         )
@@ -47,7 +47,11 @@ internal class PaymentOptionFactory @Inject constructor(
 }
 
 internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
-    val isDark = themeMode.isDarkTheme(context.isSystemDarkTheme())
+    return shouldUseDarkThemeIcon(context.isSystemDarkTheme())
+}
+
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDark: Boolean): Boolean {
+    val isDark = themeMode.isDarkTheme(isSystemDark)
     val componentColor = Color(getColors(isDark).component)
     return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
