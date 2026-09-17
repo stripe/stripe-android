@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModelStore
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.test.core.app.ApplicationProvider
@@ -43,10 +42,8 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
-import com.stripe.android.identity.navigation.NetworkedIdentityDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination.SELFIE_WARMUP
-import com.stripe.android.identity.networked.NetworkedIdentityState
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
@@ -61,7 +58,6 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
-import com.stripe.android.identity.networking.models.VerificationPageNetworkedIdentity
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureModels
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
@@ -168,6 +164,7 @@ internal class IdentityViewModelTest {
             brandLogo = BRAND_LOGO,
             brandColor = null,
             biometricConsent = null,
+            networkedIdentity = null,
             injectorKey = DUMMY_INJECTOR_KEY,
             presentTime = 0
         ),
@@ -181,8 +178,7 @@ internal class IdentityViewModelTest {
         mockSavedStateHandle,
         mock(),
         UnconfinedTestDispatcher(),
-        mock(),
-        false
+        mock()
     ).also { viewModelStoreRule.track(it) }
 
     private fun mockUploadSuccess() = runBlocking {
@@ -198,16 +194,40 @@ internal class IdentityViewModelTest {
     }
 
     @Test
+    fun `NI shared document keeps the attachment when recording consent`() = runNetworkedHostScenario {
+        model._collectedData.value = CollectedDataParam()
+        val share = scope.async {
+            model.continueWithSharedDocument(
+                networkedActionData(listOf(Requirement.BIOMETRICCONSENT, Requirement.FACE)),
+                mockController,
+            )
+        }
+        scope.runCurrent()
+        val request = repository.dataCalls.awaitItem()
+        assertThat(request.collectedData.biometricConsent).isTrue()
+        assertThat(request.clearData.idDocumentFront).isFalse()
+        assertThat(request.clearData.idDocumentBack).isFalse()
+        repository.dataResponse.complete(networkedActionData(listOf(Requirement.FACE)))
+        share.await()
+        assertThat(model.verificationPage.value?.data?.requirements?.missing).containsExactly(Requirement.FACE)
+        repository.submitCalls.expectNoEvents()
+    }
+
+    @Test
     fun `NI attachment preserves server documents in the next ordinary data request`() = runNetworkedHostScenario {
         val remaining = listOf(Requirement.NAME, Requirement.FACE)
-        model.continueAfterNetworkedIdentity(Result.success(networkedActionData(remaining)), mockController)
+        model.continueAfterNetworkedIdentity(
+            Result.success(networkedActionData(remaining)),
+            mockController,
+            ConsentDestination.ROUTE.route,
+        )
         assertThat(model.verificationPage.value?.data?.requirements?.missing).containsExactlyElementsIn(remaining)
 
         val post = scope.async {
             model.postVerificationPageDataAndMaybeNavigate(
                 navController = mockController,
                 collectedDataParam = CollectedDataParam(name = NameParam("Jane", "Doe")),
-                fromRoute = NetworkedIdentityDestination.ROUTE.route,
+                fromRoute = ConsentDestination.ROUTE.route,
             )
         }
         scope.runCurrent()
@@ -233,6 +253,7 @@ internal class IdentityViewModelTest {
         model.continueAfterNetworkedIdentity(
             Result.success(networkedActionData(listOf(Requirement.NAME))),
             mockController,
+            ConsentDestination.ROUTE.route,
         )
         assertThat(model.collectedData.value.name).isNull()
         assertThat(model.collectedData.value.biometricConsent).isTrue()
@@ -243,7 +264,11 @@ internal class IdentityViewModelTest {
     @Test
     fun `NI empty requirements submit before confirmation`() = runNetworkedHostScenario {
         val continuation = scope.async {
-            model.continueAfterNetworkedIdentity(Result.success(networkedActionData(emptyList())), mockController)
+            model.continueAfterNetworkedIdentity(
+                Result.success(networkedActionData(emptyList())),
+                mockController,
+                ConsentDestination.ROUTE.route,
+            )
         }
         scope.runCurrent()
         val submit = repository.submitCalls.awaitItem()
@@ -264,141 +289,11 @@ internal class IdentityViewModelTest {
         model.continueAfterNetworkedIdentity(
             Result.success(SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA.copy(id = VERIFICATION_SESSION_ID)),
             mockController,
+            ConsentDestination.ROUTE.route,
         )
         repository.submitCalls.expectNoEvents()
         verify(mockController).navigate(eq(ConfirmationDestination.ROUTE.route), any<NavOptionsBuilder.() -> Unit>())
     }
-
-    @Test
-    fun `NI submit failure offers an exit without replay`() = runNetworkedHostScenario {
-        val continuation = scope.async {
-            model.continueAfterNetworkedIdentity(Result.success(networkedActionData(emptyList())), mockController)
-        }
-        scope.runCurrent()
-        repository.submitCalls.awaitItem()
-        repository.submitResponse.completeExceptionally(IllegalStateException("Submit failed."))
-        continuation.await()
-        val destination = argumentCaptor<String>()
-        verify(mockController).navigate(destination.capture(), any<NavOptionsBuilder.() -> Unit>())
-        assertThat(destination.firstValue).contains("${ErrorDestination.ARG_SHOULD_FAIL}=true")
-        repository.submitCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `NI submit response waits for the replacement resumed host`() = runNetworkedHostScenario {
-        val replacementController = mock<NavController>()
-        model.attachNetworkedIdentityNavigation(mockController)
-        val continuation = scope.async {
-            model.continueAfterNetworkedIdentity(Result.success(networkedActionData(emptyList())), mockController)
-        }
-        scope.runCurrent()
-        repository.submitCalls.awaitItem()
-        model.detachNetworkedIdentityNavigation(mockController)
-        repository.submitResponse.complete(
-            SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA.copy(id = VERIFICATION_SESSION_ID)
-        )
-        scope.runCurrent()
-        assertThat(continuation.isCompleted).isFalse()
-        verifyNoInteractions(mockController)
-        verifyNoInteractions(replacementController)
-
-        model.attachNetworkedIdentityNavigation(replacementController)
-        continuation.await()
-        verifyNoInteractions(mockController)
-        verify(replacementController).navigate(
-            eq(ConfirmationDestination.ROUTE.route), any<NavOptionsBuilder.() -> Unit>()
-        )
-        repository.submitCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `NI bootstrap resume remains loading through recreation without replay`() = runNetworkedHostScenario(
-        previewEnabled = true,
-    ) {
-        val page = networkedBootstrap(VerificationPageNetworkedIdentity.Direction.ConsumerToMerchant, emptyList())
-        model._verificationPage.value = Resource.success(page)
-        model.attachNetworkedIdentityNavigation(mockController)
-        assertThat(model.tryNavigateToNetworkedIdentity(page, null, mockController)).isTrue()
-        scope.runCurrent()
-        repository.submitCalls.awaitItem()
-
-        val replacementController = mock<NavController>()
-        model.detachNetworkedIdentityNavigation(mockController)
-        model.retrieveAndBufferVerificationPage()
-        assertThat(model.verificationPage.value?.data).isSameInstanceAs(page)
-        assertThat(model.tryNavigateToNetworkedIdentity(page, null, replacementController)).isTrue()
-        assertThat(model.verificationPageSubmit.value.status).isEqualTo(Status.LOADING)
-        repository.submitCalls.expectNoEvents()
-        repository.unexpectedCalls.expectNoEvents()
-        verifyNoInteractions(mockController)
-        verifyNoInteractions(replacementController)
-
-        repository.submitResponse.complete(
-            SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA.copy(id = VERIFICATION_SESSION_ID)
-        )
-        scope.runCurrent()
-        verifyNoInteractions(mockController)
-        verifyNoInteractions(replacementController)
-        model.attachNetworkedIdentityNavigation(replacementController)
-        scope.runCurrent()
-        verifyNoInteractions(mockController)
-        verify(replacementController).navigate(
-            eq(ConfirmationDestination.ROUTE.route), any<NavOptionsBuilder.() -> Unit>()
-        )
-        repository.submitCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `NI host retains its attachment baseline and abandons only when cleared`() = runNetworkedHostScenario(
-        previewEnabled = true,
-    ) {
-        val page = networkedBootstrap(null, listOf(Requirement.IDDOCUMENTFRONT))
-        model._verificationPage.value = Resource.success(page)
-        assertThat(model.tryNavigateToNetworkedIdentity(page, null, mockController)).isTrue()
-        val networkedModel = requireNotNull(model.networkedIdentityViewModel)
-        model.retrieveAndBufferVerificationPage()
-        assertThat(model.networkedIdentityViewModel).isSameInstanceAs(networkedModel)
-        assertThat(networkedModel.state.value).isEqualTo(NetworkedIdentityState.CollectEmail)
-
-        model.continueAfterNetworkedIdentity(
-            Result.success(networkedActionData(listOf(Requirement.NAME))),
-            mockController,
-        )
-        val attachedPage = model.verificationPage.value?.data
-        model.retrieveAndBufferVerificationPage()
-        assertThat(model.verificationPage.value?.data).isSameInstanceAs(attachedPage)
-        assertThat(model.verificationPage.value?.data?.requirements?.missing).containsExactly(Requirement.NAME)
-        repository.unexpectedCalls.expectNoEvents()
-
-        val store = ViewModelStore()
-        store.put("identity", model)
-        store.clear()
-        assertThat(networkedModel.state.value).isEqualTo(NetworkedIdentityState.Cancelled)
-        assertThat(model.networkedIdentityViewModel).isNull()
-        assertThat(model.networkedIdentityEvent.value).isNull()
-    }
-
-    private fun networkedBootstrap(
-        direction: VerificationPageNetworkedIdentity.Direction?,
-        missing: List<Requirement>
-    ) = SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE.copy(
-        id = VERIFICATION_SESSION_ID,
-        status = VerificationPage.Status.REQUIRESINPUT,
-        submitted = false,
-        requirements = VerificationPageRequirements(missing),
-        merchantPublishableKey = "pk_test_merchant",
-        networkedIdentity = VerificationPageNetworkedIdentity(
-            saveAvailable = true,
-            reuseAvailable = true,
-            email = null,
-            phoneNumber = null,
-            state = VerificationPageNetworkedIdentity.State(
-                consented = direction != null,
-                skipped = false,
-                direction = direction,
-            ),
-        ),
-    )
 
     @Test
     fun `NI transport failure preserves the requirement baseline and offers a terminal exit`() {
@@ -438,7 +333,7 @@ internal class IdentityViewModelTest {
     private fun assertNetworkedActionRejected(result: Result<VerificationPageData>) = runNetworkedHostScenario {
         val baseline = model.verificationPage.value?.data
         val collected = model.collectedData.value
-        model.continueAfterNetworkedIdentity(result, mockController)
+        model.continueAfterNetworkedIdentity(result, mockController, ConsentDestination.ROUTE.route)
         assertThat(model.verificationPage.value?.data).isSameInstanceAs(baseline)
         assertThat(model.collectedData.value).isEqualTo(collected)
         assertThat(model.errorCause.value).isNotNull()
@@ -447,7 +342,6 @@ internal class IdentityViewModelTest {
     }
 
     private fun runNetworkedHostScenario(
-        previewEnabled: Boolean = false,
         block: suspend NetworkedHostScenario.() -> Unit
     ) = runTest {
         val repository = FakeIdentityHostRepository()
@@ -466,7 +360,6 @@ internal class IdentityViewModelTest {
             UnconfinedTestDispatcher(testScheduler),
             UnconfinedTestDispatcher(testScheduler),
             { error("NI continuation must not finish without ordinary Identity submission.") },
-            previewEnabled,
         ).also { viewModelStoreRule.track(it) }
         model._verificationPage.value = Resource.success(
             SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE.copy(

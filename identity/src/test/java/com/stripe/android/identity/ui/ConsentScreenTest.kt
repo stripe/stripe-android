@@ -206,7 +206,8 @@ class ConsentScreenTest {
         composeTestRule.setContent {
             ConsentScreen(
                 mockNavController,
-                mockIdentityViewModel
+                mockIdentityViewModel,
+                null
             )
         }
 

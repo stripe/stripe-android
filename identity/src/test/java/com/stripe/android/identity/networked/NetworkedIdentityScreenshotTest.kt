@@ -9,11 +9,12 @@ import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.PhoneNumberController
 import org.junit.Rule
 import org.junit.Test
 
 /**
- * Android equivalents of the eight iOS NI references. Pixel 6 is the repository's supported
+ * Android equivalents of the five iOS NI references. Pixel 6 is the repository's supported
  * Paparazzi device; fixed viewport height exercises centered content, footer and scrolling.
  */
 internal class NetworkedIdentityScreenshotTest {
@@ -45,11 +46,9 @@ internal class NetworkedIdentityScreenshotTest {
     )
 
     @Test
-    fun resendingOtp() = snapshot(
-        NetworkedIdentityState.OtpResendPending(
-            redactedPhoneNumber = "(***) *** **34",
-            otpGeneration = 2,
-        )
+    fun saveFailed() = snapshot(
+        NetworkedIdentityState.SaveFailed(details = "The request could not be completed. (resource_missing)"),
+        mode = NetworkedIdentityMode.Save,
     )
 
     @Test
@@ -81,27 +80,32 @@ internal class NetworkedIdentityScreenshotTest {
         )
     )
 
-    @Test
-    fun attachingSavedDocument() = snapshot(NetworkedIdentityState.AttachmentPending)
-
-    @Test
-    fun skippingNetworkedIdentity() = snapshot(NetworkedIdentityState.SkipPending)
-
-    private fun snapshot(state: NetworkedIdentityState, email: String = "") {
+    private fun snapshot(
+        state: NetworkedIdentityState,
+        email: String = "",
+        mode: NetworkedIdentityMode = NetworkedIdentityMode.Reuse,
+    ) {
         paparazziRule.snapshot {
             val emailController = remember { EmailConfig.createController(initialValue = email) }
+            val phoneController = remember { PhoneNumberController.createPhoneNumberController() }
             Box(Modifier.height(800.dp)) {
                 NetworkedIdentityScreenContent(
                     state = state,
+                    mode = mode,
+                    savedItems = emptyList(),
                     emailController = emailController,
-                    supportsDocumentAttachment = true,
-                    onSubmitEmail = {},
-                    onSubmitOtp = {},
-                    onResendOtp = {},
-                    onSelectDocument = {},
-                    onContinueWithDocument = {},
-                    onManualCapture = {},
-                    onCancel = {},
+                    phoneController = phoneController,
+                    actions = NetworkedIdentityScreenActions(
+                        onSubmitEmail = {},
+                        onSubmitPhone = { _, _ -> },
+                        onSubmitOtp = {},
+                        onResendOtp = {},
+                        onSelectDocument = {},
+                        onShareDocument = {},
+                        onContinue = {},
+                        onManualCapture = {},
+                        onCancel = {},
+                    ),
                 )
             }
         }
