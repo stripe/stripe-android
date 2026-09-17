@@ -620,23 +620,15 @@ internal class DefaultEventReporter @Inject internal constructor(
         publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
-            executeEvent(event, paymentMethodMetadata, publishableKey)
-        }
-    }
-
-    private fun executeEvent(
-        event: PaymentSheetEvent,
-        paymentMethodMetadata: PaymentMethodMetadata?,
-        publishableKey: String?,
-    ) {
-        val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
-            (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                event = event,
-                additionalParams = additionalParams,
+            val additionalParams = defaultParams(paymentMethodMetadata) + event.params +
+                (publishableKey?.let { mapOf(AnalyticsFields.PUBLISHABLE_KEY to it) } ?: emptyMap())
+            analyticsRequestExecutor.executeAsync(
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = additionalParams,
+                )
             )
-        )
+        }
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
