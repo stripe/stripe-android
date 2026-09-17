@@ -2,11 +2,16 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
@@ -19,6 +24,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientPr
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -44,6 +50,9 @@ class AddressElementViewModelModuleTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val networkRule = NetworkRule()
 
     @Test
     fun `providePrimaryButtonAction completes standalone through the view model`() =
@@ -112,6 +121,55 @@ class AddressElementViewModelModuleTest {
         }
 
     @Test
+    fun `providePrimaryButtonAction updates checkout shipping tax from submitted address`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            )
+            val args = AddressElementActivityContract.Args.CheckoutShipping(
+                publishableKey = "pk_123",
+                config = AddressLauncher.Configuration(),
+                checkoutSessionResponse = checkoutSessionResponse,
+            )
+            val resultStateHolder = AddressElementResultStateHolder()
+            val viewModel = createViewModel(
+                args = args,
+                resultStateHolder = resultStateHolder,
+                taxRegionUpdater = Provider { createTaxRegionUpdater() },
+            )
+
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[line2]", "Floor 2"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.getJSONArray("checkout_items").getJSONObject(0)
+                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .put("total", 5099)
+                }
+            }
+
+            resultStateHolder.result.test {
+                assertThat(awaitItem()).isNull()
+                viewModel.clickPrimaryButton(
+                    completedFormValues = COMPLETED_FORM_VALUES,
+                    checkboxChecked = true,
+                )
+
+                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
+                assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+                assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+                assertThat(result.checkoutSessionResponse).isNotEqualTo(checkoutSessionResponse)
+            }
+        }
+
+    @Test
     fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
@@ -175,6 +233,32 @@ class AddressElementViewModelModuleTest {
                     )
                 },
             ),
+        )
+    }
+
+    private companion object {
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "+14155551212",
+            isCheckboxSelected = true,
+        )
+        val COMPLETED_FORM_VALUES = mapOf(
+            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+            FormFieldId.City to FormFieldEntry("San Francisco", true),
+            FormFieldId.Country to FormFieldEntry("US", true),
+            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
+            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
+            FormFieldId.Phone to FormFieldEntry("+14155551212", true),
+            FormFieldId.PostalCode to FormFieldEntry("94103", true),
+            FormFieldId.State to FormFieldEntry("CA", true),
         )
     }
 }
