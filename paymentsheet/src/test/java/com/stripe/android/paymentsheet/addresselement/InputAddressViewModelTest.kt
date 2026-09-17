@@ -44,12 +44,7 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
-        primaryButtonAction: AddressElementPrimaryButtonAction =
-            FakeAddressElementPrimaryButtonAction {
-                Result.success(
-                    AddressElementActivityContract.Result.StandaloneSucceeded(it)
-                )
-            },
+        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction(),
         eventReporter: AddressLauncherEventReporter = this.eventReporter,
     ): InputAddressViewModel {
         val args = AddressElementActivityContract.Args.Standalone(
@@ -1113,11 +1108,7 @@ class InputAddressViewModelTest {
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             ),
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
-                Result.success(
-                    AddressElementActivityContract.Result.StandaloneSucceeded(it)
-                )
-            },
+            primaryButtonAction = FakeAddressElementPrimaryButtonAction(),
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -1190,12 +1181,12 @@ class InputAddressViewModelTest {
     }
 }
 
-private class FakeAddressElementPrimaryButtonAction(
-    private val action: suspend (AddressDetails) -> Result<AddressElementActivityContract.Result>,
-) : AddressElementPrimaryButtonAction {
+private class FakeAddressElementPrimaryButtonAction : AddressElementPrimaryButtonAction {
     override suspend fun invoke(
         addressDetails: AddressDetails,
-    ): Result<AddressElementActivityContract.Result> = action(addressDetails)
+    ): Result<AddressElementActivityContract.Result> = Result.success(
+        AddressElementActivityContract.Result.StandaloneSucceeded(addressDetails)
+    )
 }
 
 private class RecordingPrimaryButtonAction(
