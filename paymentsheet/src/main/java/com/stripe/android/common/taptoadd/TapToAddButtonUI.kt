@@ -4,9 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -15,10 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.R
 
 internal const val TAP_TO_BUTTON_UI_TEST_TAG = "tap_to_button_ui"
@@ -28,6 +29,7 @@ internal fun TapToButtonUI(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val iconSize = with(LocalDensity.current) { 18.sp.toDp() }
     val contentColor = if (enabled) {
         MaterialTheme.colors.primary
     } else {
@@ -49,7 +51,7 @@ internal fun TapToButtonUI(
             painter = painterResource(R.drawable.stripe_ic_nfc_tap),
             contentDescription = stringResource(R.string.stripe_tap_to_add_card_button_label),
             colorFilter = ColorFilter.tint(contentColor),
-            modifier = Modifier.width(18.dp).height(18.dp),
+            modifier = Modifier.size(iconSize),
         )
         Text(
             text = stringResource(R.string.stripe_tap_to_add_card_button_label),
