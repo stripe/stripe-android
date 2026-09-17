@@ -7,6 +7,7 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -18,7 +19,7 @@ internal class AttestationActivityContractTest {
     fun `createIntent creates intent correctly with AttestationArgs`() {
         val contract = AttestationActivityContract()
         val args = AttestationActivityContract.Args(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = setOf("PaymentSheet", "CustomerSheet")
         )
 
@@ -28,7 +29,7 @@ internal class AttestationActivityContractTest {
         }
 
         assertThat(intent.component?.className).isEqualTo(AttestationActivity::class.java.name)
-        assertThat(intentArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(intentArgs?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(intentArgs?.productUsage).containsExactly("PaymentSheet", "CustomerSheet")
     }
 

@@ -19,13 +19,17 @@ import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationCallback
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityCallback
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
+import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncher
 import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncherFactory
@@ -35,6 +39,7 @@ import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivity
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationArgs
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -141,6 +146,60 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         assertThat((callbackCaptor.firstValue as OnrampCheckoutResult.Failed).error)
             .isSameInstanceAs(error)
+    }
+
+    @Test
+    fun `missing identity ephemeral key is mapped by interactor`() = runTest {
+        val response = StartIdentityVerificationResponse(
+            id = "vs_123",
+            url = "https://example.com/verify",
+            ephemeralKey = null,
+        )
+        val expectedResult = OnrampVerifyIdentityResult.Failed(mock())
+        whenever(interactor.startIdentityVerification()).thenReturn(
+            OnrampStartVerificationResult.Completed(response)
+        )
+        whenever(interactor.handleIdentityVerificationResult(any())).thenReturn(expectedResult)
+        var callbackResult: OnrampVerifyIdentityResult? = null
+        val coordinator = createCoordinator(
+            verifyIdentityCallback = { callbackResult = it },
+        )
+
+        coordinator.verifyIdentity()
+        testScope.testScheduler.advanceUntilIdle()
+
+        val resultCaptor = argumentCaptor<IdentityVerificationSheet.VerificationFlowResult>()
+        verify(interactor).handleIdentityVerificationResult(resultCaptor.capture())
+        assertThat(resultCaptor.firstValue)
+            .isInstanceOf(IdentityVerificationSheet.VerificationFlowResult.Failed::class.java)
+        val error = (resultCaptor.firstValue as IdentityVerificationSheet.VerificationFlowResult.Failed)
+            .throwable
+        assertThat(error.message).isEqualTo("No ephemeral key found.")
+        assertThat(callbackResult).isSameInstanceAs(expectedResult)
+    }
+
+    @Test
+    fun `Google Pay platform key failure is mapped by interactor`() = runTest {
+        val platformKeyError = IllegalStateException("Platform key unavailable")
+        val mappedError = IllegalStateException("Mapped Onramp error")
+        val expectedResult = OnrampCollectPaymentMethodResult.Failed(mappedError)
+        whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.failure(platformKeyError))
+        whenever(interactor.collectPaymentMethodFailure(platformKeyError)).thenReturn(expectedResult)
+        var callbackResult: OnrampCollectPaymentMethodResult? = null
+        val coordinator = createCoordinator(
+            collectPaymentCallback = { callbackResult = it },
+        )
+
+        coordinator.collectPaymentMethod(
+            PaymentMethodSelection.GooglePay(
+                currencyCode = "usd",
+                amount = 1099,
+            )
+        )
+        testScope.testScheduler.advanceUntilIdle()
+
+        verify(interactor).collectPaymentMethodFailure(platformKeyError)
+        assertThat(callbackResult).isSameInstanceAs(expectedResult)
     }
 
     @Test
@@ -574,6 +633,7 @@ class OnrampPresenterCoordinatorTest {
         termsAndConditionsCallback: OnrampPartnerTermsCallback? = null,
         termsOfServiceCallback: OnrampPartnerTermsCallback? = null,
         userAttestationCallback: OnrampUserAttestationCallback? = null,
+        verifyIdentityCallback: OnrampVerifyIdentityCallback = OnrampVerifyIdentityCallback {},
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -595,7 +655,7 @@ class OnrampPresenterCoordinatorTest {
 
         val callbacks = OnrampCallbacks()
             .checkoutCallback(checkoutCallback)
-            .verifyIdentityCallback {}
+            .verifyIdentityCallback(verifyIdentityCallback)
             .collectPaymentCallback(collectPaymentCallback)
             .authorizeCallback {}
             .verifyKycCallback {}

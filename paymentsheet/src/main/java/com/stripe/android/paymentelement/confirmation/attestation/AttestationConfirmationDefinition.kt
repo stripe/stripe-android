@@ -9,7 +9,6 @@ import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReport
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.AndroidVerificationObject
@@ -35,7 +34,6 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     @AttestationScope private val coroutineScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(APPLICATION_ID) private val appId: String,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
@@ -133,7 +131,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
-                    publishableKey = publishableKeyProvider(),
+                    apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

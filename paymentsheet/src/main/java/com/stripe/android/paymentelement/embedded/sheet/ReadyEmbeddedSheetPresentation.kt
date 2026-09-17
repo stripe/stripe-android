@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -44,6 +45,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     @Assisted private val activityResultCaller: ActivityResultCaller,
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val embeddedNavigator: EmbeddedNavigator,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val sheetActivityRegistrar: SheetActivityRegistrar,
@@ -96,6 +98,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         return when (val launchMode = args.launchMode) {
             is EmbeddedLaunchMode.Form -> EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = launchMode,
             )
             is EmbeddedLaunchMode.Manage -> createManageResult(
@@ -126,6 +129,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             launchMode = launchMode,
@@ -135,6 +139,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private fun createPaymentOptionsCancellationResult(): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = customerStateHolder.customer.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
     }

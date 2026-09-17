@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -99,6 +100,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
 
@@ -160,6 +162,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
     }
@@ -206,6 +209,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },

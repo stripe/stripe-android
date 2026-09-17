@@ -185,7 +185,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         )
                     } ?: run {
                         onrampCallbacksState.verifyIdentityCallback.onResult(
-                            OnrampVerifyIdentityResult.Failed(APIException(message = "No ephemeral key found."))
+                            interactor.handleIdentityVerificationResult(
+                                IdentityVerificationSheet.VerificationFlowResult.Failed(
+                                    APIException(message = "No ephemeral key found.")
+                                )
+                            )
                         )
                     }
                 }
@@ -334,7 +338,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         },
                         onFailure = { error ->
                             onrampCallbacksState.collectPaymentCallback.onResult(
-                                OnrampCollectPaymentMethodResult.Failed(error)
+                                interactor.collectPaymentMethodFailure(error)
                             )
                         }
                     )

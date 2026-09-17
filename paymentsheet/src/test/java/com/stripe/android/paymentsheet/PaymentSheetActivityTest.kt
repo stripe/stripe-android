@@ -1315,6 +1315,7 @@ internal class PaymentSheetActivityTest {
                             integrationMetadata: IntegrationMetadata,
                             customerMetadata: CustomerMetadata?,
                             clientAttributionMetadata: ClientAttributionMetadata,
+                            isLiveMode: Boolean,
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor
                         }
@@ -1323,7 +1324,6 @@ internal class PaymentSheetActivityTest {
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-                    paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                     statusBarColor = args.statusBarColor,
                     linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),

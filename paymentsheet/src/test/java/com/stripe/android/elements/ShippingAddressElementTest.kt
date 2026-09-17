@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutCollectedDetails
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNT
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CompletableDeferred
@@ -100,6 +102,60 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present passes checkout session allowed shipping countries`() = runScenario {
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            configuration = configuredCheckoutConfiguration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                allowedShippingCountries = listOf("US", "CA"),
+            ),
+        )
+
+        shippingAddressElement.present()
+
+        val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+        assertThat(config.allowedCountries).containsExactly("US", "CA")
+        assertThat(config.address).isNull()
+        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present prefills the form with the checkout session shipping address`() = runScenario {
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            configuration = configuredCheckoutConfiguration,
+            collectedDetails = CheckoutCollectedDetails(
+                email = null,
+                shippingName = "Jenny Rosen",
+                shippingAddress = CheckoutController.Address.State(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            ),
+        )
+
+        shippingAddressElement.present()
+
+        val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+        assertThat(config.address).isEqualTo(
+            AddressDetails(
+                name = "Jenny Rosen",
+                address = PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            )
+        )
         assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
     }
 

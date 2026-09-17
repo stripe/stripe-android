@@ -10,9 +10,10 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -59,7 +60,7 @@ internal class NfcScanningTest {
             )
         )
 
-        launchFlow()
+        launchFlow(nameCollectionMode = CollectionMode.Automatic)
         openCardForm()
 
         nfcScanningCardFormPage.clickOnNfcScan()
@@ -72,6 +73,53 @@ internal class NfcScanningTest {
 
         nfcScanningCardFormPage.assertCvcIsFocused()
 
+        nfcScanningCardFormPage.fillRemainingCardDetails()
+
+        enqueueConfirmRequests()
+
+        clickPrimaryButton()
+
+        completeCheckout(cardLastFour = SCANNED_CARD_LAST_FOUR)
+    }
+
+    @Test
+    fun successWithNameRequired(
+        @TestParameter(valuesProvider = NfcScanningIntegrationType.Provider::class)
+        integrationType: NfcScanningIntegrationType,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
+    ) = runNfcScanningIntegrationTest(
+        integrationType = integrationType,
+        apiConfigurationTestType = apiConfigurationTestType,
+        composeTestRule = composeTestRule,
+        networkRule = networkRule,
+    ) {
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-nfc.json")
+        }
+
+        NfcScanningIntentsHelper.intendingNfcScanningToComplete(
+            result = NfcScanningContract.Result.Complete(
+                cardNumber = SCANNED_CARD_NUMBER,
+                expirationMonth = SCANNED_EXPIRATION_MONTH,
+                expirationYear = SCANNED_EXPIRATION_YEAR,
+            )
+        )
+
+        launchFlow(nameCollectionMode = CollectionMode.Always)
+        openCardForm()
+
+        nfcScanningCardFormPage.clickOnNfcScan()
+
+        NfcScanningIntentsHelper.intendedNfcScanningToBeLaunched(composeTestRule)
+
+        nfcScanningCardFormPage.assertScannedCardShown(
+            lastFourDigits = SCANNED_CARD_LAST_FOUR,
+        )
+
+        nfcScanningCardFormPage.assertNameIsFocused()
+
+        nfcScanningCardFormPage.fillName("Jenny Rosen")
         nfcScanningCardFormPage.fillRemainingCardDetails()
 
         enqueueConfirmRequests()

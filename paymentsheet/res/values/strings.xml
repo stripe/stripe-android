@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bank account ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Confirm the Bizum payment in your mobile banking application within %s to complete the purchase.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Buy now or pay later with Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->

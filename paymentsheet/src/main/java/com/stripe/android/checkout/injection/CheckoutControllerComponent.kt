@@ -12,6 +12,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
@@ -43,13 +44,17 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -59,7 +64,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -84,6 +88,7 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
@@ -119,7 +124,8 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
-        ApiConfigurationModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
+        ApiRequestOptionsModule::class,
         ApiConfigurationResolverModule::class,
     ],
 )
@@ -207,6 +213,17 @@ internal interface CheckoutControllerModule {
 
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
+
+    @Binds
+    fun bindsEmbeddedRowSelectionImmediateActionHandler(
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
+    ): EmbeddedRowSelectionImmediateActionHandler
+
+    @Binds
+    @Singleton
+    fun bindsVerticalPaymentSelectionHandler(
+        handler: CheckoutPaymentSelectionHandler,
+    ): VerticalPaymentSelectionHandler
 
     @Binds
     fun bindsCheckoutPaymentOptionDisplayDataFactory(

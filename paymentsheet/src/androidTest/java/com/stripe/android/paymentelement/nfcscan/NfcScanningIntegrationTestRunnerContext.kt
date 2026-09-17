@@ -7,6 +7,8 @@ import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
@@ -28,7 +30,7 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
         clientSecret = "cuss_654321",
     )
 
-    abstract suspend fun launchFlow()
+    abstract suspend fun launchFlow(nameCollectionMode: CollectionMode)
 
     abstract fun openCardForm()
 
@@ -39,12 +41,16 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
     sealed class Sheet(
         composeTestRule: ComposeTestRule,
     ) : NfcScanningIntegrationTestRunnerContext(composeTestRule) {
-        protected val configuration = StripePaymentSheet.Configuration.Builder(
-            merchantDisplayName = "Merchant, Inc.",
-        )
-            .paymentMethodLayout(PaymentMethodLayout.Vertical)
-            .customer(customerConfig)
-            .build()
+        protected fun configuration(nameCollectionMode: CollectionMode) =
+            StripePaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Merchant, Inc.",
+            )
+                .paymentMethodLayout(PaymentMethodLayout.Vertical)
+                .customer(customerConfig)
+                .billingDetailsCollectionConfiguration(
+                    BillingDetailsCollectionConfiguration(name = nameCollectionMode)
+                )
+                .build()
 
         protected val paymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -60,11 +66,11 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
             composeTestRule: ComposeTestRule,
             private val context: PaymentSheetTestRunnerContext,
         ) : Sheet(composeTestRule) {
-            override suspend fun launchFlow() {
+            override suspend fun launchFlow(nameCollectionMode: CollectionMode) {
                 context.presentPaymentSheet {
                     presentWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = configuration(nameCollectionMode),
                     )
                 }
             }
@@ -78,11 +84,11 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
             composeTestRule: ComposeTestRule,
             private val context: FlowControllerTestRunnerContext,
         ) : Sheet(composeTestRule) {
-            override suspend fun launchFlow() {
+            override suspend fun launchFlow(nameCollectionMode: CollectionMode) {
                 context.configureFlowController {
                     configureWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = configuration(nameCollectionMode),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -109,7 +115,7 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
         private val embeddedContentPage = EmbeddedContentPage(composeTestRule)
         private val embeddedFormPage = EmbeddedFormPage(composeTestRule)
 
-        override suspend fun launchFlow() {
+        override suspend fun launchFlow(nameCollectionMode: CollectionMode) {
             context.configure(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -120,6 +126,9 @@ internal sealed class NfcScanningIntegrationTestRunnerContext(
                 configurationMutator = {
                     customer(customerConfig)
                     formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+                    billingDetailsCollectionConfiguration(
+                        BillingDetailsCollectionConfiguration(name = nameCollectionMode)
+                    )
                 }
             )
         }

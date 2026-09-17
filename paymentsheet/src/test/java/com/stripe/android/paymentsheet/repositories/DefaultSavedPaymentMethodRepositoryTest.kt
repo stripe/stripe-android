@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -332,18 +333,18 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
-            clientParams = ElementsSessionClientParams(
-                mobileAppId = "com.stripe.android.test",
-                mobileSessionIdProvider = { "test_session" },
-            ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { "acct_123" },
+            apiRequestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
+            },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,

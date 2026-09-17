@@ -15,41 +15,52 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.checkouttesting.createPaymentMethod
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.ui.wallet.LinkWalletPage
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+    }
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
+    private val linkWalletPage = LinkWalletPage(testRules.compose)
     private val verticalModePage = VerticalModePage(testRules.compose)
 
     @After
@@ -109,6 +120,78 @@ internal class CheckoutPaymentElementTest {
         }
 
         assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testPaymentOptionsBridgesLinkAccountStateThroughCheckout() {
+        val checkoutInitResponse: (MockResponse) -> Unit = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "test@stripe.com")
+            }
+        }
+        val configuration = CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration()
+                .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+                .linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        PaymentElement.Configuration.LinkConfiguration.Display.WalletButtonHidden
+                    )
+                )
+        )
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
+                json.put("exists", true)
+            }
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/list"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json") { json ->
+                val paymentDetails = json.getJSONObject("redacted_payment_details")
+                json.put("redacted_payment_details", JSONArray().put(paymentDetails))
+            }
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        lateinit var controller: CheckoutController
+
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            checkoutInitResponse = checkoutInitResponse,
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            },
+        ) { context ->
+            contentPage.clickOnLpm("link")
+            contentPage.assertHasSelectedLpm("link")
+            context.presentPaymentOptions()
+
+            linkWalletPage.logOut()
+
+            verticalModePage.waitUntilVisible()
+            verticalModePage.assertLpmDoesNotExist("link")
+            Espresso.pressBack()
+            verticalModePage.waitUntilMissing()
+
+            networkRule.checkoutInit(responseFactory = checkoutInitResponse)
+            runBlocking {
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            }
+            context.markTestSucceeded()
+        }
     }
 
     @Test

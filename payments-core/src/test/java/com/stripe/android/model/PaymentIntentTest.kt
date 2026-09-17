@@ -11,6 +11,25 @@ import kotlin.test.assertFailsWith
 class PaymentIntentTest {
 
     @Test
+    fun getNextActionType_whenAwaitAuthorization() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            isLiveMode = false,
+            id = "pi_bizum",
+            currency = "eur",
+            countryCode = "ES",
+            paymentMethodTypes = listOf(PaymentMethod.Type.Bizum.code),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.AwaitAuthorization,
+        )
+
+        assertThat(paymentIntent.nextActionType).isEqualTo(StripeIntent.NextActionType.AwaitAuthorization)
+    }
+
+    @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
         val clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId

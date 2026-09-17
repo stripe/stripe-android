@@ -68,20 +68,24 @@ internal class CardDetailsController(
         }
     )
 
-    val nameElement = if (collectName) {
-        SimpleTextElement(
-            controller = SimpleTextFieldController(
-                textFieldConfig = SimpleTextFieldConfig(
-                    label = resolvableString(R.string.stripe_name_on_card),
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboard = androidx.compose.ui.text.input.KeyboardType.Text
-                ),
-                initialValue = initialValues[FormFieldId.Name],
+    private val nameController = if (collectName) {
+        SimpleTextFieldController(
+            textFieldConfig = SimpleTextFieldConfig(
+                label = resolvableString(R.string.stripe_name_on_card),
+                capitalization = KeyboardCapitalization.Words,
+                keyboard = androidx.compose.ui.text.input.KeyboardType.Text
             ),
-            identifier = FormFieldId.Name,
+            initialValue = initialValues[FormFieldId.Name],
         )
     } else {
         null
+    }
+
+    val nameElement = nameController?.let { controller ->
+        SimpleTextElement(
+            controller = controller,
+            identifier = FormFieldId.Name,
+        )
     }
 
     val label: Int? = null
@@ -145,7 +149,17 @@ internal class CardDetailsController(
                 )
             )
             cvcElement.controller.onRawValueChange("")
-            cvcElement.controller.requestFocus()
+
+            val emptyNameController = nameController?.takeIf { controller ->
+                controller.rawFieldValue.value.isBlank()
+            }
+
+            if (emptyNameController != null) {
+                emptyNameController.requestFocus()
+            } else {
+                cvcElement.controller.requestFocus()
+            }
+
             return
         } else {
             numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
