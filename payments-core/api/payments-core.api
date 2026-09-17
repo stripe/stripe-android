@@ -2122,6 +2122,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field BacsDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Bancontact Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Billie Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Bizum Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Blik Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Boleto Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -3683,6 +3684,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$VerifyWi
 
 public final class com/stripe/android/model/StripeIntent$NextActionType : java/lang/Enum {
 	public static final field AlipayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field AwaitAuthorization Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field BlikAuthorize Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field CashAppRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayBoletoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;

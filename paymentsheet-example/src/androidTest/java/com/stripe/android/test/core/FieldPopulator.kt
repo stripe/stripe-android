@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -288,6 +289,14 @@ internal class FieldPopulator(
     ) {
         selectors.getPhoneNumber(labelText)
             .performTextInput(values.phoneNumber)
+    }
+
+    fun populateCountryCodeSelector(country: String) {
+        selectors.getCountryCode().performClick()
+        selectors.composeTestRule
+            .onNode(hasText(country, substring = true))
+            .performScrollTo()
+            .performClick()
     }
 
     fun populateBoletoTaxId() {

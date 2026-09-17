@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -18,7 +17,6 @@ import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavig
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -43,16 +41,10 @@ internal class AddressElementViewModelModule {
     }
 
     @Provides
-    @Singleton
-    fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
-
-    @Provides
     @Named(PRODUCT_USAGE)
-    @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
-    @Singleton
     @OptIn(CheckoutSessionPreview::class)
     internal fun providePrimaryButtonAction(
         args: AddressElementActivityContract.Args,
@@ -68,13 +60,6 @@ internal class AddressElementViewModelModule {
             )
         }
     }
-
-    @Provides
-    @Named(PUBLISHABLE_KEY)
-    @Singleton
-    fun providesPublishableKey(
-        args: AddressElementActivityContract.Args
-    ): String = args.publishableKey
 
     @Provides
     @Singleton

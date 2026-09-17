@@ -8,6 +8,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -447,6 +449,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -475,6 +478,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -509,6 +513,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -655,6 +660,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
@@ -666,6 +672,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
 
@@ -727,6 +734,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
     }
