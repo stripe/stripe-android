@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.embedded.manage
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -13,11 +15,14 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
@@ -29,9 +34,53 @@ import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
-internal class ManageSavedPaymentMethodMutatorFactoryTest {
+internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @Test
+    fun `payment options includes available wallets`() = runScenario(
+        initialScreen = { horizontalSavedOptionsScreen() },
+        paymentMethodMetadata = metadataWithWallets(),
+    ) {
+        eventReporter.showExistingPaymentOptionsCalls.awaitItem()
+        testScope.advanceUntilIdle()
+
+        assertThat(mutator.paymentOptionsItems.value.map { it.viewType }).containsAtLeast(
+            PaymentOptionsItem.ViewType.GooglePay,
+            PaymentOptionsItem.ViewType.Link,
+        )
+    }
+
+    @Test
+    fun `manage mode excludes available wallets`() = runScenario(
+        initialScreen = { EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor()) },
+        paymentMethodMetadata = metadataWithWallets(),
+        launchMode = EmbeddedLaunchMode.Manage,
+    ) {
+        eventReporter.showManageSavedPaymentMethods.awaitItem()
+        testScope.advanceUntilIdle()
+
+        assertThat(mutator.paymentOptionsItems.value.map { it.viewType }).containsNoneOf(
+            PaymentOptionsItem.ViewType.GooglePay,
+            PaymentOptionsItem.ViewType.Link,
+        )
+    }
+
+    @Test
+    fun `form mode excludes available wallets`() = runScenario(
+        initialScreen = { EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor()) },
+        paymentMethodMetadata = metadataWithWallets(),
+        launchMode = EmbeddedLaunchMode.Form("card"),
+    ) {
+        eventReporter.showManageSavedPaymentMethods.awaitItem()
+        testScope.advanceUntilIdle()
+
+        assertThat(mutator.paymentOptionsItems.value.map { it.viewType }).containsNoneOf(
+            PaymentOptionsItem.ViewType.GooglePay,
+            PaymentOptionsItem.ViewType.Link,
+        )
+    }
 
     @Test
     fun `payment options removal from update screen navigates back before updating customer state`() = runScenario(
@@ -90,7 +139,7 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
             eventReporter = eventReporter,
         )
         val repository = FakeSavedPaymentMethodRepository(paymentMethods = listOf(paymentMethod))
-        val factory = ManageSavedPaymentMethodMutatorFactory(
+        val factory = EmbeddedSavedPaymentMethodMutatorFactory(
             eventReporter = eventReporter,
             savedPaymentMethodRepository = repository,
             selectionHolder = selectionHolder,
@@ -102,6 +151,7 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
             viewModelScope = lifecycleScope,
             updateScreenInteractorFactoryProvider = Provider { error("Not expected") },
             launchMode = launchMode,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
 
         Scenario(
@@ -134,6 +184,18 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
             ),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
+        )
+    }
+
+    private fun metadataWithWallets(): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = true,
+            isGooglePayReady = true,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
     }
 

@@ -5,9 +5,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -24,6 +26,8 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -33,6 +37,8 @@ import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLay
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -48,6 +54,9 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     val paparazziRule = PaparazziRule(
         boxModifier = Modifier.padding(16.dp),
     )
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun displaysManageAll() {
@@ -122,6 +131,42 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState(metadata),
             ),
+            walletsState = stateFlowOf(null),
+            sheetActivityState = createSheetActivityStateHolder().state,
+            onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
+        )
+
+        snapshot(screen)
+    }
+
+    @Test
+    fun displaysHorizontalPaymentOptionsWithLinkHeader() {
+        val metadata = createPaymentOptionsMetadata(PaymentSheet.PaymentMethodLayout.Horizontal)
+        val linkAccount = TestFactory.LINK_ACCOUNT
+        val walletsState = WalletsState.create(
+            isLinkAvailable = true,
+            linkEmail = linkAccount.email,
+            isGooglePayReady = false,
+            googlePayButtonType = GooglePayButtonType.Pay,
+            buttonsEnabled = true,
+            paymentMethodTypes = metadata.supportedPaymentMethodTypes(),
+            googlePayLauncherConfig = null,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+            isSetupIntent = false,
+            walletsAllowedInHeader = listOf(WalletType.Link),
+            paymentDetails = linkAccount.displayablePaymentDetails,
+            enableDefaultValues = true,
+            cardFundingFilter = metadata.cardFundingFilter,
+            cardBrandFilter = metadata.cardBrandFilter,
+            linkBrand = LinkBrand.Link,
+        )
+        val screen = EmbeddedNavigator.Screen.HorizontalPaymentOptions(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState(metadata),
+            ),
+            walletsState = stateFlowOf(walletsState),
             sheetActivityState = createSheetActivityStateHolder().state,
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
