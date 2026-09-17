@@ -132,10 +132,13 @@ private class CheckoutShippingPrimaryButtonAction(
     override suspend fun invoke(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result> {
+        val address = addressDetails.address?.toCheckoutAddress()
+            ?: return Result.failure(IllegalArgumentException("Country is required."))
+
         return taxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = TaxAddressSource.SHIPPING,
-            address = requireNotNull(addressDetails.address?.toCheckoutAddress()),
+            address = address,
         ).map { response ->
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                 address = addressDetails,
