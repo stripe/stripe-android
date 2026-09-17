@@ -9,6 +9,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -68,14 +69,17 @@ internal class DefaultGooglePayRepository(
         errorReporter: ErrorReporter,
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter,
-        googlePayConfig: GooglePayConfig,
+        apiConfiguration: ApiConfiguration.State,
     ) : this(
         context.applicationContext,
         launcherConfig.environment,
         launcherConfig.billingAddressConfig.convert(),
         launcherConfig.existingPaymentMethodRequired,
         launcherConfig.allowCreditCards,
-        googlePayConfig,
+        GooglePayConfig(
+            publishableKey = apiConfiguration.publishableKey,
+            connectedAccountId = apiConfiguration.stripeAccountId,
+        ),
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,
