@@ -23,7 +23,7 @@ private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
 private const val BIZUM_TIME_LIMIT_IN_SECONDS = 70 * 60
 private const val BIZUM_INITIAL_DELAY_IN_SECONDS = 5
 private const val MB_WAY_TIME_LIMIT_IN_SECONDS = 4 * 60
-private const val MB_WAY_INITIAL_DELAY_IN_SECONDS = 0
+private const val MB_WAY_INITIAL_DELAY_IN_SECONDS = 5
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
