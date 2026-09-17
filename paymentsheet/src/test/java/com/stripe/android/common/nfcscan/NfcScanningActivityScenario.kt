@@ -4,7 +4,6 @@ import android.os.Looper
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -12,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
 import com.stripe.android.common.nfcscan.ui.ERROR_BANNER_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_CLOSE_BUTTON_TEST_TAG
 import com.stripe.android.common.nfcscan.ui.NFC_COIL_CONTACTLESS_ICON_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import org.robolectric.Shadows.shadowOf
@@ -41,7 +41,7 @@ internal class NfcScanningActivityScenario(
     fun waitForUi() {
         composeRule.waitUntil(timeoutMillis = UI_TIMEOUT_MS) {
             waitForIdle()
-            composeRule.onAllNodesWithContentDescription("Cancel")
+            composeRule.onAllNodesWithTag(NFC_CLOSE_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
@@ -50,7 +50,7 @@ internal class NfcScanningActivityScenario(
     fun waitForCompleteUi() {
         composeRule.waitUntil(timeoutMillis = UI_TIMEOUT_MS) {
             waitForIdle()
-            composeRule.onAllNodesWithContentDescription("Cancel")
+            composeRule.onAllNodesWithTag(NFC_CLOSE_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }

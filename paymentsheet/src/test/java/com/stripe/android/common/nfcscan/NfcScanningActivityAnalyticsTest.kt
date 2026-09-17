@@ -3,9 +3,10 @@ package com.stripe.android.common.nfcscan
 import android.content.Context
 import android.os.Build
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.common.nfcscan.ui.NFC_CLOSE_BUTTON_TEST_TAG
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
@@ -55,7 +56,7 @@ internal class NfcScanningActivityAnalyticsTest {
         networkRule.expectNfcScanCanceled()
 
         launchScenario {
-            composeRule.onNodeWithContentDescription("Cancel").performClick()
+            composeRule.onNodeWithTag(NFC_CLOSE_BUTTON_TEST_TAG).performClick()
 
             waitForIdle()
         }
