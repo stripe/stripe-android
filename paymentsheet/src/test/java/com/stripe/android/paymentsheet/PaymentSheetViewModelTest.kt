@@ -202,10 +202,9 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `init should fire analytics event`() {
+    fun `init should regenerate analytics session ID`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
-        verify(eventReporter).onInit()
 
         // Creating the view model should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -2056,51 +2055,6 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error.resolvableString)))
         }
-    }
-
-    @Test
-    fun `Sends correct analytics event when using normal intent`() = runTest {
-        createViewModel()
-
-        verify(eventReporter).onInit()
-    }
-
-    @Test
-    fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .externalPaymentMethodConfirmHandler { _, _ ->
-                error("Should not be called!")
-            }
-            .build()
-
-        createViewModelForDeferredIntent()
-
-        verify(eventReporter).onInit()
-    }
-
-    @Test
-    fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .externalPaymentMethodConfirmHandler { _, _ ->
-                error("Should not be called!")
-            }
-            .build()
-
-        createViewModelForDeferredIntent()
-
-        verify(eventReporter).onInit()
     }
 
     @Test

@@ -52,15 +52,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         origin = ORIGIN,
     )
 
-    override fun onInit() {
-        fireEvent(
-            event = PaymentSheetEvent.Init(
-                mode = mode,
-            ),
-            paymentMethodMetadata = null, // We won't have a value on init, and using null prevents a stack overflow.
-        )
-    }
-
     override fun onLoadStarted(initializedViaCompose: Boolean) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
