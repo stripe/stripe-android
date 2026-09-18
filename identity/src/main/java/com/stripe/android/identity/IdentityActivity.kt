@@ -184,7 +184,11 @@ internal class IdentityActivity :
             var topBarState by remember {
                 mutableStateOf(IdentityTopBarState.GO_BACK)
             }
-            IdentityTheme(brandColor = starterArgs.brandColor) {
+            IdentityTheme(
+                brandColor = starterArgs.brandColor,
+                primaryButtonStyle = starterArgs.primaryButtonStyle,
+                secondaryButtonStyle = starterArgs.secondaryButtonStyle
+            ) {
                 val statusBarBackground = MaterialTheme.colors.background
                 val useDarkStatusBarIcons =
                     statusBarBackground.luminance() > LIGHT_STATUS_BAR_LUMINANCE_THRESHOLD

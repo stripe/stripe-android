@@ -151,7 +151,8 @@ internal fun DocWarmupView(
 
         LoadingButton(
             modifier = Modifier.testTag(DOC_FRONT_CONTINUE_BUTTON_TAG),
-            text = stringResource(id = R.string.stripe_im_ready).uppercase(),
+            text = stringResource(id = R.string.stripe_im_ready),
+            uppercase = true,
             state = continueButtonState
         ) {
             continueButtonState = LoadingButtonState.Loading
