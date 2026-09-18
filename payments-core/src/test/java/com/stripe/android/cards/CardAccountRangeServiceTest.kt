@@ -333,6 +333,58 @@ class CardAccountRangeServiceTest {
         fakeRemoteCardAccountRangeSource.calls.expectNoEvents()
     }
 
+    @Test
+    fun `If the BIN mixes PAN lengths, return the range that contains the card number first`() = runTest {
+        val service = createServiceWithMixedPanLengthBin()
+
+        service.onCardNumberChanged(CardNumber.Unvalidated("6224546600000003"), isCbcEligible = false)
+
+        assertThat(service.accountRange).isEqualTo(UNIONPAY_622454_16_DIGIT_RANGE)
+        assertThat(service.accountRangesStateFlow.value.unfilteredRanges).containsExactly(
+            UNIONPAY_622454_16_DIGIT_RANGE,
+            UNIONPAY_622454_19_DIGIT_RANGE,
+        ).inOrder()
+    }
+
+    @Test
+    fun `If the first range contains the card number, don't change the range order`() = runTest {
+        val service = createServiceWithMixedPanLengthBin()
+
+        service.onCardNumberChanged(CardNumber.Unvalidated("6224543800000000"), isCbcEligible = false)
+
+        assertThat(service.accountRangesStateFlow.value.ranges).containsExactly(
+            UNIONPAY_622454_19_DIGIT_RANGE,
+            UNIONPAY_622454_16_DIGIT_RANGE,
+        ).inOrder()
+    }
+
+    @Test
+    fun `If the BIN has ranges but none contains the card number, return the static range first`() = runTest {
+        val service = createServiceWithMixedPanLengthBin()
+
+        service.onCardNumberChanged(CardNumber.Unvalidated("6224540000000002"), isCbcEligible = false)
+
+        val accountRange = service.accountRange
+        assertThat(accountRange?.binRange?.isStatic).isTrue()
+        assertThat(accountRange?.brand).isEqualTo(CardBrand.UnionPay)
+        assertThat(accountRange?.panLength).isEqualTo(16)
+        assertThat(service.accountRangesStateFlow.value.ranges).containsAtLeast(
+            UNIONPAY_622454_19_DIGIT_RANGE,
+            UNIONPAY_622454_16_DIGIT_RANGE,
+        )
+    }
+
+    private fun createServiceWithMixedPanLengthBin(): DefaultCardAccountRangeService {
+        return DefaultCardAccountRangeService(
+            cardAccountRangeRepository = FakeCardAccountRangeRepository(
+                accountRanges = listOf(UNIONPAY_622454_19_DIGIT_RANGE, UNIONPAY_622454_16_DIGIT_RANGE),
+            ),
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+            staticCardAccountRanges = DefaultStaticCardAccountRanges(),
+        )
+    }
+
     private fun createRemoteDefaultCardAccountRangeRepository(
         remoteCardAccountRangeSource: CardAccountRangeSource
     ): CardAccountRangeRepository {
@@ -397,6 +449,22 @@ class CardAccountRangeServiceTest {
     }
 
     companion object {
+        // The card metadata service returns ranges for the 622454 BIN in this order.
+        private val UNIONPAY_622454_19_DIGIT_RANGE = AccountRange(
+            binRange = BinRange(low = "6224543800000000000", high = "6224543899999999999", isStatic = false),
+            panLength = 19,
+            brandInfo = AccountRange.BrandInfo.UnionPay,
+            country = "NP",
+            funding = CardFunding.Debit,
+        )
+        private val UNIONPAY_622454_16_DIGIT_RANGE = AccountRange(
+            binRange = BinRange(low = "6224546600000000", high = "6224546699999999", isStatic = false),
+            panLength = 16,
+            brandInfo = AccountRange.BrandInfo.UnionPay,
+            country = "CN",
+            funding = CardFunding.Debit,
+        )
+
         private fun defaultAccountRange(
             lowBinRange: String = "4000000000000000",
             highBinRange: String = "4999999999999999",
@@ -464,4 +532,18 @@ private class FakeCardAccountRangeSource(
     }
 
     override val loading: StateFlow<Boolean> = stateFlowOf(isLoading)
+}
+
+private class FakeCardAccountRangeRepository(
+    private val accountRanges: List<AccountRange>,
+) : CardAccountRangeRepository {
+    override suspend fun getAccountRange(cardNumber: CardNumber.Unvalidated): AccountRange? {
+        return getAccountRanges(cardNumber)?.firstOrNull { it.binRange.matches(cardNumber) }
+    }
+
+    override suspend fun getAccountRanges(cardNumber: CardNumber.Unvalidated): List<AccountRange>? {
+        return accountRanges.takeIf { cardNumber.bin != null }
+    }
+
+    override val loading: StateFlow<Boolean> = stateFlowOf(false)
 }
