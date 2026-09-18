@@ -2,9 +2,15 @@ package com.stripe.android.identity.ui
 
 import android.os.Build
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -58,6 +64,7 @@ internal class BottomSheetTest {
         const val LINE_TITLE = "LINE_TITLE"
         const val LINE_CONTENT = "this is the content of line"
         const val MULTI_LINES_COUNT = 5
+        const val SHEET_LAYOUT_TAG = "sheet_layout"
 
         val SINGLE_LINE_CONTENT = VerificationPageStaticContentBottomSheetContent(
             bottomSheetId = BOTTOM_SHEET_ID,
@@ -217,6 +224,46 @@ internal class BottomSheetTest {
         onNodeWithTag(BOTTOM_SHEET_BUTTON_TAG).assertIsDisplayed()
         onAllNodesWithTag(BOTTOM_SHEET_LINE_TAG)[29].performScrollTo().assertIsDisplayed()
         onNodeWithTag(BOTTOM_SHEET_BUTTON_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h1000dp")
+    fun `expanded sheet stays below the status bar while overflowing content scrolls`() = runInsetScenario {
+        val layoutBounds = onNodeWithTag(SHEET_LAYOUT_TAG).getUnclippedBoundsInRoot()
+        val sheetBounds = onNodeWithTag(BOTTOM_SHEET_CONTAINER_TAG).getUnclippedBoundsInRoot()
+        val scrollRange = onNode(hasScrollAction()).fetchSemanticsNode()
+            .config[SemanticsProperties.VerticalScrollAxisRange]
+
+        assertThat(layoutBounds.height).isEqualTo(800.dp)
+        assertThat(sheetBounds.top).isEqualTo(layoutBounds.top + 24.dp)
+        assertThat(sheetBounds.bottom).isEqualTo(layoutBounds.bottom)
+        assertThat(scrollRange.maxValue()).isGreaterThan(0f)
+        onNodeWithTag(BOTTOM_SHEET_BUTTON_TAG).assertIsDisplayed()
+        onAllNodesWithTag(BOTTOM_SHEET_LINE_TAG)[29].performScrollTo().assertIsDisplayed()
+        onNodeWithTag(BOTTOM_SHEET_BUTTON_TAG).assertIsDisplayed()
+    }
+
+    private fun runInsetScenario(testBlock: ComposeContentTestRule.() -> Unit) {
+        composeTestRule.setContent {
+            val viewModel = viewModel<BottomSheetViewModel>()
+            viewModel.showBottomSheet(
+                SINGLE_LINE_CONTENT.copy(lines = List(30) { SINGLE_LINE_CONTENT.lines.single() })
+            )
+            ModalBottomSheetLayout(
+                modifier = Modifier.height(800.dp).testTag(SHEET_LAYOUT_TAG),
+                sheetState = rememberModalBottomSheetState(
+                    initialValue = ModalBottomSheetValue.Expanded,
+                    skipHalfExpanded = true
+                ),
+                sheetContent = {
+                    BottomSheetWithInsets(statusBarInsets = WindowInsets(top = 24.dp))
+                }
+            ) {
+                Box(Modifier.fillMaxSize())
+            }
+        }
+
+        with(composeTestRule, testBlock)
     }
 
     private fun runLayoutScenario(

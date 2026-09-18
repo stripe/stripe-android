@@ -2,11 +2,10 @@ package com.stripe.android.identity.navigation
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -40,7 +39,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.ui.BottomSheet
+import com.stripe.android.identity.ui.BottomSheetWithInsets
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
@@ -386,9 +385,7 @@ private fun NavGraphBuilder.screen(
 
         ModalBottomSheetLayout(
             sheetContent = {
-                Column(Modifier.navigationBarsPadding()) {
-                    BottomSheet()
-                }
+                BottomSheetWithInsets(statusBarInsets = WindowInsets.statusBars)
             },
             sheetState = modalSheetState,
             sheetGesturesEnabled = true,

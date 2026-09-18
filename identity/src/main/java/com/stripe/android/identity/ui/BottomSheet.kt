@@ -1,9 +1,14 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +42,19 @@ import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.regex.Pattern
+
+@Composable
+@ExperimentalMaterialApi
+internal fun BottomSheetWithInsets(statusBarInsets: WindowInsets) {
+    BoxWithConstraints(Modifier.testTag(BOTTOM_SHEET_CONTAINER_TAG)) {
+        val maxSheetHeight = maxHeight - statusBarInsets.asPaddingValues().calculateTopPadding()
+        Column(
+            Modifier.heightIn(max = maxSheetHeight.coerceAtLeast(0.dp)).navigationBarsPadding()
+        ) {
+            BottomSheet()
+        }
+    }
+}
 
 @Composable
 @ExperimentalMaterialApi
@@ -205,6 +223,7 @@ internal fun ButtonSheetPreview() {
     }
 }
 
+internal const val BOTTOM_SHEET_CONTAINER_TAG = "BottomSheetContainer"
 internal const val BOTTOM_SHEET_CONTENT_TAG = "BottomSheetContent"
 internal const val BOTTOM_SHEET_TITLE_TAG = "BottomSheetTitle"
 internal const val BOTTOM_SHEET_LINE_TAG = "BottomSheetLine"
