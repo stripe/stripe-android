@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -150,7 +151,7 @@ internal class CheckoutPaymentElementTest {
                     }
                 }
 
-                val update = async(Dispatchers.Main) {
+                val update = async(start = CoroutineStart.UNDISPATCHED) {
                     controller.applyPromotionCode("10OFF")
                 }
                 try {

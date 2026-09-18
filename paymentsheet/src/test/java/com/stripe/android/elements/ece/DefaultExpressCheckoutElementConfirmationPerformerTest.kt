@@ -247,6 +247,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
+            viewModelScope = backgroundScope,
         )
         val paymentSheetEventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
