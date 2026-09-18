@@ -11,6 +11,11 @@ import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.ShippingAddressElementAnalyticsData
+import com.stripe.android.paymentsheet.addresselement.analytics.ShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -48,6 +53,8 @@ class InputAddressViewModelTest {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
         eventReporter: AddressLauncherEventReporter = this.eventReporter,
+        shippingAddressElementEventReporter: ShippingAddressElementEventReporter =
+            NoOpShippingAddressElementEventReporter,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
@@ -61,6 +68,7 @@ class InputAddressViewModelTest {
             navigator,
             resultStateHolder,
             eventReporter,
+            shippingAddressElementEventReporter,
             placesClient = null,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
@@ -86,6 +94,122 @@ class InputAddressViewModelTest {
         val viewModel = createViewModel()
         viewModel.onScreenShown()
         verify(eventReporter).onShow(eq(""))
+    }
+
+    @Test
+    fun `checkout shipping onScreenShown reports shipping address shown`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val addressEventReporter = FakeAddressLauncherEventReporter()
+            val shippingEventReporter = FakeShippingAddressElementEventReporter()
+            val viewModel = createViewModel(
+                address = AddressDetails(address = PaymentSheet.Address(country = "US")),
+                eventReporter = addressEventReporter,
+                shippingAddressElementEventReporter = shippingEventReporter,
+                argsFactory = { config ->
+                    AddressElementActivityContract.Args.CheckoutShipping(
+                        publishableKey = "pk_123",
+                        config = config,
+                        checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    )
+                },
+            )
+
+            viewModel.onScreenShown()
+
+            assertThat(shippingEventReporter.shownCalls.awaitItem()).isEqualTo(
+                ShippingAddressElementAnalyticsData(country = "US")
+            )
+            assertThat(addressEventReporter.autocompleteCountryUpdatedCalls.awaitItem()).isEqualTo("US")
+            addressEventReporter.showCalls.expectNoEvents()
+            addressEventReporter.validate()
+            shippingEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `checkout shipping save reports started and completed`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val shippingEventReporter = FakeShippingAddressElementEventReporter()
+            val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
+            val viewModel = createViewModel(
+                primaryButtonAction = FakeAddressElementPrimaryButtonAction { addressDetails ->
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                        address = addressDetails,
+                        checkoutSessionResponse = checkoutSessionResponse,
+                    )
+                },
+                shippingAddressElementEventReporter = shippingEventReporter,
+                argsFactory = { config ->
+                    AddressElementActivityContract.Args.CheckoutShipping(
+                        publishableKey = "pk_123",
+                        config = config,
+                        checkoutSessionResponse = checkoutSessionResponse,
+                    )
+                },
+            )
+
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            val started = shippingEventReporter.saveStartedCalls.awaitItem()
+            assertThat(started.country).isEqualTo("US")
+            assertThat(shippingEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
+            shippingEventReporter.saveFailedCalls.expectNoEvents()
+            shippingEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `checkout shipping save reports failure and re-enables the form`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val shippingEventReporter = FakeShippingAddressElementEventReporter()
+            val error = IllegalStateException("save failed")
+            val primaryButtonAction = RecordingPrimaryButtonAction {
+                Result.failure(error)
+            }
+            val viewModel = createViewModel(
+                primaryButtonAction = primaryButtonAction,
+                shippingAddressElementEventReporter = shippingEventReporter,
+                argsFactory = { config ->
+                    AddressElementActivityContract.Args.CheckoutShipping(
+                        publishableKey = "pk_123",
+                        config = config,
+                        checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    )
+                },
+            )
+
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            val started = shippingEventReporter.saveStartedCalls.awaitItem()
+            val failed = shippingEventReporter.saveFailedCalls.awaitItem()
+            assertThat(failed.addressData).isEqualTo(started)
+            assertThat(failed.error).isSameInstanceAs(error)
+            assertThat(viewModel.formEnabled.value).isTrue()
+            shippingEventReporter.saveCompletedCalls.expectNoEvents()
+            shippingEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `checkout shipping cancellation reports canceled`() = runTest(UnconfinedTestDispatcher()) {
+        val shippingEventReporter = FakeShippingAddressElementEventReporter()
+        val viewModel = createViewModel(
+            shippingAddressElementEventReporter = shippingEventReporter,
+            argsFactory = { config ->
+                AddressElementActivityContract.Args.CheckoutShipping(
+                    publishableKey = "pk_123",
+                    config = config,
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                )
+            },
+        )
+
+        resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+
+        shippingEventReporter.canceledCalls.awaitItem()
+        shippingEventReporter.shownCalls.expectNoEvents()
+        shippingEventReporter.saveStartedCalls.expectNoEvents()
+        shippingEventReporter.saveFailedCalls.expectNoEvents()
+        shippingEventReporter.saveCompletedCalls.expectNoEvents()
+        shippingEventReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -1119,6 +1243,7 @@ class InputAddressViewModelTest {
             navigator,
             resultStateHolder,
             eventReporter,
+            NoOpShippingAddressElementEventReporter,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),

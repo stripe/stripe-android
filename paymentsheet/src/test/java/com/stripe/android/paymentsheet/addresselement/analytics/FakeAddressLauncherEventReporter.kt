@@ -7,6 +7,9 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
     private val _showCalls = Turbine<String>()
     val showCalls: ReceiveTurbine<String> = _showCalls
 
+    private val _autocompleteCountryUpdatedCalls = Turbine<String>()
+    val autocompleteCountryUpdatedCalls: ReceiveTurbine<String> = _autocompleteCountryUpdatedCalls
+
     private val _completedCalls = Turbine<CompletedCall>()
     val completedCalls: ReceiveTurbine<CompletedCall> = _completedCalls
 
@@ -31,6 +34,10 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     override fun onShow(country: String) {
         _showCalls.add(country)
+    }
+
+    override fun updateAutocompleteCountry(country: String) {
+        _autocompleteCountryUpdatedCalls.add(country)
     }
 
     override fun onCompleted(
@@ -73,6 +80,7 @@ internal class FakeAddressLauncherEventReporter : AddressLauncherEventReporter {
 
     fun validate() {
         _showCalls.ensureAllEventsConsumed()
+        _autocompleteCountryUpdatedCalls.ensureAllEventsConsumed()
         _completedCalls.ensureAllEventsConsumed()
         _autocompleteSessionStartedCalls.ensureAllEventsConsumed()
         _autocompleteFetchStartedCalls.ensureAllEventsConsumed()
