@@ -4,6 +4,9 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED] Added support for Bizum.
 
+### Payments
+* [FIXED][14625](https://github.com/stripe/stripe-android/pull/14625) Fixed an issue where PaymentSheet and `CardNumberEditText` rejected valid card numbers for BINs whose account ranges have different PAN lengths, such as some 16-digit UnionPay cards.
+
 ## 23.19.0 - 2026-09-15
 
 ### All SDKs
