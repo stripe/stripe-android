@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -91,7 +90,10 @@ internal fun BottomSheet() {
                     BottomSheetLine(line)
                 }
             }
-            Button(
+            IdentityButton(
+                text = stringResource(id = R.string.stripe_close_button_text),
+                uppercase = true,
+                enabled = true,
                 onClick = {
                     viewModel.dismissBottomSheet()
                 },
@@ -99,9 +101,7 @@ internal fun BottomSheet() {
                     .fillMaxWidth()
                     .testTag(BOTTOM_SHEET_BUTTON_TAG)
                     .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-            ) {
-                Text(stringResource(id = R.string.stripe_close_button_text).uppercase())
-            }
+            )
         }
     }
 }

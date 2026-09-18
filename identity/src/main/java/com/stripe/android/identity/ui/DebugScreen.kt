@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
@@ -223,6 +222,7 @@ internal fun CompleteWithTestDataSection(
     )
     LoadingButton(
         text = stringResource(id = R.string.stripe_submit),
+        uppercase = false,
         state = submitState,
         modifier = Modifier.testTag(TEST_TAG_SUBMIT_BUTTON),
         onClick = {
@@ -250,7 +250,10 @@ private fun FinishMobileFlowWithResultSection(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Button(
+        IdentityButton(
+            text = stringResource(id = R.string.stripe_cancelled),
+            uppercase = false,
+            enabled = true,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 10.dp)
@@ -258,11 +261,12 @@ private fun FinishMobileFlowWithResultSection(
             onClick = {
                 finishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Canceled)
             }
-        ) {
-            Text(text = stringResource(id = R.string.stripe_cancelled))
-        }
+        )
 
-        Button(
+        IdentityButton(
+            text = stringResource(id = R.string.stripe_failed),
+            uppercase = false,
+            enabled = true,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 10.dp)
@@ -274,9 +278,7 @@ private fun FinishMobileFlowWithResultSection(
                     )
                 )
             }
-        ) {
-            Text(text = stringResource(id = R.string.stripe_failed))
-        }
+        )
     }
 }
 
@@ -292,14 +294,15 @@ private fun PreviewUserExperienceSection(
         text = stringResource(id = R.string.stripe_preview_user_experience_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
-    Button(
+    IdentityButton(
+        text = stringResource(id = R.string.stripe_proceed),
+        uppercase = false,
+        enabled = true,
         modifier = Modifier
             .fillMaxWidth()
             .testTag(TEST_TAG_PROCEED_BUTTON),
         onClick = onProceedClicked
-    ) {
-        Text(text = stringResource(id = R.string.stripe_proceed))
-    }
+    )
 }
 
 @Composable
