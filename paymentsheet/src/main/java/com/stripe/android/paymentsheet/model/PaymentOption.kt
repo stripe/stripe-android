@@ -100,7 +100,7 @@ class PaymentOption internal constructor(
         @Composable
         get() {
             val isSystemDark = isSystemInDarkTheme()
-            val drawable = remember(this) { icon(isSystemDark) }
+            val drawable = remember(this, isSystemDark) { icon(isSystemDark) }
             return rememberDrawablePainter(drawable)
         }
 
