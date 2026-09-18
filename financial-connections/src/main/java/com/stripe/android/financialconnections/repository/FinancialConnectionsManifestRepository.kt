@@ -343,7 +343,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "frontend_events[$index]" to event.toMap()
             }
         )
-        return requestExecutor.execute(
+        return requestExecutor.executeWithoutUserFacingEvents(
             request,
             FinancialConnectionsAuthorizationSession.serializer()
         )
