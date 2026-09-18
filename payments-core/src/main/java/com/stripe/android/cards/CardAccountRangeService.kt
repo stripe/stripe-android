@@ -166,7 +166,7 @@ class DefaultCardAccountRangeService(
                 }
 
                 withContext(uiContext) {
-                    updateAccountRangesResult(accountRanges.orEmpty())
+                    updateAccountRangesResult(prioritizeMatchingRanges(accountRanges.orEmpty(), cardNumber))
                 }
             }
         }
@@ -191,6 +191,27 @@ class DefaultCardAccountRangeService(
             accountRanges = filteredAccountRanges,
             unfilteredAccountRanges = accountRanges
         )
+    }
+
+    /**
+     * The repository returns every range for the 6-digit BIN, and a BIN can mix PAN lengths across
+     * its sub-ranges. Consumers read the first range, so that range must be one that contains
+     * [cardNumber].
+     *
+     * If the BIN has ranges but none contains [cardNumber], we use the static data instead.
+     */
+    private fun prioritizeMatchingRanges(
+        accountRanges: List<AccountRange>,
+        cardNumber: CardNumber.Unvalidated
+    ): List<AccountRange> {
+        val (matchingRanges, otherRanges) = accountRanges.partition { it.binRange.matches(cardNumber) }
+        val fallbackRanges = if (matchingRanges.isEmpty() && otherRanges.isNotEmpty()) {
+            staticCardAccountRanges.filter(cardNumber)
+        } else {
+            emptyList()
+        }
+
+        return matchingRanges + fallbackRanges + otherRanges
     }
 
     private fun shouldQueryRepository(
