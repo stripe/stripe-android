@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -37,6 +37,8 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentOptionResource
+import com.stripe.android.paymentsheet.model.rememberPaymentOptionResource
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -634,8 +636,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
     @Poko
     class PaymentOptionDisplayData internal constructor(
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val imageLoader: suspend () -> Drawable,
+        private val paymentOptionResource: PaymentOptionResource,
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
          */
@@ -661,8 +662,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
         val mandateText: AnnotatedString?,
         private val _shippingDetails: AddressDetails?,
     ) {
-        private val iconDrawable: Drawable by lazy {
-            DelegateDrawable(imageLoader)
+        /**
+         * Loads the payment method image for the provided raw system theme. Appearance-based theme
+         * overrides are resolved internally.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        suspend fun loadIcon(isSystemDarkTheme: Boolean): Drawable {
+            return paymentOptionResource.load(isSystemDarkTheme)
         }
 
         /**
@@ -677,7 +684,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         val iconPainter: Painter
             @Composable
-            get() = rememberDrawablePainter(iconDrawable)
+            get() = rememberDrawablePainter(rememberPaymentOptionResource(paymentOptionResource))
     }
 
     /**
