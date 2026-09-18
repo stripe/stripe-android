@@ -5,6 +5,7 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
+import com.stripe.android.connect.webview.StripeConnectWebViewLayout
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 
@@ -22,6 +23,7 @@ internal class PaymentsView internal constructor(
         attrs = attrs,
         defStyleAttr = defStyleAttr,
         embeddedComponent = StripeEmbeddedComponent.PAYMENTS,
+        webViewLayout = StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE,
         embeddedComponentManager = embeddedComponentManager,
         listener = listener,
         props = props?.build(),

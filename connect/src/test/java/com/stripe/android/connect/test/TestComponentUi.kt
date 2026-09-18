@@ -11,6 +11,7 @@ import com.stripe.android.connect.StripeComponentView
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
+import com.stripe.android.connect.webview.StripeConnectWebViewLayout
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
@@ -58,6 +59,7 @@ internal class TestComponentView(
     attrs = null,
     defStyleAttr = 0,
     embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
+    webViewLayout = StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE,
     embeddedComponentManager = null,
     listener = null,
     props = null,
