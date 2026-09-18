@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.stripe.android.identity.R
 import com.stripe.android.identity.ui.IdentityTopBarState.CLOSE
 import com.stripe.android.identity.ui.IdentityTopBarState.GO_BACK
@@ -37,6 +39,8 @@ internal fun IdentityTopAppBar(
             }
         },
         backgroundColor = Color.Transparent,
+        contentColor = MaterialTheme.colors.onBackground,
+        elevation = 0.dp,
         windowInsets = WindowInsets.statusBars
     )
 }
