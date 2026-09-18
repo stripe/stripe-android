@@ -472,6 +472,7 @@ internal class WalletViewModel(
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
                         publishableKey = linkAccount.consumerPublishableKey!!,
+                        preCollectedConsent = null,
                     )
                 }
                 .fold(
