@@ -17,6 +17,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -144,6 +145,28 @@ internal class ExpressCheckoutElementTest {
         }
 
         intended(hasComponent(LinkActivity::class.java.name))
+    }
+
+
+    @Test
+    fun testGooglePayOnlyLoad() = runExpressCheckoutElementTest(
+        networkRule = networkRule,
+        assertions = { controller ->
+            assertThat(
+                controller.session.value?.availableExpressCheckoutPaymentMethods
+            ).containsExactly(
+                ExpressCheckoutElement.PaymentMethod.GooglePay()
+            )
+        },
+        configurationUpdates = {
+            it.linkConfiguration(
+                ExpressCheckoutElement.Configuration.LinkConfiguration()
+                    .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
+            )
+        }
+    ) { testContext ->
+        // Just testing load, no need to confirm.
+        testContext.markTestSucceeded()
     }
 
     private companion object {
