@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -67,15 +66,11 @@ internal fun BottomSheet() {
             }
             Column(
                 Modifier
-                    .heightIn(max = 400.dp)
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Column(
-                    Modifier
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    for (line in bottomSheetContent.lines) {
-                        BottomSheetLine(line)
-                    }
+                for (line in bottomSheetContent.lines) {
+                    BottomSheetLine(line)
                 }
             }
             Button(
@@ -85,7 +80,7 @@ internal fun BottomSheet() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(BOTTOM_SHEET_BUTTON_TAG)
-                    .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
+                    .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             ) {
                 Text(stringResource(id = R.string.stripe_close_button_text).uppercase())
             }

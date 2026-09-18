@@ -1,7 +1,11 @@
 package com.stripe.android.identity.navigation
 
 import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -80,277 +84,273 @@ internal fun IdentityNavGraph(
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
     }
-    Scaffold(
-        contentWindowInsets = WindowInsets.systemBars,
-        topBar = {
-            IdentityTopAppBar(topBarState, onTopBarNavigationClick)
+    val topBar: @Composable () -> Unit = {
+        IdentityTopAppBar(topBarState, onTopBarNavigationClick)
+    }
+    NavHost(
+        navController = navController,
+        startDestination = InitialLoadingDestination.destinationRoute.route
+    ) {
+        screen(DebugDestination.ROUTE, topBar) {
+            DebugScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+                verificationFlowFinishable = verificationFlowFinishable
+            )
         }
-    ) { contentPadding ->
-        NavHost(
-            navController = navController,
-            modifier = Modifier.padding(contentPadding),
-            startDestination = InitialLoadingDestination.destinationRoute.route
-        ) {
-            screen(DebugDestination.ROUTE) {
-                DebugScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    verificationFlowFinishable = verificationFlowFinishable
-                )
-            }
 
-            screen(InitialLoadingDestination.ROUTE) {
-                InitialLoadingScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    fallbackUrlLauncher = fallbackUrlLauncher
-                )
-            }
-            screen(IndividualWelcomeDestination.ROUTE) {
-                IndividualWelcomeScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel
-                )
-            }
-            screen(ConsentDestination.ROUTE) {
-                ConsentScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel
-                )
-            }
-            screen(DocWarmupDestination.ROUTE) {
-                DocWarmupScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    cameraPermissionEnsureable = cameraPermissionEnsureable
-                )
-            }
-            screen(DocumentScanDestination.ROUTE) {
-                val documentScanViewModel: DocumentScanViewModel =
-                    viewModel(factory = documentScanViewModelFactory)
-                ScanDestinationEffect(
-                    lifecycleOwner = it,
-                    identityScanViewModel = documentScanViewModel
-                )
-                DocumentScanScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    documentScanViewModel = documentScanViewModel,
-                )
-            }
-            screen(SelfieWarmupDestination.ROUTE) {
-                SelfieWarmupScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel
-                )
-            }
-            screen(SelfieDestination.ROUTE) {
-                val selfieScanViewModel: SelfieScanViewModel =
-                    viewModel(factory = selfieScanViewModelFactory)
+        screen(InitialLoadingDestination.ROUTE, topBar) {
+            InitialLoadingScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+                fallbackUrlLauncher = fallbackUrlLauncher
+            )
+        }
+        screen(IndividualWelcomeDestination.ROUTE, topBar) {
+            IndividualWelcomeScreen(
+                navController = navController,
+                identityViewModel = identityViewModel
+            )
+        }
+        screen(ConsentDestination.ROUTE, topBar) {
+            ConsentScreen(
+                navController = navController,
+                identityViewModel = identityViewModel
+            )
+        }
+        screen(DocWarmupDestination.ROUTE, topBar) {
+            DocWarmupScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+                cameraPermissionEnsureable = cameraPermissionEnsureable
+            )
+        }
+        screen(DocumentScanDestination.ROUTE, topBar) {
+            val documentScanViewModel: DocumentScanViewModel =
+                viewModel(factory = documentScanViewModelFactory)
+            ScanDestinationEffect(
+                lifecycleOwner = it,
+                identityScanViewModel = documentScanViewModel
+            )
+            DocumentScanScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+                documentScanViewModel = documentScanViewModel,
+            )
+        }
+        screen(SelfieWarmupDestination.ROUTE, topBar) {
+            SelfieWarmupScreen(
+                navController = navController,
+                identityViewModel = identityViewModel
+            )
+        }
+        screen(SelfieDestination.ROUTE, topBar) {
+            val selfieScanViewModel: SelfieScanViewModel =
+                viewModel(factory = selfieScanViewModelFactory)
 
-                ScanDestinationEffect(
-                    lifecycleOwner = it,
-                    identityScanViewModel = selfieScanViewModel
-                )
-                SelfieScanScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    selfieScanViewModel = selfieScanViewModel
-                )
-            }
-            screen(DocumentUploadDestination.ROUTE) {
-                UploadScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                )
-            }
-            screen(IndividualDestination.ROUTE) {
-                IndividualScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel
-                )
-            }
-            screen(ConfirmationDestination.ROUTE) {
-                ConfirmationScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    verificationFlowFinishable = verificationFlowFinishable
-                )
-            }
-            screen(CountryNotListedDestination.ROUTE) {
-                CountryNotListedScreen(
-                    isMissingID = CountryNotListedDestination.isMissingId(it),
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    verificationFlowFinishable = verificationFlowFinishable
-                )
-            }
-            screen(OTPDestination.ROUTE) {
-                OTPScreen(navController = navController, identityViewModel = identityViewModel)
-            }
-            screen(CameraPermissionDeniedDestination.ROUTE) {
-                val requireLiveCapture =
-                    identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
+            ScanDestinationEffect(
+                lifecycleOwner = it,
+                identityScanViewModel = selfieScanViewModel
+            )
+            SelfieScanScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+                selfieScanViewModel = selfieScanViewModel
+            )
+        }
+        screen(DocumentUploadDestination.ROUTE, topBar) {
+            UploadScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+            )
+        }
+        screen(IndividualDestination.ROUTE, topBar) {
+            IndividualScreen(
+                navController = navController,
+                identityViewModel = identityViewModel
+            )
+        }
+        screen(ConfirmationDestination.ROUTE, topBar) {
+            ConfirmationScreen(
+                navController = navController,
+                identityViewModel = identityViewModel,
+                verificationFlowFinishable = verificationFlowFinishable
+            )
+        }
+        screen(CountryNotListedDestination.ROUTE, topBar) {
+            CountryNotListedScreen(
+                isMissingID = CountryNotListedDestination.isMissingId(it),
+                navController = navController,
+                identityViewModel = identityViewModel,
+                verificationFlowFinishable = verificationFlowFinishable
+            )
+        }
+        screen(OTPDestination.ROUTE, topBar) {
+            OTPScreen(navController = navController, identityViewModel = identityViewModel)
+        }
+        screen(CameraPermissionDeniedDestination.ROUTE, topBar) {
+            val requireLiveCapture =
+                identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
 
-                ErrorScreen(
-                    identityViewModel = identityViewModel,
-                    title = stringResource(id = R.string.stripe_camera_permission),
-                    message1 = stringResource(id = R.string.stripe_grant_camera_permission_text),
-                    message2 =
-                    if (!requireLiveCapture) {
-                        stringResource(
-                            R.string.stripe_upload_file_generic_text
-                        )
-                    } else {
-                        null
-                    },
-                    topButton =
-                    if (!requireLiveCapture) {
-                        ErrorScreenButton(
-                            buttonText = stringResource(id = R.string.stripe_file_upload)
-                        ) {
-                            identityViewModel.screenTracker.screenTransitionStart(
-                                IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-                            )
-                            navController.navigateTo(
-                                DocumentUploadDestination
-                            )
-                        }
-                    } else {
-                        null
-                    },
-                    bottomButton = ErrorScreenButton(
-                        buttonText = stringResource(id = R.string.stripe_app_settings)
-                    ) {
-                        identityViewModel.identityAnalyticsRequestFactory
-                            .cameraPermissionAppSettingsClicked()
-                        appSettingsOpenable.openAppSettings()
-                        // navigate back to DocWarmup, so that when user is back to the app
-                        // from settings
-                        // the camera permission check can be triggered again from there.
-                        identityViewModel.screenTracker.screenTransitionStart(
-                            IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-                        )
-                        navController.navigateTo(DocWarmupDestination)
-                    }
-                )
-            }
-            screen(CouldNotCaptureDestination.ROUTE) {
-                val fromSelfie = CouldNotCaptureDestination.fromSelfie(it)
-                val requireLiveCapture =
-                    identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
-
-                ErrorScreen(
-                    identityViewModel = identityViewModel,
-                    title = stringResource(id = R.string.stripe_could_not_capture_title),
-                    message1 = stringResource(id = R.string.stripe_could_not_capture_body1),
-                    message2 = if (fromSelfie) {
-                        null
-                    } else if (!requireLiveCapture) {
-                        stringResource(R.string.stripe_could_not_capture_body2)
-                    } else {
-                        null
-                    },
-                    topButton = if (fromSelfie || requireLiveCapture) {
-                        null
-                    } else {
-                        ErrorScreenButton(
-                            buttonText = stringResource(id = R.string.stripe_upload_a_photo),
-                        ) {
-                            identityViewModel.screenTracker.screenTransitionStart(
-                                IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-                            )
-                            navController.navigateTo(
-                                DocumentUploadDestination
-                            )
-                        }
-                    },
-                    bottomButton =
+            ErrorScreen(
+                identityViewModel = identityViewModel,
+                title = stringResource(id = R.string.stripe_camera_permission),
+                message1 = stringResource(id = R.string.stripe_grant_camera_permission_text),
+                message2 =
+                if (!requireLiveCapture) {
+                    stringResource(
+                        R.string.stripe_upload_file_generic_text
+                    )
+                } else {
+                    null
+                },
+                topButton =
+                if (!requireLiveCapture) {
                     ErrorScreenButton(
-                        buttonText = stringResource(id = R.string.stripe_try_again)
+                        buttonText = stringResource(id = R.string.stripe_file_upload)
                     ) {
                         identityViewModel.screenTracker.screenTransitionStart(
                             IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                         )
                         navController.navigateTo(
-                            if (fromSelfie) {
-                                SelfieDestination
-                            } else {
-                                DocumentScanDestination
-                            }
+                            DocumentUploadDestination
                         )
                     }
-                )
-            }
-            screen(ErrorDestination.ROUTE) {
-                Log.d(
-                    ErrorDestination.TAG,
-                    "About to show error screen with error caused by ${identityViewModel.errorCause.value?.cause}"
-                )
-                ErrorScreen(
-                    identityViewModel = identityViewModel,
-                    title = ErrorDestination.errorTitle(it),
-                    message1 = ErrorDestination.errorContent(it),
-                    topButton = ErrorDestination.continueButtonContext(it)
-                        ?.let { (topButtonText, topButtonRequirement) ->
-                            ErrorScreenButton(buttonText = topButtonText) {
-                                coroutineScope.launch {
-                                    identityViewModel.postVerificationPageDataForForceConfirm(
-                                        requirementToForceConfirm = topButtonRequirement,
-                                        navController = navController
-                                    )
-                                }
-                            }
-                        },
-                    bottomButton = ErrorScreenButton(
-                        buttonText = ErrorDestination.backButtonText(it)
+                } else {
+                    null
+                },
+                bottomButton = ErrorScreenButton(
+                    buttonText = stringResource(id = R.string.stripe_app_settings)
+                ) {
+                    identityViewModel.identityAnalyticsRequestFactory
+                        .cameraPermissionAppSettingsClicked()
+                    appSettingsOpenable.openAppSettings()
+                    // navigate back to DocWarmup, so that when user is back to the app
+                    // from settings
+                    // the camera permission check can be triggered again from there.
+                    identityViewModel.screenTracker.screenTransitionStart(
+                        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+                    )
+                    navController.navigateTo(DocWarmupDestination)
+                }
+            )
+        }
+        screen(CouldNotCaptureDestination.ROUTE, topBar) {
+            val fromSelfie = CouldNotCaptureDestination.fromSelfie(it)
+            val requireLiveCapture =
+                identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
+
+            ErrorScreen(
+                identityViewModel = identityViewModel,
+                title = stringResource(id = R.string.stripe_could_not_capture_title),
+                message1 = stringResource(id = R.string.stripe_could_not_capture_body1),
+                message2 = if (fromSelfie) {
+                    null
+                } else if (!requireLiveCapture) {
+                    stringResource(R.string.stripe_could_not_capture_body2)
+                } else {
+                    null
+                },
+                topButton = if (fromSelfie || requireLiveCapture) {
+                    null
+                } else {
+                    ErrorScreenButton(
+                        buttonText = stringResource(id = R.string.stripe_upload_a_photo),
                     ) {
                         identityViewModel.screenTracker.screenTransitionStart(
                             IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                         )
-                        if (ErrorDestination.shouldFail(it)) {
-                            val failedReason = identityViewModel.errorCause.value
-                                ?: IllegalStateException("Unknown verification error")
-                            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                                isFromFallbackUrl = false,
-                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                                throwable = failedReason,
-                                lastScreenName = identityViewModel.analyticsLastScreenName
-                            )
-                            verificationFlowFinishable.finishWithResult(
-                                IdentityVerificationSheet.VerificationFlowResult.Failed(
-                                    failedReason
-                                )
-                            )
+                        navController.navigateTo(
+                            DocumentUploadDestination
+                        )
+                    }
+                },
+                bottomButton =
+                ErrorScreenButton(
+                    buttonText = stringResource(id = R.string.stripe_try_again)
+                ) {
+                    identityViewModel.screenTracker.screenTransitionStart(
+                        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+                    )
+                    navController.navigateTo(
+                        if (fromSelfie) {
+                            SelfieDestination
                         } else {
-                            val destination = ErrorDestination.backButtonDestination(it)
-                            if (destination == ErrorDestination.UNEXPECTED_ROUTE) {
-                                navController.navigateTo(ConsentDestination)
-                            } else {
-                                var shouldContinueNavigateUp = true
-                                while (
-                                    shouldContinueNavigateUp &&
-                                    navController.currentDestination?.route?.toRouteBase() !=
-                                    destination
-                                ) {
-                                    shouldContinueNavigateUp =
-                                        navController.clearDataAndNavigateUp(identityViewModel)
-                                }
+                            DocumentScanDestination
+                        }
+                    )
+                }
+            )
+        }
+        screen(ErrorDestination.ROUTE, topBar) {
+            Log.d(
+                ErrorDestination.TAG,
+                "About to show error screen with error caused by ${identityViewModel.errorCause.value?.cause}"
+            )
+            ErrorScreen(
+                identityViewModel = identityViewModel,
+                title = ErrorDestination.errorTitle(it),
+                message1 = ErrorDestination.errorContent(it),
+                topButton = ErrorDestination.continueButtonContext(it)
+                    ?.let { (topButtonText, topButtonRequirement) ->
+                        ErrorScreenButton(buttonText = topButtonText) {
+                            coroutineScope.launch {
+                                identityViewModel.postVerificationPageDataForForceConfirm(
+                                    requirementToForceConfirm = topButtonRequirement,
+                                    navController = navController
+                                )
+                            }
+                        }
+                    },
+                bottomButton = ErrorScreenButton(
+                    buttonText = ErrorDestination.backButtonText(it)
+                ) {
+                    identityViewModel.screenTracker.screenTransitionStart(
+                        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+                    )
+                    if (ErrorDestination.shouldFail(it)) {
+                        val failedReason = identityViewModel.errorCause.value
+                            ?: IllegalStateException("Unknown verification error")
+                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = false,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            throwable = failedReason,
+                            lastScreenName = identityViewModel.analyticsLastScreenName
+                        )
+                        verificationFlowFinishable.finishWithResult(
+                            IdentityVerificationSheet.VerificationFlowResult.Failed(
+                                failedReason
+                            )
+                        )
+                    } else {
+                        val destination = ErrorDestination.backButtonDestination(it)
+                        if (destination == ErrorDestination.UNEXPECTED_ROUTE) {
+                            navController.navigateTo(ConsentDestination)
+                        } else {
+                            var shouldContinueNavigateUp = true
+                            while (
+                                shouldContinueNavigateUp &&
+                                navController.currentDestination?.route?.toRouteBase() !=
+                                destination
+                            ) {
+                                shouldContinueNavigateUp =
+                                    navController.clearDataAndNavigateUp(identityViewModel)
                             }
                         }
                     }
-                )
-            }
+                }
+            )
         }
     }
 }
 
 @ExperimentalMaterialApi
 /**
- * Built a composable screen with ModalBottomSheetLayout
+ * Builds a screen with a sheet that covers its app bar and system bar insets.
  */
 private fun NavGraphBuilder.screen(
     route: IdentityTopLevelDestination.DestinationRoute,
+    topBar: @Composable () -> Unit,
     content: @Composable (NavBackStackEntry) -> Unit
 ) {
     composable(
@@ -360,14 +360,14 @@ private fun NavGraphBuilder.screen(
         val bottomSheetViewModel = viewModel<BottomSheetViewModel>()
         val bottomSheetState by bottomSheetViewModel.bottomSheetState.collectAsState()
         val modalSheetState = rememberModalBottomSheetState(
-            initialValue = ModalBottomSheetValue.Hidden
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
         )
 
-        // Required when bottomsheet is dismissed by swiping down or clicking outside, need to
-        // update the state inside viewmodel
+        // Clear content only after hiding, including dismissals by swiping down or tapping the scrim.
         LaunchedEffect(modalSheetState.isVisible) {
             if (modalSheetState.isVisible.not()) {
-                bottomSheetViewModel.dismissBottomSheet()
+                bottomSheetViewModel.onBottomSheetHidden()
             }
         }
 
@@ -376,12 +376,17 @@ private fun NavGraphBuilder.screen(
                 modalSheetState.show()
             } else {
                 modalSheetState.hide()
+                if (!modalSheetState.isVisible) {
+                    bottomSheetViewModel.onBottomSheetHidden()
+                }
             }
         }
 
         ModalBottomSheetLayout(
             sheetContent = {
-                BottomSheet()
+                Column(Modifier.navigationBarsPadding()) {
+                    BottomSheet()
+                }
             },
             sheetState = modalSheetState,
             sheetGesturesEnabled = true,
@@ -390,7 +395,18 @@ private fun NavGraphBuilder.screen(
                 topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
             )
         ) {
-            content(navBackStackEntry)
+            Scaffold(
+                contentWindowInsets = WindowInsets.systemBars,
+                topBar = topBar
+            ) { contentPadding ->
+                Box(
+                    Modifier
+                        .padding(contentPadding)
+                        .consumeWindowInsets(contentPadding)
+                ) {
+                    content(navBackStackEntry)
+                }
+            }
         }
     }
 }
