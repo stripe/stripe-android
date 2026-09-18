@@ -6,6 +6,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.identity.R
@@ -35,6 +36,7 @@ internal fun IdentityTopAppBar(
                 )
             }
         },
+        backgroundColor = Color.Transparent,
         windowInsets = WindowInsets.statusBars
     )
 }
