@@ -15,7 +15,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
@@ -350,7 +349,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                 when {
                     session.isCustomManualEntryError() -> {
-                        FinancialConnections.emitEvent(Name.MANUAL_ENTRY_INITIATED)
+                        eventTracker.emitEvent(Name.MANUAL_ENTRY_INITIATED, Metadata())
                         finishWithResult(
                             Failed(error = CustomManualEntryRequiredError())
                         )
@@ -369,7 +368,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
 
                     else -> {
-                        FinancialConnections.emitEvent(Name.CANCEL)
+                        eventTracker.emitEvent(Name.CANCEL, Metadata())
                         finishWithResult(Canceled)
                     }
                 }
@@ -391,7 +390,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     private fun handleFinancialConnectionsCompletion(session: FinancialConnectionsSession) {
-        FinancialConnections.emitEvent(
+        eventTracker.emitEvent(
             name = Name.SUCCESS,
             metadata = Metadata(
                 manualEntry = session.paymentAccount is BankAccount,

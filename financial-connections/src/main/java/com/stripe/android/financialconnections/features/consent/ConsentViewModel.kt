@@ -6,10 +6,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -107,7 +107,7 @@ internal class ConsentViewModel @AssistedInject constructor(
         suspend {
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
-            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
+            eventTracker.emitEvent(Name.CONSENT_ACQUIRED, Metadata())
 
             val destination = determineNavigationDestination(updatedManifest)
             navigationManager.tryNavigateTo(destination(referrer = Pane.CONSENT))

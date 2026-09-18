@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
@@ -1036,6 +1037,7 @@ class FinancialConnectionsSheetViewModelTest {
             eventReporter = eventReporter,
             nativeRouter = nativeRouter,
             analyticsTracker = analyticsTracker,
+            eventContext = FinancialConnectionsEventContext(initialState.manifest ?: syncResponse.manifest),
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),

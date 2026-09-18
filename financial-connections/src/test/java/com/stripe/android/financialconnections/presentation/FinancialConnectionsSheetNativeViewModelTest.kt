@@ -10,9 +10,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.CoroutineTestRule
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -46,14 +45,13 @@ import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.assertIs
 
@@ -76,12 +74,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
-    private val liveEvents = mutableListOf<FinancialConnectionsEvent>()
-
-    @Before
-    fun setup() {
-        FinancialConnections.setEventListener { liveEvents += it }
-    }
+    private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
 
     @Test
     fun `nativeAuthFlowCoordinator - when manual entry termination, finish with CustomManualEntryRequiredError`() =
@@ -133,11 +126,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
 
         // emits live event
-        assertThat(liveEvents).contains(
-            FinancialConnectionsEvent(
-                name = Name.SUCCESS,
-                metadata = Metadata(manualEntry = false)
-            )
+        verify(eventTracker).emitEvent(
+            name = Name.SUCCESS,
+            metadata = Metadata(manualEntry = false)
         )
     }
 
@@ -161,11 +152,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
 
         // emits live event
-        assertThat(liveEvents).contains(
-            FinancialConnectionsEvent(
-                name = Name.CANCEL,
-                metadata = Metadata()
-            )
+        verify(eventTracker).emitEvent(
+            name = Name.CANCEL,
+            metadata = Metadata()
         )
     }
 
@@ -195,11 +184,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
 
         // emits live event
-        assertThat(liveEvents).contains(
-            FinancialConnectionsEvent(
-                name = Name.MANUAL_ENTRY_INITIATED,
-                metadata = Metadata()
-            )
+        verify(eventTracker).emitEvent(
+            name = Name.MANUAL_ENTRY_INITIATED,
+            metadata = Metadata()
         )
     }
 
@@ -547,11 +534,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
     }
 
-    @After
-    fun tearDown() {
-        liveEvents.clear()
-    }
-
     private fun stateWithLinkBrand(linkBrand: LinkBrand) = FinancialConnectionsSheetNativeState(
         flowType = FinancialConnectionsSheetFlowType.ForData,
         webAuthFlow = WebAuthFlowState.Uninitialized,
@@ -586,7 +568,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         currentLinkBrand: CurrentLinkBrand =
             FakeCurrentLinkBrand(initialState.linkBrand),
     ) = FinancialConnectionsSheetNativeViewModel(
-        eventTracker = mock(),
+        eventTracker = eventTracker,
         activityRetainedComponent = mock(),
         applicationId = applicationId,
         uriUtils = UriUtils(Logger.noop(), mock()),

@@ -24,9 +24,13 @@ import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsAnalyticsEventSender
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEventSender
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventEmitter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
@@ -138,17 +142,27 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         fun providesAnalyticsTracker(
-            context: Application,
             getOrFetchSync: GetOrFetchSync,
+            analyticsSender: FinancialConnectionsAnalyticsEventSender,
+            eventEmitter: FinancialConnectionsEventEmitter
+        ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
+            getOrFetchSync = getOrFetchSync,
+            analyticsSender = analyticsSender,
+            eventEmitter = eventEmitter
+        )
+
+        @Provides
+        @ActivityRetainedScope
+        fun providesAnalyticsEventSender(
+            context: Application,
             locale: Locale?,
             configuration: FinancialConnectionsSheetConfiguration,
-            requestExecutor: AnalyticsRequestV2Executor,
-        ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
+            requestExecutor: AnalyticsRequestV2Executor
+        ): FinancialConnectionsAnalyticsEventSender = DefaultFinancialConnectionsAnalyticsEventSender(
             context = context,
             configuration = configuration,
-            getOrFetchSync = getOrFetchSync,
             locale = locale ?: Locale.getDefault(),
-            requestExecutor = requestExecutor,
+            requestExecutor = requestExecutor
         )
 
         @Provides
@@ -193,10 +207,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesIsWorkManagerAvailable(
-            getOrFetchSync: GetOrFetchSync,
+            eventContext: FinancialConnectionsEventContext,
         ): IsWorkManagerAvailable {
             return RealIsWorkManagerAvailable(
-                isEnabledForMerchant = { getOrFetchSync().manifest.enableWorkManager() },
+                isEnabledForMerchant = { eventContext.manifest?.enableWorkManager() == true },
             )
         }
 

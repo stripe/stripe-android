@@ -63,7 +63,9 @@ public final class com/stripe/android/financialconnections/analytics/FinancialCo
 	public static final field $stable I
 	public final fun component1 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
 	public final fun component2 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public final fun component3 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFinancialConnectionsSessionId ()Ljava/lang/String;
 	public final fun getMetadata ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
 	public final fun getName ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
 	public fun hashCode ()I
