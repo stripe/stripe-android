@@ -1,12 +1,14 @@
 package com.stripe.android.link.theme
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-internal data class LinkTypography(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+data class LinkTypography(
     val title: TextStyle,
     val body: TextStyle,
     val bodyEmphasized: TextStyle,
