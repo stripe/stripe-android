@@ -196,6 +196,12 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     @Test
     fun `new selection requiring a form survives recreation and back returns to the list`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
     ) { scenario ->
         formPage.waitUntilVisible()
 
