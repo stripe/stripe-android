@@ -310,6 +310,9 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -329,6 +332,9 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -553,6 +559,8 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
+                    checkoutSessionResponse = null,
                 )
             ),
             onContinueClick = {},
@@ -733,6 +741,8 @@ internal class EmbeddedNavigatorTest {
                 processingState = PrimaryButtonProcessingState.Processing,
                 isProcessing = true,
                 shouldDisplayLockIcon = true,
+                pendingPaymentMethodId = null,
+                checkoutSessionResponse = null,
             )
         )
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen(
@@ -900,6 +910,8 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
+                    checkoutSessionResponse = null,
                 )
             ),
             onContinueClick = {},
@@ -921,6 +933,8 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
+                    checkoutSessionResponse = null,
                 )
             ),
             onContinueClick = {},
@@ -941,6 +955,8 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
+                    checkoutSessionResponse = null,
                 )
             ),
             onContinueClick = {},

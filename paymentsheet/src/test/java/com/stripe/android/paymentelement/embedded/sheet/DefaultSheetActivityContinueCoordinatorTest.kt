@@ -50,11 +50,12 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
         continueCoordinator.onContinue()
+        testScope.runCurrent()
 
         assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
             completeResult(checkoutSessionResponse = null)
         )
-        stateHolder.updateProcessingTurbine.expectNoEvents()
+        assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
     }
 
     @Test

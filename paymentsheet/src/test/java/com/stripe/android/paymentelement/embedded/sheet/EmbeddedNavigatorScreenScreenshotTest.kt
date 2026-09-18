@@ -64,6 +64,9 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
                     isEditing = false,
                     canEdit = true,
                     linkBrand = LinkBrand.Link,
+                    isProcessing = false,
+                    pendingPaymentMethodId = null,
+                    error = null,
                 ),
             ),
         )
@@ -213,6 +216,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            sheetTaxRegionUpdaterProvider = Provider { error("Not expected") },
         )
     }
 

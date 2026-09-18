@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
@@ -359,6 +360,7 @@ class DefaultManageScreenInteractorTest {
         isEditing: Boolean = false,
         configuredLinkBrand: LinkBrand = LinkBrand.Link,
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
+        navigateBackAfterSelection: Boolean = true,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
@@ -369,6 +371,9 @@ class DefaultManageScreenInteractorTest {
         val dispatcher = UnconfinedTestDispatcher()
         val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
         val linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = null))
+        val processing = MutableStateFlow(false)
+        val pendingPaymentMethodId = MutableStateFlow<String?>(null)
+        val error = MutableStateFlow<ResolvableString?>(null)
 
         val toggleEditTurbine = Turbine<Unit>()
         val onSelectPaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
@@ -393,6 +398,10 @@ class DefaultManageScreenInteractorTest {
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
             linkAccount = linkAccount,
+            processing = processing,
+            pendingPaymentMethodId = pendingPaymentMethodId,
+            error = error,
+            navigateBackAfterSelection = navigateBackAfterSelection,
             dispatcher = dispatcher
         )
         closeInteractorRule.track(interactor)

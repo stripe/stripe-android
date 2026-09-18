@@ -4,14 +4,17 @@ import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -44,6 +47,9 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         assertThat(
@@ -58,6 +64,68 @@ class ManageScreenUITest {
     }
 
     @Test
+    fun pendingSelection_disablesRows_showsOneSpinner_andPreservesSelection() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = displayableSavedPaymentMethods[1],
+            isEditing = false,
+            canEdit = true,
+            linkBrand = LinkBrand.Link,
+            isProcessing = true,
+            pendingPaymentMethodId = displayableSavedPaymentMethods[0].paymentMethod.id,
+            error = null,
+        )
+    ) {
+        for (paymentMethod in displayableSavedPaymentMethods) {
+            composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${paymentMethod.paymentMethod.id}"
+            ).assertIsNotEnabled()
+        }
+
+        composeRule.onAllNodesWithTag(
+            TEST_TAG_MANAGE_SCREEN_PENDING,
+            useUnmergedTree = true,
+        ).assertCountEquals(1)
+        composeRule.onNodeWithTag(
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[1].paymentMethod.id}"
+        ).assertIsSelected()
+    }
+
+    @Test
+    fun processing_preservesTrailingAffordances_inEditMode() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = null,
+            isEditing = true,
+            canEdit = true,
+            linkBrand = LinkBrand.Link,
+            isProcessing = true,
+            pendingPaymentMethodId = displayableSavedPaymentMethods[0].paymentMethod.id,
+            error = null,
+        )
+    ) {
+        for (paymentMethod in displayableSavedPaymentMethods) {
+            getChevronIcon(paymentMethod).assertExists()
+        }
+    }
+
+    @Test
+    fun error_isDisplayedInline() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = displayableSavedPaymentMethods[1],
+            isEditing = false,
+            canEdit = true,
+            linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = "Tax region update failed".resolvableString,
+        )
+    ) {
+        composeRule.onNodeWithText("Tax region update failed").assertExists()
+    }
+
+    @Test
     fun savedPaymentMethod_hasCorrectContentDescription() {
         val savedCard = PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = false)
         runScenario(
@@ -69,6 +137,9 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -87,6 +158,9 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         assertThat(
@@ -117,6 +191,9 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -137,6 +214,9 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -154,6 +234,9 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         assertThat(
@@ -176,6 +259,9 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -199,6 +285,9 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                pendingPaymentMethodId = null,
+                error = null,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -221,6 +310,9 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -238,6 +330,9 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            pendingPaymentMethodId = null,
+            error = null,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()

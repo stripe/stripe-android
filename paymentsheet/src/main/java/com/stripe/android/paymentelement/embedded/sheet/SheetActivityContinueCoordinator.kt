@@ -31,15 +31,9 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
 
     override fun onContinue() {
         val selection = selectionHolder.selection.value
-        val taxRegionUpdate = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
-        if (taxRegionUpdate == null) {
-            stateHolder.setResult(createResult(selection, checkoutSessionResponse = null))
-            return
-        }
-
         coroutineScope.launch {
             stateHolder.updateProcessing(true)
-            taxRegionUpdate().fold(
+            taxRegionUpdater.updateIfNeeded(paymentMethodMetadata, selection).fold(
                 onSuccess = { response ->
                     stateHolder.setResult(createResult(selection, response))
                 },

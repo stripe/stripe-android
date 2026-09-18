@@ -33,6 +33,9 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
                     )
                 ),
             )
@@ -50,6 +53,9 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
                     )
                 ),
             )
@@ -67,6 +73,9 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
                     )
                 ),
             )
@@ -84,6 +93,9 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
                     )
                 ),
             )
@@ -103,6 +115,9 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
                     )
                 ),
             )
@@ -136,6 +151,9 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
                     )
                 ),
             )

@@ -130,7 +130,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            checkoutSessionResponse = null,
+            checkoutSessionResponse = sheetActivityStateHolder.state.value.checkoutSessionResponse,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             launchMode = launchMode,
         )
