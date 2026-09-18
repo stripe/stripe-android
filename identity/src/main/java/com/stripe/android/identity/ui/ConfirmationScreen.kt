@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -128,7 +127,10 @@ internal fun ConfirmationScreen(
                     )
                 )
             }
-            Button(
+            IdentityButton(
+                text = successPage.buttonText,
+                uppercase = true,
+                enabled = true,
                 onClick = {
                     identityViewModel.sendSucceededAnalyticsRequestForNative()
                     verificationFlowFinishable.finishWithResult(
@@ -140,9 +142,7 @@ internal fun ConfirmationScreen(
                     .semantics {
                         testTag = CONFIRMATION_BUTTON_TAG
                     }
-            ) {
-                Text(text = successPage.buttonText.uppercase())
-            }
+            )
         }
     }
 }

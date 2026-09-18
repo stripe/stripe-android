@@ -235,6 +235,7 @@ private fun TrainingConsentActions(
     LoadingButton(
         modifier = Modifier.testTag(SELFIE_ALLOW_BUTTON_TAG),
         text = stringResource(id = R.string.stripe_allow),
+        uppercase = false,
         state = when (selectedTrainingConsent) {
             true -> LoadingButtonState.Loading
             false -> LoadingButtonState.Disabled
@@ -247,6 +248,7 @@ private fun TrainingConsentActions(
     LoadingTextButton(
         modifier = Modifier.testTag(SELFIE_DECLINE_BUTTON_TAG),
         text = declineButtonText ?: stringResource(id = R.string.stripe_decline),
+        uppercase = false,
         state = when (selectedTrainingConsent) {
             true -> LoadingButtonState.Disabled
             false -> LoadingButtonState.Loading
@@ -264,7 +266,8 @@ private fun ContinueAction(
 ) {
     LoadingButton(
         modifier = Modifier.testTag(SELFIE_CONTINUE_BUTTON_TAG),
-        text = stringResource(id = R.string.stripe_kontinue).uppercase(),
+        text = stringResource(id = R.string.stripe_kontinue),
+        uppercase = true,
         state = if (isLoading) {
             LoadingButtonState.Loading
         } else {

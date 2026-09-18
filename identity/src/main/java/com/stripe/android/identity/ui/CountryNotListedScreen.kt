@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -75,7 +74,10 @@ internal fun CountryNotListedScreen(
                     isMissingID = isMissingID
                 )
             }
-            Button(
+            IdentityButton(
+                text = countryNotListedPage.cancelButtonText,
+                uppercase = true,
+                enabled = true,
                 onClick = {
                     identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                         isFromFallbackUrl = false,
@@ -89,9 +91,7 @@ internal fun CountryNotListedScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(COUNTRY_NOT_LISTED_CANCEL_BUTTON_TAG)
-            ) {
-                Text(text = countryNotListedPage.cancelButtonText.uppercase())
-            }
+            )
         }
     }
 }
