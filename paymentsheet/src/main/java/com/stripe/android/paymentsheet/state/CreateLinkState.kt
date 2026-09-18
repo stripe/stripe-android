@@ -275,6 +275,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
     ) = LinkConfiguration(
+        // TODO-codex: update new field value to indicate whether link will ever be displayed
         stripeIntent = elementsSession.stripeIntent,
         merchantName = configuration.merchantDisplayName,
         sellerBusinessName = initializationMode.sellerBusinessName,
