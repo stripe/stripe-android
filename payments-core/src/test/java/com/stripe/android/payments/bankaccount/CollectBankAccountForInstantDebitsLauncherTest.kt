@@ -17,31 +17,6 @@ class CollectBankAccountForInstantDebitsLauncherTest {
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
     @Test
-    fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher()
-
-        launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-            clientSecret = CLIENT_SECRET,
-            configuration = CONFIGURATION,
-        )
-
-        verify(mockHostActivityLauncher).launch(
-            CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-                clientSecret = CLIENT_SECRET,
-                configuration = CONFIGURATION,
-                attachToIntent = true,
-                hostedSurface = HOSTED_SURFACE,
-                financialConnectionsAvailability = Full,
-                preCollectedConsent = null
-            )
-        )
-    }
-
-    @Test
     fun `presentWithPaymentIntent - ignores preCollectedConsent for hosted surface`() {
         val launcher = makeLauncher()
         val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
@@ -59,31 +34,6 @@ class CollectBankAccountForInstantDebitsLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-                clientSecret = CLIENT_SECRET,
-                configuration = CONFIGURATION,
-                attachToIntent = true,
-                hostedSurface = HOSTED_SURFACE,
-                financialConnectionsAvailability = Full,
-                preCollectedConsent = null
-            )
-        )
-    }
-
-    @Test
-    fun `presentWithSetupIntent - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher()
-
-        launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-            clientSecret = CLIENT_SECRET,
-            configuration = CONFIGURATION,
-        )
-
-        verify(mockHostActivityLauncher).launch(
-            CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = PUBLISHABLE_KEY,
                 stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
@@ -122,64 +72,6 @@ class CollectBankAccountForInstantDebitsLauncherTest {
                 hostedSurface = HOSTED_SURFACE,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null
-            )
-        )
-    }
-
-    @Test
-    fun `presentWithDeferredPayment - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher()
-
-        launcher.presentWithDeferredPayment(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-            configuration = CONFIGURATION,
-            elementsSessionId = "elements_session_id",
-            customerId = "customer_id",
-            onBehalfOf = "on_behalf_of_id",
-            amount = 1000,
-            currency = "usd"
-        )
-
-        verify(mockHostActivityLauncher).launch(
-            CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-                configuration = CONFIGURATION,
-                elementsSessionId = "elements_session_id",
-                customerId = "customer_id",
-                onBehalfOf = "on_behalf_of_id",
-                amount = 1000,
-                currency = "usd",
-                hostedSurface = HOSTED_SURFACE,
-                financialConnectionsAvailability = Full
-            )
-        )
-    }
-
-    @Test
-    fun `presentWithDeferredSetup - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher()
-
-        launcher.presentWithDeferredSetup(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-            configuration = CONFIGURATION,
-            elementsSessionId = "elements_session_id",
-            customerId = "customer_id",
-            onBehalfOf = "on_behalf_of_id",
-        )
-
-        verify(mockHostActivityLauncher).launch(
-            CollectBankAccountContract.Args.ForDeferredSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-                configuration = CONFIGURATION,
-                elementsSessionId = "elements_session_id",
-                customerId = "customer_id",
-                onBehalfOf = "on_behalf_of_id",
-                hostedSurface = HOSTED_SURFACE,
-                financialConnectionsAvailability = Full
             )
         )
     }
