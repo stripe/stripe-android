@@ -4,6 +4,9 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED] Added support for Bizum.
 
+### Identity
+* [FIXED][14617](https://github.com/stripe/stripe-android/pull/14617) Updated the top app bar to use the host app background color instead of its primary color.
+
 ## 23.19.0 - 2026-09-15
 
 ### All SDKs
