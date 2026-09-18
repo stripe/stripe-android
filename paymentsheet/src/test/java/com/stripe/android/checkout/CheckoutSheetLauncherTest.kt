@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -459,6 +460,78 @@ internal class CheckoutSheetLauncherTest {
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
+    fun `manageSheetLauncher commits refreshed response and selection before callback`() = testScenario(
+        immediateActionSelection = Turbine(),
+    ) {
+        val oldSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val newSelection = PaymentSelection.Saved(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_new")
+        )
+        val response = CheckoutSessionResponseFactory.create(id = "cs_refreshed", amount = 1200L)
+        selectionHolder.setSelection(oldSelection)
+        sessionRefresher.enqueueRefreshAction {
+            assertThat(selectionHolder.selection.value).isEqualTo(oldSelection)
+        }
+
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            selection = newSelection,
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = true,
+            launchMode = EmbeddedLaunchMode.Manage,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(
+            FakeCheckoutSessionRefresher.Call.CommitWithSelection(response, newSelection)
+        )
+        assertThat(requireNotNull(immediateActionSelection).awaitItem()).isEqualTo(newSelection)
+        assertThat(selectionHolder.selection.value).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `manageSheetLauncher preserves old selection when refreshed commit fails`() = testScenario(
+        immediateActionSelection = Turbine(),
+    ) {
+        val oldSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val newSelection = PaymentSelection.Saved(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_new")
+        )
+        val response = CheckoutSessionResponseFactory.create(id = "cs_refreshed")
+        val expectedError = IllegalStateException("Refresh failed")
+        selectionHolder.setSelection(oldSelection)
+        sessionRefresher.enqueueRefreshAction { throw expectedError }
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(
+            EmbeddedActivityResult.Complete(
+                previousNewSelections = Bundle(),
+                customerState = null,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
+                selection = newSelection,
+                hasBeenConfirmed = false,
+                checkoutSessionResponse = response,
+                shouldInvokeSelectionCallback = true,
+                launchMode = EmbeddedLaunchMode.Manage,
+            )
+        )
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(
+            FakeCheckoutSessionRefresher.Call.CommitWithSelection(response, newSelection)
+        )
+        assertThat(selectionHolder.selection.value).isEqualTo(oldSelection)
+        requireNotNull(immediateActionSelection).expectNoEvents()
+        assertThat(logger.errorLogs).containsExactly(
+            "Failed to refresh the checkout session after selecting a saved payment method." to expectedError
+        )
     }
 
     @Test
@@ -970,6 +1043,7 @@ internal class CheckoutSheetLauncherTest {
     @Suppress("LongMethod")
     private fun testScenario(
         promotions: List<PaymentMethodMessagePromotion>? = null,
+        immediateActionSelection: Turbine<PaymentSelection?>? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var immediateActionInvoked = false
@@ -1029,7 +1103,10 @@ internal class CheckoutSheetLauncherTest {
                     productUsage = setOf("Checkout"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-                    rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
+                    rowSelectionImmediateActionHandler = {
+                        immediateActionInvoked = true
+                        immediateActionSelection?.add(selectionHolder.selection.value)
+                    },
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(promotions),
                 )
             }
@@ -1053,6 +1130,7 @@ internal class CheckoutSheetLauncherTest {
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
                 immediateActionWasInvoked = { immediateActionInvoked },
+                immediateActionSelection = immediateActionSelection,
                 sessionRefresher = sessionRefresher,
                 logger = logger,
                 operationCoordinator = operationCoordinator,
@@ -1081,6 +1159,7 @@ internal class CheckoutSheetLauncherTest {
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
         val immediateActionWasInvoked: () -> Boolean,
+        val immediateActionSelection: Turbine<PaymentSelection?>?,
         val sessionRefresher: FakeCheckoutSessionRefresher,
         val logger: FakeLogger,
         val operationCoordinator: CheckoutOperationCoordinator,

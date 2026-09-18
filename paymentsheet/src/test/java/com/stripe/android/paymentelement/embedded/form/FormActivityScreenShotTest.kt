@@ -151,6 +151,7 @@ internal class FormActivityScreenShotTest {
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            sheetTaxRegionUpdaterProvider = Provider { error("Not expected") },
         )
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = false),
@@ -235,6 +236,7 @@ internal class FormActivityScreenShotTest {
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            sheetTaxRegionUpdaterProvider = Provider { error("Not expected") },
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

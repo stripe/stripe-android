@@ -5,13 +5,18 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
@@ -31,6 +36,8 @@ import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirmi
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -43,6 +50,7 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -242,6 +250,84 @@ internal class DefaultSheetActivityStateHolderTest {
             assertThat(canceledState.error).isNull()
             assertThat(canceledState.isProcessing).isFalse()
         }
+    }
+
+    @Test
+    fun `saved payment method selection keeps old selection pending and retains refreshed response`() = testScenario(
+        paymentMethodMetadataOverride = checkoutSessionPaymentMethodMetadata(),
+    ) {
+        val oldSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val newSelection = savedPaymentMethodSelection("pm_new")
+        val refreshedResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_refreshed",
+            amount = 1200L,
+        )
+        selectionHolder.setSelection(oldSelection)
+
+        stateHolder.selectSavedPaymentMethod(newSelection)
+
+        assertThat(selectionHolder.selection.value).isEqualTo(oldSelection)
+        assertThat(stateHolder.state.value.isProcessing).isTrue()
+        assertThat(stateHolder.state.value.pendingPaymentMethodId).isEqualTo("pm_new")
+        assertThat(stateHolder.state.value.error).isNull()
+
+        val updateCall = taxRegionUpdater.calls.awaitItem()
+        updateCall.response.complete(Result.success(refreshedResponse))
+        testScope.runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(newSelection)
+        assertThat(stateHolder.state.value.checkoutSessionResponse).isEqualTo(refreshedResponse)
+        assertThat(stateHolder.state.value.isProcessing).isTrue()
+        assertThat(navigator.result.replayCache).containsExactly(true)
+    }
+
+    @Test
+    fun `failed saved payment method selection preserves old selection and shows retryable error`() = testScenario(
+        paymentMethodMetadataOverride = checkoutSessionPaymentMethodMetadata(),
+    ) {
+        val oldSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val newSelection = savedPaymentMethodSelection("pm_new")
+        val error = IllegalStateException("Tax region update failed")
+        selectionHolder.setSelection(oldSelection)
+
+        stateHolder.selectSavedPaymentMethod(newSelection)
+        val updateCall = taxRegionUpdater.calls.awaitItem()
+        updateCall.response.complete(Result.failure(error))
+        testScope.runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(oldSelection)
+        assertThat(stateHolder.state.value.isProcessing).isFalse()
+        assertThat(stateHolder.state.value.pendingPaymentMethodId).isNull()
+        assertThat(stateHolder.state.value.error).isEqualTo(error.stripeErrorMessage())
+        assertThat(navigator.result.replayCache).isEmpty()
+    }
+
+    @Test
+    fun `retrying saved payment method selection clears error and can complete`() = testScenario(
+        paymentMethodMetadataOverride = checkoutSessionPaymentMethodMetadata(),
+    ) {
+        val oldSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val newSelection = savedPaymentMethodSelection("pm_new")
+        selectionHolder.setSelection(oldSelection)
+
+        stateHolder.selectSavedPaymentMethod(newSelection)
+        val failedUpdateCall = taxRegionUpdater.calls.awaitItem()
+        failedUpdateCall.response.complete(Result.failure(IllegalStateException("Try again")))
+        testScope.runCurrent()
+        assertThat(stateHolder.state.value.error).isNotNull()
+
+        stateHolder.selectSavedPaymentMethod(newSelection)
+
+        assertThat(stateHolder.state.value.isProcessing).isTrue()
+        assertThat(stateHolder.state.value.pendingPaymentMethodId).isEqualTo("pm_new")
+        assertThat(stateHolder.state.value.error).isNull()
+
+        val successfulUpdateCall = taxRegionUpdater.calls.awaitItem()
+        successfulUpdateCall.response.complete(Result.success(CheckoutSessionResponseFactory.create()))
+        testScope.runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(newSelection)
+        assertThat(navigator.result.replayCache).containsExactly(true)
     }
 
     @Test
@@ -621,10 +707,13 @@ internal class DefaultSheetActivityStateHolderTest {
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
         val navigator: EmbeddedNavigator,
+        val testScope: TestScope,
+        val taxRegionUpdater: DeferredSheetTaxRegionUpdater,
     )
 
     private fun testScenario(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        paymentMethodMetadataOverride: PaymentMethodMetadata? = null,
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
@@ -637,9 +726,11 @@ internal class DefaultSheetActivityStateHolderTest {
         initialBackStack: List<EmbeddedNavigator.Screen> = listOf(initialScreen),
         savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory =
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
+        taxRegionUpdater: DeferredSheetTaxRegionUpdater = DeferredSheetTaxRegionUpdater(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
+        val paymentMethodMetadata = paymentMethodMetadataOverride
+            ?: PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
@@ -664,6 +755,7 @@ internal class DefaultSheetActivityStateHolderTest {
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
+            sheetTaxRegionUpdaterProvider = taxRegionUpdater.provider,
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
@@ -682,7 +774,30 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
+            testScope = viewModelScope,
+            taxRegionUpdater = taxRegionUpdater,
         ).block()
+        taxRegionUpdater.validate()
+    }
+
+    private class DeferredSheetTaxRegionUpdater {
+        val calls = Turbine<Call>()
+
+        val provider: Provider<SheetTaxRegionUpdater> = Provider {
+            SheetTaxRegionUpdater { _, _, _ ->
+                val call = Call(CompletableDeferred())
+                calls.add(call)
+                call.response.await()
+            }
+        }
+
+        fun validate() {
+            calls.ensureAllEventsConsumed()
+        }
+
+        data class Call(
+            val response: CompletableDeferred<Result<CheckoutSessionResponse?>>,
+        )
     }
 
     private class RecordingSavedPaymentMethodConfirmInteractorFactory(
@@ -752,6 +867,8 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
+                    pendingPaymentMethodId = null,
+                    checkoutSessionResponse = null,
                 )
             ),
             onContinueClick = {},
@@ -769,10 +886,43 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
+                    pendingPaymentMethodId = null,
+                    checkoutSessionResponse = null,
                 )
             ),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
+        )
+    }
+
+    private fun checkoutSessionPaymentMethodMetadata(): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_test",
+                instancesKey = "test_instances_key",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    id = "cs_test",
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            ),
+        )
+    }
+
+    private fun savedPaymentMethodSelection(id: String): PaymentSelection.Saved {
+        return PaymentSelection.Saved(
+            CARD_PAYMENT_METHOD.copy(
+                id = id,
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        postalCode = "94103",
+                        state = "CA",
+                    ),
+                ),
+            ),
         )
     }
 

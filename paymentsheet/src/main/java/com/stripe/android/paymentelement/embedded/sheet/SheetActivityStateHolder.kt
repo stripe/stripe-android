@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
@@ -16,8 +17,10 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -45,6 +48,7 @@ internal interface SheetActivityStateHolder {
     fun updateError(error: ResolvableString?)
     fun updateProcessing(isProcessing: Boolean)
     fun onPrimaryButtonDisabledClick()
+    fun selectSavedPaymentMethod(selection: PaymentSelection.Saved)
 
     fun setResult(result: EmbeddedActivityResult)
 
@@ -56,6 +60,8 @@ internal interface SheetActivityStateHolder {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
+        val pendingPaymentMethodId: String?,
+        val checkoutSessionResponse: CheckoutSessionResponse?,
     )
 }
 
@@ -74,6 +80,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
+    private val sheetTaxRegionUpdaterProvider: Provider<SheetTaxRegionUpdater>,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -83,6 +90,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isProcessing = false,
             shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
+            pendingPaymentMethodId = null,
+            checkoutSessionResponse = null,
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
@@ -217,6 +226,41 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             coroutineScope.launch {
                 _validationRequested.emit(Unit)
             }
+        }
+    }
+
+    override fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
+        if (_state.value.isProcessing) return
+
+        _state.update {
+            it.copy(
+                isProcessing = true,
+                processingState = PrimaryButtonProcessingState.Processing,
+                isEnabled = false,
+                error = null,
+                pendingPaymentMethodId = selection.paymentMethod.id,
+            )
+        }
+
+        coroutineScope.launch {
+            sheetTaxRegionUpdaterProvider.get()
+                .updateIfNeeded(paymentMethodMetadata, selection)
+                .fold(
+                onSuccess = { response ->
+                    selectionHolder.setSelection(selection)
+                    _state.update {
+                        it.copy(checkoutSessionResponse = response)
+                    }
+                    embeddedNavigatorProvider.get().performAction(
+                        EmbeddedNavigator.Action.Close(shouldInvokeRowSelectionCallback = true)
+                    )
+                },
+                onFailure = { error ->
+                    updateProcessing(false)
+                    _state.update { it.copy(pendingPaymentMethodId = null) }
+                    updateError(error.stripeErrorMessage())
+                },
+            )
         }
     }
 

@@ -5,12 +5,15 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -27,8 +30,10 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val launchMode: EmbeddedLaunchMode,
+    private val sheetActivityStateHolder: SheetActivityStateHolder,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
+        val coordinatesCompletion = launchMode is EmbeddedLaunchMode.Manage
         return DefaultManageScreenInteractor(
             paymentMethods = customerStateHolder.paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -38,8 +43,12 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
             onSelectPaymentMethod = {
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                selectionHolder.setSelection(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
+                if (coordinatesCompletion) {
+                    sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
+                } else {
+                    selectionHolder.setSelection(savedPmSelection)
+                }
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
@@ -52,6 +61,22 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            processing = if (coordinatesCompletion) {
+                sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing }
+            } else {
+                stateFlowOf(false)
+            },
+            pendingPaymentMethodId = if (coordinatesCompletion) {
+                sheetActivityStateHolder.state.mapAsStateFlow { it.pendingPaymentMethodId }
+            } else {
+                stateFlowOf(null)
+            },
+            error = if (coordinatesCompletion) {
+                sheetActivityStateHolder.state.mapAsStateFlow { it.error }
+            } else {
+                stateFlowOf(null)
+            },
+            navigateBackAfterSelection = !coordinatesCompletion,
         )
     }
 }

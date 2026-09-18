@@ -11,8 +11,6 @@ import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 
-internal typealias SheetTaxRegionUpdate = suspend () -> Result<CheckoutSessionResponse>
-
 @OptIn(CheckoutSessionPreview::class)
 internal typealias TaxRegionUpdate = suspend (
     CheckoutSessionResponse,
@@ -29,24 +27,22 @@ internal class SheetTaxRegionUpdater internal constructor(
         updateTaxRegion = taxRegionUpdater::updateServerStateIfNeeded,
     )
 
-    fun prepareUpdate(
+    suspend fun updateIfNeeded(
         paymentMethodMetadata: PaymentMethodMetadata,
         selection: PaymentSelection?,
-    ): SheetTaxRegionUpdate? {
+    ): Result<CheckoutSessionResponse?> {
         val checkoutSessionResponse =
             (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
                 ?.checkoutSessionResponse
                 ?.takeIf { it.collectsTaxFromBillingAddress }
-                ?: return null
+                ?: return Result.success(null)
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
-            ?: return null
+            ?: return Result.success(null)
 
-        return {
-            updateTaxRegion(
-                checkoutSessionResponse,
-                CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address,
-            )
-        }
+        return updateTaxRegion(
+            checkoutSessionResponse,
+            CheckoutSessionResponse.TaxAddressSource.BILLING,
+            address,
+        )
     }
 }
