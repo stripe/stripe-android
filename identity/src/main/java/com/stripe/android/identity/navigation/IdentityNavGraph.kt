@@ -1,8 +1,11 @@
 package com.stripe.android.identity.navigation
 
 import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -12,9 +15,11 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,7 +39,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.ui.BottomSheet
+import com.stripe.android.identity.ui.BottomSheetWithInsets
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
@@ -80,15 +85,11 @@ internal fun IdentityNavGraph(
     LaunchedEffect(Unit) {
         onNavControllerCreated(navController)
     }
-    Scaffold(
-        contentWindowInsets = WindowInsets.systemBars,
-        topBar = {
-            IdentityTopAppBar(topBarState, onTopBarNavigationClick)
-        }
-    ) { contentPadding ->
+    CompositionLocalProvider(
+        LocalIdentityTopBar provides { IdentityTopAppBar(topBarState, onTopBarNavigationClick) }
+    ) {
         NavHost(
             navController = navController,
-            modifier = Modifier.padding(contentPadding),
             startDestination = InitialLoadingDestination.destinationRoute.route
         ) {
             screen(DebugDestination.ROUTE) {
@@ -347,7 +348,7 @@ internal fun IdentityNavGraph(
 
 @ExperimentalMaterialApi
 /**
- * Built a composable screen with ModalBottomSheetLayout
+ * Builds a screen with a sheet that covers its app bar and system bar insets.
  */
 private fun NavGraphBuilder.screen(
     route: IdentityTopLevelDestination.DestinationRoute,
@@ -360,14 +361,14 @@ private fun NavGraphBuilder.screen(
         val bottomSheetViewModel = viewModel<BottomSheetViewModel>()
         val bottomSheetState by bottomSheetViewModel.bottomSheetState.collectAsState()
         val modalSheetState = rememberModalBottomSheetState(
-            initialValue = ModalBottomSheetValue.Hidden
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
         )
 
-        // Required when bottomsheet is dismissed by swiping down or clicking outside, need to
-        // update the state inside viewmodel
+        // Clear content only after hiding, including dismissals by swiping down or tapping the scrim.
         LaunchedEffect(modalSheetState.isVisible) {
             if (modalSheetState.isVisible.not()) {
-                bottomSheetViewModel.dismissBottomSheet()
+                bottomSheetViewModel.onBottomSheetHidden()
             }
         }
 
@@ -376,12 +377,15 @@ private fun NavGraphBuilder.screen(
                 modalSheetState.show()
             } else {
                 modalSheetState.hide()
+                if (!modalSheetState.isVisible) {
+                    bottomSheetViewModel.onBottomSheetHidden()
+                }
             }
         }
 
         ModalBottomSheetLayout(
             sheetContent = {
-                BottomSheet()
+                BottomSheetWithInsets(statusBarInsets = WindowInsets.statusBars)
             },
             sheetState = modalSheetState,
             sheetGesturesEnabled = true,
@@ -390,7 +394,22 @@ private fun NavGraphBuilder.screen(
                 topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
             )
         ) {
-            content(navBackStackEntry)
+            Scaffold(
+                contentWindowInsets = WindowInsets.systemBars,
+                topBar = LocalIdentityTopBar.current
+            ) { contentPadding ->
+                Box(
+                    Modifier
+                        .padding(contentPadding)
+                        .consumeWindowInsets(contentPadding)
+                ) {
+                    content(navBackStackEntry)
+                }
+            }
         }
     }
+}
+
+private val LocalIdentityTopBar = staticCompositionLocalOf<@Composable () -> Unit> {
+    error("Identity top bar is not provided")
 }
