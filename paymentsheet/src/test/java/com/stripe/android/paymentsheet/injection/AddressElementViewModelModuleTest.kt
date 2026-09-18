@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepo
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpShippingAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -266,6 +267,7 @@ class AddressElementViewModelModuleTest {
         navigator = mock<AddressElementNavigator>(),
         resultStateHolder = resultStateHolder,
         eventReporter = mock(),
+        shippingAddressElementEventReporter = NoOpShippingAddressElementEventReporter,
         placesClient = null,
         primaryButtonAction = module.providePrimaryButtonAction(
             args = args,

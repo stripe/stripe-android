@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -17,6 +19,9 @@ import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavig
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.DefaultShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.ShippingAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -70,6 +75,27 @@ internal class AddressElementViewModelModule {
         apiRequestFactory = ApiRequest.Factory(),
         publishableKeyProvider = { args.publishableKey },
     )
+
+    @Provides
+    @Singleton
+    internal fun provideShippingAddressElementEventReporter(
+        args: AddressElementActivityContract.Args,
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+        analyticsRequestFactory: AnalyticsRequestFactory,
+    ): ShippingAddressElementEventReporter {
+        return when (args) {
+            is AddressElementActivityContract.Args.Standalone -> {
+                NoOpShippingAddressElementEventReporter
+            }
+            is AddressElementActivityContract.Args.CheckoutShipping -> {
+                DefaultShippingAddressElementEventReporter(
+                    analyticsRequestExecutor = analyticsRequestExecutor,
+                    analyticsRequestFactory = analyticsRequestFactory,
+                    checkoutSessionId = args.checkoutSessionResponse.id,
+                )
+            }
+        }
+    }
 
     @Provides
     @Singleton
