@@ -37,6 +37,12 @@ proguard/
 *.ipr
 *.iws
 .idea
+!/.idea/
+/.idea/*
+!/.idea/inspectionProfiles/
+/.idea/inspectionProfiles/*
+!/.idea/inspectionProfiles/Stripe_Profile.xml
+!/.idea/inspectionProfiles/profiles_settings.xml
 
 # Cursor IDE
 .cursor/
