@@ -99,9 +99,11 @@ class InputAddressViewModelTest {
     @Test
     fun `checkout shipping onScreenShown reports shipping address shown`() =
         runTest(UnconfinedTestDispatcher()) {
+            val addressEventReporter = FakeAddressLauncherEventReporter()
             val shippingEventReporter = FakeShippingAddressElementEventReporter()
             val viewModel = createViewModel(
                 address = AddressDetails(address = PaymentSheet.Address(country = "US")),
+                eventReporter = addressEventReporter,
                 shippingAddressElementEventReporter = shippingEventReporter,
                 argsFactory = { config ->
                     AddressElementActivityContract.Args.CheckoutShipping(
@@ -117,6 +119,9 @@ class InputAddressViewModelTest {
             assertThat(shippingEventReporter.shownCalls.awaitItem()).isEqualTo(
                 ShippingAddressElementAnalyticsData(country = "US")
             )
+            assertThat(addressEventReporter.autocompleteCountryUpdatedCalls.awaitItem()).isEqualTo("US")
+            addressEventReporter.showCalls.expectNoEvents()
+            addressEventReporter.validate()
             shippingEventReporter.ensureAllEventsConsumed()
         }
 

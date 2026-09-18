@@ -21,13 +21,17 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     private var lastCountry: String = ""
 
     override fun onShow(country: String) {
-        lastCountry = country
+        updateAutocompleteCountry(country)
         durationProvider.start(DurationProvider.Key.AddressElementCompletion, reset = true)
         fireEvent(
             AddressLauncherEvent.Show(
                 country = country
             )
         )
+    }
+
+    override fun updateAutocompleteCountry(country: String) {
+        lastCountry = country
     }
 
     override fun onCompleted(

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 
 internal object NoOpAddressLauncherEventReporter : AddressLauncherEventReporter {
     override fun onShow(country: String) = Unit
+    override fun updateAutocompleteCountry(country: String) = Unit
     override fun onCompleted(
         country: String,
         autocompleteResultSelected: Boolean,

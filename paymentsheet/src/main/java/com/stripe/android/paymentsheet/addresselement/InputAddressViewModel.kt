@@ -131,14 +131,16 @@ internal class InputAddressViewModel @Inject constructor(
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
     fun onScreenShown() {
+        val country = _collectedAddress.value?.address?.country.orEmpty()
         when (args) {
             is AddressElementActivityContract.Args.Standalone -> {
-                eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+                eventReporter.onShow(country)
             }
             is AddressElementActivityContract.Args.CheckoutShipping -> {
+                eventReporter.updateAutocompleteCountry(country)
                 shippingAddressElementEventReporter.onShown(
                     ShippingAddressElementAnalyticsData(
-                        country = _collectedAddress.value?.address?.country.orEmpty(),
+                        country = country,
                     )
                 )
             }
