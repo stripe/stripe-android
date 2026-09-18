@@ -127,6 +127,7 @@ internal class CheckoutConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
+            viewModelScope = backgroundScope,
         )
         val eventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(

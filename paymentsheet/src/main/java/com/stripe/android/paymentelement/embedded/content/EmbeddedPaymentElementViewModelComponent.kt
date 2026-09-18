@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHand
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -283,6 +284,10 @@ internal interface EmbeddedPaymentElementViewModelModule {
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.state
         }
+
+        @Provides
+        @EmbeddedHostProcessing
+        fun provideHostProcessing(): StateFlow<Boolean> = stateFlowOf(false)
 
         @Provides
         fun providesConfirmationStateSupplier(

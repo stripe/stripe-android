@@ -189,6 +189,7 @@ internal class EmbeddedContentUiTest {
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
             linkAccountHolder = linkAccountHolder,
+            hostProcessing = stateFlowOf(false),
         )
 
         val embeddedContentHelper =
