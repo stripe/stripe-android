@@ -7,7 +7,7 @@ import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReport
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.link.FakeIntegrityTokenProviderWarmer
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.AndroidVerificationObject
@@ -33,7 +33,7 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.FakeActivityResultLauncher
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -491,10 +491,10 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'bootstrap' should call prepare on IntegrityRequestManager when attestation is enabled`() = runTest {
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+    fun `'bootstrap' should call warmup on IntegrityTokenProviderWarmer when attestation is enabled`() = runTest {
+        val fakeIntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
         val definition = createAttestationConfirmationDefinition(
-            integrityRequestManager = fakeIntegrityRequestManager
+            integrityTokenProviderWarmer = fakeIntegrityTokenProviderWarmer
         )
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -503,15 +503,15 @@ internal class AttestationConfirmationDefinitionTest {
 
         definition.bootstrap(paymentMethodMetadata)
 
-        fakeIntegrityRequestManager.awaitPrepareCall()
-        fakeIntegrityRequestManager.ensureAllEventsConsumed()
+        fakeIntegrityTokenProviderWarmer.awaitWarmupCall()
+        fakeIntegrityTokenProviderWarmer.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `'bootstrap' should not call prepare on IntegrityRequestManager when attestation is disabled`() {
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+    fun `'bootstrap' should not call warmup on IntegrityTokenProviderWarmer when attestation is disabled`() {
+        val fakeIntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
         val definition = createAttestationConfirmationDefinition(
-            integrityRequestManager = fakeIntegrityRequestManager
+            integrityTokenProviderWarmer = fakeIntegrityTokenProviderWarmer
         )
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -520,18 +520,18 @@ internal class AttestationConfirmationDefinitionTest {
 
         definition.bootstrap(paymentMethodMetadata)
 
-        fakeIntegrityRequestManager.ensureAllEventsConsumed()
+        fakeIntegrityTokenProviderWarmer.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `'bootstrap' should report error when IntegrityRequestManager prepare fails`() = runTest {
+    fun `'bootstrap' should report error when IntegrityTokenProviderWarmer warmup fails`() = runTest {
         val fakeErrorReporter = FakeErrorReporter()
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
-            prepareResult = Result.failure(RuntimeException("Preparation failed"))
+        val fakeIntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer().apply {
+            warmupResult = Result.failure(RuntimeException("Preparation failed"))
         }
         val definition = createAttestationConfirmationDefinition(
             errorReporter = fakeErrorReporter,
-            integrityRequestManager = fakeIntegrityRequestManager
+            integrityTokenProviderWarmer = fakeIntegrityTokenProviderWarmer
         )
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -539,7 +539,7 @@ internal class AttestationConfirmationDefinitionTest {
         )
 
         definition.bootstrap(paymentMethodMetadata)
-        fakeIntegrityRequestManager.awaitPrepareCall()
+        fakeIntegrityTokenProviderWarmer.awaitWarmupCall()
 
         val call = fakeErrorReporter.awaitCall()
         assertThat(call.errorEvent).isEqualTo(
@@ -566,13 +566,13 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'bootstrap' should call prepareSucceeded on eventsReporter when IntegrityRequestManager prepare succeeds`() =
+    fun `'bootstrap' should call prepareSucceeded on eventsReporter when provider warmup succeeds`() =
         runTest {
             val fakeEventsReporter = FakeAttestationAnalyticsEventsReporter()
-            val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+            val fakeIntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
             val definition = createAttestationConfirmationDefinition(
                 eventsReporter = fakeEventsReporter,
-                integrityRequestManager = fakeIntegrityRequestManager
+                integrityTokenProviderWarmer = fakeIntegrityTokenProviderWarmer
             )
 
             val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -580,7 +580,7 @@ internal class AttestationConfirmationDefinitionTest {
             )
 
             definition.bootstrap(paymentMethodMetadata)
-            fakeIntegrityRequestManager.awaitPrepareCall()
+            fakeIntegrityTokenProviderWarmer.awaitWarmupCall()
 
             val prepareCall = fakeEventsReporter.awaitCall()
             assertThat(prepareCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.Prepare)
@@ -590,16 +590,16 @@ internal class AttestationConfirmationDefinitionTest {
         }
 
     @Test
-    fun `'bootstrap' should call prepareFailed on eventsReporter when IntegrityRequestManager prepare fails`() =
+    fun `'bootstrap' should call prepareFailed on eventsReporter when provider warmup fails`() =
         runTest {
             val fakeEventsReporter = FakeAttestationAnalyticsEventsReporter()
             val exception = RuntimeException("Preparation failed")
-            val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
-                prepareResult = Result.failure(exception)
+            val fakeIntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer().apply {
+                warmupResult = Result.failure(exception)
             }
             val definition = createAttestationConfirmationDefinition(
                 eventsReporter = fakeEventsReporter,
-                integrityRequestManager = fakeIntegrityRequestManager
+                integrityTokenProviderWarmer = fakeIntegrityTokenProviderWarmer
             )
 
             val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -607,7 +607,7 @@ internal class AttestationConfirmationDefinitionTest {
             )
 
             definition.bootstrap(paymentMethodMetadata)
-            fakeIntegrityRequestManager.awaitPrepareCall()
+            fakeIntegrityTokenProviderWarmer.awaitWarmupCall()
 
             val prepareCall = fakeEventsReporter.awaitCall()
             assertThat(prepareCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.Prepare)
@@ -649,7 +649,7 @@ internal class AttestationConfirmationDefinitionTest {
 
     private fun createAttestationConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        integrityTokenProviderWarmer: IntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer(),
         coroutineScope: CoroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         workContext: CoroutineContext = UnconfinedTestDispatcher(),
         productUsage: Set<String> = launcherArgs.productUsage,
@@ -660,7 +660,7 @@ internal class AttestationConfirmationDefinitionTest {
     ): AttestationConfirmationDefinition {
         return AttestationConfirmationDefinition(
             errorReporter = errorReporter,
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
             coroutineScope = coroutineScope,
             workContext = workContext,
             productUsage = productUsage,

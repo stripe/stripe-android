@@ -61,7 +61,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
 import com.stripe.android.financialconnections.utils.InstantDebitsResultBuilder
 import com.stripe.android.financialconnections.utils.parcelable
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -75,7 +75,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     savedStateHandle: SavedStateHandle,
     private val getOrFetchSync: GetOrFetchSync,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val integrityTokenProviderWarmer: IntegrityTokenProviderWarmer,
     private val integrityVerdictManager: IntegrityVerdictManager,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
@@ -153,7 +153,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (integrityVerdictManager.verdictFailed()) {
             return AttestationInitResult.Skipped
         }
-        return integrityRequestManager.prepare().fold(
+        return integrityTokenProviderWarmer.warmup().fold(
             onSuccess = { AttestationInitResult.Success },
             onFailure = { AttestationInitResult.Failure(it) }
         )

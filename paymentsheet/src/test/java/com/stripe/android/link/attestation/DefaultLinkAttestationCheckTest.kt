@@ -3,7 +3,7 @@ package com.stripe.android.link.attestation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.link.FakeIntegrityTokenProviderWarmer
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -15,7 +15,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.attestation.AttestationError
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -63,16 +63,19 @@ internal class DefaultLinkAttestationCheckTest {
     fun `attestation check should return AttestationFailed when integrity preparation fails`() = runTest {
         val error = Throwable("oops")
         val errorReporter = FakeErrorReporter()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-        integrityRequestManager.prepareResult = Result.failure(error)
+        val integrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer(
+            warmupResult = Result.failure(error)
+        )
 
         val attestationCheck = attestationCheck(
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
             errorReporter = errorReporter
         )
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.AttestationFailed(error))
+        integrityTokenProviderWarmer.awaitWarmupCall()
+        integrityTokenProviderWarmer.ensureAllEventsConsumed()
         assertThat(errorReporter.getLoggedErrors())
             .containsExactly(
                 ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER.eventName
@@ -168,7 +171,7 @@ internal class DefaultLinkAttestationCheckTest {
 
     private fun attestationCheck(
         linkGate: LinkGate = FakeLinkGate(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        integrityTokenProviderWarmer: IntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
@@ -176,7 +179,7 @@ internal class DefaultLinkAttestationCheckTest {
         return DefaultLinkAttestationCheck(
             linkGate = linkGate,
             linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
             linkConfiguration = linkConfiguration,
             errorReporter = errorReporter,
             workContext = dispatcher.scheduler

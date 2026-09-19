@@ -52,7 +52,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -274,7 +274,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val logFcLiteExperiment: LogFcLiteExperiment,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val integrityTokenProviderWarmer: IntegrityTokenProviderWarmer,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
     private val apiConfigurationResolver: ApiConfigurationResolver,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
@@ -355,7 +355,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
         if (elementsSession.shouldWarmUpIntegrity()) {
-            launch { integrityRequestManager.prepare() }
+            launch { integrityTokenProviderWarmer.warmup() }
         }
 
         fetchPaymentMethodMessaging(elementsSession, apiConfiguration)

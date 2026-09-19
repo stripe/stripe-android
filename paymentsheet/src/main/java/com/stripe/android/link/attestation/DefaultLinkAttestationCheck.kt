@@ -10,14 +10,14 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultLinkAttestationCheck @Inject constructor(
     private val linkGate: LinkGate,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val integrityTokenProviderWarmer: IntegrityTokenProviderWarmer,
     private val linkAccountManager: LinkAccountManager,
     private val linkConfiguration: LinkConfiguration,
     private val errorReporter: ErrorReporter,
@@ -26,7 +26,7 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
     override suspend fun invoke(): LinkAttestationCheck.Result {
         if (linkGate.useAttestationEndpoints.not()) return LinkAttestationCheck.Result.Successful
         return withContext(workContext) {
-            val result = integrityRequestManager.prepare()
+            val result = integrityTokenProviderWarmer.warmup()
             result.fold(
                 onSuccess = {
                     val email = linkAccountManager.linkAccountInfo.value.account?.email
