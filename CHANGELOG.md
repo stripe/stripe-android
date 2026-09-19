@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: PATCH
 * [Added] MoMo support in PaymentSheet.
 * [Added] GCash support in PaymentSheet.
 * [Added] ShopeePay support in PaymentSheet.
+* [Added] QRIS support in PaymentSheet.
 * [ADDED] Added support for Bizum.
 
 ## 23.19.0 - 2026-09-15

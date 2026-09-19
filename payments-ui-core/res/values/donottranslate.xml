@@ -54,4 +54,5 @@
     <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
     <string name="stripe_paymentsheet_payment_method_gcash">GCash</string>
     <string name="stripe_paymentsheet_payment_method_shopeepay">ShopeePay</string>
+    <string name="stripe_paymentsheet_payment_method_qris">QRIS</string>
 </resources>
