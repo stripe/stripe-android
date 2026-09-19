@@ -557,6 +557,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        MoMo(
+            "momo",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = true,
+        ),
         KakaoPay(
             "kakao_pay",
             isReusable = false,

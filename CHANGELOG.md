@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 * [Added] GoPay support in PaymentSheet.
+* [Added] MoMo support in PaymentSheet.
 * [ADDED] Added support for Bizum.
 
 ## 23.19.0 - 2026-09-15
