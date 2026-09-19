@@ -1,151 +1,189 @@
 package com.stripe.attestation
 
 import android.app.Activity
+import app.cash.turbine.Turbine
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.android.play.core.integrity.StandardIntegrityException
-import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityToken
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
+import com.google.android.play.core.integrity.createStandardIntegrityException
 import com.google.android.play.core.integrity.model.StandardIntegrityErrorCode
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Test
 
 class IntegrityStandardRequestManagerTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    @Test
+    fun `prepare warms token provider`() = runScenario {
+        val result = requestManager.prepare()
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
+        assertThat(result.getOrNull()).isEqualTo(Unit)
+        assertThat(tokenProviderFactory.warmupCalls.awaitItem()).isEqualTo(Unit)
+        tokenProviderFactory.integrityTokenProviderCalls.expectNoEvents()
+        tokenProvider.requestCalls.expectNoEvents()
+        logErrorCalls.expectNoEvents()
     }
 
     @Test
-    fun `prepare - success returns successful result`() = runTest {
-        val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
-        val integrityStandardRequestManager = buildRequestManager(
-            prepareTask = Tasks.forResult(tokenProvider),
+    fun `prepare preserves warmer failure`() {
+        val expectedError = AttestationError(
+            errorType = AttestationError.ErrorType.NETWORK_ERROR,
+            message = "Failed to warm token provider"
         )
 
-        val result = integrityStandardRequestManager.prepare()
+        runScenario(
+            warmupResult = Result.failure(expectedError)
+        ) {
+            val result = requestManager.prepare()
 
-        assert(result.isSuccess)
+            assertThat(result.exceptionOrNull()).isSameInstanceAs(expectedError)
+            assertThat(tokenProviderFactory.warmupCalls.awaitItem()).isEqualTo(Unit)
+            tokenProviderFactory.integrityTokenProviderCalls.expectNoEvents()
+            tokenProvider.requestCalls.expectNoEvents()
+            logErrorCalls.expectNoEvents()
+        }
     }
 
     @Test
-    fun `prepare - failure on prepare task returns Attestation error`() = runTest {
-        val integrityStandardRequestManager = buildRequestManager(
-            prepareTask = Tasks.forException(Exception("Failed to build token provider")),
+    fun `requestToken returns token`() = runScenario {
+        val result = requestManager.requestToken("requestIdentifier")
+
+        assertThat(result.getOrNull()).isEqualTo("123456789")
+        tokenProviderFactory.warmupCalls.expectNoEvents()
+        assertThat(tokenProviderFactory.integrityTokenProviderCalls.awaitItem()).isFalse()
+        assertThat(tokenProvider.requestCalls.awaitItem()).isNotNull()
+        logErrorCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `requestToken maps Play Integrity failure`() {
+        val exception = createStandardIntegrityException(StandardIntegrityErrorCode.PLAY_SERVICES_NOT_FOUND)
+
+        runScenario(
+            requestTask = Tasks.forException(exception)
+        ) {
+            val result = requestManager.requestToken("requestIdentifier")
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(AttestationError::class.java)
+            assertThat((result.exceptionOrNull() as AttestationError).errorType)
+                .isEqualTo(AttestationError.ErrorType.PLAY_SERVICES_NOT_FOUND)
+            tokenProviderFactory.warmupCalls.expectNoEvents()
+            assertThat(tokenProviderFactory.integrityTokenProviderCalls.awaitItem()).isFalse()
+            assertThat(tokenProvider.requestCalls.awaitItem()).isNotNull()
+            assertThat(logErrorCalls.awaitItem().message)
+                .isEqualTo("Integrity - Failed to request integrity token")
+        }
+    }
+
+    @Test
+    fun `requestToken preserves provider factory failure`() {
+        val expectedError = AttestationError(
+            errorType = AttestationError.ErrorType.NETWORK_ERROR,
+            message = "Failed to create token provider"
         )
 
-        val result = integrityStandardRequestManager.prepare()
+        runScenario(
+            tokenProviderResult = Result.failure(expectedError)
+        ) {
+            val result = requestManager.requestToken("requestIdentifier")
 
-        assert(result.isFailure)
-        assert(result.exceptionOrNull() is AttestationError)
+            assertThat(result.exceptionOrNull()).isSameInstanceAs(expectedError)
+            tokenProviderFactory.warmupCalls.expectNoEvents()
+            assertThat(tokenProviderFactory.integrityTokenProviderCalls.awaitItem()).isFalse()
+            tokenProvider.requestCalls.expectNoEvents()
+            assertThat(logErrorCalls.awaitItem().message)
+                .isEqualTo("Integrity - Failed to request integrity token")
+        }
     }
 
-    @Test
-    fun `prepare - concurrent calls only prepare once due to mutex`() = runTest {
-        var prepareCallCount = 0
-        val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
-        val countingFactory = object : StandardIntegrityManagerFactory {
-            override fun create(): StandardIntegrityManager = StandardIntegrityManager {
-                prepareCallCount++
-                Tasks.forResult(tokenProvider)
+    private fun runScenario(
+        requestTask: Task<StandardIntegrityToken> = Tasks.forResult(FakeStandardIntegrityToken()),
+        tokenProviderResult: Result<StandardIntegrityTokenProvider>? = null,
+        warmupResult: Result<Unit> = Result.success(Unit),
+        block: suspend Scenario.() -> Unit
+    ) = runTest {
+        val tokenProvider = FakeStandardIntegrityTokenProvider(requestTask)
+        val tokenProviderFactory = FakeIntegrityTokenProviderFactory(
+            tokenProviderResult = tokenProviderResult ?: Result.success(tokenProvider),
+            warmupResult = warmupResult
+        )
+        val logErrorCalls = Turbine<RequestLogErrorCall>()
+        val requestManager = IntegrityStandardRequestManager(
+            integrityTokenProviderFactory = tokenProviderFactory,
+            integrityTokenProviderWarmer = tokenProviderFactory,
+            logError = { message, error ->
+                logErrorCalls.add(RequestLogErrorCall(message, error))
             }
-        }
-
-        val integrityStandardRequestManager = IntegrityStandardRequestManager(
-            cloudProjectNumber = 123456789L,
-            logError = { _, _ -> },
-            factory = countingFactory
         )
 
-        // Launch 10 concurrent prepare calls
-        val results = List(10) {
-            async { integrityStandardRequestManager.prepare() }
-        }.map { it.await() }
+        Scenario(
+            requestManager = requestManager,
+            tokenProviderFactory = tokenProviderFactory,
+            tokenProvider = tokenProvider,
+            logErrorCalls = logErrorCalls
+        ).apply { block() }
 
-        // All should succeed
-        assert(results.all { it.isSuccess })
-        // But prepare should only be called once due to mutex synchronization
-        assertEquals(1, prepareCallCount)
+        tokenProviderFactory.ensureAllEventsConsumed()
+        tokenProvider.ensureAllEventsConsumed()
+        logErrorCalls.ensureAllEventsConsumed()
     }
 
-    @Test
-    fun `requestToken - success`() = runTest {
-        val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
-        val integrityStandardRequestManager = buildRequestManager(
-            prepareTask = Tasks.forResult(tokenProvider),
-        )
-
-        integrityStandardRequestManager.prepare()
-        val result = integrityStandardRequestManager.requestToken("requestIdentifier")
-
-        assert(result.isSuccess)
-    }
-
-    @Test
-    fun `requestToken - failure returns Attestation error with correct type`() = runTest {
-        val exception = mock<StandardIntegrityException> {
-            on { errorCode } doReturn StandardIntegrityErrorCode.PLAY_SERVICES_NOT_FOUND
-        }
-        val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forException(exception))
-
-        val integrityStandardRequestManager = buildRequestManager(
-            prepareTask = Tasks.forResult(tokenProvider),
-        )
-
-        integrityStandardRequestManager.prepare()
-        val result = integrityStandardRequestManager.requestToken("requestIdentifier")
-
-        assert(result.isFailure)
-        assert(result.exceptionOrNull() is AttestationError)
-        val error = result.exceptionOrNull() as AttestationError
-        assertEquals(error.errorType, AttestationError.ErrorType.PLAY_SERVICES_NOT_FOUND)
-    }
-
-    @After
-    fun cleanup() {
-        Dispatchers.resetMain()
-    }
-
-    private fun buildRequestManager(
-        prepareTask: Task<StandardIntegrityTokenProvider>
-    ) = IntegrityStandardRequestManager(
-        cloudProjectNumber = 123456789L,
-        logError = { _, _ -> },
-        factory = FakeStandardIntegrityManagerFactory(prepareTask)
+    private data class Scenario(
+        val requestManager: IntegrityRequestManager,
+        val tokenProviderFactory: FakeIntegrityTokenProviderFactory,
+        val tokenProvider: FakeStandardIntegrityTokenProvider,
+        val logErrorCalls: Turbine<RequestLogErrorCall>
     )
 }
 
-class FakeStandardIntegrityManagerFactory(
-    private val prepareTask: Task<StandardIntegrityTokenProvider>
-) : StandardIntegrityManagerFactory {
-    override fun create(): StandardIntegrityManager =
-        StandardIntegrityManager { prepareTask }
-}
+internal class FakeIntegrityTokenProviderFactory(
+    var tokenProviderResult: Result<StandardIntegrityTokenProvider>,
+    var warmupResult: Result<Unit>
+) : IntegrityTokenProviderFactory, IntegrityTokenProviderWarmer {
+    val warmupCalls = Turbine<Unit>()
+    val integrityTokenProviderCalls = Turbine<Boolean>()
 
-class FakeStandardIntegrityTokenProvider(
-    private val requestTask: Task<StandardIntegrityToken>
-) : StandardIntegrityTokenProvider {
-    override fun request(request: StandardIntegrityTokenRequest): Task<StandardIntegrityToken> {
-        return requestTask
+    override suspend fun warmup(): Result<Unit> {
+        warmupCalls.add(Unit)
+        return warmupResult
+    }
+
+    override suspend fun integrityTokenProvider(
+        allowRetry: Boolean
+    ): Result<StandardIntegrityTokenProvider> {
+        integrityTokenProviderCalls.add(allowRetry)
+        return tokenProviderResult
+    }
+
+    fun ensureAllEventsConsumed() {
+        warmupCalls.ensureAllEventsConsumed()
+        integrityTokenProviderCalls.ensureAllEventsConsumed()
     }
 }
 
-class FakeStandardIntegrityToken : StandardIntegrityToken() {
+internal class FakeStandardIntegrityTokenProvider(
+    private val requestTask: Task<StandardIntegrityToken>
+) : StandardIntegrityTokenProvider {
+    val requestCalls = Turbine<StandardIntegrityTokenRequest>()
+
+    override fun request(request: StandardIntegrityTokenRequest): Task<StandardIntegrityToken> {
+        requestCalls.add(request)
+        return requestTask
+    }
+
+    fun ensureAllEventsConsumed() {
+        requestCalls.ensureAllEventsConsumed()
+    }
+}
+
+internal class FakeStandardIntegrityToken : StandardIntegrityToken() {
     override fun showDialog(p0: Activity?, p1: Int) = Tasks.forResult(0)
     override fun token(): String = "123456789"
 }
+
+internal data class RequestLogErrorCall(
+    val message: String,
+    val error: Throwable
+)
