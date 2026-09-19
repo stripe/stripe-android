@@ -1,6 +1,8 @@
 apply from: configs.androidLibrary
 
 dependencies {
+    implementation project(":stripe-core")
+
     // Kotlin
     implementation libs.kotlin.coroutines
 
@@ -13,6 +15,9 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.truth
+    testImplementation testLibs.turbine
+    testImplementation project(":payments-core-testing")
 }
 
 android {
