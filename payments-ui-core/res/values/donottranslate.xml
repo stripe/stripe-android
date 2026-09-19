@@ -58,5 +58,6 @@
     <string name="stripe_paymentsheet_payment_method_ng_card">Naira card</string>
     <string name="stripe_paymentsheet_payment_method_touch_n_go">Touch \'n Go</string>
     <string name="stripe_paymentsheet_payment_method_truemoney">TrueMoney</string>
+    <string name="stripe_paymentsheet_payment_method_ng_wallet">Naira Wallet</string>
     <string name="stripe_paymentsheet_payment_method_ng_bank_transfer">Naira bank transfer</string>
 </resources>
