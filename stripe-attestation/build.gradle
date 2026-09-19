@@ -13,6 +13,8 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.testParameterInjector
+    testImplementation testLibs.truth
 }
 
 android {
