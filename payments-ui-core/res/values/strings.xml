@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">By confirming your payment with TrueMoney, you allow %s to charge your TrueMoney account for future payments in accordance with their terms.</string>
   <!-- Touch 'n Go mandate. %s is the merchant name. -->
   <string name="stripe_touch_n_go_mandate">By confirming your payment with Touch \'n Go, you allow %s to charge your Touch \'n Go account for future payments in accordance with their terms.</string>
   <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
