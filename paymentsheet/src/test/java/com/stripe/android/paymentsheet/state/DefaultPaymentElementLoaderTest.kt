@@ -24,7 +24,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.link.FakeIntegrityTokenProviderWarmer
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
@@ -102,7 +102,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
@@ -4202,8 +4202,8 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Should call prepare on integrity manager when attestation endpoints are enabled`() = runScenario {
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `Should call warmup on integrity provider factory when attestation endpoints are enabled`() = runScenario {
+        val integrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -4212,7 +4212,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false
             ).copy(useAttestationEndpoints = true),
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
         )
 
         loader.load(
@@ -4225,17 +4225,16 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
 
-        // Verify prepare was called
-        integrityRequestManager.awaitPrepareCall()
-        integrityRequestManager.ensureAllEventsConsumed()
+        integrityTokenProviderWarmer.awaitWarmupCall()
+        integrityTokenProviderWarmer.ensureAllEventsConsumed()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
     @Test
-    fun `Should not call prepare on integrity manager when attestation endpoints are disabled`() = runScenario {
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `Should not call warmup on integrity provider factory when attestation endpoints are disabled`() = runScenario {
+        val integrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -4244,7 +4243,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false
             ).copy(useAttestationEndpoints = false),
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
         )
 
         loader.load(
@@ -4257,16 +4256,15 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
 
-        // Verify prepare was not called by ensuring all events are consumed (no calls made)
-        integrityRequestManager.ensureAllEventsConsumed()
+        integrityTokenProviderWarmer.ensureAllEventsConsumed()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
     @Test
-    fun `Should call prepare on integrity manager in test mode when attestation endpoints are enabled`() = runScenario {
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `Should call warmup on integrity provider factory in test mode when endpoints are enabled`() = runScenario {
+        val integrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -4275,7 +4273,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false
             ).copy(useAttestationEndpoints = true),
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
         )
 
         loader.load(
@@ -4288,10 +4286,8 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
 
-        // In test mode with attestation endpoints enabled, prepare should still be called
-        // (the exact behavior depends on the feature flag, but this tests the useAttestationEndpoints path)
-        integrityRequestManager.awaitPrepareCall()
-        integrityRequestManager.ensureAllEventsConsumed()
+        integrityTokenProviderWarmer.awaitWarmupCall()
+        integrityTokenProviderWarmer.ensureAllEventsConsumed()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -5004,7 +5000,7 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        integrityTokenProviderWarmer: IntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer(),
         tapToAddConnectionStarter: TapToAddConnectionStarter =
             FakeTapToAddConnectionStarter.create(isSupported = false),
         tapToAddAvailabilityFactory: TapToAddAvailabilityFactory =
@@ -5053,7 +5049,7 @@ internal class DefaultPaymentElementLoaderTest {
             logFcLiteExperiment = logFcLiteExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
