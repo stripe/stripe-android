@@ -33,11 +33,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
-import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
+import com.stripe.android.financialconnections.utils.FakeIntegrityTokenProviderWarmer
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.testing.ViewModelStoreTestRule
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityTokenProviderWarmer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -102,8 +102,8 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(syncResponse)
             createViewModel(
                 defaultInitialState,
-                integrityRequestManager = TestIntegrityRequestManager(
-                    prepareResult = Result.success(Unit)
+                integrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer(
+                    warmupResult = Result.success(Unit)
                 )
             )
 
@@ -116,8 +116,8 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(syncResponse)
             createViewModel(
                 defaultInitialState,
-                integrityRequestManager = TestIntegrityRequestManager(
-                    prepareResult = Result.failure(Exception())
+                integrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer(
+                    warmupResult = Result.failure(Exception())
                 )
             )
 
@@ -1025,7 +1025,7 @@ class FinancialConnectionsSheetViewModelTest {
 
     private fun createViewModel(
         initialState: FinancialConnectionsSheetState,
-        integrityRequestManager: IntegrityRequestManager = TestIntegrityRequestManager()
+        integrityTokenProviderWarmer: IntegrityTokenProviderWarmer = FakeIntegrityTokenProviderWarmer()
     ): FinancialConnectionsSheetViewModel {
         return FinancialConnectionsSheetViewModel(
             applicationId = "com.example.app",
@@ -1039,7 +1039,7 @@ class FinancialConnectionsSheetViewModelTest {
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
-            integrityRequestManager = integrityRequestManager,
+            integrityTokenProviderWarmer = integrityTokenProviderWarmer,
             integrityVerdictManager = mock(),
             logger = Logger.noop(),
             ioDispatcher = testDispatcher,
