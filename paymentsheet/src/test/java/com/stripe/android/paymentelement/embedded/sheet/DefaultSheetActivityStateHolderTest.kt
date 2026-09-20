@@ -762,6 +762,7 @@ internal class DefaultSheetActivityStateHolderTest {
     private fun createHorizontalPaymentOptionsScreen(): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+            walletsState = stateFlowOf(null),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "Continue".resolvableString,
