@@ -1,6 +1,8 @@
 apply from: configs.androidLibrary
 
 dependencies {
+    implementation project(":stripe-core")
+
     // Kotlin
     implementation libs.kotlin.coroutines
 
