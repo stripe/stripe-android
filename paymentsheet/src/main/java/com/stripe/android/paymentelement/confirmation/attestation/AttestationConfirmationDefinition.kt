@@ -22,7 +22,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEve
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.attestation.AttestationWarmer
-import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,7 +30,6 @@ import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
-    private val integrityRequestManager: IntegrityRequestManager,
     private val attestationWarmer: AttestationWarmer,
     @AttestationScope private val coroutineScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
