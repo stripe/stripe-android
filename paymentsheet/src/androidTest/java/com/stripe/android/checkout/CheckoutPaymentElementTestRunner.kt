@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
@@ -57,6 +58,7 @@ internal fun runCheckoutPaymentElementTest(
     },
     successTimeoutSeconds: Long = 5L,
     renderPaymentElementContent: Boolean = true,
+    rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
     setup: suspend (CheckoutController) -> Unit,
     block: (CheckoutPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -75,7 +77,7 @@ internal fun runCheckoutPaymentElementTest(
         val controller: CheckoutController = CheckoutController.Builder(
             application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = SavedStateHandle(),
-        ).resultCallback { result ->
+        ).rowSelectionBehavior(rowSelectionBehavior).resultCallback { result ->
             resultCallback.onResult(result)
             countDownLatch.countDown()
         }.build()
