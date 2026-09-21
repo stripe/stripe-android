@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import app.cash.turbine.Turbine
-import app.cash.turbine.withTurbineTimeout
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
@@ -103,9 +102,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
             taxUpdate.releaseResponse()
 
-            val sessionAtCallback = withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                checkNotNull(callbacks.awaitItem())
-            }
+            val sessionAtCallback = checkNotNull(callbacks.awaitItem())
             assertSavedPaymentMethodSession(sessionAtCallback)
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
             contentPage.assertPaymentMethodRowsAreEnabled(true)
@@ -143,9 +140,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             )
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-            val sessionAtCallback = withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                checkNotNull(callbacks.awaitItem())
-            }
+            val sessionAtCallback = checkNotNull(callbacks.awaitItem())
             assertSavedPaymentMethodSession(sessionAtCallback)
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
             contentPage.assertPaymentMethodRowsAreEnabled(true)
@@ -181,15 +176,13 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
         fun holdResponse() {
             requests.add(Unit)
-            check(releaseResponseLatch.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            check(releaseResponseLatch.await(10, TimeUnit.SECONDS)) {
                 "Timed out waiting to release the Checkout Session update response."
             }
         }
 
         suspend fun awaitRequest() {
-            withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                requests.awaitItem()
-            }
+            requests.awaitItem()
         }
 
         fun releaseResponse() {
@@ -216,13 +209,11 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         fillOutBillingDetails()
         formPage.clickPrimaryButton()
 
-        withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-            val sessionAtCallback = checkNotNull(callbacks.awaitItem())
-            assertThat(sessionAtCallback.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
-            assertThat(sessionAtCallback.paymentOption?.paymentMethodType).isEqualTo("cashapp")
-            assertThat(sessionAtCallback.paymentOption?.billingDetails?.address?.line1)
-                .isEqualTo(BILLING_ADDRESS_LINE_ONE)
-        }
+        val sessionAtCallback = checkNotNull(callbacks.awaitItem())
+        assertThat(sessionAtCallback.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(sessionAtCallback.paymentOption?.paymentMethodType).isEqualTo("cashapp")
+        assertThat(sessionAtCallback.paymentOption?.billingDetails?.address?.line1)
+            .isEqualTo(BILLING_ADDRESS_LINE_ONE)
         contentPage.assertHasSelectedLpm("cashapp")
     }
 
@@ -679,7 +670,5 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         const val SAVED_BILLING_ADDRESS_ZIP = "80202"
         const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
         const val TAX_STATUS_COMPLETE = "complete"
-        const val REQUEST_TIMEOUT_SECONDS = 5L
-        const val UPDATE_RESPONSE_TIMEOUT_SECONDS = 15L
     }
 }
