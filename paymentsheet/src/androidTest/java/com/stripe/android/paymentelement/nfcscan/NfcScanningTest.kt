@@ -28,7 +28,7 @@ internal class NfcScanningTest {
         networkRule = networkRule,
     ) {
         around(NfcHardwareDelegateTestRule())
-            .around(FeatureFlagTestRule(FeatureFlags.enableNfcScanning, isEnabled = true))
+            .around(FeatureFlagTestRule(FeatureFlags.disableNfcScanning, isEnabled = false))
             .around(FeatureFlagTestRule(FeatureFlags.disableNfcScanningSecurity, isEnabled = true))
             .around(IntentsRule())
     }

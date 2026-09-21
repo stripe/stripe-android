@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">EPS 银行</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX 银行</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">确认使用 GCash 支付，即表示您允许 %s 根据其条款在未来支付时向您的 GCash 账户扣款。</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您输入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">持卡人姓名</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">选择您想使用的支付方式：</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[确认支付，即表示您同意由 Global Stack Services Limited 作为备案商家按照其<a href=\"%s\">使用条款</a>处理您的交易。]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[确认支付，即表示您同意由 Global Stack Services Limited 作为备案商家按照其<a href=\"%s\">条款</a>处理您的交易。]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 银行</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">提交后，系统会跳转至新页面，让您安全地完成后续步骤。</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">确认您的 PayPal 付款，即表示您允许 %s 按照他们的条款从您的 PayPal 扣取未来款项。</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">设置为默认支付方式</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">设置</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">确认使用 Touch \'n Go 支付，即表示您允许 %s 根据其条款在未来支付时向您的 Touch \'n Go 账户扣款。</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">确认使用 TrueMoney 支付，即表示您允许 %s 根据其条款在未来支付时向您的 TrueMoney 账户扣款。</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">继续操作，即表示您授权 %1$s 根据您的购买或订阅方案，定期从您的 Twint 余额中自动扣款。</string>
   <!-- Label for UPI ID number field on form -->
