@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### PaymentSheet
 * [ADDED] Added support for Bizum.
 
 ## 23.19.0 - 2026-09-15
