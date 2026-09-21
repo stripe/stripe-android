@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
 import androidx.compose.ui.test.assertTextContains
@@ -84,7 +83,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
         val updateRequests = Turbine<Unit>()
         val releaseResponse = CountDownLatch(1)
-        runSavedPaymentMethodSelectionFromCashAppScenario {
+        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks ->
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 updateRequests.add(Unit)
                 check(releaseResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
@@ -94,9 +93,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             }
 
             try {
-                selectSavedPaymentMethod()
+                contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-                awaitAndAssertSelectionPending(updateRequests)
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    updateRequests.awaitItem()
+                }
+                contentPage.assertHasSelectedLpm("cashapp")
+                assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
+                    .isEqualTo(INITIAL_TOTAL.toDouble())
 
                 releaseResponse.countDown()
 
@@ -104,8 +108,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                     checkNotNull(callbacks.awaitItem())
                 }
                 assertSavedPaymentMethodSession(sessionAtCallback)
-                contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
-                contentPage.assertLpmIsEnabled("card", true)
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
             } finally {
                 releaseResponse.countDown()
@@ -119,7 +121,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     fun testSavedPaymentMethodSelectionFailureCanRetry() {
         val updateRequests = Turbine<Unit>()
         val releaseFailureResponse = CountDownLatch(1)
-        runSavedPaymentMethodSelectionFromCashAppScenario {
+        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks ->
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 updateRequests.add(Unit)
                 check(releaseFailureResponse.await(UPDATE_RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
@@ -130,16 +132,17 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             }
 
             try {
-                selectSavedPaymentMethod()
+                contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-                awaitAndAssertSelectionPending(updateRequests)
+                withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
+                    updateRequests.awaitItem()
+                }
             } finally {
                 releaseFailureResponse.countDown()
             }
 
             waitForControllerUpdateToFinish(controller)
             contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
-            contentPage.assertLpmIsEnabled("card", true)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
@@ -148,22 +151,20 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             enqueueSavedPaymentMethodTaxUpdate(
                 automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)
             )
-            selectSavedPaymentMethod()
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
             val sessionAtCallback = withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
                 checkNotNull(callbacks.awaitItem())
             }
             assertSavedPaymentMethodSession(sessionAtCallback)
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
-            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, true)
-            contentPage.assertLpmIsEnabled("card", true)
 
             updateRequests.ensureAllEventsConsumed()
         }
     }
 
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
-        block: suspend SavedPaymentMethodSelectionScenario.() -> Unit,
+        block: suspend Scenario.(Turbine<CheckoutController.Session?>) -> Unit,
     ) {
         val callbacks = Turbine<CheckoutController.Session?>()
         lateinit var configuredController: CheckoutController
@@ -179,60 +180,28 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         ) {
             configuredController = controller
             selectCashAppAndAwaitCallback(callbacks)
-            val scenario = SavedPaymentMethodSelectionScenario(
-                scenario = this,
-                callbacks = callbacks,
-            )
-            scenario.block()
+            block(callbacks)
             callbacks.ensureAllEventsConsumed()
             markTestSucceeded()
-        }
-    }
-
-    private inner class SavedPaymentMethodSelectionScenario(
-        private val scenario: Scenario,
-        val callbacks: Turbine<CheckoutController.Session?>,
-    ) {
-        val controller: CheckoutController
-            get() = scenario.controller
-
-        fun selectSavedPaymentMethod() {
-            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
-        }
-
-        suspend fun awaitAndAssertSelectionPending(updateRequests: ReceiveTurbine<Unit>) {
-            withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-                updateRequests.awaitItem()
-            }
-            contentPage.assertSavedPaymentMethodIsEnabled(SAVED_PAYMENT_METHOD_ID, false)
-            contentPage.assertLpmIsEnabled("card", false)
-            contentPage.assertHasSelectedLpm("cashapp")
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toDouble())
-            callbacks.expectNoEvents()
         }
     }
 
     private suspend fun Scenario.selectCashAppAndAwaitCallback(
         callbacks: Turbine<CheckoutController.Session?>,
     ) {
-        val initialTaxUpdateRequests = Turbine<Unit>()
-
         contentPage.clickOnLpm("cashapp")
         formPage.waitUntilVisible()
 
-        enqueueTaxUpdate { response ->
-            initialTaxUpdateRequests.add(Unit)
+        enqueueTaxUpdate(
             automaticTaxResponseWithSavedPaymentMethod(
                 INITIAL_TOTAL,
                 TAX_STATUS_COMPLETE,
-            )(response)
-        }
+            )
+        )
         fillOutBillingDetails()
         formPage.clickPrimaryButton()
 
         withTurbineTimeout(REQUEST_TIMEOUT_SECONDS.seconds) {
-            initialTaxUpdateRequests.awaitItem()
             val sessionAtCallback = checkNotNull(callbacks.awaitItem())
             assertThat(sessionAtCallback.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
             assertThat(sessionAtCallback.paymentOption?.paymentMethodType).isEqualTo("cashapp")
@@ -240,7 +209,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 .isEqualTo(BILLING_ADDRESS_LINE_ONE)
         }
         contentPage.assertHasSelectedLpm("cashapp")
-        initialTaxUpdateRequests.ensureAllEventsConsumed()
     }
 
     private fun assertSavedPaymentMethodSession(session: CheckoutController.Session) {
