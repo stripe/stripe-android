@@ -75,9 +75,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 // Don't lookup by the configured email if the user already logged out of that
                 // account *unless* the user isn't able to change emails.
                 val canLookupCustomerEmail =
-                    (it.lastUpdateReason != UpdateReason.LoggedOut ||
-                        !config.allowUserEmailEdits) &&
-                        // TODO-codex: don't look up customer email if link config display is never
+                    (
+                        it.lastUpdateReason != UpdateReason.LoggedOut ||
+                            !config.allowUserEmailEdits
+                    ) &&
+                        config.shouldDisplay
                 getAccountStatus(
                     linkAccount = it.account,
                     canLookupCustomerEmail = canLookupCustomerEmail,

@@ -17,7 +17,6 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -146,7 +145,6 @@ internal class ExpressCheckoutElementTest {
 
         intended(hasComponent(LinkActivity::class.java.name))
     }
-
 
     @Test
     fun testGooglePayOnlyLoad() = runExpressCheckoutElementTest(

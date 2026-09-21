@@ -275,7 +275,6 @@ internal class DefaultCreateLinkState @Inject constructor(
         clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
     ) = LinkConfiguration(
-        // TODO-codex: update new field value to indicate whether link will ever be displayed
         stripeIntent = elementsSession.stripeIntent,
         merchantName = configuration.merchantDisplayName,
         sellerBusinessName = initializationMode.sellerBusinessName,
@@ -319,6 +318,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
         apiConfiguration = apiConfiguration,
+        shouldDisplay = configuration.link.shouldDisplay,
     )
 
     private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {

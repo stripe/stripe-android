@@ -53,7 +53,7 @@ internal data class LinkConfiguration(
     val clientAttributionMetadata: ClientAttributionMetadata,
     val linkBrand: LinkBrand,
     val apiConfiguration: ApiConfiguration.State,
-    // TODO-codex: add a field here which indicates whether the common config link config sets display to never
+    val shouldDisplay: Boolean,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?
