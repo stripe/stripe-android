@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -32,15 +33,6 @@ internal class InputAddressScreenScreenshotTest {
         boxModifier = Modifier.fillMaxWidth(),
     )
 
-    @get:Rule
-    val bottomInsetPaparazziRule = PaparazziRule(
-        SystemAppearance.entries,
-        includeStripeTheme = false,
-        boxModifier = Modifier
-            .fillMaxWidth()
-            .height(500.dp),
-    )
-
     @Test
     fun `default appearance renders the default appearance`() {
         snapshot(PaymentSheet.Appearance())
@@ -59,28 +51,29 @@ internal class InputAddressScreenScreenshotTest {
 
     @Test
     fun `bottom form inset is visible at the bottom of scroll`() {
-        snapshot(
-            appearance = PaymentSheet.Appearance(
-                formInsetValues = PaymentSheet.Insets(
-                    startDp = 20f,
-                    topDp = 0f,
-                    endDp = 20f,
-                    bottomDp = 40f,
-                ),
-            ),
-            title = "Checkout shipping address",
-            primaryButtonText = "Use this address",
-            paparazziRule = bottomInsetPaparazziRule,
-            scrollToBottom = true,
-        )
+        paparazziRule.snapshot {
+            Box(modifier = Modifier.height(500.dp)) {
+                InputAddressTestScreen(
+                    appearance = PaymentSheet.Appearance(
+                        formInsetValues = PaymentSheet.Insets(
+                            startDp = 20f,
+                            topDp = 0f,
+                            endDp = 20f,
+                            bottomDp = 40f,
+                        ),
+                    ),
+                    title = "Checkout shipping address",
+                    primaryButtonText = "Use this address",
+                    scrollToBottom = true,
+                )
+            }
+        }
     }
 
     private fun snapshot(
         appearance: PaymentSheet.Appearance,
         title: String? = null,
         primaryButtonText: String? = null,
-        paparazziRule: PaparazziRule = this.paparazziRule,
-        scrollToBottom: Boolean = false,
     ) {
         paparazziRule.snapshot {
             InputAddressTestScreen(
@@ -91,7 +84,6 @@ internal class InputAddressScreenScreenshotTest {
                 primaryButtonText = primaryButtonText ?: stringResource(
                     R.string.stripe_paymentsheet_address_element_primary_button
                 ),
-                scrollToBottom = scrollToBottom,
             )
         }
     }
