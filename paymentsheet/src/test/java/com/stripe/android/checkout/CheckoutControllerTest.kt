@@ -30,9 +30,11 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -779,21 +781,24 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `selectSavedPaymentMethod skips tax update when saved method has no billing address`() =
+    fun `selectSavedPaymentMethod skips tax update when automatic tax targets shipping`() =
         runMutationScenario(
             initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithoutBillingAddress(),
+                automaticTaxFor("shipping"),
+                savedCustomerWithBillingAddress(),
             ),
             paymentSelection = PaymentSelection.GooglePay,
         ) {
             val selection = loadedSavedPaymentMethodSelection()
-            assertThat(selection.paymentMethod.billingDetails?.address).isNull()
+            val before = committedState().checkoutSessionResponse
+            assertThat(selection.paymentMethod.billingDetails?.address).isNotNull()
 
             val result = controller.selectSavedPaymentMethod(selection)
 
             result.getOrThrow()
-            assertThat(committedState().paymentSelection).isEqualTo(selection)
+            val state = committedState()
+            assertThat(state.checkoutSessionResponse).isSameInstanceAs(before)
+            assertThat(state.paymentSelection).isEqualTo(selection)
         }
 
     @Test
@@ -1311,14 +1316,10 @@ internal class CheckoutControllerTest {
     }
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
-        json.put("customer", savedCustomerJson(includeBillingAddress = true))
+        json.put("customer", savedCustomerJson())
     }
 
-    private fun savedCustomerWithoutBillingAddress(): (JSONObject) -> Unit = { json ->
-        json.put("customer", savedCustomerJson(includeBillingAddress = false))
-    }
-
-    private fun savedCustomerJson(includeBillingAddress: Boolean): JSONObject {
+    private fun savedCustomerJson(): JSONObject {
         val paymentMethod = JSONObject()
             .put("id", "pm_saved_card")
             .put("object", "payment_method")
@@ -1333,8 +1334,7 @@ internal class CheckoutControllerTest {
                     .put("exp_year", 2029)
                     .put("last4", "4242")
             )
-        if (includeBillingAddress) {
-            paymentMethod.put(
+            .put(
                 "billing_details",
                 JSONObject().put(
                     "address",
@@ -1346,7 +1346,6 @@ internal class CheckoutControllerTest {
                         .put("country", "US")
                 )
             )
-        }
         return JSONObject()
             .put("id", "cus_saved_customer")
             .put("payment_methods", JSONArray().put(paymentMethod))
@@ -1429,6 +1428,7 @@ internal class CheckoutControllerTest {
             controller = controller,
             stateHolder = CheckoutControllerStateFactory.createStateHolder(controllerSavedState.handle),
             sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
+            savedStateHandle = controllerSavedState.handle,
         )
     }
 
@@ -1436,6 +1436,7 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val stateHolder: CheckoutControllerStateHolder,
         val sheetStateHolder: SheetStateHolder,
+        val savedStateHandle: SavedStateHandle,
     )
 
     private fun runConfigureScenario(
@@ -1498,6 +1499,7 @@ internal class CheckoutControllerTest {
                 MutationScenario(
                     controller = controller,
                     stateHolder = setup.stateHolder,
+                    savedStateHandle = setup.savedStateHandle,
                     testScope = this@runTest,
                     isUpdatingTurbine = isUpdatingTurbine,
                 )
@@ -1513,6 +1515,7 @@ internal class CheckoutControllerTest {
     private class MutationScenario(
         val controller: CheckoutController,
         private val stateHolder: CheckoutControllerStateHolder,
+        private val savedStateHandle: SavedStateHandle,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
@@ -1542,9 +1545,10 @@ internal class CheckoutControllerTest {
         }
 
         fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
-            val paymentMethod = requireNotNull(committedState().checkoutSessionResponse.customer)
-                .paymentMethods
-                .single()
+            val customerState: CustomerState = requireNotNull(
+                savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER]
+            )
+            val paymentMethod = customerState.paymentMethods.single()
             return PaymentSelection.Saved(paymentMethod)
         }
     }
