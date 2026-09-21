@@ -3,6 +3,7 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +39,7 @@ class PaymentElement @Inject internal constructor(
     /**
      * Presents a sheet for the customer to select or manage their payment method.
      */
+    @MainThread
     fun present() {
         contentHelper.presentPaymentOptions()
     }
