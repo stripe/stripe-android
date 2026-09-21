@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">By confirming your payment with Touch \'n Go, you allow %s to charge your Touch \'n Go account for future payments in accordance with their terms.</string>
   <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
   <string name="stripe_ng_payment_mor_notice"><![CDATA[By confirming your payment, you agree that your transaction will be handled by Global Stack Services Limited as merchant of record and in accordance with their <a href="%s">terms of use</a>.]]></string>
   <!-- GCash mandate. %s is the merchant name. -->

@@ -597,6 +597,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        TouchNGo(
+            "touch_n_go",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         NgBankTransfer(
             "ng_bank_transfer",
             isReusable = false,
