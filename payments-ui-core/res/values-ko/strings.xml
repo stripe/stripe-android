@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">EPS 은행</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX 은행</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">GCash로 결제를 확인하시면 %s 이(가) 해당 약관에 따라 향후 결제에 대해 귀하의 GCash 계정에 대금 청구하는 것을 허용하시는 것입니다.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">입력한 IBAN이 불완전합니다.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">카드 명의자</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">원하는 결제 방식 선택:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[결제를 확인하시면 Global Stack Services Limited가 기록상 판매자로서 <a href=\"%s\">이용 약관</a>에 따라 귀하의 거래를 처리하는 데 동의하시는 것입니다.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[결제를 확인하시면 Global Stack Services Limited가 기록상 판매자로서 <a href=\"%s\">약관</a>에 따라 귀하의 거래를 처리하는 데 동의하시는 것입니다.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 은행</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">제출 후에는 다음 단계를 안전하게 완료할 수 있도록 리디렉션됩니다.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">PayPal 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 PayPal 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Revolut mandate text -->
@@ -117,6 +125,10 @@
   <string name="stripe_set_as_default_payment_method">결제 방식 기본값으로 설정</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">설정</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Touch \'n Go로 결제를 확인하시면 %s 이(가) 해당 약관에 따라 향후 결제에 대해 귀하의 Touch \'n Go 계정에 대금 청구하는 것을 허용하시는 것입니다.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">TrueMoney로 결제를 확인하시면 %s 이(가) 해당 약관에 따라 향후 결제에 대해 귀하의 TrueMoney 계정에 대금 청구하는 것을 허용하시는 것입니다.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">계속 진행하시면, 귀하는 %1$s이(가) 귀하의 구매 또는 구독 플랜에 따라 정기적으로 Twint 잔액을 자동으로 출금하는 것을 승인하는 것입니다.</string>
   <!-- Label for UPI ID number field on form -->

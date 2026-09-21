@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Banka FPX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Potvrzením platby přes GCash povolujete %s strhávat z vašeho účtu GCash budoucí platby v souladu s jeho podmínkami.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Číslo IBAN, které jste zadali, je neúplné.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">Jméno na kartě</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Vyberte, jak chcete platit:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Potvrzením platby souhlasíte s tím, že vaši transakci zpracuje společnost Global Stack Services Limited jako registrovaný obchodník a v souladu se svými <a href=\"%s\">podmínkami použití</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Potvrzením platby souhlasíte s tím, že vaši transakci zpracuje společnost Global Stack Services Limited jako registrovaný obchodník a v souladu se svými <a href=\"%s\">podmínkami</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debet SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Po odeslání budete přesměrováni k bezpečnému dokončení dalších kroků.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Potvrzením platby prostřednictvím služby PayPal povolujete, aby společnost %s účtovala z vašeho účtu PayPal budoucí platby v souladu s jejich podmínkami.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Nastavit jako výchozí způsob platby</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastavit</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Potvrzením platby přes Touch \'n Go povolujete %s strhávat z vašeho účtu Touch \'n Go budoucí platby v souladu s jeho podmínkami.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Potvrzením platby přes TrueMoney povolujete %s strhávat z vašeho účtu TrueMoney budoucí platby v souladu s jeho podmínkami.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Pokračováním opravňujete společnost %1$s k automatickému opakovanému strhávání částky z vašeho zůstatku na účtu Twint podle vaší objednávky nebo zvoleného předplatného.</string>
   <!-- Label for UPI ID number field on form -->

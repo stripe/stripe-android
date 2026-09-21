@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">은행 계좌 ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">은행 계좌 ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">구매를 완료하려면 %s 내에 모바일 뱅킹 앱에서 Bizum 결제를 확인하십시오.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -66,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">귀하의 정보 확인</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN의 마지막 4자리</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">이용 약관</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">서비스 약관</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">로그인 또는 등록</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

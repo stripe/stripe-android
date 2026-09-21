@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Tài khoản ngân hàng ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Tài khoản ngân hàng ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Xác nhận thanh toán Bizum trong biểu mẫu ngân hàng di động của bạn trong vòng %s để hoàn tất giao dịch mua.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Hãy xác nhận thanh toán trong ứng dụng ngân hàng của quý vị trong vòng %s để hoàn tất giao dịch mua.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->

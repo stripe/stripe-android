@@ -17,6 +17,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
+    testImplementation testLibs.testParameterInjector
 }
 
 android {
