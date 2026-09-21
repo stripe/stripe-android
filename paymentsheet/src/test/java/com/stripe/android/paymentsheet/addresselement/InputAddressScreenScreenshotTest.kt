@@ -59,7 +59,7 @@ internal class InputAddressScreenScreenshotTest {
                             startDp = 20f,
                             topDp = 0f,
                             endDp = 20f,
-                            bottomDp = 40f,
+                            bottomDp = 200f,
                         ),
                     ),
                     title = "Checkout shipping address",
