@@ -19,12 +19,17 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.validateAnalyticsRequest
+import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -41,7 +46,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
-        around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+        around(AdvancedFraudSignalsTestRule())
+            .around(GooglePayRepositoryTestRule())
+            .around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
             .around(IntentsRule())
     }
 
@@ -49,8 +56,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testSuccessfulGooglePayPayment() {
+        validateInitialAnalyticsRequests()
+
         // This is called twice during load
-        repeat (2) {
+        repeat(2) {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/sessions/lookup"),
@@ -90,6 +99,20 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
+            validateAnalyticsRequest(
+                eventName = "mc_ece_wallet_tapped",
+                analyticsPayloadField("selected_lpm", "google_pay"),
+            )
+            repeat(2) {
+                validateAnalyticsRequest(eventName = "mc_load_started")
+            }
+            validateAnalyticsRequest(
+                eventName = "mc_embedded_payment_success",
+                analyticsPayloadField("selected_lpm", "google_pay"),
+            )
+            repeat(2) {
+                validateAnalyticsRequest(eventName = "mc_load_succeeded")
+            }
 
             page.clickGooglePayButton()
         }
@@ -99,8 +122,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
+        validateInitialAnalyticsRequests()
+
         // This is called twice during load
-        repeat (2) {
+        repeat(2) {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/sessions/lookup"),
@@ -145,11 +170,52 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("consumer-session-lookup-success.json")
             }
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+            validateAnalyticsRequest(eventName = "link.popup.show")
+            validateAnalyticsRequest(
+                eventName = "mc_ece_wallet_tapped",
+                analyticsPayloadField("selected_lpm", "link"),
+                analyticsPayloadField("link_context", "wallet"),
+            )
+            validateAnalyticsRequest(eventName = "link.popup.success")
+            validateAnalyticsRequest(
+                eventName = "mc_embedded_payment_success",
+                analyticsPayloadField("selected_lpm", "link"),
+                analyticsPayloadField("link_context", "wallet"),
+            )
+            repeat(2) {
+                validateAnalyticsRequest(eventName = "mc_load_started")
+                validateAnalyticsRequest(eventName = "link.account_lookup.complete")
+                validateAnalyticsRequest(eventName = "mc_load_succeeded")
+            }
 
             page.clickLinkButton()
         }
 
         intended(hasComponent(LinkActivity::class.java.name))
+    }
+
+    private fun validateInitialAnalyticsRequests() {
+        repeat(2) {
+            validateAnalyticsRequest(eventName = "mc_load_started")
+        }
+        repeat(2) {
+            validateAnalyticsRequest(eventName = "link.account_lookup.complete")
+        }
+        repeat(2) {
+            validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        }
+        validateAnalyticsRequest(eventName = "mc_ece_init")
+    }
+
+    private fun validateAnalyticsRequest(
+        eventName: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = eventName,
+            productUsage = setOf("Checkout"),
+            *requestMatchers,
+        )
     }
 
     private companion object {
