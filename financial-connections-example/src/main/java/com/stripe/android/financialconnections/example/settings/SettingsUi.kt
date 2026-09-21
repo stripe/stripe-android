@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -63,7 +64,8 @@ private fun <T> SingleSelectSetting(
         is SingleChoiceSetting -> SingleSelectSetting(
             name = setting.displayName,
             options = setting.options,
-            value = setting.selectedOption
+            value = setting.selectedOption,
+            keyboardType = if (setting is AccountsLimitSetting) KeyboardType.Number else KeyboardType.Text,
         ) {
             onSettingsChanged(
                 playgroundSettings.withValue(setting, it)
@@ -87,6 +89,7 @@ private fun <T> SingleSelectSetting(
     name: String,
     options: List<Option<T>>,
     value: T,
+    keyboardType: KeyboardType = KeyboardType.Text,
     onOptionChanged: (T) -> Unit,
 ) {
     when {
@@ -102,6 +105,7 @@ private fun <T> SingleSelectSetting(
             TextSetting(
                 name = name,
                 value = value as String,
+                keyboardType = keyboardType,
                 onOptionChanged = onOptionChanged as (String) -> Unit,
             )
         }
@@ -195,23 +199,30 @@ private fun <T> MultiSelectSetting(
 private fun TextSetting(
     name: String,
     value: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
     onOptionChanged: (String) -> Unit,
 ) {
-    OutlinedTextField(
-        placeholder = { Text(text = name) },
-        label = { Text(text = name) },
-        value = value,
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
-        ),
-        onValueChange = { newValue: String ->
-            onOptionChanged(newValue)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics { testTagsAsResourceId = true }
-            .testTag("$name setting"),
-    )
+    Column {
+        Text(
+            text = name,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 5.dp),
+        )
+        OutlinedTextField(
+            value = value,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+                keyboardType = keyboardType,
+            ),
+            onValueChange = { newValue: String ->
+                onOptionChanged(newValue)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { testTagsAsResourceId = true }
+                .testTag("$name setting"),
+        )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
