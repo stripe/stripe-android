@@ -81,7 +81,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     @Test
     fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
-        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks, taxUpdate ->
+        runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 taxUpdate.holdResponse()
                 automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
@@ -109,7 +109,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     @Test
     fun testSavedPaymentMethodSelectionFailureCanRetry() {
-        runSavedPaymentMethodSelectionFromCashAppScenario { callbacks, taxUpdate ->
+        runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 taxUpdate.holdResponse()
                 response.setResponseCode(400)
@@ -143,11 +143,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
-        block: suspend Scenario.(Turbine<CheckoutController.Session?>, HeldTaxUpdate) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) {
-        val callbacks = Turbine<CheckoutController.Session?>()
-        val taxUpdate = HeldTaxUpdate()
-        lateinit var configuredController: CheckoutController
+        lateinit var scenario: Scenario
         runAutomaticTaxTest(
             paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
             checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
@@ -155,18 +153,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
-                callbacks.add(configuredController.session.value)
+                scenario.callbacks.add(scenario.controller.session.value)
             },
         ) {
-            configuredController = controller
-            selectCashAppAndAwaitCallback(callbacks)
-            try {
-                block(callbacks, taxUpdate)
-            } finally {
-                taxUpdate.releaseResponse()
-            }
-            taxUpdate.ensureAllEventsConsumed()
-            callbacks.ensureAllEventsConsumed()
+            scenario = this
+            selectCashAppAndAwaitCallback()
+            block()
             markTestSucceeded()
         }
     }
@@ -197,9 +189,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         }
     }
 
-    private suspend fun Scenario.selectCashAppAndAwaitCallback(
-        callbacks: Turbine<CheckoutController.Session?>,
-    ) {
+    private suspend fun Scenario.selectCashAppAndAwaitCallback() {
         contentPage.clickOnLpm("cashapp")
         formPage.waitUntilVisible()
 
@@ -429,10 +419,17 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             },
         ) { runnerContext ->
             runBlocking {
-                Scenario(
+                val scenario = Scenario(
                     runnerContext = runnerContext,
                     controller = controller,
-                ).block()
+                )
+                try {
+                    scenario.block()
+                } finally {
+                    scenario.taxUpdate.releaseResponse()
+                }
+                scenario.taxUpdate.ensureAllEventsConsumed()
+                scenario.callbacks.ensureAllEventsConsumed()
             }
         }
     }
@@ -441,6 +438,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         private val runnerContext: CheckoutPaymentElementTestRunnerContext,
         val controller: CheckoutController,
     ) {
+        val callbacks = Turbine<CheckoutController.Session?>()
+        val taxUpdate = HeldTaxUpdate()
+
         fun presentPaymentOptions() {
             runnerContext.presentPaymentOptions()
         }
