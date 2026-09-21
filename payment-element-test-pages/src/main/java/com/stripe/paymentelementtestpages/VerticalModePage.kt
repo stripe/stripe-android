@@ -32,10 +32,13 @@ class VerticalModePage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(
+            conditionDescription = "vertical payment method layout to appear",
+            timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT,
+        ) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
