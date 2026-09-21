@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 
@@ -21,6 +22,20 @@ internal class CollectBankAccountForACHLauncher(
         stripeAccountId: String?,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
+    ) = presentWithPaymentIntent(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+        clientSecret = clientSecret,
+        configuration = configuration,
+        preCollectedConsent = null,
+    )
+
+    override fun presentWithPaymentIntent(
+        publishableKey: String,
+        stripeAccountId: String?,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
@@ -30,7 +45,8 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
-                financialConnectionsAvailability = financialConnectionsAvailability
+                financialConnectionsAvailability = financialConnectionsAvailability,
+                preCollectedConsent = preCollectedConsent
             )
         )
     }
@@ -40,6 +56,20 @@ internal class CollectBankAccountForACHLauncher(
         stripeAccountId: String?,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
+    ) = presentWithSetupIntent(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+        clientSecret = clientSecret,
+        configuration = configuration,
+        preCollectedConsent = null,
+    )
+
+    override fun presentWithSetupIntent(
+        publishableKey: String,
+        stripeAccountId: String?,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
@@ -49,7 +79,8 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
-                financialConnectionsAvailability = financialConnectionsAvailability
+                financialConnectionsAvailability = financialConnectionsAvailability,
+                preCollectedConsent = preCollectedConsent
             )
         )
     }

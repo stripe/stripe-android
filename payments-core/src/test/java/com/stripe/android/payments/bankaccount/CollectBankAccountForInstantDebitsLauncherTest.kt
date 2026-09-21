@@ -3,9 +3,7 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Lite
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -13,22 +11,20 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CollectBankAccountForACHLauncherTest {
+class CollectBankAccountForInstantDebitsLauncherTest {
 
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher(
-            financialConnectionsAvailability = Lite
-        )
+        val launcher = makeLauncher()
 
         launcher.presentWithPaymentIntent(
             publishableKey = PUBLISHABLE_KEY,
-            clientSecret = CLIENT_SECRET,
             stripeAccountId = STRIPE_ACCOUNT_ID,
-            configuration = CONFIGURATION
+            clientSecret = CLIENT_SECRET,
+            configuration = CONFIGURATION,
         )
 
         verify(mockHostActivityLauncher).launch(
@@ -38,36 +34,8 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = null,
-                financialConnectionsAvailability = Lite,
-                preCollectedConsent = null
-            )
-        )
-    }
-
-    @Test
-    fun `presentWithPaymentIntent - launches with correct attachToIntent if hostedSurface not null`() {
-        val launcher = makeLauncher(
-            hostedSurface = "payment_element",
-            financialConnectionsAvailability = Full
-        )
-
-        launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-            configuration = CONFIGURATION
-        )
-
-        verify(mockHostActivityLauncher).launch(
-            CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-                clientSecret = CLIENT_SECRET,
-                configuration = CONFIGURATION,
-                attachToIntent = false,
-                hostedSurface = "payment_element",
-                financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+                hostedSurface = HOSTED_SURFACE,
+                financialConnectionsAvailability = Full,
                 preCollectedConsent = null
             )
         )
@@ -75,17 +43,15 @@ class CollectBankAccountForACHLauncherTest {
 
     @Test
     fun `presentWithPaymentIntent - passes preCollectedConsent through to Args when provided`() {
-        val launcher = makeLauncher(
-            financialConnectionsAvailability = Lite
-        )
+        val launcher = makeLauncher()
         val preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent = "fccons_123")
 
         launcher.presentWithPaymentIntent(
             publishableKey = PUBLISHABLE_KEY,
-            clientSecret = CLIENT_SECRET,
             stripeAccountId = STRIPE_ACCOUNT_ID,
+            clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
-            preCollectedConsent = preCollectedConsent
+            preCollectedConsent = preCollectedConsent,
         )
 
         verify(mockHostActivityLauncher).launch(
@@ -95,8 +61,8 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = null,
-                financialConnectionsAvailability = Lite,
+                hostedSurface = HOSTED_SURFACE,
+                financialConnectionsAvailability = Full,
                 preCollectedConsent = preCollectedConsent
             )
         )
@@ -120,32 +86,7 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = null,
-                financialConnectionsAvailability = Full,
-                preCollectedConsent = null
-            )
-        )
-    }
-
-    @Test
-    fun `presentWithSetupIntent - launches with correct attachToIntent if hostedSurface not null`() {
-        val launcher = makeLauncher(hostedSurface = "payment_element")
-
-        launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
-            clientSecret = CLIENT_SECRET,
-            configuration = CONFIGURATION,
-        )
-
-        verify(mockHostActivityLauncher).launch(
-            CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-                clientSecret = CLIENT_SECRET,
-                configuration = CONFIGURATION,
-                attachToIntent = false,
-                hostedSurface = "payment_element",
+                hostedSurface = HOSTED_SURFACE,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null
             )
@@ -162,7 +103,7 @@ class CollectBankAccountForACHLauncherTest {
             stripeAccountId = STRIPE_ACCOUNT_ID,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
-            preCollectedConsent = preCollectedConsent
+            preCollectedConsent = preCollectedConsent,
         )
 
         verify(mockHostActivityLauncher).launch(
@@ -172,7 +113,7 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = null,
+                hostedSurface = HOSTED_SURFACE,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = preCollectedConsent
             )
@@ -181,9 +122,7 @@ class CollectBankAccountForACHLauncherTest {
 
     @Test
     fun `presentWithDeferredPayment - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher(
-            financialConnectionsAvailability = Lite
-        )
+        val launcher = makeLauncher()
 
         launcher.presentWithDeferredPayment(
             publishableKey = PUBLISHABLE_KEY,
@@ -206,8 +145,8 @@ class CollectBankAccountForACHLauncherTest {
                 onBehalfOf = "on_behalf_of_id",
                 amount = 1000,
                 currency = "usd",
-                hostedSurface = null,
-                financialConnectionsAvailability = Lite
+                hostedSurface = HOSTED_SURFACE,
+                financialConnectionsAvailability = Full
             )
         )
     }
@@ -233,20 +172,17 @@ class CollectBankAccountForACHLauncherTest {
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
-                hostedSurface = null,
+                hostedSurface = HOSTED_SURFACE,
                 financialConnectionsAvailability = Full
             )
         )
     }
 
-    private fun makeLauncher(
-        hostedSurface: String? = null,
-        financialConnectionsAvailability: FinancialConnectionsAvailability = Full
-    ): CollectBankAccountForACHLauncher {
-        return CollectBankAccountForACHLauncher(
-            mockHostActivityLauncher,
-            hostedSurface = hostedSurface,
-            financialConnectionsAvailability = financialConnectionsAvailability
+    private fun makeLauncher(): CollectBankAccountForInstantDebitsLauncher {
+        return CollectBankAccountForInstantDebitsLauncher(
+            hostActivityLauncher = mockHostActivityLauncher,
+            financialConnectionsAvailability = Full,
+            hostedSurface = HOSTED_SURFACE,
         )
     }
 
@@ -254,6 +190,7 @@ class CollectBankAccountForACHLauncherTest {
         private const val CLIENT_SECRET = "client_secret"
         private const val PUBLISHABLE_KEY = "publishableKey"
         private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
+        private const val HOSTED_SURFACE = "payment_element"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null
