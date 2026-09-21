@@ -70,6 +70,20 @@ internal class InputAddressScreenScreenshotTest {
         }
     }
 
+    @Test
+    fun `default form layout is visible at the bottom of scroll`() {
+        paparazziRule.snapshot {
+            Box(modifier = Modifier.height(500.dp)) {
+                InputAddressTestScreen(
+                    appearance = PaymentSheet.Appearance(),
+                    title = "Checkout shipping address",
+                    primaryButtonText = "Use this address",
+                    scrollToBottom = true,
+                )
+            }
+        }
+    }
+
     private fun snapshot(
         appearance: PaymentSheet.Appearance,
         title: String? = null,
