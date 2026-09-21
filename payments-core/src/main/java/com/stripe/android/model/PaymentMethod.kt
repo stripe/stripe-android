@@ -549,6 +549,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        GoPay(
+            "gopay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         KakaoPay(
             "kakao_pay",
             isReusable = false,

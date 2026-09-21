@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
@@ -68,6 +69,7 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
+        GoPayDefinition,
         GrabPayDefinition,
         IdealWeroDefinition,
         InstantDebitsDefinition,

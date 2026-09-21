@@ -1430,6 +1430,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createGoPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.GoPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createKakaoPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
