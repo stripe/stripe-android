@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">Ngân hàng EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Ngân hàng FPX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Bằng cách xác nhận thanh toán của bạn với GCash, bạn cho phép %s tính phí tài khoản GCash của bạn cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN quý vị đã nhập chưa đầy đủ.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">Tên trên thẻ</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Chọn cách bạn muốn thanh toán:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Bằng cách xác nhận thanh toán, bạn đồng ý rằng giao dịch của bạn sẽ được xử lý bởi Global Stack Services Limited với tư cách là người bán trong hồ sơ và tuân thủ với <a href=\"%s\">điều khoản sử dụng</a> của họ.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Bằng cách xác nhận thanh toán, bạn đồng ý rằng giao dịch của bạn sẽ được xử lý bởi Global Stack Services Limited với tư cách là người bán trong hồ sơ và tuân thủ với <a href=\"%s\">điều khoản sử dụng</a> của họ.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Ngân hàng Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Ghi nợ SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Sau khi gửi, bạn sẽ được chuyển hướng để hoàn tất các bước tiếp theo một cách an toàn.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Bằng cách xác nhận thanh toán của quý vị với PayPal, quý vị cho phép %s tính phí tài khoản PayPal của quý vị cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Đặt làm phương thức thanh toán mặc định</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Cài đặt</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Bằng cách xác nhận thanh toán của bạn với Touch \'n Go, bạn cho phép %s tính phí tài khoản Touch \'n Go của bạn cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Bằng cách xác nhận thanh toán của bạn với TrueMoney, bạn cho phép %s tính phí tài khoản TrueMoney của bạn cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Bằng việc tiếp tục, bạn cho phép %1$s tự động ghi nợ Số dư Twint của bạn theo định kỳ theo gói mua hoặc gói đăng ký.</string>
   <!-- Label for UPI ID number field on form -->

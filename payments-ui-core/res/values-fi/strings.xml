@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">EPS-pankki</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX-pankki</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Kun vahvistat maksusi GCashilla, valtuutat yrityksen %s veloittamaan tulevia maksuja GCash-tililtäsi ehtojensa mukaisesti.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN on puutteellinen.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">Kortissa oleva nimi</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Valitse, miten haluat maksaa:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Vahvistamalla maksun hyväksyt, että Global Stack Services Limited käsittelee maksutapahtuman rekisteröitynä kauppiaana <a href=\"%s\">käyttöehtojensa</a> mukaisesti.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Vahvistamalla maksun hyväksyt, että Global Stack Services Limited käsittelee maksutapahtuman rekisteröitynä kauppiaana sen <a href=\"%s\">ehtojen</a> mukaisesti.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Lähetyksen jälkeen sinut ohjataan eteenpäin suorittamaan seuraavat vaiheet turvallisesti.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Vahvistamalla maksusi PayPalin kanssa valtuutat kohteen %s veloittamaan tulevia maksuja PayPal-tililtäsi heidän ehtojensa mukaisesti.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Aseta oletusarvoiseksi maksutavaksi</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Määritä</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Kun vahvistat maksusi Touch \'n Golla, valtuutat yrityksen %s veloittamaan tulevia maksuja Touch \'n Go -tililtäsi ehtojensa mukaisesti.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Kun vahvistat maksusi TrueMoneylla, valtuutat yrityksen %s veloittamaan tulevia maksuja TrueMoney-tililtäsi ehtojensa mukaisesti.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Jatkamalla valtuutat yrityksen %1$s veloittamaan Twint-saldoasi automaattisesti toistuvasti ostoksesi tai tilaussuunnitelmasi mukaisesti.</string>
   <!-- Label for UPI ID number field on form -->

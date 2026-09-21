@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">Bank EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Bank untuk FPX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Dengan mengesahkan pembayaran anda dengan GCash, anda membenarkan %s mengecaj akaun GCash anda untuk pembayaran pada masa hadapan mengikut terma mereka.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN yang anda masukkan tidak lengkap.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">Nama pada kad</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Pilih cara anda ingin membayar:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Dengan mengesahkan pembayaran anda, anda bersetuju bahawa transaksi anda akan dikendalikan oleh Global Stack Services Limited sebagai pedagang rekod dan mengikut <a href=\"%s\">terma penggunaan</a> mereka.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Dengan mengesahkan pembayaran anda, anda bersetuju bahawa transaksi anda akan dikendalikan oleh Global Stack Services Limited sebagai pedagang rekod dan mengikut <a href=\"%s\">terma</a> mereka.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debit SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Selepas penyerahan, anda akan dialihkan untuk melengkapkan langkah seterusnya dengan selamat.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Dengan mengesahkan pembayaran anda dengan PayPal, anda membenarkan %s mengecaj akaun PayPal anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Tetapkan sebagai kaedah pembayaran tetapan asal</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Sediakan</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Dengan mengesahkan pembayaran anda dengan Touch \'n Go, anda membenarkan %s mengecaj akaun Touch \'n Go anda untuk pembayaran pada masa hadapan mengikut terma mereka.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Dengan mengesahkan pembayaran anda dengan TrueMoney, anda membenarkan %s mengecaj akaun TrueMoney anda untuk pembayaran pada masa hadapan mengikut terma mereka.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Dengan meneruskan, anda memberi kuasa kepada %1$s untuk mendebitkan Baki Twint anda secara berulang secara automatik mengikut pelan pembelian atau langganan anda.</string>
   <!-- Label for UPI ID number field on form -->
