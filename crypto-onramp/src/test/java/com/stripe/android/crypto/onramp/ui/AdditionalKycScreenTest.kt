@@ -48,7 +48,7 @@ internal class AdditionalKycScreenTest {
     ) {
         composeRule.onNodeWithText("Upload your proof of address").assertIsDisplayed()
         composeRule.onNodeWithText(
-            "We’re required to confirm your address to enable spending over €1,000."
+            "We may request proof of address for larger transactions."
         ).assertIsDisplayed()
         composeRule.onNodeWithTag(ADDITIONAL_KYC_CANCEL_BUTTON_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(ADDITIONAL_KYC_BACK_BUTTON_TAG).assertDoesNotExist()
@@ -175,6 +175,38 @@ internal class AdditionalKycScreenTest {
     }
 
     @Test
+    fun `document submission shows success and continues on done`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.Submitted,
+            submissionState = AdditionalKycSubmissionState.Submitted,
+            completedDocumentCount = 1,
+        ),
+    ) {
+        composeRule.onNodeWithText("Document uploaded successfully").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "You can continue while we verify your document in the background."
+        ).assertIsDisplayed()
+        composeRule.onNodeWithText("Submitted for review").assertDoesNotExist()
+        composeRule.onNodeWithText("Done").performClick()
+        assertThat(continued).isTrue()
+        assertThat(closed).isFalse()
+    }
+
+    @Test
+    fun `pending documents retain review message and close on done`() = runScenario(
+        state = screenState(page = AdditionalKycCollectionPage.Pending),
+    ) {
+        composeRule.onNodeWithText("Submitted for review").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "We’re reviewing your documents. We’ll let you know when verification is complete."
+        ).assertIsDisplayed()
+        composeRule.onNodeWithText("Document uploaded successfully").assertDoesNotExist()
+        composeRule.onNodeWithText("Done").performClick()
+        assertThat(closed).isTrue()
+        assertThat(continued).isFalse()
+    }
+
+    @Test
     fun `submitting blocks editing and shows progress`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.DocumentEditor,
@@ -208,22 +240,25 @@ internal class AdditionalKycScreenTest {
         composeRule.onNodeWithText("Tell us about your source of funds")
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
         composeRule.onNodeWithText(
-            "We’re required to understand where your funds come from to enable spending over €1,000."
+            "We may request source of funds for larger transactions."
         ).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Continue").assertIsDisplayed().performClick()
         assertThat(continued).isTrue()
     }
 
     @Test
-    fun `large text submission message scrolls while done remains visible`() = runScenario(
-        state = screenState(page = AdditionalKycCollectionPage.Submitted),
+    fun `large text upload success message scrolls while done remains visible`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.Submitted,
+            completedDocumentCount = 1,
+        ),
         fontScale = 2f,
         screenHeight = 500.dp,
     ) {
-        composeRule.onNodeWithText("Submitted for review")
+        composeRule.onNodeWithText("Document uploaded successfully")
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
         composeRule.onNodeWithText(
-            "We’re reviewing your documents. We’ll let you know when verification is complete."
+            "You can continue while we verify your document in the background."
         ).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Done").assertIsDisplayed()
     }

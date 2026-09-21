@@ -63,7 +63,7 @@
   <!-- Proof of address intro-screen title -->
   <string name="stripe_link_onramp_additional_kyc_proof_of_address_context_title">Upload your proof of address</string>
   <!-- Proof of address intro-screen explanation -->
-  <string name="stripe_link_onramp_additional_kyc_proof_of_address_context_message">We’re required to confirm your address to enable spending over €1,000.</string>
+  <string name="stripe_link_onramp_additional_kyc_proof_of_address_context_message">We may request proof of address for larger transactions.</string>
   <!-- Proof of address collection title -->
   <string name="stripe_link_onramp_additional_kyc_proof_of_address_upload_title">Upload your proof of address</string>
   <!-- Proof of address collection subtitle -->
@@ -91,7 +91,7 @@
   <!-- Source of funds intro-screen title -->
   <string name="stripe_link_onramp_additional_kyc_source_of_funds_context_title">Tell us about your source of funds</string>
   <!-- Source of funds intro-screen explanation -->
-  <string name="stripe_link_onramp_additional_kyc_source_of_funds_context_message">We’re required to understand where your funds come from to enable spending over €1,000.</string>
+  <string name="stripe_link_onramp_additional_kyc_source_of_funds_context_message">We may request source of funds for larger transactions.</string>
   <!-- Title on the generic additional KYC error screen -->
   <string name="stripe_link_onramp_additional_kyc_something_went_wrong">Something went wrong</string>
   <!-- Submitted-for-review explanation -->
@@ -192,4 +192,6 @@
   <string name="stripe_link_onramp_additional_kyc_waiting_for_review_message">Your information was submitted and is waiting for review.</string>
   <!-- Status shown for an additional KYC requirement awaiting partner action -->
   <string name="stripe_link_onramp_additional_kyc_waiting_for_review_title">Waiting for review</string>
+  <string name="stripe_link_onramp_additional_kyc_document_uploaded_title">Document uploaded successfully</string>
+  <string name="stripe_link_onramp_additional_kyc_document_uploaded_message">You can continue while we verify your document in the background.</string>
 </resources>

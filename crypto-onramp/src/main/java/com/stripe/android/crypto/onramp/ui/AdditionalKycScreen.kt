@@ -194,9 +194,8 @@ private fun AdditionalKycContent(
                     onChooseFile = onChooseFile,
                     onRemoveFile = onRemoveFile,
                 )
-                AdditionalKycCollectionPage.Submitted,
-                AdditionalKycCollectionPage.Pending,
-                -> SubmittedContent()
+                AdditionalKycCollectionPage.Submitted -> SubmittedContent(state.completedDocumentCount > 0)
+                AdditionalKycCollectionPage.Pending -> SubmittedContent(documentsUploaded = false)
                 AdditionalKycCollectionPage.Unavailable -> UnavailableContent()
             }
         }
@@ -307,7 +306,8 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
                 R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_message
             },
         ),
-        isError = false,
+        iconBackground = LinkTheme.colors.surfaceSecondary,
+        iconForeground = LinkTheme.colors.textPrimary,
         titleModifier = Modifier,
     )
 }
@@ -896,12 +896,29 @@ private fun BulletList(items: List<String>) {
 }
 
 @Composable
-private fun SubmittedContent() {
+private fun DocumentUploadedContent() {
+    MessageContent(
+        icon = R.drawable.stripe_link_check_kyc,
+        title = stringResource(R.string.stripe_link_onramp_additional_kyc_document_uploaded_title),
+        body = stringResource(R.string.stripe_link_onramp_additional_kyc_document_uploaded_message),
+        iconBackground = MessageSuccessBackground,
+        iconForeground = MessageSuccessForeground,
+        titleModifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
+    )
+}
+
+@Composable
+private fun SubmittedContent(documentsUploaded: Boolean) {
+    if (documentsUploaded) {
+        DocumentUploadedContent()
+        return
+    }
     MessageContent(
         icon = R.drawable.stripe_link_clock,
         title = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_title),
         body = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_review_message),
-        isError = false,
+        iconBackground = LinkTheme.colors.surfaceSecondary,
+        iconForeground = LinkTheme.colors.textPrimary,
         titleModifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
     )
 }
@@ -912,7 +929,8 @@ private fun UnavailableContent() {
         icon = R.drawable.stripe_link_error_template,
         title = stringResource(R.string.stripe_link_onramp_additional_kyc_something_went_wrong),
         body = stringResource(R.string.stripe_link_onramp_additional_kyc_try_again_later),
-        isError = true,
+        iconBackground = MessageErrorBackground,
+        iconForeground = Color.White,
         titleModifier = Modifier,
     )
 }
@@ -922,7 +940,8 @@ private fun MessageContent(
     icon: Int,
     title: String,
     body: String,
-    isError: Boolean,
+    iconBackground: Color,
+    iconForeground: Color,
     titleModifier: Modifier,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -937,7 +956,7 @@ private fun MessageContent(
         ) {
             Box(
                 modifier = Modifier.size(64.dp).background(
-                    color = if (isError) MessageErrorBackground else LinkTheme.colors.surfaceSecondary,
+                    color = iconBackground,
                     shape = CircleShape,
                 ),
                 contentAlignment = Alignment.Center,
@@ -945,7 +964,7 @@ private fun MessageContent(
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = null,
-                    tint = if (isError) Color.White else LinkTheme.colors.textPrimary,
+                    tint = iconForeground,
                     modifier = Modifier.size(24.dp),
                 )
             }
@@ -1341,3 +1360,7 @@ private val MessageErrorBackground = Color(0xFFE61947)
 private val MessageDarkSecondaryText = Color(0xFFD4D4D4)
 
 private val MessageDarkSurface = Color(0xFF1C1C1E)
+
+private val MessageSuccessBackground = Color(0xFF00D66F)
+
+private val MessageSuccessForeground = Color(0xFF171717)
