@@ -84,7 +84,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 taxUpdate.holdResponse()
-                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)(response)
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
             }
 
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
@@ -129,7 +134,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             callbacks.expectNoEvents()
 
             enqueueSavedPaymentMethodTaxUpdate(
-                automaticTaxResponseWithSavedPaymentMethod(UPDATED_TOTAL, TAX_STATUS_COMPLETE)
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )
             )
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
@@ -148,9 +158,11 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         lateinit var scenario: Scenario
         runAutomaticTaxTest(
             paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
-            checkoutInitResponse = automaticTaxResponseWithSavedPaymentMethod(
-                INITIAL_TOTAL,
-                TAX_STATUS_REQUIRES_LOCATION,
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_REQUIRES_LOCATION,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
             ),
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
                 scenario.callbacks.add(scenario.controller.session.value)
@@ -194,9 +206,11 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         formPage.waitUntilVisible()
 
         enqueueTaxUpdate(
-            automaticTaxResponseWithSavedPaymentMethod(
-                INITIAL_TOTAL,
-                TAX_STATUS_COMPLETE,
+            automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_COMPLETE,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
             )
         )
         fillOutBillingDetails()
@@ -574,15 +588,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         }
     }
 
-    private fun automaticTaxResponse(
-        total: Long,
-        taxStatus: String,
-    ): (MockResponse) -> Unit = automaticTaxResponse(
-        total = total,
-        taxStatus = taxStatus,
-        billingAddressCollection = "required",
-    )
-
     private fun automaticTaxResponseWithoutRequiredBilling(
         total: Long,
         taxStatus: String,
@@ -592,54 +597,11 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         billingAddressCollection = "auto",
     )
 
-    private fun automaticTaxResponseWithSavedPaymentMethod(
-        total: Long,
-        taxStatus: String,
-    ): (MockResponse) -> Unit = automaticTaxResponse(
-        total = total,
-        taxStatus = taxStatus,
-        billingAddressCollection = "auto",
-        jsonModifier = { json ->
-            json.put("account_settings", JSONObject("""{"country":"US"}"""))
-            json.put(
-                "customer",
-                JSONObject(
-                    """
-                    {
-                        "id": "cus_123",
-                        "payment_methods": [{
-                            "id": "$SAVED_PAYMENT_METHOD_ID",
-                            "object": "payment_method",
-                            "type": "card",
-                            "billing_details": {
-                                "address": {
-                                    "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
-                                    "city": "$SAVED_BILLING_ADDRESS_CITY",
-                                    "state": "$SAVED_BILLING_ADDRESS_STATE",
-                                    "country": "US",
-                                    "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
-                                }
-                            },
-                            "card": {
-                                "brand": "visa",
-                                "exp_month": 12,
-                                "exp_year": 2034,
-                                "last4": "4242"
-                            }
-                        }],
-                        "can_detach_payment_method": true
-                    }
-                    """.trimIndent()
-                )
-            )
-        },
-    )
-
     private fun automaticTaxResponse(
         total: Long,
         taxStatus: String,
-        billingAddressCollection: String,
-        jsonModifier: (JSONObject) -> Unit = {},
+        billingAddressCollection: String = "required",
+        hasSavedPaymentMethod: Boolean = false,
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -665,7 +627,40 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             json.getJSONObject("server_built_elements_session_params")
                 .getJSONObject("deferred_intent")
                 .put("amount", total)
-            jsonModifier(json)
+            if (hasSavedPaymentMethod) {
+                json.put("account_settings", JSONObject("""{"country":"US"}"""))
+                json.put(
+                    "customer",
+                    JSONObject(
+                        """
+                        {
+                            "id": "cus_123",
+                            "payment_methods": [{
+                                "id": "$SAVED_PAYMENT_METHOD_ID",
+                                "object": "payment_method",
+                                "type": "card",
+                                "billing_details": {
+                                    "address": {
+                                        "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
+                                        "city": "$SAVED_BILLING_ADDRESS_CITY",
+                                        "state": "$SAVED_BILLING_ADDRESS_STATE",
+                                        "country": "US",
+                                        "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
+                                    }
+                                },
+                                "card": {
+                                    "brand": "visa",
+                                    "exp_month": 12,
+                                    "exp_year": 2034,
+                                    "last4": "4242"
+                                }
+                            }],
+                            "can_detach_payment_method": true
+                        }
+                        """.trimIndent()
+                    )
+                )
+            }
         }
     }
 
