@@ -278,7 +278,7 @@ class CardDetailsControllerTest {
             ensureAllEventsConsumed()
         }
 
-        assertThat(cardController.cardPillElement.value).isNotNull()
+        assertThat(cardController.cardPillElement.value?.controller?.expirationDate).isEqualTo("06/30")
     }
 
     @Test
@@ -354,6 +354,7 @@ class CardDetailsControllerTest {
             val cardPillElement = after[0] as CardPillElement
 
             assertThat(cardPillElement.controller.cardNumber).isEqualTo("4242424242424242")
+            assertThat(cardPillElement.controller.expirationDate).isEqualTo("06/30")
             assertThat(after[1]).isSameInstanceAs(cardController.cvcElement)
             ensureAllEventsConsumed()
         }
