@@ -53,4 +53,5 @@
     <string name="stripe_paymentsheet_payment_method_gopay">GoPay</string>
     <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
     <string name="stripe_paymentsheet_payment_method_gcash">GCash</string>
+    <string name="stripe_paymentsheet_payment_method_shopeepay">ShopeePay</string>
 </resources>

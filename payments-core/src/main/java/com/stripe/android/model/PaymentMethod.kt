@@ -573,6 +573,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        ShopeePay(
+            "shopeepay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         KakaoPay(
             "kakao_pay",
             isReusable = false,
