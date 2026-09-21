@@ -8,15 +8,15 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -30,11 +30,6 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(AndroidJUnit4::class)
 class GooglePayRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-
-    @Before
-    fun setup() {
-        PaymentConfiguration.init(context, "pk_123")
-    }
 
     @Test
     fun `when google pay is ready, 'isReady' should return true`() = runTest {
@@ -127,6 +122,7 @@ class GooglePayRepositoryTest {
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
+            googlePayConfig = GooglePayConfig(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             paymentsClientFactory = { paymentsClient },
             errorReporter = errorReporter,
             logger = Logger.noop(),
