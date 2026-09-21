@@ -39,9 +39,13 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
 
         isSelectingSavedPaymentMethod = true
         coroutineScope.launch {
-            val result = checkoutController.selectSavedPaymentMethod(selection)
-            isSelectingSavedPaymentMethod = false
-            result.onSuccess { onSelectionComplete() }
+            try {
+                checkoutController.selectSavedPaymentMethod(selection).onSuccess {
+                    onSelectionComplete()
+                }
+            } finally {
+                isSelectingSavedPaymentMethod = false
+            }
         }
     }
 }

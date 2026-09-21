@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,6 +87,30 @@ internal class CheckoutPaymentSelectionHandlerTest {
         assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
         scenario.selectionHolder.selectionCalls.expectNoEvents()
         verify(controller, times(2)).selectSavedPaymentMethod(selection)
+        verifyNoMoreInteractions(controller)
+        scenario.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `cancelled saved selection releases the in-flight guard`() = runTest {
+        val selection = savedSelection()
+        val controller = mock<CheckoutController>()
+        whenever(controller.selectSavedPaymentMethod(selection))
+            .thenThrow(CancellationException("selection cancelled"))
+            .thenReturn(Result.success(Unit))
+        val scenario = createScenario(controller, this)
+
+        scenario.handler.select(selection, true)
+        runCurrent()
+
+        scenario.completions.expectNoEvents()
+
+        scenario.handler.select(selection, true)
+        runCurrent()
+
+        assertThat(scenario.completions.awaitItem()).isEqualTo(Unit)
+        verify(controller, times(2)).selectSavedPaymentMethod(selection)
+        scenario.selectionHolder.selectionCalls.expectNoEvents()
         verifyNoMoreInteractions(controller)
         scenario.ensureAllEventsConsumed()
     }
