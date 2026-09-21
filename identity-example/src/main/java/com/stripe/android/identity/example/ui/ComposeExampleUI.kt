@@ -506,7 +506,6 @@ private fun SubmitView(
         vsId = verificationSessionId
         when (submissionState.integrationType) {
             NATIVE -> {
-                configuration.applyLinkButtonStyles()
                 identityVerificationSheet.present(verificationSessionId, ephemeralKeySecret)
             }
 
@@ -530,40 +529,4 @@ private fun SubmitView(
             }
         }
     }
-}
-
-private fun IdentityVerificationSheet.Configuration.applyLinkButtonStyles() {
-    primaryButtonStyle = IdentityVerificationSheet.Configuration.PrimaryButtonStyle(
-        backgroundColor = IdentityVerificationSheet.Configuration.ButtonColor(
-            light = 0xFF171717.toInt(),
-            dark = android.graphics.Color.WHITE
-        ),
-        textColor = IdentityVerificationSheet.Configuration.ButtonColor(
-            light = android.graphics.Color.WHITE,
-            dark = 0xFF171717.toInt()
-        ),
-        shape = IdentityVerificationSheet.Configuration.ButtonShape(
-            cornerRadiusDp = 26f,
-            heightDp = 52f
-        ),
-        elevationDp = 0f,
-        uppercase = false
-    )
-    secondaryButtonStyle = IdentityVerificationSheet.Configuration.SecondaryButtonStyle(
-        backgroundColor = IdentityVerificationSheet.Configuration.ButtonColor(
-            light = 0xFFF5F5F5.toInt(),
-            dark = 0xFF262626.toInt()
-        ),
-        textColor = IdentityVerificationSheet.Configuration.ButtonColor(
-            light = 0xFF171717.toInt(),
-            dark = 0xFFFAFAFA.toInt()
-        ),
-        shape = IdentityVerificationSheet.Configuration.ButtonShape(
-            cornerRadiusDp = 26f,
-            heightDp = 52f
-        ),
-        elevationDp = 0f,
-        uppercase = false,
-        showBorder = false
-    )
 }
