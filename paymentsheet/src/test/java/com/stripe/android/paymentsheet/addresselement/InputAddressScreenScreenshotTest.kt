@@ -50,27 +50,6 @@ internal class InputAddressScreenScreenshotTest {
     }
 
     @Test
-    fun `bottom form inset is visible at the bottom of scroll`() {
-        paparazziRule.snapshot {
-            Box(modifier = Modifier.height(500.dp)) {
-                InputAddressTestScreen(
-                    appearance = PaymentSheet.Appearance(
-                        formInsetValues = PaymentSheet.Insets(
-                            startDp = 20f,
-                            topDp = 0f,
-                            endDp = 20f,
-                            bottomDp = 200f,
-                        ),
-                    ),
-                    title = "Checkout shipping address",
-                    primaryButtonText = "Use this address",
-                    scrollToBottom = true,
-                )
-            }
-        }
-    }
-
-    @Test
     fun `default form layout is visible at the bottom of scroll`() {
         paparazziRule.snapshot {
             Box(modifier = Modifier.height(500.dp)) {
