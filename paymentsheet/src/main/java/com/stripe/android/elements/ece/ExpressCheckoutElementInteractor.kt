@@ -20,6 +20,7 @@ internal interface ExpressCheckoutElementInteractor {
     data class State(
         val expressButtons: List<ExpressButton>,
         val buttonLayout: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State,
+        // TODO(codex): Add boolean field "enabled"
     )
 
     sealed class ViewAction {
@@ -31,12 +32,14 @@ internal interface ExpressCheckoutElementInteractor {
     }
 }
 
+// TODO(codex): Add test cases to cover new state changes.
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
     stateHolder: CheckoutControllerStateHolder,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val expressCheckoutElementConfirmationPerformer: ExpressCheckoutElementConfirmationPerformer,
+    // TODO(codex): inject operationCoordinator.isUpdating
 ) : ExpressCheckoutElementInteractor {
 
     private var hasReportedDisplayed: Boolean
@@ -49,7 +52,9 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         linkAccountHolder.linkAccountInfo,
         stateHolder.stateFlow,
         stateHolder.session,
+        // TODO(codex): add isUpdating as input here
     ) { linkAccountInfo, state, session, ->
+        // TODO(codex): Throughout this function, set enabled == !isUpdating
         val configuration = state?.configuration?.expressCheckoutElementConfiguration
         val paymentMethodMetadata = state?.expressCheckoutElementPaymentMethodMetadata
         if (configuration == null || paymentMethodMetadata == null || session == null) {

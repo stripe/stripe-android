@@ -28,6 +28,7 @@ import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.math.min
 
+// TODO(codex): Add UI tests to ECEContentTest and add a new screenshot test case as well.
 @Composable
 internal fun ExpressCheckoutElementContent(
     interactor: ExpressCheckoutElementInteractor,
@@ -57,6 +58,7 @@ internal fun ExpressCheckoutElementContent(
     interactor: ExpressCheckoutElementInteractor,
     googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
 ) {
+    // TODO(codex): Set all UI content to be enabled based on the state.enabled value from the interactor state
     val state by interactor.state.collectAsState()
 
     LaunchedEffect(Unit) {
