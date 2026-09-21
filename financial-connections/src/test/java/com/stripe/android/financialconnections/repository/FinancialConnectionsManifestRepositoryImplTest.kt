@@ -5,8 +5,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.IfMissingActiveAuthSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -201,48 +199,6 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             PRE_COLLECTED_CONSENT_PARAMS,
             PRE_COLLECTED_CONSENT_PARAMS,
         ).inOrder()
-    }
-
-    @Test
-    fun `getOrFetchSession - successful initial request then Always refetch omits evidence`() = runTest {
-        assertEvidenceOmittedOnRefetch(Always::shouldReFetch)
-    }
-
-    @Test
-    fun `getOrFetchSession - successful initial request then missing auth session refetch omits evidence`() = runTest {
-        assertEvidenceOmittedOnRefetch(IfMissingActiveAuthSession::shouldReFetch)
-    }
-
-    private suspend fun assertEvidenceOmittedOnRefetch(
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
-    ) {
-        givenSyncSessionRequestReturnsAfterDelay(ApiKeyFixtures.syncResponse())
-        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
-        val repository = buildRepository()
-
-        repository.getOrSynchronizeFinancialConnectionsSession(
-            clientSecret = "",
-            applicationId = "",
-            supportsAppVerification = false,
-            reFetchCondition = None::shouldReFetch,
-            preCollectedConsent = preCollectedConsent(),
-        )
-        repository.getOrSynchronizeFinancialConnectionsSession(
-            clientSecret = "",
-            applicationId = "",
-            supportsAppVerification = false,
-            reFetchCondition = reFetchCondition,
-            preCollectedConsent = preCollectedConsent(),
-        )
-
-        verify(apiRequestFactory, times(2)).createPost(
-            url = any(),
-            options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false),
-        )
-        assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(PRE_COLLECTED_CONSENT_PARAMS)
-        assertThat(paramsCaptor.secondValue).doesNotContainKey("pre_collected_consent")
     }
 
     /**

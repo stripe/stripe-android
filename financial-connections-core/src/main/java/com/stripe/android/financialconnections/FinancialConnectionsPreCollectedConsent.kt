@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -17,7 +18,8 @@ import kotlinx.parcelize.Parcelize
  * age, or plausibility.
  */
 @Parcelize
-data class FinancialConnectionsPreCollectedConsent(
+@Poko
+class FinancialConnectionsPreCollectedConsent(
     val consent: String,
     val collectedAt: Long,
 ) : Parcelable

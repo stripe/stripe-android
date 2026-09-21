@@ -14,10 +14,6 @@ dependencies {
     implementation libs.androidx.annotation
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
-
-    testImplementation testLibs.junit
-    testImplementation testLibs.robolectric
-    testImplementation testLibs.truth
 }
 
 android {

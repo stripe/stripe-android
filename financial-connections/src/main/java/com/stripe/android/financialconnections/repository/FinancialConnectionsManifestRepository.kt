@@ -236,22 +236,13 @@ private class FinancialConnectionsManifestRepositoryImpl(
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
         preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse = mutex.withLock {
-        val cachedSync = cachedSynchronizeSessionResponse
-        return when {
-            cachedSync == null -> synchronize(
-                applicationId,
-                clientSecret,
-                supportsAppVerification,
-                preCollectedConsent,
-            )
-            reFetchCondition(cachedSync) -> synchronize(
-                applicationId,
-                clientSecret,
-                supportsAppVerification,
-                preCollectedConsent = null,
-            )
-            else -> cachedSync
-        }
+        val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
+        return cachedSync ?: synchronize(
+            applicationId,
+            clientSecret,
+            supportsAppVerification,
+            preCollectedConsent,
+        )
     }
 
     private suspend fun synchronize(
