@@ -19,29 +19,28 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 
 @RunWith(RobolectricTestParameterInjector::class)
-internal class NgCardDefinitionTest {
+internal class NgBankTransferDefinitionTest {
     @Test
     fun `supports the documented intent modes`(
         @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgCard),
+            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgBankTransfer),
         )
 
-        assertThat(NgCardDefinition.isSupported(metadata)).isEqualTo(true)
-        assertThat(NgCardDefinition.requiresMandate(metadata)).isEqualTo(
-            intentScenario != LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+        assertThat(NgBankTransferDefinition.isSupported(metadata)).isEqualTo(
+            intentScenario == LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         )
+        assertThat(NgBankTransferDefinition.requiresMandate(metadata)).isEqualTo(false)
     }
 
     @Test
-    fun `form matches web instructions and mandate`(
-        @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
-    ) {
+    fun `form matches web instructions and mandate`() {
+        val intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgCard),
+            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.NgBankTransfer),
         )
-        val formElements = NgCardDefinition.formElements(metadata)
+        val formElements = NgBankTransferDefinition.formElements(metadata)
 
         val notice = formElements.single() as MandateTextElement
         assertThat(notice.stringResId).isEqualTo(R.string.stripe_ng_payment_mor_notice)
@@ -51,21 +50,21 @@ internal class NgCardDefinitionTest {
     @Test
     fun `terms display never hides terms without changing confirmation requirements`() {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.SetupIntent
-                .stripeIntent(PaymentMethod.Type.NgCard),
-            termsDisplay = mapOf(PaymentMethod.Type.NgCard to PaymentSheet.TermsDisplay.NEVER),
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.NgBankTransfer),
+            termsDisplay = mapOf(PaymentMethod.Type.NgBankTransfer to PaymentSheet.TermsDisplay.NEVER),
         )
-        val formElements = NgCardDefinition.formElements(metadata)
+        val formElements = NgBankTransferDefinition.formElements(metadata)
 
         assertThat(formElements).isEmpty()
-        assertThat(NgCardDefinition.requiresMandate(metadata)).isEqualTo(true)
+        assertThat(NgBankTransferDefinition.requiresMandate(metadata)).isEqualTo(false)
     }
 
     @Test
     fun `collects configured contact information`() {
-        val formElements = NgCardDefinition.formElements(
+        val formElements = NgBankTransferDefinition.formElements(
             PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_card")),
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -81,7 +80,7 @@ internal class NgCardDefinitionTest {
 
     @Test
     fun `does not redisplay saved payment methods`() {
-        assertThat(NgCardDefinition.supportedAsSavedPaymentMethod).isFalse()
+        assertThat(NgBankTransferDefinition.supportedAsSavedPaymentMethod).isFalse()
     }
 
     @Test
