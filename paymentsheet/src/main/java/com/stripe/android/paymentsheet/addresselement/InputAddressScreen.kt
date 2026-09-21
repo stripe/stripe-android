@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,9 +32,6 @@ import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Provider
-
-@VisibleForTesting
-internal const val INPUT_ADDRESS_FORM_CONTENT_TEST_TAG = "InputAddressFormContent"
 
 @Composable
 internal fun InputAddressScreen(
@@ -73,7 +68,6 @@ internal fun InputAddressScreen(
             ) {
                 Column(
                     Modifier
-                        .testTag(INPUT_ADDRESS_FORM_CONTENT_TEST_TAG)
                         .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                         .padding(top = MaterialTheme.stripeFormInsets.top.dp)
                         .padding(bottom = MaterialTheme.stripeFormInsets.bottom.dp)

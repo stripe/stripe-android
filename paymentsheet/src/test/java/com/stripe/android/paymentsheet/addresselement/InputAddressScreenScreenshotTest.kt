@@ -3,11 +3,14 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -15,6 +18,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.uicore.LocalFormScrollContext
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,6 +30,15 @@ internal class InputAddressScreenScreenshotTest {
         SystemAppearance.entries,
         includeStripeTheme = false,
         boxModifier = Modifier.fillMaxWidth(),
+    )
+
+    @get:Rule
+    val bottomInsetPaparazziRule = PaparazziRule(
+        SystemAppearance.entries,
+        includeStripeTheme = false,
+        boxModifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp),
     )
 
     @Test
@@ -44,10 +57,30 @@ internal class InputAddressScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun `bottom form inset is visible at the bottom of scroll`() {
+        snapshot(
+            appearance = PaymentSheet.Appearance(
+                formInsetValues = PaymentSheet.Insets(
+                    startDp = 20f,
+                    topDp = 0f,
+                    endDp = 20f,
+                    bottomDp = 40f,
+                ),
+            ),
+            title = "Checkout shipping address",
+            primaryButtonText = "Use this address",
+            paparazziRule = bottomInsetPaparazziRule,
+            scrollToBottom = true,
+        )
+    }
+
     private fun snapshot(
         appearance: PaymentSheet.Appearance,
         title: String? = null,
         primaryButtonText: String? = null,
+        paparazziRule: PaparazziRule = this.paparazziRule,
+        scrollToBottom: Boolean = false,
     ) {
         paparazziRule.snapshot {
             InputAddressTestScreen(
@@ -58,6 +91,7 @@ internal class InputAddressScreenScreenshotTest {
                 primaryButtonText = primaryButtonText ?: stringResource(
                     R.string.stripe_paymentsheet_address_element_primary_button
                 ),
+                scrollToBottom = scrollToBottom,
             )
         }
     }
@@ -67,6 +101,7 @@ internal class InputAddressScreenScreenshotTest {
         appearance: PaymentSheet.Appearance,
         title: String,
         primaryButtonText: String,
+        scrollToBottom: Boolean = false,
     ) {
         val addressFormController = remember {
             AddressFormController(
@@ -86,6 +121,9 @@ internal class InputAddressScreenScreenshotTest {
             onCloseClick = {},
             topContent = {},
             formContent = {
+                if (scrollToBottom) {
+                    ScrollToBottom()
+                }
                 FormUI(
                     hiddenIdentifiers = emptySet(),
                     enabled = true,
@@ -95,6 +133,16 @@ internal class InputAddressScreenScreenshotTest {
             },
             bottomContent = {},
         )
+    }
+
+    @Composable
+    private fun ScrollToBottom() {
+        val scrollState = LocalFormScrollContext.current?.scrollState
+        val maxScroll = scrollState?.maxValue ?: 0
+
+        LaunchedEffect(scrollState, maxScroll) {
+            scrollState?.scrollTo(maxScroll)
+        }
     }
 
     private fun configuredAppearance(
