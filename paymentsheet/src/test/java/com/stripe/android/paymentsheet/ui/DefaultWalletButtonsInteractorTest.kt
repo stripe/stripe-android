@@ -21,6 +21,7 @@ import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
@@ -321,7 +322,7 @@ class DefaultWalletButtonsInteractorTest {
             WalletButtonsInteractor.ViewAction.OnButtonPressed(
                 button = WalletButtonsInteractor.WalletButton.GooglePay(
                     buttonType = null,
-                    apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     allowCreditCards = true,
                     cardBrandFilter = PaymentSheetCardBrandFilter(

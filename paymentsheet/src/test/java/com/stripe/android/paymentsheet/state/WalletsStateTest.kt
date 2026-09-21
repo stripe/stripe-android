@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -48,6 +49,17 @@ class WalletsStateTest {
         val googlePay = state?.googlePay(WalletLocation.INLINE)
         assertThat(googlePay).isNotNull()
         assertThat(googlePay?.buttonType).isEqualTo(GooglePayButtonType.Pay)
+    }
+
+    @Test
+    fun `create does not return GooglePay when API configuration is null`() {
+        val state = createViaFactory(
+            isLinkAvailable = true,
+            isGooglePayReady = true,
+            apiConfiguration = null,
+        )
+
+        assertThat(state?.googlePay(WalletLocation.INLINE)).isNull()
     }
 
     @Test
@@ -119,6 +131,7 @@ class WalletsStateTest {
         isLinkAvailable: Boolean? = false,
         linkEmail: String? = null,
         isGooglePayReady: Boolean = false,
+        apiConfiguration: ApiConfiguration.State? = DEFAULT_API_CONFIG,
         buttonsEnabled: Boolean = true,
         paymentMethodTypes: List<String> = listOf(PaymentMethod.Type.Card.code),
         isSetupIntent: Boolean = false,
@@ -127,7 +140,7 @@ class WalletsStateTest {
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
             isGooglePayReady = isGooglePayReady,
-            apiConfiguration = TEST_API_CONFIGURATION,
+            apiConfiguration = apiConfiguration,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
@@ -289,7 +302,7 @@ class WalletsStateTest {
             },
             googlePay = if (hasGooglePay) {
                 WalletsState.GooglePay(
-                    apiConfiguration = TEST_API_CONFIGURATION,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
@@ -305,13 +318,6 @@ class WalletsStateTest {
             onLinkPressed = {},
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
-        )
-    }
-
-    private companion object {
-        val TEST_API_CONFIGURATION = ApiConfiguration.State(
-            publishableKey = "pk_test_123",
-            stripeAccountId = null,
         )
     }
 }

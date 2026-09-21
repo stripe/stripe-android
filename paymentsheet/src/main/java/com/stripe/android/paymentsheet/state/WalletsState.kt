@@ -166,10 +166,10 @@ internal data class WalletsState(
             googlePayButtonType: GooglePayButtonType,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?
         ): GooglePay? {
-            if (!isGooglePayReady) return null
+            if (!isGooglePayReady || apiConfiguration == null) return null
 
             return GooglePay(
-                apiConfiguration = requireNotNull(apiConfiguration),
+                apiConfiguration = apiConfiguration,
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
                 buttonType = googlePayButtonType,
                 additionalEnabledNetworks = googlePayLauncherConfig?.additionalEnabledNetworks.orEmpty(),
