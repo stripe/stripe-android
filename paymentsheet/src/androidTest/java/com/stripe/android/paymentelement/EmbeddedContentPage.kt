@@ -79,6 +79,17 @@ internal class EmbeddedContentPage(
         }
     }
 
+    fun assertSavedPaymentMethodIsEnabled(paymentMethodId: String, isEnabled: Boolean) {
+        val row = composeTestRule
+            .onNode(hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"))
+            .performScrollTo()
+        if (isEnabled) {
+            row.assertIsEnabled()
+        } else {
+            row.assertIsNotEnabled()
+        }
+    }
+
     fun clickOnSavedPM(paymentMethodId: String) {
         waitUntilVisible()
 
