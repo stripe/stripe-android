@@ -219,6 +219,7 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(scalapayTestCases)
     addAll(gopayTestCases)
     addAll(shopeePayTestCases)
+    addAll(qrisTestCases)
     addAll(gCashTestCases)
     addAll(moMoTestCases)
     addAll(sepaDebitTestCases)
