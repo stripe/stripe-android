@@ -28,20 +28,19 @@ import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.math.min
 
-// TODO(codex): Add UI tests to ECEContentTest and add a new screenshot test case as well.
 @Composable
 internal fun ExpressCheckoutElementContent(
     interactor: ExpressCheckoutElementInteractor,
 ) {
     ExpressCheckoutElementContent(
         interactor = interactor,
-        googlePayButton = { button, onPressed ->
+        googlePayButton = { button, enabled, onPressed ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = button.allowCreditCards,
                 buttonType = button.googlePayButtonType,
                 billingAddressParameters = button.billingAddressParameters,
-                isEnabled = true,
+                isEnabled = enabled,
                 cardBrandFilter = button.cardBrandFilter,
                 cardFundingFilter = button.cardFundingFilter,
                 additionalEnabledNetworks = button.additionalEnabledNetworks,
@@ -56,9 +55,8 @@ internal fun ExpressCheckoutElementContent(
 @Composable
 internal fun ExpressCheckoutElementContent(
     interactor: ExpressCheckoutElementInteractor,
-    googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
+    googlePayButton: @Composable (ExpressButton.GooglePay, Boolean, () -> Unit) -> Unit,
 ) {
-    // TODO(codex): Set all UI content to be enabled based on the state.enabled value from the interactor state
     val state by interactor.state.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -96,6 +94,7 @@ internal fun ExpressCheckoutElementContent(
                         Box(modifier = Modifier.width(buttonWidth)) {
                             ExpressButtonContent(
                                 button = button,
+                                enabled = state.enabled,
                                 interactor = interactor,
                                 googlePayButton = googlePayButton,
                             )
@@ -149,12 +148,13 @@ internal fun calculateColumnCount(
 @Composable
 private fun ExpressButtonContent(
     button: ExpressButton,
+    enabled: Boolean,
     interactor: ExpressCheckoutElementInteractor,
-    googlePayButton: @Composable (ExpressButton.GooglePay, () -> Unit) -> Unit,
+    googlePayButton: @Composable (ExpressButton.GooglePay, Boolean, () -> Unit) -> Unit,
 ) {
     key(button) {
         when (button) {
-            is ExpressButton.GooglePay -> googlePayButton(button) {
+            is ExpressButton.GooglePay -> googlePayButton(button, enabled) {
                 interactor.handleViewAction(
                     ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
                         expressButton = button,
@@ -163,7 +163,7 @@ private fun ExpressButtonContent(
             }
             is ExpressButton.Link -> LinkButton(
                 state = button.state,
-                enabled = true,
+                enabled = enabled,
                 theme = button.buttonTheme.toLinkButtonTheme(),
                 linkBrand = button.linkBrand,
                 onClick = {

@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -81,13 +82,7 @@ internal fun GooglePayButton(
         is PrimaryButton.State.Ready -> PayButton(
             modifier = modifier
                 .fillMaxWidth()
-                .semantics {
-                    onClick {
-                        onPressed()
-
-                        true
-                    }
-                }
+                .googlePayButtonSemantics(isEnabled, onPressed)
                 .testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
             allowedPaymentMethods = allowedPaymentMethods,
             type = buttonType.toComposeButtonType(),
@@ -102,6 +97,20 @@ internal fun GooglePayButton(
             modifier = modifier,
             state = state,
         )
+    }
+}
+
+private fun Modifier.googlePayButtonSemantics(
+    enabled: Boolean,
+    onPressed: () -> Unit,
+): Modifier = semantics {
+    if (enabled) {
+        onClick {
+            onPressed()
+            true
+        }
+    } else {
+        disabled()
     }
 }
 

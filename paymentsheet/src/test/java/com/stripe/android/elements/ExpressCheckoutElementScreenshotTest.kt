@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,7 +40,21 @@ internal class ExpressCheckoutElementScreenshotTest {
         paparazziRule.snapshot {
             ExpressCheckoutElementContent(
                 interactor = FakeExpressCheckoutElementInteractor(),
-                googlePayButton = { _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+            )
+        }
+    }
+
+    @Test
+    fun rendersDisabledGooglePayAndLinkButtons() {
+        paparazziRule.snapshot {
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(
+                    state = stateFlowOf(
+                        ExpressCheckoutElementInteractorStateFactory.create(enabled = false)
+                    ),
+                ),
+                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
             )
         }
     }
@@ -57,7 +72,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
             )
         }
     }
@@ -83,7 +98,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, _ -> FakeGooglePayButton() },
+                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
             )
         }
     }
@@ -106,7 +121,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                             )
                         ),
                     ),
-                    googlePayButton = { _, _ -> FakeGooglePayButton() },
+                    googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
                 )
                 ExpressCheckoutElementContent(
                     interactor = FakeExpressCheckoutElementInteractor(
@@ -118,18 +133,19 @@ internal class ExpressCheckoutElementScreenshotTest {
                             )
                         ),
                     ),
-                    googlePayButton = { _, _ -> FakeGooglePayButton() },
+                    googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
                 )
             }
         }
     }
 
     @Composable
-    private fun FakeGooglePayButton() {
+    private fun FakeGooglePayButton(enabled: Boolean) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
+                .alpha(if (enabled) 1f else 0.5f)
                 .background(
                     color = Color.Black,
                     shape = RoundedCornerShape(6.dp),

@@ -4,6 +4,7 @@ package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -20,7 +21,7 @@ internal interface ExpressCheckoutElementInteractor {
     data class State(
         val expressButtons: List<ExpressButton>,
         val buttonLayout: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State,
-        // TODO(codex): Add boolean field "enabled"
+        val enabled: Boolean,
     )
 
     sealed class ViewAction {
@@ -32,14 +33,13 @@ internal interface ExpressCheckoutElementInteractor {
     }
 }
 
-// TODO(codex): Add test cases to cover new state changes.
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
     stateHolder: CheckoutControllerStateHolder,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val expressCheckoutElementConfirmationPerformer: ExpressCheckoutElementConfirmationPerformer,
-    // TODO(codex): inject operationCoordinator.isUpdating
+    operationCoordinator: CheckoutOperationCoordinator,
 ) : ExpressCheckoutElementInteractor {
 
     private var hasReportedDisplayed: Boolean
@@ -52,15 +52,15 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         linkAccountHolder.linkAccountInfo,
         stateHolder.stateFlow,
         stateHolder.session,
-        // TODO(codex): add isUpdating as input here
-    ) { linkAccountInfo, state, session, ->
-        // TODO(codex): Throughout this function, set enabled == !isUpdating
+        operationCoordinator.isUpdating,
+    ) { linkAccountInfo, state, session, isUpdating ->
         val configuration = state?.configuration?.expressCheckoutElementConfiguration
         val paymentMethodMetadata = state?.expressCheckoutElementPaymentMethodMetadata
         if (configuration == null || paymentMethodMetadata == null || session == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+                enabled = !isUpdating,
             )
         }
 
@@ -81,6 +81,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
             buttonLayout = configuration.appearance.buttonLayout,
+            enabled = !isUpdating,
         )
     }
 
