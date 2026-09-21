@@ -82,7 +82,10 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     fun testSavedPaymentMethodSelectionRefreshesBillingTaxBeforeCommitting() {
         runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
-                taxUpdate.holdResponse()
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
                 automaticTaxResponse(
                     total = UPDATED_TOTAL,
                     taxStatus = TAX_STATUS_COMPLETE,
@@ -93,14 +96,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-            taxUpdate.awaitRequest()
+            taxUpdateRequests.awaitItem()
             contentPage.assertPaymentMethodRowsAreEnabled(false)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
             callbacks.expectNoEvents()
 
-            taxUpdate.releaseResponse()
+            releaseTaxUpdateResponse.countDown()
 
             val sessionAtCallback = checkNotNull(callbacks.awaitItem())
             assertSavedPaymentMethodSession(sessionAtCallback)
@@ -113,17 +116,20 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     fun testSavedPaymentMethodSelectionFailureCanRetry() {
         runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
-                taxUpdate.holdResponse()
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
                 response.setResponseCode(400)
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
 
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
 
-            taxUpdate.awaitRequest()
-            taxUpdate.releaseResponse()
+            taxUpdateRequests.awaitItem()
+            contentPage.assertPaymentMethodRowsAreEnabled(false)
+            releaseTaxUpdateResponse.countDown()
 
-            waitForControllerUpdateToFinish(controller)
             contentPage.assertPaymentMethodRowsAreEnabled(true)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
@@ -167,30 +173,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             selectCashAppAndAwaitCallback()
             block()
             markTestSucceeded()
-        }
-    }
-
-    private class HeldTaxUpdate {
-        private val requests = Turbine<Unit>()
-        private val releaseResponseLatch = CountDownLatch(1)
-
-        fun holdResponse() {
-            requests.add(Unit)
-            check(releaseResponseLatch.await(10, TimeUnit.SECONDS)) {
-                "Timed out waiting to release the Checkout Session update response."
-            }
-        }
-
-        suspend fun awaitRequest() {
-            requests.awaitItem()
-        }
-
-        fun releaseResponse() {
-            releaseResponseLatch.countDown()
-        }
-
-        fun ensureAllEventsConsumed() {
-            requests.ensureAllEventsConsumed()
         }
     }
 
@@ -431,9 +413,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 try {
                     scenario.block()
                 } finally {
-                    scenario.taxUpdate.releaseResponse()
+                    scenario.releaseTaxUpdateResponse.countDown()
                 }
-                scenario.taxUpdate.ensureAllEventsConsumed()
+                scenario.taxUpdateRequests.ensureAllEventsConsumed()
                 scenario.callbacks.ensureAllEventsConsumed()
             }
         }
@@ -444,7 +426,8 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         val controller: CheckoutController,
     ) {
         val callbacks = Turbine<CheckoutController.Session?>()
-        val taxUpdate = HeldTaxUpdate()
+        val taxUpdateRequests = Turbine<Unit>()
+        val releaseTaxUpdateResponse = CountDownLatch(1)
 
         fun presentPaymentOptions() {
             runnerContext.presentPaymentOptions()
@@ -570,12 +553,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
             controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
-        }
-    }
-
-    private fun waitForControllerUpdateToFinish(controller: CheckoutController) {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            !controller.isUpdating.value
         }
     }
 

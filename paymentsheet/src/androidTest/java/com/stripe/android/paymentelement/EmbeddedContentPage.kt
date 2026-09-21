@@ -72,11 +72,22 @@ internal class EmbeddedContentPage(
             tag.startsWith("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_") ||
                 tag.startsWith("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_")
         }
-        val rows = composeTestRule.onAllNodes(
-            rowMatcher.and(hasAnyAncestor(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT)))
+        val rowsMatcher = rowMatcher.and(
+            hasAnyAncestor(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
         )
+        val enabledMatcher = if (isEnabled) isEnabled() else isNotEnabled()
+
+        composeTestRule.waitUntil {
+            val rows = composeTestRule.onAllNodes(rowsMatcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            val rowsWithExpectedState = composeTestRule.onAllNodes(rowsMatcher.and(enabledMatcher))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            rows.isNotEmpty() && rowsWithExpectedState.size == rows.size
+        }
+
+        val rows = composeTestRule.onAllNodes(rowsMatcher)
         assertThat(rows.fetchSemanticsNodes()).isNotEmpty()
-        rows.assertAll(if (isEnabled) isEnabled() else isNotEnabled())
+        rows.assertAll(enabledMatcher)
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
