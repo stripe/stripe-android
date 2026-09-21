@@ -1,5 +1,7 @@
 package com.stripe.android.paymentelement
 
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
@@ -41,6 +43,18 @@ internal class EmbeddedContentPage(
 
         composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
             .assertIsSelected()
+    }
+
+    fun assertLpmIsEnabled(code: String, isEnabled: Boolean) {
+        waitUntilVisible()
+
+        val row = composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
+            .performScrollTo()
+        if (isEnabled) {
+            row.assertIsEnabled()
+        } else {
+            row.assertIsNotEnabled()
+        }
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {

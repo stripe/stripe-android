@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
@@ -34,6 +36,14 @@ internal class AddressElementPage(
         composeTestRule.onNodeWithText("Massachusetts").performScrollTo().performClick()
     }
 
+    fun assertCompleteAddress() {
+        assertTextFieldContains("Full name", "Real Name")
+        assertTextFieldContains("Address line 1", "1234 Main St")
+        assertTextFieldContains("City", "Boston")
+        assertTextFieldContains("ZIP Code", "12345")
+        composeTestRule.onNodeWithText("Massachusetts").performScrollTo().assertIsDisplayed()
+    }
+
     fun clickSave() {
         composeTestRule.waitForNode(hasText("Save address").and(isEnabled()))
         composeTestRule.onNodeWithText("Save address").performScrollTo().performClick()
@@ -64,5 +74,11 @@ internal class AddressElementPage(
 
     fun clickClose() {
         composeTestRule.onNodeWithContentDescription("Close").performClick()
+    }
+
+    private fun assertTextFieldContains(label: String, value: String) {
+        composeTestRule.onNode(hasText(label).and(hasSetTextAction()))
+            .performScrollTo()
+            .assertTextContains(value)
     }
 }

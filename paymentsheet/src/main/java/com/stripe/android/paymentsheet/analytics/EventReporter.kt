@@ -42,11 +42,6 @@ internal interface LoadingEventReporter {
 internal interface EventReporter : CardScanEventsReporter {
 
     /**
-     * PaymentSheet has been instantiated or FlowController has finished its configuration.
-     */
-    fun onInit()
-
-    /**
      * PaymentSheet has been dismissed by pressing the close button.
      */
     fun onDismiss()

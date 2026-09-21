@@ -139,6 +139,33 @@ class PaymentIntentResultTest {
     }
 
     @Test
+    fun outcome_whenBizumAwaitsAuthorization_shouldReturnCanceled() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethod(
+                id = "pm_bizum",
+                created = 500L,
+                liveMode = false,
+                type = PaymentMethod.Type.Bizum,
+                code = "bizum",
+            ),
+            isLiveMode = false,
+            id = "pi_bizum",
+            currency = "eur",
+            countryCode = "ES",
+            paymentMethodTypes = listOf("bizum"),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.AwaitAuthorization,
+        )
+
+        assertThat(PaymentIntentResult(paymentIntent).outcome)
+            .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+    }
+
+    @Test
     fun `should parcelize correctly`() {
         ParcelUtils.verifyParcelRoundtrip(
             PaymentIntentResult(

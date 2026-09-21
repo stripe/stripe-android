@@ -23,6 +23,7 @@ import androidx.test.espresso.Espresso.pressBack
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -33,7 +34,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.createCustomerState
@@ -49,6 +49,8 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @RunWith(RobolectricTestRunner::class)
@@ -90,32 +92,13 @@ internal class EmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `processing shows spinner and blocks back on form`() = launch { scenario ->
-        scenario.onActivity { activity ->
-            activity.sheetActivityStateHolder.updateProcessing(true)
-        }
-        composeTestRule.waitForIdle()
-        primaryButton.performScrollTo()
-
-        composeTestRule.onNodeWithText(
-            applicationContext.getString(PaymentSheetR.string.stripe_paymentsheet_primary_button_processing)
-        ).assertIsDisplayed()
-        pressBack()
-        onIdle()
-        scenario.onActivity { activity ->
-            assertThat(activity.embeddedNavigator.screen.value)
-                .isInstanceOf<EmbeddedNavigator.Screen.Form>()
-        }
-    }
-
-    @Test
     fun `checkout Continue displays error and keeps form open`() {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
 
-        launch(paymentMethodMetadata = checkoutPaymentMethodMetadata()) { scenario ->
+        launch(paymentMethodMetadata = checkoutPaymentMethodMetadata()) {
             val expectedError = applicationContext.getString(PaymentSheetR.string.stripe_something_went_wrong)
             fillOutCheckoutCard()
             primaryButton.performScrollTo().assertIsEnabled().performClick()
@@ -127,9 +110,45 @@ internal class EmbeddedSheetActivityTest {
             }
             composeTestRule.onNodeWithText(expectedError).performScrollTo().assertIsDisplayed()
             primaryButton.assertIsEnabled()
-            scenario.onActivity { activity ->
-                assertThat(activity.embeddedNavigator.screen.value)
-                    .isInstanceOf<EmbeddedNavigator.Screen.Form>()
+            formPage.waitUntilVisible()
+        }
+    }
+
+    @Test
+    fun `processing shows progress and blocks back on form`() {
+        val requestReceived = CountDownLatch(1)
+        val releaseResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            requestReceived.countDown()
+            check(releaseResponse.await(10, TimeUnit.SECONDS))
+        }
+
+        launch(paymentMethodMetadata = checkoutPaymentMethodMetadata()) { scenario ->
+            try {
+                fillOutCheckoutCard()
+                primaryButton.performScrollTo().assertIsEnabled().performClick()
+                val processingLabel = applicationContext.getString(
+                    PaymentSheetR.string.stripe_paymentsheet_primary_button_processing
+                )
+                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                    composeTestRule.onAllNodes(hasText(processingLabel))
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                        .isNotEmpty()
+                }
+                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                    requestReceived.count == 0L
+                }
+                composeTestRule.onNodeWithText(processingLabel).assertIsDisplayed()
+
+                scenario.onActivity { activity ->
+                    activity.onBackPressedDispatcher.onBackPressed()
+                }
+
+                formPage.waitUntilVisible()
+            } finally {
+                releaseResponse.countDown()
             }
         }
     }
@@ -183,31 +202,6 @@ internal class EmbeddedSheetActivityTest {
                 checkoutSessionResponse = response,
             ),
         )
-    }
-
-    @Test
-    fun `When SheetActivityStateHolder has result, activity finishes with that result`() = launch { scenario ->
-        scenario.onActivity { activity ->
-            activity.sheetActivityStateHolder.setResult(
-                EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    selection = null,
-                    hasBeenConfirmed = true,
-                    customerState = null,
-                    checkoutSessionResponse = null,
-                    shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.Form(
-                        selectedPaymentMethodCode = "card",
-                    ),
-                )
-            )
-        }
-
-        onIdle()
-
-        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
-        assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
     }
 
     @Test
@@ -268,10 +262,12 @@ internal class EmbeddedSheetActivityTest {
                     selection = null,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                     ),
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 ),
             )
         ).use { scenario ->

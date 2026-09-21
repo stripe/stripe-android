@@ -90,8 +90,6 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.ui.SepaMandateContract
-import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -145,9 +143,6 @@ internal class DefaultFlowControllerTest {
     private val paymentOptionActivityLauncher =
         mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
 
-    private val sepaMandateActivityLauncher =
-        mock<ActivityResultLauncher<SepaMandateContract.Args>>()
-
     private val flowControllerLinkPaymentLauncher = mock<LinkPaymentLauncher>()
     private val walletsButtonLinkPaymentLauncher = mock<LinkPaymentLauncher>()
 
@@ -182,13 +177,6 @@ internal class DefaultFlowControllerTest {
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
-
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                any<SepaMandateContract>(),
-                any()
-            )
-        ).thenReturn(sepaMandateActivityLauncher)
 
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
     }
@@ -415,7 +403,7 @@ internal class DefaultFlowControllerTest {
 
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption?.label).isEqualTo("···· $last4")
+        assertThat(paymentOption?.label).isEqualTo("\u2066···· $last4\u2069")
         assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
     }
 
@@ -438,7 +426,7 @@ internal class DefaultFlowControllerTest {
 
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption?.label).isEqualTo("···· $last4")
+        assertThat(paymentOption?.label).isEqualTo("\u2066···· $last4\u2069")
         assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
         // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
@@ -724,7 +712,8 @@ internal class DefaultFlowControllerTest {
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption).isNotNull()
         assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
-        assertThat(paymentOption?.label).isEqualTo("···· ${savedPaymentMethods.first().card?.last4}")
+        assertThat(paymentOption?.label)
+            .isEqualTo("\u2066···· ${savedPaymentMethods.first().card?.last4}\u2069")
 
         // Verify callback was invoked with the fallback payment option
         verify(paymentOptionResultCallback).onPaymentOptionResult(
@@ -775,7 +764,8 @@ internal class DefaultFlowControllerTest {
             val paymentOption = flowController.getPaymentOption()
             assertThat(paymentOption).isNotNull()
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
-            assertThat(paymentOption?.label).isEqualTo("···· ${savedPaymentMethods.first().card?.last4}")
+            assertThat(paymentOption?.label)
+                .isEqualTo("\u2066···· ${savedPaymentMethods.first().card?.last4}\u2069")
 
             // Verify callback was invoked
             verify(paymentOptionResultCallback).onPaymentOptionResult(
@@ -806,13 +796,13 @@ internal class DefaultFlowControllerTest {
             verify(paymentOptionResultCallback).onPaymentOptionResult(
                 argThat {
                     paymentOption?.drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa_ref &&
-                        paymentOption.label == "···· 4242" &&
+                        paymentOption.label == "\u2066···· 4242\u2069" &&
                         !didCancel
                 }
             )
             val paymentOption = flowController.getPaymentOption()
             assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-            assertThat(paymentOption?.label).isEqualTo("···· 4242")
+            assertThat(paymentOption?.label).isEqualTo("\u2066···· 4242\u2069")
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
         }
 
@@ -1268,8 +1258,7 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `confirm() with default sepa saved payment method should show sepa mandate`() = confirmationTest {
-        val appearance = PaymentSheet.Appearance()
+    fun `confirm() passes default saved SEPA payment method to confirmation handler`() = confirmationTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         val flowController = createFlowController(
             paymentSelection = paymentSelection,
@@ -1282,20 +1271,10 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .allowsDelayedPaymentMethods(true)
-                .appearance(appearance)
                 .build()
         )
 
         flowController.confirm()
-
-        verify(sepaMandateActivityLauncher).launch(
-            SepaMandateContract.Args(
-                merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                appearance = appearance,
-            )
-        )
-
-        flowController.onSepaMandateResult(SepaMandateResult.Acknowledged)
 
         val arguments = startTurbine.awaitItem()
 
@@ -1306,30 +1285,6 @@ internal class DefaultFlowControllerTest {
                 optionsParams = null,
             )
         )
-    }
-
-    @Test
-    fun `confirm() with default sepa saved payment method should cancel after show sepa mandate`() = confirmationTest {
-        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
-        val flowController = createFlowController(
-            paymentSelection = paymentSelection,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-                    .paymentMethodTypes.plus("sepa_debit")
-            )
-        )
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
-                .allowsDelayedPaymentMethods(true)
-                .build()
-        )
-
-        flowController.confirm()
-
-        verify(sepaMandateActivityLauncher).launch(any())
-
-        flowController.onSepaMandateResult(SepaMandateResult.Canceled)
     }
 
     @Test
@@ -1355,9 +1310,9 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        flowController.confirm()
+        assertThat(paymentSelection.hasAcknowledgedSepaMandate).isTrue()
 
-        verify(sepaMandateActivityLauncher, never()).launch(any())
+        flowController.confirm()
 
         val arguments = startTurbine.awaitItem()
 
@@ -1366,6 +1321,7 @@ internal class DefaultFlowControllerTest {
                 shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
+                hasAcknowledgedSepaMandate = true,
             )
         )
     }
@@ -1728,6 +1684,7 @@ internal class DefaultFlowControllerTest {
                 shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
+                hasAcknowledgedSepaMandate = true,
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
@@ -2304,6 +2261,7 @@ internal class DefaultFlowControllerTest {
                     cvc = "505"
                 ),
                 originatedFromWallet = false,
+                hasAcknowledgedSepaMandate = true,
             )
         )
         assertThat(arguments.paymentMethodMetadata.shippingDetails).isEqualTo(shippingDetails)

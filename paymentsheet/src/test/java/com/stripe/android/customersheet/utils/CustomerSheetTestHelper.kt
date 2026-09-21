@@ -95,6 +95,7 @@ internal interface CustomerSheetTestHelper {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)
@@ -136,7 +137,6 @@ internal interface CustomerSheetTestHelper {
                 ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentConfiguration = paymentConfiguration,
                     bacsMandateConfirmationLauncherFactory = {
                         FakeBacsMandateConfirmationLauncher()
                     },

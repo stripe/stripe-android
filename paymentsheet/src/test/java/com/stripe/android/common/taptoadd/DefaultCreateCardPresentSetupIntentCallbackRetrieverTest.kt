@@ -1,8 +1,6 @@
 package com.stripe.android.common.taptoadd
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -36,7 +34,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
             errorReporter = errorReporter,
         )
 
-        assertThat(retriever.waitForCallback()).isEqualTo(callback)
+        assertThat(retriever.waitForCallback(isLiveMode = false)).isEqualTo(callback)
         errorReporter.ensureAllEventsConsumed()
     }
 
@@ -52,7 +50,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
 
         runTest(dispatcher) {
             val retrieveJob = async {
-                retriever.waitForCallback()
+                retriever.waitForCallback(isLiveMode = false)
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -83,7 +81,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
             lateinit var exception: CallbackNotFoundException
             val retrieveJob = async {
                 exception = assertFailsWith<CallbackNotFoundException> {
-                    retriever.waitForCallback()
+                    retriever.waitForCallback(isLiveMode = false)
                 }
             }
 
@@ -120,11 +118,10 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
     fun `waitForCallback returns test error message when not in live mode`() = runTest {
         val retriever = createRetriever(
             callbackProvider = { null },
-            isLiveMode = false
         )
 
         try {
-            retriever.waitForCallback()
+            retriever.waitForCallback(isLiveMode = false)
             error("Expected exception to be thrown")
         } catch (e: CallbackNotFoundException) {
             assertThat(e.resolvableError)
@@ -139,11 +136,10 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
     fun `waitForCallback returns generic error message when in live mode`() = runTest {
         val retriever = createRetriever(
             callbackProvider = { null },
-            isLiveMode = true,
         )
 
         try {
-            retriever.waitForCallback()
+            retriever.waitForCallback(isLiveMode = true)
             error("Expected exception to be thrown")
         } catch (e: CallbackNotFoundException) {
             assertThat(e.resolvableError)
@@ -154,18 +150,10 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
     private fun createRetriever(
         callbackProvider: Provider<CreateCardPresentSetupIntentCallback?>,
         errorReporter: ErrorReporter = FakeErrorReporter(),
-        isLiveMode: Boolean = false,
     ): DefaultCreateCardPresentSetupIntentCallbackRetriever {
-        val apiKey = if (isLiveMode) LIVE_PUBLISHABLE_KEY else ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-
         return DefaultCreateCardPresentSetupIntentCallbackRetriever(
             errorReporter = errorReporter,
-            requestOptionsProvider = { ApiRequest.Options(apiKey = apiKey) },
             createCardPresentSetupIntentCallbackProvider = callbackProvider,
         )
-    }
-
-    private companion object {
-        const val LIVE_PUBLISHABLE_KEY = "pk_live_123"
     }
 }

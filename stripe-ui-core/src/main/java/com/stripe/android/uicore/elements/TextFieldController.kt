@@ -10,7 +10,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -34,7 +33,6 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     val trailingIcon: StateFlow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
-    val layoutDirection: LayoutDirection?
     override val label: StateFlow<ResolvableString>
     val visualTransformation: StateFlow<VisualTransformation>
     override val showOptionalLabel: Boolean
@@ -149,7 +147,7 @@ class SimpleTextFieldController(
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
-    override val layoutDirection: LayoutDirection? = textFieldConfig.layoutDirection
+    override val enforceLeftToRightTextDirection: Boolean = textFieldConfig.enforceLeftToRightTextDirection
 
     override val autofillType: ContentType? = when (textFieldConfig) {
         is DateConfig -> ContentType.CreditCardExpirationDate
@@ -185,6 +183,7 @@ class SimpleTextFieldController(
 
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
+    private val focusAsk = MutableStateFlow(false)
 
     override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
@@ -246,6 +245,10 @@ class SimpleTextFieldController(
         _isValidating.value = isValidating
     }
 
+    fun requestFocus() {
+        focusAsk.value = true
+    }
+
     @Composable
     override fun ComposeUI(
         enabled: Boolean,
@@ -254,6 +257,8 @@ class SimpleTextFieldController(
         hiddenIdentifiers: Set<FormFieldId>,
         lastTextFieldIdentifier: FormFieldId?,
     ) {
+        val focusRequester = rememberTextFocusRequester(focusAsk)
+
         TextField(
             textFieldController = this,
             enabled = enabled,
@@ -263,6 +268,7 @@ class SimpleTextFieldController(
                 ImeAction.Next
             },
             modifier = modifier,
+            focusRequester = focusRequester,
             shouldAnnounceLabel = textFieldConfig.shouldAnnounceLabel,
             shouldAnnounceFieldValue = textFieldConfig.shouldAnnounceFieldValue
         )

@@ -26,6 +26,21 @@ internal class AddressElementTest {
     }
 
     @Test
+    fun completedAddressSurvivesActivityRecreationAndReturnsSucceededResult() = runAddressElementTest(page) {
+        val activity = present()
+        page.fillCompleteAddress()
+
+        val recreatedActivity = recreate(activity)
+
+        assertThat(recreatedActivity).isNotSameInstanceAs(activity)
+        page.waitUntilVisible()
+        page.assertCompleteAddress()
+        page.clickSave()
+
+        assertThat(results.awaitItem()).isEqualTo(expectedResult)
+    }
+
+    @Test
     fun invalidAddressShowsErrorAndCanBeCorrected() = runAddressElementTest(page) {
         present()
         page.clickDisabledSave()

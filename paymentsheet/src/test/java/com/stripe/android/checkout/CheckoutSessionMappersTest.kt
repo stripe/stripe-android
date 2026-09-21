@@ -1,345 +1,159 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.repositories.TotalSummaryResponseFactory
 import org.junit.Test
+import java.util.Locale
 
-@OptIn(CheckoutSessionPreview::class)
 class CheckoutSessionMappersTest {
-
     @Test
-    fun `maps id`() {
-        val session = createSession(id = "cs_test_123")
-        assertThat(session.id).isEqualTo("cs_test_123")
-    }
-
-    @Test
-    fun `maps status open`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.OPEN)
-        assertThat(session.status).isInstanceOf(Session.Status.Open::class.java)
-    }
-
-    @Test
-    fun `maps status complete`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(session.status).isInstanceOf(Session.Status.Complete::class.java)
-    }
-
-    @Test
-    fun `maps status expired`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.EXPIRED)
-        assertThat(session.status).isInstanceOf(Session.Status.Expired::class.java)
-    }
-
-    @Test
-    fun `maps livemode true`() {
-        val session = createSession(liveMode = true)
-        assertThat(session.liveMode).isTrue()
-    }
-
-    @Test
-    fun `maps livemode false`() {
-        val session = createSession(liveMode = false)
-        assertThat(session.liveMode).isFalse()
-    }
-
-    @Test
-    fun `maps currency`() {
-        val session = createSession(currency = "eur")
-        assertThat(session.currency).isEqualTo("eur")
-    }
-
-    @Test
-    fun `maps customerEmail`() {
-        val session = createSession(customerEmail = "test@example.com")
-        assertThat(session.email).isEqualTo("test@example.com")
-    }
-
-    @Test
-    fun `maps collected email over customerEmail`() {
-        val session = createSession(
-            customerEmail = "checkout@example.com",
-            collectedEmail = "collected@example.com",
-        )
-
-        assertThat(session.email).isEqualTo("collected@example.com")
-    }
-
-    @Test
-    fun `null customerEmail maps to null`() {
-        val session = createSession(customerEmail = null)
-        assertThat(session.email).isNull()
-    }
-
-    @Test
-    fun `maps tax status ready`() {
-        val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.READY)
-        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.Ready)
-    }
-
-    @Test
-    fun `maps tax status requires shipping address`() {
-        val session = createSession(
-            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
-        )
-        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.RequiresShippingAddress)
-    }
-
-    @Test
-    fun `maps tax status requires billing address`() {
-        val session = createSession(
-            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
-        )
-        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.RequiresBillingAddress)
-    }
-
-    @Test
-    fun `maps tax status unknown`() {
-        val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN)
-        assertThat(session.tax.status).isEqualTo(Session.Tax.Status.Unknown)
-    }
-
-    @Test
-    fun `null totalSummary maps to null`() {
-        val session = createSession(totalSummary = null)
-        assertThat(session.totalSummary).isNull()
-    }
-
-    @Test
-    fun `maps totalSummary subtotal`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(subtotal = 5000L),
-        )
-        assertThat(session.totalSummary?.subtotal).isEqualTo(5000L)
-    }
-
-    @Test
-    fun `maps totalSummary totalDueToday`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(totalDueToday = 4044L),
-        )
-        assertThat(session.totalSummary?.totalDueToday).isEqualTo(4044L)
-    }
-
-    @Test
-    fun `maps totalSummary totalAmountDue`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(totalAmountDue = 3000L),
-        )
-        assertThat(session.totalSummary?.totalAmountDue).isEqualTo(3000L)
-    }
-
-    @Test
-    fun `maps discountAmounts`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(
-                discountAmounts = listOf(
-                    CheckoutSessionResponse.DiscountAmount(amount = 500L, displayName = "SUMMER10"),
-                    CheckoutSessionResponse.DiscountAmount(amount = 250L, displayName = "LOYALTY5"),
-                ),
-            ),
-        )
-        val discounts = session.totalSummary!!.discountAmounts
-        assertThat(discounts).hasSize(2)
-        assertThat(discounts[0].amount).isEqualTo(500L)
-        assertThat(discounts[0].displayName).isEqualTo("SUMMER10")
-        assertThat(discounts[1].amount).isEqualTo(250L)
-        assertThat(discounts[1].displayName).isEqualTo("LOYALTY5")
-    }
-
-    @Test
-    fun `maps taxAmounts`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(
-                taxAmounts = listOf(
-                    CheckoutSessionResponse.TaxAmount(
-                        amount = 294L,
-                        inclusive = false,
-                        displayName = "Sales Tax",
-                        percentage = 6.875,
-                    ),
-                ),
-            ),
-        )
-        val taxes = session.totalSummary!!.taxAmounts
-        assertThat(taxes).hasSize(1)
-        assertThat(taxes[0].amount).isEqualTo(294L)
-        assertThat(taxes[0].inclusive).isFalse()
-        assertThat(taxes[0].displayName).isEqualTo("Sales Tax")
-        assertThat(taxes[0].percentage).isEqualTo(6.875)
-    }
-
-    @Test
-    fun `maps shippingRate`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(
-                shippingRate = CheckoutSessionResponse.ShippingRate(
-                    id = "shr_standard",
-                    amount = 500L,
-                    displayName = "Standard Shipping",
-                    deliveryEstimate = "5-7 business days",
-                ),
-            ),
-        )
-        val shipping = session.totalSummary!!.shippingRate!!
-        assertThat(shipping.id).isEqualTo("shr_standard")
-        assertThat(shipping.amount).isEqualTo(500L)
-        assertThat(shipping.displayName).isEqualTo("Standard Shipping")
-        assertThat(shipping.deliveryEstimate).isEqualTo("5-7 business days")
-    }
-
-    @Test
-    fun `null shippingRate maps to null`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(shippingRate = null),
-        )
-        assertThat(session.totalSummary!!.shippingRate).isNull()
-    }
-
-    @Test
-    fun `maps appliedBalance`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(appliedBalance = -200L),
-        )
-        assertThat(session.totalSummary!!.appliedBalance).isEqualTo(-200L)
-    }
-
-    @Test
-    fun `null appliedBalance maps to null`() {
-        val session = createSession(
-            totalSummary = TotalSummaryResponseFactory.create(appliedBalance = null),
-        )
-        assertThat(session.totalSummary!!.appliedBalance).isNull()
-    }
-
-    @Test
-    fun `maps lineItems`() {
-        val session = createSession(
-            lineItems = listOf(
-                CheckoutSessionResponse.LineItem(
-                    id = "li_1",
-                    name = "Llama Figure",
+    fun `maps unified public fields and totals`() {
+        val response = CheckoutSessionResponseFactory.create(
+            businessName = "Widgets, Inc.",
+            liveMode = true,
+            customerEmail = "server@example.com",
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(
+                    total = 1080,
+                    subtotal = 1000,
+                    unitAmount = 500,
                     quantity = 2,
-                    unitAmount = 999L,
-                    subtotal = 1998L,
-                    total = 1998L,
-                ),
+                    name = "Widget",
+                ).withTaxes(inclusive = 20, exclusive = 80)
             ),
         )
-        val items = session.lineItems
-        assertThat(items).hasSize(1)
-        assertThat(items[0].id).isEqualTo("li_1")
-        assertThat(items[0].name).isEqualTo("Llama Figure")
-        assertThat(items[0].quantity).isEqualTo(2)
-        assertThat(items[0].unitAmount).isEqualTo(999L)
-        assertThat(items[0].subtotal).isEqualTo(1998L)
-        assertThat(items[0].total).isEqualTo(1998L)
+
+        val session = response.session()
+
+        assertThat(session.businessName).isEqualTo("Widgets, Inc.")
+        assertThat(session.livemode).isTrue()
+        assertThat(session.email).isEqualTo("server@example.com")
+        assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
+        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1000.0)
+        assertThat(session.totals.taxInclusive.minorUnitsAmount).isEqualTo(20.0)
+        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(80.0)
+        assertThat(session.totals.discount.minorUnitsAmount).isEqualTo(0.0)
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1080.0)
     }
 
     @Test
-    fun `empty lineItems maps to empty list`() {
-        val session = createSession()
-        assertThat(session.lineItems).isEmpty()
+    fun `maps nested item using stable inner key and server computed amounts`() {
+        val item = CheckoutSessionResponseFactory.create(
+            checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 2500, subtotal = 2400))
+        ).session().orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice
+
+        assertThat(item.key).isEqualTo("group_1")
+        assertThat(item.items.single().key).isEqualTo("item_1")
+        assertThat(item.items.single().amountDetails.subtotal.minorUnitsAmount).isEqualTo(2400.0)
+        assertThat(item.items.single().amountDetails.total.minorUnitsAmount).isEqualTo(2500.0)
     }
 
     @Test
-    fun `maps shippingOptions`() {
-        val session = createSession(
-            shippingOptions = listOf(
-                CheckoutSessionResponse.ShippingRate(
-                    id = "shr_standard",
-                    amount = 500L,
-                    displayName = "Standard Shipping",
-                    deliveryEstimate = null,
-                ),
-                CheckoutSessionResponse.ShippingRate(
-                    id = "shr_express",
-                    amount = 1500L,
-                    displayName = "Express Shipping",
-                    deliveryEstimate = "1-3 business days",
-                ),
-            ),
-        )
-        val options = session.shippingOptions
-        assertThat(options).hasSize(2)
-        assertThat(options[0].id).isEqualTo("shr_standard")
-        assertThat(options[0].amount).isEqualTo(500L)
-        assertThat(options[0].displayName).isEqualTo("Standard Shipping")
-        assertThat(options[0].deliveryEstimate).isNull()
-        assertThat(options[1].id).isEqualTo("shr_express")
-        assertThat(options[1].amount).isEqualTo(1500L)
-        assertThat(options[1].displayName).isEqualTo("Express Shipping")
-        assertThat(options[1].deliveryEstimate).isEqualTo("1-3 business days")
+    fun `formats USD JPY and sub-cent values with injected locale`() {
+        val usd = CheckoutSessionResponseFactory.create(amount = 1234).session()
+        val jpy = CheckoutSessionResponseFactory.create(amount = 1234, currency = "jpy").session()
+        val decimalItem = CheckoutSessionResponseFactory.checkoutItem().let { group ->
+            group.copy(
+                oneTimePrice = group.oneTimePrice.copy(
+                    items = group.oneTimePrice.items.map {
+                        it.copy(unitAmountDecimal = 12.345678901234)
+                    }
+                )
+            )
+        }
+        val decimal = CheckoutSessionResponseFactory.create(checkoutItems = listOf(decimalItem)).session()
+
+        assertThat(usd.totals.total.amount).isEqualTo("$12.34")
+        assertThat(jpy.totals.total.amount).isEqualTo("¥1,234")
+        assertThat(
+            (decimal.orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice)
+                .items.single().unitAmountDecimal?.amount
+        ).contains("0.12345678901234")
     }
 
     @Test
-    fun `empty shippingOptions maps to empty list`() {
-        val session = createSession()
-        assertThat(session.shippingOptions).isEmpty()
-    }
-
-    @Test
-    fun `currency selector is unavailable when adaptive pricing is absent`() {
-        val session = createSession()
-
-        assertThat(session.isCurrencySelectorAvailable).isFalse()
-    }
-
-    @Test
-    fun `currency selector is available when adaptive pricing has a local currency option`() {
-        val session = createSession(
+    fun `maps adaptive pricing currencies`() {
+        val session = CheckoutSessionResponseFactory.create(
+            currency = "eur",
+            checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(currency = "eur")),
             adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
-                activePresentmentCurrency = "usd",
-                integrationAmount = 5099L,
-                integrationCurrency = "eur",
+                activePresentmentCurrency = "eur",
+                integrationAmount = 1100,
+                integrationCurrency = "usd",
                 localCurrencyOptions = listOf(
-                    CheckoutSessionResponse.LocalCurrencyOption(
-                        amount = 6106L,
-                        conversionMarkupBps = 150,
-                        currency = "usd",
-                        presentmentExchangeRate = "1.19749",
-                    ),
+                    CheckoutSessionResponse.LocalCurrencyOption(1000, 400, "eur", "0.90")
                 ),
             ),
-        )
+        ).session()
 
-        assertThat(session.isCurrencySelectorAvailable).isTrue()
+        assertThat(session.currency).isEqualTo("usd")
+        assertThat(session.presentmentDetails?.presentmentCurrency).isEqualTo("eur")
     }
 
-    private fun createSession(
-        id: String = DEFAULT_CHECKOUT_SESSION_ID,
-        status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
-        liveMode: Boolean = false,
-        currency: String = "usd",
-        customerEmail: String? = null,
-        collectedEmail: String? = null,
-        taxStatus: CheckoutSessionResponse.TaxStatus = CheckoutSessionResponse.TaxStatus.READY,
-        totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
-        lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
-        shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
-        adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
-    ): Session {
-        return CheckoutSessionResponseFactory.create(
-            id = id,
-            status = status,
-            liveMode = liveMode,
-            currency = currency,
-            customerEmail = customerEmail,
-            taxStatus = taxStatus,
-            totalSummary = totalSummary,
-            lineItems = lineItems,
-            shippingOptions = shippingOptions,
-            adaptivePricingInfo = adaptivePricingInfo,
-        ).asCheckoutSession(
-            collectedEmail = collectedEmail,
+    @Test
+    fun `complete status contains payment status`() {
+        val status = CheckoutSessionResponseFactory.create(
+            status = CheckoutSessionResponse.Status.COMPLETE,
+            paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+        ).session().status as CheckoutController.Session.Status.Complete
+
+        assertThat(status.paymentStatus).isEqualTo(CheckoutController.Session.Status.PaymentStatus.Paid)
+    }
+
+    @Test
+    fun `tax is nullable and derives pending state`() {
+        val absent = CheckoutSessionResponseFactory.create(taxMeta = null).session()
+        val pending = CheckoutSessionResponseFactory.create(
+            taxMeta = CheckoutSessionResponse.TaxMeta(
+                CheckoutSessionResponse.TaxComputationType.AUTOMATIC,
+                CheckoutSessionResponse.TaxStatus.REQUIRES_LOCATION_INPUTS,
+            ),
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        ).session()
+
+        assertThat(absent.tax).isNull()
+        assertThat(pending.tax?.status).isEqualTo(CheckoutController.Session.Tax.Status.RequiresShippingAddress)
+    }
+
+    @Test
+    fun `local email and shipping address override response state`() {
+        val address = CheckoutController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
+        val session = CheckoutSessionResponseFactory.create(customerEmail = "server@example.com").asCheckoutSession(
+            collectedEmail = "local@example.com",
+            collectedShippingName = "Jenny",
+            collectedShippingAddress = address,
             flagImages = null,
-            paymentOptionDisplayData = null,
+            paymentOption = null,
             availableExpressButtonTypes = emptyList(),
+            locale = Locale.US,
         )
+
+        assertThat(session.email).isEqualTo("local@example.com")
+        assertThat(session.shippingAddress?.name).isEqualTo("Jenny")
+        assertThat(session.shippingAddress?.address?.postalCode).isEqualTo("80202")
     }
+
+    private fun CheckoutSessionResponse.session() = asCheckoutSession(
+        collectedEmail = null,
+        collectedShippingName = null,
+        collectedShippingAddress = null,
+        flagImages = null,
+        paymentOption = null,
+        availableExpressButtonTypes = emptyList(),
+        locale = Locale.US,
+    )
+
+    private fun CheckoutSessionResponse.CheckoutItem.withTaxes(
+        inclusive: Long,
+        exclusive: Long,
+    ): CheckoutSessionResponse.CheckoutItem = copy(
+        oneTimePrice = oneTimePrice.copy(
+            items = oneTimePrice.items.map {
+                it.copy(taxInclusive = inclusive, taxExclusive = exclusive)
+            }
+        )
+    )
 }

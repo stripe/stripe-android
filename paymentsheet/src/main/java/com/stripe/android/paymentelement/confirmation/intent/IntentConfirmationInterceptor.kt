@@ -33,6 +33,7 @@ internal interface IntentConfirmationInterceptor {
             integrationMetadata: IntegrationMetadata,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
+            isLiveMode: Boolean,
         ): IntentConfirmationInterceptor
     }
 
@@ -54,6 +55,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
         integrationMetadata: IntegrationMetadata,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        isLiveMode: Boolean,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
             is IntegrationMetadata.CustomerSheet -> {
@@ -69,7 +71,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
-                    createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
+                    createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(isLiveMode),
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
@@ -77,14 +79,14 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> {
                 deferredIntentConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
-                    createIntentCallback = deferredIntentCallbackRetriever.waitForPaymentMethodCallback(),
+                    createIntentCallback = deferredIntentCallbackRetriever.waitForPaymentMethodCallback(isLiveMode),
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
             is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken -> {
                 sharedPaymentTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
-                    handler = deferredIntentCallbackRetriever.waitForSharedPaymentTokenCallback(),
+                    handler = deferredIntentCallbackRetriever.waitForSharedPaymentTokenCallback(isLiveMode),
                 )
             }
             is IntegrationMetadata.IntentFirst -> {

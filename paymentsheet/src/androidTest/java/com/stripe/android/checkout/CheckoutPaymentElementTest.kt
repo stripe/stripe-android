@@ -15,40 +15,57 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.checkouttesting.createPaymentMethod
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.ui.wallet.LinkWalletPage
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPaymentElementTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+    }
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
+    private val linkWalletPage = LinkWalletPage(testRules.compose)
     private val verticalModePage = VerticalModePage(testRules.compose)
 
     @After
@@ -111,7 +128,125 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
-    fun testBillingTaxUpdateRefreshesCheckoutSession() = runAutomaticTaxTest { context, controller ->
+    fun testPaymentMethodsAreDisabledWhileCheckoutUpdateIsInProgress() {
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            },
+        ) { context ->
+            runBlocking {
+                contentPage.assertLpmIsEnabled("card", isEnabled = true)
+
+                val holdResponse = CountDownLatch(1)
+                networkRule.checkoutUpdate(
+                    bodyPart("promotion_code", "10OFF"),
+                ) { response ->
+                    holdResponse.await(10, TimeUnit.SECONDS)
+                    response.testBodyFromFile("checkout-session-init.json") { json ->
+                        json.put("customer_email", "checkout@example.com")
+                        json.getJSONObject("elements_session").remove("link_settings")
+                    }
+                }
+
+                val update = async(start = CoroutineStart.UNDISPATCHED) {
+                    controller.applyPromotionCode("10OFF")
+                }
+                try {
+                    testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                        controller.isUpdating.value
+                    }
+                    contentPage.assertLpmIsEnabled("card", isEnabled = false)
+                } finally {
+                    holdResponse.countDown()
+                }
+
+                assertThat(update.await().isSuccess).isTrue()
+                testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                    !controller.isUpdating.value
+                }
+                contentPage.assertLpmIsEnabled("card", isEnabled = true)
+                context.markTestSucceeded()
+            }
+        }
+    }
+
+    @Test
+    fun testPaymentOptionsBridgesLinkAccountStateThroughCheckout() {
+        val checkoutInitResponse: (MockResponse) -> Unit = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "test@stripe.com")
+            }
+        }
+        val configuration = CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration()
+                .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+                .linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        PaymentElement.Configuration.LinkConfiguration.Display.WalletButtonHidden
+                    )
+                )
+        )
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
+                json.put("exists", true)
+            }
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/list"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json") { json ->
+                val paymentDetails = json.getJSONObject("redacted_payment_details")
+                json.put("redacted_payment_details", JSONArray().put(paymentDetails))
+            }
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        lateinit var controller: CheckoutController
+
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            checkoutInitResponse = checkoutInitResponse,
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            },
+        ) { context ->
+            contentPage.clickOnLpm("link")
+            contentPage.assertHasSelectedLpm("link")
+            context.presentPaymentOptions()
+
+            linkWalletPage.logOut()
+
+            verticalModePage.waitUntilVisible()
+            verticalModePage.assertLpmDoesNotExist("link")
+            Espresso.pressBack()
+            verticalModePage.waitUntilMissing()
+
+            networkRule.checkoutInit(responseFactory = checkoutInitResponse)
+            runBlocking {
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            }
+            context.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testBillingTaxUpdateRefreshesCheckoutSession() = runAutomaticTaxTest {
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
 
         contentPage.clickOnLpm("card")
@@ -122,17 +257,17 @@ internal class CheckoutPaymentElementTest {
         assertThat(controller.session.value?.tax?.status)
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
-        context.markTestSucceeded()
+        markTestSucceeded()
     }
 
     @Test
-    fun testBillingTaxUpdateFailureCanRetryFromPaymentOptions() = runAutomaticTaxTest { context, controller ->
+    fun testBillingTaxUpdateFailureCanRetryFromPaymentOptions() = runAutomaticTaxTest {
         enqueueTaxUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
 
-        context.presentPaymentOptions()
+        presentPaymentOptions()
         verticalModePage.clickNewPaymentMethodButton("card")
         fillOutCardAndBillingDetails()
         formPage.clickPrimaryButtonWithoutWaitingForDismissal()
@@ -140,7 +275,7 @@ internal class CheckoutPaymentElementTest {
         formPage.assertErrorIsShown(applicationContext.getString(R.string.stripe_something_went_wrong))
         formPage.waitUntilVisible()
         formPage.assertPrimaryButtonIsEnabled()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(INITIAL_TOTAL)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
 
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
         formPage.clickPrimaryButton()
@@ -149,7 +284,7 @@ internal class CheckoutPaymentElementTest {
         assertThat(controller.session.value?.tax?.status)
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
-        context.markTestSucceeded()
+        markTestSucceeded()
     }
 
     @Test
@@ -192,7 +327,7 @@ internal class CheckoutPaymentElementTest {
         runAutomaticTaxTest(
             paymentMethodLayout = paymentMethodLayout,
             checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
-        ) { context, controller ->
+        ) {
             enqueueTaxUpdate(automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_COMPLETE))
             contentPage.clickOnLpm("card")
             fillOutCardAndBillingDetails()
@@ -201,7 +336,7 @@ internal class CheckoutPaymentElementTest {
 
             enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
 
-            context.presentPaymentOptions()
+            presentPaymentOptions()
             preparePaymentOptionsScreen(paymentMethodLayout)
             clickPaymentOptionsPrimaryButton()
 
@@ -209,7 +344,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("card")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -222,8 +357,8 @@ internal class CheckoutPaymentElementTest {
                 INITIAL_TOTAL,
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
-        ) { context, controller ->
-            context.presentPaymentOptions()
+        ) {
+            presentPaymentOptions()
             selectCashApp(paymentMethodLayout)
             formPage.waitUntilVisible()
 
@@ -235,7 +370,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -249,8 +384,8 @@ internal class CheckoutPaymentElementTest {
                 INITIAL_TOTAL,
                 TAX_STATUS_REQUIRES_LOCATION,
             ),
-        ) { context, controller ->
-            context.presentPaymentOptions()
+        ) {
+            presentPaymentOptions()
             selectCashApp(paymentMethodLayout)
             formPage.waitUntilVisible()
             assertBillingDetailsArePopulated()
@@ -262,7 +397,7 @@ internal class CheckoutPaymentElementTest {
             assertThat(controller.session.value?.tax?.status)
                 .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -286,7 +421,7 @@ internal class CheckoutPaymentElementTest {
     }
 
     private fun runAutomaticTaxTest(
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
         checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
@@ -296,7 +431,7 @@ internal class CheckoutPaymentElementTest {
     private fun runAutomaticTaxTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
         checkoutInitResponse: (MockResponse) -> Unit,
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
@@ -306,21 +441,43 @@ internal class CheckoutPaymentElementTest {
     private fun runAutomaticTaxTest(
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) {
         lateinit var controller: CheckoutController
         runCheckoutPaymentElementTest(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
-            setup = {
-                controller = it
-                it.configure(
+            setup = { configuredController ->
+                controller = configuredController
+                configuredController.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,
                 ).getOrThrow()
             },
-        ) { context ->
-            block(context, controller)
+        ) { runnerContext ->
+            runBlocking {
+                Scenario(
+                    runnerContext = runnerContext,
+                    controller = controller,
+                ).block()
+            }
+        }
+    }
+
+    private class Scenario(
+        private val runnerContext: CheckoutPaymentElementTestRunnerContext,
+        val controller: CheckoutController,
+    ) {
+        fun presentPaymentOptions() {
+            runnerContext.presentPaymentOptions()
+        }
+
+        fun confirm() {
+            runnerContext.confirm()
+        }
+
+        fun markTestSucceeded() {
+            runnerContext.markTestSucceeded()
         }
     }
 
@@ -422,7 +579,7 @@ internal class CheckoutPaymentElementTest {
 
     private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            controller.session.value?.totalSummary?.totalDueToday == total
+            controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
         }
     }
 
@@ -464,13 +621,11 @@ internal class CheckoutPaymentElementTest {
                     .put("computation_type", "automatic")
                     .put("status", taxStatus),
             )
-            json.put(
-                "total_summary",
-                JSONObject()
-                    .put("subtotal", INITIAL_TOTAL)
-                    .put("due", total)
-                    .put("total", total),
-            )
+            json.getJSONArray("checkout_items").getJSONObject(0)
+                .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                .put("subtotal", INITIAL_TOTAL)
+                .put("total", total)
+                .put("tax_exclusive", total - INITIAL_TOTAL)
             json.getJSONObject("elements_session").remove("link_settings")
             json.getJSONObject("server_built_elements_session_params")
                 .getJSONObject("deferred_intent")

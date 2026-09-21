@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
@@ -108,7 +109,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             override suspend fun confirm() {
                 context.consumePaymentOptionEventForFlowController(
                     paymentMethodType = "card",
-                    label = "···· 4242"
+                    label = "4242"
                 )
 
                 context.flowController.confirm()
@@ -166,7 +167,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         override suspend fun confirm() {
             val paymentOption = context.paymentOptionTurbine.awaitItem()
 
-            assertThat(paymentOption?.label).isEqualTo("···· 4242")
+            assertThat(paymentOption?.label).isEqualTo("···· 4242".withLtrIsolate())
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
             context.confirm()

@@ -9,12 +9,13 @@ Use fakes, scenario helpers, and behavior-focused assertions to keep tests relia
 
 ## Core Principles
 
-1. Prefer fakes over mocks. Name them `FakeClassName`, keep them `internal`, and place them in the test source set.
-2. Track every observed fake interaction with Turbine. Mutable properties are only for configuring behavior.
-3. Put shared setup in a `runScenario` helper and validate every fake after the test block.
-4. Use Google Truth assertions and prefer field-level assertions when exact object equality is not the contract.
-5. Cover one scenario or configuration per `@Test`.
-6. Test Flow emissions with Turbine's `.test { }` API.
+1. Use fakes for production collaborators. Name them `FakeClassName`, keep them `internal`, and place them in the test source set.
+2. If a production collaborator cannot be faked cleanly, stop and propose a testability seam before writing the test.
+3. Track every observed fake interaction with Turbine. Mutable properties are only for configuring behavior.
+4. Put shared setup in a `runScenario` helper and validate every fake after the test block.
+5. Use Google Truth assertions and prefer field-level assertions when exact object equality is not the contract.
+6. Cover one scenario or configuration per `@Test`.
+7. Test Flow emissions with Turbine's `.test { }` API.
 
 ## Creating Fakes
 
@@ -149,7 +150,7 @@ For coroutine tests involving real NetworkRule or OkHttp I/O:
 - Use `runTest`, `async`, and `await()` so failures propagate.
 - Use `testScheduler.advanceUntilIdle()` to advance to a suspension point; never use `Thread.sleep`.
 - After releasing a latch, use `await()` because OkHttp resumes asynchronously.
-- Give every `CountDownLatch.await()` in a mock handler a timeout.
+- Give every `CountDownLatch.await()` in a network response handler a timeout.
 - Use Turbine for StateFlow emission sequences and latches for request ordering.
 - Assert both that a queued request did not arrive while held and that it arrived after release.
 

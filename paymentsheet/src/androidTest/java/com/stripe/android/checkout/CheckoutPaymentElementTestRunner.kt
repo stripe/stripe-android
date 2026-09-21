@@ -56,6 +56,7 @@ internal fun runCheckoutPaymentElementTest(
         }
     },
     successTimeoutSeconds: Long = 5L,
+    renderPaymentElementContent: Boolean = true,
     setup: suspend (CheckoutController) -> Unit,
     block: (CheckoutPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -86,10 +87,12 @@ internal fun runCheckoutPaymentElementTest(
         lateinit var presenter: CheckoutPresenter
         scenario.onActivity { activity ->
             presenter = controller.createPresenter(activity)
-            val paymentElement = presenter.paymentElement()
-            activity.setContent {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    paymentElement.Content()
+            if (renderPaymentElementContent) {
+                val paymentElement = presenter.paymentElement()
+                activity.setContent {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        paymentElement.Content()
+                    }
                 }
             }
         }

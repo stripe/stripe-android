@@ -16,6 +16,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -29,7 +30,9 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +73,7 @@ internal class CheckoutControllerTest {
         .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(CoroutineTestRule())
 
     // The controller resolves callbacks from the process-global PaymentElementCallbackReferences,
     // keyed by integration name. Clear it between tests so registrations don't leak across cases.
@@ -166,13 +170,91 @@ internal class CheckoutControllerTest {
     ) {
         result.getOrThrow()
 
-        val billingAddress = requireNotNull(committedState?.collectedDetails?.billingAddress)
+        val billingAddress = requireNotNull(committedState?.embeddedConfiguration?.defaultBillingDetails?.address)
         assertThat(billingAddress.city).isEqualTo("San Francisco")
         assertThat(billingAddress.country).isEqualTo("US")
         assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
     }
+
+    @Test
+    fun `configure keeps a valid default shipping address in session when SAE is configured`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration()
+                .shippingAddressElement(ShippingAddressElement.Configuration())
+                .defaults(
+                    CheckoutController.Configuration.Defaults().shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("John Shipping")
+                            .address(
+                                CheckoutController.Address()
+                                    .city("San Francisco")
+                                    .country("US")
+                                    .line1("510 Townsend St")
+                                    .postalCode("94103")
+                                    .state("CA")
+                            )
+                    )
+                ),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
+            assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("US")
+            assertThat(committedState?.collectedDetails?.shippingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
+    fun `configure drops a default shipping address outside allowed countries when SAE is configured`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration()
+                .shippingAddressElement(ShippingAddressElement.Configuration())
+                .defaults(
+                    CheckoutController.Configuration.Defaults().shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("John Shipping")
+                            .address(CheckoutController.Address().country("DE"))
+                    )
+                ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        allowedShippingCountries(listOf("US", "CA")),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress).isNull()
+            assertThat(committedState?.collectedDetails?.shippingName).isNull()
+            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `configure keeps a disallowed default shipping address when SAE is not configured`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(CheckoutController.Address().country("DE"))
+                )
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        allowedShippingCountries(listOf("US", "CA")),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
+            assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("DE")
+        }
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
@@ -404,11 +486,11 @@ internal class CheckoutControllerTest {
         },
     ) {
         controller.session.test {
-            assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
+            assertThat(awaitItem()?.paymentOption).isNotNull()
 
             controller.clearPaymentOption().getOrThrow()
 
-            assertThat(requireNotNull(awaitItem()).paymentOptionDisplayData).isNull()
+            assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
         }
         val clearedState = committedState()
         assertThat(clearedState.paymentSelection).isNull()
@@ -438,7 +520,7 @@ internal class CheckoutControllerTest {
             assertThat(result.exceptionOrNull()).hasMessageThat()
                 .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
             // The rejected clear leaves the selection intact.
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(controller.session.value?.paymentOption).isNotNull()
         }
 
     @Test
@@ -456,12 +538,12 @@ internal class CheckoutControllerTest {
             val clearPaymentOption = async { controller.clearPaymentOption() }
             testScheduler.advanceUntilIdle()
 
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNotNull()
+            assertThat(controller.session.value?.paymentOption).isNotNull()
 
             holdResponse.countDown()
             assertThat(mutation.await().isSuccess).isTrue()
             assertThat(clearPaymentOption.await().isSuccess).isTrue()
-            assertThat(controller.session.value?.paymentOptionDisplayData).isNull()
+            assertThat(controller.session.value?.paymentOption).isNull()
         }
 
     @Test
@@ -574,14 +656,14 @@ internal class CheckoutControllerTest {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
             responseFactory = successResponseFactory { json ->
-                json.put("total_summary", totalSummaryJson(due = 5099))
+                checkoutItemJson(json).put("total", 5099).put("subtotal", 5099)
             },
         )
 
         val result = controller.updateCurrency("usd")
 
         result.getOrThrow()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099.0)
     }
 
     @Test
@@ -606,6 +688,8 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+            .isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -711,20 +795,25 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `commitShippingAddress stores local details and reloads payment element state`() =
-        runMutationScenario {
-            val response = committedState().checkoutSessionResponse
+    fun `commitShippingAddress commits caller-provided response and shipping details without another tax request`() =
+        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
+            val previousResponse = committedState().checkoutSessionResponse
+            val response = previousResponse.copy(
+                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+            )
             val address = fullAddress.build()
 
             val result = controller.commitShippingAddress(
                 name = "John",
                 address = address,
+                updatedCheckoutSessionResponse = response,
             )
 
             result.getOrThrow()
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
@@ -736,14 +825,14 @@ internal class CheckoutControllerTest {
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
             responseFactory = successResponseFactory { json ->
-                json.put("total_summary", totalSummaryJson(due = 8000))
+                checkoutItemJson(json).put("total", 8000).put("subtotal", 8000)
             },
         )
 
         val result = controller.runServerUpdate { Result.success(Unit) }
 
         result.getOrThrow()
-        assertThat(controller.session.value?.totalSummary?.totalDueToday).isEqualTo(8000)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
     }
 
     @Test
@@ -1042,13 +1131,6 @@ internal class CheckoutControllerTest {
         }
     }
 
-    // Builds a total_summary object. The parser requires subtotal, due, and total to all be present
-    // to produce a non-null summary, so a test asserting on totalDueToday must set all three.
-    private fun totalSummaryJson(due: Long): JSONObject = JSONObject()
-        .put("subtotal", due)
-        .put("due", due)
-        .put("total", due)
-
     private fun combine(vararg modifiers: (JSONObject) -> Unit): (JSONObject) -> Unit = { json ->
         modifiers.forEach { it(json) }
     }
@@ -1100,19 +1182,33 @@ internal class CheckoutControllerTest {
     ): CheckoutController.Session {
         return CheckoutController.Session(
             id = DEFAULT_CHECKOUT_SESSION_ID,
+            businessName = null,
             status = CheckoutController.Session.Status.Open(),
-            liveMode = false,
+            livemode = false,
             currency = "usd",
+            presentmentDetails = null,
+            discountAmounts = emptyList(),
             email = null,
+            orderSummaryItems = emptyList(),
+            minorUnitsAmountDivisor = 100,
+            paymentOption = null,
+            shippingAddress = null,
             tax = CheckoutController.Session.Tax(CheckoutController.Session.Tax.Status.Ready),
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
-            paymentOptionDisplayData = null,
+            taxAmounts = emptyList(),
+            totals = CheckoutController.Session.Totals(
+                subtotal = CheckoutController.Session.Amount("$0.00", 0.0),
+                taxExclusive = CheckoutController.Session.Amount("$0.00", 0.0),
+                taxInclusive = CheckoutController.Session.Amount("$0.00", 0.0),
+                discount = CheckoutController.Session.Amount("$0.00", 0.0),
+                total = CheckoutController.Session.Amount("$0.00", 0.0),
+            ),
             currencySelectorOptions = null,
             availableExpressButtonTypes = availableExpressButtonTypes,
         )
     }
+
+    private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
+        .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
 
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,

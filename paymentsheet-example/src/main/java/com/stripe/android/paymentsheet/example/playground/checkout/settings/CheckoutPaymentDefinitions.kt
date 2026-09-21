@@ -27,7 +27,6 @@ internal object CheckoutPaymentDefinitions {
     val opensCardScanner = boolean(
         key = "payment.opens_card_scanner",
         displayName = "Open card scanner automatically",
-        defaultValue = false,
     )
     val preferredNetworks = csv(
         key = "payment.preferred_networks",
@@ -47,32 +46,26 @@ internal object CheckoutPaymentDefinitions {
     val cardBrandAcceptance = CardBrandAcceptanceDefinitions()
 
     internal class CardBrandAcceptanceDefinitions {
-        val mode = choice(
+        val mode = enumChoice(
             key = "payment.card_brand_acceptance.mode",
             displayName = "Mode",
             defaultValue = CheckoutCardBrandAcceptanceMode.All,
-            options = CheckoutCardBrandAcceptanceMode.entries.map { it.name to it },
-            serialize = CheckoutCardBrandAcceptanceMode::name,
         )
         val visa = boolean(
             key = "payment.card_brand_acceptance.visa",
             displayName = "Visa",
-            defaultValue = false,
         )
         val mastercard = boolean(
             key = "payment.card_brand_acceptance.mastercard",
             displayName = "Mastercard",
-            defaultValue = false,
         )
         val amex = boolean(
             key = "payment.card_brand_acceptance.amex",
             displayName = "Amex",
-            defaultValue = false,
         )
         val discover = boolean(
             key = "payment.card_brand_acceptance.discover",
             displayName = "Discover",
-            defaultValue = false,
         )
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
             key = "payment.card_brand_acceptance",
@@ -143,17 +136,14 @@ internal object CheckoutPaymentDefinitions {
                 val cornerRadius = optionalFloat(
                     key = "payment.appearance.primary_button.shape.corner",
                     displayName = "Corner radius",
-                    minimum = 0f,
                 )
                 val borderWidth = optionalFloat(
                     key = "payment.appearance.primary_button.shape.border",
                     displayName = "Border width",
-                    minimum = 0f,
                 )
                 val height = optionalFloat(
                     key = "payment.appearance.primary_button.shape.height",
                     displayName = "Height",
-                    minimum = 0f,
                 )
                 val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
                     key = "payment.appearance.primary_button.shape",
@@ -169,7 +159,6 @@ internal object CheckoutPaymentDefinitions {
                 val size = optionalFloat(
                     key = "payment.appearance.primary_button.typography.size",
                     displayName = "Font size",
-                    minimum = 0f,
                     minimumExclusive = true,
                 )
                 val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
@@ -198,13 +187,10 @@ internal object CheckoutPaymentDefinitions {
                 key = "payment.appearance.insets.horizontal",
                 displayName = "Horizontal",
                 defaultValue = 20f,
-                minimum = 0f,
             )
             val vertical = decimal(
                 key = "payment.appearance.insets.vertical",
                 displayName = "Vertical",
-                defaultValue = 0f,
-                minimum = 0f,
             )
             val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
                 key = "payment.appearance.insets",
@@ -229,9 +215,7 @@ internal object CheckoutPaymentDefinitions {
     val googlePay = CheckoutGooglePayDefinitions(
         key = "payment.google_pay",
         displayName = "Google Pay",
-        defaultDisplay = PaymentElement.Configuration.GooglePayConfiguration.Display.Automatic,
         displayOptions = PaymentElement.Configuration.GooglePayConfiguration.Display.entries,
-        defaultButtonType = PaymentElement.Configuration.GooglePayConfiguration.ButtonType.Pay,
         buttonTypeOptions = PaymentElement.Configuration.GooglePayConfiguration.ButtonType.entries,
     )
 

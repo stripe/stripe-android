@@ -2,19 +2,11 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -25,6 +17,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.rememberTextFocusRequester
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -33,7 +26,6 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -58,7 +50,7 @@ class CvcController constructor(
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val enforceLeftToRightTextDirection: Boolean = true
 
     override val showOptionalLabel: Boolean = false
 
@@ -160,24 +152,7 @@ class CvcController constructor(
         hiddenIdentifiers: Set<FormFieldId>,
         lastTextFieldIdentifier: FormFieldId?,
     ) {
-        val isInspectionMode = LocalInspectionMode.current
-        val focusRequester = remember { FocusRequester() }
-        val windowInfo = LocalWindowInfo.current
-
-        LaunchedEffect(isInspectionMode) {
-            if (!isInspectionMode) {
-                focusAsk.collect { shouldFocus ->
-                    if (shouldFocus) {
-                        snapshotFlow { windowInfo.isWindowFocused }.first { it }
-                        withFrameNanos {}
-                        while (!focusRequester.requestFocus()) {
-                            withFrameNanos {}
-                        }
-                        focusAsk.value = false
-                    }
-                }
-            }
-        }
+        val focusRequester = rememberTextFocusRequester(focusAsk)
 
         TextField(
             textFieldController = this,

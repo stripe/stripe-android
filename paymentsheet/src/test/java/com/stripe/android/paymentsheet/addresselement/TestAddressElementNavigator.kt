@@ -8,7 +8,6 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
     private val navigateToCalls = Turbine<Call.NavigateTo>()
     private val setResultCalls = Turbine<Call.SetResult>()
     private val getResultFlowCalls = Turbine<Call.GetResultFlow>()
-    private val dismissCalls = Turbine<Call.Dismiss>()
     private val onBackCalls = Turbine<Call.OnBack>()
 
     override fun navigateTo(target: AddressElementScreen) {
@@ -25,19 +24,15 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         return null
     }
 
-    override fun dismiss(result: AddressLauncherResult) {
-        dismissCalls.add(Call.Dismiss(result))
-    }
-
-    override fun onBack() {
+    override fun onBack(): Boolean {
         onBackCalls.add(Call.OnBack)
+        return true
     }
 
     sealed interface Call {
         data class NavigateTo(val target: AddressElementScreen) : Call
         data class SetResult(val key: String, val value: Any?) : Call
         data class GetResultFlow(val key: String) : Call
-        data class Dismiss(val result: AddressLauncherResult) : Call
         data object OnBack : Call
     }
 
@@ -46,7 +41,6 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
         val navigateToCalls: ReceiveTurbine<Call.NavigateTo>,
         val setResultCalls: ReceiveTurbine<Call.SetResult>,
         val getResultFlowCalls: ReceiveTurbine<Call.GetResultFlow>,
-        val dismissCalls: ReceiveTurbine<Call.Dismiss>,
         val onBackCalls: ReceiveTurbine<Call.OnBack>,
     )
 
@@ -62,7 +56,6 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
                     navigateToCalls = navigator.navigateToCalls,
                     setResultCalls = navigator.setResultCalls,
                     getResultFlowCalls = navigator.getResultFlowCalls,
-                    dismissCalls = navigator.dismissCalls,
                     onBackCalls = navigator.onBackCalls,
                 )
             )
@@ -70,7 +63,6 @@ internal class TestAddressElementNavigator private constructor() : AddressElemen
             navigator.navigateToCalls.ensureAllEventsConsumed()
             navigator.setResultCalls.ensureAllEventsConsumed()
             navigator.getResultFlowCalls.ensureAllEventsConsumed()
-            navigator.dismissCalls.ensureAllEventsConsumed()
             navigator.onBackCalls.ensureAllEventsConsumed()
         }
     }

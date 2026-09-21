@@ -278,7 +278,7 @@ class CardDetailsControllerTest {
             ensureAllEventsConsumed()
         }
 
-        assertThat(cardController.cardPillElement.value).isNotNull()
+        assertThat(cardController.cardPillElement.value?.controller?.expirationDate).isEqualTo("06/30")
     }
 
     @Test
@@ -354,6 +354,7 @@ class CardDetailsControllerTest {
             val cardPillElement = after[0] as CardPillElement
 
             assertThat(cardPillElement.controller.cardNumber).isEqualTo("4242424242424242")
+            assertThat(cardPillElement.controller.expirationDate).isEqualTo("06/30")
             assertThat(after[1]).isSameInstanceAs(cardController.cvcElement)
             ensureAllEventsConsumed()
         }
@@ -467,6 +468,47 @@ class CardDetailsControllerTest {
     }
 
     @Test
+    fun `When validated card scanned with empty required name, name field gains focus`() = composeTest(
+        collectName = true,
+    ) { controller ->
+        composeTestRule.onNodeWithText(NAME_ON_CARD_TEXT).assert(!isFocused())
+
+        controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(NAME_ON_CARD_TEXT).assert(isFocused())
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+    }
+
+    @Test
+    fun `When validated card scanned with completed required name, CVC field gains focus`() = composeTest(
+        collectName = true,
+        initialValues = mapOf(FormFieldId.Name to "Jenny Rosen"),
+    ) { controller ->
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+
+        controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(isFocused())
+        composeTestRule.onNodeWithText(NAME_ON_CARD_TEXT).assert(!isFocused())
+    }
+
+    @Test
     fun `When card scanned via camera, CVC field does not gain focus`() = composeTest { controller ->
         composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
 
@@ -484,9 +526,14 @@ class CardDetailsControllerTest {
     }
 
     private fun composeTest(
+        collectName: Boolean = false,
+        initialValues: Map<FormFieldId, String?> = emptyMap(),
         block: suspend (controller: CardDetailsController) -> Unit,
     ) = runTest {
-        val cardController = cardDetailsController()
+        val cardController = cardDetailsController(
+            initialValues = initialValues,
+            collectName = collectName,
+        )
 
         composeTestRule.setContent {
             CompositionLocalProvider(
@@ -522,6 +569,7 @@ class CardDetailsControllerTest {
         ),
         cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
         dateConfig: TextFieldConfig = DateConfig(),
+        collectName: Boolean = false,
     ): CardDetailsController {
         return CardDetailsController(
             cardBrandFilter = cardBrandFilter,
@@ -532,6 +580,7 @@ class CardDetailsControllerTest {
             cardDetailsTextFieldConfig = cardDetailsTextFieldConfig,
             cvcTextFieldConfig = cvcTextFieldConfig,
             dateConfig = dateConfig,
+            collectName = collectName,
             validationMessageComparator = object : FieldValidationMessageComparator {
                 override fun compare(
                     a: FieldValidationMessage?,
@@ -593,5 +642,6 @@ class CardDetailsControllerTest {
 
     private companion object {
         const val CVC_TEXT = "CVC"
+        const val NAME_ON_CARD_TEXT = "Name on card"
     }
 }

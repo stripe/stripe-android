@@ -10,7 +10,5 @@ import kotlinx.parcelize.Parcelize
 internal data class CheckoutCollectedDetails(
     val email: String?,
     val shippingName: String? = null,
-    val billingName: String? = null,
     val shippingAddress: Address.State? = null,
-    val billingAddress: Address.State? = null,
 ) : Parcelable

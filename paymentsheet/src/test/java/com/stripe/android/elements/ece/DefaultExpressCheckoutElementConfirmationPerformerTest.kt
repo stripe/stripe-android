@@ -122,7 +122,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm uses automatic billing details collection configuration`() {
+    fun `confirm collects email when unavailable and uses automatic collection for other billing details`() {
         val state = createState()
 
         runScenario(
@@ -143,7 +143,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
             )
             assertThat(billingDetails.email).isEqualTo(
-                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+                PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
             assertThat(billingDetails.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
@@ -247,6 +247,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
+            viewModelScope = backgroundScope,
         )
         val paymentSheetEventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(

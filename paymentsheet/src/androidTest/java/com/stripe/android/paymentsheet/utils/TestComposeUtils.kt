@@ -10,6 +10,8 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val IS_PLACED = "is_placed_in_layout"
 
+internal fun String.withLtrIsolate(): String = "\u2066$this\u2069"
+
 /**
  * This matcher checks if a given composable node is placed on the screen.
  *

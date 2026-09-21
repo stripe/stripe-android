@@ -1,1468 +1,279 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-@Suppress("LargeClass")
 class CheckoutSessionResponseJsonParserTest {
-
     @Test
-    fun `parse checkout session response`() {
-        val result = CheckoutSessionResponseJsonParser.parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
-
-        // Verify CheckoutSessionResponse fields
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
-        assertThat(result?.amount).isEqualTo(999L)
-        assertThat(result?.currency).isEqualTo("usd")
-        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
-        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
-        assertThat(result?.liveMode).isFalse()
-        assertThat(result?.businessName).isEqualTo("Mobile Example Account")
-
-        // Verify ElementsSession is parsed correctly
-        val elementsSession = result?.elementsSession
-        assertThat(elementsSession).isNotNull()
-        assertThat(elementsSession?.elementsSessionId).isEqualTo("elements_session_1nWWJQ3A6yS")
-        assertThat(elementsSession?.merchantCountry).isEqualTo("US")
-        assertThat(elementsSession?.isGooglePayEnabled).isTrue()
-
-        // Verify StripeIntent is created correctly
-        val stripeIntent = elementsSession?.stripeIntent
-        assertThat(stripeIntent).isNotNull()
-        assertThat(stripeIntent).isInstanceOf(PaymentIntent::class.java)
-
-        // Verify payment method types from ordered_payment_method_types
-        assertThat(stripeIntent?.paymentMethodTypes).containsExactly(
-            "card",
-            "link",
-            "cashapp",
-            "alipay",
-            "wechat_pay",
-            "us_bank_account",
-            "amazon_pay",
-            "afterpay_clearpay",
-            "klarna",
-            "crypto"
-        ).inOrder()
-    }
-
-    @Test
-    fun `parse checkout session response includes line items`() {
-        val result = CheckoutSessionResponseJsonParser.parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+    fun `parses nested unified one-time price group`() {
+        val result = parse(base())
 
         assertThat(result).isNotNull()
-        val lineItems = result!!.lineItems
-        assertThat(lineItems).hasSize(1)
-        assertThat(lineItems[0].id).isEqualTo("li_1SrjAuLu5o3P18ZpVBMMs98l")
-        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
-        assertThat(lineItems[0].quantity).isEqualTo(1)
-        assertThat(lineItems[0].subtotal).isEqualTo(999L)
-        assertThat(lineItems[0].total).isEqualTo(999L)
-        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
-    }
-
-    @Test
-    fun `parse multiple line items`() {
-        val result = CheckoutSessionResponseJsonParser.parse(
-            json = CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON
-        )
-
-        assertThat(result).isNotNull()
-        val lineItems = result!!.lineItems
-        assertThat(lineItems).hasSize(2)
-
-        assertThat(lineItems[0].id).isEqualTo("li_item1")
-        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
-        assertThat(lineItems[0].quantity).isEqualTo(2)
-        assertThat(lineItems[0].subtotal).isEqualTo(1998L)
-        assertThat(lineItems[0].total).isEqualTo(1998L)
-        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
-
-        assertThat(lineItems[1].id).isEqualTo("li_item2")
-        assertThat(lineItems[1].name).isEqualTo("Alpaca Plushie")
-        assertThat(lineItems[1].quantity).isEqualTo(1)
-        assertThat(lineItems[1].subtotal).isEqualTo(2499L)
-        assertThat(lineItems[1].total).isEqualTo(2499L)
-        assertThat(lineItems[1].unitAmount).isEqualTo(2499L)
-    }
-
-    @Test
-    fun `parse line item unitAmount from unit_amount_override`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_override",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 7000, "subtotal": 7000, "total": 7000 },
-                "line_item_group": {
-                    "currency": "usd",
-                    "total": 7000,
-                    "subtotal": 7000,
-                    "due": 7000,
-                    "line_items": [
-                        {
-                            "id": "li_override_item",
-                            "object": "item",
-                            "name": "Widget",
-                            "quantity": 2,
-                            "subtotal": 7000,
-                            "total": 7000,
-                            "unit_amount_override": 3500,
-                            "price": {
-                                "unit_amount": 2999
-                            }
-                        }
-                    ]
-                }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        val lineItems = result!!.lineItems
-        assertThat(lineItems).hasSize(1)
-        assertThat(lineItems[0].id).isEqualTo("li_override_item")
-        assertThat(lineItems[0].name).isEqualTo("Widget")
-        assertThat(lineItems[0].quantity).isEqualTo(2)
-        assertThat(lineItems[0].unitAmount).isEqualTo(3500L)
-        assertThat(lineItems[0].subtotal).isEqualTo(7000L)
-        assertThat(lineItems[0].total).isEqualTo(7000L)
-    }
-
-    @Test
-    fun `parse line item unitAmount from price when total includes tax`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_tax",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 11034, "subtotal": 10198, "total": 11034 },
-                "line_item_group": {
-                    "currency": "usd",
-                    "total": 11034,
-                    "subtotal": 10198,
-                    "due": 11034,
-                    "line_items": [
-                        {
-                            "id": "li_tax_item",
-                            "object": "item",
-                            "name": "Classic T-Shirt",
-                            "quantity": 2,
-                            "subtotal": 10198,
-                            "total": 11034,
-                            "unit_amount_override": null,
-                            "price": {
-                                "unit_amount": 5099
-                            }
-                        }
-                    ]
-                }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        val lineItems = result!!.lineItems
-        assertThat(lineItems).hasSize(1)
-        assertThat(lineItems[0].id).isEqualTo("li_tax_item")
-        assertThat(lineItems[0].name).isEqualTo("Classic T-Shirt")
-        assertThat(lineItems[0].quantity).isEqualTo(2)
-        assertThat(lineItems[0].unitAmount).isEqualTo(5099L)
-        assertThat(lineItems[0].subtotal).isEqualTo(10198L)
-        assertThat(lineItems[0].total).isEqualTo(11034L)
-    }
-
-    @Test
-    fun `parse returns empty line items when no line_item_group`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result!!.lineItems).isEmpty()
-    }
-
-    @Test
-    fun `parse returns null when session_id is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "currency": "usd",
-                "total_summary": { "due": 1000 },
-                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `parse throws when ui_mode is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "currency": "usd",
-                "total_summary": { "due": 1000 }
-            }
-            """.trimIndent()
-        )
-
-        val exception = org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
-            CheckoutSessionResponseJsonParser.parse(json)
-        }
-        assertThat(exception.message).contains("Expected ui_mode to be \"custom\"")
-    }
-
-    @Test
-    fun `parse throws when ui_mode is not custom`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "embedded",
-                "currency": "usd",
-                "total_summary": { "due": 1000 }
-            }
-            """.trimIndent()
-        )
-
-        val exception = org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
-            CheckoutSessionResponseJsonParser.parse(json)
-        }
-        assertThat(exception.message).contains("Expected ui_mode to be \"custom\"")
-    }
-
-    @Test
-    fun `parse returns null when currency is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "total_summary": { "due": 1000 },
-                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `parse returns null when total_summary is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `parse succeeds when elements_session is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_123")
-        assertThat(result?.amount).isEqualTo(1000L)
-        assertThat(result?.currency).isEqualTo("usd")
-        assertThat(result?.elementsSession).isNull()
-    }
-
-    @Test
-    fun `parse returns null elements_session when it is invalid`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000 },
-                "elements_session": {}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        // Response is parsed successfully but elements_session is null due to invalid JSON
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_123")
-        assertThat(result?.elementsSession).isNull()
-    }
-
-    @Test
-    fun `parse confirm response with succeeded payment intent`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
-        assertThat(result?.amount).isEqualTo(999L)
-        assertThat(result?.currency).isEqualTo("usd")
-
-        // Verify PaymentIntent is parsed
-        val paymentIntent = result?.paymentIntent
-        assertThat(paymentIntent).isNotNull()
-        assertThat(paymentIntent?.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
-        assertThat(paymentIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
-        assertThat(paymentIntent?.isConfirmed).isTrue()
-
-        // Confirm responses don't include elements_session
-        assertThat(result?.elementsSession).isNull()
-    }
-
-    @Test
-    fun `parse confirm response with requires_action payment intent`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
-
-        // Verify PaymentIntent has requires_action status
-        val paymentIntent = result?.paymentIntent
-        assertThat(paymentIntent).isNotNull()
-        assertThat(paymentIntent?.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
-        assertThat(paymentIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
-        assertThat(paymentIntent?.requiresAction()).isTrue()
-
-        // Verify next_action is parsed
-        assertThat(paymentIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
-    }
-
-    @Test
-    fun `parse init response with customer and saved payment methods`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(result?.amount).isEqualTo(1000L)
-
-        // Verify customer is parsed from top-level
-        val customer = result?.customer
-        assertThat(customer).isNotNull()
-        assertThat(customer?.id).isEqualTo("cus_test_customer")
-
-        // Verify payment methods are parsed
-        val paymentMethods = customer?.paymentMethods
-        assertThat(paymentMethods).hasSize(2)
-        assertThat(paymentMethods?.get(0)?.id).isEqualTo("pm_card_visa")
-        assertThat(paymentMethods?.get(0)?.type).isEqualTo(PaymentMethod.Type.Card)
-        assertThat(paymentMethods?.get(0)?.card?.last4).isEqualTo("4242")
-        assertThat(paymentMethods?.get(0)?.card?.brand).isEqualTo(CardBrand.Visa)
-
-        assertThat(paymentMethods?.get(1)?.id).isEqualTo("pm_card_mastercard")
-        assertThat(paymentMethods?.get(1)?.card?.last4).isEqualTo("5555")
-        assertThat(paymentMethods?.get(1)?.card?.brand).isEqualTo(CardBrand.MasterCard)
-    }
-
-    @Test
-    fun `parse init response with customer but empty payment methods`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_EMPTY_CUSTOMER_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.customer).isNotNull()
-        assertThat(result?.customer?.id).isEqualTo("cus_test_empty_customer")
-        assertThat(result?.customer?.paymentMethods).isEmpty()
-    }
-
-    @Test
-    fun `parse init response without customer returns null customer`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(result?.customer).isNull()
-    }
-
-    @Test
-    fun `parse init response with save offer enabled and status not_accepted`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_ENABLED_JSON)
-
-        assertThat(result).isNotNull()
-        val offerSave = result?.savedPaymentMethodsOfferSave
-        assertThat(offerSave).isNotNull()
-        assertThat(offerSave?.enabled).isTrue()
-        assertThat(offerSave?.status).isEqualTo(
-            CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
-        )
-    }
-
-    @Test
-    fun `parse init response with save offer enabled and status accepted`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_ACCEPTED_JSON)
-
-        assertThat(result).isNotNull()
-        val offerSave = result?.savedPaymentMethodsOfferSave
-        assertThat(offerSave).isNotNull()
-        assertThat(offerSave?.enabled).isTrue()
-        assertThat(offerSave?.status).isEqualTo(
-            CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
-        )
-    }
-
-    @Test
-    fun `parse init response with save offer disabled`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_DISABLED_JSON)
-
-        assertThat(result).isNotNull()
-        val offerSave = result?.savedPaymentMethodsOfferSave
-        assertThat(offerSave).isNotNull()
-        assertThat(offerSave?.enabled).isFalse()
-        assertThat(offerSave?.status).isEqualTo(
-            CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
-        )
-    }
-
-    @Test
-    fun `parse init response without save offer returns null`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.savedPaymentMethodsOfferSave).isNull()
-    }
-
-    @Test
-    fun `parse customer with can_detach_payment_method true`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_abc123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": {
-                    "due": 1000
-                },
-                "customer": {
-                    "id": "cus_test_customer",
-                    "payment_methods": [],
-                    "can_detach_payment_method": true
-                },
-                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        val customer = result?.customer
-        assertThat(customer).isNotNull()
-        assertThat(customer?.canDetachPaymentMethod).isTrue()
-    }
-
-    @Test
-    fun `parse customer with can_detach_payment_method false`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_abc123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": {
-                    "due": 1000
-                },
-                "customer": {
-                    "id": "cus_test_customer",
-                    "payment_methods": [],
-                    "can_detach_payment_method": false
-                },
-                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        val customer = result?.customer
-        assertThat(customer).isNotNull()
-        assertThat(customer?.canDetachPaymentMethod).isFalse()
-    }
-
-    @Test
-    fun `parse customer without can_detach_payment_method defaults to false`() {
-        // Use existing fixture that doesn't have can_detach_payment_method field
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
-
-        assertThat(result).isNotNull()
-        val customer = result?.customer
-        assertThat(customer).isNotNull()
-        assertThat(customer?.canDetachPaymentMethod).isFalse()
-    }
-
-    @Test
-    fun `parse full order summary with discounts, taxes, and shipping`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_ORDER_SUMMARY_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.amount).isEqualTo(4044L)
-
-        val totalSummary = result?.totalSummary
-        assertThat(totalSummary).isNotNull()
-        assertThat(totalSummary?.subtotal).isEqualTo(5000L)
-        assertThat(totalSummary?.totalDueToday).isEqualTo(4044L)
-        assertThat(totalSummary?.totalAmountDue).isEqualTo(4044L)
-
-        // Discounts
-        assertThat(totalSummary?.discountAmounts).hasSize(2)
-        assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(500L)
-        assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("SUMMER10")
-        assertThat(totalSummary?.discountAmounts?.get(1)?.amount).isEqualTo(250L)
-        assertThat(totalSummary?.discountAmounts?.get(1)?.displayName).isEqualTo("LOYALTY5")
-
-        // Taxes
-        assertThat(totalSummary?.taxAmounts).hasSize(1)
-        assertThat(totalSummary?.taxAmounts?.get(0)?.amount).isEqualTo(294L)
-        assertThat(totalSummary?.taxAmounts?.get(0)?.inclusive).isFalse()
-        assertThat(totalSummary?.taxAmounts?.get(0)?.displayName).isEqualTo("Sales Tax")
-        assertThat(totalSummary?.taxAmounts?.get(0)?.percentage).isEqualTo(6.875)
-
-        // Shipping
-        assertThat(totalSummary?.shippingRate).isNotNull()
-        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_standard")
-        assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
-        assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Standard Shipping")
-        assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("5-7 business days")
-
-        // No applied balance
-        assertThat(totalSummary?.appliedBalance).isNull()
-    }
-
-    @Test
-    fun `parse applied balance`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_APPLIED_BALANCE_JSON)
-
-        assertThat(result).isNotNull()
-        val totalSummary = result?.totalSummary
-        assertThat(totalSummary).isNotNull()
-        assertThat(totalSummary?.subtotal).isEqualTo(1000L)
-        assertThat(totalSummary?.totalDueToday).isEqualTo(800L)
-        assertThat(totalSummary?.totalAmountDue).isEqualTo(1000L)
-        assertThat(totalSummary?.appliedBalance).isEqualTo(-200L)
-    }
-
-    @Test
-    fun `parse shipping option fallback`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON)
-
-        assertThat(result).isNotNull()
-        val totalSummary = result?.totalSummary
-        assertThat(totalSummary).isNotNull()
-        assertThat(totalSummary?.shippingRate).isNotNull()
-        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_express")
-        assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
-        assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Express Shipping")
-        assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("1-3 business days")
-    }
-
-    @Test
-    fun `parse without total_summary falls back to line_item_group`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_TOTAL_SUMMARY_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.amount).isEqualTo(2000L)
-
-        val totalSummary = result?.totalSummary
-        assertThat(totalSummary).isNotNull()
-        assertThat(totalSummary?.subtotal).isEqualTo(2000L)
-        assertThat(totalSummary?.totalDueToday).isEqualTo(2000L)
-        assertThat(totalSummary?.totalAmountDue).isEqualTo(2000L)
-        assertThat(totalSummary?.discountAmounts).isEmpty()
-        assertThat(totalSummary?.taxAmounts).isEmpty()
-        assertThat(totalSummary?.shippingRate).isNull()
-        assertThat(totalSummary?.appliedBalance).isNull()
-    }
-
-    @Test
-    fun `parse with empty discount and tax arrays`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_abc123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": {
-                    "due": 1000,
-                    "subtotal": 1000,
-                    "total": 1000
-                },
-                "line_item_group": {
-                    "currency": "usd",
-                    "total": 1000,
-                    "subtotal": 1000,
-                    "due": 1000,
-                    "discount_amounts": [],
-                    "tax_amounts": []
-                },
-                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        val totalSummary = result?.totalSummary
-        assertThat(totalSummary).isNotNull()
-        assertThat(totalSummary?.discountAmounts).isEmpty()
-        assertThat(totalSummary?.taxAmounts).isEmpty()
-    }
-
-    @Test
-    fun `parse returns null totalSummary when neither total_summary nor line_item_group has subtotal`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.totalSummary).isNull()
-    }
-
-    @Test
-    fun `parse discount amounts from coupon field`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_abc123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": {
-                    "due": 4099,
-                    "subtotal": 5099,
-                    "total": 4099
-                },
-                "line_item_group": {
-                    "due": 4099,
-                    "subtotal": 5099,
-                    "total": 4099,
-                    "discount_amounts": [
-                        {
-                            "amount": 1000,
-                            "coupon": {
-                                "object": "coupon",
-                                "name": "10OFF",
-                                "amount_off": 1000,
-                                "currency": "usd",
-                                "duration": "once"
-                            },
-                            "currency": "usd",
-                            "promotion_code": {
-                                "object": "promotion_code",
-                                "code": "10OFF"
-                            }
-                        }
-                    ]
-                }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.amount).isEqualTo(4099L)
-        val totalSummary = result?.totalSummary
-        assertThat(totalSummary).isNotNull()
-        assertThat(totalSummary?.discountAmounts).hasSize(1)
-        assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(1000L)
-        assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("10OFF")
-    }
-
-    @Test
-    fun `parse shipping options from root level`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON)
-
-        assertThat(result).isNotNull()
-        val shippingOptions = result!!.shippingOptions
-        assertThat(shippingOptions).hasSize(3)
-
-        assertThat(shippingOptions[0].id).isEqualTo("shr_standard")
-        assertThat(shippingOptions[0].amount).isEqualTo(500L)
-        assertThat(shippingOptions[0].displayName).isEqualTo("Standard Shipping")
-        assertThat(shippingOptions[0].deliveryEstimate).isNull()
-
-        assertThat(shippingOptions[1].id).isEqualTo("shr_express")
-        assertThat(shippingOptions[1].amount).isEqualTo(1500L)
-        assertThat(shippingOptions[1].displayName).isEqualTo("Express Shipping")
-
-        assertThat(shippingOptions[2].id).isEqualTo("shr_free")
-        assertThat(shippingOptions[2].amount).isEqualTo(0L)
-        assertThat(shippingOptions[2].displayName).isEqualTo("Free Shipping")
-    }
-
-    @Test
-    fun `parse customer_email from top level when customer is null (guest checkout)`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_GUEST_WITH_EMAIL_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.customerEmail).isEqualTo("guest@example.com")
-        assertThat(result?.customer).isNull()
-    }
-
-    @Test
-    fun `parse merchant country from account settings`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "account_settings": { "country": "GB" }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.merchantCountry).isEqualTo("GB")
-    }
-
-    @Test
-    fun `customerEmail is null when customer_email is JSON null`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "customer_email": null
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.customerEmail).isNull()
-    }
-
-    @Test
-    fun `customerEmail is null when customer_email is not present in JSON`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.customerEmail).isNull()
-    }
-
-    @Test
-    fun `parse returns empty shipping options when not present`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result!!.shippingOptions).isEmpty()
-    }
-
-    @Test
-    fun `parse setup mode init response`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
-        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
-        assertThat(result?.amount).isEqualTo(0L)
-        assertThat(result?.currency).isEqualTo("usd")
-        assertThat(result?.paymentIntent).isNull()
-        assertThat(result?.setupIntent).isNull()
-        assertThat(result?.elementsSession).isNotNull()
-    }
-
-    @Test
-    fun `parse setup mode confirm response with succeeded setup intent`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
-        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
-        assertThat(result?.amount).isEqualTo(0L)
-
-        assertThat(result?.paymentIntent).isNull()
-        val setupIntent = result?.setupIntent
-        assertThat(setupIntent).isNotNull()
-        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
-        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
-        assertThat(setupIntent?.isConfirmed).isTrue()
-    }
-
-    @Test
-    fun `parse setup mode confirm response with requires_action setup intent`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
-
-        val setupIntent = result?.setupIntent
-        assertThat(setupIntent).isNotNull()
-        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
-        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
-        assertThat(setupIntent?.requiresAction()).isTrue()
-        assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
-    }
-
-    @Test
-    fun `parse adaptive pricing info`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_ADAPTIVE_PRICING_JSON)
-
-        assertThat(result).isNotNull()
-        val adaptivePricingInfo = result?.adaptivePricingInfo
-        assertThat(adaptivePricingInfo).isNotNull()
-        assertThat(adaptivePricingInfo?.activePresentmentCurrency).isEqualTo("usd")
-        assertThat(adaptivePricingInfo?.integrationAmount).isEqualTo(5099L)
-        assertThat(adaptivePricingInfo?.integrationCurrency).isEqualTo("eur")
-
-        val localCurrencyOptions = adaptivePricingInfo?.localCurrencyOptions
-        assertThat(localCurrencyOptions).hasSize(1)
-        assertThat(localCurrencyOptions?.get(0)?.amount).isEqualTo(6106L)
-        assertThat(localCurrencyOptions?.get(0)?.conversionMarkupBps).isEqualTo(400)
-        assertThat(localCurrencyOptions?.get(0)?.currency).isEqualTo("usd")
-        assertThat(localCurrencyOptions?.get(0)?.presentmentExchangeRate).isEqualTo("1.19749")
-    }
-
-    @Test
-    fun `parse adaptive pricing info with multiple local currency options`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_abc123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 6106, "subtotal": 6106, "total": 6106 },
-                "adaptive_pricing_info": {
-                    "active_presentment_currency": "usd",
-                    "integration_amount": 5099,
-                    "integration_currency": "eur",
-                    "local_currency_options": [
-                        {
-                            "amount": 6106,
-                            "conversion_markup_bps": 400,
-                            "currency": "usd",
-                            "presentment_exchange_rate": "1.19749"
-                        },
-                        {
-                            "amount": 7200,
-                            "conversion_markup_bps": 350,
-                            "currency": "gbp",
-                            "presentment_exchange_rate": "1.41200"
-                        }
-                    ]
-                }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        val localCurrencyOptions = result?.adaptivePricingInfo?.localCurrencyOptions
-        assertThat(localCurrencyOptions).hasSize(2)
-
-        assertThat(localCurrencyOptions?.get(0)?.amount).isEqualTo(6106L)
-        assertThat(localCurrencyOptions?.get(0)?.currency).isEqualTo("usd")
-
-        assertThat(localCurrencyOptions?.get(1)?.amount).isEqualTo(7200L)
-        assertThat(localCurrencyOptions?.get(1)?.conversionMarkupBps).isEqualTo(350)
-        assertThat(localCurrencyOptions?.get(1)?.currency).isEqualTo("gbp")
-        assertThat(localCurrencyOptions?.get(1)?.presentmentExchangeRate).isEqualTo("1.41200")
-    }
-
-    @Test
-    fun `parse returns null adaptive pricing info when not present`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.adaptivePricingInfo).isNull()
-    }
-
-    @Test
-    fun `parse confirm response with elements_session replaces deferred intent with confirmed PaymentIntent`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.paymentIntent).isNotNull()
-        assertThat(result?.paymentIntent?.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
-
-        val elementsSession = result?.elementsSession
-        assertThat(elementsSession).isNotNull()
-        assertThat(elementsSession?.stripeIntent).isInstanceOf(PaymentIntent::class.java)
-
-        val stripeIntent = elementsSession?.stripeIntent as PaymentIntent
-        assertThat(stripeIntent.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
-        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
-    }
-
-    @Test
-    fun `parse confirm response with elements_session replaces deferred intent with confirmed SetupIntent`() {
-        val result = CheckoutSessionResponseJsonParser
-            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.setupIntent).isNotNull()
-        assertThat(result?.setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
-
-        val elementsSession = result?.elementsSession
-        assertThat(elementsSession).isNotNull()
-        assertThat(elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
-
-        val stripeIntent = elementsSession?.stripeIntent as SetupIntent
-        assertThat(stripeIntent.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
-        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
-    }
-
-    @Test
-    fun `parse status open`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "status": "open",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
-    }
-
-    @Test
-    fun `parse status complete`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "status": "complete",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
-    }
-
-    @Test
-    fun `parse status expired`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "status": "expired",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.EXPIRED)
-    }
-
-    @Test
-    fun `fails to parse unrecognized status`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "status": "something_new",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `fails to parse missing status`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(
-            json = json,
-            addDefaultStatus = false,
-        )
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `parse livemode true`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "livemode": true,
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.liveMode).isTrue()
-    }
-
-    @Test
-    fun `parse livemode false`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "livemode": false,
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.liveMode).isFalse()
-    }
-
-    @Test
-    fun `parse livemode defaults to false when missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.liveMode).isFalse()
-    }
-
-    @Test
-    fun `parse tax status ready when tax_meta status is complete`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "tax_meta": { "computation_type": "automatic", "status": "complete" },
-                "tax_context": { "automatic_tax_address_source": "session.billing" },
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.READY)
-    }
-
-    @Test
-    fun `parse tax status requires_shipping_address when address source is shipping`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "tax_meta": { "computation_type": "automatic", "status": "requires_location_inputs" },
-                "tax_context": { "automatic_tax_address_source": "session.shipping" },
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS)
-    }
-
-    @Test
-    fun `parse tax status requires_billing_address when address source is billing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "tax_meta": { "computation_type": "automatic", "status": "requires_location_inputs" },
-                "tax_context": { "automatic_tax_address_source": "session.billing" },
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
-    }
-
-    @Test
-    fun `parse tax status defaults to billing for unrecognized address source`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "tax_meta": { "computation_type": "automatic", "status": "requires_location_inputs" },
-                "tax_context": { "automatic_tax_address_source": "something_new" },
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
-    }
-
-    @Test
-    fun `parse tax status defaults to unknown when tax_meta is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
-    }
-
-    @Test
-    fun `parse automatic tax enabled and address source from tax_context`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "tax_context": {
-                    "automatic_tax_enabled": true,
-                    "automatic_tax_address_source": "session.billing"
-                },
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.automaticTaxEnabled).isTrue()
-        assertThat(result?.taxAddressSource)
-            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
-    }
-
-    @Test
-    fun `parse taxAddressSource is null when automatic_tax_enabled but address_source missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "tax_context": {
-                    "automatic_tax_enabled": true
-                },
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.automaticTaxEnabled).isTrue()
-        assertThat(result?.taxAddressSource).isNull()
-    }
-
-    @Test
-    fun `parse defaults automaticTaxEnabled to false when tax_context is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.automaticTaxEnabled).isFalse()
-        assertThat(result?.taxAddressSource).isNull()
-    }
-
-    @Test
-    fun `parse allowedShippingCountries from shipping_address_collection`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "shipping_address_collection": {
-                    "allowed_countries": ["US", "CA", "GB"]
-                }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.allowedShippingCountries).isEqualTo(listOf("US", "CA", "GB"))
-        assertThat(result?.requiresShippingAddress).isTrue()
-    }
-
-    @Test
-    fun `parse allowedShippingCountries is null when shipping_address_collection is absent`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.allowedShippingCountries).isNull()
+        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
         assertThat(result?.requiresShippingAddress).isFalse()
+        assertThat(result?.checkoutItems).hasSize(1)
+        val group = result!!.checkoutItems.single()
+        assertThat(group.key).isEqualTo("group_1")
+        assertThat(group.oneTimePrice.items.single().innerItemKey).isEqualTo("item_1")
+        assertThat(group.oneTimePrice.items.single().subtotal).isEqualTo(5099)
     }
 
     @Test
-    fun `parse allowedShippingCountries is null when allowed_countries key is absent`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "shipping_address_collection": {}
-            }
-            """.trimIndent()
+    fun `shipping address collection requires a shipping address`() {
+        val json = base().put(
+            "shipping_address_collection",
+            JSONObject().put("allowed_countries", JSONArray().put("US").put("CA"))
         )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
 
-        assertThat(result).isNotNull()
-        assertThat(result?.allowedShippingCountries).isNull()
+        val result = parse(json)
+
+        assertThat(result?.allowedShippingCountries).containsExactly("US", "CA").inOrder()
         assertThat(result?.requiresShippingAddress).isTrue()
     }
 
     @Test
-    fun `parse requiresBillingAddress true when billing_address_collection is required`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "billing_address_collection": "required"
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
+    fun `unit amount override takes precedence and decimal is retained`() {
+        val json = base()
+        val item = item(json)
+        item.put("unit_amount", 4000)
+        item.put("unit_amount_decimal", "4000.123456789012")
 
-        assertThat(result).isNotNull()
-        assertThat(result?.requiresBillingAddress).isTrue()
+        val result = parse(json)!!.checkoutItems.single().oneTimePrice.items.single()
+
+        assertThat(result.unitAmount).isEqualTo(4000)
+        assertThat(result.price.unitAmount).isEqualTo(5099)
+        assertThat(result.unitAmountDecimal).isEqualTo(4000.123456789012)
     }
 
     @Test
-    fun `parse requiresBillingAddress false when billing_address_collection is auto`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "billing_address_collection": "auto"
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
+    fun `parses multiple groups and per-item tax`() {
+        val json = base()
+        val first = json.getJSONArray("checkout_items").getJSONObject(0)
+        val second = JSONObject(first.toString()).put("key", "group_2")
+        second.getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+            .put("inner_item_key", "item_2")
+            .put("tax_amounts", JSONArray().put(taxAmount()))
+        json.getJSONArray("checkout_items").put(second)
 
-        assertThat(result).isNotNull()
-        assertThat(result?.requiresBillingAddress).isFalse()
+        val result = parse(json)!!
+
+        assertThat(result.checkoutItems).hasSize(2)
+        assertThat(result.checkoutItems[1].oneTimePrice.items.single().taxAmounts.single().taxRate.displayName)
+            .isEqualTo("Sales tax")
     }
 
     @Test
-    fun `parse requiresBillingAddress false when billing_address_collection is absent`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
-            }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
+    fun `parses aggregate discounts and taxes separately`() {
+        val json = base()
+        json.getJSONObject("recurring_details")
+            .put("total_tax_amounts", JSONArray().put(taxAmount()))
+            .put(
+                "total_discount_amounts",
+                JSONArray().put(
+                    JSONObject().put("amount", 500).put("display_name", "Summer")
+                        .put("coupon", JSONObject().put("code", "SUMMER").put("name", "Summer").put("percent_off", 10))
+                        .put("promotion_code", JSONObject().put("code", "SAVE10"))
+                )
+            )
 
-        assertThat(result).isNotNull()
-        assertThat(result?.requiresBillingAddress).isFalse()
+        val result = parse(json)!!
+
+        assertThat(result.recurringDetails?.totalTaxAmounts).hasSize(1)
+        assertThat(result.recurringDetails?.totalDiscountAmounts?.single()?.promotionCode?.code).isEqualTo("SAVE10")
     }
 
     @Test
-    fun `parse requiresBillingAddress false when billing_address_collection is JSON null`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "billing_address_collection": null
-            }
-            """.trimIndent()
+    fun `parses adaptive pricing`() {
+        val json = base().put(
+            "adaptive_pricing_info",
+            JSONObject().put("active_presentment_currency", "usd").put("integration_amount", 5000)
+                .put("integration_currency", "cad")
+                .put(
+                    "local_currency_options",
+                    JSONArray().put(
+                        JSONObject().put("amount", 5099).put("conversion_markup_bps", 400)
+                            .put("currency", "usd").put("presentment_exchange_rate", "0.90")
+                    )
+                )
         )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
 
-        assertThat(result).isNotNull()
-        assertThat(result?.requiresBillingAddress).isFalse()
+        val result = parse(json)!!
+
+        assertThat(result.adaptivePricingInfo?.integrationCurrency).isEqualTo("cad")
+        assertThat(result.adaptivePricingInfo?.activePresentmentCurrency).isEqualTo("usd")
     }
 
     @Test
-    fun `parse allowedShippingCountries is empty list when allowed_countries is empty array`() {
-        val json = JSONObject(
-            """
-            {
-                "session_id": "cs_test_123",
-                "ui_mode": "custom",
-                "currency": "usd",
-                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
-                "shipping_address_collection": {
-                    "allowed_countries": []
+    fun `parses every status and payment status combination`() {
+        CheckoutSessionResponse.Status.entries.forEach { status ->
+            CheckoutSessionResponse.PaymentStatus.entries.forEach { paymentStatus ->
+                val json = base()
+                    .put("status", status.name.lowercase())
+                    .put("payment_status", paymentStatus.name.lowercase())
+                if (paymentStatus == CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED) {
+                    json.put("payment_status", "no_payment_required")
                 }
+                assertThat(parse(json)).isNotNull()
             }
-            """.trimIndent()
-        )
-        val result = CheckoutSessionResponseJsonParser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result?.allowedShippingCountries).isEqualTo(emptyList<String>())
-    }
-
-    /**
-     * Most parser tests predate the required status field and exercise unrelated response fields.
-     * Give those fixtures a known status while allowing status-specific tests to opt out.
-     */
-    private object CheckoutSessionResponseJsonParser {
-        fun parse(
-            json: JSONObject,
-            addDefaultStatus: Boolean = true,
-        ): CheckoutSessionResponse? {
-            val responseJson = JSONObject(json.toString())
-            if (addDefaultStatus && !responseJson.has("status")) {
-                responseJson.put("status", "open")
-            }
-            return com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseJsonParser.parse(responseJson)
         }
     }
+
+    @Test
+    fun `no payment required produces setup-style elements session`() {
+        val json = base().put("payment_status", "no_payment_required")
+
+        val result = parse(json)
+
+        assertThat(result?.elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+    }
+
+    @Test
+    fun `parses confirmed payment response and replaces deferred intent`() {
+        val result = parseResponse(baseFixture = "checkout-session-confirm.json")
+        val paymentIntent = requireNotNull(result.paymentIntent)
+        val elementsSession = requireNotNull(result.elementsSession)
+
+        assertThat(result.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
+        assertThat(result.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.PAID)
+        assertThat(paymentIntent.id).isEqualTo("pi_cs_example")
+        assertThat(paymentIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
+        assertThat(result.setupIntent).isNull()
+        assertThat(elementsSession.stripeIntent).isEqualTo(paymentIntent)
+    }
+
+    @Test
+    fun `parses confirmed payment response when customer detach capability is absent`() {
+        val result = parseResponse(
+            baseFixture = "checkout-session-confirm.json",
+            overridesFixture = "checkout-session-customer-without-detach-capability.json",
+        )
+        val customer = requireNotNull(result.customer)
+
+        assertThat(customer.id).isEqualTo("cus_VDr7KDndDhelXY")
+        assertThat(customer.paymentMethods).isEmpty()
+        assertThat(customer.canDetachPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `parses returning customer with saved payment methods`() {
+        val result = parseResponse(
+            baseFixture = "checkout-session-init.json",
+            overridesFixture = "checkout-session-returning-customer.json",
+        )
+        val customer = requireNotNull(result.customer)
+        val offerSave = requireNotNull(result.savedPaymentMethodsOfferSave)
+
+        assertThat(result.customerEmail).isEqualTo("email@example.com")
+        assertThat(customer.id).isEqualTo("cus_VDrEHIySBXFE9z")
+        assertThat(customer.canDetachPaymentMethod).isTrue()
+        assertThat(customer.paymentMethods.map { it.id })
+            .containsExactly("pm_1UDPW3Lu5o3P18Zp5rGujYbm", "pm_1UDPW3Lu5o3P18ZpfZ3q9HVI")
+            .inOrder()
+        assertThat(customer.paymentMethods.map { it.type })
+            .containsExactly(PaymentMethod.Type.USBankAccount, PaymentMethod.Type.Card)
+            .inOrder()
+        assertThat(offerSave.enabled).isTrue()
+        assertThat(offerSave.status)
+            .isEqualTo(CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED)
+    }
+
+    @Test
+    fun `parses automatic tax requiring billing location`() {
+        val result = parseResponse(
+            baseFixture = "checkout-session-init.json",
+            overridesFixture = "checkout-session-automatic-tax.json",
+        )
+        val taxMeta = requireNotNull(result.taxMeta)
+
+        assertThat(result.automaticTaxEnabled).isTrue()
+        assertThat(result.taxAddressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+        assertThat(result.requiresBillingAddress).isTrue()
+        assertThat(result.collectsTaxFromBillingAddress).isTrue()
+        assertThat(taxMeta.computationType)
+            .isEqualTo(CheckoutSessionResponse.TaxComputationType.AUTOMATIC)
+        assertThat(taxMeta.status)
+            .isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_LOCATION_INPUTS)
+    }
+
+    @Test
+    fun `rejects legacy and malformed response boundaries`() {
+        val mutations: List<(JSONObject) -> Unit> = listOf(
+            { it.put("mode", "payment") },
+            { it.put("checkout_items", JSONArray()) },
+            { it.getJSONArray("checkout_items").getJSONObject(0).put("type", "subscription") },
+            { item(it).getJSONObject("price").put("currency", "eur") },
+            { it.put("status", "unknown") },
+            { it.put("payment_status", "unknown") },
+            { item(it).remove("inner_item_key") },
+            { item(it).put("unit_amount_decimal", "NaN") },
+        )
+
+        mutations.forEach { mutation ->
+            assertThat(parse(base().also(mutation))).isNull()
+        }
+    }
+
+    @Test
+    fun `rejects enabled adjustable quantity without bounds`() {
+        val json = base()
+        item(json).put("adjustable_quantity", JSONObject().put("enabled", true))
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects malformed tax rate`() {
+        val json = base()
+        item(json).put(
+            "tax_amounts",
+            JSONArray().put(
+                taxAmount().apply {
+                    getJSONObject("tax_rate").put("rate_type", "mystery")
+                }
+            )
+        )
+
+        assertThat(parse(json)).isNull()
+    }
+
+    private fun base(): JSONObject = response(baseFixture = "checkout-session-init.json")
+
+    private fun parseResponse(
+        baseFixture: String,
+        overridesFixture: String? = null,
+    ): CheckoutSessionResponse {
+        return requireNotNull(parse(response(baseFixture, overridesFixture)))
+    }
+
+    private fun response(
+        baseFixture: String,
+        overridesFixture: String? = null,
+    ): JSONObject {
+        val response = jsonFixture(baseFixture)
+        overridesFixture?.let(::jsonFixture)?.let { overrides ->
+            overrides.keys().forEach { key -> response.put(key, overrides.get(key)) }
+        }
+        return response
+    }
+
+    private fun jsonFixture(name: String): JSONObject {
+        val resource = requireNotNull(javaClass.classLoader?.getResource(name))
+        return JSONObject(resource.readText())
+    }
+
+    private fun item(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
+        .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+
+    private fun taxAmount() = JSONObject().put("amount", 80).put("inclusive", false).put(
+        "tax_rate",
+        JSONObject().put("display_name", "Sales tax").put("percentage", 8.0).put("rate_type", "percentage")
+    )
+
+    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser.parse(json)
 }

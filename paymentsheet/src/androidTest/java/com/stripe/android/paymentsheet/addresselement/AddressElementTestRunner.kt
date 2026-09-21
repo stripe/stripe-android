@@ -2,6 +2,9 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
 import com.stripe.android.paymentsheet.MainActivity
@@ -16,7 +19,7 @@ internal class AddressElementTestRunnerContext(
     val page: AddressElementPage,
     val results: Turbine<AddressLauncherResult>,
 ) {
-    fun present() {
+    fun present(): AddressElementActivity {
         val activityLaunchObserver = ActivityLaunchObserver(AddressElementActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
@@ -33,6 +36,28 @@ internal class AddressElementTestRunnerContext(
         }
         activityLaunchObserver.awaitLaunch()
         page.waitUntilVisible()
+        return resumedAddressElementActivity()
+    }
+
+    fun recreate(activity: AddressElementActivity): AddressElementActivity {
+        val activityLaunchObserver = ActivityLaunchObserver(AddressElementActivity::class.java)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            activityLaunchObserver.prepareForLaunch(activity)
+            activity.recreate()
+        }
+        activityLaunchObserver.awaitLaunch()
+        return resumedAddressElementActivity()
+    }
+
+    private fun resumedAddressElementActivity(): AddressElementActivity {
+        lateinit var addressElementActivity: AddressElementActivity
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            addressElementActivity = ActivityLifecycleMonitorRegistry.getInstance()
+                .getActivitiesInStage(Stage.RESUMED)
+                .filterIsInstance<AddressElementActivity>()
+                .single()
+        }
+        return addressElementActivity
     }
 }
 

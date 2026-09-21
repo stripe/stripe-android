@@ -1,10 +1,50 @@
 {
   "session_id": "cs_test_abc123",
   "ui_mode": "custom",
+  "mode": "modeless",
   "status": "open",
+  "payment_status": "unpaid",
+  "livemode": false,
   "currency": "usd",
-  "total_summary": {
-    "due": 5099
+  "checkout_items": [
+    {
+      "key": "group_1",
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "inner_item_key": "item_1",
+            "price": {
+              "id": "price_1",
+              "currency": "usd",
+              "unit_amount": 5099,
+              "product": {
+                "name": "Classic T-Shirt",
+                "images": []
+              }
+            },
+            "quantity": 1,
+            "subtotal": 5099,
+            "total": 5099,
+            "unit_amount": 5099,
+            "unit_amount_decimal": "5099",
+            "unit_label": null,
+            "tax_amounts": [],
+            "tax_inclusive": 0,
+            "tax_exclusive": 0,
+            "adjustable_quantity": null
+          }
+        ]
+      }
+    }
+  ],
+  "recurring_details": {
+    "total_discount_amounts": [],
+    "total_tax_amounts": []
+  },
+  "tax_meta": {
+    "computation_type": "Off",
+    "status": null
   },
   "elements_session": {
     "apple_pay_preference": "enabled",
@@ -13,7 +53,9 @@
     "link_settings": {
       "link_authenticated_change_event_enabled": false,
       "link_bank_onboarding_enabled": false,
-      "link_funding_sources": ["CARD"],
+      "link_funding_sources": [
+        "CARD"
+      ],
       "link_mobile_disable_default_opt_in": true,
       "link_passthrough_mode_enabled": false
     },

@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Ychwanegu cyfrif banc</string>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="stripe_add_new_payment_method">Ychwanegu dull talu newydd</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Ychwanegu dull talu</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Prynu nawr neu dalu wedyn gydag Afterpay.</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_bank_account_ending_in">Cyfrif banc sy\'n gorffen gyda %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Cyfrif banc···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Cyfrif banc ····%s</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Prynu nawr neu dalu wedyn gyda Cash App Afterpay</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Prynu nawr neu dalu wedyn gyda Clearpay</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Cadw\'ch manylion i dalu\'n ddiogel ag 1 clic gyda Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Cadw fy manylion i dalu\'n gyflymach gyda Link</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Cadw fy manylion i dalu’n gyflymach gyda %s</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Ewch ati i greu cyfrif gyda Link i dalu’n gyflymach ar draws y we</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Ewch ati i greu cyfrif gyda %s i dalu’n gyflymach ar draws y we</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">Credyd %1$s</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">Debyd %1$s</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">Cerdyn Rhagdaledig %1$s</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">Cerdyn %1$s</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Cadarnhau’r manylion talu</string>
+  <!-- CTA text for accepting the suggested email correction -->
+  <string name="stripe_link_email_suggestion_update">Ie, diweddaru</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Mewngofnodi neu gofrestru</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Derbyn</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Canslo</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Datganiadau</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">Cyfeiriad</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">Cadarnhau</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">Dyddiad geni</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">Enw</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">Cadarnhewch eich manylion</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 digid olaf yr SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Mewngofnodi neu gofrestru</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Cytuno a pharhau</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Talu gydag 1 clic yn gyflym ac yn ddiogel</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Talu’n gyflym ac yn ddiogel</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Cadw\'ch manylion talu gyda Link, a thalu\'n ddiogel gydag 1 clic ar wefannau sy\'n gydnaws â Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Gallwch dalu\'n gyflymach ym mhob man sy’n derbyn Link.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Gallwch dalu’n gyflymach ym mhob man sy’n derbyn %s.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Drwy fwrw ymlaen, rydych chi\'n cytuno i\'r <terms>Telerau</terms> a\'r <privacy>Polisi Preifatrwydd</privacy>.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Diweddaru cerdyn</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">Hwn yw\'ch cerdyn diofyn</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Diweddaru cerdyn</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">Rhowch y cod a anfonwyd i %s.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Diweddaru cerdyn</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Allgofnodi o Link</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Allgofnodi o %s</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">Cerdyn wedi dod i ben. Rhowch gynnig ar gerdyn arall.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Cerdyn wedi’i wrthod. Rhowch gynnig ar gerdyn arall.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">Cerdyn wedi dod i ben. Rhowch gynnig ar gerdyn arall.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Does dim modd delio â waledi symudol. Rhowch gynnig ar gerdyn ffisegol.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Daliwch y cerdyn tu ôl i’r ffôn</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Aeth rhywbeth o’i le. Rhowch gynnig ar gerdyn arall.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">Dim modd delio â’r cerdyn. Rhowch gynnig ar gerdyn arall.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Rhowch gynnig arall arni.</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">neu rhowch hwn â llaw</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">Talu gyda %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Talu gyda %s</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Drwy barhau, rydych chi\'n cytuno i awdurdodi taliadau yn unol â\'r <terms>telerau hyn</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Drwy gadw\'ch cyfrif banc ar gyfer %s rydych chi\'n cytuno i awdurdodi taliadau yn unol â\'r <terms>telerau hyn</terms>.]]></string>
+  <!-- Error message when an error case happens when linking your account -->
+  <string name="stripe_paymentsheet_ach_something_went_wrong">Aeth rhywbeth o\'i le wrth gysylltu\'ch cyfrif.\nRhowch gynnig arall arni yn nes ymlaen.</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ychwanegu</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Ychwanegu eich manylion talu</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Cerdyn wedi’i ychwanegu</string>
+  <!-- Title for a button that when pressed saves the provided address. -->
+  <string name="stripe_paymentsheet_address_element_primary_button">Cadw\'r cyfeiriad</string>
+  <!-- Title for shipping address entry section -->
+  <string name="stripe_paymentsheet_address_element_shipping_address">Cyfeiriad Dosbarthu</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Defnyddio’r cyfeiriad bilio ar gyfer dosbarthu</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Bydd e-bost yn cael ei anfon at %s cyn pen tri diwrnod busnes i gadarnhau bod y cyfarwyddyd debyd hwn wedi\'i osod.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Cadarnhau eich manylion Debyd Uniongyrchol</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Addasu\'r manylion</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Hefyd, byddwch yn cael eich hysbysu ddau ddiwrnod ymlaen llaw drwy e-bost am unrhyw swm a fydd yn cael ei ddebydu o dan y cyfarwyddyd hwn. Bydd taliadau yn ymddangos fel \'%s\' ar eich datganiad banc.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Diogelir eich taliadau gan y %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Does dim modd newid manylion y cyfrif banc.</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Gallwch gael %s yn ôl pan fyddwch chi\'n talu drwy fanc. <a href=\"https://link.com/promotion-terms\">Gweler&#160;telerau</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Gallwch gael %s yn ôl pan fyddwch yn talu gyda\'ch banc am y tro cyntaf. <a href=\"https://link.com/promotion-terms\">Gweler&#160;telerau</a>]]></string>
+  <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Dim cynnig hyrwyddo %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Does dim modd newid manylion y cerdyn.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Drwy ddarparu manylion eich cerdyn, rydych chi\'n caniatáu i %s godi tâl ar eich cerdyn ar gyfer taliadau yn y dyfodol, yn unol â\'u telerau.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Drwy barhau, rydych chi’n cytuno i gadw eich manylion ar gyfer pryniannau yn y dyfodol gyda %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Drwy barhau, rydych chi’n cytuno i gadw eich manylion ar gyfer pryniannau yn y dyfodol gyda %s a <link>Link</link>. Rydych chi hefyd yn cytuno i <terms>Delerau</terms> a <privacy>Pholisi Preifatrwydd</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Drwy barhau, rydych chi’n cytuno i gadw eich manylion ar gyfer pryniannau yn y dyfodol gyda %s a <link>Link</link> (gweler y <terms>Telerau</terms> a’r <privacy>Polisi Preifatrwydd</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Drwy barhau, rydych chi’n cytuno i gadw eich manylion ar gyfer pryniannau yn y dyfodol gyda %s a <link>Link</link> yn unol â <terms>thelerau</terms> a <privacy>pholisi preifatrwydd</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Drwy barhau, rydych chi’n cytuno i gadw eich manylion ar gyfer pryniannau yn y dyfodol gyda %1$s a <link>%2$s</link> yn unol â thelerau %2$s <terms></terms> a <privacy>pholisi preifatrwydd</privacy>.]]></string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Heb ddiweddaru\'r cerdyn. Rhowch gynnig arall arni.</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Dewis dull talu</string>
+  <string name="stripe_paymentsheet_close">Cau</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">Cadarnhau eich CVC</string>
+  <!-- Text for a button that allows manual entry of an address -->
+  <string name="stripe_paymentsheet_enter_address_manually">Rhoi\'r cyfeiriad â llaw</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Rheoli cyfrif banc UDA</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Rheoli cerdyn</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Rheoli cardiau</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Rheoli cyfrif banc</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Rheoli dull talu</string>
+  <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_methods">Rheoli dulliau talu</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Rheoli debyd SEPA</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Bydd Stripe yn talu $0.01 i mewn i\'ch cyfrif mewn 1–2 ddiwrnod busnes. Wedyn fe gewch chi e-bost gyda chyfarwyddiadau i gwblhau taliad i %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Golygu %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Cerdyn newydd</string>
+  <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
+  <string name="stripe_paymentsheet_new_pm">Dull talu newydd</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">Dim ond brand y cerdyn y mae modd ei newid.</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Neu dalu gan ddefnyddio</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Neu dalu â cherdyn</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Neu defnyddiwch</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Neu defnyddiwch gerdyn</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Talu</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Talu gan ddefnyddio</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_pay_with_bank_title">Talu gyda\'ch cyfrif banc mewn ychydig o gamau yn unig.</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">Wrthi\'n prosesu...</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Tynnu\'r cyfrif banc?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title">Tynnu cyfrif banc</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Tynnu\'r cerdyn</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Tynnu\'r cerdyn?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Bydd y dull talu hwn yn cael ei dynnu ond bydd yn dal ar gael ar gyfer tanysgrifiadau %s.</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">Tynnu %s</string>
+  <!-- Title shown above a view containing a customer's payment method that they can delete -->
+  <string name="stripe_paymentsheet_remove_pm_title">Tynnu\'r dull talu</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Cadw ar gyfer taliadau yn y dyfodol</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Cadw\'r cerdyn hwn ar gyfer taliadau %s yn y dyfodol</string>
+  <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
+  <string name="stripe_paymentsheet_saved">Wedi cadw</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Cerdyn wedi’i gadw</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Dewis cerdyn</string>
+  <!-- Title shown above a view containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Dewis dull talu</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_your_payment_method">Dewiswch eich dull talu</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Does dim modd newid manylion debyd SEPA.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Heb newid y dull talu diofyn. Rhowch gynnig arall arni.</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Cyfanswm: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Dim modd newid manylion y dull talu.</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Heb ddiweddaru brand y cerdyn. Rhowch gynnig arall arni.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Cadarnhewch y taliad yn eich ap bancio neu dalu o fewn %s i gwblhau\'r pryniant.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Gosod fel dull talu diofyn</string>
+  <!-- Text for alert message when user needs to confirm payment in their payment app -->
+  <string name="stripe_qrcode_lpm_confirm_payment">Cadarnhewch y taliad yn eich ap bancio neu dalu o fewn %s i gwblhau\'r pryniant.</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Tynnu\'r cyfrif banc sy\'n gorffen gyda %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Botwm Shop Pay</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Dangos y ddewislen</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Allgofnodi o Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Allgofnodi o %s</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Ymuno â Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Talu\'n ddiogel gydag 1 clic</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Talu\'n gyflymach yn %s a miloedd o fasnachwyr eraill.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Drwy ymuno â Link, rydych chi\'n cytuno i\'r <terms>Telerau</terms> a\'r <privacy>Polisi Preifatrwydd</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Drwy ddarparu eich cyfeiriad e-bost, rydych chi\'n cytuno i greu cyfrif Link a chadw eich manylion talu gyda Link, yn unol â <terms>Thelerau Link</terms> a\'i <privacy>Bolisi Preifatrwydd</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Drwy roi eich cyfeiriad e-bost, rydych chi’n cytuno i greu cyfrif %1$s a chadw eich manylion talu gyda %1$s, yn unol â Thelerau<terms>%1$s </terms> a <privacy>Pholisi Preifatrwydd</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Drwy ddarparu eich rhif ffôn, rydych chi\'n cytuno i greu cyfrif Link a chadw eich manylion talu gyda Link, yn unol â <terms>Thelerau Link</terms> a\'i <privacy>Bolisi Preifatrwydd</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Drwy roi eich rhif ffôn, rydych chi’n cytuno i greu cyfrif %1$s a chadw eich manylion talu gyda %1$s, yn unol â Thelerau <terms>%1$s </terms> a <privacy>Pholisi Preifatrwydd</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Drwy ymuno â %1$s, rydych chi\'n cytuno i\'r <terms>Telerau</terms> a’r <privacy>Polisi Preifatrwydd</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Drwy ddarparu eich rhif ffôn a\'ch cyfeiriad e-bost, rydych chi\'n cytuno i greu cyfrif Link yn amodol ar <terms>Delerau</terms> a <privacy>Pholisi Preifatrwydd</privacy> Link.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Drwy roi rhif ffôn a chyfeiriad e-bost, rydych chi’n cytuno i greu cyfrif %1$s yn unol â Thelerau<terms> %1$s</terms> a <privacy>Pholisi Preifatrwydd</privacy>.]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">Mae\'ch cyfrif wedi cael ei ddadysgogi</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Trafodyn wedi\'i gwblhau</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Cerdyn wedi’i ychwanegu</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">Tapiwch i ychwanegu cerdyn</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Cerdyn wedi’i wrthod</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Ceisiwch dapio eich cerdyn eto</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Dim modd delio a’r cerdyn</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Diffoddwch yr opsiynau datblygwr, a rhowch gynnig arall arni</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Rhowch gynnig ar rwydwaith arall a thapio eto</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Wedi talu %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Ewch yn ôl a thapio eich cerdyn eto</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Dydy eich dyfais ddim yn gallu delio â’r nodwedd tapio i ychwanegu</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Rhowch gynnig ar ddyfais arall</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Dim modd delio â’r ddyfais</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Rhowch gynnig ar gerdyn arall</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_cancel">Canslo a thalu drwy ffordd arall</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_header">Cymeradwyo taliad</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="stripe_upi_polling_payment_failed_message">Ewch yn ôl a dewis dull talu arall</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="stripe_upi_polling_payment_failed_title">Taliad wedi methu</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Newid cyfeiriad e-bost</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">Dim chi?</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Cod wedi\'i anfon</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Cadarnhau mai chi sydd yno</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Rhowch eich cod dilysu</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Mewngofnodi i\'ch cyfrif Link</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Defnyddio eich manylion wedi\'u cadw i dalu\'n gyflymach</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Rhowch y cod a anfonwyd i %s i ddefnyddio Link i dalu yn ddiofyn.</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Dim %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Ailanfon y cod</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">Gweld mwy</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Drwy fwrw ymlaen, rydych chi\'n cytuno i awdurdodi taliadau yn amodol ar y <terms>telerau</terms> hyn.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Drwy gyflwyno eich archeb i %1$s a %2$s, rydych chi’n cytuno i gadw eich gwybodaeth gyda %3$s ar gyfer pryniannau yn y dyfodol, ac yn cytuno i awdurdodi taliadau yn unol â’r <terms>telerau hyn</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Drwy gyflwyno eich archeb i %s rydych chi\'n cytuno i awdurdodi taliadau yn unol â’r <terms>telerau hyn</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Talu</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Parhau drwy ffordd arall</string>
+  <!-- Label for identifying the default payment method. -->
+  <string name="stripe_wallet_default">Diofyn</string>
+  <string name="stripe_wallet_expand_accessibility">Newid dewis</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Dulliau talu</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Pasio drwodd</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Talu drwy ffordd arall</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Cardiau debyd yw’r mwyaf tebygol o gael eu derbyn.</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Er diogelwch, rhowch god diogelwch eich cerdyn eto.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Ydych chi\'n siŵr eich bod am dynnu\'r cyfrif cysylltiedig hwn?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Ydych chi\'n siŵr eich bod am dynnu\'r cerdyn hwn?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Tynnu\'r cyfrif cysylltiedig</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Gosod fel manylion diofyn</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Ddim ar gael ar gyfer y pryniant hwn</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Diweddaru\'r cerdyn</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Mae\'r cerdyn hwn wedi dod i ben. Ewch ati i ddiweddaru manylion eich cerdyn neu dewiswch ddull talu arall.</string>
+</resources>

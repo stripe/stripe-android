@@ -9,13 +9,15 @@ import app.cash.turbine.Turbine
 class FakeActivityResultLauncher<I> : ActivityResultLauncher<I>() {
     private val _calls = Turbine<Call<I>>()
     val calls: ReceiveTurbine<Call<I>> = _calls
+    private val _unregisterCalls = Turbine<Unit>()
+    val unregisterCalls: ReceiveTurbine<Unit> = _unregisterCalls
 
     override fun launch(input: I, options: ActivityOptionsCompat?) {
         _calls.add(Call(input))
     }
 
     override fun unregister() {
-        throw NotImplementedError("Not implemented!")
+        _unregisterCalls.add(Unit)
     }
 
     override val contract: ActivityResultContract<I, *>

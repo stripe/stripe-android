@@ -50,7 +50,7 @@ internal class CheckoutControllerStateHolderTest {
         testScenario(paymentOptionFactory = factory) {
             stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
 
-            assertThat(stateHolder.session.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
+            assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
         }
     }
@@ -96,6 +96,16 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `setSelection acknowledges the SEPA mandate`() = testScenario {
+        stateHolder.state = committedState()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+        stateHolder.setSelection(selection)
+
+        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
     }
 
     @Test
@@ -215,6 +225,7 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = false,
     )
 
     private fun testScenario(
