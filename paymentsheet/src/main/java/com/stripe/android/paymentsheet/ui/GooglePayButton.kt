@@ -23,7 +23,6 @@ import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
-import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.R
