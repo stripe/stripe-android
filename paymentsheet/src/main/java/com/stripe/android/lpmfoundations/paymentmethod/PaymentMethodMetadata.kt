@@ -8,7 +8,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
+import com.stripe.android.core.utils.FeatureFlags.disableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -447,7 +447,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddAvailable,
-                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && enableNfcScanning.isEnabled,
+                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && !disableNfcScanning.isEnabled,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
@@ -519,7 +519,7 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
-                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && enableNfcScanning.isEnabled,
+                isNfcScanningEnabled = false,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
