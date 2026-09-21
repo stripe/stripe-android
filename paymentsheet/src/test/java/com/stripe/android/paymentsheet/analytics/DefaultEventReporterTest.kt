@@ -58,14 +58,6 @@ class DefaultEventReporterTest {
     )
 
     @Test
-    fun `onInit fires event`() = runScenario {
-        eventReporter.onInit()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_complete_init")
-    }
-
-    @Test
     fun `onExperimentExposure enqueues V2 event`() = runScenario {
         paymentMethodMetadataStack.push(null)
 

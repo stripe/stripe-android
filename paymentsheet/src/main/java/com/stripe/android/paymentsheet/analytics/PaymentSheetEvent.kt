@@ -78,14 +78,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
-    class Init(
-        private val mode: EventReporter.Mode,
-    ) : PaymentSheetEvent() {
-
-        override val eventName: String
-            get() = formatEventName(mode, "init")
-    }
-
     class Dismiss : PaymentSheetEvent() {
         override val eventName: String = "mc_dismiss"
     }

@@ -99,6 +99,16 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `setSelection acknowledges the SEPA mandate`() = testScenario {
+        stateHolder.state = committedState()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+        stateHolder.setSelection(selection)
+
+        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
     fun `setSelection with a new selection emits and stashes it into previousNewSelections`() = testScenario {
         val originalPreviousNewSelections = Bundle()
         stateHolder.state = committedState(previousNewSelections = originalPreviousNewSelections)

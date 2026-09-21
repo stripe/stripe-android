@@ -30,7 +30,9 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +73,7 @@ internal class CheckoutControllerTest {
         .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(CoroutineTestRule())
 
     // The controller resolves callbacks from the process-global PaymentElementCallbackReferences,
     // keyed by integration name. Clear it between tests so registrations don't leak across cases.
@@ -792,20 +795,25 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `commitShippingAddress stores local details and reloads payment element state`() =
-        runMutationScenario {
-            val response = committedState().checkoutSessionResponse
+    fun `commitShippingAddress commits caller-provided response and shipping details without another tax request`() =
+        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
+            val previousResponse = committedState().checkoutSessionResponse
+            val response = previousResponse.copy(
+                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+            )
             val address = fullAddress.build()
 
             val result = controller.commitShippingAddress(
                 name = "John",
                 address = address,
+                updatedCheckoutSessionResponse = response,
             )
 
             result.getOrThrow()
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")

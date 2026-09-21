@@ -113,6 +113,7 @@ private fun ConfigurationContent(
             is CheckoutPlaygroundSettingDefinition.Value<*> -> ValueRow(
                 definition = definition,
                 value = requireNotNull(values[definition]),
+                error = settings.validationError(definition),
                 enabled = true,
                 onValueChanged = { settings.updateSerialized(definition, it) },
             )
@@ -142,6 +143,7 @@ private fun SearchResultsContent(
             ValueRow(
                 definition = result.definition,
                 value = requireNotNull(values[result.definition]),
+                error = settings.validationError(result.definition),
                 enabled = enabled,
                 onValueChanged = { value ->
                     if (enabled) {
@@ -215,13 +217,14 @@ private fun ConfigurationRow(
 private fun <T> ValueRow(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    error: String?,
     enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
     if (definition.input == CheckoutPlaygroundSettingDefinition.Value.Input.Color) {
         ColorValue(definition, value, enabled, onValueChanged)
     } else if (definition.options.isEmpty()) {
-        TextValue(definition, value, enabled, onValueChanged)
+        TextValue(definition, value, error, enabled, onValueChanged)
     } else if (definition.options.size < MaxInlineOptions) {
         RadioValue(definition, value, enabled, onValueChanged)
     } else {
@@ -337,10 +340,10 @@ private fun Color.toSerializedColor(): String {
 private fun <T> TextValue(
     definition: CheckoutPlaygroundSettingDefinition.Value<T>,
     value: String,
+    error: String?,
     enabled: Boolean,
     onValueChanged: (String) -> Unit,
 ) {
-    val error = definition.validationError(value)
     OutlinedTextField(
         value = value,
         onValueChange = onValueChanged,

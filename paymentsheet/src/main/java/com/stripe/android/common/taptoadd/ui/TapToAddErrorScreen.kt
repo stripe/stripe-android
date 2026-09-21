@@ -15,14 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeTypography
 
 @Composable
 internal fun ColumnScope.TapToAddErrorScreen(
     title: ResolvableString,
     action: ResolvableString,
 ) {
+    val fontSize = MaterialTheme.stripeTypography.xLargeFontSize
+
     Spacer(Modifier.weight(1f))
 
     Image(
@@ -41,7 +43,7 @@ internal fun ColumnScope.TapToAddErrorScreen(
         text = title.resolve(),
         color = MaterialTheme.colors.secondaryVariant,
         style = MaterialTheme.typography.h5,
-        fontSize = StripeTheme.typographyMutable.xLargeFontSize,
+        fontSize = fontSize,
         fontWeight = FontWeight.W800,
     )
 
@@ -52,7 +54,7 @@ internal fun ColumnScope.TapToAddErrorScreen(
         text = action.resolve(),
         color = MaterialTheme.colors.secondaryVariant,
         style = MaterialTheme.typography.h5,
-        fontSize = StripeTheme.typographyMutable.xLargeFontSize,
+        fontSize = fontSize,
         fontWeight = FontWeight.W400
     )
 

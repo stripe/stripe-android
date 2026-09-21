@@ -190,6 +190,23 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On acknowledged saved selection, should propagate SEPA mandate state`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+        ).also {
+            it.hasAcknowledgedSepaMandate = true
+        }
+
+        val confirmationOption = paymentSelection.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        ) as PaymentMethodConfirmationOption.Saved
+
+        assertThat(confirmationOption.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
     fun `On saved selection with link input and link configuration, should convert to saved link option`() {
         val userInput = UserInput.SignUp(
             email = "email@email.com",

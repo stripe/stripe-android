@@ -12,6 +12,7 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
+@Suppress("TooManyFunctions")
 internal class CheckoutPlaygroundSettings private constructor(
     private val root: CheckoutPlaygroundSettingDefinition.Configuration,
     defaultValues: Map<String, String>,
@@ -91,8 +92,12 @@ internal class CheckoutPlaygroundSettings private constructor(
 
     fun validationErrors(): Map<CheckoutPlaygroundSettingDefinition.Value<*>, String> {
         return _values.value.mapNotNull { (definition, value) ->
-            definition.validationError(value)?.let { definition to it }
+            definition.validationError(value, this)?.let { definition to it }
         }.toMap()
+    }
+
+    fun validationError(definition: CheckoutPlaygroundSettingDefinition.Value<*>): String? {
+        return definition.validationError(serializedValue(definition), this)
     }
 
     fun snapshot(): Snapshot {

@@ -2,12 +2,17 @@ package com.stripe.android.common.taptoadd
 
 import android.app.Activity.RESULT_OK
 import android.app.Application
+import android.os.Build
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.core.view.WindowCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
@@ -20,11 +25,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkSignupModeResult
@@ -43,6 +50,8 @@ import com.stripe.android.tta.testing.TerminalTestDelegate
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.PaymentLauncherContractArgsCvcMatcher
 import com.stripe.android.view.ActivityStarter
+import com.stripe.stripeterminal.external.InternalApi
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.runTest
@@ -50,11 +59,12 @@ import org.junit.Rule
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 import com.stripe.android.core.R as StripeCoreR
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
-@OptIn(TapToAddPreview::class)
+@OptIn(TapToAddPreview::class, AppearanceAPIAdditionsPreview::class, InternalApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TapToAddActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -90,6 +100,58 @@ class TapToAddActivityTest {
     private val errorPage = TapToAddErrorPage(composeTestRule)
 
     @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "notnight")
+    fun `always dark appearance uses light system bar icons in system light`() = runScenario(
+        mode = TapToAddMode.Continue,
+        metadata = createMetadata(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        ),
+    ) {
+        launch {
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+            assertThat(insetsController.isAppearanceLightStatusBars).isFalse()
+            assertThat(insetsController.isAppearanceLightNavigationBars).isFalse()
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "night")
+    fun `always light appearance uses dark system bar icons in system dark`() = runScenario(
+        mode = TapToAddMode.Continue,
+        metadata = createMetadata(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        ),
+    ) {
+        launch {
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+            assertThat(insetsController.isAppearanceLightStatusBars).isTrue()
+            assertThat(insetsController.isAppearanceLightNavigationBars).isTrue()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `terminal configuration uses always dark appearance in system light`() = runScenario(
+        mode = TapToAddMode.Continue,
+        metadata = createMetadata(
+            appearance = PaymentSheet.Appearance(
+                colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = DARK_PRIMARY),
+                themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+            ),
+        ),
+    ) {
+        launch {
+            val configuration = terminalWrapperTestRule.delegate.awaitSetTapToPayUxConfigurationCall()
+
+            assertThat(configuration.darkMode).isEqualTo(TapToPayUxConfiguration.DarkMode.DARK)
+            assertThat((configuration.colors.primary as TapToPayUxConfiguration.Color.Value).color)
+                .isEqualTo(DARK_PRIMARY.toArgb())
+        }
+    }
+
+    @Test
     fun successInContinueMode() = runScenario(
         mode = TapToAddMode.Continue,
     ) {
@@ -98,7 +160,7 @@ class TapToAddActivityTest {
         enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
 
         launch { activityScenario ->
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
+            cardCollectionHelper.assertSuccessfulCardCollection(info, DEFAULT_UX_CONFIGURATION)
 
             waitForIdle()
 
@@ -144,7 +206,7 @@ class TapToAddActivityTest {
         linkHelper.enqueueLookup()
 
         launch { activityScenario ->
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
+            cardCollectionHelper.assertSuccessfulCardCollection(info, DEFAULT_UX_CONFIGURATION)
 
             waitForIdle()
 
@@ -189,7 +251,7 @@ class TapToAddActivityTest {
         )
 
         launch { activityScenario ->
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
+            cardCollectionHelper.assertSuccessfulCardCollection(info, DEFAULT_UX_CONFIGURATION)
 
             waitForIdle()
 
@@ -339,7 +401,7 @@ class TapToAddActivityTest {
         )
 
         launch { activityScenario ->
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
+            cardCollectionHelper.assertSuccessfulCardCollection(info, DEFAULT_UX_CONFIGURATION)
 
             waitForIdle()
 
@@ -559,10 +621,10 @@ class TapToAddActivityTest {
                             )
                         )
                     ).use { scenario ->
-                        scenario.onActivity {
+                        scenario.onActivity { activity ->
                             runTest {
                                 cardArtTestHelper.assertCardArtAssetPreloads()
-                                block(scenario)
+                                activity.block(scenario)
                             }
                         }
                     }
@@ -611,12 +673,26 @@ class TapToAddActivityTest {
 
     private class Scenario(
         val launch: (
-            block: suspend (activityScenario: ActivityScenario<TapToAddActivity>) -> Unit
+            block: suspend TapToAddActivity.(activityScenario: ActivityScenario<TapToAddActivity>) -> Unit
         ) -> Unit
     )
 
+    private fun createMetadata(appearance: PaymentSheet.Appearance): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            customerEphemeralKeySecret = TestApiKeys.EPHEMERAL,
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            appearance = appearance,
+        )
+    }
+
     private companion object {
         const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "mpe1"
+        val DARK_PRIMARY = Color(0xFF123456)
+        val DEFAULT_UX_CONFIGURATION = createTapToAddUxConfiguration(
+            appearance = PaymentSheet.Appearance(),
+            isSystemDark = false,
+        )
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             amount = 1099
         )

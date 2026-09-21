@@ -88,6 +88,8 @@ internal class ShippingAddressElementTest {
 
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(launch.input.checkoutSessionResponse)
+            .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -217,13 +219,15 @@ internal class ShippingAddressElementTest {
                 state = "CA",
             ),
         )
+        val updatedResponse = CheckoutSessionResponseFactory.create(amount = 2000L)
         registration.dispatch(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails, updatedResponse)
         )
 
         assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
             FakeCommitShippingAddress.Call(
                 name = addressDetails.name,
+                checkoutSessionResponse = updatedResponse,
                 address = CheckoutController.Address.State(
                     city = "San Francisco",
                     country = "US",
@@ -255,7 +259,8 @@ internal class ShippingAddressElementTest {
 
             registration.dispatch(
                 AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                    AddressDetails(
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    address = AddressDetails(
                         name = "Jenny Rosen",
                         address = PaymentSheet.Address(
                             city = "San Francisco",
@@ -302,7 +307,8 @@ internal class ShippingAddressElementTest {
 
         registration.dispatch(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                AddressDetails(
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                address = AddressDetails(
                     name = "Missing country",
                     address = PaymentSheet.Address(
                         line1 = "510 Townsend St",
