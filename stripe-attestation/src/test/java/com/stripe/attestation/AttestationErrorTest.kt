@@ -17,6 +17,8 @@ class AttestationErrorTest {
     }
 
     private fun expectedRetryability(errorType: AttestationError.ErrorType): Boolean {
+        // This table intentionally duplicates ErrorType.isRetriable so the external retry contract is
+        // encoded independently from production values. Changes and new error types require explicit review.
         return when (errorType) {
             AttestationError.ErrorType.CLIENT_TRANSIENT_ERROR,
             AttestationError.ErrorType.GOOGLE_SERVER_UNAVAILABLE,

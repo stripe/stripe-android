@@ -11,6 +11,12 @@ class AttestationError(
     cause: Throwable? = null
 ) : Exception(message, cause) {
 
+    /**
+     * [isRetriable] mirrors the retry guidance in the Play Integrity error code documentation:
+     * https://developer.android.com/google/play/integrity/error-codes
+     *
+     * Product-specific retry decisions belong at a higher layer and should not change this metadata.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ErrorType(
         val isRetriable: Boolean
