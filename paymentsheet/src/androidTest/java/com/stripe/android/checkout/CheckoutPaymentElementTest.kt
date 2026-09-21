@@ -226,7 +226,7 @@ internal class CheckoutPaymentElementTest {
         }
     }
     
-        @Test
+    @Test
     fun testLinkAccountStatusIsLoaded_forLinkDisplayAutomatic() {
         runLinkLoadingTest(
             linkDisplay = PaymentElement.Configuration.LinkConfiguration.Display.Automatic,
