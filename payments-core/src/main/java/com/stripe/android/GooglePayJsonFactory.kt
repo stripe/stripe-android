@@ -38,11 +38,11 @@ class GooglePayJsonFactory internal constructor(
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
 ) {
     /**
-     * [PaymentConfiguration] must be instantiated before calling this.
+     * Creates a factory using the provided API configuration.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        context: Context,
+        apiConfiguration: ApiConfiguration.State,
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
@@ -53,7 +53,10 @@ class GooglePayJsonFactory internal constructor(
         cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         additionalEnabledNetworks: List<String> = emptyList()
     ) : this(
-        googlePayConfig = GooglePayConfig(context),
+        googlePayConfig = GooglePayConfig(
+            publishableKey = apiConfiguration.publishableKey,
+            connectedAccountId = apiConfiguration.stripeAccountId
+        ),
         isJcbEnabled = isJcbEnabled,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
@@ -93,22 +96,6 @@ class GooglePayJsonFactory internal constructor(
         additionalEnabledNetworks = additionalEnabledNetworks,
         cardBrandFilter = DefaultCardBrandFilter,
         cardFundingFilter = DefaultCardFundingFilter
-    )
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
-        apiConfiguration: ApiConfiguration.State,
-        cardBrandFilter: CardBrandFilter,
-        cardFundingFilter: CardFundingFilter,
-        additionalEnabledNetworks: List<String>
-    ) : this(
-        googlePayConfig = GooglePayConfig(
-            publishableKey = apiConfiguration.publishableKey,
-            connectedAccountId = apiConfiguration.stripeAccountId,
-        ),
-        cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter,
-        additionalEnabledNetworks = additionalEnabledNetworks
     )
 
     @Inject

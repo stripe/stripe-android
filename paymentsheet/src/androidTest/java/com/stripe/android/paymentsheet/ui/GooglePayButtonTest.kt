@@ -83,7 +83,7 @@ class GooglePayButtonTest {
     private companion object {
         val TEST_API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = "pk_test_123",
-            stripeAccountId = null,
+            stripeAccountId = "acct_123",
         )
     }
 }

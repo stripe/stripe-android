@@ -53,9 +53,6 @@ internal fun GooglePayButton(
         apiConfiguration,
         billingAddressParameters,
         allowCreditCards,
-        cardBrandFilter,
-        cardFundingFilter,
-        additionalEnabledNetworks,
     ) {
         if (isInspectionMode) {
             ""
