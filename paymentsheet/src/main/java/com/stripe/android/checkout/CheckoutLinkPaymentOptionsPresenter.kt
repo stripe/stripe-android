@@ -53,12 +53,13 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             defaultPresenter.present()
             return
         }
+        val paymentMethodMetadata = state.paymentMethodMetadata ?: return
 
         sheetStateHolder.sheetIsOpen = true
         val didLaunch = selectionLauncher.launchIfEligible(
             selection = state.paymentSelection,
-            configuration = state.paymentMethodMetadata.linkState?.configuration,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            configuration = paymentMethodMetadata.linkState?.configuration,
+            paymentMethodMetadata = paymentMethodMetadata,
             hasUserDeclinedVerification = state.linkEagerPresentationSuppressed,
         )
         if (!didLaunch) {
@@ -72,11 +73,16 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             return
         }
+        val paymentMethodMetadata = state.paymentMethodMetadata
+        if (paymentMethodMetadata == null) {
+            sheetStateHolder.sheetIsOpen = false
+            return
+        }
         handleLinkPaymentMethodSelectionResult(
             result = result,
             selection = state.paymentSelection,
             customerState = customerStateHolder.customer.value,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = paymentMethodMetadata,
             currentLinkAccountInfo = linkAccountHolder.linkAccountInfo.value,
         ).forEach(::applyOutcome)
     }

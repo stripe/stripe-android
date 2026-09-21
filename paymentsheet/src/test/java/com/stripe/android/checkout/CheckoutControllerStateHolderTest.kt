@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -52,6 +53,17 @@ internal class CheckoutControllerStateHolderTest {
 
             assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
+    fun `session has no payment option when payment element metadata is absent`() {
+        testScenario(
+            paymentOptionFactory = { _, _ -> error("Payment option factory should not be called") },
+        ) {
+            stateHolder.state = committedState(paymentMethodMetadata = null)
+
+            assertThat(stateHolder.session.value?.paymentOption).isNull()
         }
     }
 
@@ -209,11 +221,15 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         requiresShippingAddress: Boolean = false,
     ) = CheckoutControllerState(
-        configuration = CheckoutController.Configuration().build(),
+        configuration = CheckoutController.Configuration().apply {
+            if (paymentMethodMetadata != null) {
+                paymentElement(PaymentElement.Configuration())
+            }
+        }.build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(
             requiresShippingAddress = requiresShippingAddress,
         ),

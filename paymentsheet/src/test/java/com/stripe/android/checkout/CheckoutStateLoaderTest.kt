@@ -62,6 +62,20 @@ import kotlin.time.Duration.Companion.seconds
 internal class CheckoutStateLoaderTest {
 
     @Test
+    fun `loadInitial skips payment element when payment element configuration is absent`() = runScenario {
+        loader.loadInitial(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(stateHolder.state?.paymentMethodMetadata).isNull()
+        assertThat(stateHolder.state?.embeddedConfiguration).isNull()
+        assertThat(paymentElementLoader.lastIntegrationConfiguration).isNull()
+        assertThat(chooser.lastCall).isNull()
+        assertThat(stateHolder.session.value).isNotNull()
+    }
+
+    @Test
     fun `loadInitial commits only payment element metadata when ECE is not configured`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
@@ -77,7 +91,11 @@ internal class CheckoutStateLoaderTest {
 
         loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
 
+        assertThat(stateHolder.state?.paymentMethodMetadata).isNull()
+        assertThat(stateHolder.state?.embeddedConfiguration).isNull()
         assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+        assertThat(paymentElementLoader.lastIntegrationConfiguration)
+            .isInstanceOf(PaymentElementLoader.Configuration.ExpressCheckoutElement::class.java)
     }
 
     @Test
@@ -85,6 +103,7 @@ internal class CheckoutStateLoaderTest {
         paymentElementLoaderDelay = 1.seconds,
     ) {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
@@ -380,7 +399,9 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
     }
 
-    private fun defaultConfiguration() = CheckoutController.Configuration().build()
+    private fun defaultConfiguration() = CheckoutController.Configuration()
+        .paymentElement(PaymentElement.Configuration())
+        .build()
 
     private fun response(
         merchantCountry: String? = "US",
@@ -404,7 +425,7 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
-        configuration = CheckoutController.Configuration().build(),
+        configuration = defaultConfiguration(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),

@@ -45,6 +45,18 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm does nothing when payment element configuration is absent`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            configuration = CheckoutController.Configuration().build(),
+            paymentMethodMetadata = null,
+            embeddedConfiguration = null,
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        ),
+    ) {
+        performer.confirm()
+    }
+
+    @Test
     fun `confirm does nothing when the selection cannot be converted to a confirmation option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),

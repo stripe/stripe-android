@@ -3,7 +3,6 @@ package com.stripe.android.checkout.injection
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
-import com.stripe.android.elements.PaymentElement
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
@@ -11,7 +10,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
@@ -59,26 +57,22 @@ internal interface PaymentElementModule {
     @Binds
     fun bindsSheetLauncher(launcher: CheckoutSheetLauncher): EmbeddedSheetLauncher
 
-    @OptIn(CheckoutSessionPreview::class)
     companion object {
-        @Provides
-        fun providePaymentElementConfiguration(
-            stateHolder: CheckoutControllerStateHolder,
-        ): PaymentElement.Configuration.State {
-            return requireNotNull(stateHolder.state).configuration.paymentElementConfiguration
-        }
-
         @Provides
         fun provideEmbeddedContentState(
             stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
-                state?.let {
+                val paymentMethodMetadata = state?.paymentMethodMetadata
+                val embeddedConfiguration = state?.embeddedConfiguration
+                if (paymentMethodMetadata != null && embeddedConfiguration != null) {
                     EmbeddedContentHelperStateHolder.State(
-                        paymentMethodMetadata = it.paymentMethodMetadata,
-                        embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
-                        configuration = it.embeddedConfiguration,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        embeddedViewDisplaysMandateText = embeddedConfiguration.embeddedViewDisplaysMandateText,
+                        configuration = embeddedConfiguration,
                     )
+                } else {
+                    null
                 }
             }
         }

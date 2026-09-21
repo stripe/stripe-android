@@ -88,6 +88,16 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure omits payment element state when payment element configuration is absent`() =
+        runConfigureScenario(configuration = CheckoutController.Configuration()) {
+            result.getOrThrow()
+
+            assertThat(committedState?.paymentMethodMetadata).isNull()
+            assertThat(committedState?.embeddedConfiguration).isNull()
+            assertThat(controller.session.value).isNotNull()
+        }
+
+    @Test
     fun `configure emits session with id from response`() = runConfigureScenario {
         result.getOrThrow()
         assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
@@ -155,18 +165,20 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure prefills the default billing address`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address()
-                        .city(" San Francisco ")
-                        .country(" US ")
-                        .line1(" 510 Townsend St ")
-                        .postalCode(" 94103 ")
-                        .state(" CA ")
+        configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
+            .defaults(
+                CheckoutController.Configuration.Defaults().billingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails().address(
+                        CheckoutController.Address()
+                            .city(" San Francisco ")
+                            .country(" US ")
+                            .line1(" 510 Townsend St ")
+                            .postalCode(" 94103 ")
+                            .state(" CA ")
+                    )
                 )
-            )
-        ),
+            ),
     ) {
         result.getOrThrow()
 
@@ -292,9 +304,11 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure seeds the default email locally`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().email("prefill@example.com")
-        ),
+        configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
+            .defaults(
+                CheckoutController.Configuration.Defaults().email("prefill@example.com")
+            ),
         networkSetup = {
             networkRule.checkoutInit(responseFactory = ::successResponse)
         },
@@ -325,7 +339,9 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure uses the configured merchant display name over the checkout session business name`() =
         runConfigureScenario(
-            configuration = CheckoutController.Configuration().merchantDisplayName("Acme Corp"),
+            configuration = CheckoutController.Configuration()
+                .merchantDisplayName("Acme Corp")
+                .paymentElement(PaymentElement.Configuration()),
         ) {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
@@ -436,7 +452,7 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        controller.configure(DEFAULT_CLIENT_SECRET, paymentElementConfiguration()).getOrThrow()
 
         // Simulate process death: persist the handle and build a new controller from the restored copy.
         val recreated = createController(savedStateHandle.simulateProcessDeath())
@@ -449,7 +465,7 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        controller.configure(DEFAULT_CLIENT_SECRET, paymentElementConfiguration()).getOrThrow()
 
         // Persisting and restoring the handle simulates the controller being rebuilt after process
         // death: the committed state is read back from the restored namespaced child.
@@ -459,7 +475,7 @@ internal class CheckoutControllerTest {
         )
         val state = recreated.stateHolder.state
         assertThat(state).isNotNull()
-        assertThat(state!!.embeddedConfiguration.merchantDisplayName)
+        assertThat(state!!.embeddedConfiguration?.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 
@@ -688,7 +704,7 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("checkout@example.com")
     }
 
@@ -816,8 +832,8 @@ internal class CheckoutControllerTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
-            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
-            assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+            assertThat(state.paymentMethodMetadata?.shippingDetails?.name).isEqualTo("John")
+            assertThat(state.paymentMethodMetadata?.shippingDetails?.address).isEqualTo(
                 address.asPaymentSheet()
             )
         }
@@ -1242,7 +1258,7 @@ internal class CheckoutControllerTest {
 
     private fun runConfigureScenario(
         clientSecret: String = DEFAULT_CLIENT_SECRET,
-        configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
+        configuration: CheckoutController.Configuration = paymentElementConfiguration(),
         networkSetup: () -> Unit = { networkRule.defaultInit() },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -1286,7 +1302,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        controller.configure(DEFAULT_CLIENT_SECRET, paymentElementConfiguration()).getOrThrow()
         paymentSelection?.let(setup.stateHolder::setSelection)
         temporarySelection?.let(setup.stateHolder::setTemporarySelection)
         if (!previousNewSelections.isEmpty) {
@@ -1331,6 +1347,10 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
+    }
+
+    private fun paymentElementConfiguration(): CheckoutController.Configuration {
+        return CheckoutController.Configuration().paymentElement(PaymentElement.Configuration())
     }
 
     private companion object {

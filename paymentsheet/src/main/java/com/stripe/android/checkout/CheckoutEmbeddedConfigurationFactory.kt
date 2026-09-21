@@ -14,25 +14,26 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): EmbeddedPaymentElement.Configuration {
+    ): EmbeddedPaymentElement.Configuration? {
+        val paymentElementConfiguration = configuration.paymentElementConfiguration ?: return null
         val merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName)
         return EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
             .embeddedViewDisplaysMandateText(
-                configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
+                paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(
                 checkoutSessionResponse.toBillingDetailsCollectionConfiguration()
             )
-            .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
-            .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
-            .cardBrandAcceptance(configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet())
+            .preferredNetworks(paymentElementConfiguration.preferredNetworks)
+            .paymentMethodOrder(paymentElementConfiguration.paymentMethodOrder)
+            .cardBrandAcceptance(paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet())
             .opensCardScannerAutomatically(
-                configuration.paymentElementConfiguration.opensCardScannerAutomatically
+                paymentElementConfiguration.opensCardScannerAutomatically
             )
-            .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
-            .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
+            .termsDisplay(paymentElementConfiguration.termsDisplay.asPaymentSheet())
+            .appearance(paymentElementConfiguration.appearance.asPaymentSheet())
             .googlePay(configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse))
-            .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
+            .link(paymentElementConfiguration.linkConfiguration.asPaymentSheet())
             .defaultBillingDetails(
                 configuration.toBillingDetails(
                     checkoutSessionResponse = checkoutSessionResponse,

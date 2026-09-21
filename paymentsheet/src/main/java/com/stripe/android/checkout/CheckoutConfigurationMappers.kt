@@ -42,17 +42,19 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
 internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
-    paymentElementConfiguration.googlePayConfiguration
-        .takeIf { it.display == GooglePayDisplay.Automatic }
-        ?.let { configuration ->
-            checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
-                configuration.asPaymentSheet(
-                    merchantCountry = merchantCountry,
-                    liveMode = checkoutSessionResponse.livemode,
-                    isDebugBuild = BuildConfig.DEBUG,
-                )
+    paymentElementConfiguration?.let { paymentElementConfiguration ->
+        paymentElementConfiguration.googlePayConfiguration
+            .takeIf { it.display == GooglePayDisplay.Automatic }
+            ?.let { configuration ->
+                checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
+                    configuration.asPaymentSheet(
+                        merchantCountry = merchantCountry,
+                        liveMode = checkoutSessionResponse.livemode,
+                        isDebugBuild = BuildConfig.DEBUG,
+                    )
+                }
             }
-        }
+    }
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutController.Configuration.State.toBillingDetails(

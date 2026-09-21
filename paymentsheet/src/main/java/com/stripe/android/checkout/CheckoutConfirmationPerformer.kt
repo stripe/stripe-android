@@ -49,27 +49,29 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         state: CheckoutControllerState,
         paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
+        val paymentMethodMetadata = state.paymentMethodMetadata ?: return null
+        val embeddedConfiguration = state.embeddedConfiguration ?: return null
         val configuration = commonConfigurationFactory.createForPaymentElement(
             configuration = state.configuration,
             checkoutSessionResponse = state.checkoutSessionResponse,
             collectedDetails = state.collectedDetails,
-        )
+        ) ?: return null
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
-            linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = configuration,
-                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethodMetadata = paymentMethodMetadata,
             ),
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
-                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+                !embeddedConfiguration.embeddedViewDisplaysMandateText,
         ) ?: return null
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
         )
     }
