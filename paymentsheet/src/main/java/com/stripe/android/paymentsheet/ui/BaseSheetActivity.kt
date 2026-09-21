@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.os.Build
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -21,9 +22,20 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     // User keys identify the Stripe Dashboard mobile app, where MOTO lets merchants enter a customer's card.
     // Exclude those card details from Autofill so they cannot be saved on the merchant's device.
+    @SuppressLint("InlinedApi")
     protected fun disableAutofillForUserKey() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && PaymentConfiguration.getInstance(this).isUserKey()) {
-            window.decorView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
+        val isUserKey = try {
+            PaymentConfiguration.getInstance(this).isUserKey()
+        } catch (_: IllegalStateException) {
+            // getInstance() throws when PaymentConfiguration is unavailable; default to preserving Autofill.
+            false
+        }
+
+        if (isUserKey) {
+            ViewCompat.setImportantForAutofill(
+                window.decorView,
+                View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS,
+            )
         }
     }
 

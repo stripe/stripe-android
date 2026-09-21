@@ -154,6 +154,22 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `missing payment configuration leaves activity hierarchy autofill importance unchanged`() {
+        context.getSharedPreferences(PaymentConfiguration::class.java.canonicalName, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
+        PaymentConfiguration.clearInstance()
+
+        runActivityScenario { scenario ->
+            scenario.onActivity { activity ->
+                assertThat(activity.window.decorView.importantForAutofill)
+                    .isEqualTo(View.IMPORTANT_FOR_AUTOFILL_AUTO)
+            }
+        }
+    }
+
+    @Test
     @Config(sdk = [Build.VERSION_CODES.M])
     fun `user key does not access autofill APIs before Android O`() {
         PaymentConfiguration.init(context, "uk_test_123")
