@@ -203,6 +203,7 @@ class GooglePayJsonFactory internal constructor(
         hasDynamicCallbacks: Boolean = false,
         isEmailRequired: Boolean = false,
         allowCreditCards: Boolean? = null,
+        blockedIssuerCountryCodes: List<String> = emptyList(),
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -212,8 +213,10 @@ class GooglePayJsonFactory internal constructor(
                 JSONArray()
                     .put(
                         createCardPaymentMethod(
-                            billingAddressParameters,
-                            allowCreditCards
+                            billingAddressParameters = billingAddressParameters,
+                            allowCreditCards = allowCreditCards,
+                            forIsReadyToPayRequest = false,
+                            blockedIssuerCountryCodes = blockedIssuerCountryCodes,
                         )
                     )
             )
@@ -337,6 +340,20 @@ class GooglePayJsonFactory internal constructor(
         allowCreditCards: Boolean?,
         forIsReadyToPayRequest: Boolean = false
     ): JSONObject {
+        return createCardPaymentMethod(
+            billingAddressParameters = billingAddressParameters,
+            allowCreditCards = allowCreditCards,
+            forIsReadyToPayRequest = forIsReadyToPayRequest,
+            blockedIssuerCountryCodes = emptyList(),
+        )
+    }
+
+    private fun createCardPaymentMethod(
+        billingAddressParameters: BillingAddressParameters?,
+        allowCreditCards: Boolean?,
+        forIsReadyToPayRequest: Boolean,
+        blockedIssuerCountryCodes: List<String>,
+    ): JSONObject {
         val cardPaymentMethodParams = createBaseCardPaymentMethodParams(forIsReadyToPayRequest = forIsReadyToPayRequest)
             .apply {
                 if (billingAddressParameters?.isRequired == true) {
@@ -355,6 +372,9 @@ class GooglePayJsonFactory internal constructor(
                     .and(allowCreditCards ?: true)
                 put("allowCreditCards", allowCreditCards)
                 put("allowPrepaidCards", cardFundingFilter.isAccepted(CardFunding.Prepaid))
+                if (blockedIssuerCountryCodes.isNotEmpty()) {
+                    put("blockedIssuerCountryCodes", JSONArray(blockedIssuerCountryCodes))
+                }
             }
 
         return JSONObject()

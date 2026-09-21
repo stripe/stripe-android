@@ -405,6 +405,7 @@ class GooglePayConfirmationDefinitionTest {
             confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
                     sellerBusinessName = "My business, Inc.",
+                    googlePayBlockedIssuerCountryCodes = listOf("IN"),
                 ),
             ),
             arguments = EmptyConfirmationLauncherArgs,
@@ -425,6 +426,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = listOf("IN"),
         )
     }
 
@@ -462,6 +464,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 
@@ -500,6 +503,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 
@@ -539,6 +543,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 
@@ -595,6 +600,7 @@ class GooglePayConfirmationDefinitionTest {
             ),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 
@@ -633,6 +639,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = shippingAddressParameters,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 
@@ -710,6 +717,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 
@@ -743,6 +751,7 @@ class GooglePayConfirmationDefinitionTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 

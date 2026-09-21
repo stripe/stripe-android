@@ -81,6 +81,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
         displayItems: List<GooglePayJsonFactory.DisplayItem>,
         billingEmailOverride: String?,
         shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
+        blockedIssuerCountryCodes: List<String>,
     ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
@@ -98,6 +99,7 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
                 shippingAddressParameters = shippingAddressParameters,
+                blockedIssuerCountryCodes = blockedIssuerCountryCodes,
             )
         )
     }

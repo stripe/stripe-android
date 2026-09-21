@@ -114,6 +114,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata, context),
             billingEmailOverride = config.billingEmailOverride,
             shippingAddressParameters = config.shippingAddressParameters,
+            blockedIssuerCountryCodes = confirmationArgs.paymentMethodMetadata.googlePayBlockedIssuerCountryCodes,
         )
     }
 

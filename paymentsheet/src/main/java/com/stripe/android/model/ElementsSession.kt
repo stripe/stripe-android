@@ -113,6 +113,16 @@ internal data class ElementsSession(
     val shouldUseAutocompleteProxyEndpoints: Boolean
         get() = flags[Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS] == true
 
+    val googlePayBlockedIssuerCountryCodes: List<String>
+        get() = if (
+            merchantCountry.equals("IN", ignoreCase = true) &&
+            flags[Flag.ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS] == true
+        ) {
+            listOf("IN")
+        } else {
+            emptyList()
+        }
+
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
@@ -241,6 +251,7 @@ internal data class ElementsSession(
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
         ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha"),
+        ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS("elements_google_pay_block_india_issued_cards"),
         ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT(
             "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
         ),

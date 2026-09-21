@@ -84,6 +84,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = listOf("IN"),
         )
 
         assertThat(activityResultLauncher.launchArgs[0]).isEqualTo(
@@ -101,6 +102,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
                 displayItems = emptyList(),
                 billingEmailOverride = null,
                 shippingAddressParameters = null,
+                blockedIssuerCountryCodes = listOf("IN"),
                 dynamicCallbackId = null,
             )
         )
@@ -132,6 +134,7 @@ class InternalGooglePayPaymentMethodLauncherTest {
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
 
         assertThat(activityResultLauncher.launchArgs.single().dynamicCallbackId).isEqualTo("instanceId")

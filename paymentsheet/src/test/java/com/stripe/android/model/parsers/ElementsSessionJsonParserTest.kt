@@ -1625,6 +1625,46 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Parses elements_google_pay_block_india_issued_cards flag`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val json = JSONObject(
+            """
+            {
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "IN",
+                "payment_intent": {
+                  "id": "pi_123",
+                  "object": "payment_intent",
+                  "amount": 1099,
+                  "currency": "inr",
+                  "status": "requires_payment_method"
+                },
+                "ordered_payment_method_types": ["card"]
+              },
+              "flags": {
+                "elements_google_pay_block_india_issued_cards": true
+              }
+            }
+            """.trimIndent()
+        )
+
+        val session = parser.parse(json)
+
+        assertThat(session?.flags?.get(ElementsSession.Flag.ELEMENTS_GOOGLE_PAY_BLOCK_INDIA_ISSUED_CARDS))
+            .isTrue()
+    }
+
+    @Test
     fun `Parses elements_mobile_attest_on_intent_confirmation flag as false when disabled`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(

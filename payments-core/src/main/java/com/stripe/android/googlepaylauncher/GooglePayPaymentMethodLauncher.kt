@@ -293,6 +293,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             displayItems = displayItems,
             billingEmailOverride = billingEmailOverride,
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 

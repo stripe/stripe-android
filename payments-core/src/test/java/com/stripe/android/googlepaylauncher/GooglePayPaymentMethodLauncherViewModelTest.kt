@@ -234,6 +234,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 0,
                     apiConfiguration = ARGS.apiConfiguration,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             )
             assertThat(transactionInfo)
@@ -264,6 +265,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 0,
                     apiConfiguration = ARGS.apiConfiguration,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             )
             assertThat(transactionInfo)
@@ -325,6 +327,22 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentDataRequest() should include blocked issuer country codes`() {
+        val viewModel = createViewModel(
+            args = ARGS.copy(blockedIssuerCountryCodes = listOf("IN")),
+        )
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        val parameters = paymentDataRequest
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+        val blockedIssuerCountryCodes = parameters.getJSONArray("blockedIssuerCountryCodes")
+        assertThat(blockedIssuerCountryCodes.getString(0)).isEqualTo("IN")
+    }
+
+    @Test
     fun `createPaymentDataRequest() should include shipping address parameters`() {
         val viewModel = createViewModel(
             args = ARGS.copy(
@@ -366,6 +384,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     transactionId = null,
                     apiConfiguration = ARGS.apiConfiguration,
                     shippingAddressParameters = null,
+                    blockedIssuerCountryCodes = emptyList(),
                 )
             )
 
@@ -443,6 +462,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
             ),
             shippingAddressParameters = null,
+            blockedIssuerCountryCodes = emptyList(),
         )
     }
 }
