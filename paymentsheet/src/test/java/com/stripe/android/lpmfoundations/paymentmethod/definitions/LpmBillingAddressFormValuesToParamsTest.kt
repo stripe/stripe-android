@@ -220,6 +220,7 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(gopayTestCases)
     addAll(shopeePayTestCases)
     addAll(qrisTestCases)
+    addAll(ngCardTestCases)
     addAll(gCashTestCases)
     addAll(moMoTestCases)
     addAll(sepaDebitTestCases)
