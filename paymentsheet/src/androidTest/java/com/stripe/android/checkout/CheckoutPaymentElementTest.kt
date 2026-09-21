@@ -321,6 +321,68 @@ internal class CheckoutPaymentElementTest {
         )
     }
 
+    @Test
+    fun testLinkAccountStatusIsLoaded_forLinkDisplayAutomatic() {
+        runLinkLoadingTest(
+            linkDisplay = PaymentElement.Configuration.LinkConfiguration.Display.Automatic,
+            expectedToLoadLinkAccount = true,
+        )
+    }
+
+    @Test
+    fun testLinkAccountStatusIsLoaded_forLinkDisplayNever() {
+        runLinkLoadingTest(
+            linkDisplay = PaymentElement.Configuration.LinkConfiguration.Display.Never,
+            expectedToLoadLinkAccount = false,
+        )
+    }
+
+    private fun runLinkLoadingTest(
+        linkDisplay: PaymentElement.Configuration.LinkConfiguration.Display,
+        expectedToLoadLinkAccount: Boolean,
+    ) {
+        val checkoutInitResponse: (MockResponse) -> Unit = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "test@stripe.com")
+            }
+        }
+        val configuration = CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration()
+                .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+                .linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        linkDisplay
+                    )
+                )
+        )
+
+        if (expectedToLoadLinkAccount) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
+                    json.put("exists", true)
+                }
+            }
+        }
+
+
+        lateinit var controller: CheckoutController
+
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            checkoutInitResponse = checkoutInitResponse,
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            },
+        ) { context ->
+            // Just testing loading events, mark test succeeded once that has completed.
+            context.markTestSucceeded()
+        }
+    }
+
     private fun runPaymentOptionsTaxUpdateTest(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
     ) {
