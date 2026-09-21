@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.utils
 
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -10,21 +9,11 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 
-internal sealed class ConfirmationType(
+internal enum class ConfirmationType(
     val createIntentCallback: CreateIntentCallback?,
     val isDeferredIntent: Boolean,
 ) {
-    abstract fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
-        networkRule: NetworkRule,
-        paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
-        setAsDefault: Boolean,
-    )
-
-    abstract fun enqueuePaymentIntentConfirmWithoutSetAsDefault(
-        networkRule: NetworkRule,
-    )
-
-    data object IntentFirst : ConfirmationType(
+    IntentFirst(
         createIntentCallback = null,
         isDeferredIntent = false,
     ) {
@@ -33,7 +22,7 @@ internal sealed class ConfirmationType(
             paymentMethodType: PaymentMethodType,
             setAsDefault: Boolean
         ) {
-            if (paymentMethodType is PaymentMethodType.Card) {
+            if (paymentMethodType == PaymentMethodType.Card) {
                 enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
                     networkRule = networkRule,
                     setAsDefault = setAsDefault,
@@ -84,9 +73,9 @@ internal sealed class ConfirmationType(
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
         }
-    }
+    },
 
-    data object DeferredClientSideConfirmation : ConfirmationType(
+    DeferredClientSideConfirmation(
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
         },
@@ -97,7 +86,7 @@ internal sealed class ConfirmationType(
             paymentMethodType: PaymentMethodType,
             setAsDefault: Boolean
         ) {
-            if (paymentMethodType is PaymentMethodType.Card) {
+            if (paymentMethodType == PaymentMethodType.Card) {
                 enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
                     networkRule = networkRule,
                     setAsDefault = setAsDefault,
@@ -187,14 +176,15 @@ internal sealed class ConfirmationType(
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
         }
-    }
-}
+    };
 
-internal object ConfirmationTypeProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<ConfirmationType> {
-        return listOf(
-            ConfirmationType.IntentFirst,
-            ConfirmationType.DeferredClientSideConfirmation,
-        )
-    }
+    abstract fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
+        networkRule: NetworkRule,
+        paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
+        setAsDefault: Boolean,
+    )
+
+    abstract fun enqueuePaymentIntentConfirmWithoutSetAsDefault(
+        networkRule: NetworkRule,
+    )
 }

@@ -2,18 +2,15 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import app.cash.burst.Burst
+import app.cash.burst.burstValues
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ConfirmationType
-import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentMethodType
-import com.stripe.android.paymentsheet.utils.PaymentMethodTypeProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -22,12 +19,14 @@ import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
+@Burst
 internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
+    private val apiConfigurationTestType: ApiConfigurationTestType = burstValues(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+    ),
+    private val confirmationType: ConfirmationType,
+    private val paymentMethodType: PaymentMethodType,
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create {
@@ -36,12 +35,6 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
-    lateinit var confirmationType: ConfirmationType
-
-    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
-    lateinit var paymentMethodType: PaymentMethodType
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical
@@ -126,7 +119,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
             page.clickOnLpm(paymentMethodType.type.code, forVerticalMode = true)
             composeTestRule.waitForIdle()
 
-            if (paymentMethodType is PaymentMethodType.UsBankAccount) {
+            if (paymentMethodType == PaymentMethodType.UsBankAccount) {
                 composeTestRule.waitUntil(
                     timeoutMillis = 5000L
                 ) {
@@ -176,7 +169,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
     }
 
     private fun PaymentMethodType.getLast4(): String {
-        if (this is PaymentMethodType.Card) {
+        if (this == PaymentMethodType.Card) {
             return "4242"
         } else {
             return "6789"
