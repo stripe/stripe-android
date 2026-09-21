@@ -1,11 +1,18 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.DefaultStripeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -41,10 +48,27 @@ class InputAddressScreenTest {
         assertThat(counter).isEqualTo(1)
     }
 
+    @Test
+    fun save_error_is_displayed_as_an_assertive_live_region() {
+        setContent(saveError = "Something went wrong.".resolvableString)
+
+        composeTestRule.onNodeWithText("Something went wrong.")
+            .assertIsDisplayed()
+            .assertLiveRegionMode(LiveRegionMode.Assertive)
+    }
+
+    @Test
+    fun save_error_is_not_displayed_when_null() {
+        setContent(saveError = null)
+
+        composeTestRule.onNodeWithText("Something went wrong.").assertDoesNotExist()
+    }
+
     private fun setContent(
         primaryButtonEnabled: Boolean = true,
         primaryButtonCallback: () -> Unit = {},
-        onCloseCallback: () -> Unit = {}
+        onCloseCallback: () -> Unit = {},
+        saveError: ResolvableString? = null,
     ) {
         composeTestRule.setContent {
             DefaultStripeTheme {
@@ -57,9 +81,17 @@ class InputAddressScreenTest {
                     onCloseClick = onCloseCallback,
                     topContent = {},
                     formContent = {},
-                    bottomContent = {}
+                    bottomContent = {},
+                    saveError = saveError,
                 )
             }
         }
+    }
+
+    private fun SemanticsNodeInteraction.assertLiveRegionMode(
+        value: LiveRegionMode,
+    ): SemanticsNodeInteraction {
+        assertThat(fetchSemanticsNode().config[SemanticsProperties.LiveRegion]).isEqualTo(value)
+        return this
     }
 }

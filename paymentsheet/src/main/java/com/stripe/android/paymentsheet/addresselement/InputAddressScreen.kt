@@ -18,10 +18,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getOuterFormInsets
@@ -41,7 +43,8 @@ internal fun InputAddressScreen(
     onCloseClick: () -> Unit,
     topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
-    bottomContent: @Composable ColumnScope.() -> Unit
+    bottomContent: @Composable ColumnScope.() -> Unit,
+    saveError: ResolvableString?,
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -75,6 +78,12 @@ internal fun InputAddressScreen(
                 topContent()
                 formContent()
                 bottomContent()
+                saveError?.let {
+                    ErrorMessage(
+                        error = it.resolve(),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
                 PrimaryButton(
                     isEnabled = primaryButtonEnabled,
                     label = primaryButtonText,
@@ -117,6 +126,7 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
@@ -180,6 +190,7 @@ internal fun InputAddressScreen(
                     }
                 )
             }
-        }
+        },
+        saveError = saveError,
     )
 }
