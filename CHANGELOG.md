@@ -9,6 +9,7 @@ NEXT_VERSION_BUMP: PATCH
 * [Added] TrueMoney support in PaymentSheet.
 * [Added] Naira Wallet support in PaymentSheet.
 * [Added] Naira USSD support in PaymentSheet.
+* [Added] Mondu support in PaymentSheet.
 * [Added] GoPay support in PaymentSheet.
 * [Added] MoMo support in PaymentSheet.
 * [Added] GCash support in PaymentSheet.
