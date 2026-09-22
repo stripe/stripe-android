@@ -353,6 +353,7 @@ internal interface CheckoutControllerModule {
             return operationCoordinator.isUpdating
         }
 
+        @Provides
         @EmbeddedHostProcessing
         fun provideHostProcessing(
             operationCoordinator: CheckoutOperationCoordinator,
