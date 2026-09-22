@@ -513,7 +513,7 @@ internal class PaymentSheetDeferredTest(
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         page.waitForText("We don't accept visa")
         testContext.markTestSucceeded()
@@ -772,6 +772,7 @@ internal class PaymentSheetDeferredTest(
         testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
         apiConfigurationTestType = apiConfigurationTestType,
+        composeTestRule = testRules.compose,
         networkRule = networkRule,
         testType = testType,
         createIntentCallback = { _, _ ->

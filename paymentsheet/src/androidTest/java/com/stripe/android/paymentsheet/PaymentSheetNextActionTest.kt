@@ -134,7 +134,7 @@ internal class PaymentSheetNextActionTest(
             }
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         waitForBrowserAuthToLaunch()
 

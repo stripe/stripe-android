@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.compose.setContent
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -108,6 +108,7 @@ internal fun runPaymentSheetTest(
 
 internal fun runMultiplePaymentSheetInstancesTest(
     networkRule: NetworkRule,
+    composeTestRule: ComposeTestRule,
     apiConfigurationTestType: ApiConfigurationTestType,
     testType: MultipleInstancesTestType,
     createIntentCallback: CreateIntentCallback,
@@ -187,9 +188,11 @@ internal fun runMultiplePaymentSheetInstancesTest(
         )
         block(testContext)
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        composeTestRule.waitUntil(TimeUnit.SECONDS.toMillis(successTimeoutSeconds)) {
+            countDownLatch.count == 0L
+        }
         networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
+        assertThat(countDownLatch.count).isEqualTo(0L)
 
         if (testType == MultipleInstancesTestType.RunWithFirst) {
             assertThat(firstCreateIntentCallbackCalled).isTrue()

@@ -29,7 +29,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetBillingConfigurationTest(
@@ -108,7 +107,9 @@ internal class PaymentSheetBillingConfigurationTest(
 
         page.clickPrimaryButton()
 
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        composeTestRule.waitUntil(5_000) {
+            countDownLatch.count == 0L
+        }
     }
 
     @Test
@@ -176,7 +177,9 @@ internal class PaymentSheetBillingConfigurationTest(
 
         page.clickPrimaryButton()
 
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        composeTestRule.waitUntil(5_000) {
+            countDownLatch.count == 0L
+        }
     }
 
     @Test

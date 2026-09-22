@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -22,7 +23,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -76,7 +76,6 @@ import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLaunc
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
-import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -90,7 +89,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
@@ -227,8 +226,8 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    private val PaymentSheetActivity.buyButton: PrimaryButton
-        get() = findViewById(R.id.primary_button)
+    private val buyButton
+        get() = composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
 
     @Test
     fun `disables primary button when editing`() {
@@ -238,13 +237,13 @@ internal class PaymentSheetActivityTest {
 
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            buyButton.assertIsEnabled()
 
             startEditing()
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertIsNotEnabled()
         }
     }
 
@@ -271,12 +270,12 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(isLinkAvailable = true)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
-            activity.buyButton.callOnClick()
+            buyButton.performClick()
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
@@ -289,7 +288,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
 
             composeTestRule
@@ -302,7 +301,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertExists()
 
-            activity.buyButton.callOnClick()
+            buyButton.performClick()
 
             composeTestRule
                 .onNodeWithText(error)
@@ -518,7 +517,7 @@ internal class PaymentSheetActivityTest {
             composeTestRule.onNodeWithTag(
                 TEST_TAG_LIST + "card",
             ).onChildren().assertAny(isSelected())
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertIsNotEnabled()
         }
     }
 
@@ -529,18 +528,18 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
         val googlePayListener = viewModel.captureGooglePayListener()
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             // Initially empty card
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertExists().assertIsNotEnabled()
 
             // Update to Google Pay
             viewModel.checkoutWithGooglePay()
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertDoesNotExist()
             assertThat(viewModel.contentVisible.value).isFalse()
 
             googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            testDispatcher.scheduler.advanceUntilIdle()
+            composeTestRule.waitForIdle()
             assertThat(viewModel.contentVisible.value).isTrue()
 
             // Update to saved card
@@ -548,14 +547,12 @@ internal class PaymentSheetActivityTest {
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
             Espresso.onIdle()
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            buyButton.assertExists().assertIsEnabled()
 
             // Back to empty/invalid card
             viewModel.updateSelection(null)
             Espresso.onIdle()
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertExists().assertIsNotEnabled()
 
             // New valid card
             viewModel.updateSelection(
@@ -566,8 +563,7 @@ internal class PaymentSheetActivityTest {
                 )
             )
             Espresso.onIdle()
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            buyButton.assertExists().assertIsEnabled()
         }
     }
 
@@ -637,19 +633,17 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled)
-                .isTrue()
+            buyButton.assertIsEnabled()
 
-            activity.buyButton.performClick()
+            buyButton.performClick()
 
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled)
-                .isFalse()
+            buyButton.assertIsNotEnabled()
         }
     }
 
@@ -661,10 +655,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
-            val buyBinding = StripeAndroidPrimaryButtonBinding.bind(activity.buyButton)
-
-            assertThat(buyBinding.confirmedIcon.isVisible)
-                .isFalse()
+            buyButton.assertExists()
 
             activity.finish()
         }
@@ -680,8 +671,9 @@ internal class PaymentSheetActivityTest {
             viewModel.viewState.value = PaymentSheetViewState.StartProcessing
 
             composeTestRule.waitForIdle()
-            assertThat(activity.buyButton.externalLabel?.resolve(context))
-                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
+            buyButton.assert(
+                hasText(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
+            )
         }
     }
 
@@ -1119,8 +1111,8 @@ internal class PaymentSheetActivityTest {
             paymentMethods = emptyList(),
         )
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
+        scenario.launch(intent).onActivity {
+            buyButton.assert(hasText("Pay CA\$99.99"))
         }
     }
 
@@ -1137,10 +1129,10 @@ internal class PaymentSheetActivityTest {
 
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             testDispatcher.scheduler.advanceTimeBy(250)
             composeTestRule.waitForIdle()
-            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
+            buyButton.assert(hasText("Pay CA\$99.99"))
         }
     }
 

@@ -2,11 +2,10 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -15,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
@@ -42,9 +40,8 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -101,8 +98,8 @@ internal class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
 
-    private val PaymentOptionsActivity.continueButton: PrimaryButton
-        get() = findViewById(R.id.primary_button)
+    private val continueButton
+        get() = composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
 
     @BeforeTest
     fun setup() {
@@ -181,8 +178,8 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isFalse()
+            it.onActivity {
+                continueButton.assertDoesNotExist()
             }
         }
     }
@@ -194,8 +191,8 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isTrue()
+            it.onActivity {
+                continueButton.performScrollTo().assertIsDisplayed()
             }
         }
     }
@@ -214,8 +211,8 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isFalse()
+            it.onActivity {
+                continueButton.assertDoesNotExist()
 
                 // Navigate to "Add Payment Method" fragment
                 composeTestRule
@@ -223,12 +220,12 @@ internal class PaymentOptionsActivityTest {
                     .performClick()
 
                 Espresso.onIdle()
-                assertThat(activity.continueButton.isVisible).isTrue()
+                continueButton.performScrollTo().assertIsDisplayed()
 
                 // Navigate back to payment options list
                 pressBack()
 
-                assertThat(activity.continueButton.isVisible).isFalse()
+                continueButton.assertDoesNotExist()
             }
         }
     }
@@ -237,13 +234,7 @@ internal class PaymentOptionsActivityTest {
     fun `Verify Ready state updates the add button label`() {
         runActivityScenario {
             it.onActivity { activity ->
-                val addBinding = StripeAndroidPrimaryButtonBinding.bind(activity.continueButton)
-
-                assertThat(addBinding.confirmedIcon.isVisible)
-                    .isFalse()
-
-                assertThat(activity.continueButton.externalLabel?.resolve(context))
-                    .isEqualTo("Continue")
+                continueButton.assert(hasText("Continue"))
 
                 activity.finish()
             }
@@ -342,11 +333,8 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isTrue()
-                assertThat(activity.continueButton.defaultTintList).isEqualTo(
-                    ColorStateList.valueOf(Color.Magenta.toArgb())
-                )
+            it.onActivity {
+                continueButton.performScrollTo().assertIsDisplayed()
             }
         }
     }

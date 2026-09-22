@@ -188,7 +188,7 @@ internal class PaymentSheetTest(
 
         formPage.fillOutName()
         formPage.fillOutEmail()
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         networkRule.enqueue(
             method("POST"),
@@ -229,7 +229,7 @@ internal class PaymentSheetTest(
             response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
         page.waitForText("An error occurred. Check your connection and try again.")
         page.assertNoText("IOException", substring = true)
         testContext.markTestSucceeded()
@@ -263,7 +263,7 @@ internal class PaymentSheetTest(
             response.testBodyFromFile("payment-intent-confirm-insufficient-funds.json")
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
         page.waitForText("Your card has insufficient funds.")
         page.assertNoText("StripeException", substring = true)
         testContext.markTestSucceeded()
@@ -658,7 +658,7 @@ internal class PaymentSheetTest(
             response.setResponseCode(500)
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
         page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
