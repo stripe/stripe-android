@@ -48,7 +48,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateLinkAccountLookupAnalyticsRequest()
         }
 
-        validateAnalyticsRequest(eventName = "mc_ece_init")
+        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -67,10 +67,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            validateAnalyticsRequest(
-                eventName = "mc_ece_wallet_tapped",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-            )
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",
                 analyticsPayloadField("selected_lpm", "google_pay"),
@@ -96,7 +92,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateLinkAccountLookupAnalyticsRequest()
         }
 
-        validateAnalyticsRequest(eventName = "mc_ece_init")
+        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -109,11 +105,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             validateAnalyticsRequest(eventName = "link.popup.show")
-            validateAnalyticsRequest(
-                eventName = "mc_ece_wallet_tapped",
-                analyticsPayloadField("selected_lpm", "link"),
-                analyticsPayloadField("link_context", "wallet"),
-            )
             validateAnalyticsRequest(eventName = "link.popup.success")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",

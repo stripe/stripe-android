@@ -224,7 +224,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `handleViewAction OnWalletTapped reports wallet tapped event and starts confirmation`() = runScenario(
+    fun `handleViewAction OnWalletTapped starts confirmation`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
         ),
@@ -239,13 +239,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
         val confirmedButton = confirmationPerformer.calls.awaitItem()
         assertThat(confirmedButton).isEqualTo(expressButton)
-
-        assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(
-                FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped(
-                    expressButton = expressButton,
-                ),
-            )
     }
 
     private fun runScenario(
