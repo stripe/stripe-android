@@ -295,7 +295,7 @@ internal class PollingActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -304,7 +304,7 @@ internal class PollingActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }

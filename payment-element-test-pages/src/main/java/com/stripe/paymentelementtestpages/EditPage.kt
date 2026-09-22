@@ -79,7 +79,7 @@ class EditPage(
                             )
                         )
                     )
-                    .fetchSemanticsNodes()
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isEmpty()
             }
         }
@@ -95,7 +95,7 @@ class EditPage(
         composeTestRule.waitUntil(timeoutMillis = 5_000L) {
             composeTestRule
                 .onAllNodes(hasTestTag(REMOVE_BUTTON_LOADING))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }

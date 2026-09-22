@@ -138,13 +138,13 @@ internal class FormValidationTest(
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
         composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
@@ -158,7 +158,7 @@ internal class FormValidationTest(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasText("This field cannot be blank."))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

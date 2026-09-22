@@ -1009,7 +1009,7 @@ internal class FlowControllerTest(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
@@ -1017,7 +1017,7 @@ internal class FlowControllerTest(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_pm_67890").performClick()
@@ -1080,7 +1080,7 @@ internal class FlowControllerTest(
         val actualTags = composeTestRule
             .onNodeWithTag(TEST_TAG_LIST, true)
             .onChildren()
-            .fetchSemanticsNodes()
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
             .map { it.config[SemanticsProperties.TestTag] }
 
         assertThat(actualTags).isEqualTo(

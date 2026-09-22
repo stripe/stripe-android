@@ -125,7 +125,7 @@ class LinkFormElementTest {
     private fun ComposeTestRule.waitForRemainingLinkFields() {
         waitUntil(timeoutMillis = 5000L) {
             onAllNodesWithTag(testTag = LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

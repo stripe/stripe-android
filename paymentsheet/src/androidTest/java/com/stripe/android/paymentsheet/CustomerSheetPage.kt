@@ -37,7 +37,7 @@ internal class CustomerSheetPage(
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasText(text, substring).and(isPlaced()))
-                .fetchSemanticsNodes().isEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
         }
     }
 

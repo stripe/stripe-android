@@ -56,7 +56,7 @@ class AutocompleteScreenTest {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithText("primaryText")
-                .fetchSemanticsNodes().size == 1
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).size == 1
         }
     }
 
