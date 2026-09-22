@@ -43,17 +43,9 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
             isEnabled = false,
         )
 
-        composeRule.onNodeWithTag(
-            scenario.rowTestTag,
-            useUnmergedTree = true,
-        )
+        composeRule.onNodeWithTag(scenario.rowTestTag, useUnmergedTree = true)
             .assertIsNotEnabled()
-            .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)))
-            .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)).not())
-        composeRule.onAllNodesWithTag(
-            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
-            useUnmergedTree = true,
-        ).assertCountEquals(1)
+        assertRowIconState(scenario.rowTestTag, isSelectionPending = true)
         composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE, useUnmergedTree = true).assertExists()
     }
 
@@ -66,12 +58,7 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
 
         composeRule.onNodeWithTag(scenario.rowTestTag, useUnmergedTree = true)
             .assertIsEnabled()
-            .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
-            .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
-        composeRule.onAllNodesWithTag(
-            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
-            useUnmergedTree = true,
-        ).assertCountEquals(0)
+        assertRowIconState(scenario.rowTestTag, isSelectionPending = false)
     }
 
     @Test
@@ -83,12 +70,7 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
 
         composeRule.onNodeWithTag(scenario.rowTestTag, useUnmergedTree = true)
             .assertIsNotEnabled()
-            .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
-            .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
-        composeRule.onAllNodesWithTag(
-            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
-            useUnmergedTree = true,
-        ).assertCountEquals(0)
+        assertRowIconState(scenario.rowTestTag, isSelectionPending = false)
     }
 
     private fun runScenario(
@@ -118,6 +100,30 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
         return Scenario(
             rowTestTag = "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${paymentMethod.paymentMethod.id}",
         )
+    }
+
+    private fun assertRowIconState(
+        rowTestTag: String,
+        isSelectionPending: Boolean,
+    ) {
+        val displayedIconTag = if (isSelectionPending) {
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
+        } else {
+            TEST_TAG_ICON_FROM_RES
+        }
+        val hiddenIconTag = if (isSelectionPending) {
+            TEST_TAG_ICON_FROM_RES
+        } else {
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
+        }
+
+        composeRule.onNodeWithTag(rowTestTag, useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasTestTag(displayedIconTag)))
+            .assert(hasAnyDescendant(hasTestTag(hiddenIconTag)).not())
+        composeRule.onAllNodesWithTag(
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(if (isSelectionPending) 1 else 0)
     }
 
     private data class Scenario(
