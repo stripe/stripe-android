@@ -346,6 +346,7 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
+        @CheckoutIsUpdating
         fun provideIsUpdating(
             operationCoordinator: CheckoutOperationCoordinator,
         ): StateFlow<Boolean> {
@@ -355,9 +356,9 @@ internal interface CheckoutControllerModule {
         @Provides
         @EmbeddedHostProcessing
         fun provideHostProcessing(
-            operationCoordinator: CheckoutOperationCoordinator,
+            @CheckoutIsUpdating isUpdating: StateFlow<Boolean>,
         ): StateFlow<Boolean> {
-            return operationCoordinator.isUpdating
+            return isUpdating
         }
     }
 }

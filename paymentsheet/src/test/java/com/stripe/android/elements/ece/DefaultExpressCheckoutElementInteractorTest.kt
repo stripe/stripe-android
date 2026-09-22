@@ -115,13 +115,16 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state is disabled while an operation is updating`() = runScenario {
-        assertThat(interactor.state.value.enabled).isTrue()
-
-        isUpdating.value = true
+    fun `state is disabled when updating`() = runScenario(
+        isUpdating = MutableStateFlow(true),
+    ) {
         assertThat(interactor.state.value.enabled).isFalse()
+    }
 
-        isUpdating.value = false
+    @Test
+    fun `state is enabled when not updating`() = runScenario(
+        isUpdating = MutableStateFlow(false),
+    ) {
         assertThat(interactor.state.value.enabled).isTrue()
     }
 
@@ -148,33 +151,21 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
 
         interactor.state.test {
-            assertThat(awaitItem()).isEqualTo(
-                ExpressCheckoutElementInteractor.State(
-                    expressButtons = listOf(
-                        ExpressButton.Link.create(
-                            paymentMethodMetadata = paymentMethodMetadata,
-                            linkAccountInfo = LinkAccountUpdate.Value(null),
-                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-                        ),
-                    ),
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
-                    enabled = true,
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
             linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
 
-            assertThat(awaitItem()).isEqualTo(
-                ExpressCheckoutElementInteractor.State(
-                    expressButtons = listOf(
-                        ExpressButton.Link.create(
-                            paymentMethodMetadata = paymentMethodMetadata,
-                            linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
-                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-                        ),
-                    ),
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
-                    enabled = true,
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
@@ -302,7 +293,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             linkAccountHolder = linkAccountHolder,
             paymentMethodMetadata = paymentMethodMetadata,
             googlePayConfiguration = googlePayConfiguration,
-            isUpdating = isUpdating,
             interactorFactory = interactorFactory,
         ).block()
 
@@ -347,7 +337,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val linkAccountHolder: LinkAccountHolder,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val googlePayConfiguration: CheckoutGooglePayConfiguration,
-        val isUpdating: MutableStateFlow<Boolean>,
         private val interactorFactory: () -> DefaultExpressCheckoutElementInteractor,
     ) {
         fun createInteractor(): DefaultExpressCheckoutElementInteractor {

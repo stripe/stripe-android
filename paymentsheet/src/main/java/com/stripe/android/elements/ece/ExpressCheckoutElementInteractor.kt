@@ -4,6 +4,7 @@ package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.injection.CheckoutIsUpdating
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -38,7 +39,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val expressCheckoutElementConfirmationPerformer: ExpressCheckoutElementConfirmationPerformer,
-    isUpdating: StateFlow<Boolean>,
+    @CheckoutIsUpdating isUpdating: StateFlow<Boolean>,
 ) : ExpressCheckoutElementInteractor {
 
     private var hasReportedDisplayed: Boolean
