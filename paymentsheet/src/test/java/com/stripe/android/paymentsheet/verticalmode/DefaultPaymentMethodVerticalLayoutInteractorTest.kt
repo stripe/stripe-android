@@ -66,16 +66,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         .around(closeInteractorRule)
 
     @Test
-    fun state_updatesWhenProcessingUpdates() = runScenario {
+    fun state_updatesWhenProcessingUpdates() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
         interactor.state.test {
             awaitItem().run {
                 assertThat(isProcessing).isFalse()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             }
             processingSource.value = true
             awaitItem().run {
                 assertThat(isProcessing).isTrue()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             }
         }
     }
@@ -87,7 +89,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(isProcessing).isFalse()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
                 }
 
                 savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
@@ -112,14 +114,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
                 awaitItem().run {
                     assertThat(isProcessing).isTrue()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
                 }
 
                 processingSource.value = false
 
                 awaitItem().run {
                     assertThat(isProcessing).isFalse()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
                 }
             }
         }
@@ -130,7 +132,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         interactor.state.test {
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
                 pendingSelection = PaymentSelection.Saved(
@@ -139,7 +141,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
 
             expectNoEvents()
-            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
 
