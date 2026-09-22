@@ -1,36 +1,21 @@
 package com.stripe.android.checkout
 
-import android.app.Activity
-import android.app.Instrumentation
-import android.content.Intent
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.Intents.intending
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
@@ -58,40 +43,20 @@ internal class ExpressCheckoutElementAnalyticsTest {
     fun testSuccessfulGooglePayPayment() {
         validateInitialAnalyticsRequests()
 
-        // This is called twice during load
+        // This is called twice during load - once for PE, once for ECE
         repeat(2) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueLinkAccountLookup()
         }
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
-            },
-            assertions = { controller ->
-                assertThat(
-                    controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains(
-                    ExpressCheckoutElement.PaymentMethod.GooglePay()
-                )
+            resultCallback = {
+                // We expect the result callback to be called but test the result in other tests.
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
 
-            intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWith(
-                Instrumentation.ActivityResult(
-                    Activity.RESULT_OK,
-                    Intent().putExtra(
-                        "extra_result",
-                        GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod),
-                    ),
-                )
-            )
+            enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
 
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
@@ -117,57 +82,28 @@ internal class ExpressCheckoutElementAnalyticsTest {
             page.clickGooglePayButton()
         }
 
-        intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
+        assertGooglePayCalled()
     }
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
         validateInitialAnalyticsRequests()
 
-        // This is called twice during load
+        // This is called twice during load - once for PE, once for ECE
         repeat(2) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueLinkAccountLookup()
         }
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
-            },
-            assertions = { controller ->
-                assertThat(
-                    controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains(
-                    ExpressCheckoutElement.PaymentMethod.Link()
-                )
+            resultCallback = {
+                // We expect the result callback to be called but test the result in other tests.
             },
         ) {
-            intending(hasComponent(LinkActivity::class.java.name)).respondWith(
-                Instrumentation.ActivityResult(
-                    LinkActivity.RESULT_COMPLETE,
-                    Intent().putExtra(
-                        LinkActivityContract.EXTRA_RESULT,
-                        LinkActivityResult.Completed(LinkAccountUpdate.None),
-                    ),
-                )
-            )
+            enqueueSuccessfulNativeLinkPayment()
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
+            repeat(2) {
+                networkRule.enqueueLinkAccountLookup()
             }
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
             validateAnalyticsRequest(eventName = "link.popup.show")
@@ -191,7 +127,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             page.clickLinkButton()
         }
 
-        intended(hasComponent(LinkActivity::class.java.name))
+        assertNativeLinkCalled()
     }
 
     private fun validateInitialAnalyticsRequests() {
@@ -216,10 +152,5 @@ internal class ExpressCheckoutElementAnalyticsTest {
             productUsage = setOf("Checkout"),
             *requestMatchers,
         )
-    }
-
-    private companion object {
-        const val GOOGLE_PAY_ACTIVITY_NAME =
-            "com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
     }
 }

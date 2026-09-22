@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
 import androidx.test.espresso.intent.Intents.intended
@@ -12,7 +11,6 @@ import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
@@ -45,7 +43,7 @@ internal class ExpressCheckoutElementTest {
     fun testSuccessfulGooglePayPayment() {
         // This is called twice during load - once for ECE, once for PE
         repeat(2) {
-            enqueueLinkAccountLookup()
+            networkRule.enqueueLinkAccountLookup()
         }
 
         runExpressCheckoutElementTest(
@@ -63,14 +61,8 @@ internal class ExpressCheckoutElementTest {
         ) {
             val paymentMethod = PaymentMethodFactory.card()
 
-            intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWith(
-                Instrumentation.ActivityResult(
-                    Activity.RESULT_OK,
-                    Intent().putExtra(
-                        "extra_result",
-                        GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod),
-                    ),
-                )
+            enqueueSuccessfulGooglePayPayment(
+                paymentMethod = paymentMethod,
             )
 
             networkRule.checkoutConfirm(
@@ -83,14 +75,14 @@ internal class ExpressCheckoutElementTest {
             page.clickGooglePayButton()
         }
 
-        intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
+        assertGooglePayCalled()
     }
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
         // This is called twice during load - once for ECE, once for PE
         repeat (2) {
-            enqueueLinkAccountLookup()
+            networkRule.enqueueLinkAccountLookup()
         }
 
         runExpressCheckoutElementTest(
@@ -106,40 +98,23 @@ internal class ExpressCheckoutElementTest {
                 )
             },
         ) {
-            intending(hasComponent(LinkActivity::class.java.name)).respondWith(
-                Instrumentation.ActivityResult(
-                    LinkActivity.RESULT_COMPLETE,
-                    Intent().putExtra(
-                        LinkActivityContract.EXTRA_RESULT,
-                        LinkActivityResult.Completed(LinkAccountUpdate.None),
-                    ),
-                )
-            )
+            enqueueSuccessfulNativeLinkPayment()
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
+            repeat(2) {
+                networkRule.enqueueLinkAccountLookup()
             }
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickLinkButton()
         }
 
-        intended(hasComponent(LinkActivity::class.java.name))
+        assertNativeLinkCalled()
     }
 
     @Test
     fun testGooglePayOnlyLoad() {
         // This is called for PE, but we skip this account lookup for ECE since its Link config sets display to never.
-        enqueueLinkAccountLookup()
+        networkRule.enqueueLinkAccountLookup()
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -160,19 +135,5 @@ internal class ExpressCheckoutElementTest {
             // Just testing load, no need to confirm.
             testContext.markTestSucceeded()
         }
-    }
-
-    private fun enqueueLinkAccountLookup() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
-    }
-
-    private companion object {
-        const val GOOGLE_PAY_ACTIVITY_NAME =
-            "com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
     }
 }
