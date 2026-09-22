@@ -5,7 +5,6 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
@@ -20,6 +19,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -440,13 +440,10 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     }
 
     @Test
-    fun `When the payment configuration is test, isLiveMode should be false`() = runTest(testDispatcher) {
+    fun `When the API configuration is test, isLiveMode should be false`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            paymentConfiguration = PaymentConfiguration(
-                publishableKey = "pk_test_123",
-                stripeAccountId = "acct_123",
-            )
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         viewModel.viewState.test {
