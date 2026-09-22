@@ -277,8 +277,6 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             linkBrand = linkBrand,
             isEnabled = isEnabled,
             isSelected = selection?.isSaved == true,
-            isLoading = displayedSavedPaymentMethod.isSelectionPending,
-            loadingIndicatorTestTag = EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             trailingContent = {
                 SavedPaymentMethodTrailingContent(
                     viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
@@ -297,8 +295,6 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
         if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
-
-internal const val EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG = "embedded_saved_payment_method_pending"
 
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(

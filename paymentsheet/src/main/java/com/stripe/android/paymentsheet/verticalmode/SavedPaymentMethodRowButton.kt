@@ -33,14 +33,14 @@ import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
+internal const val SAVED_PAYMENT_METHOD_PENDING_TEST_TAG = "embedded_saved_payment_method_pending"
+
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     isSelected: Boolean,
-    isLoading: Boolean = false,
-    loadingIndicatorTestTag: String? = null,
     modifier: Modifier = Modifier,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
     onClick: () -> Unit = {},
@@ -63,8 +63,6 @@ internal fun SavedPaymentMethodRowButton(
         iconContent = {
             SavedPaymentMethodIcon(
                 displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-                isLoading = isLoading,
-                loadingIndicatorTestTag = loadingIndicatorTestTag,
             )
         },
         title = paymentMethodTitle.resolve(),
@@ -86,8 +84,6 @@ internal fun SavedPaymentMethodRowButton(
 @Composable
 private fun SavedPaymentMethodIcon(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-    isLoading: Boolean,
-    loadingIndicatorTestTag: String?,
 ) {
     Box(
         modifier = Modifier
@@ -95,17 +91,11 @@ private fun SavedPaymentMethodIcon(
             .height(iconHeight),
         contentAlignment = Alignment.Center,
     ) {
-        if (isLoading) {
+        if (displayableSavedPaymentMethod.isSelectionPending) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(iconHeight)
-                    .then(
-                        if (loadingIndicatorTestTag != null) {
-                            Modifier.testTag(loadingIndicatorTestTag)
-                        } else {
-                            Modifier
-                        }
-                    ),
+                    .testTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG),
             )
         } else {
             val paymentMethod = displayableSavedPaymentMethod.paymentMethod

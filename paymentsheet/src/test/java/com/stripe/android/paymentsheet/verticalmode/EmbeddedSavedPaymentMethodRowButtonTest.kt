@@ -48,10 +48,10 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
             useUnmergedTree = true,
         )
             .assertIsNotEnabled()
-            .assert(hasAnyDescendant(hasTestTag(EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)))
+            .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)))
             .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)).not())
         composeRule.onAllNodesWithTag(
-            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             useUnmergedTree = true,
         ).assertCountEquals(1)
         composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE, useUnmergedTree = true).assertExists()
@@ -67,9 +67,9 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
         composeRule.onNodeWithTag(scenario.rowTestTag, useUnmergedTree = true)
             .assertIsEnabled()
             .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
-            .assert(hasAnyDescendant(hasTestTag(EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
+            .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
         composeRule.onAllNodesWithTag(
-            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             useUnmergedTree = true,
         ).assertCountEquals(0)
     }
@@ -84,9 +84,9 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
         composeRule.onNodeWithTag(scenario.rowTestTag, useUnmergedTree = true)
             .assertIsNotEnabled()
             .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
-            .assert(hasAnyDescendant(hasTestTag(EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
+            .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
         composeRule.onAllNodesWithTag(
-            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             useUnmergedTree = true,
         ).assertCountEquals(0)
     }
