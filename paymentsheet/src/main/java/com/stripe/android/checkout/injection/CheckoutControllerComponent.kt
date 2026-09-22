@@ -224,7 +224,6 @@ internal interface CheckoutControllerModule {
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
-    @Singleton
     fun bindsVerticalPaymentSelectionHandler(
         handler: CheckoutPaymentSelectionHandler,
     ): VerticalPaymentSelectionHandler

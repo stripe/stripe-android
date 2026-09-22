@@ -95,6 +95,10 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     }
 }
 
+internal data class SavedPaymentMethodSelectionState(
+    val pendingSelection: PaymentSelection.Saved?,
+)
+
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
