@@ -42,12 +42,10 @@ internal class CheckoutPaymentElementTestRunnerContext(
     fun recreateHost() {
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.recreate()
-        scenario.onActivity { activity ->
-            presenter = controller.createPresenter(activity)
-            if (renderPaymentElementContent) {
-                activity.setCheckoutContent(presenter)
-            }
-        }
+        presenter = scenario.createCheckoutPresenter(
+            controller = controller,
+            renderPaymentElementContent = renderPaymentElementContent,
+        )
         scenario.moveToState(Lifecycle.State.RESUMED)
     }
 
@@ -102,12 +100,10 @@ internal fun runCheckoutPaymentElementTest(
         }
 
         lateinit var presenter: CheckoutPresenter
-        scenario.onActivity { activity ->
-            presenter = controller.createPresenter(activity)
-            if (renderPaymentElementContent) {
-                activity.setCheckoutContent(presenter)
-            }
-        }
+        presenter = scenario.createCheckoutPresenter(
+            controller = controller,
+            renderPaymentElementContent = renderPaymentElementContent,
+        )
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -130,11 +126,21 @@ internal fun runCheckoutPaymentElementTest(
     }
 }
 
-private fun MainActivity.setCheckoutContent(presenter: CheckoutPresenter) {
-    val paymentElement = presenter.paymentElement()
-    setContent {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            paymentElement.Content()
+private fun ActivityScenario<MainActivity>.createCheckoutPresenter(
+    controller: CheckoutController,
+    renderPaymentElementContent: Boolean,
+): CheckoutPresenter {
+    lateinit var presenter: CheckoutPresenter
+    onActivity { activity ->
+        presenter = controller.createPresenter(activity)
+        if (renderPaymentElementContent) {
+            val paymentElement = presenter.paymentElement()
+            activity.setContent {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    paymentElement.Content()
+                }
+            }
         }
     }
+    return presenter
 }
