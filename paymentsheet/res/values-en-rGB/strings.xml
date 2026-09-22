@@ -115,7 +115,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
   <string name="stripe_nfc_scan_error_mobile_wallet">Use a physical card.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
-  <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind your phone</string>
   <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
   <string name="stripe_nfc_scan_internal_error_message">Couldn\'t read card. Try another.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
