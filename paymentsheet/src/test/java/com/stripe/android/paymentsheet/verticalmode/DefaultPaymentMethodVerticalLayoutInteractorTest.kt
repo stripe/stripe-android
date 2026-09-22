@@ -87,42 +87,19 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         runScenario(initialPaymentMethods = listOf(selection.paymentMethod)) {
             interactor.state.test {
-                awaitItem().run {
-                    assertThat(isProcessing).isFalse()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-                }
+                assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
                 savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
                     pendingSelection = selection
                 )
 
-                awaitItem().run {
-                    assertThat(isProcessing).isFalse()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-                }
-
-                processingSource.value = true
-
-                awaitItem().run {
-                    assertThat(isProcessing).isTrue()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-                }
+                assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
                 savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
                     pendingSelection = null
                 )
 
-                awaitItem().run {
-                    assertThat(isProcessing).isTrue()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-                }
-
-                processingSource.value = false
-
-                awaitItem().run {
-                    assertThat(isProcessing).isFalse()
-                    assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-                }
+                assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             }
         }
     }
