@@ -32,10 +32,10 @@ class VerticalModePage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(conditionDescription = "the payment-method selection screen to be visible") {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
