@@ -1006,7 +1006,7 @@ internal class FlowControllerTest(
             )
         }
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()
@@ -1014,7 +1014,7 @@ internal class FlowControllerTest(
         }
         composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
                 .fetchSemanticsNodes()

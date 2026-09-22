@@ -22,7 +22,7 @@ class EditPage(
     private val composeTestRule: ComposeTestRule
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

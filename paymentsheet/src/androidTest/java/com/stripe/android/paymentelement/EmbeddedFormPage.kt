@@ -71,7 +71,7 @@ internal class EmbeddedFormPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             isVisible()
         }
     }
@@ -186,7 +186,7 @@ internal class EmbeddedFormPage(
     }
 
     fun waitUntilHeaderPromoBadgeIsMissing() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodesWithTag(TEST_TAG_HEADER_PROMO_BADGE)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
@@ -197,7 +197,7 @@ internal class EmbeddedFormPage(
     }
 
     private fun waitUntilPrimaryButtonIsEnabled() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()

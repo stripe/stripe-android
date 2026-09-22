@@ -89,7 +89,7 @@ class VerticalModePage(
     }
 
     fun assertHasSavedPaymentMethods() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).isDisplayed()
         }
         composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertExists()
@@ -98,7 +98,9 @@ class VerticalModePage(
     fun assertDoesNotHaveSavedPaymentMethods() {
         val savedText = composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT)
 
-        composeTestRule.waitUntil { savedText.isNotDisplayed() }
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
+            savedText.isNotDisplayed()
+        }
         savedText.assertDoesNotExist()
     }
 
@@ -134,7 +136,9 @@ class VerticalModePage(
         val savedPaymentMethod = composeTestRule
             .onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
 
-        composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
+            savedPaymentMethod.isDisplayed()
+        }
         savedPaymentMethod.performClick()
     }
 

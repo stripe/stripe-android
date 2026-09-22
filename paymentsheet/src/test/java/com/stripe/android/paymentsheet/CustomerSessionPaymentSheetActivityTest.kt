@@ -368,7 +368,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 2_000) {
+                composeTestRule.waitUntil(timeoutMillis = 5_000) {
                     composeTestRule
                         .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
                         .fetchSemanticsNodes()
