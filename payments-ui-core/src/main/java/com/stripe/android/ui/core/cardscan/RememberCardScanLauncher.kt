@@ -14,6 +14,7 @@ internal fun rememberCardScanLauncher(
     isStripeCardScanAllowed: Boolean = false,
     enableMlKitCardScan: Boolean = false,
     disableSsdOcrCardScan: Boolean = false,
+    publishableKey: String,
     onResult: (CardScanResult) -> Unit,
     isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
 ): CardScanLauncher? {
@@ -27,6 +28,7 @@ internal fun rememberCardScanLauncher(
     return if (isStripeCardScanAllowed && isStripeCardScanAvailable() && hasActiveStripeScanner) {
         rememberCardScanStripeLauncher(
             eventsReporter = eventsReporter,
+            publishableKey = publishableKey,
             enableMlKitCardScan = enableMlKitCardScan,
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
