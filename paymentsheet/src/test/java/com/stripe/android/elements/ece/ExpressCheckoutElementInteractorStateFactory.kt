@@ -29,10 +29,12 @@ internal object ExpressCheckoutElementInteractorStateFactory {
             ),
         ),
         buttonLayout: Appearance.ButtonLayout.State = Appearance.ButtonLayout().build(),
+        enabled: Boolean = true,
     ): ExpressCheckoutElementInteractor.State {
         return ExpressCheckoutElementInteractor.State(
             expressButtons = expressButtons,
             buttonLayout = buttonLayout,
+            enabled = enabled,
         )
     }
 }
