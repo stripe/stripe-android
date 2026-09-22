@@ -211,6 +211,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "unexpected_error")
         UNEXPECTED_ERROR("unexpected_error"),
 
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown"),
+
         // CLIENT SIDE PANES
         @SerialName(value = "link_account_picker")
         LINK_ACCOUNT_PICKER("link_account_picker"),
@@ -237,7 +240,7 @@ internal data class FinancialConnectionsSessionManifest(
         EXIT("exit");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
+            EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNKNOWN)
     }
 
     @Serializable(with = Product.Serializer::class)
