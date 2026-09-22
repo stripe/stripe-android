@@ -1074,11 +1074,13 @@ private fun DocumentTypeSelector(
                             style = LinkTheme.typography.bodyEmphasized,
                             color = LinkTheme.colors.textPrimary,
                         )
-                        Text(
-                            text = subtype.description,
-                            style = LinkTheme.typography.detail,
-                            color = LinkTheme.colors.textTertiary,
-                        )
+                        subtype.description?.let { description ->
+                            Text(
+                                text = description,
+                                style = LinkTheme.typography.detail,
+                                color = LinkTheme.colors.textTertiary,
+                            )
+                        }
                     }
                 }
             }
@@ -1287,7 +1289,7 @@ internal data class AdditionalKycDocumentSlotState(
 internal data class AdditionalKycDocumentSubtypeState(
     val id: String,
     val label: String,
-    val description: String,
+    val description: String?,
     val isEnabled: Boolean,
 )
 

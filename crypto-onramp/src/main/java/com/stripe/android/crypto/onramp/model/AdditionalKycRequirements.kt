@@ -42,7 +42,7 @@ internal data class AdditionalKycDocumentRequirement(
 internal data class AdditionalKycDocumentSubtype(
     val id: String,
     val label: String,
-    val description: String,
+    val description: String?,
 ) : Parcelable
 
 @Parcelize

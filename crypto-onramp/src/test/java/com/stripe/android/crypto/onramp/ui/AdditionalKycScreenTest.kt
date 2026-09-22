@@ -89,6 +89,8 @@ internal class AdditionalKycScreenTest {
             .assertIsDisplayed()
         composeRule.onNodeWithTag(additionalKycSubtypePickerTag(0)).performClick()
         composeRule.onNodeWithText("Document type").assertIsDisplayed()
+        composeRule.onNodeWithTag(additionalKycSubtypeOptionTag(0, "salary")).assertIsDisplayed()
+        composeRule.onNodeWithText("Document description").assertDoesNotExist()
         composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
         composeRule.onNodeWithTag(additionalKycSubtypeOptionTag(0, "utility_bill")).performClick()
         composeRule.onNodeWithTag(additionalKycChooseFileTag(0))
@@ -398,7 +400,7 @@ internal class AdditionalKycScreenTest {
                     AdditionalKycDocumentSubtypeState(
                         id = "salary",
                         label = "Salary",
-                        description = "Document description",
+                        description = null,
                         isEnabled = true,
                     ),
                     AdditionalKycDocumentSubtypeState(

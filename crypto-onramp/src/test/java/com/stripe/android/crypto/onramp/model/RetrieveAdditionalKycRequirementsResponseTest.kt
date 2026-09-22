@@ -187,12 +187,39 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         assertThat(error.developerMessage).isEqualTo("Verification failed")
     }
 
-    private fun parseFixture(fileName: String): RetrieveAdditionalKycRequirementsResponse {
+    @Test
+    fun `missing subtype description is preserved as null`() {
+        val response = parseFixture("source_of_funds_required.json")
+        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val subtypes = requireNotNull(requirement.document).acceptedSubtypes
+
+        assertThat(subtypes.first().description).isEqualTo("Recent payslip")
+        assertThat(subtypes.last().id).isEqualTo("bank_statement")
+        assertThat(subtypes.last().label).isEqualTo("Bank statement")
+        assertThat(subtypes.last().description).isNull()
+    }
+
+    @Test
+    fun `explicit null subtype description is preserved as null`() {
+        val response = parseFixture("source_of_funds_required.json") { fixture ->
+            fixture.replace("\"description\": \"Recent payslip\"", "\"description\": null")
+        }
+        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val subtype = requireNotNull(requirement.document).acceptedSubtypes.first()
+
+        assertThat(subtype.id).isEqualTo("payslip")
+        assertThat(subtype.description).isNull()
+    }
+
+    private fun parseFixture(
+        fileName: String,
+        transform: (String) -> String = { it },
+    ): RetrieveAdditionalKycRequirementsResponse {
         val fixture = requireNotNull(
             javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/$fileName")
         ).bufferedReader().use { it.readText() }
 
-        return decode(fixture)
+        return decode(transform(fixture))
     }
 
     private fun decode(value: String): RetrieveAdditionalKycRequirementsResponse {

@@ -90,7 +90,7 @@ internal data class AdditionalKycDocumentRequirementResponse(
 internal data class AdditionalKycDocumentSubtypeResponse(
     val id: String,
     val label: String,
-    val description: String,
+    val description: String? = null,
 )
 
 @Serializable

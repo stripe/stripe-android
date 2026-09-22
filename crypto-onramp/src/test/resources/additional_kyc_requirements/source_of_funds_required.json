@@ -13,8 +13,7 @@
           },
           {
             "id": "bank_statement",
-            "label": "Bank statement",
-            "description": "Recent bank statement"
+            "label": "Bank statement"
           }
         ],
         "accepted_formats": [
