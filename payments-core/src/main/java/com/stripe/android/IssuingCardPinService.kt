@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -369,7 +370,12 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 keyProvider,
                 StripeApiRepository(
                     context = context,
-                    publishableKeyProvider = { publishableKey },
+                    apiConfigurationProvider = {
+                        ApiConfiguration.State(
+                            publishableKey = publishableKey,
+                            stripeAccountId = stripeAccountId,
+                        )
+                    },
                     requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                     appInfo = appInfo,
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(

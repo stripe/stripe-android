@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.AddressFixtures
@@ -223,7 +224,12 @@ internal class StripeEndToEndTest {
     ): Stripe {
         val stripeRepository = StripeApiRepository(
             context = context,
-            publishableKeyProvider = { publishableKey },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null,
+                )
+            },
             requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         )

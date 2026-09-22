@@ -38,8 +38,8 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        StripeRepositoryModule::class,
         ApiRequestOptionsModule::class,
+        StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         SepaMandateConfirmationModule::class,
         TapToAddConnectionStarterModule::class,

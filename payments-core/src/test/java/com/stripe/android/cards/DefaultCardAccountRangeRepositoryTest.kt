@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AccountRange
@@ -308,7 +309,12 @@ internal class DefaultCardAccountRangeRepositoryTest {
     ): CardAccountRangeSource {
         val stripeRepository = StripeApiRepository(
             context = application,
-            publishableKeyProvider = { publishableKey },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null,
+                )
+            },
             requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         )
         return RemoteCardAccountRangeSource(
