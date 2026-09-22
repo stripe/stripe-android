@@ -6,7 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakePaymentMethodVerticalLayoutInteractor(
@@ -50,8 +50,11 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     }
 
     override val isLiveMode: Boolean = true
-    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlowOf(initialState)
-    override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(initialShowsWalletsHeader)
+    val stateSource = MutableStateFlow(initialState)
+    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateSource
+    val selectionErrorSource = MutableStateFlow<Throwable?>(null)
+    override val selectionError: StateFlow<Throwable?> = selectionErrorSource
+    override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(initialShowsWalletsHeader)
 
     val closeCalls = Turbine<Unit>()
 

@@ -54,6 +54,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     val showsWalletsHeader: StateFlow<Boolean>
 
+    val selectionError: StateFlow<Throwable?>
+
     fun handleViewAction(viewAction: ViewAction)
 
     fun close()
@@ -324,6 +326,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val showsWalletsHeader: StateFlow<Boolean> = walletsState.mapAsStateFlow { walletsState ->
         walletsState != null && walletsState.walletsInHeader
+    }
+
+    override val selectionError: StateFlow<Throwable?> = savedPaymentMethodSelectionState.mapAsStateFlow {
+        (it as? SavedPaymentMethodSelectionState.Failed)?.error
     }
 
     init {

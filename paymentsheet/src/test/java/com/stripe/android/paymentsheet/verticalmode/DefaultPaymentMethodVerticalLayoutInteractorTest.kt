@@ -101,6 +101,27 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun selectionError_emitsSeparatelyFromMainState() = runScenario {
+        val expectedError = IllegalStateException("selection failed")
+
+        interactor.state.test {
+            val initialState = awaitItem()
+            assertThat(initialState.displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
+
+            interactor.selectionError.test {
+                assertThat(awaitItem()).isNull()
+
+                savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(expectedError)
+
+                assertThat(awaitItem()).isSameInstanceAs(expectedError)
+                assertThat(interactor.state.value).isEqualTo(initialState)
+            }
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun state_doesNotMarkMissingDisplayedSavedPaymentMethodPending() = runScenario {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
@@ -109,6 +130,43 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
+        }
+    }
+
+    @Test
+    fun state_projectsPendingSelectionWithoutAnError() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+    ) {
+        assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+        assertThat(interactor.selectionError.value).isNull()
+    }
+
+    @Test
+    fun state_projectsFailedSelectionWithoutPending() {
+        val expectedError = IllegalStateException("selection failed")
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
+        ) {
+            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(interactor.selectionError.value).isSameInstanceAs(expectedError)
+        }
+    }
+
+    @Test
+    fun enteringPaymentMethodForm_preservesSavedPaymentMethodSelectionError() {
+        val expectedError = IllegalStateException("selection failed")
+        runScenario(
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
+        ) {
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
+            assertThat(interactor.selectionError.value).isSameInstanceAs(expectedError)
         }
     }
 
@@ -2003,6 +2061,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             ),
         ),
         initialProcessing: Boolean = false,
+        initialSavedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         initialSelection: PaymentSelection? = null,
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
@@ -2025,7 +2085,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
         val savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
-            SavedPaymentMethodSelectionState.Idle
+            initialSavedPaymentMethodSelectionState
         )
         val temporarySelection: MutableStateFlow<PaymentMethodCode?> = MutableStateFlow(null)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)

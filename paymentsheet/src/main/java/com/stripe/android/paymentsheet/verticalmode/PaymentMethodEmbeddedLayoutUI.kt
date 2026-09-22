@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
@@ -35,6 +36,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -60,12 +62,14 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     }
 
     val state by interactor.state.collectAsState()
+    val selectionError by interactor.selectionError.collectAsState()
 
     PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
+        selectionError = selectionError,
         linkBrand = state.linkBrand,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
@@ -115,6 +119,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    selectionError: Throwable?,
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
@@ -168,6 +173,19 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
+
+        selectionError?.let { error ->
+            ErrorMessage(
+                error = error.stripeErrorMessage().resolve(),
+                modifier = Modifier
+                    .padding(
+                        start = appearance.style.getHorizontalInsets(),
+                        top = 8.dp,
+                        end = appearance.style.getHorizontalInsets(),
+                    )
+                    .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
+            )
+        }
     }
 }
 
@@ -295,6 +313,9 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
         if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
+
+internal const val EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG =
+    "embedded_saved_payment_method_selection_error"
 
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(

@@ -3,7 +3,9 @@ package com.stripe.android.checkout
 import android.app.Application
 import app.cash.turbine.Turbine
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -31,6 +33,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -168,16 +171,40 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
             immediateActionCalls.expectNoEvents()
+            assertSavedPaymentMethodSelectionErrorIsDisplayed()
 
-            enqueueSavedPaymentMethodTaxUpdate(
+            val releaseRetryResponse = CountDownLatch(1)
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseRetryResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session retry response."
+                }
                 automaticTaxResponse(
                     total = UPDATED_TOTAL,
                     taxStatus = TAX_STATUS_COMPLETE,
                     billingAddressCollection = "auto",
                     hasSavedPaymentMethod = true,
-                )
-            )
-            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+                )(response)
+            }
+            try {
+                contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+                taxUpdateRequests.awaitItem()
+                assertSavedPaymentMethodSpinnerCount(1)
+                assertSavedPaymentMethodSelectionErrorIsNotDisplayed()
+                immediateActionCalls.expectNoEvents()
+
+                recreateHost()
+
+                assertSavedPaymentMethodSpinnerCount(1)
+                assertSavedPaymentMethodSelectionErrorIsNotDisplayed()
+                taxUpdateRequests.expectNoEvents()
+                immediateActionCalls.expectNoEvents()
+
+                releaseRetryResponse.countDown()
+            } finally {
+                releaseRetryResponse.countDown()
+            }
         }
     }
 
@@ -208,6 +235,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertPaymentMethodRowsAreEnabled(true)
                 assertSavedPaymentMethodSpinnerCount(0)
+                assertSavedPaymentMethodSelectionErrorIsNotDisplayed()
                 markTestSucceeded()
             } finally {
                 releaseTaxUpdateResponse.countDown()
@@ -612,6 +640,34 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             useUnmergedTree = true,
         ).assertCountEquals(expectedCount)
+    }
+
+    private fun assertSavedPaymentMethodSelectionErrorIsDisplayed() {
+        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+            testRules.compose.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+        testRules.compose.onNodeWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertIsDisplayed().assertTextEquals(
+            applicationContext.getString(R.string.stripe_something_went_wrong)
+        )
+    }
+
+    private fun assertSavedPaymentMethodSelectionErrorIsNotDisplayed() {
+        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+            testRules.compose.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+        }
+        testRules.compose.onAllNodesWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(0)
     }
 
     private fun automaticTaxResponseWithoutRequiredBilling(
