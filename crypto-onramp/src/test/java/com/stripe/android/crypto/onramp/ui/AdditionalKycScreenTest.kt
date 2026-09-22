@@ -84,9 +84,12 @@ internal class AdditionalKycScreenTest {
             requirementType = AdditionalKycRequirementType.ProofOfAddress,
         ),
     ) {
+        composeRule.onNodeWithText("PDF, JPEG, or PNG, up to 5 MB per file.")
+            .performScrollTo()
+            .assertIsDisplayed()
         composeRule.onNodeWithTag(additionalKycSubtypePickerTag(0)).performClick()
         composeRule.onNodeWithText("Document type").assertIsDisplayed()
-        composeRule.onNodeWithText("Electricity, water, gas, internet, phone bill").assertIsDisplayed()
+        composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
         composeRule.onNodeWithTag(additionalKycSubtypeOptionTag(0, "utility_bill")).performClick()
         composeRule.onNodeWithTag(additionalKycChooseFileTag(0))
             .performScrollTo()
@@ -154,7 +157,7 @@ internal class AdditionalKycScreenTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("electricity-bill.docx").assertIsDisplayed()
         composeRule.onNodeWithText(
-            "This file type isn’t supported. Upload a PDF, JPEG, or PNG file."
+            "This file type isn’t supported. Choose a file in one of the accepted formats."
         ).assertIsDisplayed()
     }
 
@@ -375,10 +378,11 @@ internal class AdditionalKycScreenTest {
         ): AdditionalKycDocumentState {
             return AdditionalKycDocumentState(
                 acceptedFormats = listOf("pdf", "jpeg", "png"),
+                fileRequirements = "PDF, JPEG, or PNG, up to 5 MB per file.",
                 instructions = listOf("Upload documents that support your transaction activity"),
                 maxFileSizeMegabytes = 5,
-                minDocuments = 1,
-                maxDocuments = 10,
+                minDocumentTypes = 1,
+                maxDocumentTypes = 10,
                 editingSlotIndex = editingSlotIndex,
                 slots = slots,
             )
@@ -394,11 +398,13 @@ internal class AdditionalKycScreenTest {
                     AdditionalKycDocumentSubtypeState(
                         id = "salary",
                         label = "Salary",
+                        description = "Document description",
                         isEnabled = true,
                     ),
                     AdditionalKycDocumentSubtypeState(
                         id = "utility_bill",
                         label = "Utility bill",
+                        description = "Utility provider document description",
                         isEnabled = true,
                     ),
                 ),

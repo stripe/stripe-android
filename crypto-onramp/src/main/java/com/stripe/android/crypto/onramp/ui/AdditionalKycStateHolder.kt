@@ -52,12 +52,7 @@ internal class AdditionalKycStateHolder(
         get() = requirement?.document?.acceptedFormats.orEmpty()
 
     val maximumFileSizeBytes: Long?
-        get() = when (requirement?.description) {
-            PROOF_OF_ADDRESS,
-            SOURCE_OF_FUNDS,
-            -> MAX_FILE_SIZE_BYTES
-            else -> null
-        }
+        get() = requirement?.document?.maxFileSizeBytes
 
     fun onContinue(): Boolean {
         if (!canEdit()) {
@@ -134,7 +129,8 @@ internal class AdditionalKycStateHolder(
         }
         val slot = documentSlots.firstOrNull { it.file == null } ?: DocumentSlot(
             index = nextDocumentSlotIndex(),
-            subtypeId = requirement?.document?.acceptedSubtypes?.firstOrNull()?.id,
+            subtypeId = requirement?.document?.acceptedSubtypes
+                ?.firstOrNull { canSelectSubtype(nextDocumentSlotIndex(), it.id) }?.id,
             file = null,
         ).also { newSlot -> documentSlots = documentSlots + newSlot }
         editingDocumentSlot = slot.index
@@ -179,7 +175,10 @@ internal class AdditionalKycStateHolder(
             return
         }
         val document = requirement?.document ?: return
-        if (document.acceptedSubtypes.none { subtype -> subtype.id == subtypeId }) {
+        if (
+            document.acceptedSubtypes.none { subtype -> subtype.id == subtypeId } ||
+            !canSelectSubtype(slotIndex, subtypeId)
+        ) {
             return
         }
 
@@ -447,15 +446,12 @@ internal class AdditionalKycStateHolder(
                 AdditionalKycDocumentState(
                     acceptedFormats = it.acceptedFormats,
                     instructions = it.instructions,
+                    fileRequirements = it.fileRequirements,
                     maxFileSizeMegabytes = maximumFileSizeBytes
                         ?.div(BYTES_PER_MEGABYTE)
                         ?.toInt(),
-                    minDocuments = it.minDocuments.coerceAtLeast(MINIMUM_DOCUMENT_COUNT),
-                    maxDocuments = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                        PROOF_OF_ADDRESS_MAX_DOCUMENT_COUNT
-                    } else {
-                        SOURCE_OF_FUNDS_MAX_DOCUMENT_COUNT
-                    },
+                    minDocumentTypes = it.minDocumentTypes.coerceAtLeast(MINIMUM_DOCUMENT_COUNT),
+                    maxDocumentTypes = it.maxDocumentTypes,
                     editingSlotIndex = editingDocumentSlot,
                     slots = documentSlots.map { slot ->
                         AdditionalKycDocumentSlotState(
@@ -464,7 +460,8 @@ internal class AdditionalKycStateHolder(
                                 AdditionalKycDocumentSubtypeState(
                                     id = subtype.id,
                                     label = subtype.label,
-                                    isEnabled = true,
+                                    description = subtype.description,
+                                    isEnabled = canSelectSubtype(slot.index, subtype.id),
                                 )
                             },
                             selectedSubtypeId = slot.subtypeId,
@@ -530,7 +527,8 @@ internal class AdditionalKycStateHolder(
         if (requirement.document != null) {
             val document = requirement.document
             val completedSlots = documentSlots.filter { slot -> slot.file != null }
-            if (completedSlots.size < document.minDocuments.coerceAtLeast(MINIMUM_DOCUMENT_COUNT)) {
+            val completedTypes = completedSlots.mapNotNull { it.subtypeId }.toSet()
+            if (completedTypes.size < document.minDocumentTypes.coerceAtLeast(MINIMUM_DOCUMENT_COUNT)) {
                 return AdditionalKycValidationError.MissingDocuments
             }
             if (document.acceptedSubtypes.isNotEmpty() && completedSlots.any { it.subtypeId == null }) {
@@ -558,11 +556,19 @@ internal class AdditionalKycStateHolder(
         return requirement.document != null || requirement.questionnaire != null
     }
 
+    private fun canSelectSubtype(slotIndex: Int, subtypeId: String): Boolean {
+        val document = requirement?.document ?: return false
+        val selectedTypes = documentSlots.filter { it.index != slotIndex && it.file != null }
+            .mapNotNull { it.subtypeId }.toSet()
+        return subtypeId in selectedTypes || selectedTypes.size < document.maxDocumentTypes
+    }
+
     private fun addNextUploadSlotIfNeeded(completedSlotIndex: Int) {
         val requirementType = requirement.toRequirementType()
-        val completedDocumentCount = documentSlots.count { slot -> slot.file != null }
+        val completedDocumentCount = documentSlots.filter { it.file != null }
+            .mapNotNull { it.subtypeId }.distinct().size
         val minimumDocumentCount = requirement?.document
-            ?.minDocuments
+            ?.minDocumentTypes
             ?.coerceAtLeast(MINIMUM_DOCUMENT_COUNT)
             ?: MINIMUM_DOCUMENT_COUNT
         if (
@@ -572,16 +578,6 @@ internal class AdditionalKycStateHolder(
             editingDocumentSlot = completedSlotIndex
             return
         }
-        val maximumDocumentCount = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-            PROOF_OF_ADDRESS_MAX_DOCUMENT_COUNT
-        } else {
-            SOURCE_OF_FUNDS_MAX_DOCUMENT_COUNT
-        }
-        if (completedDocumentCount >= maximumDocumentCount) {
-            editingDocumentSlot = null
-            return
-        }
-
         val completedSlot = documentSlots.firstOrNull { slot -> slot.index == completedSlotIndex } ?: return
         val nextSlot = DocumentSlot(
             index = nextDocumentSlotIndex(),
@@ -667,10 +663,7 @@ internal class AdditionalKycStateHolder(
         private const val SOURCE_OF_FUNDS_QUESTIONS = "source_of_funds_questions"
         private const val FUNDING_SOURCES_QUESTION_ID = "funding_sources"
         private const val MINIMUM_DOCUMENT_COUNT = 1
-        private const val PROOF_OF_ADDRESS_MAX_DOCUMENT_COUNT = 2
-        private const val SOURCE_OF_FUNDS_MAX_DOCUMENT_COUNT = 10
         private const val BYTES_PER_MEGABYTE = 1_000_000L
-        private const val MAX_FILE_SIZE_BYTES = 5L * BYTES_PER_MEGABYTE
 
         private fun createAnswers(requirement: AdditionalKycRequirement?): MutableMap<String, String> {
             return requirement

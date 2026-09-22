@@ -16,7 +16,7 @@ internal class AdditionalKycStateHolderTest {
     fun `proof of address advances from context to document editor`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
-                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
             )
@@ -35,7 +35,7 @@ internal class AdditionalKycStateHolderTest {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
                 userActionRequired = listOf(
-                    documentRequirement(minDocuments = 1).copy(
+                    documentRequirement(minDocumentTypes = 1).copy(
                         description = "source_of_funds",
                         questionnaire = AdditionalKycQuestionnaire(
                             questions = listOf(
@@ -67,7 +67,7 @@ internal class AdditionalKycStateHolderTest {
     fun `initial state uses first requirement awaiting user action`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
-                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = listOf(questionnaireRequirement()),
                 pendingStripeAction = emptyList(),
             )
@@ -115,7 +115,7 @@ internal class AdditionalKycStateHolderTest {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
                 userActionRequired = listOf(
-                    documentRequirement(minDocuments = 2).copy(
+                    documentRequirement(minDocumentTypes = 1).copy(
                         description = "source_of_funds",
                         questionnaire = AdditionalKycQuestionnaire(
                             questions = listOf(
@@ -164,7 +164,7 @@ internal class AdditionalKycStateHolderTest {
     fun `unsupported file type is rejected`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
-                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
             )
@@ -187,7 +187,7 @@ internal class AdditionalKycStateHolderTest {
     fun `uploading state retains selected file name`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
-                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
             )
@@ -204,7 +204,7 @@ internal class AdditionalKycStateHolderTest {
     fun `proof of address file at size limit is accepted`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
-                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
             )
@@ -221,7 +221,7 @@ internal class AdditionalKycStateHolderTest {
     fun `oversized proof of address file is rejected`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
-                userActionRequired = listOf(documentRequirement(minDocuments = 1)),
+                userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
             )
@@ -241,7 +241,7 @@ internal class AdditionalKycStateHolderTest {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
                 userActionRequired = listOf(
-                    documentRequirement(minDocuments = 1).copy(description = "source_of_funds")
+                    documentRequirement(minDocumentTypes = 1).copy(description = "source_of_funds")
                 ),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
@@ -258,11 +258,11 @@ internal class AdditionalKycStateHolderTest {
     }
 
     @Test
-    fun `unrecognized document requirement has no client file size limit`() {
+    fun `unrecognized document requirement uses server file size limit`() {
         val stateHolder = AdditionalKycStateHolder(
             requirements(
                 userActionRequired = listOf(
-                    documentRequirement(minDocuments = 1).copy(description = "future_requirement")
+                    documentRequirement(minDocumentTypes = 1).copy(description = "future_requirement")
                 ),
                 pendingPartnerAction = emptyList(),
                 pendingStripeAction = emptyList(),
@@ -271,9 +271,9 @@ internal class AdditionalKycStateHolderTest {
 
         val accepted = stateHolder.isAcceptedFileSize(fileSizeBytes = Long.MAX_VALUE)
 
-        assertThat(accepted).isTrue()
-        assertThat(stateHolder.maximumFileSizeBytes).isNull()
-        assertThat(stateHolder.state.document?.maxFileSizeMegabytes).isNull()
+        assertThat(accepted).isFalse()
+        assertThat(stateHolder.maximumFileSizeBytes).isEqualTo(5_000_000L)
+        assertThat(stateHolder.state.document?.maxFileSizeMegabytes).isEqualTo(5)
     }
 
     @Test
@@ -282,7 +282,7 @@ internal class AdditionalKycStateHolderTest {
             requirements(
                 userActionRequired = emptyList(),
                 pendingPartnerAction = listOf(
-                    documentRequirement(minDocuments = 1).copy(awaitingActionFrom = "partner")
+                    documentRequirement(minDocumentTypes = 1).copy(awaitingActionFrom = "partner")
                 ),
                 pendingStripeAction = emptyList(),
             )
@@ -322,7 +322,7 @@ internal class AdditionalKycStateHolderTest {
             requirements(
                 userActionRequired = emptyList(),
                 pendingPartnerAction = listOf(
-                    documentRequirement(minDocuments = 1).copy(awaitingActionFrom = "partner")
+                    documentRequirement(minDocumentTypes = 1).copy(awaitingActionFrom = "partner")
                 ),
                 pendingStripeAction = listOf(
                     questionnaireRequirement().copy(awaitingActionFrom = "stripe")
@@ -417,6 +417,73 @@ internal class AdditionalKycStateHolderTest {
         assertThat(stateHolder.advanceToNextRequirement()).isFalse()
     }
 
+    @Test
+    fun `multiple files of one type do not satisfy minimum distinct types`() = runDocumentScenario(
+        minDocumentTypes = 2,
+    ) {
+        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf")
+        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf")
+
+        assertThat(createSubmission()).isNull()
+        assertThat(state.validationError).isEqualTo(AdditionalKycValidationError.MissingDocuments)
+
+        onDocumentSubtypeSelected(1, "payslip")
+
+        assertThat(createSubmission()?.documents?.map { it.documentSubtype })
+            .containsExactly("bank_statement", "payslip")
+    }
+
+    @Test
+    fun `maximum distinct types disables new types but permits more files of existing type`() = runDocumentScenario(
+        maxDocumentTypes = 1,
+    ) {
+        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf")
+
+        val slot = requireNotNull(state.document).slots.first { it.index == 1 }
+        assertThat(slot.subtypes.first { it.id == "payslip" }.isEnabled).isFalse()
+        assertThat(slot.subtypes.first { it.id == "bank_statement" }.isEnabled).isTrue()
+        onDocumentSubtypeSelected(1, "payslip")
+        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf")
+
+        val documents = requireNotNull(createSubmission()).documents
+        assertThat(documents.single().documentSubtype).isEqualTo("bank_statement")
+        assertThat(documents.single().files).hasSize(2)
+    }
+
+    @Test
+    fun `server file size limit is used at byte boundary`() = runDocumentScenario(
+        maxFileSizeBytes = 2_000_000L,
+    ) {
+        assertThat(maximumFileSizeBytes).isEqualTo(2_000_000L)
+        assertThat(isAcceptedFileSize(2_000_000L)).isTrue()
+        assertThat(isAcceptedFileSize(2_000_001L)).isFalse()
+        assertThat(state.document?.maxFileSizeMegabytes).isEqualTo(2)
+    }
+
+    private fun runDocumentScenario(
+        minDocumentTypes: Int = 1,
+        maxDocumentTypes: Int = 2,
+        maxFileSizeBytes: Long = 5_000_000L,
+        block: AdditionalKycStateHolder.() -> Unit,
+    ) {
+        val requirement = documentRequirement(minDocumentTypes)
+        AdditionalKycStateHolder(
+            requirements(
+                userActionRequired = listOf(
+                    requirement.copy(
+                        description = "source_of_funds",
+                        document = requireNotNull(requirement.document).copy(
+                            maxDocumentTypes = maxDocumentTypes,
+                            maxFileSizeBytes = maxFileSizeBytes,
+                        ),
+                    )
+                ),
+                pendingPartnerAction = emptyList(),
+                pendingStripeAction = emptyList(),
+            )
+        ).block()
+    }
+
     private companion object {
         fun question(id: String): AdditionalKycQuestion {
             return AdditionalKycQuestion(
@@ -476,7 +543,7 @@ internal class AdditionalKycStateHolderTest {
             )
         }
 
-        fun documentRequirement(minDocuments: Int): AdditionalKycRequirement {
+        fun documentRequirement(minDocumentTypes: Int): AdditionalKycRequirement {
             return AdditionalKycRequirement(
                 description = "proof_of_address",
                 requestedBy = "swapped",
@@ -492,14 +559,19 @@ internal class AdditionalKycStateHolderTest {
                         AdditionalKycDocumentSubtype(
                             id = "bank_statement",
                             label = "Bank statement",
+                            description = "Statements from your bank",
                         ),
                         AdditionalKycDocumentSubtype(
                             id = "payslip",
                             label = "Payslip",
+                            description = "Recent payslips",
                         ),
                     ),
                     acceptedFormats = listOf("pdf", "jpeg", "png"),
-                    minDocuments = minDocuments,
+                    minDocumentTypes = minDocumentTypes,
+                    maxDocumentTypes = 2,
+                    maxFileSizeBytes = 5_000_000L,
+                    fileRequirements = "PDF, JPEG, or PNG, up to 5 MB per file.",
                     instructions = listOf("Show your full name and address"),
                 ),
                 questionnaire = null,

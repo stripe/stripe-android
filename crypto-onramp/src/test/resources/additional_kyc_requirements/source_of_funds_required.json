@@ -1,53 +1,59 @@
 {
   "requirements": {
-    "entries": [
-      {
-        "description": "source_of_funds",
-        "requested_by": "swapped",
-        "awaiting_action_from": "user",
-        "errors": [],
-        "document": {
-          "accepted_subtypes": [
+    "source_of_funds": {
+      "requested_by": "swapped",
+      "awaiting_action_from": "user",
+      "errors": [],
+      "document": {
+        "accepted_subtypes": [
+          {
+            "id": "payslip",
+            "label": "Payslip",
+            "description": "Recent payslip"
+          },
+          {
+            "id": "bank_statement",
+            "label": "Bank statement",
+            "description": "Recent bank statement"
+          }
+        ],
+        "accepted_formats": [
+          "pdf",
+          "jpeg",
+          "png"
+        ],
+        "instructions": [
+          "Upload documents that support your past and expected transaction activity"
+        ],
+        "min_document_types": 1,
+        "max_document_types": 2,
+        "max_file_size_bytes": 5000000,
+        "file_requirements": "PDF, JPEG, or PNG, up to 5 MB per file."
+      },
+      "additional_requirements": {
+        "questionnaire": {
+          "questions": [
             {
-              "id": "payslip",
-              "label": "Payslip"
+              "id": "purchase_purpose",
+              "prompt": "Why are you purchasing cryptocurrency?",
+              "answer_type": "free_text",
+              "required": true
             },
             {
-              "id": "bank_statement",
-              "label": "Bank statement"
+              "id": "third_party_advised",
+              "prompt": "Has anyone advised you to purchase cryptocurrency?",
+              "answer_type": "free_text",
+              "required": true
+            },
+            {
+              "id": "funding_sources",
+              "prompt": "How are you funding your transactions?",
+              "answer_type": "free_text",
+              "required": true
             }
-          ],
-          "accepted_formats": ["pdf", "jpeg", "png"],
-          "min_documents": 1,
-          "instructions": [
-            "Upload documents that support your past and expected transaction activity"
-          ],
-          "additional_requirements": {
-            "questionnaire": {
-              "questions": [
-                {
-                  "id": "purchase_purpose",
-                  "prompt": "Why are you purchasing cryptocurrency?",
-                  "answer_type": "free_text",
-                  "required": true
-                },
-                {
-                  "id": "third_party_advised",
-                  "prompt": "Has anyone advised you to purchase cryptocurrency?",
-                  "answer_type": "free_text",
-                  "required": true
-                },
-                {
-                  "id": "funding_sources",
-                  "prompt": "How are you funding your transactions?",
-                  "answer_type": "free_text",
-                  "required": true
-                }
-              ]
-            }
-          }
+          ]
         }
       }
-    ]
+    }
   }
 }

@@ -108,7 +108,6 @@ internal fun AdditionalKycScreen(
                     val slot = state.document?.slots?.firstOrNull { it.index == selectorSlotIndex }
                     if (slot != null) {
                         DocumentTypeSelector(
-                            requirementType = state.requirementType,
                             slot = slot,
                             onClose = { selectorSlotIndex = null },
                             onSelected = { subtypeId ->
@@ -576,11 +575,10 @@ private fun DocumentEditorContent(
             completedSlots.forEach { slot ->
                 UploadedFileCard(slot = slot, onRemoveFile = onRemoveFile)
             }
-            val showUpload = state.requirementType == AdditionalKycRequirementType.SourceOfFunds ||
-                completedSlots.size < document.minDocuments
-            if (showUpload && editingSlot.fileName == null) {
+            if (editingSlot.fileName == null) {
                 UploadDocumentControl(
                     slot = editingSlot,
+                    fileRequirements = document.fileRequirements,
                     isUploading = state.selectingFileSlot == editingSlot.index,
                     uploadingFileName = state.selectingFileName,
                     enabled = selectedSubtypeId != null && state.selectingFileSlot == null,
@@ -646,6 +644,7 @@ private fun DocumentTypeField(
 @Composable
 private fun UploadDocumentControl(
     slot: AdditionalKycDocumentSlotState,
+    fileRequirements: String,
     isUploading: Boolean,
     uploadingFileName: String?,
     enabled: Boolean,
@@ -655,7 +654,7 @@ private fun UploadDocumentControl(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(76.dp)
+            .heightIn(min = 76.dp)
             .dashedBorder(borderColor)
             .clickable(enabled = enabled) { onChooseFile(slot.index) }
             .padding(horizontal = 16.dp)
@@ -687,7 +686,7 @@ private fun UploadDocumentControl(
                 text = if (isUploading) {
                     stringResource(R.string.stripe_link_onramp_additional_kyc_uploading)
                 } else {
-                    stringResource(R.string.stripe_link_onramp_additional_kyc_file_requirements)
+                    fileRequirements
                 },
                 style = LinkTheme.typography.caption,
                 color = LinkTheme.colors.textTertiary,
@@ -1002,7 +1001,6 @@ private val AdditionalKycCollectionPage.isMessage: Boolean
 @Composable
 @Suppress("LongMethod")
 private fun DocumentTypeSelector(
-    requirementType: AdditionalKycRequirementType,
     slot: AdditionalKycDocumentSlotState,
     onClose: () -> Unit,
     onSelected: (subtypeId: String) -> Unit,
@@ -1076,34 +1074,15 @@ private fun DocumentTypeSelector(
                             style = LinkTheme.typography.bodyEmphasized,
                             color = LinkTheme.colors.textPrimary,
                         )
-                        if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                            proofOfAddressSubtypeDescription(subtype.id, subtype.label)?.let { description ->
-                                Text(
-                                    text = description,
-                                    style = LinkTheme.typography.detail,
-                                    color = LinkTheme.colors.textTertiary,
-                                )
-                            }
-                        }
+                        Text(
+                            text = subtype.description,
+                            style = LinkTheme.typography.detail,
+                            color = LinkTheme.colors.textTertiary,
+                        )
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun proofOfAddressSubtypeDescription(id: String, label: String): String? {
-    val value = "$id $label".lowercase(Locale.ROOT)
-    return when {
-        "id" in value -> stringResource(R.string.stripe_link_onramp_additional_kyc_id_document_description)
-        "government" in value -> stringResource(
-            R.string.stripe_link_onramp_additional_kyc_government_document_description
-        )
-        "utility" in value -> stringResource(R.string.stripe_link_onramp_additional_kyc_utility_bill_description)
-        "bank" in value -> stringResource(R.string.stripe_link_onramp_additional_kyc_bank_document_description)
-        "lease" in value -> stringResource(R.string.stripe_link_onramp_additional_kyc_lease_agreement_description)
-        else -> null
     }
 }
 
@@ -1200,7 +1179,7 @@ private fun validationErrorMessage(
 ): String {
     return when (error) {
         AdditionalKycValidationError.UnsupportedFileType ->
-            stringResource(R.string.stripe_link_onramp_additional_kyc_unsupported_file_type_design)
+            stringResource(R.string.stripe_link_onramp_additional_kyc_unsupported_file_type)
         AdditionalKycValidationError.FileTooLarge -> stringResource(
             R.string.stripe_link_onramp_additional_kyc_file_too_large_design,
             maxFileSizeMegabytes ?: DEFAULT_MAX_FILE_SIZE_MEGABYTES,
@@ -1289,9 +1268,10 @@ internal data class AdditionalKycQuestionState(
 internal data class AdditionalKycDocumentState(
     val acceptedFormats: List<String>,
     val instructions: List<String>,
+    val fileRequirements: String,
     val maxFileSizeMegabytes: Int?,
-    val minDocuments: Int,
-    val maxDocuments: Int,
+    val minDocumentTypes: Int,
+    val maxDocumentTypes: Int,
     val editingSlotIndex: Int?,
     val slots: List<AdditionalKycDocumentSlotState>,
 )
@@ -1307,6 +1287,7 @@ internal data class AdditionalKycDocumentSlotState(
 internal data class AdditionalKycDocumentSubtypeState(
     val id: String,
     val label: String,
+    val description: String,
     val isEnabled: Boolean,
 )
 

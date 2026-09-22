@@ -12,10 +12,10 @@ class RetrieveAdditionalKycRequirementsResponseTest {
 
     @Test
     fun `proof of address requirement is parsed`() {
-        val requirement = parseFixture("proof_of_address_required.json").requirements.entries.single()
+        val requirement = parseFixture("proof_of_address_required.json")
+            .requirements.entries.getValue("proof_of_address")
         val document = requireNotNull(requirement.document)
 
-        assertThat(requirement.description).isEqualTo("proof_of_address")
         assertThat(requirement.requestedBy).isEqualTo("swapped")
         assertThat(requirement.awaitingActionFrom).isEqualTo("user")
         assertThat(requirement.errors).isEmpty()
@@ -23,20 +23,23 @@ class RetrieveAdditionalKycRequirementsResponseTest {
             .containsExactly("utility_bill", "bank_statement")
             .inOrder()
         assertThat(document.acceptedFormats).containsExactly("pdf", "jpeg", "png").inOrder()
-        assertThat(document.minDocuments).isEqualTo(1)
+        assertThat(document.minDocumentTypes).isEqualTo(1)
+        assertThat(document.maxDocumentTypes).isEqualTo(2)
+        assertThat(document.maxFileSizeBytes).isEqualTo(5_000_000L)
+        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG, or PNG, up to 5 MB per file.")
+        assertThat(document.acceptedSubtypes.first().description).isEqualTo("Recent utility bill")
         assertThat(document.instructions).hasSize(2)
-        assertThat(document.additionalRequirements).isNull()
+        assertThat(requirement.additionalRequirements).isNull()
     }
 
     @Test
-    fun `source of funds questionnaire is parsed under document requirements`() {
-        val requirement = parseFixture("source_of_funds_required.json").requirements.entries.single()
-        val questionnaire = requireNotNull(requirement.document)
-            .additionalRequirements
+    fun `source of funds questionnaire is parsed beside document requirements`() {
+        val requirement = parseFixture("source_of_funds_required.json")
+            .requirements.entries.getValue("source_of_funds")
+        val questionnaire = requirement.additionalRequirements
             ?.questionnaire
         val questions = requireNotNull(questionnaire).questions
 
-        assertThat(requirement.description).isEqualTo("source_of_funds")
         assertThat(requirement.errors).isEmpty()
         assertThat(questions.map { it.id })
             .containsExactly("purchase_purpose", "third_party_advised", "funding_sources")
@@ -47,11 +50,11 @@ class RetrieveAdditionalKycRequirementsResponseTest {
 
     @Test
     fun `requirement awaiting partner action omits document configuration`() {
-        val requirement = parseFixture("pending_review.json").requirements.entries.single()
+        val requirement = parseFixture("pending_review.json").requirements.entries.getValue("proof_of_address")
 
-        assertThat(requirement.description).isEqualTo("proof_of_address")
         assertThat(requirement.awaitingActionFrom).isEqualTo("partner")
         assertThat(requirement.document).isNull()
+        assertThat(requirement.additionalRequirements).isNull()
     }
 
     @Test
@@ -60,16 +63,15 @@ class RetrieveAdditionalKycRequirementsResponseTest {
             """
                 {
                   "requirements": {
-                    "entries": [{
-                      "description": "source_of_funds",
+                    "source_of_funds": {
                       "requested_by": "swapped",
                       "awaiting_action_from": "stripe",
                       "errors": []
-                    }]
+                    }
                   }
                 }
             """.trimIndent()
-        ).requirements.entries.single()
+        ).requirements.entries.values.single()
 
         assertThat(requirement.awaitingActionFrom).isEqualTo("stripe")
         assertThat(requirement.document).isNull()
@@ -77,7 +79,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
 
     @Test
     fun `empty requirement entries are supported`() {
-        val response = decode("""{"requirements":{"entries":[]}}""")
+        val response = decode("""{"requirements":{}}""")
 
         assertThat(response.requirements.entries).isEmpty()
     }
@@ -85,7 +87,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     @Test
     fun `empty document array is treated as absent`() {
         val requirement = decode(userRequirementJson(document = "[]"))
-            .requirements.entries.single()
+            .requirements.entries.values.single()
 
         assertThat(requirement.document).isNull()
     }
@@ -94,24 +96,24 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     fun `empty additional requirements array is treated as absent`() {
         val requirement = decode(
             userRequirementJson(
-                document = documentJson(additionalRequirements = "[]")
+                document = "null",
+                additionalRequirements = "[]"
             )
-        ).requirements.entries.single()
+        ).requirements.entries.values.single()
 
-        assertThat(requireNotNull(requirement.document).additionalRequirements).isNull()
+        assertThat(requirement.additionalRequirements).isNull()
     }
 
     @Test
     fun `empty questionnaire array is treated as absent`() {
         val requirement = decode(
             userRequirementJson(
-                document = documentJson(
-                    additionalRequirements = """{"questionnaire": []}"""
-                )
+                document = "null",
+                additionalRequirements = """{"questionnaire": []}"""
             )
-        ).requirements.entries.single()
+        ).requirements.entries.values.single()
 
-        assertThat(requireNotNull(requirement.document).additionalRequirements?.questionnaire).isNull()
+        assertThat(requirement.additionalRequirements?.questionnaire).isNull()
     }
 
     @Test
@@ -130,6 +132,61 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
     }
 
+    @Test
+    fun `unknown action owner is preserved when decoding`() {
+        val response = decode(userRequirementJson(document = "null").replace("user", "future_owner"))
+        val requirement = response.requirements.toAdditionalKycRequirements().unrecognizedActionOwner.single()
+
+        assertThat(requirement.description).isEqualTo("proof_of_address")
+        assertThat(requirement.awaitingActionFrom).isEqualTo("future_owner")
+    }
+
+    @Test
+    fun `unknown answer type is preserved without a document`() {
+        val response = decode(
+            userRequirementJson(
+                document = "null",
+                additionalRequirements = """
+                    {"questionnaire":{"questions":[{
+                      "id":"purpose", "prompt":"Why?", "answer_type":"future_type", "required":true
+                    }]}}
+                """.trimIndent(),
+            )
+        )
+        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+
+        assertThat(requirement.document).isNull()
+        assertThat(requirement.questionnaire?.questions?.single()?.answerType).isEqualTo("future_type")
+    }
+
+    @Test
+    fun `document collection settings are preserved in domain model`() {
+        val response = parseFixture("proof_of_address_required.json")
+        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val document = requireNotNull(requirement.document)
+
+        assertThat(requirement.description).isEqualTo("proof_of_address")
+        assertThat(document.minDocumentTypes).isEqualTo(1)
+        assertThat(document.maxDocumentTypes).isEqualTo(2)
+        assertThat(document.maxFileSizeBytes).isEqualTo(5_000_000L)
+        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG, or PNG, up to 5 MB per file.")
+        assertThat(document.acceptedSubtypes.first().description).isEqualTo("Recent utility bill")
+    }
+
+    @Test
+    fun `error description is decoded as developer-facing detail`() {
+        val response = decode(
+            userRequirementJson(document = "null").replace(
+                "\"errors\": []",
+                """"errors": [{"code":"document_rejected","description":"Verification failed"}]""",
+            )
+        )
+        val error = response.requirements.toAdditionalKycRequirements().userActionRequired.single().errors.single()
+
+        assertThat(error.code).isEqualTo("document_rejected")
+        assertThat(error.developerMessage).isEqualTo("Verification failed")
+    }
+
     private fun parseFixture(fileName: String): RetrieveAdditionalKycRequirementsResponse {
         val fixture = requireNotNull(
             javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/$fileName")
@@ -142,30 +199,18 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         return json.decodeFromString(RetrieveAdditionalKycRequirementsResponse.serializer(), value)
     }
 
-    private fun userRequirementJson(document: String): String {
+    private fun userRequirementJson(document: String, additionalRequirements: String = "null"): String {
         return """
             {
               "requirements": {
-                "entries": [{
-                  "description": "proof_of_address",
+                "proof_of_address": {
                   "requested_by": "swapped",
                   "awaiting_action_from": "user",
                   "errors": [],
-                  "document": $document
-                }]
+                  "document": $document,
+                  "additional_requirements": $additionalRequirements
+                }
               }
-            }
-        """.trimIndent()
-    }
-
-    private fun documentJson(additionalRequirements: String): String {
-        return """
-            {
-              "accepted_subtypes": [],
-              "accepted_formats": [],
-              "min_documents": 1,
-              "instructions": [],
-              "additional_requirements": $additionalRequirements
             }
         """.trimIndent()
     }
