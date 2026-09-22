@@ -4,7 +4,9 @@ import android.app.Application
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
+import com.stripe.attestation.AttestationTokenProvider
 import com.stripe.attestation.AttestationWarmer
+import com.stripe.attestation.DefaultAttestationTokenProvider
 import com.stripe.attestation.DefaultAttestationWarmer
 import com.stripe.attestation.IntegrityRequestManager
 import com.stripe.attestation.IntegrityStandardRequestManager
@@ -27,6 +29,13 @@ internal object PaymentsIntegrityModule {
             integrityRequestManager = integrityRequestManager,
             retryDelaySupplier = ExponentialBackoffRetryDelaySupplier()
         )
+    }
+
+    @Provides
+    fun provideAttestationTokenProvider(
+        integrityRequestManager: IntegrityRequestManager
+    ): AttestationTokenProvider {
+        return DefaultAttestationTokenProvider(integrityRequestManager)
     }
 }
 
