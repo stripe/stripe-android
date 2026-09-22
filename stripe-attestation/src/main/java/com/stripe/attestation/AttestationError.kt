@@ -48,6 +48,7 @@ class AttestationError(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromException(exception: Throwable): AttestationError = when (exception) {
+            is AttestationError -> exception
             is StandardIntegrityException -> AttestationError(
                 errorType = errorCodeToErrorTypeMap[exception.errorCode] ?: ErrorType.UNKNOWN,
                 message = exception.message ?: "Integrity error occurred",
