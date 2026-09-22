@@ -41,12 +41,14 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testSuccessfulGooglePayPayment() {
-        validateInitialAnalyticsRequests()
-
-        // This is called twice during load - once for PE, once for ECE
+        // We load twice, once for PE and once for ECE. So all these requests are made twice.
         repeat(2) {
             networkRule.enqueueLinkAccountLookup()
+            validateLoadingAnalyticsRequests()
+            validateLinkAccountLookupAnalyticsRequest()
         }
+
+        validateAnalyticsRequest(eventName = "mc_ece_init")
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -64,19 +66,19 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
+
             validateAnalyticsRequest(
                 eventName = "mc_ece_wallet_tapped",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
-            repeat(2) {
-                validateAnalyticsRequest(eventName = "mc_load_started")
-            }
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
+
+            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
             repeat(2) {
-                validateAnalyticsRequest(eventName = "mc_load_succeeded")
+                validateLoadingAnalyticsRequests()
             }
 
             page.clickGooglePayButton()
@@ -87,12 +89,14 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
-        validateInitialAnalyticsRequests()
-
-        // This is called twice during load - once for PE, once for ECE
+        // We load twice, once for PE and once for ECE. So all these requests are made twice.
         repeat(2) {
             networkRule.enqueueLinkAccountLookup()
+            validateLoadingAnalyticsRequests()
+            validateLinkAccountLookupAnalyticsRequest()
         }
+
+        validateAnalyticsRequest(eventName = "mc_ece_init")
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -102,10 +106,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
         ) {
             enqueueSuccessfulNativeLinkPayment()
 
-            repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
-            }
             networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(
                 eventName = "mc_ece_wallet_tapped",
@@ -118,10 +120,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
             )
+
+            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
+            // We also re-load Link state since the confirmation was for a Link payment method.
             repeat(2) {
-                validateAnalyticsRequest(eventName = "mc_load_started")
-                validateAnalyticsRequest(eventName = "link.account_lookup.complete")
-                validateAnalyticsRequest(eventName = "mc_load_succeeded")
+                networkRule.enqueueLinkAccountLookup()
+                validateLoadingAnalyticsRequests()
+                validateLinkAccountLookupAnalyticsRequest()
             }
 
             page.clickLinkButton()
@@ -130,17 +135,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
         assertNativeLinkCalled()
     }
 
-    private fun validateInitialAnalyticsRequests() {
-        repeat(2) {
-            validateAnalyticsRequest(eventName = "mc_load_started")
-        }
-        repeat(2) {
-            validateAnalyticsRequest(eventName = "link.account_lookup.complete")
-        }
-        repeat(2) {
-            validateAnalyticsRequest(eventName = "mc_load_succeeded")
-        }
-        validateAnalyticsRequest(eventName = "mc_ece_init")
+    private fun validateLoadingAnalyticsRequests() {
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+    }
+
+    private fun validateLinkAccountLookupAnalyticsRequest() {
+        validateAnalyticsRequest(eventName = "link.account_lookup.complete")
     }
 
     private fun validateAnalyticsRequest(
