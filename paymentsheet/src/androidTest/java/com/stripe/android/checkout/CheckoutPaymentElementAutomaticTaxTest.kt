@@ -31,7 +31,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
-import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
@@ -604,12 +604,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private fun assertSavedPaymentMethodSpinnerCount(expectedCount: Int) {
         testRules.compose.waitUntil(timeoutMillis = 5_000) {
             testRules.compose.onAllNodesWithTag(
-                EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
                 useUnmergedTree = true,
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).size == expectedCount
         }
         testRules.compose.onAllNodesWithTag(
-            EMBEDDED_SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             useUnmergedTree = true,
         ).assertCountEquals(expectedCount)
     }
