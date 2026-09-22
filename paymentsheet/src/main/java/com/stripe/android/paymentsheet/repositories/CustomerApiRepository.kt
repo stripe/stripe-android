@@ -4,6 +4,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -71,6 +72,7 @@ internal class CustomerApiRepository @Inject constructor(
                         paymentMethodType = paymentMethodType,
                     ),
                     productUsageTokens = productUsageTokens,
+                    publishableKey = apiConfiguration.publishableKey,
                     requestOptions = ApiRequest.Options(
                         apiKey = ephemeralKeySecret,
                         stripeAccount = apiConfiguration.stripeAccountId,
@@ -78,11 +80,19 @@ internal class CustomerApiRepository @Inject constructor(
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
                     errorReporter.report(
-                        ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
-                        StripeException.create(it)
+                        errorEvent = ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+                        stripeException = StripeException.create(it),
+                        additionalNonPiiParams = mapOf(
+                            AnalyticsFields.PUBLISHABLE_KEY to apiConfiguration.publishableKey
+                        ),
                     )
                 }.onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS,
+                        additionalNonPiiParams = mapOf(
+                            AnalyticsFields.PUBLISHABLE_KEY to apiConfiguration.publishableKey
+                        ),
+                    )
                 }
             }
         }

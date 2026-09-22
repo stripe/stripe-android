@@ -11,6 +11,7 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
@@ -26,7 +27,6 @@ import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
@@ -115,6 +115,7 @@ import java.security.Security
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -136,14 +137,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(context, workContext),
+        DefaultFraudDetectionDataRepository(context, publishableKeyProvider, workContext),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
         DefaultCardAccountRangeRepositoryFactory(
             context = context,
             productUsageTokens = productUsageTokens,
             requestSurface = requestSurface,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            publishableKeyProvider = publishableKeyProvider,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
@@ -156,7 +162,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -165,7 +171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
@@ -881,6 +887,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
+        publishableKey: String,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
@@ -894,7 +901,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(
                         PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                        productUsageTokens = productUsageTokens
+                        productUsageTokens = productUsageTokens,
+                        publishableKey = publishableKey,
                     )
                 )
             },
