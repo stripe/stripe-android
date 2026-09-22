@@ -116,12 +116,12 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                                 currency = "usd"
                             )
                         ),
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 } else {
                     presentWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 }
             }
@@ -151,7 +151,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                                 currency = "usd",
                             )
                         ),
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -161,7 +161,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                 } else {
                     configureWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()

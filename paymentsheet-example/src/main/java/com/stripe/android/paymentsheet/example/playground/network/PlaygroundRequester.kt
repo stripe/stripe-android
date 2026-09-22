@@ -14,6 +14,9 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.ResolvedApiConfiguration
+import com.stripe.android.paymentsheet.example.playground.settings.ResolvedApiConfigurationSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.UseApiConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,15 +50,21 @@ internal class PlaygroundRequester(
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
                 // which will be used on all Stripe API calls
-                withContext(Dispatchers.IO) {
-                    PaymentConfiguration.init(
-                        applicationContext,
-                        checkoutResponse.publishableKey,
-                    )
+                if (!UseApiConfigurationSettingsDefinition.isEnabled(playgroundSettings)) {
+                    withContext(Dispatchers.IO) {
+                        PaymentConfiguration.init(
+                            applicationContext,
+                            checkoutResponse.publishableKey,
+                        )
+                    }
                 }
 
                 val customerId = checkoutResponse.customerId
                 val updatedSettings = playgroundSettings.playgroundSettings()
+                updatedSettings[ResolvedApiConfigurationSettingsDefinition] = ResolvedApiConfiguration(
+                    publishableKey = checkoutResponse.publishableKey,
+                    stripeAccountId = null,
+                )
                 val currentCustomerType = playgroundSettings[CustomerSettingsDefinition]
                 if (
                     (currentCustomerType == CustomerType.NEW || currentCustomerType == CustomerType.RETURNING) &&

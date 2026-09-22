@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
@@ -188,6 +189,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -213,6 +215,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
@@ -247,6 +250,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = fakePlaces,
             stripeAutocompleteRepository = null,
@@ -281,6 +285,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -305,6 +310,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = null,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -331,6 +337,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -348,6 +355,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     fun `Factory uses launcher when proxy flag is on but inline disabled`() = test { scenario ->
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = "test-key",
                 autocompleteCountries = setOf("US"),
@@ -412,6 +420,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         ),
     ) = PaymentElementAutocompleteAddressInteractor(
         launcher = launcher,
+        apiConfigurationProvider = { DEFAULT_API_CONFIG },
         autocompleteConfig = autocompleteConfig,
     )
 
