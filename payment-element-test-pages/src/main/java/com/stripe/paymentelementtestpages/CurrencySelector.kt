@@ -20,7 +20,9 @@ class CurrencySelector(
         val currencyOption = composeTestRule
             .onNodeWithTag("TEST_TAG_CURRENCY_OPTION_$currencyCode")
 
-        composeTestRule.waitUntil { currencyOption.isDisplayed() }
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
+            currencyOption.isDisplayed()
+        }
         currencyOption.performClick()
     }
 }

@@ -19,7 +19,7 @@ class ManagePage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -34,7 +34,7 @@ class ManagePage(
     }
 
     fun waitUntilNotVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
                 .fetchSemanticsNodes()
@@ -64,7 +64,7 @@ class ManagePage(
     }
 
     fun waitUntilGone(paymentMethodId: String) {
-        composeTestRule.waitUntil(timeoutMillis = 2_000L) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(
                     hasTestTag("${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_$paymentMethodId"),

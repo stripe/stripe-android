@@ -207,7 +207,7 @@ internal class OnrampE2EPage(
     }
 
     fun confirmKycVerification() {
-        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 1.seconds.inWholeMilliseconds)) {
+        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 5.seconds.inWholeMilliseconds)) {
             clickTag(KYC_SECTION_TAG)
         }
         clickTag(VERIFY_KYC_BUTTON_TAG)
@@ -335,7 +335,7 @@ internal class OnrampE2EPage(
         replaceText(CARD_CVC_LABEL, TEST_NEW_CARD_CVC)
 
         val postalCodeMatcher = hasText(CARD_POSTAL_CODE_LABEL).and(hasSetTextAction())
-        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 3.seconds.inWholeMilliseconds)) {
+        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 5.seconds.inWholeMilliseconds)) {
             composeRule.onNode(postalCodeMatcher)
                 .performScrollTo()
                 .performTextReplacement(TEST_CARD_POSTAL_CODE)

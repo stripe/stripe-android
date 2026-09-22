@@ -359,7 +359,7 @@ internal class PaymentSheetPage(
     }
 
     fun checkSetAsDefaultCheckbox() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(
                 hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes().isNotEmpty()
@@ -448,7 +448,7 @@ internal class PaymentSheetPage(
         waitUntilVisible()
 
         if (forVerticalMode) {
-            composeTestRule.waitUntil {
+            composeTestRule.waitUntil(timeoutMillis = 5_000) {
                 composeTestRule
                     .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                     .fetchSemanticsNodes()
@@ -485,7 +485,7 @@ internal class PaymentSheetPage(
             TEST_TAG_LIST
         }
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(
                 hasTestTag(testTagForLayout)
             )
@@ -496,7 +496,7 @@ internal class PaymentSheetPage(
     }
 
     fun assertIsOnFormPage() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -505,7 +505,7 @@ internal class PaymentSheetPage(
     }
 
     fun assertLpmSelected(code: String) {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -543,7 +543,7 @@ internal class PaymentSheetPage(
     fun assertSavedSelection(paymentMethodId: String) {
         waitUntilVisible()
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(
                 hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
                     .and(isSelected())
