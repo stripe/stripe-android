@@ -2,6 +2,13 @@
 
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.20.0 - 2026-09-21
+
+### Payments
+* [FIXED][14643](https://github.com/stripe/stripe-android/pull/14643) Fixed redirects with Alipay+ and the Alipay SDK
+
+### PaymentSheet
 * [ADDED] Added support for Bizum.
 
 ## 23.19.0 - 2026-09-15

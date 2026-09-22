@@ -5,8 +5,10 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
+import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
@@ -28,9 +30,11 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -54,6 +58,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -710,6 +715,137 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `selectSavedPaymentMethod refreshes tax and commits response and selection together`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+            assertLoadingConsumed = true,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val before = committedState()
+            val requestReceived = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                requestReceived.countDown()
+                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the saved payment method tax response."
+                }
+                successfulSavedPaymentMethodResponse(response)
+            }
+
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+
+            val result = async { controller.selectSavedPaymentMethod(selection) }
+            try {
+                testScheduler.advanceUntilIdle()
+
+                assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+                assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+                assertThat(committedState()).isEqualTo(before)
+
+                releaseResponse.countDown()
+                result.await().getOrThrow()
+
+                assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+                val state = committedState()
+                assertThat(state.checkoutSessionResponse.livemode).isTrue()
+                assertThat(state.paymentSelection).isEqualTo(selection)
+            } finally {
+                releaseResponse.countDown()
+            }
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod preserves prior state when tax update fails`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            networkRule.checkoutUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+            val before = committedState()
+            val selection = loadedSavedPaymentMethodSelection()
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(committedState()).isEqualTo(before)
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod skips tax update when automatic tax targets shipping`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val before = committedState().checkoutSessionResponse
+            assertThat(selection.paymentMethod.billingDetails?.address).isNotNull()
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            result.getOrThrow()
+            val state = committedState()
+            assertThat(state.checkoutSessionResponse).isSameInstanceAs(before)
+            assertThat(state.paymentSelection).isEqualTo(selection)
+        }
+
+    @Test
+    fun `saved selection ignores a duplicate while its tax response is pending`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val completions = Turbine<CheckoutControllerState>()
+            val handler = createSelectionHandler(completions)
+            val requestReceived = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                requestReceived.countDown()
+                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the saved payment method tax response."
+                }
+                successfulSavedPaymentMethodResponse(response)
+            }
+
+            handler.select(selection, true)
+            try {
+                testScheduler.advanceUntilIdle()
+                assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+
+                handler.select(selection, true)
+                completions.expectNoEvents()
+
+                releaseResponse.countDown()
+                val stateAtCompletion = withTurbineTimeout(10.seconds) {
+                    completions.awaitItem()
+                }
+                assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
+                assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                completions.expectNoEvents()
+            } finally {
+                releaseResponse.countDown()
+            }
+
+            completions.ensureAllEventsConsumed()
+        }
+
+    @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
@@ -1110,6 +1246,20 @@ internal class CheckoutControllerTest {
         checkoutInit(responseFactory = ::successResponse)
     }
 
+    private fun NetworkRule.savedPaymentMethodTaxUpdate(
+        responseFactory: (MockResponse) -> Unit,
+    ) {
+        checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94111"),
+            bodyPart("tax_region[line1]", "1234 Main Street"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
     // The base fixture omits customer_email. Inject one for standard success paths; a test can
     // remove it in the JSON modifier when exercising an absent session email.
     // Link is disabled so the loader doesn't fire a consumer session lookup that's unrelated to
@@ -1153,6 +1303,53 @@ internal class CheckoutControllerTest {
                 .put("automatic_tax_enabled", true)
                 .put("automatic_tax_address_source", source),
         )
+    }
+
+    private fun successfulSavedPaymentMethodResponse(response: MockResponse) {
+        successResponseFactory(
+            combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+                { json -> json.put("livemode", true) },
+            )
+        ).invoke(response)
+    }
+
+    private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
+        json.put("customer", savedCustomerJson())
+    }
+
+    private fun savedCustomerJson(): JSONObject {
+        val paymentMethod = JSONObject()
+            .put("id", "pm_saved_card")
+            .put("object", "payment_method")
+            .put("created", 1)
+            .put("livemode", false)
+            .put("type", "card")
+            .put(
+                "card",
+                JSONObject()
+                    .put("brand", "visa")
+                    .put("exp_month", 8)
+                    .put("exp_year", 2029)
+                    .put("last4", "4242")
+            )
+            .put(
+                "billing_details",
+                JSONObject().put(
+                    "address",
+                    JSONObject()
+                        .put("line1", "1234 Main Street")
+                        .put("city", "San Francisco")
+                        .put("state", "CA")
+                        .put("postal_code", "94111")
+                        .put("country", "US")
+                )
+            )
+        return JSONObject()
+            .put("id", "cus_saved_customer")
+            .put("payment_methods", JSONArray().put(paymentMethod))
+            .put("can_detach_payment_method", true)
     }
 
     @Suppress("RestrictedApi")
@@ -1231,6 +1428,7 @@ internal class CheckoutControllerTest {
             controller = controller,
             stateHolder = CheckoutControllerStateFactory.createStateHolder(controllerSavedState.handle),
             sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
+            savedStateHandle = controllerSavedState.handle,
         )
     }
 
@@ -1238,6 +1436,7 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val stateHolder: CheckoutControllerStateHolder,
         val sheetStateHolder: SheetStateHolder,
+        val savedStateHandle: SavedStateHandle,
     )
 
     private fun runConfigureScenario(
@@ -1300,6 +1499,7 @@ internal class CheckoutControllerTest {
                 MutationScenario(
                     controller = controller,
                     stateHolder = setup.stateHolder,
+                    savedStateHandle = setup.savedStateHandle,
                     testScope = this@runTest,
                     isUpdatingTurbine = isUpdatingTurbine,
                 )
@@ -1315,6 +1515,7 @@ internal class CheckoutControllerTest {
     private class MutationScenario(
         val controller: CheckoutController,
         private val stateHolder: CheckoutControllerStateHolder,
+        private val savedStateHandle: SavedStateHandle,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
@@ -1331,6 +1532,25 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
+
+        fun createSelectionHandler(
+            completions: Turbine<CheckoutControllerState>,
+        ): CheckoutPaymentSelectionHandler {
+            return CheckoutPaymentSelectionHandler(
+                checkoutController = controller,
+                selectionHolder = stateHolder,
+                immediateActionHandler = { completions.add(committedState()) },
+                coroutineScope = this,
+            )
+        }
+
+        fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
+            val customerState: CustomerState = requireNotNull(
+                savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER]
+            )
+            val paymentMethod = customerState.paymentMethods.single()
+            return PaymentSelection.Saved(paymentMethod)
+        }
     }
 
     private companion object {
