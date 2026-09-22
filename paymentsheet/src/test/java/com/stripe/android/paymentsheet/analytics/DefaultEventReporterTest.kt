@@ -19,6 +19,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -95,7 +96,7 @@ class DefaultEventReporterTest {
                 reset = true,
             )
         )
-        eventReporter.onLoadStarted(initializedViaCompose = true, publishableKey = "pk_test_123")
+        eventReporter.onLoadStarted(initializedViaCompose = true, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_started")
@@ -181,7 +182,7 @@ class DefaultEventReporterTest {
             )
         )
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error, publishableKey = "pk_test_123")
+        eventReporter.onLoadFailed(error = error, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -259,7 +260,7 @@ class DefaultEventReporterTest {
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.milliseconds
 
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error, publishableKey = "pk_test_123")
+        eventReporter.onLoadFailed(error = error, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -280,7 +281,7 @@ class DefaultEventReporterTest {
             )
         )
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error, publishableKey = "pk_test_123")
+        eventReporter.onLoadFailed(error = error, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -1503,7 +1504,7 @@ class DefaultEventReporterTest {
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKey = "pk_test_123",
+            publishableKey = DEFAULT_API_CONFIG.publishableKey,
             defaultProductUsageTokens = setOf(""),
         )
 
