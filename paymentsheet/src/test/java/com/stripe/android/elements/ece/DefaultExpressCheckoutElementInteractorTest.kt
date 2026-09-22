@@ -8,9 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.checkout.CheckoutOperationCoordinator
-import com.stripe.android.checkout.FakeCheckoutSessionRefresher
-import com.stripe.android.core.Logger
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -22,16 +19,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -45,9 +37,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
     @get:Rule
     val paymentConfigurationRule = PaymentConfigurationTestRule(applicationContext)
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `state contains provided express buttons`() = runScenario(
@@ -129,21 +118,10 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     fun `state is disabled while an operation is updating`() = runScenario {
         assertThat(interactor.state.value.enabled).isTrue()
 
-        val mutationStarted = CompletableDeferred<Unit>()
-        val mutationFinished = CompletableDeferred<Unit>()
-        val mutation = backgroundScope.launch {
-            operationCoordinator.runMutation {
-                mutationStarted.complete(Unit)
-                mutationFinished.await()
-                Result.success(Unit)
-            }
-        }
-
-        mutationStarted.await()
+        isUpdating.value = true
         assertThat(interactor.state.value.enabled).isFalse()
 
-        mutationFinished.complete(Unit)
-        mutation.join()
+        isUpdating.value = false
         assertThat(interactor.state.value.enabled).isTrue()
     }
 
@@ -292,20 +270,11 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         requiresShippingAddress: Boolean = false,
+        isUpdating: MutableStateFlow<Boolean> = MutableStateFlow(false),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeExpressCheckoutElementEventReporter()
         val confirmationPerformer = FakeExpressCheckoutElementConfirmationPerformer()
-        val confirmationHandler = FakeConfirmationHandler()
-        val sessionRefresher = FakeCheckoutSessionRefresher()
-        val operationCoordinator = CheckoutOperationCoordinator(
-            confirmationHandler = confirmationHandler,
-            sheetStateHolder = SheetStateHolder(savedStateHandle),
-            sessionRefresher = sessionRefresher,
-            logger = Logger.noop(),
-            resultCallback = {},
-            viewModelScope = backgroundScope,
-        )
 
         val interactorFactory = {
             val stateHolder = createStateHolder(
@@ -322,7 +291,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 savedStateHandle = savedStateHandle,
                 eventReporter = eventReporter,
                 expressCheckoutElementConfirmationPerformer = confirmationPerformer,
-                operationCoordinator = operationCoordinator,
+                isUpdating = isUpdating,
             )
         }
 
@@ -333,15 +302,12 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             linkAccountHolder = linkAccountHolder,
             paymentMethodMetadata = paymentMethodMetadata,
             googlePayConfiguration = googlePayConfiguration,
-            operationCoordinator = operationCoordinator,
-            backgroundScope = backgroundScope,
+            isUpdating = isUpdating,
             interactorFactory = interactorFactory,
         ).block()
 
         eventReporter.ensureAllEventsConsumed()
         confirmationPerformer.ensureAllEventsConsumed()
-        confirmationHandler.validate()
-        sessionRefresher.ensureAllEventsConsumed()
     }
 
     private fun createStateHolder(
@@ -381,8 +347,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val linkAccountHolder: LinkAccountHolder,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val googlePayConfiguration: CheckoutGooglePayConfiguration,
-        val operationCoordinator: CheckoutOperationCoordinator,
-        val backgroundScope: CoroutineScope,
+        val isUpdating: MutableStateFlow<Boolean>,
         private val interactorFactory: () -> DefaultExpressCheckoutElementInteractor,
     ) {
         fun createInteractor(): DefaultExpressCheckoutElementInteractor {

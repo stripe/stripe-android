@@ -40,7 +40,7 @@ internal class ExpressCheckoutElementScreenshotTest {
         paparazziRule.snapshot {
             ExpressCheckoutElementContent(
                 interactor = FakeExpressCheckoutElementInteractor(),
-                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -72,7 +72,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -98,7 +98,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                         )
                     ),
                 ),
-                googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -121,7 +121,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                             )
                         ),
                     ),
-                    googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
                 )
                 ExpressCheckoutElementContent(
                     interactor = FakeExpressCheckoutElementInteractor(
@@ -133,14 +133,14 @@ internal class ExpressCheckoutElementScreenshotTest {
                             )
                         ),
                     ),
-                    googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
                 )
             }
         }
     }
 
     @Composable
-    private fun FakeGooglePayButton(enabled: Boolean) {
+    private fun FakeGooglePayButton(enabled: Boolean = true) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
