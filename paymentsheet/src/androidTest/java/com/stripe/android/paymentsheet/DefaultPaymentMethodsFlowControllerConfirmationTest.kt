@@ -132,7 +132,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
                 ) {
                     composeTestRule.onAllNodes(
                         hasTestTag(TEST_TAG_BILLING_DETAILS)
-                    ).fetchSemanticsNodes().isNotEmpty()
+                    ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
                 }
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
 
@@ -141,7 +141,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
                 ) {
                     composeTestRule.onAllNodes(
                         hasTestTag(TEST_TAG_ACCOUNT_DETAILS)
-                    ).fetchSemanticsNodes().isNotEmpty()
+                    ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
                 }
             } else {
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)

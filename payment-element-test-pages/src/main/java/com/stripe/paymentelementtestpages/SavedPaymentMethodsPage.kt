@@ -22,7 +22,7 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -36,7 +36,7 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
                     }
                 )
             )
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }
@@ -63,7 +63,7 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         val testTag = PaymentOptionsItem.ViewType.AddCard.name
@@ -73,7 +73,7 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
         ) {
             composeTestRule
                 .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 

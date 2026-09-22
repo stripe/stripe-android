@@ -227,7 +227,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
         composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
@@ -256,7 +256,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(SHEET_ERROR_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
@@ -292,7 +292,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 
@@ -317,7 +317,7 @@ internal class PaymentSheetPage(
     fun assertNoText(text: String, substring: Boolean = false) {
         composeTestRule
             .onAllNodes(hasText(text, substring = substring))
-            .fetchSemanticsNodes().isEmpty()
+            .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
     }
 
     fun addPaymentMethod() {
@@ -362,7 +362,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(
                 hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled())
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         composeTestRule.onNode(hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG))
             .performScrollTo()
@@ -373,7 +373,7 @@ internal class PaymentSheetPage(
     fun assertNoSetAsDefaultCheckbox() {
         composeTestRule.onAllNodesWithTag(
             SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
-        ).fetchSemanticsNodes().isEmpty()
+        ).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
     }
 
     fun assertSetAsDefaultCheckboxNotChecked() {
@@ -383,7 +383,7 @@ internal class PaymentSheetPage(
         ) {
             composeTestRule.onAllNodes(
                 hasTestTag(testTag).and(isToggleable()).and(isOff())
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 
@@ -394,7 +394,7 @@ internal class PaymentSheetPage(
         ) {
             composeTestRule.onAllNodes(
                 hasTestTag(testTag).and(isToggleable()).and(isOn())
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 
@@ -410,7 +410,7 @@ internal class PaymentSheetPage(
         ) {
             composeTestRule.onAllNodes(
                 hasTestTag(testTag).and(isToggleable()).and(isOff())
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 
@@ -421,7 +421,7 @@ internal class PaymentSheetPage(
         ) {
             composeTestRule.onAllNodes(
                 hasTestTag(testTag).and(isToggleable()).and(isOn())
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 
@@ -451,7 +451,7 @@ internal class PaymentSheetPage(
             composeTestRule.waitUntil(timeoutMillis = 5_000) {
                 composeTestRule
                     .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                    .fetchSemanticsNodes()
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
             }
 
@@ -489,7 +489,7 @@ internal class PaymentSheetPage(
             composeTestRule.onAllNodes(
                 hasTestTag(testTagForLayout)
             )
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         composeTestRule.onNodeWithTag(testTagForLayout).assertExists()
@@ -547,7 +547,7 @@ internal class PaymentSheetPage(
             composeTestRule.onAllNodes(
                 hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
                     .and(isSelected())
-            ).fetchSemanticsNodes()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

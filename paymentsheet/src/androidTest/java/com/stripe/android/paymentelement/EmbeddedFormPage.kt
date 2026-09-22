@@ -106,7 +106,7 @@ internal class EmbeddedFormPage(
         ) {
             composeTestRule.onAllNodes(
                 hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled())
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
         composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
@@ -125,7 +125,7 @@ internal class EmbeddedFormPage(
                 hasText("Card number").and(
                     SemanticsMatcher.expectValue(SemanticsProperties.Error, errorMessage)
                 )
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 

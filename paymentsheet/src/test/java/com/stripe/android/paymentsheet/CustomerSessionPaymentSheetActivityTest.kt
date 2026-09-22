@@ -371,7 +371,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 composeTestRule.waitUntil(timeoutMillis = 5_000) {
                     composeTestRule
                         .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                        .fetchSemanticsNodes()
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isNotEmpty()
                 }
 
