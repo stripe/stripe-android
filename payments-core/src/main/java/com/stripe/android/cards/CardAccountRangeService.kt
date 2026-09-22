@@ -92,7 +92,7 @@ class DefaultCardAccountRangeService(
     }
 
     override val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
-    private var lastBin: Bin? = null
+    private var repositoryResult: RepositoryResult? = null
 
     private val _accountRangesStateFlow = MutableStateFlow<CardAccountRangeService.AccountRangesState>(
         value = CardAccountRangeService.AccountRangesState.Success(emptyList(), emptyList())
@@ -149,25 +149,29 @@ class DefaultCardAccountRangeService(
 
     @JvmSynthetic
     override fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) {
-        if (shouldQueryAccountRange(cardNumber)) {
-            // cancel in-flight job
-            cancelAccountRangeRepositoryJob()
+        // cancel in-flight job
+        cancelAccountRangeRepositoryJob()
 
-            // Emit loading state before fetching
-            _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Loading
+        val bin = cardNumber.bin
+        val cachedResult = repositoryResult?.takeIf { bin != null && it.bin == bin }
+        if (cachedResult != null) {
+            publishPrioritizedRanges(cachedResult.accountRanges, cardNumber)
+            return
+        }
 
-            accountRangeRepositoryJob = coroutineScope.launch(workContext) {
-                val bin = cardNumber.bin
+        // Emit loading state before fetching
+        _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Loading
 
-                val accountRanges = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRanges(cardNumber)
-                } else {
-                    null
-                }
+        accountRangeRepositoryJob = coroutineScope.launch(workContext) {
+            val accountRanges = if (bin != null) {
+                cardAccountRangeRepository.getAccountRanges(cardNumber)
+            } else {
+                null
+            }.orEmpty()
 
-                withContext(uiContext) {
-                    updateAccountRangesResult(prioritizeMatchingRanges(accountRanges.orEmpty(), cardNumber))
-                }
+            withContext(uiContext) {
+                repositoryResult = bin?.let { RepositoryResult(it, accountRanges) }
+                publishPrioritizedRanges(accountRanges, cardNumber)
             }
         }
     }
@@ -178,6 +182,11 @@ class DefaultCardAccountRangeService(
     }
 
     override fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
+        repositoryResult = null
+        publishAccountRanges(accountRanges)
+    }
+
+    private fun publishAccountRanges(accountRanges: List<AccountRange>) {
         val filteredAccountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
 
         // Single source update - both filtered and unfiltered
@@ -191,6 +200,25 @@ class DefaultCardAccountRangeService(
             accountRanges = filteredAccountRanges,
             unfilteredAccountRanges = accountRanges
         )
+    }
+
+    /**
+     * The repository result depends only on the BIN, but the range that applies depends on the
+     * whole card number, so the order is recomputed for every card number within the BIN.
+     * Publishing only on a change keeps listeners from reacting to every keystroke.
+     */
+    private fun publishPrioritizedRanges(
+        accountRanges: List<AccountRange>,
+        cardNumber: CardNumber.Unvalidated
+    ) {
+        val prioritizedRanges = prioritizeMatchingRanges(accountRanges, cardNumber)
+        val state = accountRangesStateFlow.value
+
+        if (state !is CardAccountRangeService.AccountRangesState.Success ||
+            state.unfilteredRanges != prioritizedRanges
+        ) {
+            publishAccountRanges(prioritizedRanges)
+        }
     }
 
     /**
@@ -222,14 +250,8 @@ class DefaultCardAccountRangeService(
         else -> false
     }
 
-    private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        return with(accountRange) {
-            val shouldQuery = this == null ||
-                cardNumber.bin == null ||
-                !binRange.matches(cardNumber) ||
-                cardNumber.bin != lastBin
-            lastBin = cardNumber.bin
-            shouldQuery
-        }
-    }
+    private class RepositoryResult(
+        val bin: Bin,
+        val accountRanges: List<AccountRange>,
+    )
 }
