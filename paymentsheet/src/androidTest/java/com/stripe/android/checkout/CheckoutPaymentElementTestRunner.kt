@@ -25,8 +25,11 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementTestRunnerContext(
-    private val presenter: CheckoutPresenter,
+    private var presenter: CheckoutPresenter,
+    private val controller: CheckoutController,
     private val countDownLatch: CountDownLatch,
+    private val scenario: ActivityScenario<MainActivity>,
+    private val renderPaymentElementContent: Boolean,
 ) {
     fun presentPaymentOptions() {
         presenter.paymentElement().present()
@@ -34,6 +37,18 @@ internal class CheckoutPaymentElementTestRunnerContext(
 
     fun confirm() {
         presenter.confirm()
+    }
+
+    fun recreateHost() {
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.recreate()
+        scenario.onActivity { activity ->
+            presenter = controller.createPresenter(activity)
+            if (renderPaymentElementContent) {
+                activity.setCheckoutContent(presenter)
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
     }
 
     /**
@@ -90,12 +105,7 @@ internal fun runCheckoutPaymentElementTest(
         scenario.onActivity { activity ->
             presenter = controller.createPresenter(activity)
             if (renderPaymentElementContent) {
-                val paymentElement = presenter.paymentElement()
-                activity.setContent {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        paymentElement.Content()
-                    }
-                }
+                activity.setCheckoutContent(presenter)
             }
         }
 
@@ -104,7 +114,10 @@ internal fun runCheckoutPaymentElementTest(
         block(
             CheckoutPaymentElementTestRunnerContext(
                 presenter = presenter,
+                controller = controller,
                 countDownLatch = countDownLatch,
+                scenario = scenario,
+                renderPaymentElementContent = renderPaymentElementContent,
             )
         )
 
@@ -113,6 +126,15 @@ internal fun runCheckoutPaymentElementTest(
         assertThat(didCompleteSuccessfully).isTrue()
         scenario.onActivity {
             controller.destroy()
+        }
+    }
+}
+
+private fun MainActivity.setCheckoutContent(presenter: CheckoutPresenter) {
+    val paymentElement = presenter.paymentElement()
+    setContent {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            paymentElement.Content()
         }
     }
 }

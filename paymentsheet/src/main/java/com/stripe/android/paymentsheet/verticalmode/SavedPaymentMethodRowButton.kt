@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.verticalmode
 import android.content.res.Configuration
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.getSublabel
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
@@ -36,6 +39,8 @@ internal fun SavedPaymentMethodRowButton(
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     isSelected: Boolean,
+    isLoading: Boolean = false,
+    loadingIndicatorTestTag: String? = null,
     modifier: Modifier = Modifier,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
     onClick: () -> Unit = {},
@@ -56,27 +61,11 @@ internal fun SavedPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
         iconContent = {
-            val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
-            CardArtImage(
-                url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
-                modifier = Modifier
-                    .width(UIConstants.iconWidth)
-                    .height(iconHeight)
-            ) {
-                PaymentMethodIconFromResource(
-                    iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
-                        // Link brand doesn't matter in vertical mode, where we only show the icon.
-                        linkBrand = LinkBrand.Link,
-                        forVerticalMode = true
-                    ),
-                    colorFilter = null,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .height(iconHeight)
-                        .width(UIConstants.iconWidth)
-                        .testMetadata(displayBrand)
-                )
-            }
+            SavedPaymentMethodIcon(
+                displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                isLoading = isLoading,
+                loadingIndicatorTestTag = loadingIndicatorTestTag,
+            )
         },
         title = paymentMethodTitle.resolve(),
         subtitle = displayableSavedPaymentMethod.paymentMethod.getSublabel()?.resolve(),
@@ -92,6 +81,56 @@ internal fun SavedPaymentMethodRowButton(
         shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge,
         promotionProvider = null
     )
+}
+
+@Composable
+private fun SavedPaymentMethodIcon(
+    displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    isLoading: Boolean,
+    loadingIndicatorTestTag: String?,
+) {
+    Box(
+        modifier = Modifier
+            .width(UIConstants.iconWidth)
+            .height(iconHeight),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(iconHeight)
+                    .then(
+                        if (loadingIndicatorTestTag != null) {
+                            Modifier.testTag(loadingIndicatorTestTag)
+                        } else {
+                            Modifier
+                        }
+                    ),
+            )
+        } else {
+            val paymentMethod = displayableSavedPaymentMethod.paymentMethod
+            CardArtImage(
+                url = paymentMethod.card?.cardArt?.artImage?.url,
+                modifier = Modifier
+                    .width(UIConstants.iconWidth)
+                    .height(iconHeight)
+            ) {
+                PaymentMethodIconFromResource(
+                    iconRes = paymentMethod.getSavedPaymentMethodIcon(
+                        // Link brand doesn't matter in vertical mode, where we only show the icon.
+                        linkBrand = LinkBrand.Link,
+                        forVerticalMode = true
+                    ),
+                    colorFilter = null,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(iconHeight)
+                        .width(UIConstants.iconWidth)
+                        .testMetadata(paymentMethod.card?.displayBrand)
+                )
+            }
+        }
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

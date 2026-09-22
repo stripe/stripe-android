@@ -91,6 +91,7 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
@@ -358,6 +359,13 @@ internal interface CheckoutControllerModule {
             operationCoordinator: CheckoutOperationCoordinator,
         ): StateFlow<Boolean> {
             return operationCoordinator.isUpdating
+        }
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(
+            handler: CheckoutPaymentSelectionHandler,
+        ): StateFlow<SavedPaymentMethodSelectionState> {
+            return handler.state
         }
     }
 }

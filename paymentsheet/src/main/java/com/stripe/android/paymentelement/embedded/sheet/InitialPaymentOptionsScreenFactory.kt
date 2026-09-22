@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodSelectionState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -178,6 +179,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+            savedPaymentMethodSelectionState = stateFlowOf(
+                SavedPaymentMethodSelectionState(pendingSelection = null)
+            ),
             temporarySelection = stateFlowOf(null),
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(

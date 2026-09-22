@@ -98,6 +98,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
+    savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
     paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
@@ -157,6 +158,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
+                savedPaymentMethodSelectionState = stateFlowOf(
+                    SavedPaymentMethodSelectionState(pendingSelection = null)
+                ),
                 temporarySelection = stateFlowOf(null),
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
@@ -231,12 +235,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,
-        mostRecentlySelectedSavedPaymentMethod
-    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
+        mostRecentlySelectedSavedPaymentMethod,
+        savedPaymentMethodSelectionState,
+    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
         getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
-            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+            pendingSelection = selectionState.pendingSelection,
         )
     }
 
@@ -474,6 +480,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
+        pendingSelection: PaymentSelection.Saved?,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -481,7 +488,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = paymentMethodMetadata,
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
+            isSelectionPending = pendingSelection?.paymentMethod?.id?.let {
+                it == paymentMethodToDisplay.id
+            } ?: false,
         )
     }
 
