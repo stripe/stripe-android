@@ -15,13 +15,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutCollectedDetails
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -61,7 +61,7 @@ internal class ShippingAddressElementTest {
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
         activityLauncher.launchCalls.expectNoEvents()
-        paymentConfiguration.getCalls.expectNoEvents()
+        apiConfigurationProvider.getCalls.expectNoEvents()
     }
 
     @Test
@@ -81,7 +81,7 @@ internal class ShippingAddressElementTest {
             assertThat(call.stripeException).isNull()
             assertThat(call.additionalNonPiiParams).isEmpty()
             activityLauncher.launchCalls.expectNoEvents()
-            paymentConfiguration.getCalls.expectNoEvents()
+            apiConfigurationProvider.getCalls.expectNoEvents()
         }
 
     @Test
@@ -89,7 +89,7 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
 
         val launch = activityLauncher.launchCalls.awaitItem()
-        assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(launch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(launch.input.checkoutSessionResponse)
             .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
 
@@ -106,7 +106,7 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -123,7 +123,7 @@ internal class ShippingAddressElementTest {
         val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
         assertThat(config.allowedCountries).containsExactly("US", "CA")
         assertThat(config.address).isNull()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -194,14 +194,14 @@ internal class ShippingAddressElementTest {
 
         activityLauncher.launchCalls.awaitItem()
         activityLauncher.launchCalls.expectNoEvents()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
     fun `recreated element suppresses presentation while original is active`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         val recreated = createElement()
         recreated.shippingAddressElement.present()
@@ -212,21 +212,25 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `present resolves the latest payment configuration`() = runScenario {
+    fun `present resolves the latest API configuration`() = runScenario {
         shippingAddressElement.present()
 
         val firstLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(firstLaunch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(AddressElementActivityContract.Result.Canceled)
-        paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        apiConfigurationProvider.value = DEFAULT_API_CONFIG.copy(
+            publishableKey = "pk_new",
+            stripeAccountId = "acct_new",
+        )
 
         shippingAddressElement.present()
 
         val secondLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(secondLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(secondLaunch.input.apiConfiguration.publishableKey).isEqualTo("pk_new")
+        assertThat(secondLaunch.input.apiConfiguration.stripeAccountId).isEqualTo("acct_new")
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -268,8 +272,8 @@ internal class ShippingAddressElementTest {
 
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -281,7 +285,7 @@ internal class ShippingAddressElementTest {
         ) {
             shippingAddressElement.present()
             activityLauncher.launchCalls.awaitItem()
-            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
             registration.dispatch(
                 AddressElementActivityContract.Result.CheckoutShippingSucceeded(
@@ -309,7 +313,7 @@ internal class ShippingAddressElementTest {
 
             shippingAddressElement.present()
             activityLauncher.launchCalls.awaitItem()
-            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
@@ -317,7 +321,7 @@ internal class ShippingAddressElementTest {
     fun `canceled result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(AddressElementActivityContract.Result.Canceled)
 
@@ -329,7 +333,7 @@ internal class ShippingAddressElementTest {
     fun `malformed successful result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
@@ -352,7 +356,7 @@ internal class ShippingAddressElementTest {
     fun `recreated element result clears presentation after host destruction`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         activityLauncher.unregisterCalls.awaitItem()
@@ -367,7 +371,7 @@ internal class ShippingAddressElementTest {
 
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
         recreated.ensureAllEventsConsumed()
     }
 
@@ -396,9 +400,7 @@ internal class ShippingAddressElementTest {
             )
         }
         val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
-        val paymentConfiguration = RecordingProvider(
-            PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-        )
+        val apiConfigurationProvider = RecordingProvider(DEFAULT_API_CONFIG)
         val errorReporter = FakeErrorReporter()
         val coroutineScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
 
@@ -408,7 +410,7 @@ internal class ShippingAddressElementTest {
             val shippingAddressElement = ShippingAddressElement(
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
-                paymentConfiguration = paymentConfiguration,
+                apiConfigurationProvider = apiConfigurationProvider,
                 coroutineScope = coroutineScope,
                 commitShippingAddress = commitShippingAddress,
                 stateHolder = stateHolder,
@@ -435,14 +437,14 @@ internal class ShippingAddressElementTest {
             stateHolder = stateHolder,
             shippingAddressElementStateHolder = shippingAddressElementStateHolder,
             commitShippingAddress = commitShippingAddress,
-            paymentConfiguration = paymentConfiguration,
+            apiConfigurationProvider = apiConfigurationProvider,
             errorReporter = errorReporter,
             registration = element.registration,
             createElement = ::createElement,
         ).block()
 
         element.ensureAllEventsConsumed()
-        paymentConfiguration.getCalls.ensureAllEventsConsumed()
+        apiConfigurationProvider.getCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
         commitShippingAddress.ensureAllEventsConsumed()
     }
@@ -535,7 +537,7 @@ internal class ShippingAddressElementTest {
         val stateHolder: CheckoutControllerStateHolder,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         val commitShippingAddress: FakeCommitShippingAddress,
-        val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
+        val apiConfigurationProvider: RecordingProvider<ApiConfiguration.State>,
         val errorReporter: FakeErrorReporter,
         val registration: Registration,
         val createElement: suspend () -> ElementScenario,

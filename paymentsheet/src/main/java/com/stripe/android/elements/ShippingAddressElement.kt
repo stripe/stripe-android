@@ -10,13 +10,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.checkout.toShippingDetails
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -44,7 +44,7 @@ internal fun interface CommitShippingAddress {
 class ShippingAddressElement internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val commitShippingAddress: CommitShippingAddress,
     private val stateHolder: CheckoutControllerStateHolder,
@@ -55,7 +55,7 @@ class ShippingAddressElement internal constructor(
     internal constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
-        paymentConfiguration: Provider<PaymentConfiguration>,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @ViewModelScope coroutineScope: CoroutineScope,
         checkoutController: CheckoutController,
         stateHolder: CheckoutControllerStateHolder,
@@ -64,7 +64,7 @@ class ShippingAddressElement internal constructor(
     ) : this(
         activityResultCaller = activityResultCaller,
         lifecycleOwner = lifecycleOwner,
-        paymentConfiguration = paymentConfiguration,
+        apiConfigurationProvider = apiConfigurationProvider,
         coroutineScope = coroutineScope,
         commitShippingAddress = CommitShippingAddress(checkoutController::commitShippingAddress),
         stateHolder = stateHolder,
@@ -134,7 +134,7 @@ class ShippingAddressElement internal constructor(
         shippingAddressElementStateHolder.isPresenting = true
         activityLauncher.launch(
             AddressElementActivityContract.Args.CheckoutShipping(
-                publishableKey = paymentConfiguration.get().publishableKey,
+                apiConfiguration = apiConfigurationProvider.get(),
                 checkoutSessionResponse = state.checkoutSessionResponse,
                 config = AddressLauncher.Configuration(
                     appearance = configuration.appearance.asPaymentSheet(),
