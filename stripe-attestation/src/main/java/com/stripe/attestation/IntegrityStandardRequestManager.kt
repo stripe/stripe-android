@@ -1,12 +1,12 @@
 package com.stripe.attestation
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -43,6 +43,7 @@ class IntegrityStandardRequestManager(
 ) : IntegrityRequestManager {
 
     private val standardIntegrityManager: StandardIntegrityManager by lazy { factory.create() }
+    private val logger = Logger.real()
     private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {
@@ -82,11 +83,11 @@ class IntegrityStandardRequestManager(
 
     private suspend fun getOrPrepareTokenProvider(): StandardIntegrityTokenProvider = mutex.withLock {
         integrityTokenProvider?.let {
-            Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
+            logger.debug("Integrity token already prepared - instance: $standardIntegrityManager")
             return@withLock it
         }
 
-        Log.d("Integrity", "Preparing integrity token provider - instance: $standardIntegrityManager")
+        logger.debug("Preparing integrity token provider - instance: $standardIntegrityManager")
         val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
             .prepareIntegrityToken(
                 PrepareIntegrityTokenRequest.builder()
