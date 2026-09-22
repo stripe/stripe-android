@@ -70,6 +70,7 @@ internal fun InputAddressScreen(
                     Modifier
                         .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                         .padding(top = MaterialTheme.stripeFormInsets.top.dp)
+                        .padding(bottom = MaterialTheme.stripeFormInsets.bottom.dp)
                 ) {
                     Text(
                         title,

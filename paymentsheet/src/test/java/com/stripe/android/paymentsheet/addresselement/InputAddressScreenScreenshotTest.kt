@@ -2,12 +2,16 @@
 
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -15,6 +19,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.uicore.LocalFormScrollContext
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +49,20 @@ internal class InputAddressScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun `default form layout is visible at the bottom of scroll`() {
+        paparazziRule.snapshot {
+            Box(modifier = Modifier.height(500.dp)) {
+                InputAddressTestScreen(
+                    appearance = PaymentSheet.Appearance(),
+                    title = "Checkout shipping address",
+                    primaryButtonText = "Use this address",
+                    scrollToBottom = true,
+                )
+            }
+        }
+    }
+
     private fun snapshot(
         appearance: PaymentSheet.Appearance,
         title: String? = null,
@@ -67,6 +86,7 @@ internal class InputAddressScreenScreenshotTest {
         appearance: PaymentSheet.Appearance,
         title: String,
         primaryButtonText: String,
+        scrollToBottom: Boolean = false,
     ) {
         val addressFormController = remember {
             AddressFormController(
@@ -86,6 +106,9 @@ internal class InputAddressScreenScreenshotTest {
             onCloseClick = {},
             topContent = {},
             formContent = {
+                if (scrollToBottom) {
+                    ScrollToBottom()
+                }
                 FormUI(
                     hiddenIdentifiers = emptySet(),
                     enabled = true,
@@ -95,6 +118,16 @@ internal class InputAddressScreenScreenshotTest {
             },
             bottomContent = {},
         )
+    }
+
+    @Composable
+    private fun ScrollToBottom() {
+        val scrollState = LocalFormScrollContext.current?.scrollState
+        val maxScroll = scrollState?.maxValue ?: 0
+
+        LaunchedEffect(scrollState, maxScroll) {
+            scrollState?.scrollTo(maxScroll)
+        }
     }
 
     private fun configuredAppearance(
