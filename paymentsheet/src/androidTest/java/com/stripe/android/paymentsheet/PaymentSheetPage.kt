@@ -2,11 +2,14 @@
 
 package com.stripe.android.paymentsheet
 
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Button
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -25,11 +28,10 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
@@ -225,7 +227,20 @@ internal class PaymentSheetPage(
     }
 
     fun clickPrimaryButton() {
-        composeTestRule.waitUntilWithIdle {
+        clickPrimaryButtonWithoutWaitingForDismissal()
+
+        composeTestRule.waitUntilWithIdle("sheet primary button to disappear") {
+            composeTestRule
+                .onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        composeTestRule.waitForIdle()
+    }
+
+    fun clickPrimaryButtonWithoutWaitingForDismissal() {
+        composeTestRule.waitUntilWithIdle("enabled sheet primary button to appear") {
             composeTestRule
                 .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
@@ -234,22 +249,17 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
-
-        composeTestRule.waitForIdle()
     }
 
     fun assertPrimaryButton(expectedStateDescription: String, canPay: Boolean) {
-        onView(withId(R.id.primary_button)).check { view, _ ->
-            val nodeInfo = AccessibilityNodeInfo()
-            view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.stateDescription).isEqualTo(expectedStateDescription)
-            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
-            if (canPay) {
-                assertThat(nodeInfo.isClickable).isTrue()
-                assertThat(nodeInfo.isEnabled).isTrue()
-            } else {
-                assertThat(nodeInfo.isEnabled).isFalse()
-            }
+        val primaryButton = composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+            .assert(hasText(expectedStateDescription))
+
+        if (canPay) {
+            primaryButton.assertIsEnabled()
+        } else {
+            primaryButton.assertIsNotEnabled()
         }
     }
 

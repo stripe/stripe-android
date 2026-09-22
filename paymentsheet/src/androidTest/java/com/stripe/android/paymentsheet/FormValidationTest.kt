@@ -51,6 +51,7 @@ internal class FormValidationTest(
     ) = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::expectNoResult
     ) { testContext ->
@@ -74,6 +75,7 @@ internal class FormValidationTest(
     ) = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::expectNoResult
     ) { testContext ->
