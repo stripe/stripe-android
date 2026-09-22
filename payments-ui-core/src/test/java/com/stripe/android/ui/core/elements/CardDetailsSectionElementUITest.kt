@@ -12,7 +12,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.ui.core.ApiKeyFixtures
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -87,10 +86,7 @@ internal class CardDetailsSectionElementUITest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val controller = CardDetailsSectionController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
-                context = context,
-                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-            ),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             coroutineScope = backgroundScope,
             collectName = false,

@@ -9,7 +9,6 @@ import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -126,10 +125,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         return if (context == null) {
             NullCardAccountRangeRepositoryFactory
         } else {
-            DefaultCardAccountRangeRepositoryFactory(
-                context = context,
-                publishableKeySupplier = { DEFAULT_API_CONFIG.publishableKey },
-            )
+            DefaultCardAccountRangeRepositoryFactory(context)
         }
     }
 }
