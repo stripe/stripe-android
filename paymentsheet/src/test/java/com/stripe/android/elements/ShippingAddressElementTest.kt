@@ -160,7 +160,7 @@ internal class ShippingAddressElementTest {
                 ),
             )
         )
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -183,7 +183,7 @@ internal class ShippingAddressElementTest {
             assertThat(config.buttonTitle).isEqualTo("Use this address")
 
             assertAppearance(config.appearance)
-            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
