@@ -13,7 +13,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.AttestationTokenProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -21,7 +21,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 internal class AttestationViewModel @Inject constructor(
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val attestationTokenProvider: AttestationTokenProvider,
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
     private val errorReporter: ErrorReporter
@@ -37,7 +37,7 @@ internal class AttestationViewModel @Inject constructor(
 
     private suspend fun attest() {
         attestationAnalyticsEventsReporter.requestToken()
-        integrityRequestManager.requestToken()
+        attestationTokenProvider.getToken()
             .onSuccess { token ->
                 attestationAnalyticsEventsReporter.requestTokenSucceeded()
                 _result.emit(AttestationActivityResult.Success(token))

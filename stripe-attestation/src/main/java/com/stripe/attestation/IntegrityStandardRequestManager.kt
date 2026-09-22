@@ -30,6 +30,8 @@ interface IntegrityRequestManager {
      *  [Docs](https://developer.android.com/google/play/integrity/standard#protect-requests)
      */
     suspend fun requestToken(requestIdentifier: String? = null): Result<String>
+
+    suspend fun reset() = Unit
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -44,28 +46,7 @@ class IntegrityStandardRequestManager(
     private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {
-        mutex.withLock {
-            // The mutex ensures only one coroutine executes this block at a time, but multiple
-            // calls can still queue up waiting for the lock. The if-check prevents redundant work
-            // by ensuring that once the first call completes and sets integrityTokenProvider, all
-            // subsequent calls (that were queued) will see it's already initialized and return
-            // early without re-executing the expensive prepareIntegrityToken() operation.
-            if (integrityTokenProvider != null) {
-                Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
-                return Result.success(Unit)
-            }
-            Log.d("Integrity", "Preparing integrity token provider - instance: $standardIntegrityManager")
-            val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
-                .prepareIntegrityToken(
-                    PrepareIntegrityTokenRequest.builder()
-                        .setCloudProjectNumber(cloudProjectNumber)
-                        .build()
-                ).awaitTask()
-
-            finishedTask.toResult()
-                .onSuccess { integrityTokenProvider = it }
-                .getOrThrow()
-        }
+        getOrPrepareTokenProvider()
     }
         .map {}
         .recoverCatching {
@@ -77,20 +58,16 @@ class IntegrityStandardRequestManager(
         requestIdentifier: String?,
     ): Result<String> = request(requestIdentifier)
 
+    override suspend fun reset() {
+        mutex.withLock {
+            integrityTokenProvider = null
+        }
+    }
+
     private suspend fun request(
         requestHash: String?,
     ): Result<String> = runCatching {
-        if (integrityTokenProvider == null) {
-            // If prepare() hasn't been called yet, perform it preemptively.
-            // This ensures callers of requestToken() don't need to explicitly prepare first.
-            // This is a convenience method, but it is recommended to call prepare() early as
-            // it can take a few seconds to complete.
-            prepare().getOrThrow()
-        }
-        val finishedTask = requireNotNull(
-            value = integrityTokenProvider,
-            lazyMessage = { "Integrity token provider is not initialized after prepare()" }
-        ).request(
+        val finishedTask = getOrPrepareTokenProvider().request(
             StandardIntegrityTokenRequest.builder()
                 .setRequestHash(requestHash)
                 .build()
@@ -102,4 +79,23 @@ class IntegrityStandardRequestManager(
             logError("Integrity - Failed to request integrity token", it)
             throw AttestationError.fromException(it)
         }
+
+    private suspend fun getOrPrepareTokenProvider(): StandardIntegrityTokenProvider = mutex.withLock {
+        integrityTokenProvider?.let {
+            Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
+            return@withLock it
+        }
+
+        Log.d("Integrity", "Preparing integrity token provider - instance: $standardIntegrityManager")
+        val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
+            .prepareIntegrityToken(
+                PrepareIntegrityTokenRequest.builder()
+                    .setCloudProjectNumber(cloudProjectNumber)
+                    .build()
+            ).awaitTask()
+
+        finishedTask.toResult()
+            .getOrThrow()
+            .also { integrityTokenProvider = it }
+    }
 }
