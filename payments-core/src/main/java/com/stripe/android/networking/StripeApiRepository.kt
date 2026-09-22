@@ -124,7 +124,7 @@ import kotlin.coroutines.CoroutineContext
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class StripeApiRepository @JvmOverloads internal constructor(
     private val context: Context,
-    private val publishableKeyProvider: () -> String,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     private val requestSurface: RequestSurface,
     private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
@@ -137,22 +137,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(context, publishableKeyProvider, workContext),
+        DefaultFraudDetectionDataRepository(
+            context = context,
+            publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+            workContext = workContext,
+        ),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
         DefaultCardAccountRangeRepositoryFactory(
             context = context,
             productUsageTokens = productUsageTokens,
             requestSurface = requestSurface,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            apiConfigurationProvider = {
-                ApiConfiguration.State(
-                    publishableKey = publishableKeyProvider(),
-                    stripeAccountId = null,
-                )
-            },
+            apiConfigurationProvider = apiConfigurationProvider,
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
+        PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+            defaultProductUsageTokens = productUsageTokens,
+        ),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
@@ -162,7 +165,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        apiConfigProvider: Provider<ApiConfiguration.State>,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -171,7 +174,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = { apiConfigProvider.get().publishableKey },
+        apiConfigurationProvider = apiConfigurationProvider,
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
@@ -1633,7 +1636,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         val cardAccountRangeRepository =
             cardAccountRangeRepositoryFactory.createWithStripeRepository(
                 stripeRepository = this,
-                publishableKey = publishableKeyProvider()
+                publishableKey = apiConfigurationProvider.get().publishableKey
             )
 
         val accountRanges = cardAccountRangeRepository.getAccountRanges(

@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -76,7 +77,13 @@ internal class CardWidgetViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val stripeRepository = StripeApiRepository(
                 context = context,
-                publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+                apiConfigurationProvider = {
+                    val configuration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = configuration.publishableKey,
+                        stripeAccountId = configuration.stripeAccountId,
+                    )
+                },
                 requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
             )
 

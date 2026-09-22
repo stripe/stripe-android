@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
+import com.stripe.android.core.ApiConfiguration;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -914,7 +915,7 @@ public class StripeTest {
     ) {
         return new StripeApiRepository(
                 context,
-                () -> publishableKey,
+                () -> new ApiConfiguration.State(publishableKey, null),
                 RequestSurface.PaymentElement,
                 null,
                 new FakeLogger(),

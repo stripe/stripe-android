@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
@@ -184,7 +185,12 @@ internal class PaymentMethodEndToEndTest {
     fun createPaymentMethod_withGrabPay_shouldCreateObject() = runTest {
         val repository = StripeApiRepository(
             context = context,
-            publishableKeyProvider = { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                )
+            },
             requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         )
@@ -202,7 +208,12 @@ internal class PaymentMethodEndToEndTest {
     fun `createPaymentMethod() with PayPay PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
             context = context,
-            publishableKeyProvider = { ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                )
+            },
             requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         ).createPaymentMethod(
@@ -218,7 +229,12 @@ internal class PaymentMethodEndToEndTest {
     fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
             context = context,
-            publishableKeyProvider = { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                )
+            },
             requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         ).createPaymentMethod(

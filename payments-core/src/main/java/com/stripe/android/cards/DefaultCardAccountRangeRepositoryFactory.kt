@@ -110,7 +110,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                 RemoteCardAccountRangeSource(
                     StripeApiRepository(
                         context = appContext,
-                        publishableKeyProvider = { publishableKey },
+                        apiConfigurationProvider = apiConfigurationProvider,
                         requestSurface = requestSurface,
                     ),
                     ApiRequest.Options(

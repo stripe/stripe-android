@@ -16,6 +16,7 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.ACCOUNT
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.CARTES_BANCAIRES_ACCOUNT_RANGES
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY16_ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY19_ACCOUNTS
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
@@ -388,7 +389,16 @@ class CardAccountRangeServiceTest {
 
     private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
         return RemoteCardAccountRangeSource(
-            StripeApiRepository(applicationContext, { publishableKey }, RequestSurface.PaymentElement),
+            StripeApiRepository(
+                applicationContext,
+                {
+                    ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = null,
+                    )
+                },
+                RequestSurface.PaymentElement,
+            ),
             ApiRequest.Options(publishableKey),
             DefaultCardAccountRangeStore(applicationContext),
             DefaultAnalyticsRequestExecutor(),

@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.model.PaymentIntentFixtures
@@ -198,7 +199,12 @@ internal class StripePaymentAuthTest {
         return Stripe(
             StripeApiRepository(
                 context = ApplicationProvider.getApplicationContext(),
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    )
+                },
                 requestSurface = RequestSurface.PaymentElement,
                 stripeNetworkClient = DefaultStripeNetworkClient(
                     workContext = testDispatcher
