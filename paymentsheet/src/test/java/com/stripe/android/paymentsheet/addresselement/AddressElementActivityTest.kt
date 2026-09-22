@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +33,7 @@ internal class AddressElementActivityTest {
     @Test
     fun `standalone contract creates intent with standalone args`() {
         val args = AddressElementActivityContract.Args.Standalone(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             config = null,
         )
 
@@ -48,7 +49,7 @@ internal class AddressElementActivityTest {
     @Test
     fun `checkout shipping contract creates intent with checkout shipping args`() {
         val args = AddressElementActivityContract.Args.CheckoutShipping(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             config = null,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
         )
