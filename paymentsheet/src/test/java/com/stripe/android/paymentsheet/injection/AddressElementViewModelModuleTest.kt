@@ -8,6 +8,7 @@ import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -57,7 +58,7 @@ class AddressElementViewModelModuleTest {
     fun `providePrimaryButtonAction completes standalone through the view model`() =
         runTest(UnconfinedTestDispatcher()) {
             val args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
             )
             val resultStateHolder = AddressElementResultStateHolder()
@@ -203,7 +204,7 @@ class AddressElementViewModelModuleTest {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -220,7 +221,7 @@ class AddressElementViewModelModuleTest {
         val placesClient = module.provideGooglePlacesClient(
             context = mock<Context>(),
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
         )
@@ -240,7 +241,7 @@ class AddressElementViewModelModuleTest {
         )
         val resultStateHolder = AddressElementResultStateHolder()
         val args = AddressElementActivityContract.Args.CheckoutShipping(
-            publishableKey = "pk_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             config = AddressLauncher.Configuration(),
             checkoutSessionResponse = checkoutSessionResponse,
         )
