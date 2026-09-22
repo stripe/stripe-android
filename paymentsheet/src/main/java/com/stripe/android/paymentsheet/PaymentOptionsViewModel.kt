@@ -181,6 +181,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 paymentMethodMetadata.shouldShowLinkButton,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady && visibleWallets.contains(WalletType.GooglePay),
+            apiConfiguration = paymentMethodMetadata.apiConfiguration,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,

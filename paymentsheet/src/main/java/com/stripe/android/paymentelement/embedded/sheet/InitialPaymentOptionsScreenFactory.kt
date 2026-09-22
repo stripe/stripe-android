@@ -291,6 +291,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
             linkEmail = null,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
+            apiConfiguration = paymentMethodMetadata.apiConfiguration,
             buttonsEnabled = true,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,

@@ -15,6 +15,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
@@ -524,6 +525,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 linkBrand = LinkBrand.Link
             ),
             googlePay = WalletsState.GooglePay(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
                 billingAddressParameters = null,
@@ -561,6 +563,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 linkBrand = LinkBrand.Link
             ),
             googlePay = WalletsState.GooglePay(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
                 billingAddressParameters = null,
@@ -601,6 +604,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     linkBrand = LinkBrand.Link
                 ),
                 googlePay = WalletsState.GooglePay(
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
@@ -786,6 +790,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         walletsState.value = WalletsState(
             link = null,
             googlePay = WalletsState.GooglePay(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
                 billingAddressParameters = null,
@@ -1636,6 +1641,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isLinkAvailable = true,
             linkEmail = "foo@bar.com",
             isGooglePayReady = true,
+            apiConfiguration = DEFAULT_API_CONFIG,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = true,
             paymentMethodTypes = listOf("card"),
@@ -1664,6 +1670,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isLinkAvailable = true,
             linkEmail = null,
             isGooglePayReady = true,
+            apiConfiguration = DEFAULT_API_CONFIG,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = true,
             paymentMethodTypes = listOf("card"),
@@ -1927,6 +1934,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             linkBrand = LinkBrand.Link,
         ),
         googlePay = WalletsState.GooglePay(
+            apiConfiguration = DEFAULT_API_CONFIG,
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,
             billingAddressParameters = null,
