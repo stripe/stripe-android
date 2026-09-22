@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.scanui.CancellationReason
-import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -107,7 +106,7 @@ class CardScanStripeLauncherTest {
         val launcher = CardScanStripeLauncher(
             context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
-            publishableKey = PaymentConfigurationTestRule.PUBLISHABLE_KEY,
+            publishableKey = PUBLISHABLE_KEY,
             enableMlKitCardScan = false,
             elementsSessionId = null,
             disableSsdOcrCardScan = false,
@@ -122,5 +121,9 @@ class CardScanStripeLauncherTest {
         scenario.block()
 
         fakeEventsReporter.validate()
+    }
+
+    private companion object {
+        const val PUBLISHABLE_KEY = "pk_test_123"
     }
 }
