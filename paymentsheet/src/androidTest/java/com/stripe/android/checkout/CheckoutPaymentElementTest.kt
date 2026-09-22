@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -136,7 +137,7 @@ internal class CheckoutPaymentElementTest {
                     controller.applyPromotionCode("10OFF")
                 }
                 try {
-                    testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                    testRules.compose.waitUntilWithIdle {
                         controller.isUpdating.value
                     }
                     contentPage.assertLpmIsEnabled("card", isEnabled = false)
@@ -145,7 +146,7 @@ internal class CheckoutPaymentElementTest {
                 }
 
                 assertThat(update.await().isSuccess).isTrue()
-                testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                testRules.compose.waitUntilWithIdle {
                     !controller.isUpdating.value
                 }
                 contentPage.assertLpmIsEnabled("card", isEnabled = true)

@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
@@ -297,7 +298,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
             primaryButton.performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.waitUntilWithIdle {
                 composeTestRule.onAllNodesWithText(expectedError)
                     .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
@@ -334,12 +335,12 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 val processingLabel = applicationContext.getString(
                     R.string.stripe_paymentsheet_primary_button_processing
                 )
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodesWithText(processingLabel)
                         .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isNotEmpty()
                 }
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     requestReceived.count == 0L
                 }
                 cardRow.assertIsNotEnabled()

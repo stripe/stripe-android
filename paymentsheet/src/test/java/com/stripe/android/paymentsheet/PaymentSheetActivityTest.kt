@@ -102,6 +102,7 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -1390,7 +1391,7 @@ internal class PaymentSheetActivityTest {
         }
 
     private fun startEditing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodesWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()

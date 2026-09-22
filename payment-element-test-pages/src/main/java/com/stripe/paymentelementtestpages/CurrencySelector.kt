@@ -6,6 +6,7 @@ import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.stripe.android.testing.waitUntilWithIdle
 
 class CurrencySelector(
     private val composeTestRule: ComposeTestRule
@@ -20,7 +21,7 @@ class CurrencySelector(
         val currencyOption = composeTestRule
             .onNodeWithTag("TEST_TAG_CURRENCY_OPTION_$currencyCode")
 
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             currencyOption.isDisplayed()
         }
         currencyOption.performClick()

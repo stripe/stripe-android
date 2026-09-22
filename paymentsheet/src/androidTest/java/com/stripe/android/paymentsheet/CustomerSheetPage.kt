@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.isPlaced
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
@@ -34,7 +35,7 @@ internal class CustomerSheetPage(
     fun waitUntilRemoved(text: String, substring: Boolean = false) {
         waitForIdle()
 
-        composeTestRule.waitUntil(5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasText(text, substring).and(isPlaced()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
@@ -42,7 +43,7 @@ internal class CustomerSheetPage(
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(5000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes(
                 atLeastOneRootRequired = false
             ).isEmpty()
@@ -160,9 +161,7 @@ internal class CustomerSheetPage(
     }
 
     fun waitUntil(matcher: SemanticsMatcher) {
-        waitForIdle()
-
-        composeTestRule.waitUntil(5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(matcher.and(isEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()

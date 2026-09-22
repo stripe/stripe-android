@@ -23,13 +23,14 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.hasTestMetadata
 
 internal class EmbeddedContentPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -77,7 +78,7 @@ internal class EmbeddedContentPage(
         )
         val enabledMatcher = if (isEnabled) isEnabled() else isNotEnabled()
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             val rows = composeTestRule.onAllNodes(rowsMatcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
             val rowsWithExpectedState = composeTestRule.onAllNodes(rowsMatcher.and(enabledMatcher))

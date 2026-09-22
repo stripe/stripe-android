@@ -13,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.waitUntilWithIdle
 
 class TapToAddLinkTestHelper(
     private val composeTestRule: ComposeTestRule,
@@ -84,7 +85,7 @@ class TapToAddLinkTestHelper(
     }
 
     private fun waitForText(text: String): SemanticsNodeInteraction {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasText(text))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -110,8 +111,6 @@ class TapToAddLinkTestHelper(
     )
 
     private companion object {
-        const val DEFAULT_UI_TIMEOUT = 5000L
-
         const val EMAIL = "email@email.com"
         const val PHONE_INPUT = "2113526421"
         const val PHONE = "+1$PHONE_INPUT"
