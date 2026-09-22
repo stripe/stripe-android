@@ -333,6 +333,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED(
             partialEventName = "intent_confirmation_handler.attestation.invoked_when_disabled"
         ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_CLOUD_PROJECT_NUMBER_IS_INVALID(
+            partialEventName = "intent_confirmation_handler.attestation.cloud_project_number_is_invalid"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_INTEGRITY_TOKEN_PROVIDER_INVALID(
+            partialEventName = "intent_confirmation_handler.attestation.integrity_token_provider_invalid"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_HASH_TOO_LONG(
+            partialEventName = "intent_confirmation_handler.attestation.request_hash_too_long"
+        ),
         INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
             partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
         ),
