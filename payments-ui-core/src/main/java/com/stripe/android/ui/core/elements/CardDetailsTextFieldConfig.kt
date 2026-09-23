@@ -19,6 +19,7 @@ interface CardDetailsTextFieldConfig {
     val debugLabel: String
     val label: ResolvableString
     val keyboard: KeyboardType
+    val autofillAllowed: Boolean
     fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation
     fun determineState(
         brand: CardBrand,
