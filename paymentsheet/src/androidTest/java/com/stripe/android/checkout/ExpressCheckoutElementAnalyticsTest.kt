@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -52,6 +53,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
+            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             resultCallback = {
                 // We expect the result callback to be called but test the result in other tests.
             },
@@ -96,6 +98,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
+            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             resultCallback = {
                 // We expect the result callback to be called but test the result in other tests.
             },

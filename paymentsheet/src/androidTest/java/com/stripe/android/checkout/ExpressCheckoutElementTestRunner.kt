@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -33,6 +34,7 @@ internal class ExpressCheckoutElementTestRunnerContext(
 
 internal fun runExpressCheckoutElementTest(
     networkRule: NetworkRule,
+    initialCheckoutSessionResponseFactory: (MockResponse) -> Unit,
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
         error("Override + validate if expected.")
     },
@@ -43,7 +45,7 @@ internal fun runExpressCheckoutElementTest(
 ) {
     val countDownLatch = CountDownLatch(1)
 
-    networkRule.checkoutInit()
+    networkRule.checkoutInit(responseFactory = initialCheckoutSessionResponseFactory)
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
