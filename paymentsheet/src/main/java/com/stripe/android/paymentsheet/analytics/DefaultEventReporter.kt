@@ -52,13 +52,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         origin = ORIGIN,
     )
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
             event = PaymentSheetEvent.LoadStarted(
                 initializedViaCompose = initializedViaCompose
             ),
             paymentMethodMetadata = null, // We don't have these details until load is complete.
+            publishableKey = publishableKey,
         )
     }
 
@@ -84,6 +85,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadFailed(
         error: Throwable,
+        publishableKey: String,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
         fireEvent(
@@ -93,6 +95,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
+            publishableKey = publishableKey,
         )
     }
 
@@ -613,12 +616,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
+        publishableKey: String? = null,
     ) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+                    publishableKeyOverride = publishableKey,
                 )
             )
         }
