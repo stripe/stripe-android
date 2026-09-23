@@ -4,8 +4,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.ApiConfigurationFixtures.DEFAULT_REQUEST_OPTIONS
 import com.stripe.android.paymentmethodmessaging.element.DefaultPaymentMethodMessagingCoordinator
 import com.stripe.android.paymentmethodmessaging.element.FakeStripeRepository
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingContent
@@ -192,7 +192,7 @@ internal class PaymentMethodMessageAnalyticsTest {
         val errorReporter = FakeErrorReporter()
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
-            apiConfigProvider = { ApiConfiguration.State(publishableKey = "pk_123_test", stripeAccountId = null) },
+            requestOptions = DEFAULT_REQUEST_OPTIONS,
             eventReporter = eventReporter,
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = errorReporter

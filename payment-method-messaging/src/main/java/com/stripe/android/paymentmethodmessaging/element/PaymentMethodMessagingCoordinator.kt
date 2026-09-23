@@ -2,7 +2,6 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
@@ -15,7 +14,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal interface PaymentMethodMessagingCoordinator {
     val messagingContent: StateFlow<PaymentMethodMessagingContent?>
@@ -26,7 +24,7 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    private val requestOptions: ApiRequest.Options,
     private val eventReporter: PaymentMethodMessagingEventReporter,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val errorReporter: ErrorReporter
@@ -38,7 +36,6 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     override suspend fun configure(
         configuration: PaymentMethodMessagingElement.Configuration.State
     ): PaymentMethodMessagingElement.ConfigureResult = viewModelScope.async {
-        val apiConfiguration = apiConfigProvider.get()
         eventReporter.onLoadStarted(configuration)
         stripeRepository.retrievePaymentMethodMessage(
             paymentMethods = configuration.paymentMethodTypes?.map { it.code } ?: listOf(),
@@ -46,10 +43,7 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             currency = configuration.currency,
             locale = configuration.locale,
             country = configuration.countryCode,
-            requestOptions = ApiRequest.Options(
-                apiKey = apiConfiguration.publishableKey,
-                stripeAccount = apiConfiguration.stripeAccountId
-            )
+            requestOptions = requestOptions,
         ).fold(
             onSuccess = { paymentMethodMessage ->
                 val content = PaymentMethodMessagingContent.get(
