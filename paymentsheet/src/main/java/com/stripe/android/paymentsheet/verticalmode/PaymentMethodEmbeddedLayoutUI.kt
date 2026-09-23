@@ -112,7 +112,6 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
 
     EmbeddedSavedPaymentMethodSelectionError(
         error = selectionError,
-        appearance = appearance,
     )
 }
 
@@ -179,21 +178,15 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     }
 }
 
-@VisibleForTesting
 @Composable
-internal fun EmbeddedSavedPaymentMethodSelectionError(
+private fun EmbeddedSavedPaymentMethodSelectionError(
     error: Throwable?,
-    appearance: Embedded,
 ) {
     error?.let {
         ErrorMessage(
             error = it.stripeErrorMessage().resolve(),
             modifier = Modifier
-                .padding(
-                    start = appearance.style.getHorizontalInsets(),
-                    top = 8.dp,
-                    end = appearance.style.getHorizontalInsets(),
-                )
+                .padding(top = 8.dp)
                 .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
         )
     }

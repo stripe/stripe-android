@@ -122,7 +122,7 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
                 .boundsInRoot
 
             assertThat(errorBounds.left).isWithin(0.1f).of(
-                with(composeRule.density) { 12.dp.toPx() }
+                with(composeRule.density) { 0.dp.toPx() }
             )
             assertThat(errorBounds.top).isGreaterThan(savedPaymentMethodBounds.bottom)
             assertThat(errorBounds.top).isGreaterThan(newPaymentMethodBounds.bottom)
