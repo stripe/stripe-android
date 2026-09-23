@@ -101,10 +101,14 @@ internal interface ManageScreenInteractor {
 
 internal data class SelectionBehavior(
     val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    val processing: StateFlow<Boolean>,
-    val pendingPaymentMethodId: StateFlow<String?>,
-    val error: StateFlow<ResolvableString?>,
+    val selectionState: StateFlow<SelectionState>,
     val navigateBackAfterSelection: Boolean,
+)
+
+internal data class SelectionState(
+    val isProcessing: Boolean,
+    val pendingPaymentMethodId: String?,
+    val error: ResolvableString?,
 )
 
 internal class DefaultManageScreenInteractor(
@@ -126,38 +130,25 @@ internal class DefaultManageScreenInteractor(
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
 
-    private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
-        combineAsStateFlow(
-            paymentMethods,
-            defaultPaymentMethodId,
-            selectionBehavior.pendingPaymentMethodId,
-        ) { paymentMethods, defaultPaymentMethodId, pendingPaymentMethodId ->
-            paymentMethods.map {
-                it.toDisplayableSavedPaymentMethod(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    defaultPaymentMethodId = defaultPaymentMethodId,
-                    isSelectionPending = it.id == pendingPaymentMethodId,
-                )
-            }
-        }
-
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
-    private val linkAndOperation = combineAsStateFlow(
-        linkAccount,
-        selectionBehavior.processing,
-        selectionBehavior.error,
-    ) { linkAccount, processing, error ->
-        LinkAndOperation(linkAccount, processing, error)
-    }
-
     override val state = combineAsStateFlow(
-        displayableSavedPaymentMethods,
+        paymentMethods,
+        defaultPaymentMethodId,
         selection,
         editing,
         canEdit,
-        linkAndOperation,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAndOperation ->
+        linkAccount,
+        selectionBehavior.selectionState,
+    ) { paymentMethods, defaultPaymentMethodId, paymentSelection, editing, canEdit, linkAccount, selectionState ->
+        val displayablePaymentMethods = paymentMethods.map {
+            it.toDisplayableSavedPaymentMethod(
+                paymentMethodMetadata = paymentMethodMetadata,
+                defaultPaymentMethodId = defaultPaymentMethodId,
+                isSelectionPending = it.id == selectionState.pendingPaymentMethodId,
+            )
+        }
+
         val currentSelection = if (editing) {
             null
         } else {
@@ -169,9 +160,9 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
-            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAndOperation.linkAccount.account),
-            isProcessing = linkAndOperation.isProcessing,
-            error = linkAndOperation.error,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
+            isProcessing = selectionState.isProcessing,
+            error = selectionState.error,
         )
     }
 
@@ -219,12 +210,6 @@ internal class DefaultManageScreenInteractor(
         }
     }
 
-    private data class LinkAndOperation(
-        val linkAccount: LinkAccountUpdate.Value,
-        val isProcessing: Boolean,
-        val error: ResolvableString?,
-    )
-
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
@@ -245,9 +230,13 @@ internal class DefaultManageScreenInteractor(
                         viewModel.updateSelection(savedPmSelection)
                         viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                     },
-                    processing = stateFlowOf(false),
-                    pendingPaymentMethodId = stateFlowOf(null),
-                    error = stateFlowOf(null),
+                    selectionState = stateFlowOf(
+                        SelectionState(
+                            isProcessing = false,
+                            pendingPaymentMethodId = null,
+                            error = null,
+                        )
+                    ),
                     navigateBackAfterSelection = true,
                 ),
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },

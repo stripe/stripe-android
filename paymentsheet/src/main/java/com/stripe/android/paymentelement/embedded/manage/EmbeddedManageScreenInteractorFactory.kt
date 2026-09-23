@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
+import com.stripe.android.paymentsheet.verticalmode.SelectionState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Inject
@@ -41,10 +42,13 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                     eventReporter.onSelectPaymentOption(savedPmSelection)
                     sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
                 },
-                processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
-                pendingPaymentMethodId = sheetActivityStateHolder.state
-                    .mapAsStateFlow { it.pendingPaymentMethodId },
-                error = sheetActivityStateHolder.state.mapAsStateFlow { it.error },
+                selectionState = sheetActivityStateHolder.state.mapAsStateFlow {
+                    SelectionState(
+                        isProcessing = it.isProcessing,
+                        pendingPaymentMethodId = it.pendingPaymentMethodId,
+                        error = it.error,
+                    )
+                },
                 navigateBackAfterSelection = false,
             )
             EmbeddedLaunchMode.PaymentOptions,
@@ -54,9 +58,13 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                     eventReporter.onSelectPaymentOption(savedPmSelection)
                     selectionHolder.setSelection(savedPmSelection)
                 },
-                processing = stateFlowOf(false),
-                pendingPaymentMethodId = stateFlowOf(null),
-                error = stateFlowOf(null),
+                selectionState = stateFlowOf(
+                    SelectionState(
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
+                    )
+                ),
                 navigateBackAfterSelection = true,
             )
         }

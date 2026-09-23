@@ -410,9 +410,13 @@ class DefaultManageScreenInteractorTest {
                 onSelectPaymentMethod = {
                     onSelectPaymentMethodTurbine.add(it)
                 },
-                processing = stateFlowOf(false),
-                pendingPaymentMethodId = stateFlowOf(null),
-                error = stateFlowOf(null),
+                selectionState = stateFlowOf(
+                    SelectionState(
+                        isProcessing = false,
+                        pendingPaymentMethodId = null,
+                        error = null,
+                    )
+                ),
                 navigateBackAfterSelection = navigateBackAfterSelection,
             ),
             onUpdatePaymentMethod = { notImplemented() },
