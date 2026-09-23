@@ -11,7 +11,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.injection.CustomerSheetConfirmationModule
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import dagger.BindsInstance
@@ -24,7 +23,6 @@ import dagger.Component
         CustomerSheetConfirmationModule::class,
         CustomerSheetViewModelModule::class,
         ApiConfigurationFromPaymentConfigurationModule::class,
-        ApiRequestOptionsModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         GooglePayLauncherModule::class,
