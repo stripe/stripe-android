@@ -39,8 +39,14 @@ internal class CardScanStripeLauncher(
 
     // CardScanSheet.isSupported is safe to call directly here because this class is only
     // instantiated after confirming stripecardscan is available at runtime (see rememberCardScanLauncher).
-    private val _isAvailable = MutableStateFlow(CardScanSheet.isSupported(context))
-    override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
+    private val _loadingState = MutableStateFlow(
+        if (CardScanSheet.isSupported(context)) {
+            CardScanLoadingState.Available
+        } else {
+            CardScanLoadingState.Unavailable
+        }
+    )
+    override val loadingState: StateFlow<CardScanLoadingState> = _loadingState.asStateFlow()
 
     lateinit var activityLauncher: ActivityResultLauncher<CardScanSheetParams>
 
