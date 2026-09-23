@@ -92,7 +92,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickLinkButton()
         }
@@ -146,7 +146,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickGooglePayButton()
         }
@@ -174,7 +174,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickLinkButton()
         }
