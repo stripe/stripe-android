@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -162,33 +164,27 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testSavedPaymentMethodSelectionError() {
-        val imageLoader = FakeStripeImageLoader()
+    fun testSavedPaymentMethodSelectionErrorWithMandate() {
+        val interactor = createSavedPaymentMethodSelectionErrorInteractor()
 
         paparazziRule.snapshot {
-            Column {
-                PaymentMethodEmbeddedLayoutUI(
-                    paymentMethods = paymentMethods,
-                    displayedSavedPaymentMethod = savedPaymentMethod,
-                    savedPaymentMethodAction =
-                    PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                    selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
-                    linkBrand = LinkBrand.Link,
-                    isEnabled = true,
-                    onViewMorePaymentMethods = {},
-                    onSelectSavedPaymentMethod = {},
-                    onManageOneSavedPaymentMethod = {},
-                    imageLoader = imageLoader,
-                    appearance = getEmbeddedAppearance(FloatingButton::class),
-                )
-                EmbeddedSavedPaymentMethodSelectionError(
-                    error = IllegalStateException("Unable to update the Checkout Session."),
-                    appearance = getEmbeddedAppearance(FloatingButton::class),
-                )
-            }
+            TestSavedPaymentMethodSelectionError(
+                interactor = interactor,
+                embeddedViewDisplaysMandateText = true,
+            )
         }
+    }
 
-        imageLoader.ensureAllEventsConsumed()
+    @Test
+    fun testSavedPaymentMethodSelectionErrorWithoutMandate() {
+        val interactor = createSavedPaymentMethodSelectionErrorInteractor()
+
+        paparazziRule.snapshot {
+            TestSavedPaymentMethodSelectionError(
+                interactor = interactor,
+                embeddedViewDisplaysMandateText = false,
+            )
+        }
     }
 
     @Test
@@ -312,6 +308,40 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             appearance = Embedded(rowStyle),
             modifier = Modifier.verticalScroll(scrollState),
         )
+    }
+
+    @Composable
+    private fun TestSavedPaymentMethodSelectionError(
+        interactor: PaymentMethodVerticalLayoutInteractor,
+        embeddedViewDisplaysMandateText: Boolean,
+    ) {
+        Column {
+            PaymentMethodEmbeddedLayoutUI(
+                interactor = interactor,
+                embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+    }
+
+    private fun createSavedPaymentMethodSelectionErrorInteractor(): FakePaymentMethodVerticalLayoutInteractor {
+        return FakePaymentMethodVerticalLayoutInteractor(
+            initialState = PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = paymentMethods,
+                isProcessing = false,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                mandate = "Mandate".resolvableString,
+                linkBrand = LinkBrand.Link,
+            ),
+            viewActionRecorder = ViewActionRecorder(),
+        ).also {
+            it.selectionErrorSource.value = IllegalStateException(
+                "Unable to update the Checkout Session."
+            )
+        }
     }
 
     @Composable
