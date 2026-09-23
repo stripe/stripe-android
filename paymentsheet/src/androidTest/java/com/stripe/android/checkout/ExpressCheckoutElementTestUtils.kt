@@ -17,6 +17,7 @@ import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.NativeLinkArgs
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
@@ -24,6 +25,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.testing.PaymentMethodFactory
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -57,45 +59,6 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddress(response: Moc
             "shipping_address_collection",
             JSONObject().put("allowed_countries", JSONArray(listOf("US", "CA")))
         )
-    }
-}
-
-internal fun createCheckoutInitResponseWithRequiredBillingAddress(response: MockResponse) {
-    createCheckoutInitResponseWithRequiredBillingAddress(
-        response = response,
-        automaticTaxEnabled = false,
-    )
-}
-
-internal fun createCheckoutInitResponseWithRequiredBillingAddressForAutomaticTax(response: MockResponse) {
-    createCheckoutInitResponseWithRequiredBillingAddress(
-        response = response,
-        automaticTaxEnabled = true,
-    )
-}
-
-private fun createCheckoutInitResponseWithRequiredBillingAddress(
-    response: MockResponse,
-    automaticTaxEnabled: Boolean,
-) {
-    response.testBodyFromFile("checkout-session-init.json") { json ->
-        json.put("customer_email", "checkout@example.com")
-        json.put("account_settings", JSONObject().put("country", "US"))
-        json.put("billing_address_collection", "required")
-        if (automaticTaxEnabled) {
-            json.put(
-                "tax_context",
-                JSONObject()
-                    .put("automatic_tax_enabled", true)
-                    .put("automatic_tax_address_source", "session.billing")
-            )
-            json.put(
-                "tax_meta",
-                JSONObject()
-                    .put("computation_type", "automatic")
-                    .put("status", "requires_location_inputs")
-            )
-        }
     }
 }
 
@@ -155,6 +118,23 @@ internal fun enqueueSuccessfulNativeLinkPayment() {
 internal fun enqueueNativeLinkPaymentMethod(paymentMethod: PaymentMethod) {
     enqueueNativeLinkPaymentResult(
         LinkActivityResult.PaymentMethodObtained(paymentMethod)
+    )
+}
+
+internal fun createPaymentMethodWithBillingAddress(): PaymentMethod {
+    return PaymentMethodFactory.card(
+        last4 = "4242",
+        id = "pm_1234",
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 3",
+                postalCode = "94103",
+                state = "CA",
+            ),
+        ),
     )
 }
 
