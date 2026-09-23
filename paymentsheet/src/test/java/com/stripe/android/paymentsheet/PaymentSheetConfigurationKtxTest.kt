@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.PaymentElementCallbackTestRule
+import com.stripe.android.utils.registerForTest
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertFailsWith
@@ -260,9 +261,12 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when CT callback is set with LegacyCustomerEphemeralKey in test mode`() {
         val callbackIdentifier = "test_identifier"
 
-        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ -> error("Should not be called!") }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = callbackIdentifier,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ -> error("Should not be called!") }
+                .build(),
+        )
 
         val configWithLegacyKey = configuration.newBuilder()
             .customer(
@@ -290,9 +294,12 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should succeed when CT callback is set with LegacyCustomerEphemeralKey in live mode`() {
         val callbackIdentifier = "test_identifier"
 
-        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ -> error("Should not be called!") }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = callbackIdentifier,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ -> error("Should not be called!") }
+                .build(),
+        )
 
         val configWithLegacyKey = configuration.newBuilder()
             .customer(
@@ -315,9 +322,12 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should succeed when createIntentWithConfirmationTokenCallback is set with CustomerSession`() {
         val callbackIdentifier = "test_identifier"
 
-        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ -> error("Should not be called!") }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = callbackIdentifier,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ -> error("Should not be called!") }
+                .build(),
+        )
 
         val configWithCustomerSession = configuration.newBuilder()
             .customer(
@@ -340,9 +350,12 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should succeed when customer is null and createIntentWithConfirmationTokenCallback is set`() {
         val callbackIdentifier = "test_identifier"
 
-        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ -> error("Should not be called!") }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = callbackIdentifier,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ -> error("Should not be called!") }
+                .build(),
+        )
 
         val configWithoutCustomer = configuration.newBuilder()
             .customer(null)
@@ -496,11 +509,14 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when Tap to Add callback is set and billing details collection collects anything`() {
         val callbackIdentifier = "tap_to_add_common_configuration_test"
 
-        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
-            .createCardPresentSetupIntentCallback {
-                error("Should not be called")
-            }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = callbackIdentifier,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createCardPresentSetupIntentCallback {
+                    error("Should not be called")
+                }
+                .build(),
+        )
 
         val configCollectingBilling = configuration.newBuilder()
             .billingDetailsCollectionConfiguration(
@@ -529,11 +545,14 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should succeed when Tap to Add callback is set and billing details collection collects nothing`() {
         val callbackIdentifier = "tap_to_add_common_configuration_test"
 
-        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
-            .createCardPresentSetupIntentCallback {
-                error("Should not be called")
-            }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = callbackIdentifier,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createCardPresentSetupIntentCallback {
+                    error("Should not be called")
+                }
+                .build(),
+        )
 
         val configNotCollectingBilling = configuration.newBuilder()
             .billingDetailsCollectionConfiguration(PaymentSheet.BillingDetailsCollectionConfiguration())

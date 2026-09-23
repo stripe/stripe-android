@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
+import com.stripe.android.utils.registerForTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,11 +55,14 @@ internal class CustomPaymentMethodConfirmationActivityTest {
 
     @Before
     fun setup() {
-        PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks.Builder()
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = "ConfirmationTestIdentifier",
+            callbacks = PaymentElementCallbacks.Builder()
+                .confirmCustomPaymentMethodCallback { _, _ ->
+                    error("Should not be called!")
+                }
+                .build(),
+        )
     }
 
     @Test

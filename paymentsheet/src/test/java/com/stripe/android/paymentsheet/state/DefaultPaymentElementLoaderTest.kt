@@ -103,6 +103,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.registerForTest
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flowOf
@@ -2047,11 +2048,14 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Emits correct events when loading succeeds for deferred intent`() = runScenario {
-        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ ->
-                error("Should not be called.")
-            }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ ->
+                    error("Should not be called.")
+                }
+                .build(),
+        )
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
@@ -2150,11 +2154,14 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Emits correct events when loading fails with invalid confirmation method`() = runScenario {
-        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ ->
-                error("Should not be called.")
-            }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ ->
+                    error("Should not be called.")
+                }
+                .build(),
+        )
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 confirmationMethod = Manual,
@@ -4622,11 +4629,14 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `analyticsMetadataFactory is called with correct parameters without customer`() = runScenario {
-        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ ->
-                error("Should not be called.")
-            }
-            .build()
+        PaymentElementCallbackReferences.registerForTest(
+            key = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { _ ->
+                    error("Should not be called.")
+                }
+                .build(),
+        )
 
         val analyticsMetadataFactory = FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
             AnalyticsMetadata(emptyMap())

@@ -43,14 +43,6 @@ internal object PaymentElementCallbackReferences {
         return registration
     }
 
-    operator fun set(key: String, callbacks: PaymentElementCallbacks) {
-        instanceCallbackMap[key] = Entry(Any(), callbacks)
-    }
-
-    fun remove(key: String) {
-        instanceCallbackMap.remove(key)
-    }
-
     @VisibleForTesting
     fun clear() {
         instanceCallbackMap.clear()

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
@@ -103,8 +104,9 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     ) {
-        setPaymentSheetCallbacks(
-            PaymentElementCallbacks.Builder()
+        registerPaymentSheetCallbacks(
+            owner = activity,
+            callbacks = PaymentElementCallbacks.Builder()
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                 .build()
         )
@@ -134,8 +136,9 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        setPaymentSheetCallbacks(
-            PaymentElementCallbacks.Builder()
+        registerPaymentSheetCallbacks(
+            owner = activity,
+            callbacks = PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .build()
         )
@@ -169,8 +172,9 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        setPaymentSheetCallbacks(
-            PaymentElementCallbacks.Builder()
+        registerPaymentSheetCallbacks(
+            owner = activity,
+            callbacks = PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                 .build()
@@ -217,8 +221,9 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     ) {
-        setPaymentSheetCallbacks(
-            PaymentElementCallbacks.Builder()
+        registerPaymentSheetCallbacks(
+            owner = fragment,
+            callbacks = PaymentElementCallbacks.Builder()
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                 .build()
         )
@@ -248,8 +253,9 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        setPaymentSheetCallbacks(
-            PaymentElementCallbacks.Builder()
+        registerPaymentSheetCallbacks(
+            owner = fragment,
+            callbacks = PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .build()
         )
@@ -283,8 +289,9 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        setPaymentSheetCallbacks(
-            PaymentElementCallbacks.Builder()
+        registerPaymentSheetCallbacks(
+            owner = fragment,
+            callbacks = PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                 .build()
@@ -373,14 +380,14 @@ class PaymentSheet internal constructor(
          * @param activity The Activity that is presenting [PaymentSheet].
          */
         fun build(activity: ComponentActivity): PaymentSheet {
-            initializeCallbacks()
+            initializeCallbacks(activity)
             return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
-            initializeCallbacks()
+            initializeCallbacks(activity)
             return PaymentSheet(DefaultPaymentSheetLauncher(activity, signal, resultCallback))
         }
 
@@ -390,7 +397,7 @@ class PaymentSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          */
         fun build(fragment: Fragment): PaymentSheet {
-            initializeCallbacks()
+            initializeCallbacks(fragment)
             return PaymentSheet(DefaultPaymentSheetLauncher(fragment, resultCallback))
         }
 
@@ -408,8 +415,8 @@ class PaymentSheet internal constructor(
             )
         }
 
-        private fun initializeCallbacks() {
-            setPaymentSheetCallbacks(callbacksBuilder.build())
+        private fun initializeCallbacks(owner: LifecycleOwner) {
+            registerPaymentSheetCallbacks(owner, callbacksBuilder.build())
         }
     }
 
@@ -4067,7 +4074,7 @@ class PaymentSheet internal constructor(
              * @param activity The Activity that is presenting [PaymentSheet.FlowController].
              */
             fun build(activity: ComponentActivity): FlowController {
-                initializeCallbacks()
+                initializeCallbacks(activity)
                 return FlowControllerFactory(activity, paymentOptionResultCallback, resultCallback).create()
             }
 
@@ -4077,7 +4084,7 @@ class PaymentSheet internal constructor(
              * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
              */
             fun build(fragment: Fragment): FlowController {
-                initializeCallbacks()
+                initializeCallbacks(fragment)
                 return FlowControllerFactory(fragment, paymentOptionResultCallback, resultCallback).create()
             }
 
@@ -4096,8 +4103,8 @@ class PaymentSheet internal constructor(
                 )
             }
 
-            private fun initializeCallbacks() {
-                setFlowControllerCallbacks(callbacks = callbacksBuilder.build())
+            private fun initializeCallbacks(owner: LifecycleOwner) {
+                registerFlowControllerCallbacks(owner, callbacksBuilder.build())
             }
         }
 
@@ -4175,8 +4182,9 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
+                registerFlowControllerCallbacks(
+                    owner = activity,
+                    callbacks = PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                         .build()
                 )
@@ -4213,8 +4221,9 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
+                registerFlowControllerCallbacks(
+                    owner = activity,
+                    callbacks = PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .build()
                 )
@@ -4257,8 +4266,9 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
+                registerFlowControllerCallbacks(
+                    owner = activity,
+                    callbacks = PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                         .build()
@@ -4324,8 +4334,9 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
+                registerFlowControllerCallbacks(
+                    owner = fragment,
+                    callbacks = PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                         .build()
                 )
@@ -4362,8 +4373,9 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
+                registerFlowControllerCallbacks(
+                    owner = fragment,
+                    callbacks = PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .build()
                 )
@@ -4406,8 +4418,9 @@ class PaymentSheet internal constructor(
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
+                registerFlowControllerCallbacks(
+                    owner = fragment,
+                    callbacks = PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                         .build()
@@ -4422,12 +4435,20 @@ class PaymentSheet internal constructor(
     }
 
     companion object {
-        private fun setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
+        private fun registerPaymentSheetCallbacks(owner: LifecycleOwner, callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences.register(
+                key = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+                owner = owner,
+                callbacks = callbacks,
+            )
         }
 
-        private fun setFlowControllerCallbacks(callbacks: PaymentElementCallbacks) {
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
+        private fun registerFlowControllerCallbacks(owner: LifecycleOwner, callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences.register(
+                key = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+                owner = owner,
+                callbacks = callbacks,
+            )
         }
 
         /**

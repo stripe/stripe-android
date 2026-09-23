@@ -37,7 +37,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -155,7 +154,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentOptionActivityLauncher.unregister()
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
-                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                 }
             }
         )

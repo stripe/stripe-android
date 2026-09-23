@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.utils.registerForTest
 import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
@@ -568,7 +569,10 @@ internal class CheckoutControllerTest {
     @Test
     fun `integration name keys the controller into its own global callback references entry`() = runTest {
         val callbacks = PaymentElementCallbacks.Builder().build()
-        PaymentElementCallbackReferences["merchant_checkout"] = callbacks
+        PaymentElementCallbackReferences.registerForTest(
+            key = "merchant_checkout",
+            callbacks = callbacks,
+        )
 
         val controller = createController(integrationName = "merchant_checkout")
 
