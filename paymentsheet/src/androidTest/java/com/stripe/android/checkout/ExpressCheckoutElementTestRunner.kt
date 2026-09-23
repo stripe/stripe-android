@@ -37,7 +37,7 @@ internal fun runExpressCheckoutElementTest(
         error("Override + validate if expected.")
     },
     successTimeoutSeconds: Long = 5L,
-    assertions: (CheckoutController) -> Unit,
+    assertions: (CheckoutController) -> Unit = {},
     configurationUpdates: (ExpressCheckoutElement.Configuration) -> ExpressCheckoutElement.Configuration = { it },
     block: (ExpressCheckoutElementTestRunnerContext) -> Unit,
 ) {
