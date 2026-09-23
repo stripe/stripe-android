@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -82,6 +83,22 @@ internal class CheckoutControllerStateHolderTest {
             )
 
             assertThat(stateHolder.session.value).isNotNull()
+        }
+    }
+
+    @Test
+    fun `saved selection state guards pending operations and returns to idle`() = testScenario {
+        stateHolder.savedSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            assertThat(stateHolder.beginSavedSelection()).isTrue()
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+
+            assertThat(stateHolder.beginSavedSelection()).isFalse()
+            expectNoEvents()
+
+            stateHolder.finishSavedSelection()
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
     }
 
@@ -201,6 +218,8 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(stateHolder.temporarySelection.value).isEqualTo("card")
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }

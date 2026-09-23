@@ -363,9 +363,9 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun provideSavedPaymentMethodSelectionState(
-            handler: CheckoutPaymentSelectionHandler,
+            stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<SavedPaymentMethodSelectionState> {
-            return handler.state
+            return stateHolder.savedSelectionState
         }
     }
 }

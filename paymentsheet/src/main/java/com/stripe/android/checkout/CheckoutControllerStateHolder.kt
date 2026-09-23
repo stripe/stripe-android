@@ -12,16 +12,19 @@ import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Owns [CheckoutController]'s [CheckoutControllerState] — the single source of truth for the
  * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
- * projections (e.g. [session]) are derived from the one [stateFlow]. Kept separate from the
- * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
- * into the controller.
+ * projections (e.g. [session]) are derived from the one [stateFlow]. Transient saved-method
+ * selection operation state remains in memory and is not part of the persisted controller state.
+ * Kept separate from the controller so [CheckoutStateLoader] can commit loaded state directly
+ * rather than reaching back into the controller.
  */
 @OptIn(CheckoutSessionPreview::class)
 @Singleton
@@ -47,6 +50,26 @@ internal class CheckoutControllerStateHolder @Inject constructor(
                 availableExpressButtonTypesFactory,
             )
         }
+
+    private val _savedSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
+        SavedPaymentMethodSelectionState.Idle,
+    )
+
+    val savedSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
+        _savedSelectionState.asStateFlow()
+
+    fun beginSavedSelection(): Boolean {
+        if (_savedSelectionState.value is SavedPaymentMethodSelectionState.Pending) {
+            return false
+        }
+
+        _savedSelectionState.value = SavedPaymentMethodSelectionState.Pending
+        return true
+    }
+
+    fun finishSavedSelection() {
+        _savedSelectionState.value = SavedPaymentMethodSelectionState.Idle
+    }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }
