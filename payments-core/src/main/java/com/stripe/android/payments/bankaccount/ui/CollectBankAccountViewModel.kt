@@ -129,6 +129,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         publishableKey = args.publishableKey,
                         stripeAccountId = args.stripeAccountId,
                         elementsSessionContext = elementsSessionContext,
+                        preCollectedConsent = args.preCollectedConsent.takeIf {
+                            args.hostedSurface == null && args.configuration !is InstantDebits
+                        },
                     )
                 )
             }
