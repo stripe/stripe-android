@@ -245,7 +245,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
         threeDS2UiType: ThreeDS2UiType? = null,
-        errorMessage: String? = null
+        errorMessage: String? = null,
+        publishableKeyOverride: String? = null
     ): AnalyticsRequest {
         return createRequest(
             event,
@@ -255,7 +256,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 tokenType = tokenType,
                 threeDS2UiType = threeDS2UiType,
                 errorMessage = errorMessage,
-            )
+            ),
+            publishableKeyOverride
         )
     }
 

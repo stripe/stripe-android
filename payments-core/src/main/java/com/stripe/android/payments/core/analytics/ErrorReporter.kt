@@ -33,6 +33,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         errorEvent: ErrorEvent,
         stripeException: StripeException? = null,
         additionalNonPiiParams: Map<String, String> = emptyMap(),
+        publishableKeyOverride: String? = null
     )
 
     override fun reportFraudDetectionError(error: StripeException) {

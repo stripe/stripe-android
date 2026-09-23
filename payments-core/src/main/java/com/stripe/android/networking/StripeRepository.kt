@@ -211,7 +211,8 @@ interface StripeRepository {
     suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        analyticsPublishableKey: String?
     ): Result<List<PaymentMethod>>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -876,7 +876,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        analyticsPublishableKey: String?
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -889,7 +890,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(
                         PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                        productUsageTokens = productUsageTokens
+                        productUsageTokens = productUsageTokens,
+                        publishableKeyOverride = analyticsPublishableKey
                     )
                 )
             },
