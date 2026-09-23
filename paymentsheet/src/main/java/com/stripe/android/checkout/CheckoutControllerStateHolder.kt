@@ -79,20 +79,18 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     fun finishSavedSelection() {
         _savedSelectionState.update { state ->
-            if (state is SavedPaymentMethodSelectionState.Pending) {
-                SavedPaymentMethodSelectionState.Idle
-            } else {
-                state
+            when (state) {
+                is SavedPaymentMethodSelectionState.Pending -> SavedPaymentMethodSelectionState.Idle
+                else -> state
             }
         }
     }
 
     fun clearErrorMessages() {
         _savedSelectionState.update { state ->
-            if (state is SavedPaymentMethodSelectionState.Failed) {
-                SavedPaymentMethodSelectionState.Idle
-            } else {
-                state
+            when (state) {
+                is SavedPaymentMethodSelectionState.Failed -> SavedPaymentMethodSelectionState.Idle
+                else -> state
             }
         }
     }
