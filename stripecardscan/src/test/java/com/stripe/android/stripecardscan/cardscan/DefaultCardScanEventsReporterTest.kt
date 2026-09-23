@@ -213,7 +213,7 @@ internal class DefaultCardScanEventsReporterTest {
                 pluginTypeProvider = { null }
             ),
             durationProvider = durationProvider,
-            cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID, publishableKey = null)
+            cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)

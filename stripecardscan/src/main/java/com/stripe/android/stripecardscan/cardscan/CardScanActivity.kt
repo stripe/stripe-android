@@ -221,7 +221,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             BundleCompat.getParcelable(it, INTENT_PARAM_REQUEST, CardScanSheetParams::class.java)
         }
         val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
-            ?: CardScanConfiguration(elementsSessionId = null, publishableKey = null)
+            ?: CardScanConfiguration(elementsSessionId = null)
 
         scanFlow = createScanFlow(
             enableMlKitTextRecognition = cardScanConfiguration.enableMlKitTextRecognition,

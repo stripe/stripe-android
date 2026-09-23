@@ -45,7 +45,8 @@ internal interface CardScanModule {
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
             publishableKeyProvider = {
-                configuration.publishableKey ?: PaymentConfiguration.getInstance(application).publishableKey
+                configuration.apiConfiguration?.publishableKey
+                    ?: PaymentConfiguration.getInstance(application).publishableKey
             },
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanStripeLauncher.Companion.rememberCardScanStripeLauncher
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -14,7 +15,7 @@ internal fun rememberCardScanLauncher(
     isStripeCardScanAllowed: Boolean = false,
     enableMlKitCardScan: Boolean = false,
     disableSsdOcrCardScan: Boolean = false,
-    publishableKey: String,
+    apiConfiguration: ApiConfiguration.State,
     onResult: (CardScanResult) -> Unit,
     isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
 ): CardScanLauncher? {
@@ -28,7 +29,7 @@ internal fun rememberCardScanLauncher(
     return if (isStripeCardScanAllowed && isStripeCardScanAvailable() && hasActiveStripeScanner) {
         rememberCardScanStripeLauncher(
             eventsReporter = eventsReporter,
-            publishableKey = publishableKey,
+            apiConfiguration = apiConfiguration,
             enableMlKitCardScan = enableMlKitCardScan,
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
