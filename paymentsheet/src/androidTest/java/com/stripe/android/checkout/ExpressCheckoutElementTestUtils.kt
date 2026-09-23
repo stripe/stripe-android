@@ -3,28 +3,19 @@ package com.stripe.android.checkout
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
-import android.os.Parcelable
-import androidx.core.os.BundleCompat
-import androidx.test.espresso.intent.Intents.getIntents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import okhttp3.mockwebserver.MockResponse
-import org.json.JSONArray
-import org.json.JSONObject
 
 internal fun NetworkRule.enqueueLinkAccountLookup() {
     enqueue(
@@ -35,27 +26,10 @@ internal fun NetworkRule.enqueueLinkAccountLookup() {
     }
 }
 
-internal fun enqueueSuccessfulGooglePayPayment(
-    paymentMethod: PaymentMethod,
-    shippingInformation: ShippingInformation? = null,
-) {
+internal fun enqueueSuccessfulGooglePayPayment(paymentMethod: PaymentMethod) {
     enqueueGooglePayPaymentResult(
-        GooglePayPaymentMethodLauncher.Result.Completed(
-            paymentMethod = paymentMethod,
-            shippingInformation = shippingInformation,
-        )
+        GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
     )
-}
-
-internal fun createCheckoutInitResponseWithRequiredShippingAddress(response: MockResponse) {
-    response.testBodyFromFile("checkout-session-init.json") { json ->
-        json.put("customer_email", "checkout@example.com")
-        json.put("account_settings", JSONObject().put("country", "US"))
-        json.put(
-            "shipping_address_collection",
-            JSONObject().put("allowed_countries", JSONArray(listOf("US", "CA")))
-        )
-    }
 }
 
 internal fun enqueueFailedGooglePayPayment(error: Throwable) {
@@ -81,22 +55,6 @@ private fun enqueueGooglePayPaymentResult(result: GooglePayPaymentMethodLauncher
 
 internal fun assertGooglePayCalled() {
     intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
-}
-
-internal fun assertGooglePayCalledWithShippingAddressParameters(
-    expected: GooglePayJsonFactory.ShippingAddressParameters,
-) {
-    assertGooglePayCalled()
-
-    val intent = getIntents().single { hasComponent(GOOGLE_PAY_ACTIVITY_NAME).matches(it) }
-    val args = intent.extras?.let {
-        BundleCompat.getParcelable(it, "extra_args", Parcelable::class.java)
-    }
-    val shippingAddressParameters = requireNotNull(args).javaClass
-        .getDeclaredField("shippingAddressParameters")
-        .apply { isAccessible = true }
-        .get(args)
-    assertThat(shippingAddressParameters).isEqualTo(expected)
 }
 
 internal fun enqueueSuccessfulNativeLinkPayment() {

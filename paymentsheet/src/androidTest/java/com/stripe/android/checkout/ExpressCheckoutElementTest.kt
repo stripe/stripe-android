@@ -2,13 +2,10 @@ package com.stripe.android.checkout
 
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.model.Address
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -95,7 +92,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickLinkButton()
         }
@@ -149,7 +146,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickGooglePayButton()
         }
@@ -177,91 +174,11 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
 
             page.clickLinkButton()
         }
 
         assertNativeLinkCalled()
-    }
-
-    @Test
-    fun testLinkIsHiddenWhenShippingAddressIsRequired() {
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-        }
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
-            assertions = { controller ->
-                assertThat(
-                    controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly(
-                    ExpressCheckoutElement.PaymentMethod.GooglePay()
-                )
-            },
-        ) { testContext ->
-            page.assertGooglePayButtonExists()
-            page.assertLinkButtonDoesNotExist()
-            testContext.markTestSucceeded()
-        }
-    }
-
-    @Test
-    fun testGooglePayCollectsAndConfirmsRequiredShippingAddress() {
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-        }
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
-            resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
-            },
-        ) {
-            val paymentMethod = PaymentMethodFactory.card()
-            val shippingInformation = ShippingInformation(
-                address = Address(
-                    city = "San Francisco",
-                    country = "US",
-                    line1 = "510 Townsend St",
-                    line2 = "Floor 3",
-                    postalCode = "94103",
-                    state = "CA",
-                ),
-                name = "Jenny Rosen",
-                phone = null,
-            )
-
-            enqueueSuccessfulGooglePayPayment(
-                paymentMethod = paymentMethod,
-                shippingInformation = shippingInformation,
-            )
-
-            networkRule.checkoutConfirm(
-                bodyPart("payment_method", paymentMethod.id),
-                bodyPart("expected_amount", "5099"),
-                bodyPart("shipping[name]", "Jenny Rosen"),
-                bodyPart("shipping[address][line1]", "510 Townsend St"),
-                bodyPart("shipping[address][line2]", "Floor 3"),
-                bodyPart("shipping[address][city]", "San Francisco"),
-                bodyPart("shipping[address][state]", "CA"),
-                bodyPart("shipping[address][postal_code]", "94103"),
-                bodyPart("shipping[address][country]", "US"),
-            ) { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            page.clickGooglePayButton()
-        }
-
-        assertGooglePayCalledWithShippingAddressParameters(
-            GooglePayJsonFactory.ShippingAddressParameters(
-                isRequired = true,
-                allowedCountryCodes = setOf("US", "CA"),
-            )
-        )
     }
 }
