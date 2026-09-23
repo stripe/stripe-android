@@ -99,6 +99,14 @@ internal interface ManageScreenInteractor {
     }
 }
 
+internal data class SelectionBehavior(
+    val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    val processing: StateFlow<Boolean>,
+    val pendingPaymentMethodId: StateFlow<String?>,
+    val error: StateFlow<ResolvableString?>,
+    val navigateBackAfterSelection: Boolean,
+)
+
 internal class DefaultManageScreenInteractor(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
@@ -106,15 +114,11 @@ internal class DefaultManageScreenInteractor(
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val selectionBehavior: SelectionBehavior,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
-    private val processing: StateFlow<Boolean>,
-    private val pendingPaymentMethodId: StateFlow<String?>,
-    private val error: StateFlow<ResolvableString?>,
-    private val navigateBackAfterSelection: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
@@ -126,7 +130,7 @@ internal class DefaultManageScreenInteractor(
         combineAsStateFlow(
             paymentMethods,
             defaultPaymentMethodId,
-            pendingPaymentMethodId,
+            selectionBehavior.pendingPaymentMethodId,
         ) { paymentMethods, defaultPaymentMethodId, pendingPaymentMethodId ->
             paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
@@ -141,8 +145,8 @@ internal class DefaultManageScreenInteractor(
 
     private val linkAndOperation = combineAsStateFlow(
         linkAccount,
-        processing,
-        error,
+        selectionBehavior.processing,
+        selectionBehavior.error,
     ) { linkAccount, processing, error ->
         LinkAndOperation(linkAccount, processing, error)
     }
@@ -203,8 +207,8 @@ internal class DefaultManageScreenInteractor(
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        onSelectPaymentMethod(paymentMethod)
-        if (navigateBackAfterSelection) {
+        selectionBehavior.onSelectPaymentMethod(paymentMethod)
+        if (selectionBehavior.navigateBackAfterSelection) {
             safeNavigateBack(true)
         }
     }
@@ -235,11 +239,17 @@ internal class DefaultManageScreenInteractor(
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                onSelectPaymentMethod = {
-                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                    viewModel.updateSelection(savedPmSelection)
-                    viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
-                },
+                selectionBehavior = SelectionBehavior(
+                    onSelectPaymentMethod = {
+                        val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                        viewModel.updateSelection(savedPmSelection)
+                        viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
+                    },
+                    processing = stateFlowOf(false),
+                    pendingPaymentMethodId = stateFlowOf(null),
+                    error = stateFlowOf(null),
+                    navigateBackAfterSelection = true,
+                ),
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->
                     if (withDelay) {
@@ -250,10 +260,6 @@ internal class DefaultManageScreenInteractor(
                 },
                 defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
-                processing = stateFlowOf(false),
-                pendingPaymentMethodId = stateFlowOf(null),
-                error = stateFlowOf(null),
-                navigateBackAfterSelection = true,
             )
         }
 

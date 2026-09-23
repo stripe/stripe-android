@@ -406,17 +406,19 @@ class DefaultManageScreenInteractorTest {
             toggleEdit = {
                 toggleEditTurbine.add(Unit)
             },
-            onSelectPaymentMethod = {
-                onSelectPaymentMethodTurbine.add(it)
-            },
+            selectionBehavior = SelectionBehavior(
+                onSelectPaymentMethod = {
+                    onSelectPaymentMethodTurbine.add(it)
+                },
+                processing = stateFlowOf(false),
+                pendingPaymentMethodId = stateFlowOf(null),
+                error = stateFlowOf(null),
+                navigateBackAfterSelection = navigateBackAfterSelection,
+            ),
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
             linkAccount = linkAccount,
-            processing = stateFlowOf(false),
-            pendingPaymentMethodId = stateFlowOf(null),
-            error = stateFlowOf(null),
-            navigateBackAfterSelection = navigateBackAfterSelection,
             dispatcher = dispatcher
         )
         closeInteractorRule.track(interactor)

@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Inject
@@ -33,7 +34,33 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val sheetActivityStateHolder: SheetActivityStateHolder,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
-        val coordinatesCompletion = launchMode is EmbeddedLaunchMode.Manage
+        val selectionBehavior = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> SelectionBehavior(
+                onSelectPaymentMethod = {
+                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                    eventReporter.onSelectPaymentOption(savedPmSelection)
+                    sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
+                },
+                processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+                pendingPaymentMethodId = sheetActivityStateHolder.state
+                    .mapAsStateFlow { it.pendingPaymentMethodId },
+                error = sheetActivityStateHolder.state.mapAsStateFlow { it.error },
+                navigateBackAfterSelection = false,
+            )
+            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.Form -> SelectionBehavior(
+                onSelectPaymentMethod = {
+                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                    eventReporter.onSelectPaymentOption(savedPmSelection)
+                    selectionHolder.setSelection(savedPmSelection)
+                },
+                processing = stateFlowOf(false),
+                pendingPaymentMethodId = stateFlowOf(null),
+                error = stateFlowOf(null),
+                navigateBackAfterSelection = true,
+            )
+        }
+
         return DefaultManageScreenInteractor(
             paymentMethods = customerStateHolder.paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -41,15 +68,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             editing = savedPaymentMethodMutator.editing,
             canEdit = savedPaymentMethodMutator.canEdit,
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
-            onSelectPaymentMethod = {
-                val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                eventReporter.onSelectPaymentOption(savedPmSelection)
-                if (coordinatesCompletion) {
-                    sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
-                } else {
-                    selectionHolder.setSelection(savedPmSelection)
-                }
-            },
+            selectionBehavior = selectionBehavior,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
                 val action = when (launchMode) {
@@ -61,22 +80,6 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
-            processing = if (coordinatesCompletion) {
-                sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing }
-            } else {
-                stateFlowOf(false)
-            },
-            pendingPaymentMethodId = if (coordinatesCompletion) {
-                sheetActivityStateHolder.state.mapAsStateFlow { it.pendingPaymentMethodId }
-            } else {
-                stateFlowOf(null)
-            },
-            error = if (coordinatesCompletion) {
-                sheetActivityStateHolder.state.mapAsStateFlow { it.error }
-            } else {
-                stateFlowOf(null)
-            },
-            navigateBackAfterSelection = !coordinatesCompletion,
         )
     }
 }
