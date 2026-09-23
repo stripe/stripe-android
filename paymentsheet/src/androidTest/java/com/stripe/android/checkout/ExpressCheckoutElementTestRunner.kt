@@ -43,7 +43,7 @@ internal fun runExpressCheckoutElementTest(
 ) {
     val countDownLatch = CountDownLatch(1)
 
-    networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+    networkRule.checkoutInit()
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)

@@ -1,24 +1,13 @@
 package com.stripe.android.checkout
 
-import android.app.Instrumentation
-import android.content.Intent
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.Intents.intending
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -103,7 +92,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+            networkRule.checkoutInit()
 
             page.clickLinkButton()
         }
@@ -135,5 +124,61 @@ internal class ExpressCheckoutElementTest {
             // Just testing load, no need to confirm.
             testContext.markTestSucceeded()
         }
+    }
+
+    @Test
+    fun testFailedGooglePayPayment() {
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
+
+        val expectedErrorMessage = "Google Pay failed"
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
+                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
+            },
+        ) {
+            enqueueFailedGooglePayPayment(IllegalStateException(expectedErrorMessage))
+
+            repeat(2) {
+                networkRule.enqueueLinkAccountLookup()
+            }
+            networkRule.checkoutInit()
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalled()
+    }
+
+    @Test
+    fun testFailedNativeLinkPayment() {
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
+
+        val expectedErrorMessage = "Link failed"
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
+                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
+            },
+        ) {
+            enqueueFailedNativeLinkPayment(IllegalStateException(expectedErrorMessage))
+
+            repeat(2) {
+                networkRule.enqueueLinkAccountLookup()
+            }
+            networkRule.checkoutInit()
+
+            page.clickLinkButton()
+        }
+
+        assertNativeLinkCalled()
     }
 }

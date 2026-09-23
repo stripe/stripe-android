@@ -27,12 +27,27 @@ internal fun NetworkRule.enqueueLinkAccountLookup() {
 }
 
 internal fun enqueueSuccessfulGooglePayPayment(paymentMethod: PaymentMethod) {
+    enqueueGooglePayPaymentResult(
+        GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+    )
+}
+
+internal fun enqueueFailedGooglePayPayment(error: Throwable) {
+    enqueueGooglePayPaymentResult(
+        GooglePayPaymentMethodLauncher.Result.Failed(
+            error = error,
+            errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
+        )
+    )
+}
+
+private fun enqueueGooglePayPaymentResult(result: GooglePayPaymentMethodLauncher.Result) {
     intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWith(
         Instrumentation.ActivityResult(
             Activity.RESULT_OK,
             Intent().putExtra(
                 "extra_result",
-                GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod),
+                result,
             ),
         )
     )
@@ -43,12 +58,27 @@ internal fun assertGooglePayCalled() {
 }
 
 internal fun enqueueSuccessfulNativeLinkPayment() {
+    enqueueNativeLinkPaymentResult(
+        LinkActivityResult.Completed(LinkAccountUpdate.None)
+    )
+}
+
+internal fun enqueueFailedNativeLinkPayment(error: Throwable) {
+    enqueueNativeLinkPaymentResult(
+        LinkActivityResult.Failed(
+            error = error,
+            linkAccountUpdate = LinkAccountUpdate.None,
+        )
+    )
+}
+
+private fun enqueueNativeLinkPaymentResult(result: LinkActivityResult) {
     intending(hasComponent(LinkActivity::class.java.name)).respondWith(
         Instrumentation.ActivityResult(
             LinkActivity.RESULT_COMPLETE,
             Intent().putExtra(
                 LinkActivityContract.EXTRA_RESULT,
-                LinkActivityResult.Completed(LinkAccountUpdate.None),
+                result,
             ),
         )
     )
