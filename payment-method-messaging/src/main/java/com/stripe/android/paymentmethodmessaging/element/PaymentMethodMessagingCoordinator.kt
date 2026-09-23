@@ -14,6 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal interface PaymentMethodMessagingCoordinator {
     val messagingContent: StateFlow<PaymentMethodMessagingContent?>
@@ -24,7 +25,7 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
     private val eventReporter: PaymentMethodMessagingEventReporter,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val errorReporter: ErrorReporter
@@ -43,7 +44,7 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             currency = configuration.currency,
             locale = configuration.locale,
             country = configuration.countryCode,
-            requestOptions = requestOptions,
+            requestOptions = requestOptionsProvider.get(),
         ).fold(
             onSuccess = { paymentMethodMessage ->
                 val content = PaymentMethodMessagingContent.get(

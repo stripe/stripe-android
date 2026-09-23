@@ -192,7 +192,7 @@ internal class PaymentMethodMessageAnalyticsTest {
         val errorReporter = FakeErrorReporter()
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
-            requestOptions = DEFAULT_REQUEST_OPTIONS,
+            requestOptionsProvider = { DEFAULT_REQUEST_OPTIONS },
             eventReporter = eventReporter,
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = errorReporter
