@@ -30,6 +30,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
+    // The selection handler depends on CheckoutController, which constructs this loader.
     private val selectionHandler: Provider<VerticalPaymentSelectionHandler>,
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
@@ -56,11 +57,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     fun clear() {
-        val previousSelection = stateHolder.selection.value
         stateHolder.state = null
-        if (previousSelection != null) {
-            selectionHandler.get().clearErrorMessages()
-        }
         customerStateHolder.setCustomerState(null)
     }
 

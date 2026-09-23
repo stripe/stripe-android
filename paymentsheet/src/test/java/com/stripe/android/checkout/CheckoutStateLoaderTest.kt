@@ -268,19 +268,7 @@ internal class CheckoutStateLoaderTest {
         // The loader would recompute a card selection, but the customer's Google Pay pick must win.
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         isGooglePayAvailable = true,
-        selectionChooser = { savedStateHandle ->
-            DefaultEmbeddedSelectionChooser(
-                savedStateHandle = savedStateHandle,
-                formHelperFactory = EmbeddedFormHelperFactory(
-                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                    embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
-                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                    savedStateHandle = savedStateHandle,
-                    isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-                ),
-                internalRowSelectionCallback = { null },
-            )
-        },
+        selectionChooser = ::realSelectionChooser,
     ) {
         // Initial load seeds the chooser's stored previous configuration.
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
@@ -299,26 +287,37 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `reload clears selection errors when committed selection changes`() = runScenario(
-        chosenSelection = PaymentSelection.GooglePay,
+    fun `reload clears selection errors when selected saved method disappears`() = runScenario(
+        loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        customer = savedCustomer(),
+        selectionChooser = ::realSelectionChooser,
     ) {
-        stateHolder.state = committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
+        assertThat(stateHolder.selection.value)
+            .isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
+        paymentElementLoader.updatePaymentMethods(emptyList())
         loader.reload(requireNotNull(stateHolder.state))
 
-        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.selection.value).isNull()
         selectionHandler.clearErrorMessagesCalls.awaitItem()
     }
 
     @Test
-    fun `reload preserves selection errors when committed selection is unchanged`() = runScenario(
-        chosenSelection = PaymentSelection.GooglePay,
+    fun `reload preserves selection errors when selected saved method remains available`() = runScenario(
+        loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        customer = savedCustomer(),
+        selectionChooser = ::realSelectionChooser,
     ) {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
+        val selection = stateHolder.selection.value
+        assertThat(selection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
         loader.reload(requireNotNull(stateHolder.state))
 
-        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.selection.value).isEqualTo(selection)
         selectionHandler.clearErrorMessagesCalls.expectNoEvents()
     }
 
@@ -338,13 +337,13 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `clear resets selection errors when removing committed selection`() = runScenario {
+    fun `clear removes committed selection without invoking selection actions`() = runScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
 
         loader.clear()
 
         assertThat(stateHolder.selection.value).isNull()
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
+        selectionHandler.clearErrorMessagesCalls.expectNoEvents()
     }
 
     @Test
@@ -446,6 +445,18 @@ internal class CheckoutStateLoaderTest {
     private fun savedCustomer() = CustomerState(
         paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         defaultPaymentMethodId = null,
+    )
+
+    private fun realSelectionChooser(savedStateHandle: SavedStateHandle) = DefaultEmbeddedSelectionChooser(
+        savedStateHandle = savedStateHandle,
+        formHelperFactory = EmbeddedFormHelperFactory(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            savedStateHandle = savedStateHandle,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        ),
+        internalRowSelectionCallback = { null },
     )
 
     // A committed state as [CheckoutStateLoader] would produce it, for exercising reloads. The
