@@ -52,8 +52,8 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     override val isLiveMode: Boolean = true
     val stateSource = MutableStateFlow(initialState)
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateSource
-    val selectionErrorSource = MutableStateFlow<ResolvableString?>(null)
-    override val selectionError: StateFlow<ResolvableString?> = selectionErrorSource
+    val errorSource = MutableStateFlow<ResolvableString?>(null)
+    override val error: StateFlow<ResolvableString?> = errorSource
     override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(initialShowsWalletsHeader)
 
     val closeCalls = Turbine<Unit>()

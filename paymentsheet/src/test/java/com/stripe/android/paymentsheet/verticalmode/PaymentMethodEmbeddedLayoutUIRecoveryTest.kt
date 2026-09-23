@@ -79,7 +79,7 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
             }
         }
         composeRule.waitForIdle()
-        interactor.selectionErrorSource.value = R.string.stripe_something_went_wrong.resolvableString
+        interactor.errorSource.value = R.string.stripe_something_went_wrong.resolvableString
         composeRule.waitForIdle()
 
         TestScenario(
@@ -133,7 +133,7 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
             interactor.stateSource.value = interactor.stateSource.value.copy(
                 selection = Selection.New("cashapp"),
             )
-            interactor.selectionErrorSource.value = null
+            interactor.errorSource.value = null
             composeRule.waitForIdle()
         }
 

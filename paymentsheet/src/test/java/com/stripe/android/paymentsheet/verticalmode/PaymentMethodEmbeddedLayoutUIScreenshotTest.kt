@@ -339,7 +339,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             ),
             viewActionRecorder = ViewActionRecorder(),
         ).also {
-            it.selectionErrorSource.value = R.string.stripe_something_went_wrong.resolvableString
+            it.errorSource.value = R.string.stripe_something_went_wrong.resolvableString
         }
     }
 

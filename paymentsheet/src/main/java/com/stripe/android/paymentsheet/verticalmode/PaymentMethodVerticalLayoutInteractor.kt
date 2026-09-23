@@ -55,7 +55,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     val showsWalletsHeader: StateFlow<Boolean>
 
-    val selectionError: StateFlow<ResolvableString?>
+    val error: StateFlow<ResolvableString?>
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -329,7 +329,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState != null && walletsState.walletsInHeader
     }
 
-    override val selectionError: StateFlow<ResolvableString?> = savedPaymentMethodSelectionState.mapAsStateFlow {
+    override val error: StateFlow<ResolvableString?> = savedPaymentMethodSelectionState.mapAsStateFlow {
         (it as? SavedPaymentMethodSelectionState.Failed)?.error?.stripeErrorMessage()
     }
 

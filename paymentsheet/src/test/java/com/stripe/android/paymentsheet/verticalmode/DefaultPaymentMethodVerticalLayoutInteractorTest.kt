@@ -109,7 +109,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             val initialState = awaitItem()
             assertThat(initialState.displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
 
-            interactor.selectionError.test {
+            interactor.error.test {
                 assertThat(awaitItem()).isNull()
 
                 savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(expectedError)
@@ -140,7 +140,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
     ) {
         assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-        assertThat(interactor.selectionError.value).isNull()
+        assertThat(interactor.error.value).isNull()
     }
 
     @Test
@@ -152,7 +152,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
         ) {
             assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-            assertThat(interactor.selectionError.value).isEqualTo(expectedErrorMessage)
+            assertThat(interactor.error.value).isEqualTo(expectedErrorMessage)
         }
     }
 
@@ -169,7 +169,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
             assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
-            assertThat(interactor.selectionError.value).isEqualTo(expectedErrorMessage)
+            assertThat(interactor.error.value).isEqualTo(expectedErrorMessage)
         }
     }
 
