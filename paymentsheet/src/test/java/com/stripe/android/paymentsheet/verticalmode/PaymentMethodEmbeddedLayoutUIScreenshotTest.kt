@@ -162,6 +162,30 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testSavedPaymentMethodSelectionError() {
+        val imageLoader = FakeStripeImageLoader()
+
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                selectionError = IllegalStateException("Unable to update the Checkout Session."),
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = imageLoader,
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+
+        imageLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(

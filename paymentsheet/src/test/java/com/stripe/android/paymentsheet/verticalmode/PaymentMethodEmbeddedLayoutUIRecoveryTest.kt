@@ -3,10 +3,11 @@ package com.stripe.android.paymentsheet.verticalmode
 import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -137,7 +138,10 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
         }
 
         fun assertErrorCleared() {
-            error.assertDoesNotExist()
+            composeRule.onAllNodesWithTag(
+                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+                useUnmergedTree = true,
+            ).assertCountEquals(0)
         }
     }
 }
