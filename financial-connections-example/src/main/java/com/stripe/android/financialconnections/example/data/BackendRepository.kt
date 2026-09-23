@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.example.data
 
 import com.stripe.android.financialconnections.example.BuildConfig
-import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.CreateAccountHolderBody
 import com.stripe.android.financialconnections.example.data.model.CreateConsentBody
+import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.MerchantsResponse
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody

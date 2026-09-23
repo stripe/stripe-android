@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import retrofit2.HttpException
 
 internal class FinancialConnectionsPlaygroundViewModel(
@@ -197,7 +196,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
             accountHolder = pendingConsent.accountHolder,
             preCollectedConsent = FinancialConnectionsPreCollectedConsent(
                 consent = pendingConsent.consent.id,
-                collectedAt = Instant.now().epochSecond,
+                collectedAt = System.currentTimeMillis() / MILLIS_PER_SECOND,
             ),
         )
     }
@@ -639,6 +638,10 @@ internal class FinancialConnectionsPlaygroundViewModel(
             @Suppress("UNCHECKED_CAST")
             return FinancialConnectionsPlaygroundViewModel(applicationSupplier(), uriSupplier()) as T
         }
+    }
+
+    private companion object {
+        const val MILLIS_PER_SECOND = 1_000L
     }
 }
 

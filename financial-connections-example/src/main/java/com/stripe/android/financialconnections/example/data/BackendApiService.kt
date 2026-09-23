@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.example.data
 
-import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.CreateAccountHolderBody
 import com.stripe.android.financialconnections.example.data.model.CreateAccountHolderResponse
-import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
 import com.stripe.android.financialconnections.example.data.model.CreateConsentBody
+import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
+import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
 import com.stripe.android.financialconnections.example.data.model.CreateSetupIntentResponse
 import com.stripe.android.financialconnections.example.data.model.IssuedConsent
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody

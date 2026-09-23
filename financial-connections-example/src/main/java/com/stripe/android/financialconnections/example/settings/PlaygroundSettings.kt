@@ -5,10 +5,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.edit
+import com.stripe.android.financialconnections.example.BuildConfig
 import com.stripe.android.financialconnections.example.Experience
 import com.stripe.android.financialconnections.example.Flow
 import com.stripe.android.financialconnections.example.IntegrationType
-import com.stripe.android.financialconnections.example.BuildConfig
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 import kotlinx.serialization.encodeToString
