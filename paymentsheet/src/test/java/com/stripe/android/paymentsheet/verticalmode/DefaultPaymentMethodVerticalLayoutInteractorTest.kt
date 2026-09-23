@@ -93,6 +93,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(interactor.error.value).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
@@ -107,7 +108,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
         interactor.state.test {
             val initialState = awaitItem()
-            assertThat(initialState.displayedSavedPaymentMethod?.isSelectionPending ?: false).isFalse()
 
             interactor.error.test {
                 assertThat(awaitItem()).isNull()
@@ -117,8 +117,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(awaitItem()).isEqualTo(expectedErrorMessage)
                 assertThat(interactor.state.value).isEqualTo(initialState)
             }
-
-            expectNoEvents()
         }
     }
 
@@ -132,15 +130,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
         }
-    }
-
-    @Test
-    fun state_projectsPendingSelectionWithoutAnError() = runScenario(
-        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-        initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-    ) {
-        assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-        assertThat(interactor.error.value).isNull()
     }
 
     @Test

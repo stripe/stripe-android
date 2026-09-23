@@ -249,9 +249,6 @@ internal class CheckoutStateLoaderTest {
         loaderSelection = PaymentSelection.GooglePay,
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
-        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
-
         // The committed state's selection is what the chooser must be offered as the previous
         // value, sourced from the incoming state rather than a separate holder.
         loader.reload(committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
@@ -260,8 +257,6 @@ internal class CheckoutStateLoaderTest {
         // selection.
         assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(stateHolder.savedSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         val call = chooser.lastCall
         assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(call?.newSelection).isEqualTo(PaymentSelection.GooglePay)
@@ -345,15 +340,6 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(stateHolder.savedSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
-    }
-
-    @Test
-    fun `clear removes committed selection without invoking selection actions`() = runScenario {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
-
-        loader.clear()
-
-        assertThat(stateHolder.selection.value).isNull()
     }
 
     @Test

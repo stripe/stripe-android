@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
-import com.stripe.android.paymentsheet.verticalmode.FakeVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CleanupTestRule
@@ -130,10 +129,8 @@ internal class EmbeddedContentUiTest {
 
     @Test
     fun `rebuilding content with unchanged selection preserves selection error`() {
-        val selectionHandler = FakeVerticalPaymentSelectionHandler()
         runScenario(
             selection = PaymentSelection.GooglePay,
-            selectionHandler = selectionHandler,
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
                 IllegalStateException("Selection failed")
             ),
@@ -169,7 +166,6 @@ internal class EmbeddedContentUiTest {
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         selection: PaymentSelection? = null,
-        selectionHandler: FakeVerticalPaymentSelectionHandler? = null,
         savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -222,7 +218,7 @@ internal class EmbeddedContentUiTest {
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            verticalPaymentSelectionHandler = selectionHandler ?: ImmediateVerticalPaymentSelectionHandler(
+            verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { updatedSelection, _ -> selectionHolder.setSelection(updatedSelection) },
                 completionAction = immediateActionHandler::invoke,
             ),
@@ -253,6 +249,5 @@ internal class EmbeddedContentUiTest {
             embeddedContentHelper = embeddedContentHelper,
             state = state,
         ).block()
-        selectionHandler?.ensureAllEventsConsumed()
     }
 }

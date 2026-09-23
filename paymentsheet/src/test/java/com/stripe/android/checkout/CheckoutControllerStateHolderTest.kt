@@ -94,6 +94,11 @@ internal class CheckoutControllerStateHolderTest {
             assertThat(stateHolder.beginSavedSelection()).isTrue()
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
+            stateHolder.clearErrorMessages()
+            assertThat(stateHolder.savedSelectionState.value)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+            expectNoEvents()
+
             assertThat(stateHolder.beginSavedSelection()).isFalse()
             expectNoEvents()
 
@@ -103,7 +108,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `finishing a failed saved selection preserves the failure`() = testScenario {
+    fun `finishing a failed saved selection preserves the failure until it is cleared`() = testScenario {
         val error = IllegalStateException("Selection failed")
         stateHolder.failSavedSelection(error)
 
@@ -111,6 +116,11 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(stateHolder.savedSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
+
+        stateHolder.clearErrorMessages()
+
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test

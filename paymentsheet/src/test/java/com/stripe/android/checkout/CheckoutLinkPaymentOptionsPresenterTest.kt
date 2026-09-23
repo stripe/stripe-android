@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -96,6 +97,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
     @Test
     fun `completion clears errors when the Link selection is unchanged`() = runScenario {
+        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
         presenter.present()
 
         resultCallback(
@@ -103,6 +105,8 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         )
 
         assertThat(stateHolder.selection.value).isEqualTo(linkSelection)
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 

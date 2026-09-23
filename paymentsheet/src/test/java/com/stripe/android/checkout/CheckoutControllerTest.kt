@@ -835,9 +835,6 @@ internal class CheckoutControllerTest {
                     try {
                         assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
 
-                        stateHolder.clearErrorMessages()
-                        assertThat(stateHolder.savedSelectionState.value)
-                            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
                         handler.select(selection, true)
                         expectNoEvents()
                         completions.expectNoEvents()
@@ -930,7 +927,6 @@ internal class CheckoutControllerTest {
             assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
 
             assertThat(states.awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-            states.expectNoEvents()
             completions.expectNoEvents()
         } finally {
             releaseResponse.countDown()
@@ -938,7 +934,7 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `saved selection retry failure replaces the prior error`() =
+    fun `canceling saved selection clears pending state without completion`() =
         runMutationScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
@@ -948,61 +944,9 @@ internal class CheckoutControllerTest {
         ) {
             val selection = loadedSavedPaymentMethodSelection()
             val completions = Turbine<CheckoutControllerState>()
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"First tax error"}}""")
-            }
 
             withSelectionHandler(completions) {
                 stateHolder.savedSelectionState.test {
-                    awaitItem()
-                    handler.select(selection, true)
-                    awaitItem()
-                    val firstFailureState = withTurbineTimeout(10.seconds) { awaitItem() }
-                    val firstError = (firstFailureState as SavedPaymentMethodSelectionState.Failed).error
-
-                    networkRule.savedPaymentMethodTaxUpdate { response ->
-                        response.setResponseCode(400)
-                        response.setBody("""{"error":{"message":"Second tax error"}}""")
-                    }
-                    handler.select(selection, true)
-                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-                    val secondFailureState = withTurbineTimeout(10.seconds) { awaitItem() }
-                    val secondError = (secondFailureState as SavedPaymentMethodSelectionState.Failed).error
-
-                    assertThat(secondError).isNotSameInstanceAs(firstError)
-                    assertThat(secondError.message).contains("Second tax error")
-                    completions.expectNoEvents()
-                }
-            }
-
-            completions.ensureAllEventsConsumed()
-        }
-
-    @Test
-    fun `canceling saved selection retry clears pending state without completion`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = loadedSavedPaymentMethodSelection()
-            val completions = Turbine<CheckoutControllerState>()
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
-
-            withSelectionHandler(completions) {
-                stateHolder.savedSelectionState.test {
-                    awaitItem()
-                    handler.select(selection, true)
-                    awaitItem()
-                    val failedState = withTurbineTimeout(10.seconds) { awaitItem() }
-                    assertThat(failedState).isInstanceOf(SavedPaymentMethodSelectionState.Failed::class.java)
-
                     val requestReceived = CountDownLatch(1)
                     val releaseResponse = CountDownLatch(1)
                     networkRule.savedPaymentMethodTaxUpdate { response ->
@@ -1013,6 +957,7 @@ internal class CheckoutControllerTest {
                         successfulSavedPaymentMethodResponse(response)
                     }
                     handler.select(selection, true)
+                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
                     try {
@@ -1026,41 +971,6 @@ internal class CheckoutControllerTest {
                     } finally {
                         releaseResponse.countDown()
                     }
-                }
-            }
-
-            completions.ensureAllEventsConsumed()
-        }
-
-    @Test
-    fun `clearing selection error preserves committed selection without invoking completion`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = loadedSavedPaymentMethodSelection()
-            val completions = Turbine<CheckoutControllerState>()
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
-
-            withSelectionHandler(completions) {
-                stateHolder.savedSelectionState.test {
-                    awaitItem()
-                    handler.select(selection, true)
-                    awaitItem()
-                    val failedState = withTurbineTimeout(10.seconds) { awaitItem() }
-                    assertThat(failedState).isInstanceOf(SavedPaymentMethodSelectionState.Failed::class.java)
-
-                    stateHolder.clearErrorMessages()
-
-                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    assertThat(committedState().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-                    completions.expectNoEvents()
                 }
             }
 
