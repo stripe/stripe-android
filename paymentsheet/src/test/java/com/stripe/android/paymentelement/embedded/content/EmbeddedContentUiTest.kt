@@ -149,14 +149,12 @@ internal class EmbeddedContentUiTest {
                 }
                 composeRule.waitForIdle()
                 composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
-                selectionHandler.clearErrorMessagesCalls.expectNoEvents()
 
                 state.value = loadedState.copy(embeddedViewDisplaysMandateText = false)
 
                 assertThat(requireNotNull(awaitItem())).isNotSameInstanceAs(firstContent)
                 composeRule.waitForIdle()
                 composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
-                selectionHandler.clearErrorMessagesCalls.expectNoEvents()
             }
         }
     }

@@ -33,15 +33,6 @@ internal class ImmediateVerticalPaymentSelectionHandlerTest {
     }
 
     @Test
-    fun `clearing errors does not invoke selection or completion actions`() = runScenario(
-        completion = { events -> events.add(Event.SelectionCompleted) },
-    ) {
-        handler.clearErrorMessages()
-
-        events.expectNoEvents()
-    }
-
-    @Test
     fun `updates selection when completion action is absent`() = runScenario(
         completion = null,
     ) {

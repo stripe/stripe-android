@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.verticalmode.FakeVerticalPaymentSelectionHandler
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
@@ -225,7 +224,6 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -247,7 +245,6 @@ internal class CheckoutSheetLauncherTest {
         )
 
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(immediateActionWasInvoked()).isTrue()
     }
@@ -267,7 +264,6 @@ internal class CheckoutSheetLauncherTest {
         )
 
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(immediateActionWasInvoked()).isFalse()
     }
@@ -291,7 +287,6 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         runCurrent()
@@ -316,7 +311,6 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         runCurrent()
 
         expectNoRefreshCalls()
@@ -379,7 +373,6 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -461,7 +454,6 @@ internal class CheckoutSheetLauncherTest {
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
@@ -483,7 +475,6 @@ internal class CheckoutSheetLauncherTest {
         )
 
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(immediateActionWasInvoked()).isTrue()
     }
@@ -505,10 +496,8 @@ internal class CheckoutSheetLauncherTest {
 
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
 
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(immediateActionWasInvoked()).isFalse()
-        selectionHandler.selectionCompleteCalls.expectNoEvents()
     }
 
     @Test
@@ -817,7 +806,6 @@ internal class CheckoutSheetLauncherTest {
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(selectionHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -845,7 +833,6 @@ internal class CheckoutSheetLauncherTest {
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
         assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(linkAccountInfo)
@@ -871,7 +858,6 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         runCurrent()
 
         assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
@@ -945,7 +931,6 @@ internal class CheckoutSheetLauncherTest {
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         assertThat(selectionHolder.selection.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -1013,7 +998,6 @@ internal class CheckoutSheetLauncherTest {
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        val selectionHandler = FakeVerticalPaymentSelectionHandler()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -1053,7 +1037,6 @@ internal class CheckoutSheetLauncherTest {
                     activityResultCaller = activityResultCaller,
                     lifecycleOwner = owner,
                     selectionHolder = selectionHolder,
-                    selectionHandler = selectionHandler,
                     customerStateHolder = customerStateHolder,
                     linkAccountHolder = linkAccountHolder,
                     sheetStateHolder = sheetStateHolder,
@@ -1081,7 +1064,6 @@ internal class CheckoutSheetLauncherTest {
 
             Scenario(
                 selectionHolder = selectionHolder,
-                selectionHandler = selectionHandler,
                 lifecycleOwner = lifecycleOwner,
                 customerStateHolder = customerStateHolder,
                 linkAccountHolder = linkAccountHolder,
@@ -1104,14 +1086,12 @@ internal class CheckoutSheetLauncherTest {
             ).block()
         }
 
-        selectionHandler.ensureAllEventsConsumed()
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val selectionHandler: FakeVerticalPaymentSelectionHandler,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val linkAccountHolder: LinkAccountHolder,
@@ -1147,7 +1127,6 @@ internal class CheckoutSheetLauncherTest {
                 activityResultRegistry = mock(),
                 lifecycleOwner = lifecycleOwner,
                 stateHolder = mock(),
-                selectionHandler = selectionHandler,
                 customerStateHolder = customerStateHolder,
                 linkAccountHolder = mock(),
                 sheetStateHolder = sheetStateHolder,

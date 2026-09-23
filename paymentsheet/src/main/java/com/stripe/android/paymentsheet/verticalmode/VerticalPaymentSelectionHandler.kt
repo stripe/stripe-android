@@ -6,8 +6,6 @@ internal interface VerticalPaymentSelectionHandler {
     fun select(selection: PaymentSelection, isUserInput: Boolean)
 
     fun onSelectionComplete()
-
-    fun clearErrorMessages()
 }
 
 internal class ImmediateVerticalPaymentSelectionHandler(
@@ -22,6 +20,4 @@ internal class ImmediateVerticalPaymentSelectionHandler(
     override fun onSelectionComplete() {
         completionAction?.invoke()
     }
-
-    override fun clearErrorMessages() = Unit
 }

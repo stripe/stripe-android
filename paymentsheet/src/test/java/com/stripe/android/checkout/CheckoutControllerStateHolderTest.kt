@@ -103,6 +103,45 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `finishing a failed saved selection preserves the failure`() = testScenario {
+        val error = IllegalStateException("Selection failed")
+        stateHolder.failSavedSelection(error)
+
+        stateHolder.finishSavedSelection()
+
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
+    }
+
+    @Test
+    fun `changed committed selection clears failure while equal reload preserves it`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        val error = IllegalStateException("Selection failed")
+        stateHolder.failSavedSelection(error)
+
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
+
+        stateHolder.state = committedState(
+            paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+        )
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `explicit equal selection clears failure`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+
+        assertThat(stateHolder.savedSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
     fun `setSelection updates paymentSelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 

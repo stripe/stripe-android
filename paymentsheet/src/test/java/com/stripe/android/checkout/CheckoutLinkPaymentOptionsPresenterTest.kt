@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.verticalmode.FakeVerticalPaymentSelectionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -92,7 +91,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(linkSelection.copy(selectedPayment = updatedPayment))
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -104,9 +102,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = selectedPayment)
         )
 
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         assertThat(stateHolder.selection.value).isEqualTo(linkSelection)
-        selectionHandler.selectionCompleteCalls.expectNoEvents()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -124,7 +120,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         )
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.Saved(fallback))
-        selectionHandler.clearErrorMessagesCalls.awaitItem()
         verify(defaultPresenter).present()
     }
 
@@ -256,7 +251,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply { set(linkAccountInfo) }
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
-        val selectionHandler = FakeVerticalPaymentSelectionHandler()
         val defaultPresenter = mock<DefaultEmbeddedPaymentOptionsPresenter>()
         val linkPaymentLauncher = mock<LinkPaymentLauncher>()
         val activityResultRegistry = mock<ActivityResultRegistry>()
@@ -273,7 +267,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             activityResultRegistry = activityResultRegistry,
             lifecycleOwner = lifecycleOwner,
             stateHolder = stateHolder,
-            selectionHandler = selectionHandler,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
             sheetStateHolder = sheetStateHolder,
@@ -298,9 +291,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             linkAccountInfo = linkAccountInfo,
             paymentMethodMetadata = paymentMethodMetadata,
             resultCallback = callbackCaptor.firstValue,
-            selectionHandler = selectionHandler,
         ).block()
-        selectionHandler.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
@@ -316,7 +307,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAccountInfo: LinkAccountUpdate.Value,
         val paymentMethodMetadata: com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata,
         val resultCallback: (LinkActivityResult) -> Unit,
-        val selectionHandler: FakeVerticalPaymentSelectionHandler,
     ) {
         val linkConfiguration: LinkConfiguration
             get() = requireNotNull(paymentMethodMetadata.linkState?.configuration)

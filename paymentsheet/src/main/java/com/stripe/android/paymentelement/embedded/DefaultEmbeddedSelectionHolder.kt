@@ -27,6 +27,8 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
         savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = previousNewSelections
     }
 
+    override fun clearErrorMessages() = Unit
+
     override fun setTemporarySelection(code: PaymentMethodCode?) {
         savedStateHandle[EMBEDDED_TEMPORARY_SELECTION_KEY] = code
     }

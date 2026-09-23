@@ -2242,7 +2242,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 internal class FakeVerticalPaymentSelectionHandler : VerticalPaymentSelectionHandler {
     val selectCalls = Turbine<SelectCall>()
     val selectionCompleteCalls = Turbine<Unit>()
-    val clearErrorMessagesCalls = Turbine<Unit>()
 
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
         selectCalls.add(SelectCall(selection, isUserInput))
@@ -2252,14 +2251,9 @@ internal class FakeVerticalPaymentSelectionHandler : VerticalPaymentSelectionHan
         selectionCompleteCalls.add(Unit)
     }
 
-    override fun clearErrorMessages() {
-        clearErrorMessagesCalls.add(Unit)
-    }
-
     fun ensureAllEventsConsumed() {
         selectCalls.ensureAllEventsConsumed()
         selectionCompleteCalls.ensureAllEventsConsumed()
-        clearErrorMessagesCalls.ensureAllEventsConsumed()
     }
 
     data class SelectCall(

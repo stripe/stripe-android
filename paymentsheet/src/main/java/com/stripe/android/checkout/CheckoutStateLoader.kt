@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
@@ -30,8 +29,6 @@ internal class CheckoutStateLoader @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
-    // The selection handler depends on CheckoutController, which constructs this loader.
-    private val selectionHandler: Provider<VerticalPaymentSelectionHandler>,
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
@@ -109,7 +106,6 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        val previousSelection = stateHolder.selection.value
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
@@ -124,9 +120,6 @@ internal class CheckoutStateLoader @Inject constructor(
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
 
-        if (previousSelection != selection) {
-            selectionHandler.get().clearErrorMessages()
-        }
         customerStateHolder.setCustomerState(loadResults.customer)
     }
 

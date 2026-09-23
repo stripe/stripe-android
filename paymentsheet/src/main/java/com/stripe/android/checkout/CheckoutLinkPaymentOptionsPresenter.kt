@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPayment
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -28,7 +27,6 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     private val activityResultRegistry: ActivityResultRegistry,
     private val lifecycleOwner: LifecycleOwner,
     private val stateHolder: CheckoutControllerStateHolder,
-    private val selectionHandler: VerticalPaymentSelectionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -92,7 +90,6 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             }
             is LinkPaymentMethodSelectionOutcome.UpdateSelection -> {
                 stateHolder.setSelection(outcome.selection)
-                selectionHandler.clearErrorMessages()
                 if (outcome.showPaymentOptions) {
                     presentDefault()
                 } else {

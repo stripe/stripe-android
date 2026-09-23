@@ -16,6 +16,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,7 +39,11 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
+            val previousSelection = savedStateHandle.get<CheckoutControllerState>(STATE_KEY)?.paymentSelection
             savedStateHandle[STATE_KEY] = value
+            if (previousSelection != value?.paymentSelection) {
+                clearErrorMessages()
+            }
         }
 
     val stateFlow: StateFlow<CheckoutControllerState?> =
@@ -68,8 +73,28 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         return true
     }
 
+    fun failSavedSelection(error: Throwable) {
+        _savedSelectionState.value = SavedPaymentMethodSelectionState.Failed(error)
+    }
+
     fun finishSavedSelection() {
-        _savedSelectionState.value = SavedPaymentMethodSelectionState.Idle
+        _savedSelectionState.update { state ->
+            if (state is SavedPaymentMethodSelectionState.Pending) {
+                SavedPaymentMethodSelectionState.Idle
+            } else {
+                state
+            }
+        }
+    }
+
+    override fun clearErrorMessages() {
+        _savedSelectionState.update { state ->
+            if (state is SavedPaymentMethodSelectionState.Failed) {
+                SavedPaymentMethodSelectionState.Idle
+            } else {
+                state
+            }
+        }
     }
 
     override val selection: StateFlow<PaymentSelection?> =
@@ -91,6 +116,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             paymentSelection = updatedSelection,
             previousNewSelections = previousNewSelections,
         )
+        clearErrorMessages()
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {

@@ -826,7 +826,7 @@ internal class CheckoutControllerTest {
                     successfulSavedPaymentMethodResponse(response)
                 }
 
-                handler.state.test {
+                stateHolder.savedSelectionState.test {
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                     handler.select(selection, true)
@@ -835,8 +835,9 @@ internal class CheckoutControllerTest {
                     try {
                         assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
 
-                        handler.clearErrorMessages()
-                        assertThat(handler.state.value).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                        stateHolder.clearErrorMessages()
+                        assertThat(stateHolder.savedSelectionState.value)
+                            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
                         handler.select(selection, true)
                         expectNoEvents()
                         completions.expectNoEvents()
@@ -876,7 +877,7 @@ internal class CheckoutControllerTest {
             }
 
             withSelectionHandler(completions) {
-                handler.state.test {
+                stateHolder.savedSelectionState.test {
                     awaitSavedSelectionFailure(handler, selection, completions)
                     assertSavedSelectionRetrySucceeds(this, handler, selection, completions)
                 }
@@ -953,7 +954,7 @@ internal class CheckoutControllerTest {
             }
 
             withSelectionHandler(completions) {
-                handler.state.test {
+                stateHolder.savedSelectionState.test {
                     awaitItem()
                     handler.select(selection, true)
                     awaitItem()
@@ -995,7 +996,7 @@ internal class CheckoutControllerTest {
             }
 
             withSelectionHandler(completions) {
-                handler.state.test {
+                stateHolder.savedSelectionState.test {
                     awaitItem()
                     handler.select(selection, true)
                     awaitItem()
@@ -1048,14 +1049,14 @@ internal class CheckoutControllerTest {
             }
 
             withSelectionHandler(completions) {
-                handler.state.test {
+                stateHolder.savedSelectionState.test {
                     awaitItem()
                     handler.select(selection, true)
                     awaitItem()
                     val failedState = withTurbineTimeout(10.seconds) { awaitItem() }
                     assertThat(failedState).isInstanceOf(SavedPaymentMethodSelectionState.Failed::class.java)
 
-                    handler.clearErrorMessages()
+                    stateHolder.clearErrorMessages()
 
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     assertThat(committedState().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
@@ -1083,7 +1084,7 @@ internal class CheckoutControllerTest {
             }
 
             withSelectionHandler(completions) {
-                handler.state.test {
+                stateHolder.savedSelectionState.test {
                     awaitSavedSelectionFailure(handler, selection, completions)
 
                     handler.select(PaymentSelection.GooglePay, true)
@@ -1708,7 +1709,7 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val result: Result<Unit>,
         val savedStateHandle: SavedStateHandle,
-        private val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutControllerStateHolder,
     ) {
         val committedState: CheckoutControllerState?
             get() = stateHolder.state
