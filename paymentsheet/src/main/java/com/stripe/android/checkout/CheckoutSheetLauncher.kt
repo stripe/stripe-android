@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -64,6 +65,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val selectionHandler: VerticalPaymentSelectionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -156,6 +158,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
         selectionHolder.setSelection(result.selection)
+        selectionHandler.clearErrorMessages()
     }
 
     private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
@@ -180,6 +183,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
             if (!stillExists) {
                 selectionHolder.setSelection(null)
+                selectionHandler.clearErrorMessages()
             }
         }
     }

@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.verticalmode.FakeVerticalPaymentSelectionHandler
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
@@ -259,6 +260,7 @@ internal class CheckoutStateLoaderTest {
         val call = chooser.lastCall
         assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(call?.newSelection).isEqualTo(PaymentSelection.GooglePay)
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
     }
 
     @Test
@@ -282,6 +284,7 @@ internal class CheckoutStateLoaderTest {
     ) {
         // Initial load seeds the chooser's stored previous configuration.
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
 
         // The customer picks Google Pay after the initial load; in the single-state model that pick
         // lives on the committed state rather than a separate selection holder.
@@ -292,6 +295,56 @@ internal class CheckoutStateLoaderTest {
         loader.reload(afterPick)
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
+    }
+
+    @Test
+    fun `reload clears selection errors when committed selection changes`() = runScenario(
+        chosenSelection = PaymentSelection.GooglePay,
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        loader.reload(requireNotNull(stateHolder.state))
+
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
+    }
+
+    @Test
+    fun `reload preserves selection errors when committed selection is unchanged`() = runScenario(
+        chosenSelection = PaymentSelection.GooglePay,
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        loader.reload(requireNotNull(stateHolder.state))
+
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        selectionHandler.clearErrorMessagesCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `failed reload preserves selection errors`() = runScenario(
+        shouldFail = true,
+        chosenSelection = PaymentSelection.GooglePay,
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        assertFailsWith<IllegalStateException> {
+            loader.reload(requireNotNull(stateHolder.state))
+        }
+
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHandler.clearErrorMessagesCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `clear resets selection errors when removing committed selection`() = runScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        loader.clear()
+
+        assertThat(stateHolder.selection.value).isNull()
+        selectionHandler.clearErrorMessagesCalls.awaitItem()
     }
 
     @Test
@@ -459,6 +512,7 @@ internal class CheckoutStateLoaderTest {
         )
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val selectionHandler = FakeVerticalPaymentSelectionHandler()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
@@ -485,6 +539,7 @@ internal class CheckoutStateLoaderTest {
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,
             stateHolder = stateHolder,
+            selectionHandler = { selectionHandler },
             customerStateHolder = customerStateHolder,
             internalRowSelectionCallback = { internalRowSelectionCallback },
         )
@@ -497,8 +552,10 @@ internal class CheckoutStateLoaderTest {
             chooser = recordingChooser,
             imageLoader = imageLoader,
             testScheduler = testScheduler,
+            selectionHandler = selectionHandler,
         ).block()
 
+        selectionHandler.ensureAllEventsConsumed()
         imageLoader.ensureAllEventsConsumed()
     }
 
@@ -510,6 +567,7 @@ internal class CheckoutStateLoaderTest {
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
         val testScheduler: TestCoroutineScheduler,
+        val selectionHandler: FakeVerticalPaymentSelectionHandler,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,

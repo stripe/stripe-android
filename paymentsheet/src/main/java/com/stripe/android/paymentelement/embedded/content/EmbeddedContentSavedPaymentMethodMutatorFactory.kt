@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +24,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
     @UIContext private val uiContext: CoroutineContext,
     private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val selectionHandler: VerticalPaymentSelectionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
@@ -40,7 +42,10 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
             uiContext = uiContext,
             savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::setSelection,
+            setSelection = {
+                selectionHolder.setSelection(it)
+                selectionHandler.clearErrorMessages()
+            },
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},

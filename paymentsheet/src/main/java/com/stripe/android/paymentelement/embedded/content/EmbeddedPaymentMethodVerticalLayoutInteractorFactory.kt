@@ -122,7 +122,11 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
             updateSelection = { updatedSelection, _ ->
+                val previousSelection = selectionHolder.selection.value
                 selectionHolder.setSelection(updatedSelection)
+                if (previousSelection != updatedSelection) {
+                    verticalPaymentSelectionHandler.clearErrorMessages()
+                }
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),

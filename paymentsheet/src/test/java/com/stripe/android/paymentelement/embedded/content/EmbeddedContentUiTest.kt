@@ -162,6 +162,10 @@ internal class EmbeddedContentUiTest {
         )
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
+        val selectionHandler = ImmediateVerticalPaymentSelectionHandler(
+            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            completionAction = immediateActionHandler::invoke,
+        )
 
         val state = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(null)
         val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
@@ -170,6 +174,7 @@ internal class EmbeddedContentUiTest {
             uiContext = Dispatchers.Unconfined,
             savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selectionHolder = selectionHolder,
+            selectionHandler = selectionHandler,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
             coroutineScope = viewModelScope,
@@ -182,10 +187,7 @@ internal class EmbeddedContentUiTest {
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-                completionAction = immediateActionHandler::invoke,
-            ),
+            verticalPaymentSelectionHandler = selectionHandler,
             coroutineScope = viewModelScope,
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,

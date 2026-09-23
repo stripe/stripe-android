@@ -9,11 +9,9 @@ import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSele
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,18 +33,10 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     private val immediateHandler = ImmediateVerticalPaymentSelectionHandler(
         updateSelection = { selection, _ ->
             selectionHolder.setSelection(selection)
-            clearError()
+            clearErrorMessages()
         },
         completionAction = immediateActionHandler::invoke,
     )
-
-    init {
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            selectionHolder.selection.drop(1).collect {
-                clearError()
-            }
-        }
-    }
 
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
         when (selection) {
@@ -56,7 +46,7 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     override fun onSelectionComplete() {
-        clearError()
+        clearErrorMessages()
         immediateHandler.onSelectionComplete()
     }
 
@@ -85,7 +75,7 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
         }
     }
 
-    private fun clearError() {
+    override fun clearErrorMessages() {
         _state.update { state ->
             if (state is SavedPaymentMethodSelectionState.Failed) {
                 SavedPaymentMethodSelectionState.Idle
