@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -34,7 +35,7 @@ internal class ExpressCheckoutElementTestRunnerContext(
 
 internal fun runExpressCheckoutElementTest(
     networkRule: NetworkRule,
-    initialCheckoutSessionResponseFactory: (MockResponse) -> Unit,
+    initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
         error("Override + validate if expected.")
     },

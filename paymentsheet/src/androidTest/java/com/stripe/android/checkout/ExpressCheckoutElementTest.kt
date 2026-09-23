@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.utils.FeatureFlags
@@ -41,7 +40,6 @@ internal class ExpressCheckoutElementTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
             },
@@ -81,7 +79,6 @@ internal class ExpressCheckoutElementTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
             },
@@ -113,7 +110,6 @@ internal class ExpressCheckoutElementTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
@@ -142,7 +138,6 @@ internal class ExpressCheckoutElementTest {
         val expectedErrorMessage = "Google Pay failed"
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
                 val error = (result as CheckoutController.Result.Failed).error
@@ -171,7 +166,6 @@ internal class ExpressCheckoutElementTest {
         val expectedErrorMessage = "Link failed"
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::create,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
                 val error = (result as CheckoutController.Result.Failed).error
@@ -199,7 +193,7 @@ internal class ExpressCheckoutElementTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredShippingAddress,
+            initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
@@ -222,7 +216,7 @@ internal class ExpressCheckoutElementTest {
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredShippingAddress,
+            initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
             },

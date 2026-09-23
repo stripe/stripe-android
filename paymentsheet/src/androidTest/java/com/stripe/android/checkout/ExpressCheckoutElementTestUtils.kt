@@ -22,6 +22,9 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
+import org.json.JSONObject
 
 internal fun NetworkRule.enqueueLinkAccountLookup() {
     enqueue(
@@ -32,15 +35,9 @@ internal fun NetworkRule.enqueueLinkAccountLookup() {
     }
 }
 
-internal fun enqueueSuccessfulGooglePayPayment(paymentMethod: PaymentMethod) {
-    enqueueGooglePayPaymentResult(
-        GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
-    )
-}
-
 internal fun enqueueSuccessfulGooglePayPayment(
     paymentMethod: PaymentMethod,
-    shippingInformation: ShippingInformation,
+    shippingInformation: ShippingInformation? = null,
 ) {
     enqueueGooglePayPaymentResult(
         GooglePayPaymentMethodLauncher.Result.Completed(
@@ -48,6 +45,17 @@ internal fun enqueueSuccessfulGooglePayPayment(
             shippingInformation = shippingInformation,
         )
     )
+}
+
+internal fun createCheckoutInitResponseWithRequiredShippingAddress(response: MockResponse) {
+    response.testBodyFromFile("checkout-session-init.json") { json ->
+        json.put("customer_email", "checkout@example.com")
+        json.put("account_settings", JSONObject().put("country", "US"))
+        json.put(
+            "shipping_address_collection",
+            JSONObject().put("allowed_countries", JSONArray(listOf("US", "CA")))
+        )
+    }
 }
 
 internal fun enqueueFailedGooglePayPayment(error: Throwable) {
