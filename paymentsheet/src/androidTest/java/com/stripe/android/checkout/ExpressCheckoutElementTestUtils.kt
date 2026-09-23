@@ -16,12 +16,14 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.PaymentSheet
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -58,6 +60,45 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddress(response: Moc
     }
 }
 
+internal fun createCheckoutInitResponseWithRequiredBillingAddress(response: MockResponse) {
+    createCheckoutInitResponseWithRequiredBillingAddress(
+        response = response,
+        automaticTaxEnabled = false,
+    )
+}
+
+internal fun createCheckoutInitResponseWithRequiredBillingAddressForAutomaticTax(response: MockResponse) {
+    createCheckoutInitResponseWithRequiredBillingAddress(
+        response = response,
+        automaticTaxEnabled = true,
+    )
+}
+
+private fun createCheckoutInitResponseWithRequiredBillingAddress(
+    response: MockResponse,
+    automaticTaxEnabled: Boolean,
+) {
+    response.testBodyFromFile("checkout-session-init.json") { json ->
+        json.put("customer_email", "checkout@example.com")
+        json.put("account_settings", JSONObject().put("country", "US"))
+        json.put("billing_address_collection", "required")
+        if (automaticTaxEnabled) {
+            json.put(
+                "tax_context",
+                JSONObject()
+                    .put("automatic_tax_enabled", true)
+                    .put("automatic_tax_address_source", "session.billing")
+            )
+            json.put(
+                "tax_meta",
+                JSONObject()
+                    .put("computation_type", "automatic")
+                    .put("status", "requires_location_inputs")
+            )
+        }
+    }
+}
+
 internal fun enqueueFailedGooglePayPayment(error: Throwable) {
     enqueueGooglePayPaymentResult(
         GooglePayPaymentMethodLauncher.Result.Failed(
@@ -88,20 +129,32 @@ internal fun assertGooglePayCalledWithShippingAddressParameters(
 ) {
     assertGooglePayCalled()
 
-    val intent = getIntents().single { hasComponent(GOOGLE_PAY_ACTIVITY_NAME).matches(it) }
-    val args = intent.extras?.let {
-        BundleCompat.getParcelable(it, "extra_args", Parcelable::class.java)
-    }
-    val shippingAddressParameters = requireNotNull(args).javaClass
-        .getDeclaredField("shippingAddressParameters")
-        .apply { isAccessible = true }
-        .get(args)
+    val shippingAddressParameters = googlePayLauncherArg("shippingAddressParameters")
     assertThat(shippingAddressParameters).isEqualTo(expected)
+}
+
+internal fun assertGooglePayCalledWithRequiredBillingAddress() {
+    assertGooglePayCalled()
+
+    val config = googlePayLauncherArg("config") as GooglePayPaymentMethodLauncher.Config
+    assertThat(config.billingAddressConfig).isEqualTo(
+        GooglePayPaymentMethodLauncher.BillingAddressConfig(
+            isRequired = true,
+            format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+            isPhoneNumberRequired = false,
+        )
+    )
 }
 
 internal fun enqueueSuccessfulNativeLinkPayment() {
     enqueueNativeLinkPaymentResult(
         LinkActivityResult.Completed(LinkAccountUpdate.None)
+    )
+}
+
+internal fun enqueueNativeLinkPaymentMethod(paymentMethod: PaymentMethod) {
+    enqueueNativeLinkPaymentResult(
+        LinkActivityResult.PaymentMethodObtained(paymentMethod)
     )
 }
 
@@ -128,6 +181,32 @@ private fun enqueueNativeLinkPaymentResult(result: LinkActivityResult) {
 
 internal fun assertNativeLinkCalled() {
     intended(hasComponent(LinkActivity::class.java.name))
+}
+
+internal fun assertNativeLinkCalledWithRequiredBillingAddress() {
+    assertNativeLinkCalled()
+
+    val intent = getIntents().single { hasComponent(LinkActivity::class.java.name).matches(it) }
+    val args = intent.extras?.let {
+        BundleCompat.getParcelable(it, LinkActivity.EXTRA_ARGS, NativeLinkArgs::class.java)
+    }
+    assertThat(args?.configuration?.billingDetailsCollectionConfiguration).isEqualTo(
+        PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+    )
+}
+
+private fun googlePayLauncherArg(name: String): Any? {
+    val intent = getIntents().single { hasComponent(GOOGLE_PAY_ACTIVITY_NAME).matches(it) }
+    val args = intent.extras?.let {
+        BundleCompat.getParcelable(it, "extra_args", Parcelable::class.java)
+    }
+    return requireNotNull(args).javaClass
+        .getDeclaredField(name)
+        .apply { isAccessible = true }
+        .get(args)
 }
 
 private const val GOOGLE_PAY_ACTIVITY_NAME =

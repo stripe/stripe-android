@@ -5,9 +5,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -262,6 +264,91 @@ internal class ExpressCheckoutElementTest {
                 isRequired = true,
                 allowedCountryCodes = setOf("US", "CA"),
             )
+        )
+    }
+
+    @Test
+    fun testGooglePayCollectsAndConfirmsRequiredBillingAddress() {
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory =
+                ::createCheckoutInitResponseWithRequiredBillingAddressForAutomaticTax,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+            },
+        ) {
+            val paymentMethod = createPaymentMethodWithBillingAddress()
+
+            enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
+            enqueueBillingAddressUpdateAndConfirm(paymentMethod)
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalledWithRequiredBillingAddress()
+    }
+
+    @Test
+    fun testNativeLinkCollectsAndConfirmsRequiredBillingAddress() {
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
+
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredBillingAddress,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+            },
+        ) {
+            val paymentMethod = createPaymentMethodWithBillingAddress()
+
+            enqueueNativeLinkPaymentMethod(paymentMethod)
+            enqueueConfirm(paymentMethod)
+
+            page.clickLinkButton()
+        }
+
+        assertNativeLinkCalledWithRequiredBillingAddress()
+    }
+
+    private fun enqueueBillingAddressUpdateAndConfirm(paymentMethod: PaymentMethod) {
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("tax_region[line2]", "Floor 3"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+        ) { response ->
+            createCheckoutInitResponseWithRequiredBillingAddressForAutomaticTax(response)
+        }
+        enqueueConfirm(paymentMethod)
+    }
+
+    private fun enqueueConfirm(paymentMethod: PaymentMethod) {
+        networkRule.checkoutConfirm(
+            bodyPart("payment_method", paymentMethod.id),
+            bodyPart("expected_amount", "5099"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+    }
+
+    private fun createPaymentMethodWithBillingAddress(): PaymentMethod {
+        return PaymentMethodFactory.card(
+            last4 = "4242",
+            id = "pm_1234",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 3",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            ),
         )
     }
 }
