@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -98,7 +99,7 @@ internal class CustomerRepositoryTest {
                 ),
                 productUsageTokens = any(),
                 requestOptions = eq(expectedRequestOptions()),
-                analyticsPublishableKey = eq(DEFAULT_API_CONFIG.publishableKey),
+                apiConfiguration = eq(DEFAULT_API_CONFIG),
             )
         }
 
@@ -129,7 +130,7 @@ internal class CustomerRepositoryTest {
                 ),
                 productUsageTokens = any(),
                 requestOptions = any(),
-                analyticsPublishableKey = eq(DEFAULT_API_CONFIG.publishableKey),
+                apiConfiguration = eq(DEFAULT_API_CONFIG),
             )
         }
 
@@ -182,7 +183,7 @@ internal class CustomerRepositoryTest {
                         ),
                         productUsageTokens = any(),
                         requestOptions = any(),
-                        analyticsPublishableKey = any(),
+                        apiConfiguration = any(),
                     )
                 }.thenReturn(Result.success(mockedReturnPaymentMethods))
             }
@@ -241,7 +242,7 @@ internal class CustomerRepositoryTest {
                     ),
                     productUsageTokens = any(),
                     requestOptions = any(),
-                    analyticsPublishableKey = any(),
+                    apiConfiguration = any(),
                 )
             }.thenReturn(Result.success(mockedReturnPaymentMethods))
         }
@@ -708,7 +709,7 @@ internal class CustomerRepositoryTest {
                 listPaymentMethodsParams = any(),
                 productUsageTokens = any(),
                 requestOptions = any(),
-                analyticsPublishableKey = any(),
+                apiConfiguration = any(),
             )
         )
             .doReturn(Result.failure(InvalidParameterException("Request Failed")))
@@ -725,7 +726,7 @@ internal class CustomerRepositoryTest {
                     listPaymentMethodsParams = any(),
                     productUsageTokens = any(),
                     requestOptions = any(),
-                    analyticsPublishableKey = any(),
+                    apiConfiguration = any(),
                 )
             }.doReturn(result)
         }
@@ -842,7 +843,7 @@ internal class CustomerRepositoryTest {
             listPaymentMethodsParams: ListPaymentMethodsParams,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options,
-            analyticsPublishableKey: String?,
+            apiConfiguration: ApiConfiguration.State,
         ): Result<List<PaymentMethod>> {
             return Result.success(paymentMethodsToRetrieve)
         }

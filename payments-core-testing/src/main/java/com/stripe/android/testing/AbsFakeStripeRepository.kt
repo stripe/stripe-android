@@ -1,6 +1,7 @@
 package com.stripe.android.testing
 
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
@@ -207,7 +208,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options,
-        analyticsPublishableKey: String?
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>> {
         TODO("Not yet implemented")
     }

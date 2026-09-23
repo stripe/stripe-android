@@ -75,7 +75,7 @@ internal class CustomerApiRepository @Inject constructor(
                         apiKey = ephemeralKeySecret,
                         stripeAccount = apiConfiguration.stripeAccountId,
                     ),
-                    analyticsPublishableKey = apiConfiguration.publishableKey
+                    apiConfiguration = apiConfiguration,
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
                     errorReporter.report(
