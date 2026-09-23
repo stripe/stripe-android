@@ -87,7 +87,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         }
     }
 
-    override fun clearErrorMessages() {
+    fun clearErrorMessages() {
         _savedSelectionState.update { state ->
             if (state is SavedPaymentMethodSelectionState.Failed) {
                 SavedPaymentMethodSelectionState.Idle

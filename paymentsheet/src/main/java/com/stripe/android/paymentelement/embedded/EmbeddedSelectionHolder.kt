@@ -12,8 +12,6 @@ internal interface EmbeddedSelectionHolder {
 
     fun setSelection(updatedSelection: PaymentSelection?)
 
-    fun clearErrorMessages()
-
     fun setTemporarySelection(code: PaymentMethodCode?)
 
     fun setPreviousNewSelections(bundle: Bundle)
