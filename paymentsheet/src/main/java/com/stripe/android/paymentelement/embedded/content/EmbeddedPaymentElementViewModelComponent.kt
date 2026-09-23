@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
@@ -288,6 +289,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Provides
         @EmbeddedHostProcessing
         fun provideHostProcessing(): StateFlow<Boolean> = stateFlowOf(false)
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(): StateFlow<SavedPaymentMethodSelectionState> {
+            return stateFlowOf(SavedPaymentMethodSelectionState.Idle)
+        }
 
         @Provides
         fun providesConfirmationStateSupplier(
