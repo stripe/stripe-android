@@ -108,17 +108,9 @@ composeRule.onNodeWithTag(SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
 
 ## Waiting for Recomposition
 
-Use `ComposeTestRule.waitUntilWithIdle` from `com.stripe.android.testing` for async UI waits. The
-extension waits for Compose to become idle before polling and applies the standard 5,000 ms
-timeout. Provide a condition description when it will make a timeout failure easier to diagnose.
-When polling semantics nodes, pass `atLeastOneRootRequired = false` so activity and window
-transitions can temporarily have no Compose root while the wait continues.
 
 ```kotlin
-// Wait for pending recompositions
-composeRule.waitForIdle()
-
-// Wait for async content after Compose becomes idle
+// Wait for pending recompositions and then for async content
 composeRule.waitUntilWithIdle(
     conditionDescription = "node with tag $MY_TAG to appear",
 ) {
