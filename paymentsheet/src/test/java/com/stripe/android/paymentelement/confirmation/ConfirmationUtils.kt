@@ -23,6 +23,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
@@ -182,7 +183,7 @@ internal suspend fun createIntentConfirmationInterceptor(
 }
 
 internal fun createTestConfirmationHandlerFactory(
-    paymentElementCallbackIdentifier: String,
+    paymentElementCallbackIdentifier: CallbacksKey,
     intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,

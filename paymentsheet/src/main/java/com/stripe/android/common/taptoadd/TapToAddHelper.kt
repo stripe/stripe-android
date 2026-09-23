@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -57,7 +58,7 @@ internal class DefaultTapToAddHelper(
     private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val productUsage: Set<String>,
-    private val paymentElementCallbackIdentifier: String,
+    private val paymentElementCallbackIdentifier: CallbacksKey,
     private val tapToAddMode: TapToAddMode,
     private val eventMode: EventReporter.Mode,
     private val eventReporter: EventReporter,
@@ -173,7 +174,7 @@ internal class DefaultTapToAddHelper(
     class Factory @Inject constructor(
         private val context: Context,
         @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-        @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+        @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: CallbacksKey,
         private val eventReporter: EventReporter,
         private val savedStateHandle: SavedStateHandle,
         private val eventMode: EventReporter.Mode,

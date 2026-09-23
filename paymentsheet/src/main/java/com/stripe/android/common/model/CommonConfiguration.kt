@@ -10,6 +10,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -54,7 +55,7 @@ internal data class CommonConfiguration(
     fun validate(
         initializationMode: PaymentElementLoader.InitializationMode,
         isLiveMode: Boolean,
-        @PaymentElementCallbackIdentifier callbackIdentifier: String,
+        @PaymentElementCallbackIdentifier callbackIdentifier: CallbacksKey,
         isTapToAddSupported: Boolean = true,
     ) {
         customerAndMerchantValidate()
@@ -129,7 +130,7 @@ internal data class CommonConfiguration(
     @Suppress("ThrowsCount")
     private fun confirmationTokenValidate(
         isLiveMode: Boolean,
-        @PaymentElementCallbackIdentifier callbackIdentifier: String
+        @PaymentElementCallbackIdentifier callbackIdentifier: CallbacksKey
     ) {
         if (
             PaymentElementCallbackReferences[callbackIdentifier]?.createIntentWithConfirmationTokenCallback != null &&
@@ -145,7 +146,7 @@ internal data class CommonConfiguration(
     // These exception messages are not localized as they are not intended to be displayed to a user.
     @OptIn(TapToAddPreview::class)
     private fun tapToAddValidate(
-        @PaymentElementCallbackIdentifier callbackIdentifier: String
+        @PaymentElementCallbackIdentifier callbackIdentifier: CallbacksKey
     ) {
         if (
             PaymentElementCallbackReferences[callbackIdentifier]?.createCardPresentSetupIntentCallback != null &&

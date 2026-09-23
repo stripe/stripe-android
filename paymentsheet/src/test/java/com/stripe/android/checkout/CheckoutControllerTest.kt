@@ -29,6 +29,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -555,20 +556,21 @@ internal class CheckoutControllerTest {
     fun `default integration name is used as the payment element callback identifier`() = runTest {
         val controller = createController()
 
-        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo(DEFAULT_INTEGRATION_NAME)
+        assertThat(controller.paymentElementCallbackIdentifier)
+            .isEqualTo(UnscopedCallbacksKey(DEFAULT_INTEGRATION_NAME))
     }
 
     @Test
     fun `custom integration name is used as the payment element callback identifier`() = runTest {
         val controller = createController(integrationName = "merchant_checkout")
 
-        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo("merchant_checkout")
+        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo(UnscopedCallbacksKey("merchant_checkout"))
     }
 
     @Test
     fun `integration name keys the controller into its own global callback references entry`() = runTest {
         val callbacks = PaymentElementCallbacks.Builder().build()
-        PaymentElementCallbackReferences["merchant_checkout"] = callbacks
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("merchant_checkout")] = callbacks
 
         val controller = createController(integrationName = "merchant_checkout")
 
@@ -1418,7 +1420,7 @@ internal class CheckoutControllerTest {
         val controller = destroyControllerRule.track(
             DaggerCheckoutControllerComponent.factory().create(
                 application = applicationContext,
-                paymentElementCallbackIdentifier = integrationName,
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey(integrationName),
                 resultCallback = CheckoutController.ResultCallback {},
                 rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
                 checkoutControllerSavedState = controllerSavedState,

@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
 
@@ -13,7 +14,7 @@ import javax.inject.Inject
  * Contract used to explicitly launch Link natively.
  */
 internal class NativeLinkActivityContract @Inject constructor(
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: CallbacksKey,
     private val requestSurface: RequestSurface,
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {

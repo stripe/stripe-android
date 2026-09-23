@@ -7,6 +7,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -140,7 +141,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val input = launcher.calls.awaitItem().input
 
         assertThat(input.paymentElementCallbackIdentifier)
-            .isEqualTo("cpm_test_payment_element_identifier")
+            .isEqualTo(UnscopedCallbacksKey("cpm_test_payment_element_identifier"))
         assertThat(input.type).isEqualTo(CUSTOM_PAYMENT_METHOD_TYPE)
         assertThat(input.billingDetails).isEqualTo(BILLING_DETAILS)
 
@@ -217,7 +218,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         test(
             Scenario(
                 definition = CustomPaymentMethodConfirmationDefinition(
-                    paymentElementCallbackIdentifier = "cpm_test_payment_element_identifier",
+                    paymentElementCallbackIdentifier = UnscopedCallbacksKey("cpm_test_payment_element_identifier"),
                     confirmCustomPaymentMethodCallbackProvider = { callback },
                     errorReporter = errorReporter,
                 ),

@@ -36,8 +36,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -105,7 +105,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: CallbacksKey,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
@@ -155,7 +155,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentOptionActivityLauncher.unregister()
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
-                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                 }
             }
         )
@@ -771,7 +770,7 @@ internal class DefaultFlowController @Inject internal constructor(
             statusBarColor: () -> Int?,
             paymentOptionResultCallback: PaymentOptionResultCallback,
             paymentResultCallback: PaymentSheetResultCallback,
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             initializedViaCompose: Boolean,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
         ): PaymentSheet.FlowController {
@@ -779,7 +778,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 owner = viewModelStoreOwner,
                 factory = FlowControllerViewModel.Factory(statusBarColor(), paymentElementCallbackIdentifier),
             ).get(
-                key = "FlowControllerViewModel(instance = $paymentElementCallbackIdentifier)",
+                key = "FlowControllerViewModel(instance = ${paymentElementCallbackIdentifier.key})",
                 modelClass = FlowControllerViewModel::class.java
             )
 

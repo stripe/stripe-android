@@ -7,6 +7,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
+import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -18,7 +21,7 @@ internal class FlowControllerFactory(
     private val statusBarColor: () -> Int?,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: String = "FlowController",
+    private val paymentElementCallbackIdentifier: CallbacksKey,
     private val initializedViaCompose: Boolean = false,
 ) {
     constructor(
@@ -32,6 +35,11 @@ internal class FlowControllerFactory(
         statusBarColor = { StatusBarCompat.color(activity) },
         paymentOptionResultCallback = paymentOptionResultCallback,
         paymentResultCallback = paymentResultCallback,
+        paymentElementCallbackIdentifier = LifecyclePaymentElementCallbackReferences.get(
+            lifecycle = activity.lifecycle,
+            owner = activity,
+            key = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+        ).key(FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER),
     )
 
     constructor(
@@ -45,6 +53,11 @@ internal class FlowControllerFactory(
         statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
         paymentOptionResultCallback = paymentOptionResultCallback,
         paymentResultCallback = paymentResultCallback,
+        paymentElementCallbackIdentifier = LifecyclePaymentElementCallbackReferences.get(
+            lifecycle = fragment.lifecycle,
+            owner = fragment,
+            key = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+        ).key(FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER),
     )
 
     fun create(): PaymentSheet.FlowController =
@@ -52,7 +65,7 @@ internal class FlowControllerFactory(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "FlowController(instance = $paymentElementCallbackIdentifier)",
+                key = "FlowController(instance = ${paymentElementCallbackIdentifier.key})",
                 registryOwner = activityResultRegistryOwner,
             ),
             activityResultRegistryOwner = activityResultRegistryOwner,

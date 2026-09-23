@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentCompat
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 
 /**
@@ -24,7 +26,11 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
         savedInstanceState?.getBoolean(HAS_CONFIRM_STARTED_KEY)?.let { hasConfirmStarted = it }
 
         val type = intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE)
-        val paymentElementCallbackIdentifier = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
+        val paymentElementCallbackIdentifier = IntentCompat.getParcelableExtra(
+            intent,
+            EXTRA_PAYMENT_ELEMENT_IDENTIFIER,
+            CallbacksKey::class.java,
+        )
 
         @Suppress("DEPRECATION")
         val billingDetails = intent.getParcelableExtra<PaymentMethod.BillingDetails>(EXTRA_BILLING_DETAILS)

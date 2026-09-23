@@ -13,6 +13,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,13 +37,14 @@ class ExternalPaymentMethodProxyActivityTest {
         val expectedBillingDetails =
             PaymentMethod.BillingDetails(name = "Joe", address = Address(city = "Seattle", line1 = "123 Main St"))
 
-        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks.Builder()
-            .externalPaymentMethodConfirmHandler(confirmHandler)
-            .build()
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifier")] =
+            PaymentElementCallbacks.Builder()
+                .externalPaymentMethodConfirmHandler(confirmHandler)
+                .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifier"),
                 type = expectedExternalPaymentMethodType,
                 billingDetails = expectedBillingDetails,
             )
@@ -64,13 +66,14 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks.Builder()
-            .externalPaymentMethodConfirmHandler(confirmHandler)
-            .build()
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifier")] =
+            PaymentElementCallbacks.Builder()
+                .externalPaymentMethodConfirmHandler(confirmHandler)
+                .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifier"),
                 type = "external_fawry",
                 billingDetails = PaymentMethod.BillingDetails(),
             )
@@ -135,17 +138,19 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks.Builder()
-            .externalPaymentMethodConfirmHandler(firstConfirmHandler)
-            .build()
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifierOne")] =
+            PaymentElementCallbacks.Builder()
+                .externalPaymentMethodConfirmHandler(firstConfirmHandler)
+                .build()
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks.Builder()
-            .externalPaymentMethodConfirmHandler(secondConfirmHandler)
-            .build()
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifierTwo")] =
+            PaymentElementCallbacks.Builder()
+                .externalPaymentMethodConfirmHandler(secondConfirmHandler)
+                .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifierOne",
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifierOne"),
                 type = "external_paypal",
                 billingDetails = PaymentMethod.BillingDetails(
                     email = "email@email.com",
@@ -155,7 +160,7 @@ class ExternalPaymentMethodProxyActivityTest {
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifierTwo",
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifierTwo"),
                 type = "external_fawry",
                 billingDetails = PaymentMethod.BillingDetails(
                     email = "email2@email.com",

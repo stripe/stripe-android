@@ -33,6 +33,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -135,7 +136,7 @@ internal interface CustomerSheetTestHelper {
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }
                 ?: createTestConfirmationHandlerFactory(
-                    paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
+                    paymentElementCallbackIdentifier = UnscopedCallbacksKey("CustomerSheetTestIdentifier"),
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
                     bacsMandateConfirmationLauncherFactory = {
                         FakeBacsMandateConfirmationLauncher()

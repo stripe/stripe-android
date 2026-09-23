@@ -15,6 +15,7 @@ import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -990,7 +991,7 @@ class LinkController @Inject internal constructor(
                 .build(
                     application = application,
                     savedStateHandle = savedStateHandle,
-                    paymentElementCallbackIdentifier = "LinkController",
+                    paymentElementCallbackIdentifier = UnscopedCallbacksKey("LinkController"),
                     requestSurface = requestSurface,
                 )
                 .linkController

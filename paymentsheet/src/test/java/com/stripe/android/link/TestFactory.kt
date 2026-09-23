@@ -38,6 +38,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -350,7 +351,7 @@ internal object TestFactory {
         apiConfiguration = LINK_CONFIGURATION.apiConfiguration,
         linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
-        paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
+        paymentElementCallbackIdentifier = UnscopedCallbacksKey("LinkNativeTestIdentifier"),
         launchMode = LinkLaunchMode.Full,
         statusBarColor = null,
     )

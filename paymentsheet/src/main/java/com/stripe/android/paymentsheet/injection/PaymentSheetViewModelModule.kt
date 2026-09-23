@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -35,7 +36,7 @@ internal class PaymentSheetViewModelModule {
 
     @Provides
     @PaymentElementCallbackIdentifier
-    fun provideCallbackIdentifier(args: PaymentSheetContract.Args): String = args.paymentElementCallbackIdentifier
+    fun provideCallbackIdentifier(args: PaymentSheetContract.Args): CallbacksKey = args.paymentElementCallbackIdentifier
 
     @Provides
     @ViewModelScope

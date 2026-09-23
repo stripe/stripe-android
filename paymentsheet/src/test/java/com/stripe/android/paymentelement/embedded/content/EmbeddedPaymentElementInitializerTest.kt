@@ -4,21 +4,27 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
 
 internal class EmbeddedPaymentElementInitializerTest {
     @get:Rule
+    val callbackTestRule = PaymentElementCallbackTestRule()
+
+    @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `initialize init and clear sheetLauncher`() = testScenario {
+    fun `initialize init and clear sheetLauncher`() = runScenario {
         assertThat(sheetStateHolder.sheetLauncher).isNull()
         initializer.initialize(true)
         assertThat(sheetStateHolder.sheetLauncher).isNotNull()
@@ -27,7 +33,7 @@ internal class EmbeddedPaymentElementInitializerTest {
     }
 
     @Test
-    fun `initialize when not applicationIsTaskOwner emits analytics event once`() = testScenario {
+    fun `initialize when not applicationIsTaskOwner emits analytics event once`() = runScenario {
         initializer.initialize(false)
         assertThat(eventReporter.cannotProperlyReturnFromLinkAndOtherLPMsCalls.awaitItem()).isEqualTo(Unit)
         initializer.initialize(false)
@@ -35,48 +41,24 @@ internal class EmbeddedPaymentElementInitializerTest {
     }
 
     @Test
-    fun `when lifecycle is destroyed, should un-initialize callbacks`() {
-        val owner = TestLifecycleOwner()
-        val callbacks = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _, _ ->
-                error("Not implemented")
-            }
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("Not implemented")
-            }
-            .externalPaymentMethodConfirmHandler { _, _ ->
-                error("Not implemented")
-            }
-            .build()
+    fun `Destroying an initialized element does not remove callbacks registered by another owner`() = runScenario {
+        val callbackOwner = TestLifecycleOwner()
+        val callbacks = PaymentElementCallbacks.Builder().build()
+        val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
+        references[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER.key] = callbacks
+        initializer.initialize(true)
+        assertThat(sheetStateHolder.sheetLauncher).isNotNull()
 
-        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER] = callbacks
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
 
-        testScenario(owner, PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER) {
-            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-
-            assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
-                .isEqualTo(callbacks)
-
-            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-
-            assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
-                .isEqualTo(callbacks)
-
-            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-
-            assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
-                .isEqualTo(callbacks)
-
-            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-            assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
-                .isNotNull()
-        }
+        assertThat(PaymentElementCallbackReferences[references.key(PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER.key)])
+            .isSameInstanceAs(callbacks)
+        assertThat(sheetStateHolder.sheetLauncher).isNull()
+        callbackOwner.currentState = Lifecycle.State.DESTROYED
     }
 
-    private fun testScenario(
+    private fun runScenario(
         lifecycleOwner: TestLifecycleOwner = TestLifecycleOwner(),
-        paymentElementCallbackIdentifier: String = PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val sheetStateHolder = SheetStateHolder(SavedStateHandle())
@@ -87,7 +69,6 @@ internal class EmbeddedPaymentElementInitializerTest {
             lifecycleOwner = lifecycleOwner,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
         )
         Scenario(
             initializer = initializer,
@@ -106,6 +87,7 @@ internal class EmbeddedPaymentElementInitializerTest {
     )
 
     private companion object {
-        private const val PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER = "EmbeddedPaymentElementTestIdentifier"
+        private val PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER =
+            UnscopedCallbacksKey("EmbeddedPaymentElementTestIdentifier")
     }
 }

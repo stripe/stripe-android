@@ -23,7 +23,9 @@ import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
@@ -98,9 +100,9 @@ internal interface CustomerSheetViewModelModule {
     companion object {
         @Provides
         @PaymentElementCallbackIdentifier
-        fun providesPaymentElementCallbackIdentifier(): String {
+        fun providesPaymentElementCallbackIdentifier(): CallbacksKey {
             // We currently do not support multiple instances of Customer Sheet
-            return "CustomerSheet"
+            return UnscopedCallbacksKey("CustomerSheet")
         }
 
         @Provides

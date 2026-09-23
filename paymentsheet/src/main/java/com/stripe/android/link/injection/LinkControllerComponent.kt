@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import dagger.BindsInstance
@@ -26,7 +27,7 @@ internal interface LinkControllerComponent {
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             @BindsInstance requestSurface: RequestSurface,
         ): LinkControllerComponent
     }

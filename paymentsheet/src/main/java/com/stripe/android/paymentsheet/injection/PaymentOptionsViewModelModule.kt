@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -33,7 +34,8 @@ internal class PaymentOptionsViewModelModule {
 
     @Provides
     @PaymentElementCallbackIdentifier
-    fun provideCallbackIdentifier(args: PaymentOptionContract.Args): String = args.paymentElementCallbackIdentifier
+    fun provideCallbackIdentifier(args: PaymentOptionContract.Args): CallbacksKey =
+        args.paymentElementCallbackIdentifier
 
     @Provides
     @Named(PRODUCT_USAGE)

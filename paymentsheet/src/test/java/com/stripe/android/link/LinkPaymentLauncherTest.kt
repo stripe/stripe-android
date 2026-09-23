@@ -10,6 +10,7 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -378,7 +379,7 @@ internal class LinkPaymentLauncherTest {
             },
             linkActivityContract = linkActivityContract,
             linkStore = linkStore,
-            paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier"
+            paymentElementCallbackIdentifier = UnscopedCallbacksKey("PaymentElementCallbackIdentifier")
         )
     }
 }

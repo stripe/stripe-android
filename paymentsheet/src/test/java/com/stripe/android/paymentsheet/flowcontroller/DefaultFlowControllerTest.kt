@@ -55,6 +55,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -2085,90 +2086,18 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _, _ ->
-                error("I’m alive")
-            }
-            .build()
-
+    fun `Destroying a flow controller does not remove callbacks registered by another owner`() {
+        val callbackOwner = TestLifecycleOwner()
+        val callbacks = PaymentElementCallbacks.Builder().build()
+        val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
+        references[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER.key] = callbacks
         createFlowController()
 
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.createIntentCallback
-        ).isNotNull()
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
 
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.createIntentCallback
-        ).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.createIntentCallback
-        ).isNull()
-    }
-
-    @Test
-    fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .externalPaymentMethodConfirmHandler { _, _ ->
-                error("I’m alive")
-            }
-            .build()
-
-        createFlowController()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.externalPaymentMethodConfirmHandler
-        ).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.externalPaymentMethodConfirmHandler
-        ).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.externalPaymentMethodConfirmHandler
-        ).isNull()
-    }
-
-    @Test
-    fun `Clears out confirmCustomPaymentMethodCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("I’m alive")
-            }
-            .build()
-
-        createFlowController()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.confirmCustomPaymentMethodCallback
-        ).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.confirmCustomPaymentMethodCallback
-        ).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.confirmCustomPaymentMethodCallback
-        ).isNull()
+        assertThat(PaymentElementCallbackReferences[references.key(FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER.key)])
+            .isSameInstanceAs(callbacks)
+        callbackOwner.currentState = Lifecycle.State.DESTROYED
     }
 
     @Test

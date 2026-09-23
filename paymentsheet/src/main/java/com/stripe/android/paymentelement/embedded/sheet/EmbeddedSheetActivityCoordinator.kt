@@ -60,7 +60,7 @@ internal class EmbeddedSheetActivityCoordinator(
                 activity = activity,
                 args = updatedArgs,
                 activityResultCaller = PaymentElementActivityResultCaller(
-                    key = "EmbeddedSheetActivity_${updatedArgs.paymentElementCallbackIdentifier}",
+                    key = "EmbeddedSheetActivity_${updatedArgs.paymentElementCallbackIdentifier.key}",
                     registryOwner = activity,
                 ),
             ),
