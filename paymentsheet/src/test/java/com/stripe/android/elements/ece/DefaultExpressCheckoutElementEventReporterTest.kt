@@ -8,11 +8,8 @@ import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
-import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -26,7 +23,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         reporter.onEceDisplayed()
 
         val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_init")
+        assertThat(loggedParams).containsEntry("event", "elements.express_checkout_element.init")
         assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("ordered_lpms", "link,google_pay")
         assertThat(loggedParams).containsEntry(
@@ -83,42 +80,10 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         )
     }
 
-    @Test
-    fun `onEceWalletTapped fires expected event for Link`() = runScenario {
-        val linkButton = ExpressButton.Link.create(
-            paymentMethodMetadata = paymentMethodMetadata,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            buttonTheme = ButtonTheme.Automatic,
-        )
-
-        reporter.onEceWalletTapped(linkButton)
-
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_wallet_tapped")
-        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("selected_lpm", "link")
-        assertThat(loggedParams).containsKey("link_context")
-    }
-
-    @Test
-    fun `onEceWalletTapped fires expected event for GooglePay`() = runScenario {
-        reporter.onEceWalletTapped(googlePayButton)
-
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_ece_wallet_tapped")
-        assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
-        assertThat(loggedParams).containsEntry("duration", 1.0f)
-        assertThat(loggedParams).containsEntry("selected_lpm", "google_pay")
-        assertThat(loggedParams).doesNotContainKey("link_context")
-    }
-
     private class Scenario(
         val reporter: ExpressCheckoutElementEventReporter,
         val executor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
-        val paymentMethodMetadata: PaymentMethodMetadata,
-        val googlePayButton: ExpressButton.GooglePay,
     )
 
     private fun runScenario(
@@ -169,13 +134,6 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 reporter = reporter,
                 executor = analyticsRequestExecutor,
                 durationProvider = durationProvider,
-                paymentMethodMetadata = paymentMethodMetadata,
-                googlePayButton = ExpressButton.GooglePay.create(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    googlePayConfiguration = googlePayConfiguration,
-                    shippingAddressRequired = false,
-                    buttonTheme = ButtonTheme.Automatic,
-                ),
             )
         )
     }
