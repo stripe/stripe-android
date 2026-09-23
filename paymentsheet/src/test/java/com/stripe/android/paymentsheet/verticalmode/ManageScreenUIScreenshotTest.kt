@@ -34,7 +34,6 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        pendingPaymentMethodId = null,
                         error = null,
                     )
                 ),
@@ -54,7 +53,6 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        pendingPaymentMethodId = null,
                         error = null,
                     )
                 ),
@@ -74,7 +72,6 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        pendingPaymentMethodId = null,
                         error = null,
                     )
                 ),
@@ -94,7 +91,6 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        pendingPaymentMethodId = null,
                         error = null,
                     )
                 ),
@@ -116,7 +112,6 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        pendingPaymentMethodId = null,
                         error = null,
                     )
                 ),
@@ -152,7 +147,6 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        pendingPaymentMethodId = null,
                         error = null,
                     )
                 ),

@@ -40,7 +40,6 @@ internal class ManageScreenUITransitionScreenshotTest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         )
@@ -51,8 +50,12 @@ internal class ManageScreenUITransitionScreenshotTest {
                 delay(500L)
                 interactor.updateState {
                     it.copy(
+                        paymentMethods = paymentMethods.mapIndexed { index, paymentMethod ->
+                            paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
+                                isSelectionPending = index == 1,
+                            )
+                        },
                         isProcessing = true,
-                        pendingPaymentMethodId = paymentMethods[1].paymentMethod.id,
                     )
                 }
             }

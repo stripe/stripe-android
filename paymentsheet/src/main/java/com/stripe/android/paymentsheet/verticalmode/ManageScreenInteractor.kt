@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -40,7 +41,6 @@ internal interface ManageScreenInteractor {
         val canEdit: Boolean,
         val linkBrand: LinkBrand,
         val isProcessing: Boolean,
-        val pendingPaymentMethodId: String?,
         val error: ResolvableString?,
     ) {
         private val containsOnlyCards: Boolean by lazy {
@@ -123,11 +123,16 @@ internal class DefaultManageScreenInteractor(
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
-        combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
+        combineAsStateFlow(
+            paymentMethods,
+            defaultPaymentMethodId,
+            pendingPaymentMethodId,
+        ) { paymentMethods, defaultPaymentMethodId, pendingPaymentMethodId ->
             paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
-                    paymentMethodMetadata,
-                    defaultPaymentMethodId
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    defaultPaymentMethodId = defaultPaymentMethodId,
+                    isSelectionPending = it.id == pendingPaymentMethodId,
                 )
             }
         }
@@ -137,10 +142,9 @@ internal class DefaultManageScreenInteractor(
     private val linkAndOperation = combineAsStateFlow(
         linkAccount,
         processing,
-        pendingPaymentMethodId,
         error,
-    ) { linkAccount, processing, pendingPaymentMethodId, error ->
-        LinkAndOperation(linkAccount, processing, pendingPaymentMethodId, error)
+    ) { linkAccount, processing, error ->
+        LinkAndOperation(linkAccount, processing, error)
     }
 
     override val state = combineAsStateFlow(
@@ -163,7 +167,6 @@ internal class DefaultManageScreenInteractor(
             canEdit = canEdit,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAndOperation.linkAccount.account),
             isProcessing = linkAndOperation.isProcessing,
-            pendingPaymentMethodId = linkAndOperation.pendingPaymentMethodId,
             error = linkAndOperation.error,
         )
     }
@@ -215,7 +218,6 @@ internal class DefaultManageScreenInteractor(
     private data class LinkAndOperation(
         val linkAccount: LinkAccountUpdate.Value,
         val isProcessing: Boolean,
-        val pendingPaymentMethodId: String?,
         val error: ResolvableString?,
     )
 
@@ -248,9 +250,9 @@ internal class DefaultManageScreenInteractor(
                 },
                 defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
-                processing = com.stripe.android.uicore.utils.stateFlowOf(false),
-                pendingPaymentMethodId = com.stripe.android.uicore.utils.stateFlowOf(null),
-                error = com.stripe.android.uicore.utils.stateFlowOf(null),
+                processing = stateFlowOf(false),
+                pendingPaymentMethodId = stateFlowOf(null),
+                error = stateFlowOf(null),
                 navigateBackAfterSelection = true,
             )
         }

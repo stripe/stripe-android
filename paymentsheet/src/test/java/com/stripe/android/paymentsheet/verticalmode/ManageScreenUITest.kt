@@ -49,7 +49,6 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            pendingPaymentMethodId = null,
             error = null,
         )
     ) {
@@ -80,7 +79,6 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         ) {
@@ -101,7 +99,6 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            pendingPaymentMethodId = null,
             error = null,
         )
     ) {
@@ -137,7 +134,6 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         ) {
@@ -160,7 +156,6 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         ) {
@@ -180,7 +175,6 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            pendingPaymentMethodId = null,
             error = null,
         )
     ) {
@@ -208,7 +202,6 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         ) {
@@ -234,7 +227,6 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             ),
         ) {
@@ -259,7 +251,6 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            pendingPaymentMethodId = null,
             error = null,
         )
     ) {
@@ -279,7 +270,6 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            pendingPaymentMethodId = null,
             error = null,
         ),
     ) {
@@ -289,36 +279,43 @@ class ManageScreenUITest {
     }
 
     @Test
-    fun processingDisablesRowsAndShowsSpinnerOnPendingRow() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = displayableSavedPaymentMethods,
-            currentSelection = null,
-            isEditing = false,
-            canEdit = true,
-            linkBrand = LinkBrand.Link,
-            isProcessing = true,
-            pendingPaymentMethodId = displayableSavedPaymentMethods[1].paymentMethod.id,
-            error = null,
-        )
-    ) {
-        displayableSavedPaymentMethods.forEach {
-            val isPending = it == displayableSavedPaymentMethods[1]
-            val row = composeRule.onNodeWithTag(
-                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
-                useUnmergedTree = true,
+    fun processingDisablesRowsAndShowsSpinnerOnPendingRow() {
+        val pendingPaymentMethods = displayableSavedPaymentMethods.mapIndexed { index, paymentMethod ->
+            paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
+                isSelectionPending = index == 1,
             )
-                .assertIsNotEnabled()
-            val hasLoadingIndicator = hasAnyDescendant(hasTestTag(TEST_TAG_MANAGE_SCREEN_PENDING))
-            val hasPaymentMethodIcon = hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES))
-
-            if (isPending) {
-                row.assert(hasLoadingIndicator).assert(hasPaymentMethodIcon.not())
-            } else {
-                row.assert(hasLoadingIndicator.not()).assert(hasPaymentMethodIcon)
-            }
         }
-        composeRule.onAllNodesWithTag(TEST_TAG_MANAGE_SCREEN_PENDING, useUnmergedTree = true)
-            .assertCountEquals(1)
+
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = pendingPaymentMethods,
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+                isProcessing = true,
+                error = null,
+            )
+        ) {
+            pendingPaymentMethods.forEach {
+                val isPending = it.isSelectionPending
+                val row = composeRule.onNodeWithTag(
+                    "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
+                    useUnmergedTree = true,
+                )
+                    .assertIsNotEnabled()
+                val hasLoadingIndicator = hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG))
+                val hasPaymentMethodIcon = hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES))
+
+                if (isPending) {
+                    row.assert(hasLoadingIndicator).assert(hasPaymentMethodIcon.not())
+                } else {
+                    row.assert(hasLoadingIndicator.not()).assert(hasPaymentMethodIcon)
+                }
+            }
+            composeRule.onAllNodesWithTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG, useUnmergedTree = true)
+                .assertCountEquals(1)
+        }
     }
 
     private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {

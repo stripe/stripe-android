@@ -37,8 +37,6 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 linkBrand = state.linkBrand,
                 isEnabled = !state.isProcessing,
                 isSelected = isSelected,
-                isLoading = state.pendingPaymentMethodId == it.paymentMethod.id,
-                loadingIndicatorTestTag = TEST_TAG_MANAGE_SCREEN_PENDING,
                 onClick = {
                     rowOnClick(
                         isEditing = state.isEditing,
@@ -84,6 +82,3 @@ private fun TrailingContent(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val TEST_TAG_MANAGE_SCREEN_PENDING = "manage_screen_pending"

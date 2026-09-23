@@ -311,7 +311,6 @@ internal class EmbeddedNavigatorTest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         )
@@ -333,7 +332,6 @@ internal class EmbeddedNavigatorTest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                pendingPaymentMethodId = null,
                 error = null,
             )
         )
@@ -957,6 +955,7 @@ internal class EmbeddedNavigatorTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},

@@ -699,7 +699,8 @@ internal object PaymentMethodFixtures {
     }
 
     fun PaymentMethod.toDisplayableSavedPaymentMethod(
-        shouldShowDefaultBadge: Boolean = false
+        shouldShowDefaultBadge: Boolean = false,
+        isSelectionPending: Boolean = false,
     ): DisplayableSavedPaymentMethod {
         val displayName = linkPaymentDetails?.label
             ?: this.card?.last4?.resolvableString
@@ -710,6 +711,7 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
+            isSelectionPending = isSelectionPending,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }
