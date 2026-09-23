@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.testing.CoroutineTestRule
@@ -71,13 +72,16 @@ internal class PaymentElementComposeTest {
     }
 
     @Test
-    fun `The replacement lifecycle owns cleanup`() = runScenario {
+    fun `Destroying the replacement lifecycle restores the previous live lifecycle's callbacks`() = runScenario {
+        val previousCallbacks = callbacks
         composeRule.runOnIdle { owner = replacementOwner }
+        val replacementCallbacks = createCallbacks("replacement")
+        composeRule.runOnIdle { callbacks = replacementCallbacks }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(callbacks)
+            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(replacementCallbacks)
             replacementOwner.currentState = Lifecycle.State.DESTROYED
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isNull()
+            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(previousCallbacks)
         }
     }
 
@@ -96,7 +100,8 @@ internal class PaymentElementComposeTest {
     fun `Recomposition cannot reclaim callbacks from a newer registration`() = runScenario {
         val newerCallbacks = createCallbacks("newer registration")
         composeRule.runOnIdle {
-            PaymentElementCallbackReferences.register(IDENTIFIER, replacementOwner, newerCallbacks)
+            val references = LifecyclePaymentElementCallbackReferences(replacementOwner.lifecycle)
+            references[IDENTIFIER] = newerCallbacks
             callbacks = createCallbacks("stale update")
         }
 

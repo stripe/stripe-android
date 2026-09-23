@@ -44,7 +44,7 @@ import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -4436,19 +4436,13 @@ class PaymentSheet internal constructor(
 
     companion object {
         private fun registerPaymentSheetCallbacks(owner: LifecycleOwner, callbacks: PaymentElementCallbacks) {
-            PaymentElementCallbackReferences.register(
-                key = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
-                owner = owner,
-                callbacks = callbacks,
-            )
+            val references = LifecyclePaymentElementCallbackReferences(owner.lifecycle)
+            references[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
         }
 
         private fun registerFlowControllerCallbacks(owner: LifecycleOwner, callbacks: PaymentElementCallbacks) {
-            PaymentElementCallbackReferences.register(
-                key = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
-                owner = owner,
-                callbacks = callbacks,
-            )
+            val references = LifecyclePaymentElementCallbackReferences(owner.lifecycle)
+            references[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
         }
 
         /**

@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler.EXTRA_
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.utils.registerForTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -34,17 +33,14 @@ internal class CustomPaymentMethodProxyActivityTest {
         lateinit var receivedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod
         lateinit var receivedBillingDetails: PaymentMethod.BillingDetails
 
-        PaymentElementCallbackReferences.registerForTest(
-            key = PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
-            callbacks = PaymentElementCallbacks.Builder()
-                .confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
-                    receivedCustomPaymentMethod = customPaymentMethod
-                    receivedBillingDetails = billingDetails
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
+                receivedCustomPaymentMethod = customPaymentMethod
+                receivedBillingDetails = billingDetails
 
-                    countDownLatch.countDown()
-                }
-                .build(),
-        )
+                countDownLatch.countDown()
+            }
+            .build()
 
         ActivityScenario.launch<CustomPaymentMethodProxyActivity>(createIntent())
 

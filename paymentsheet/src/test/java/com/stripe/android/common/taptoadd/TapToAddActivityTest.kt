@@ -49,7 +49,6 @@ import com.stripe.android.tta.testing.TapToAddLinkTestHelper
 import com.stripe.android.tta.testing.TerminalTestDelegate
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.PaymentLauncherContractArgsCvcMatcher
-import com.stripe.android.utils.registerForTest
 import com.stripe.android.view.ActivityStarter
 import com.stripe.stripeterminal.external.InternalApi
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
@@ -654,14 +653,12 @@ class TapToAddActivityTest {
     private fun enqueueCallbacks(
         createCardPresentSetupIntentResult: CreateIntentResult
     ) {
-        PaymentElementCallbackReferences.registerForTest(
-            key = PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
-            callbacks = PaymentElementCallbacks.Builder()
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] =
+            PaymentElementCallbacks.Builder()
                 .createCardPresentSetupIntentCallback {
                     createCardPresentSetupIntentResult
                 }
-                .build(),
-        )
+                .build()
     }
 
     private fun TapToAddLinkTestHelper.Input.toUserInput(): UserInput {

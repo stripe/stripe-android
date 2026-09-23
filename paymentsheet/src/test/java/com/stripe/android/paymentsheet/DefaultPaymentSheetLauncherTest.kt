@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -91,7 +92,8 @@ class DefaultPaymentSheetLauncherTest {
     fun `Destroying a launcher does not remove callbacks registered by another owner`() {
         val callbackOwner = TestLifecycleOwner()
         val callbacks = PaymentElementCallbacks.Builder().build()
-        PaymentElementCallbackReferences.register(PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER, callbackOwner, callbacks)
+        val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
+        references[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
 
         launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }.use { scenario ->
             scenario.onFragment { fragment ->

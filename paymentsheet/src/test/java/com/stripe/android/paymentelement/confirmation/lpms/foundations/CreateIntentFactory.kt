@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
-import com.stripe.android.utils.registerForTest
 
 internal class CreateIntentFactory(
     private val paymentElementCallbackIdentifier: String,
@@ -46,7 +45,7 @@ internal class CreateIntentFactory(
         currency: String,
         createWithSetupFutureUsage: Boolean,
     ): Result<CreateIntentData> {
-        PaymentElementCallbackReferences.registerForTest(
+        PaymentElementCallbackReferences.set(
             key = paymentElementCallbackIdentifier,
             callbacks = PaymentElementCallbacks.Builder()
                 .createIntentCallback { paymentMethod, _ ->
@@ -109,7 +108,7 @@ internal class CreateIntentFactory(
     fun createDeferredSetupIntent(
         country: MerchantCountry,
     ): Result<CreateIntentData> {
-        PaymentElementCallbackReferences.registerForTest(
+        PaymentElementCallbackReferences.set(
             key = paymentElementCallbackIdentifier,
             callbacks = PaymentElementCallbacks.Builder()
                 .createIntentCallback { paymentMethod, _ ->

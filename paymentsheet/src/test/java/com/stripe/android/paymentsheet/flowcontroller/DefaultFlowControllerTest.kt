@@ -55,6 +55,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -2088,7 +2089,8 @@ internal class DefaultFlowControllerTest {
     fun `Destroying a flow controller does not remove callbacks registered by another owner`() {
         val callbackOwner = TestLifecycleOwner()
         val callbacks = PaymentElementCallbacks.Builder().build()
-        PaymentElementCallbackReferences.register(FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER, callbackOwner, callbacks)
+        val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
+        references[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = callbacks
         createFlowController()
 
         lifecycleOwner.currentState = Lifecycle.State.DESTROYED

@@ -27,7 +27,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
-import com.stripe.android.utils.registerForTest
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -354,20 +353,17 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        PaymentElementCallbackReferences.registerForTest(
-            key = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            callbacks = PaymentElementCallbacks.Builder()
-                .createIntentCallback { _, _ ->
-                    error("Should not be called!")
-                }
-                .confirmCustomPaymentMethodCallback { _, _ ->
-                    error("Should not be called!")
-                }
-                .externalPaymentMethodConfirmHandler { _, _ ->
-                    error("Should not be called!")
-                }
-                .build(),
-        )
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         configurationHandler.configure(
             scope = this,
@@ -393,20 +389,17 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        PaymentElementCallbackReferences.registerForTest(
-            key = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            callbacks = PaymentElementCallbacks.Builder()
-                .createIntentCallback { _, _ ->
-                    error("Should not be called!")
-                }
-                .confirmCustomPaymentMethodCallback { _, _ ->
-                    error("Should not be called!")
-                }
-                .externalPaymentMethodConfirmHandler { _, _ ->
-                    error("Should not be called!")
-                }
-                .build(),
-        )
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         configurationHandler.configure(
             scope = this,

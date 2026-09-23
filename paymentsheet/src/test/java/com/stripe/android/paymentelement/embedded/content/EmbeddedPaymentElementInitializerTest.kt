@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
@@ -42,7 +43,8 @@ internal class EmbeddedPaymentElementInitializerTest {
     fun `Destroying an initialized element does not remove callbacks registered by another owner`() = runScenario {
         val callbackOwner = TestLifecycleOwner()
         val callbacks = PaymentElementCallbacks.Builder().build()
-        PaymentElementCallbackReferences.register(PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER, callbackOwner, callbacks)
+        val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
+        references[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER] = callbacks
         initializer.initialize(true)
         assertThat(sheetStateHolder.sheetLauncher).isNotNull()
 
