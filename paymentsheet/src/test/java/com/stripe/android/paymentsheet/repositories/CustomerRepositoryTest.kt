@@ -97,7 +97,8 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
-                requestOptions = eq(expectedRequestOptions())
+                requestOptions = eq(expectedRequestOptions()),
+                analyticsPublishableKey = eq(DEFAULT_API_CONFIG.publishableKey),
             )
         }
 
@@ -127,7 +128,8 @@ internal class CustomerRepositoryTest {
                     )
                 ),
                 productUsageTokens = any(),
-                requestOptions = any()
+                requestOptions = any(),
+                analyticsPublishableKey = eq(DEFAULT_API_CONFIG.publishableKey),
             )
         }
 
@@ -179,7 +181,8 @@ internal class CustomerRepositoryTest {
                             )
                         ),
                         productUsageTokens = any(),
-                        requestOptions = any()
+                        requestOptions = any(),
+                        analyticsPublishableKey = any(),
                     )
                 }.thenReturn(Result.success(mockedReturnPaymentMethods))
             }
@@ -237,7 +240,8 @@ internal class CustomerRepositoryTest {
                         )
                     ),
                     productUsageTokens = any(),
-                    requestOptions = any()
+                    requestOptions = any(),
+                    analyticsPublishableKey = any(),
                 )
             }.thenReturn(Result.success(mockedReturnPaymentMethods))
         }
@@ -703,7 +707,8 @@ internal class CustomerRepositoryTest {
             repository.getPaymentMethods(
                 listPaymentMethodsParams = any(),
                 productUsageTokens = any(),
-                requestOptions = any()
+                requestOptions = any(),
+                analyticsPublishableKey = any(),
             )
         )
             .doReturn(Result.failure(InvalidParameterException("Request Failed")))
@@ -720,6 +725,7 @@ internal class CustomerRepositoryTest {
                     listPaymentMethodsParams = any(),
                     productUsageTokens = any(),
                     requestOptions = any(),
+                    analyticsPublishableKey = any(),
                 )
             }.doReturn(result)
         }
@@ -835,7 +841,8 @@ internal class CustomerRepositoryTest {
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options
+            requestOptions: ApiRequest.Options,
+            analyticsPublishableKey: String?,
         ): Result<List<PaymentMethod>> {
             return Result.success(paymentMethodsToRetrieve)
         }
