@@ -263,6 +263,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             checkoutSessionResponse = response,
             shouldInvokeSelectionCallback = true,
             launchMode = launchMode,
