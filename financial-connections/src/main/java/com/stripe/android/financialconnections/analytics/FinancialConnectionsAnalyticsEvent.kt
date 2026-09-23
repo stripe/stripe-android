@@ -302,12 +302,12 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     )
 
     class PaneNotFound : FinancialConnectionsAnalyticsEvent(
-        name = "error.unexpected",
+        name = "error.pane_not_found",
         params = mapOf(
             "pane" to Pane.UNKNOWN.analyticsValue,
             "error" to "PaneNotFound",
             "error_type" to "PaneNotFound",
-            "error_message" to "Pane Not Found: either app state is invalid, or an unsupported pane was requested.",
+            "error_message" to "Pane not found: an unsupported pane was requested.",
         )
     )
 

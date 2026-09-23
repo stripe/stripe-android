@@ -527,13 +527,13 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val eventCaptor = argumentCaptor<FinancialConnectionsAnalyticsEvent>()
         verify(eventTracker).track(eventCaptor.capture())
         verifyNoMoreInteractions(eventTracker)
-        assertThat(eventCaptor.firstValue.eventName).isEqualTo("linked_accounts.error.unexpected")
+        assertThat(eventCaptor.firstValue.eventName).isEqualTo("linked_accounts.error.pane_not_found")
         assertThat(eventCaptor.firstValue.params).containsExactly(
             "pane", "unknown",
             "error", "PaneNotFound",
             "error_type", "PaneNotFound",
             "error_message",
-            "Pane Not Found: either app state is invalid, or an unsupported pane was requested.",
+            "Pane not found: an unsupported pane was requested.",
         )
     }
 
