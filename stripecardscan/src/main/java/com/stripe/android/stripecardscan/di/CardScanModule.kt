@@ -1,7 +1,6 @@
 package com.stripe.android.stripecardscan.di
 
 import android.app.Application
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -45,8 +44,7 @@ internal interface CardScanModule {
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
             publishableKeyProvider = {
-                configuration.apiConfiguration?.publishableKey
-                    ?: PaymentConfiguration.getInstance(application).publishableKey
+                requireNotNull(configuration.apiConfiguration?.publishableKey)
             },
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )
