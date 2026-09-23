@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.rememberCardScanLauncher
 
@@ -12,6 +13,7 @@ class CardScanAction(
     private val isStripeCardScanAllowed: Boolean,
     private val enableMlKitCardScan: Boolean,
     private val disableSsdOcrCardScan: Boolean,
+    private val apiConfiguration: ApiConfiguration.State,
     val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
 ) : CardDetailsAction {
     @Composable
@@ -21,6 +23,7 @@ class CardScanAction(
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            apiConfiguration = apiConfiguration,
             onResult = { result ->
                 (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
                     onScannedCard(

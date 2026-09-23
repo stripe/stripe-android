@@ -14,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.IntentCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class CardScanStripeLauncher(
     context: Context,
     private val eventsReporter: CardScanEventsReporter,
+    private val apiConfiguration: ApiConfiguration.State,
     private val enableMlKitCardScan: Boolean,
     private val elementsSessionId: String?,
     private val disableSsdOcrCardScan: Boolean,
@@ -53,6 +55,7 @@ internal class CardScanStripeLauncher(
             CardScanSheetParams(
                 CardScanConfiguration(
                     elementsSessionId = elementsSessionId,
+                    apiConfiguration = apiConfiguration,
                     enableMlKitTextRecognition = enableMlKitCardScan,
                     disableSsdOcr = disableSsdOcrCardScan,
                 )
@@ -113,6 +116,7 @@ internal class CardScanStripeLauncher(
         @Composable
         internal fun rememberCardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
+            apiConfiguration: ApiConfiguration.State,
             enableMlKitCardScan: Boolean = false,
             elementsSessionId: String? = null,
             disableSsdOcrCardScan: Boolean = false,
@@ -121,11 +125,17 @@ internal class CardScanStripeLauncher(
             val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
             val launcher = remember(
-                eventsReporter, context, enableMlKitCardScan, elementsSessionId, disableSsdOcrCardScan,
+                eventsReporter,
+                context,
+                apiConfiguration,
+                enableMlKitCardScan,
+                elementsSessionId,
+                disableSsdOcrCardScan,
             ) {
                 CardScanStripeLauncher(
                     context = context,
                     eventsReporter = eventsReporter,
+                    apiConfiguration = apiConfiguration,
                     enableMlKitCardScan = enableMlKitCardScan,
                     elementsSessionId = elementsSessionId,
                     disableSsdOcrCardScan = disableSsdOcrCardScan,
