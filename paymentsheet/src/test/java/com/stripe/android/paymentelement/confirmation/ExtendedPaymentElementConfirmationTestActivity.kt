@@ -41,7 +41,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -182,7 +184,8 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
 
         @Provides
         @PaymentElementCallbackIdentifier
-        fun providesPaymentElementCallbackIdentifier(): String = "ExtendedConfirmationTestIdentifier"
+        fun providesPaymentElementCallbackIdentifier(): CallbacksKey =
+            UnscopedCallbacksKey("ExtendedConfirmationTestIdentifier")
 
         @Provides
         fun providesContext(application: Application): Context = application

@@ -22,7 +22,9 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -66,7 +68,7 @@ class CheckoutController @Inject internal constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
-    @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: CallbacksKey,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
 ) {
@@ -331,7 +333,7 @@ class CheckoutController @Inject internal constructor(
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
         val subcomponent = checkoutPresenterSubcomponentFactory.create(
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
+                key = "CheckoutController(instance = ${paymentElementCallbackIdentifier.key})",
                 registryOwner = activity,
             ),
             lifecycleOwner = activity,
@@ -1038,7 +1040,7 @@ class CheckoutController @Inject internal constructor(
             )
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
-                paymentElementCallbackIdentifier = integrationName,
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey(integrationName),
                 resultCallback = resultCallback,
                 rowSelectionBehavior = rowSelectionBehavior,
                 checkoutControllerSavedState = checkoutControllerSavedState,

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.common.ui.rememberCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
 import java.util.UUID
@@ -28,9 +29,9 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must have a ViewModelStoreOwner."
     }
 
-    val paymentElementCallbackIdentifier = rememberSaveable {
-        UUID.randomUUID().toString()
-    }
+    val key = rememberSaveable { UUID.randomUUID().toString() }
+    val callbackReferences = rememberCallbackReferences(key)
+    val paymentElementCallbackIdentifier = callbackReferences.key(key)
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
@@ -47,7 +48,7 @@ fun rememberEmbeddedPaymentElement(
         EmbeddedPaymentElement.create(
             activity = activity,
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
+                key = "EmbeddedPaymentElement(instance = ${paymentElementCallbackIdentifier.key})",
                 registryOwner = activityResultRegistryOwner,
             ),
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
@@ -87,7 +88,7 @@ fun rememberEmbeddedPaymentElement(
             .build()
     }
 
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+    UpdateCallbacks(callbackReferences, key, callbacks)
 
     return embeddedPaymentElement
 }

@@ -12,6 +12,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
@@ -89,7 +90,7 @@ internal interface PaymentElementModule {
         fun provideCheckoutLinkPaymentLauncher(
             linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
             linkActivityContract: LinkActivityContract,
-            @PaymentElementCallbackIdentifier identifier: String,
+            @PaymentElementCallbackIdentifier identifier: CallbacksKey,
             linkStore: LinkStore,
         ): LinkPaymentLauncher {
             return LinkPaymentLauncher(

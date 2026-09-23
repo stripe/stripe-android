@@ -11,7 +11,7 @@ class PaymentElementCallbackReferencesTest {
 
     @Test
     fun `On get with no callbacks available, should return null`() {
-        assertThat(PaymentElementCallbackReferences["Key1"]).isNull()
+        assertThat(PaymentElementCallbackReferences[UnscopedCallbacksKey("Key1")]).isNull()
     }
 
     @Test
@@ -24,14 +24,14 @@ class PaymentElementCallbackReferencesTest {
     }
 
     @Test
-    fun `On get with callbacks not assigned to a given key but has callbacks set, should return the first set`() {
+    fun `On get with callbacks only assigned to other keys, should return null`() {
         val initialRegisteredCallbacks = createCallbacks()
 
-        PaymentElementCallbackReferences["Key2"] = initialRegisteredCallbacks
-        PaymentElementCallbackReferences["Key3"] = createCallbacks()
-        PaymentElementCallbackReferences["Key4"] = createCallbacks()
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("Key2")] = initialRegisteredCallbacks
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("Key3")] = createCallbacks()
+        PaymentElementCallbackReferences[UnscopedCallbacksKey("Key4")] = createCallbacks()
 
-        assertThat(PaymentElementCallbackReferences[DEFAULT_TEST_KEY]).isEqualTo(initialRegisteredCallbacks)
+        assertThat(PaymentElementCallbackReferences[DEFAULT_TEST_KEY]).isNull()
     }
 
     @Test
@@ -67,6 +67,6 @@ class PaymentElementCallbackReferencesTest {
     }
 
     private companion object {
-        const val DEFAULT_TEST_KEY = "Key1"
+        val DEFAULT_TEST_KEY = UnscopedCallbacksKey("Key1")
     }
 }

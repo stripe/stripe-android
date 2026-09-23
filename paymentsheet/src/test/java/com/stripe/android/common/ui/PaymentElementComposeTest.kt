@@ -1,6 +1,7 @@
 package com.stripe.android.common.ui
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -43,7 +45,7 @@ internal class PaymentElementComposeTest {
         composeRule.runOnIdle { callbacks = updatedCallbacks }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(updatedCallbacks)
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isSameInstanceAs(updatedCallbacks)
             assertThat(owner.observerCount).isEqualTo(initialObserverCount)
         }
     }
@@ -54,9 +56,9 @@ internal class PaymentElementComposeTest {
         composeRule.runOnIdle { callbacks = updatedCallbacks }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(updatedCallbacks)
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isSameInstanceAs(updatedCallbacks)
             owner.currentState = Lifecycle.State.DESTROYED
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isNull()
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isNull()
         }
     }
 
@@ -67,21 +69,22 @@ internal class PaymentElementComposeTest {
 
         composeRule.runOnIdle {
             previousOwner.currentState = Lifecycle.State.DESTROYED
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(callbacks)
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isSameInstanceAs(callbacks)
         }
     }
 
     @Test
-    fun `Destroying the replacement lifecycle restores the previous live lifecycle's callbacks`() = runScenario {
-        val previousCallbacks = callbacks
+    fun `The replacement lifecycle owns cleanup for the same callback key`() = runScenario {
+        val previousKey = callbackKey
         composeRule.runOnIdle { owner = replacementOwner }
         val replacementCallbacks = createCallbacks("replacement")
         composeRule.runOnIdle { callbacks = replacementCallbacks }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(replacementCallbacks)
+            assertThat(callbackKey).isEqualTo(previousKey)
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isSameInstanceAs(replacementCallbacks)
             replacementOwner.currentState = Lifecycle.State.DESTROYED
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(previousCallbacks)
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isNull()
         }
     }
 
@@ -90,23 +93,24 @@ internal class PaymentElementComposeTest {
         composeRule.runOnIdle { includeCallbacks = false }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(callbacks)
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isSameInstanceAs(callbacks)
             owner.currentState = Lifecycle.State.DESTROYED
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isNull()
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isNull()
         }
     }
 
     @Test
-    fun `Recomposition cannot reclaim callbacks from a newer registration`() = runScenario {
+    fun `Recomposition does not change another scope's callbacks`() = runScenario {
         val newerCallbacks = createCallbacks("newer registration")
+        val otherReferences = LifecyclePaymentElementCallbackReferences(replacementOwner.lifecycle)
         composeRule.runOnIdle {
-            val references = LifecyclePaymentElementCallbackReferences(replacementOwner.lifecycle)
-            references[IDENTIFIER] = newerCallbacks
+            otherReferences[IDENTIFIER] = newerCallbacks
             callbacks = createCallbacks("stale update")
         }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(newerCallbacks)
+            assertThat(PaymentElementCallbackReferences[otherReferences.key(IDENTIFIER)])
+                .isSameInstanceAs(newerCallbacks)
         }
     }
 
@@ -118,7 +122,7 @@ internal class PaymentElementComposeTest {
         }
 
         composeRule.runOnIdle {
-            assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isNull()
+            assertThat(PaymentElementCallbackReferences[callbackKey]).isNull()
         }
     }
 
@@ -129,13 +133,15 @@ internal class PaymentElementComposeTest {
         composeRule.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides scenario.owner) {
                 if (scenario.includeCallbacks) {
-                    UpdateCallbacks(IDENTIFIER, scenario.callbacks)
+                    val references = rememberCallbackReferences(IDENTIFIER)
+                    UpdateCallbacks(references, IDENTIFIER, scenario.callbacks)
+                    SideEffect { scenario.callbackKey = references.key(IDENTIFIER) }
                 }
             }
         }
         try {
             composeRule.runOnIdle {
-                assertThat(PaymentElementCallbackReferences[IDENTIFIER]).isSameInstanceAs(scenario.callbacks)
+                assertThat(PaymentElementCallbackReferences[scenario.callbackKey]).isSameInstanceAs(scenario.callbacks)
             }
             scenario.block()
         } finally {
@@ -154,6 +160,7 @@ internal class PaymentElementComposeTest {
         var owner by mutableStateOf(owner)
         var callbacks by mutableStateOf(callbacks)
         var includeCallbacks by mutableStateOf(true)
+        lateinit var callbackKey: CallbacksKey
     }
 
     private fun createCallbacks(name: String): PaymentElementCallbacks {

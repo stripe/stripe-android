@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -246,7 +247,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): ExternalPaymentMethodConfirmationDefinition {
         return ExternalPaymentMethodConfirmationDefinition(
-            paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
+            paymentElementCallbackIdentifier = UnscopedCallbacksKey("ExternalPaymentMethodTestIdentifier"),
             externalPaymentMethodConfirmHandlerProvider = { externalPaymentMethodConfirmHandler },
             errorReporter = errorReporter,
         )

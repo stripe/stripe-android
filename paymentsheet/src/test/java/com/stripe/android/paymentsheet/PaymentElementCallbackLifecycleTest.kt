@@ -7,6 +7,8 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.PaymentElementCallbackTestRule
@@ -36,11 +38,11 @@ internal class PaymentElementCallbackLifecycleTest {
     ) = runScenario(creation, ownerType) {
         createElement(firstHost, createCallback("first"))
         val latestCallback = createCallback("latest")
-        createElement(secondHost, latestCallback)
+        val latestKey = createElement(secondHost, latestCallback)
 
         firstHost.destroy()
 
-        assertThat(PaymentElementCallbackReferences[creation.identifier]?.createIntentCallback)
+        assertThat(PaymentElementCallbackReferences[latestKey]?.createIntentCallback)
             .isSameInstanceAs(latestCallback)
     }
 
@@ -50,13 +52,13 @@ internal class PaymentElementCallbackLifecycleTest {
         @TestParameter ownerType: OwnerType,
     ) = runScenario(creation, ownerType) {
         val callback = createCallback("registered")
-        createElement(firstHost, callback)
-        assertThat(PaymentElementCallbackReferences[creation.identifier]?.createIntentCallback)
+        val callbackKey = createElement(firstHost, callback)
+        assertThat(PaymentElementCallbackReferences[callbackKey]?.createIntentCallback)
             .isSameInstanceAs(callback)
 
         firstHost.destroy()
 
-        assertThat(PaymentElementCallbackReferences[creation.identifier]).isNull()
+        assertThat(PaymentElementCallbackReferences[callbackKey]).isNull()
     }
 
     private fun runScenario(creation: Creation, ownerType: OwnerType, block: Scenario.() -> Unit) {
@@ -92,7 +94,7 @@ internal class PaymentElementCallbackLifecycleTest {
         val secondHost: Host,
     ) {
         @Suppress("DEPRECATION")
-        fun createElement(host: Host, callback: CreateIntentCallback) {
+        fun createElement(host: Host, callback: CreateIntentCallback): CallbacksKey {
             val fragment = host.fragment
             val resultCallback = PaymentSheetResultCallback { error("Should not be called!") }
             val optionCallback = PaymentOptionCallback { error("Should not be called!") }
@@ -121,6 +123,10 @@ internal class PaymentElementCallbackLifecycleTest {
                     }
                 }
             }
+            val owner = fragment ?: host.activity
+            val storeOwner = fragment ?: host.activity
+            return LifecyclePaymentElementCallbackReferences.get(owner.lifecycle, storeOwner, creation.identifier)
+                .key(creation.identifier)
         }
     }
 

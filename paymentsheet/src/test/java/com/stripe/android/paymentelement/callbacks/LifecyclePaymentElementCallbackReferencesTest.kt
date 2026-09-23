@@ -22,7 +22,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstReferences[KEY] = callbacks
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(callbacks)
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isSameInstanceAs(callbacks)
     }
 
     @Test
@@ -32,7 +32,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstReferences[KEY] = updatedCallbacks
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(updatedCallbacks)
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isSameInstanceAs(updatedCallbacks)
     }
 
     @Test
@@ -43,21 +43,21 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
         firstReferences[KEY] = firstCallbacks
         secondReferences[OTHER_KEY] = secondCallbacks
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(firstCallbacks)
-        assertThat(PaymentElementCallbackReferences[OTHER_KEY]).isSameInstanceAs(secondCallbacks)
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isSameInstanceAs(firstCallbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(OTHER_KEY)]).isSameInstanceAs(secondCallbacks)
     }
 
     @Test
     fun `Destroying a lifecycle removes all its references`() = runScenario {
         firstReferences[KEY] = createCallbacks("first")
         firstReferences[OTHER_KEY] = createCallbacks("second")
-        assertThat(PaymentElementCallbackReferences[KEY]).isNotNull()
-        assertThat(PaymentElementCallbackReferences[OTHER_KEY]).isNotNull()
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isNotNull()
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(OTHER_KEY)]).isNotNull()
 
         firstOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isNull()
-        assertThat(PaymentElementCallbackReferences[OTHER_KEY]).isNull()
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isNull()
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(OTHER_KEY)]).isNull()
     }
 
     @Test
@@ -68,7 +68,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(newerCallbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(KEY)]).isSameInstanceAs(newerCallbacks)
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(callbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(KEY)]).isSameInstanceAs(callbacks)
     }
 
     @Test
@@ -90,20 +90,22 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstReferences[KEY] = createCallbacks("updated first")
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(newerCallbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(KEY)]).isSameInstanceAs(newerCallbacks)
     }
 
     @Test
-    fun `Destroying the newer scope restores the older live scope`() = runScenario {
+    fun `Destroying one scope removes only its exact key`() = runScenario {
         val firstCallbacks = createCallbacks("first")
+        val secondCallbacks = createCallbacks("second")
         firstReferences[KEY] = firstCallbacks
-        val newerCallbacks = createCallbacks("second")
-        secondReferences[KEY] = newerCallbacks
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(newerCallbacks)
+        secondReferences[KEY] = secondCallbacks
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isSameInstanceAs(firstCallbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(KEY)]).isSameInstanceAs(secondCallbacks)
 
         secondOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(firstCallbacks)
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isSameInstanceAs(firstCallbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(KEY)]).isNull()
     }
 
     @Test
@@ -115,7 +117,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstReferences[KEY] = createCallbacks("updated first")
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(newerCallbacks)
+        assertThat(PaymentElementCallbackReferences[sameLifecycleReferences.key(KEY)]).isSameInstanceAs(newerCallbacks)
     }
 
     @Test
@@ -125,7 +127,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstReferences[KEY] = createCallbacks("late update")
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isNull()
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isNull()
     }
 
     @Test
@@ -135,7 +137,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         references[KEY] = createCallbacks("late registration")
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isNull()
+        assertThat(PaymentElementCallbackReferences[references.key(KEY)]).isNull()
     }
 
     @Test
@@ -145,7 +147,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(callbacks)
+        assertThat(PaymentElementCallbackReferences[secondReferences.key(KEY)]).isSameInstanceAs(callbacks)
     }
 
     @Test
@@ -155,7 +157,7 @@ internal class LifecyclePaymentElementCallbackReferencesTest {
 
         firstOwner.currentState = Lifecycle.State.CREATED
 
-        assertThat(PaymentElementCallbackReferences[KEY]).isSameInstanceAs(callbacks)
+        assertThat(PaymentElementCallbackReferences[firstReferences.key(KEY)]).isSameInstanceAs(callbacks)
     }
 
     private fun runScenario(block: Scenario.() -> Unit) {

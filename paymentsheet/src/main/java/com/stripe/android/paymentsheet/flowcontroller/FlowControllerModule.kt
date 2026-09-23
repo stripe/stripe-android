@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -55,7 +56,7 @@ internal object FlowControllerModule {
     fun provideFlowControllerLinkLauncher(
         linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
-        @PaymentElementCallbackIdentifier identifier: String,
+        @PaymentElementCallbackIdentifier identifier: CallbacksKey,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
         linkAnalyticsComponentFactory,
@@ -70,7 +71,7 @@ internal object FlowControllerModule {
     fun provideWalletsButtonLinkLauncher(
         linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
-        @PaymentElementCallbackIdentifier identifier: String,
+        @PaymentElementCallbackIdentifier identifier: CallbacksKey,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
         linkAnalyticsComponentFactory,

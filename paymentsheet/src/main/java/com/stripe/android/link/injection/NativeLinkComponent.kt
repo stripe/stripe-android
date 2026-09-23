@@ -22,6 +22,7 @@ import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
@@ -85,7 +86,7 @@ internal interface NativeLinkComponent {
             paymentMethodMetadata: PaymentMethodMetadata,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             @BindsInstance
             context: Context,
             @BindsInstance

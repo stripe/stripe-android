@@ -13,6 +13,8 @@ import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
+import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
@@ -27,7 +29,7 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+    private val paymentElementCallbackIdentifier: CallbacksKey,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     constructor(
@@ -43,6 +45,11 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
+        paymentElementCallbackIdentifier = LifecyclePaymentElementCallbackReferences.get(
+            lifecycle = activity.lifecycle,
+            owner = activity,
+            key = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+        ).key(PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -63,6 +70,11 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
+        paymentElementCallbackIdentifier = LifecyclePaymentElementCallbackReferences.get(
+            lifecycle = activity.lifecycle,
+            owner = activity,
+            key = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+        ).key(PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER),
     )
 
     constructor(
@@ -78,6 +90,11 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
+        paymentElementCallbackIdentifier = LifecyclePaymentElementCallbackReferences.get(
+            lifecycle = fragment.lifecycle,
+            owner = fragment,
+            key = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+        ).key(PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER),
     )
 
     @TestOnly
@@ -96,6 +113,11 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
+        paymentElementCallbackIdentifier = LifecyclePaymentElementCallbackReferences.get(
+            lifecycle = fragment.lifecycle,
+            owner = fragment,
+            key = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+        ).key(PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER),
     )
 
     override fun present(

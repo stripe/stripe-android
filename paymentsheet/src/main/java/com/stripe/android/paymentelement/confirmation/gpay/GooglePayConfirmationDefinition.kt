@@ -15,6 +15,7 @@ import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMe
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -26,7 +27,7 @@ import javax.inject.Inject
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
-    @PaymentElementCallbackIdentifier val instanceId: String,
+    @PaymentElementCallbackIdentifier val instanceId: CallbacksKey,
     private val context: Context,
     private val googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
@@ -80,7 +81,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         )
 
         return googlePayPaymentMethodLauncherFactory.create(
-            instanceId = instanceId,
+            instanceId = instanceId.key,
             lifecycleOwner = lifecycleOwner,
             activityResultLauncher = activityResultLauncher,
             onPaymentDataChangedCallback = onPaymentDataChangedCallback,

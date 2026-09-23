@@ -29,6 +29,7 @@ import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -687,7 +688,7 @@ class TapToAddActivityTest {
     }
 
     private companion object {
-        const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "mpe1"
+        val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = UnscopedCallbacksKey("mpe1")
         val DARK_PRIMARY = Color(0xFF123456)
         val DEFAULT_UX_CONFIGURATION = createTapToAddUxConfiguration(
             appearance = PaymentSheet.Appearance(),

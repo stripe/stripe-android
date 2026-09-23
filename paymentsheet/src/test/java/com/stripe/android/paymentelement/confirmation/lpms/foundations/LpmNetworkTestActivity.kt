@@ -25,6 +25,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -105,7 +106,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
     @Parcelize
     data class Args(
         val publishableKey: String,
-        val paymentElementCallbackIdentifier: String,
+        val paymentElementCallbackIdentifier: CallbacksKey,
         val allowsManualConfirmation: Boolean,
     ) : ActivityStarter.Args {
         companion object {
@@ -159,7 +160,7 @@ internal interface LpmNetworkTestViewModelComponent {
             allowsManualConfirmation: Boolean,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             @BindsInstance
             savedStateHandle: SavedStateHandle,
             @BindsInstance

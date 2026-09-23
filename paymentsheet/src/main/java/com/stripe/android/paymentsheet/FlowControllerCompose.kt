@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.common.ui.rememberCallbackReferences
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
@@ -143,11 +144,13 @@ internal fun internalRememberPaymentSheetFlowController(
     paymentOptionResultCallback: PaymentOptionResultCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    val paymentElementCallbackIdentifier = rememberSaveable {
+    val key = rememberSaveable {
         UUID.randomUUID().toString()
     }
+    val callbackReferences = rememberCallbackReferences(key)
+    val paymentElementCallbackIdentifier = callbackReferences.key(key)
 
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+    UpdateCallbacks(callbackReferences, key, callbacks)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"

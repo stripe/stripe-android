@@ -11,6 +11,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -44,7 +45,7 @@ class GooglePayConfirmationFlowTest {
                 val mediator = ConfirmationMediator(
                     savedStateHandle = savedStateHandle,
                     definition = GooglePayConfirmationDefinition(
-                        instanceId = "instanceId",
+                        instanceId = UnscopedCallbacksKey("instanceId"),
                         context = ApplicationProvider.getApplicationContext<Context>(),
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
@@ -106,7 +107,7 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
-            instanceId = "instanceId",
+            instanceId = UnscopedCallbacksKey("instanceId"),
             context = ApplicationProvider.getApplicationContext<Context>(),
             googlePayPaymentMethodLauncherFactory =
                 RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),

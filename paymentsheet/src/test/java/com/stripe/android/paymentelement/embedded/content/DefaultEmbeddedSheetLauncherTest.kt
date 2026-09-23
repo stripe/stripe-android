@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -77,7 +78,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("EmbeddedPaymentElement"),
-            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+            paymentElementCallbackIdentifier = UnscopedCallbacksKey("EmbeddedFormTestIdentifier"),
             statusBarColor = null,
             selection = null,
             previousNewSelections = selectionHolder.previousNewSelections,
@@ -413,7 +414,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("EmbeddedPaymentElement"),
-            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+            paymentElementCallbackIdentifier = UnscopedCallbacksKey("EmbeddedFormTestIdentifier"),
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
             previousNewSelections = selectionHolder.previousNewSelections,
@@ -611,7 +612,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("EmbeddedPaymentElement"),
-            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+            paymentElementCallbackIdentifier = UnscopedCallbacksKey("EmbeddedFormTestIdentifier"),
             statusBarColor = null,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
@@ -864,7 +865,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 errorReporter = errorReporter,
                 productUsage = setOf("EmbeddedPaymentElement"),
                 statusBarColor = null,
-                paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+                paymentElementCallbackIdentifier = UnscopedCallbacksKey("EmbeddedFormTestIdentifier"),
                 embeddedResultCallbackHelper = callbackHelper,
                 rowSelectionImmediateActionHandler = immediateActionHandler,
             )

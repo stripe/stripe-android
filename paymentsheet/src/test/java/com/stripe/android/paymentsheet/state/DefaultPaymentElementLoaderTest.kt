@@ -64,6 +64,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
@@ -5104,7 +5105,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private companion object {
-        private const val PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER = "PaymentElementLoaderTest"
+        private val PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER = UnscopedCallbacksKey("PaymentElementLoaderTest")
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
         private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(

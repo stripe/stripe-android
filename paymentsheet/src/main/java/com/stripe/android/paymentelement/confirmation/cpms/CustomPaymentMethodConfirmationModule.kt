@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.cpms
 
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -21,7 +22,7 @@ internal interface CustomPaymentMethodConfirmationModule {
     companion object {
         @Provides
         fun provideConfirmCustomPaymentMethodCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: CallbacksKey,
         ): ConfirmCustomPaymentMethodCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
                 ?.confirmCustomPaymentMethodCallback

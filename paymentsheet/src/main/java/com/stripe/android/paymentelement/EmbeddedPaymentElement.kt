@@ -22,6 +22,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
@@ -778,7 +779,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             activityResultCaller: ActivityResultCaller,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             resultCallback: ResultCallback,
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(
@@ -788,7 +789,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                     StatusBarCompat.color(activity),
                 )
             ).get(
-                key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",
+                key = "EmbeddedPaymentElementViewModel(instance = ${paymentElementCallbackIdentifier.key})",
                 modelClass = EmbeddedPaymentElementViewModel::class.java,
             )
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -34,7 +35,7 @@ internal class PaymentOptionContract :
         val enableLogging: Boolean,
         val walletButtonsRendered: Boolean,
         val productUsage: Set<String>,
-        val paymentElementCallbackIdentifier: String,
+        val paymentElementCallbackIdentifier: CallbacksKey,
         val promotions: List<PaymentMethodMessagePromotion>?
     ) : ActivityStarter.Args {
         internal companion object {

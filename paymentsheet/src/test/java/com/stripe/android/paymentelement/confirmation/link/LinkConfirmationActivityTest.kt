@@ -23,6 +23,7 @@ import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
@@ -192,7 +193,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             apiConfiguration = TestFactory.LINK_CONFIGURATION.apiConfiguration,
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
-                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
+                            paymentElementCallbackIdentifier = UnscopedCallbacksKey("ConfirmationTestIdentifier"),
                             launchMode = LinkLaunchMode.Full,
                             statusBarColor = null,
                         )

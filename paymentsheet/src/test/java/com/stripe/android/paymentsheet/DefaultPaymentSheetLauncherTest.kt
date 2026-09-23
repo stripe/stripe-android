@@ -104,7 +104,7 @@ class DefaultPaymentSheetLauncherTest {
 
             scenario.moveToState(Lifecycle.State.DESTROYED)
 
-            assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER])
+            assertThat(PaymentElementCallbackReferences[references.key(PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER)])
                 .isSameInstanceAs(callbacks)
         }
         callbackOwner.currentState = Lifecycle.State.DESTROYED

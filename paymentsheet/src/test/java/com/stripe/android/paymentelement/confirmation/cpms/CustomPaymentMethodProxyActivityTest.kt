@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler.EXTRA_CUSTOM_PAYMENT_METHOD_RESULT
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -116,7 +117,7 @@ internal class CustomPaymentMethodProxyActivityTest {
     )
 
     private companion object {
-        const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "CustomPaymentMethodTestIdentifier"
+        val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = UnscopedCallbacksKey("CustomPaymentMethodTestIdentifier")
 
         val CUSTOM_PAYMENT_METHOD = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",

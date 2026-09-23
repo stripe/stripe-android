@@ -14,6 +14,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -94,7 +95,7 @@ internal interface EmbeddedPaymentElementViewModelComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             @BindsInstance
             @Named(STATUS_BAR_COLOR)
             statusBarColor: Int?,
@@ -298,7 +299,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
         @Provides
         fun providesInternalRowSelectionCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: CallbacksKey,
         ): InternalRowSelectionCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
         }

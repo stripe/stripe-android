@@ -11,6 +11,7 @@ import com.stripe.android.link.verification.DefaultLinkInlineInteractor
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
@@ -75,7 +76,7 @@ internal interface FlowControllerStateComponent {
             application: Application,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: CallbacksKey,
             @BindsInstance
             flowControllerViewModel: FlowControllerViewModel,
             @BindsInstance

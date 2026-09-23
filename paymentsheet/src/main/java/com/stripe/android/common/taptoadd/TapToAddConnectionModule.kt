@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -49,7 +50,7 @@ internal interface TapToAddConnectionModule {
         @OptIn(TapToAddPreview::class)
         @Provides
         fun providesCreateCardPresentSetupIntentCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: CallbacksKey,
         ): CreateCardPresentSetupIntentCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
                 ?.createCardPresentSetupIntentCallback

@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.callbacks.LifecyclePaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -44,13 +45,13 @@ internal class EmbeddedPaymentElementInitializerTest {
         val callbackOwner = TestLifecycleOwner()
         val callbacks = PaymentElementCallbacks.Builder().build()
         val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
-        references[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER] = callbacks
+        references[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER.key] = callbacks
         initializer.initialize(true)
         assertThat(sheetStateHolder.sheetLauncher).isNotNull()
 
         lifecycleOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
+        assertThat(PaymentElementCallbackReferences[references.key(PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER.key)])
             .isSameInstanceAs(callbacks)
         assertThat(sheetStateHolder.sheetLauncher).isNull()
         callbackOwner.currentState = Lifecycle.State.DESTROYED
@@ -86,6 +87,7 @@ internal class EmbeddedPaymentElementInitializerTest {
     )
 
     private companion object {
-        private const val PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER = "EmbeddedPaymentElementTestIdentifier"
+        private val PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER =
+            UnscopedCallbacksKey("EmbeddedPaymentElementTestIdentifier")
     }
 }

@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
@@ -272,7 +273,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         enableLogging = false,
         productUsage = mock(),
-        paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
+        paymentElementCallbackIdentifier = UnscopedCallbacksKey("PaymentOptionsViewModelTestCallbackIdentifier"),
         linkAccountInfo = LinkAccountUpdate.Value(
             account = null,
             lastUpdateReason = null

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
@@ -415,7 +416,7 @@ class PaymentSheet internal constructor(
             )
         }
 
-        private fun initializeCallbacks(owner: LifecycleOwner) {
+        private fun <T> initializeCallbacks(owner: T) where T : LifecycleOwner, T : ViewModelStoreOwner {
             registerPaymentSheetCallbacks(owner, callbacksBuilder.build())
         }
     }
@@ -4103,7 +4104,7 @@ class PaymentSheet internal constructor(
                 )
             }
 
-            private fun initializeCallbacks(owner: LifecycleOwner) {
+            private fun <T> initializeCallbacks(owner: T) where T : LifecycleOwner, T : ViewModelStoreOwner {
                 registerFlowControllerCallbacks(owner, callbacksBuilder.build())
             }
         }
@@ -4435,13 +4436,23 @@ class PaymentSheet internal constructor(
     }
 
     companion object {
-        private fun registerPaymentSheetCallbacks(owner: LifecycleOwner, callbacks: PaymentElementCallbacks) {
-            val references = LifecyclePaymentElementCallbackReferences(owner.lifecycle)
+        private fun <T> registerPaymentSheetCallbacks(owner: T, callbacks: PaymentElementCallbacks)
+            where T : LifecycleOwner, T : ViewModelStoreOwner {
+            val references = LifecyclePaymentElementCallbackReferences.get(
+                owner.lifecycle,
+                owner,
+                PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+            )
             references[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
         }
 
-        private fun registerFlowControllerCallbacks(owner: LifecycleOwner, callbacks: PaymentElementCallbacks) {
-            val references = LifecyclePaymentElementCallbackReferences(owner.lifecycle)
+        private fun <T> registerFlowControllerCallbacks(owner: T, callbacks: PaymentElementCallbacks)
+            where T : LifecycleOwner, T : ViewModelStoreOwner {
+            val references = LifecyclePaymentElementCallbackReferences.get(
+                owner.lifecycle,
+                owner,
+                FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+            )
             references[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
         }
 

@@ -33,6 +33,7 @@ import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -278,7 +279,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
     private val apiConfigurationResolver: ApiConfigurationResolver,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: CallbacksKey,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
     private val createCustomerState: CreateCustomerState,

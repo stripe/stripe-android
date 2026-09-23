@@ -40,6 +40,7 @@ import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.callbacks.CallbacksKey
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
@@ -140,7 +141,7 @@ internal interface CheckoutControllerComponent {
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: CallbacksKey,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
             @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
             @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
@@ -306,7 +307,7 @@ internal interface CheckoutControllerModule {
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
         fun providesAnalyticEventCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: CallbacksKey,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }

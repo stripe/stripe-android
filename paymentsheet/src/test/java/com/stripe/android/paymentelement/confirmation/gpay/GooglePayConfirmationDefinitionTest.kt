@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -812,7 +813,7 @@ class GooglePayConfirmationDefinitionTest {
         onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback? = null,
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
-            instanceId = instanceId,
+            instanceId = UnscopedCallbacksKey(instanceId),
             context = context,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             userFacingLogger = userFacingLogger,

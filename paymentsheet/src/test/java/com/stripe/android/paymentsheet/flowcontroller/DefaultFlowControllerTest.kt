@@ -2090,12 +2090,12 @@ internal class DefaultFlowControllerTest {
         val callbackOwner = TestLifecycleOwner()
         val callbacks = PaymentElementCallbacks.Builder().build()
         val references = LifecyclePaymentElementCallbackReferences(callbackOwner.lifecycle)
-        references[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = callbacks
+        references[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER.key] = callbacks
         createFlowController()
 
         lifecycleOwner.currentState = Lifecycle.State.DESTROYED
 
-        assertThat(PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER])
+        assertThat(PaymentElementCallbackReferences[references.key(FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER.key)])
             .isSameInstanceAs(callbacks)
         callbackOwner.currentState = Lifecycle.State.DESTROYED
     }

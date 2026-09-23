@@ -46,6 +46,7 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.callbacks.UnscopedCallbacksKey
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
@@ -1529,7 +1530,7 @@ internal class PaymentOptionsViewModelTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             enableLogging = false,
             productUsage = mock(),
-            paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
+            paymentElementCallbackIdentifier = UnscopedCallbacksKey("PaymentOptionsViewModelTestCallbackIdentifier"),
             linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
                 lastUpdateReason = null
