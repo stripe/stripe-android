@@ -158,9 +158,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
-                savedPaymentMethodSelectionState = stateFlowOf(
-                    SavedPaymentMethodSelectionState(pendingSelection = null)
-                ),
+                savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
                 temporarySelection = stateFlowOf(null),
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
@@ -242,7 +240,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            pendingSelection = selectionState.pendingSelection,
+            isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending,
         )
     }
 
@@ -480,7 +478,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
-        pendingSelection: PaymentSelection.Saved?,
+        isSelectionPending: Boolean,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -489,9 +487,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = paymentMethodMetadata,
             defaultPaymentMethodId = null,
-            isSelectionPending = pendingSelection?.paymentMethod?.id?.let {
-                it == paymentMethodToDisplay.id
-            } ?: false,
+            isSelectionPending = isSelectionPending,
         )
     }
 

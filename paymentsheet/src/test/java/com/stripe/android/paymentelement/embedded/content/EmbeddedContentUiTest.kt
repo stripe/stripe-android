@@ -191,9 +191,7 @@ internal class EmbeddedContentUiTest {
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
             linkAccountHolder = linkAccountHolder,
             hostProcessing = stateFlowOf(false),
-            savedPaymentMethodSelectionState = stateFlowOf(
-                SavedPaymentMethodSelectionState(pendingSelection = null)
-            ),
+            savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
         )
 
         val embeddedContentHelper =

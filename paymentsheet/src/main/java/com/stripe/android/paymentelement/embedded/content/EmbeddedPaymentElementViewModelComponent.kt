@@ -292,9 +292,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
         @Provides
         fun provideSavedPaymentMethodSelectionState(): StateFlow<SavedPaymentMethodSelectionState> {
-            return stateFlowOf(
-                SavedPaymentMethodSelectionState(pendingSelection = null)
-            )
+            return stateFlowOf(SavedPaymentMethodSelectionState.Idle)
         }
 
         @Provides

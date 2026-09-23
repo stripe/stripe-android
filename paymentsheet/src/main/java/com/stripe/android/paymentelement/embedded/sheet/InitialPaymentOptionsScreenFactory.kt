@@ -179,9 +179,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
-            savedPaymentMethodSelectionState = stateFlowOf(
-                SavedPaymentMethodSelectionState(pendingSelection = null)
-            ),
+            savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
             temporarySelection = stateFlowOf(null),
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(

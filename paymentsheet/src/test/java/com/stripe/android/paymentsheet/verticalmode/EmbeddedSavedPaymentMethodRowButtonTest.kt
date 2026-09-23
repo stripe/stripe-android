@@ -66,7 +66,7 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
     }
 
     @Test
-    fun `row with a different pending method keeps its icon`() {
+    fun `disabled row that is not pending keeps its icon`() {
         val scenario = runScenario(
             isSelectionPending = false,
             isEnabled = false,

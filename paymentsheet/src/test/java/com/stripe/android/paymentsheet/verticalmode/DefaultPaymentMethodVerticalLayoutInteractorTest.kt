@@ -83,42 +83,19 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun state_marksDisplayedSavedPaymentMethodPendingWhenSelectionIdMatches() {
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        runScenario(initialPaymentMethods = listOf(selection.paymentMethod)) {
-            interactor.state.test {
-                assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-
-                savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
-                    pendingSelection = selection
-                )
-
-                assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-
-                savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
-                    pendingSelection = null
-                )
-
-                assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-            }
-        }
-    }
-
-    @Test
-    fun state_doesNotMarkDisplayedSavedPaymentMethodPendingWhenSelectionIdDiffers() = runScenario(
+    fun state_marksDisplayedSavedPaymentMethodPendingWhenSelectionIsPending() = runScenario(
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
-                pendingSelection = PaymentSelection.Saved(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_other"),
-                ),
-            )
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
-            expectNoEvents()
-            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
 
@@ -127,9 +104,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState(
-                pendingSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            )
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
@@ -2048,8 +2023,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
-        val savedPaymentMethodSelectionState = MutableStateFlow(
-            SavedPaymentMethodSelectionState(pendingSelection = null)
+        val savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
+            SavedPaymentMethodSelectionState.Idle
         )
         val temporarySelection: MutableStateFlow<PaymentMethodCode?> = MutableStateFlow(null)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)
