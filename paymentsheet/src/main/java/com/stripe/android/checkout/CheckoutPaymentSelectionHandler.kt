@@ -23,7 +23,9 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {
-    private val _state = MutableStateFlow(SavedPaymentMethodSelectionState(pendingSelection = null))
+    private val _state = MutableStateFlow<SavedPaymentMethodSelectionState>(
+        SavedPaymentMethodSelectionState.Idle
+    )
     val state: StateFlow<SavedPaymentMethodSelectionState> = _state.asStateFlow()
 
     private val immediateHandler = ImmediateVerticalPaymentSelectionHandler(
@@ -43,16 +45,16 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
-        if (state.value.pendingSelection != null) return
+        if (state.value is SavedPaymentMethodSelectionState.Pending) return
 
-        _state.value = SavedPaymentMethodSelectionState(pendingSelection = selection)
+        _state.value = SavedPaymentMethodSelectionState.Pending
         coroutineScope.launch {
             try {
                 checkoutController.selectSavedPaymentMethod(selection).onSuccess {
                     onSelectionComplete()
                 }
             } finally {
-                _state.value = SavedPaymentMethodSelectionState(pendingSelection = null)
+                _state.value = SavedPaymentMethodSelectionState.Idle
             }
         }
     }

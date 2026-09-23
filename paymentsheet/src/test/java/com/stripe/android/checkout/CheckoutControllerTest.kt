@@ -825,14 +825,10 @@ internal class CheckoutControllerTest {
             }
 
             handler.state.test {
-                assertThat(awaitItem()).isEqualTo(
-                    SavedPaymentMethodSelectionState(pendingSelection = null)
-                )
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                 handler.select(selection, true)
-                assertThat(awaitItem()).isEqualTo(
-                    SavedPaymentMethodSelectionState(pendingSelection = selection)
-                )
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
                 try {
                     testScheduler.advanceUntilIdle()
@@ -848,9 +844,7 @@ internal class CheckoutControllerTest {
                     }
                     assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
                     assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
-                    assertThat(awaitItem()).isEqualTo(
-                        SavedPaymentMethodSelectionState(pendingSelection = null)
-                    )
+                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     expectNoEvents()
                     completions.expectNoEvents()
                 } finally {
