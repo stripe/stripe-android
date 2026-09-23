@@ -120,8 +120,10 @@ internal class FinancialConnectionsPlaygroundViewModel(
 
         val consentMode = get<PreCollectedConsentModeSetting>().selectedOption.takeIf {
             state.value.experience == Experience.FinancialConnections &&
-                (state.value.flow != Flow.PaymentIntent ||
-                    get<IntegrationTypeSetting>().selectedOption == IntegrationType.Standalone)
+                (
+                    state.value.flow != Flow.PaymentIntent ||
+                        get<IntegrationTypeSetting>().selectedOption == IntegrationType.Standalone
+                    )
         } ?: PreCollectedConsentMode.Off
         when (consentMode) {
             PreCollectedConsentMode.Off -> launchFinancialConnections(
