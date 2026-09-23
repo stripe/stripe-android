@@ -12,14 +12,20 @@ import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.data.model.AccountHolder
+import com.stripe.android.financialconnections.example.data.model.IssuedConsent
 import com.stripe.android.financialconnections.example.data.model.Merchant
+import com.stripe.android.financialconnections.example.data.model.toCreateAccountHolderBody
+import com.stripe.android.financialconnections.example.data.model.toCreateConsentBody
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
+import com.stripe.android.financialconnections.example.settings.CustomerIdSetting
 import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
@@ -27,8 +33,13 @@ import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.ForceOnelinkConsumerSetting
 import com.stripe.android.financialconnections.example.settings.ForceOnelinkSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
+import com.stripe.android.financialconnections.example.settings.ManualConsentCollectedAtSetting
+import com.stripe.android.financialconnections.example.settings.ManualConsentIdSetting
 import com.stripe.android.financialconnections.example.settings.MerchantSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
+import com.stripe.android.financialconnections.example.settings.PreCollectedConsentLocaleSetting
+import com.stripe.android.financialconnections.example.settings.PreCollectedConsentMode
+import com.stripe.android.financialconnections.example.settings.PreCollectedConsentModeSetting
 import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkMode
@@ -42,6 +53,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import retrofit2.HttpException
 
 internal class FinancialConnectionsPlaygroundViewModel(
@@ -107,19 +119,123 @@ internal class FinancialConnectionsPlaygroundViewModel(
         )
         saveToSharedPreferences(getApplication())
 
+        val consentMode = get<PreCollectedConsentModeSetting>().selectedOption.takeIf {
+            state.value.experience == Experience.FinancialConnections &&
+                (state.value.flow != Flow.PaymentIntent ||
+                    get<IntegrationTypeSetting>().selectedOption == IntegrationType.Standalone)
+        } ?: PreCollectedConsentMode.Off
+        when (consentMode) {
+            PreCollectedConsentMode.Off -> launchFinancialConnections(
+                settings = this,
+                accountHolder = null,
+                preCollectedConsent = null,
+            )
+            PreCollectedConsentMode.Manual -> {
+                val consent = get<ManualConsentIdSetting>().selectedOption.trim()
+                val collectedAt = get<ManualConsentCollectedAtSetting>().selectedOption.toLongOrNull()
+                if (consent.isBlank() || collectedAt == null || collectedAt <= 0) {
+                    showError(IllegalArgumentException("Manual Consent ID and a positive Unix timestamp are required."))
+                } else {
+                    launchFinancialConnections(
+                        settings = this,
+                        accountHolder = manualAccountHolder(),
+                        preCollectedConsent = FinancialConnectionsPreCollectedConsent(consent, collectedAt),
+                    )
+                }
+            }
+            PreCollectedConsentMode.Guided -> prepareGuidedConsent(this)
+        }
+    }
+
+    private fun PlaygroundSettings.manualAccountHolder(): AccountHolder? {
+        if (get<FlowSetting>().selectedOption == Flow.Token) {
+            return null
+        }
+        return get<CustomerIdSetting>().selectedOption
+            .trim()
+            .takeIf(String::isNotBlank)
+            ?.let { customerId ->
+                AccountHolder(type = "customer", customer = customerId)
+            }
+    }
+
+    private fun prepareGuidedConsent(settings: PlaygroundSettings) {
+        viewModelScope.launch {
+            showLoadingWithMessage("Creating account holder and Stripe-issued Consent.")
+            runCatching {
+                val holderType = if (settings.get<FlowSetting>().selectedOption == Flow.Token) "account" else "customer"
+                val request = settings.lasRequest()
+                val accountHolder = repository.createAccountHolder(
+                    request.toCreateAccountHolderBody(holderType)
+                ).accountHolder
+                val consent = repository.createConsent(
+                    request.toCreateConsentBody(
+                        accountHolder = accountHolder,
+                        locale = settings.get<PreCollectedConsentLocaleSetting>().selectedOption
+                            .trim()
+                            .takeIf(String::isNotBlank),
+                    )
+                )
+                PendingPreCollectedConsent(settings, accountHolder, consent)
+            }.onSuccess { pendingConsent ->
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        pendingPreCollectedConsent = pendingConsent,
+                        status = it.status + "Review the Stripe-issued Consent before launching Financial Connections.",
+                    )
+                }
+            }.onFailure(::showError)
+        }
+    }
+
+    fun onPreCollectedConsentAccepted() {
+        val pendingConsent = state.value.pendingPreCollectedConsent ?: return
+        _state.update { it.copy(pendingPreCollectedConsent = null) }
+        launchFinancialConnections(
+            settings = pendingConsent.settings,
+            accountHolder = pendingConsent.accountHolder,
+            preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+                consent = pendingConsent.consent.id,
+                collectedAt = Instant.now().epochSecond,
+            ),
+        )
+    }
+
+    fun onPreCollectedConsentCancelled() {
+        _state.update {
+            it.copy(
+                loading = false,
+                pendingPreCollectedConsent = null,
+                status = it.status + "Pre-collected Consent acceptance was cancelled.",
+            )
+        }
+    }
+
+    private fun launchFinancialConnections(
+        settings: PlaygroundSettings,
+        accountHolder: AccountHolder?,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) {
         when (state.value.experience) {
             Experience.FinancialConnections -> {
                 when (state.value.flow) {
-                    Flow.Data -> startForData(this)
-                    Flow.Token -> startForToken(this)
-                    Flow.PaymentIntent -> startWithPaymentIntent(this, experience = Experience.FinancialConnections)
+                    Flow.Data -> startForData(settings, accountHolder, preCollectedConsent)
+                    Flow.Token -> startForToken(settings, accountHolder, preCollectedConsent)
+                    Flow.PaymentIntent -> startWithPaymentIntent(
+                        settings,
+                        experience = Experience.FinancialConnections,
+                        accountHolder = accountHolder,
+                        preCollectedConsent = preCollectedConsent,
+                    )
+                    Flow.SetupIntent -> startWithSetupIntent(settings, accountHolder, preCollectedConsent)
                 }
             }
             Experience.InstantDebits -> {
-                startWithPaymentIntent(this, experience = Experience.InstantDebits)
+                startWithPaymentIntent(settings, Experience.InstantDebits, null, null)
             }
             Experience.LinkCardBrand -> {
-                startWithPaymentIntent(this, experience = Experience.LinkCardBrand)
+                startWithPaymentIntent(settings, Experience.LinkCardBrand, null, null)
             }
         }
     }
@@ -127,6 +243,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
     private fun startWithPaymentIntent(
         settings: PlaygroundSettings,
         experience: Experience,
+        accountHolder: AccountHolder?,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
@@ -134,7 +252,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 repository.createPaymentIntent(
                     settings.paymentIntentRequest(
                         linkMode = experience.linkMode,
-                    )
+                    ).copy(accountHolder = accountHolder)
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -178,6 +296,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,
+                            preCollectedConsent = preCollectedConsent,
                         )
                     )
                 }
@@ -186,11 +305,15 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData(settings: PlaygroundSettings) {
+    private fun startForData(
+        settings: PlaygroundSettings,
+        accountHolder: AccountHolder?,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSession(settings.lasRequest())
+                repository.createLinkAccountSession(settings.lasRequest().copy(accountHolder = accountHolder))
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -205,7 +328,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
                                 stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
-                            )
+                            ),
+                            preCollectedConsent = preCollectedConsent,
                         )
                     )
                 }
@@ -214,28 +338,68 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken(settings: PlaygroundSettings) {
+    private fun startForToken(
+        settings: PlaygroundSettings,
+        accountHolder: AccountHolder?,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSessionForToken(settings.lasRequest())
+                repository.createLinkAccountSessionForToken(settings.lasRequest().copy(accountHolder = accountHolder))
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
 
+                    val stripeAccount = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
                     _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
-                            )
+                                stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
+                            ),
+                            preCollectedConsent = preCollectedConsent,
                         )
                     )
                 }
                 // Error retrieving session: display error.
                 .onFailure(::showError)
+        }
+    }
+
+    private fun startWithSetupIntent(
+        settings: PlaygroundSettings,
+        accountHolder: AccountHolder?,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) {
+        viewModelScope.launch {
+            showLoadingWithMessage("Creating SetupIntent from example backend.")
+            runCatching {
+                repository.createSetupIntent(
+                    settings.paymentIntentRequest().copy(accountHolder = accountHolder)
+                )
+            }.onSuccess {
+                _state.update { current ->
+                    current.copy(
+                        publishableKey = it.publishableKey,
+                        intentClientSecret = it.intentSecret,
+                        loading = true,
+                        status = current.status + "SetupIntent created, opening FinancialConnectionsSheet.",
+                    )
+                }
+                val stripeAccount = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
+                _viewEffect.emit(
+                    FinancialConnectionsPlaygroundViewEffect.OpenForSetupIntent(
+                        setupIntentSecret = it.intentSecret,
+                        publishableKey = it.publishableKey,
+                        stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
+                        preCollectedConsent = preCollectedConsent,
+                    )
+                )
+            }.onFailure(::showError)
         }
     }
 
@@ -408,7 +572,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 
     private suspend fun confirmIntentIfNeeded() {
-        val shouldConfirmIntent = state.value.settings.get<ConfirmIntentSetting>().selectedOption
+        val shouldConfirmIntent = state.value.settings.get<ConfirmIntentSetting>().selectedOption &&
+            state.value.flow == Flow.PaymentIntent
         val clientSecret = state.value.intentClientSecret
 
         if (shouldConfirmIntent && clientSecret != null) {
@@ -480,7 +645,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
 enum class Flow(val apiValue: String) {
     Data("Data"),
     Token("Token"),
-    PaymentIntent("PaymentIntent");
+    PaymentIntent("PaymentIntent"),
+    SetupIntent("SetupIntent");
 
     companion object {
         fun fromApiValue(apiValue: String): Flow = entries.first { it.apiValue == apiValue }
@@ -519,11 +685,13 @@ enum class NativeOverride(val apiValue: String) {
 
 sealed class FinancialConnectionsPlaygroundViewEffect {
     data class OpenForData(
-        val configuration: FinancialConnectionsSheet.Configuration
+        val configuration: FinancialConnectionsSheet.Configuration,
+        val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) : FinancialConnectionsPlaygroundViewEffect()
 
     data class OpenForToken(
-        val configuration: FinancialConnectionsSheet.Configuration
+        val configuration: FinancialConnectionsSheet.Configuration,
+        val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) : FinancialConnectionsPlaygroundViewEffect()
 
     data class OpenForPaymentIntent(
@@ -535,8 +703,22 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
         val experience: Experience,
         val integrationType: IntegrationType,
         val elementsSessionContext: ElementsSessionContext,
+        val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) : FinancialConnectionsPlaygroundViewEffect()
+
+    data class OpenForSetupIntent(
+        val setupIntentSecret: String,
+        val publishableKey: String,
+        val stripeAccountId: String?,
+        val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
+
+internal data class PendingPreCollectedConsent(
+    val settings: PlaygroundSettings,
+    val accountHolder: AccountHolder,
+    val consent: IssuedConsent,
+)
 
 internal data class FinancialConnectionsPlaygroundState(
     val backendUrl: String = "",
@@ -544,6 +726,7 @@ internal data class FinancialConnectionsPlaygroundState(
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val intentClientSecret: String? = null,
+    val pendingPreCollectedConsent: PendingPreCollectedConsent? = null,
     val status: List<String> = emptyList(),
     val emittedEvents: List<String> = emptyList()
 ) {

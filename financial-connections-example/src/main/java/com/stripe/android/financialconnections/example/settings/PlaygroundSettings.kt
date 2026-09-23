@@ -5,6 +5,9 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.edit
+import com.stripe.android.financialconnections.example.Experience
+import com.stripe.android.financialconnections.example.Flow
+import com.stripe.android.financialconnections.example.IntegrationType
 import com.stripe.android.financialconnections.example.BuildConfig
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
@@ -21,13 +24,43 @@ internal data class PlaygroundSettings(
         val merchant = get<MerchantSetting>()
         val flow = get<FlowSetting>()
         val experience = get<ExperienceSetting>()
+        val integrationType = get<IntegrationTypeSetting>()
+        val preCollectedConsentMode = get<PreCollectedConsentModeSetting>().selectedOption
         settings.filter {
             it.shouldDisplay(
                 merchant = merchant.selectedOption,
                 flow = flow.selectedOption,
                 experience = experience.selectedOption,
-            )
+            ) && supportsPreCollectedConsent(
+                setting = it,
+                flow = flow.selectedOption,
+                experience = experience.selectedOption,
+                integrationType = integrationType.selectedOption,
+            ) && when (it) {
+                is PreCollectedConsentLocaleSetting -> preCollectedConsentMode == PreCollectedConsentMode.Guided
+                is ManualConsentIdSetting,
+                is ManualConsentCollectedAtSetting -> preCollectedConsentMode == PreCollectedConsentMode.Manual
+                else -> true
+            }
         }
+    }
+
+    private fun supportsPreCollectedConsent(
+        setting: Setting<*>,
+        flow: Flow,
+        experience: Experience,
+        integrationType: IntegrationType,
+    ): Boolean {
+        if (
+            setting !is PreCollectedConsentModeSetting &&
+            setting !is PreCollectedConsentLocaleSetting &&
+            setting !is ManualConsentIdSetting &&
+            setting !is ManualConsentCollectedAtSetting
+        ) {
+            return true
+        }
+        return experience == Experience.FinancialConnections &&
+            (flow != Flow.PaymentIntent || integrationType == IntegrationType.Standalone)
     }
 
     fun <T> withValue(
@@ -183,6 +216,10 @@ internal data class PlaygroundSettings(
             CustomerIdSetting(),
             StripeAccountIdSetting().takeIf { BuildConfig.TEST_ENVIRONMENT != "edge" },
             RelinkAuthorizationSetting(),
+            PreCollectedConsentModeSetting(),
+            PreCollectedConsentLocaleSetting(),
+            ManualConsentIdSetting(),
+            ManualConsentCollectedAtSetting(),
         )
     }
 }
