@@ -43,7 +43,7 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
-    fun `selection failure is row-aligned, below the full list, before mandate, and clears`() = runScenario {
+    fun `selection failure is row-aligned, below mandate, and clears`() = runScenario {
         assertErrorPlacementAndMessage()
         clearError()
         assertErrorCleared()
@@ -126,7 +126,7 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
             )
             assertThat(errorBounds.top).isGreaterThan(savedPaymentMethodBounds.bottom)
             assertThat(errorBounds.top).isGreaterThan(newPaymentMethodBounds.bottom)
-            assertThat(mandateBounds.top).isGreaterThan(errorBounds.bottom)
+            assertThat(errorBounds.top).isGreaterThan(mandateBounds.bottom)
         }
 
         fun clearError() {

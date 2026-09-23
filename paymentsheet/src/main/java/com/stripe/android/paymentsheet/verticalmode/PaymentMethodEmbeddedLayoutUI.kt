@@ -69,7 +69,6 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
-        selectionError = selectionError,
         linkBrand = state.linkBrand,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
@@ -110,6 +109,11 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         mandate = state.mandate,
     )
+
+    EmbeddedSavedPaymentMethodSelectionError(
+        error = selectionError,
+        appearance = appearance,
+    )
 }
 
 @VisibleForTesting
@@ -119,7 +123,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
-    selectionError: Throwable?,
     linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
@@ -173,19 +176,26 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
+    }
+}
 
-        selectionError?.let { error ->
-            ErrorMessage(
-                error = error.stripeErrorMessage().resolve(),
-                modifier = Modifier
-                    .padding(
-                        start = appearance.style.getHorizontalInsets(),
-                        top = 8.dp,
-                        end = appearance.style.getHorizontalInsets(),
-                    )
-                    .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
-            )
-        }
+@VisibleForTesting
+@Composable
+internal fun EmbeddedSavedPaymentMethodSelectionError(
+    error: Throwable?,
+    appearance: Embedded,
+) {
+    error?.let {
+        ErrorMessage(
+            error = it.stripeErrorMessage().resolve(),
+            modifier = Modifier
+                .padding(
+                    start = appearance.style.getHorizontalInsets(),
+                    top = 8.dp,
+                    end = appearance.style.getHorizontalInsets(),
+                )
+                .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
+        )
     }
 }
 

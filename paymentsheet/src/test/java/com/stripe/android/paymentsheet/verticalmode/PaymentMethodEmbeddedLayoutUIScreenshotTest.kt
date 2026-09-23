@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -147,7 +148,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 ),
                 savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
-                selectionError = null,
                 linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 onViewMorePaymentMethods = {},
@@ -166,20 +166,26 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         val imageLoader = FakeStripeImageLoader()
 
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
-                selectionError = IllegalStateException("Unable to update the Checkout Session."),
-                linkBrand = LinkBrand.Link,
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = imageLoader,
-                appearance = getEmbeddedAppearance(FloatingButton::class),
-            )
+            Column {
+                PaymentMethodEmbeddedLayoutUI(
+                    paymentMethods = paymentMethods,
+                    displayedSavedPaymentMethod = savedPaymentMethod,
+                    savedPaymentMethodAction =
+                    PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                    selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                    linkBrand = LinkBrand.Link,
+                    isEnabled = true,
+                    onViewMorePaymentMethods = {},
+                    onSelectSavedPaymentMethod = {},
+                    onManageOneSavedPaymentMethod = {},
+                    imageLoader = imageLoader,
+                    appearance = getEmbeddedAppearance(FloatingButton::class),
+                )
+                EmbeddedSavedPaymentMethodSelectionError(
+                    error = IllegalStateException("Unable to update the Checkout Session."),
+                    appearance = getEmbeddedAppearance(FloatingButton::class),
+                )
+            }
         }
 
         imageLoader.ensureAllEventsConsumed()
@@ -273,7 +279,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
-            selectionError = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -298,7 +303,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = selection,
-            selectionError = null,
             linkBrand = LinkBrand.Link,
             isEnabled = true,
             onViewMorePaymentMethods = {},
@@ -322,7 +326,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction = action,
                 selection = null,
-                selectionError = null,
                 linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
