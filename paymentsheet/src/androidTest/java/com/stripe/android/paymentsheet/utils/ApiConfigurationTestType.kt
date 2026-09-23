@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.utils
 
 import android.content.Context
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
-import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.networktesting.TestApiKeys
@@ -34,7 +33,6 @@ internal sealed class ApiConfigurationTestType(
         )
     }
 
-    @OptIn(ApiConfigurationPreview::class)
     fun applyTo(configuration: PaymentSheet.Configuration): PaymentSheet.Configuration {
         return apiConfiguration?.let {
             configuration.newBuilder().apiConfiguration(it).build()
