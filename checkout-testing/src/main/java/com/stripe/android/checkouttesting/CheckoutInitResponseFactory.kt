@@ -1,10 +1,10 @@
-package com.stripe.android.checkout
+package com.stripe.android.checkouttesting
 
 import com.stripe.android.networktesting.testBodyFromFile
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 
-internal object CheckoutInitResponseFactory {
+object CheckoutInitResponseFactory {
     fun create(response: MockResponse) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
