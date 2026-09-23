@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
@@ -110,9 +109,14 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         mandate = state.mandate,
     )
 
-    EmbeddedSavedPaymentMethodSelectionError(
-        error = selectionError,
-    )
+    selectionError?.let { error ->
+        ErrorMessage(
+            error = error.resolve(),
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
+        )
+    }
 }
 
 @VisibleForTesting
@@ -175,20 +179,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
-    }
-}
-
-@Composable
-private fun EmbeddedSavedPaymentMethodSelectionError(
-    error: Throwable?,
-) {
-    error?.let {
-        ErrorMessage(
-            error = it.stripeErrorMessage().resolve(),
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
-        )
     }
 }
 

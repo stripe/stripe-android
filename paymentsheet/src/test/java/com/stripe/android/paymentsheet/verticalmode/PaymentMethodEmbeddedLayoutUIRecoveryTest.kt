@@ -79,7 +79,7 @@ internal class PaymentMethodEmbeddedLayoutUIRecoveryTest {
             }
         }
         composeRule.waitForIdle()
-        interactor.selectionErrorSource.value = IllegalStateException("Unable to update the Checkout Session.")
+        interactor.selectionErrorSource.value = R.string.stripe_something_went_wrong.resolvableString
         composeRule.waitForIdle()
 
         TestScenario(

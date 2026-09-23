@@ -103,6 +103,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun selectionError_emitsSeparatelyFromMainState() = runScenario {
         val expectedError = IllegalStateException("selection failed")
+        val expectedErrorMessage = R.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
             val initialState = awaitItem()
@@ -113,7 +114,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
                 savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(expectedError)
 
-                assertThat(awaitItem()).isSameInstanceAs(expectedError)
+                assertThat(awaitItem()).isEqualTo(expectedErrorMessage)
                 assertThat(interactor.state.value).isEqualTo(initialState)
             }
 
@@ -145,18 +146,20 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun state_projectsFailedSelectionWithoutPending() {
         val expectedError = IllegalStateException("selection failed")
+        val expectedErrorMessage = R.string.stripe_something_went_wrong.resolvableString
         runScenario(
             initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
         ) {
             assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-            assertThat(interactor.selectionError.value).isSameInstanceAs(expectedError)
+            assertThat(interactor.selectionError.value).isEqualTo(expectedErrorMessage)
         }
     }
 
     @Test
     fun enteringPaymentMethodForm_preservesSavedPaymentMethodSelectionError() {
         val expectedError = IllegalStateException("selection failed")
+        val expectedErrorMessage = R.string.stripe_something_went_wrong.resolvableString
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
             initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
@@ -166,7 +169,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
             assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
-            assertThat(interactor.selectionError.value).isSameInstanceAs(expectedError)
+            assertThat(interactor.selectionError.value).isEqualTo(expectedErrorMessage)
         }
     }
 

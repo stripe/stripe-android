@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -54,7 +55,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     val showsWalletsHeader: StateFlow<Boolean>
 
-    val selectionError: StateFlow<Throwable?>
+    val selectionError: StateFlow<ResolvableString?>
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -328,8 +329,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState != null && walletsState.walletsInHeader
     }
 
-    override val selectionError: StateFlow<Throwable?> = savedPaymentMethodSelectionState.mapAsStateFlow {
-        (it as? SavedPaymentMethodSelectionState.Failed)?.error
+    override val selectionError: StateFlow<ResolvableString?> = savedPaymentMethodSelectionState.mapAsStateFlow {
+        (it as? SavedPaymentMethodSelectionState.Failed)?.error?.stripeErrorMessage()
     }
 
     init {

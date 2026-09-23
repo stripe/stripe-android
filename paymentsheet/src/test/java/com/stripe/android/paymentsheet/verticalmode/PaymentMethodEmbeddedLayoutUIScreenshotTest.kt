@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -338,9 +339,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             ),
             viewActionRecorder = ViewActionRecorder(),
         ).also {
-            it.selectionErrorSource.value = IllegalStateException(
-                "Unable to update the Checkout Session."
-            )
+            it.selectionErrorSource.value = R.string.stripe_something_went_wrong.resolvableString
         }
     }
 
