@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.testing.FakePollingAnalyticsEventReporter
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
@@ -292,7 +293,7 @@ internal class PollingActivityTest {
     }
 
     private fun assertQrCodeWebViewIsDisplayed() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -301,7 +302,7 @@ internal class PollingActivityTest {
     }
 
     private fun assertQrCodeWebViewIsNotDisplayed() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

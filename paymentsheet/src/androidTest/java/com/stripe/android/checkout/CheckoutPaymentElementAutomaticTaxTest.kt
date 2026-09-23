@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.Turbine
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
@@ -13,6 +12,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
@@ -488,7 +489,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
         }
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(hasTestTag(layoutTag))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
@@ -496,7 +497,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun clickPaymentOptionsPrimaryButton() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(
                 hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
@@ -553,7 +554,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
         }
     }

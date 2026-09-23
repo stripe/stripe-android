@@ -4,10 +4,10 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitUntilWithIdle
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -127,18 +128,14 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
             composeTestRule.waitForIdle()
 
             if (paymentMethodType is PaymentMethodType.UsBankAccount) {
-                composeTestRule.waitUntil(
-                    timeoutMillis = 5000L
-                ) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodes(
                         hasTestTag(TEST_TAG_BILLING_DETAILS)
                     ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
                 }
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
 
-                composeTestRule.waitUntil(
-                    timeoutMillis = 5000L
-                ) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodes(
                         hasTestTag(TEST_TAG_ACCOUNT_DETAILS)
                     ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()

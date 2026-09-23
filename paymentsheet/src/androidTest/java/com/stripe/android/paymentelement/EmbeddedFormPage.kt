@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
-import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.testing.waitUntilWithIdle
 
 internal class EmbeddedFormPage(
     private val composeTestRule: ComposeTestRule,
@@ -71,13 +71,13 @@ internal class EmbeddedFormPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             isVisible()
         }
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -88,21 +88,18 @@ internal class EmbeddedFormPage(
     fun clickPrimaryButton() {
         clickPrimaryButtonWithoutWaitingForDismissal()
 
-        composeTestRule.waitUntil(5.seconds.inWholeMilliseconds) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
-
-        composeTestRule.waitForIdle()
     }
 
     fun clickDisabledPrimaryButton() {
         waitUntilVisible()
 
-        composeTestRule.waitUntil(
+        composeTestRule.waitUntilWithIdle(
             conditionDescription = "embedded form primary button to become disabled",
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
         ) {
             composeTestRule.onAllNodes(
                 hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled())
@@ -117,9 +114,8 @@ internal class EmbeddedFormPage(
     }
 
     fun assertCardNumberError(errorMessage: String) {
-        composeTestRule.waitUntil(
+        composeTestRule.waitUntilWithIdle(
             conditionDescription = "card number field to show error '$errorMessage'",
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
         ) {
             composeTestRule.onAllNodes(
                 hasText("Card number").and(
@@ -144,7 +140,7 @@ internal class EmbeddedFormPage(
     }
 
     fun assertErrorIsShown(message: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(hasTestTag(SHEET_ERROR_TEST_TAG).and(hasText(message)))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
@@ -174,7 +170,7 @@ internal class EmbeddedFormPage(
         val matcher = hasTestTag(TEST_TAG_HEADER_PROMO_BADGE).and(
             hasAnyDescendant(hasText(text, substring = true))
         )
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(matcher, useUnmergedTree = true)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
@@ -186,7 +182,7 @@ internal class EmbeddedFormPage(
     }
 
     fun waitUntilHeaderPromoBadgeIsMissing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodesWithTag(TEST_TAG_HEADER_PROMO_BADGE)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
@@ -197,7 +193,7 @@ internal class EmbeddedFormPage(
     }
 
     private fun waitUntilPrimaryButtonIsEnabled() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()

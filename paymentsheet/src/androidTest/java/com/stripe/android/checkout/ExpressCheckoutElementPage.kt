@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.testing.waitUntilWithIdle
 
 internal class ExpressCheckoutElementPage(
     private val composeTestRule: ComposeTestRule,
@@ -27,9 +28,8 @@ internal class ExpressCheckoutElementPage(
 
     private fun clickButton(testTag: String, name: String) {
         val button = hasTestTag(testTag) and isEnabled() and hasClickAction()
-        composeTestRule.waitUntil(
+        composeTestRule.waitUntilWithIdle(
             conditionDescription = "$name button is enabled and clickable",
-            timeoutMillis = 5_000,
         ) {
             composeTestRule.onAllNodes(button)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

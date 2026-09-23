@@ -3,6 +3,7 @@ package com.stripe.android.tta.testing
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 
 class TapToAddSavedPaymentMethodPage(
     private val composeTestRule: ComposeTestRule,
@@ -14,8 +15,7 @@ class TapToAddSavedPaymentMethodPage(
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
-            composeTestRule.waitForIdle()
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(hasText(TITLE))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
@@ -31,7 +31,7 @@ class TapToAddSavedPaymentMethodPage(
     private fun assertHasAddedCardText() {
         val matcher = hasText(TITLE)
 
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(matcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1

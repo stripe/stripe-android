@@ -9,6 +9,7 @@ import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import com.stripe.android.testing.waitUntilWithIdle
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 
@@ -25,7 +26,7 @@ class TapToAddConfirmationTestHelper(
     }
 
     fun intendedPaymentConfirmationToBeLaunched(vararg matchers: Matcher<Intent>) {
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             runCatching {
                 intended(
                     allOf(
