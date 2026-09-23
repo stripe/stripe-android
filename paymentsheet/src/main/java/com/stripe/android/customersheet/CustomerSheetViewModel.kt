@@ -158,12 +158,7 @@ internal class CustomerSheetViewModel(
         productUsageTokens = productUsage,
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-        apiConfigurationProvider = {
-            ApiConfiguration.State(
-                publishableKey = paymentConfiguration.publishableKey,
-                stripeAccountId = paymentConfiguration.stripeAccountId,
-            )
-        },
+        apiConfigurationProvider = apiConfigurationProvider,
     )
 
     private val customerState = MutableStateFlow(

@@ -176,6 +176,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = appContext,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = apiConfigurationProvider,
+        ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )
