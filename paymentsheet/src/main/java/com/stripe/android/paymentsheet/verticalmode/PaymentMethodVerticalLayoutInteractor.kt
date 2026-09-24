@@ -131,6 +131,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : PaymentMethodVerticalLayoutInteractor {
 
+    private data class ProcessingState(
+        val isProcessing: Boolean,
+        val error: ResolvableString?,
+    )
+
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
@@ -290,24 +295,26 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
-    private val linkAccountAndSelectionError = combineAsStateFlow(
-        linkAccount,
+    private val processingState = combineAsStateFlow(
+        processing,
         selectionError,
-    ) { linkAccount, selectionError ->
-        linkAccount to selectionError
+    ) { isProcessing, error ->
+        ProcessingState(
+            isProcessing = isProcessing,
+            error = error,
+        )
     }
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
-        processing,
+        processingState,
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
-        linkAccountAndSelectionError,
-    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode, linkAccountAndSelectionError ->
-        val (linkAccount, selectionError) = linkAccountAndSelectionError
+        linkAccount,
+    ) { displayablePaymentMethods, processingState, mostRecentSelection, displayedSavedPaymentMethod,
+        action, temporarySelectionCode, linkAccount ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -324,12 +331,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
-            isProcessing = isProcessing,
+            isProcessing = processingState.isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            error = selectionError,
+            error = processingState.error,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
     }
