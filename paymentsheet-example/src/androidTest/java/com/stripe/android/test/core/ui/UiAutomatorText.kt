@@ -24,6 +24,13 @@ open class UiAutomatorText(
             UiSelector().textMatches(label)
         } else { UiSelector().textContains(label) }
 
+    private val bySelector
+        get() = if (labelMatchesExactly) {
+            By.text(label)
+        } else {
+            By.textContains(label)
+        }
+
     open fun click() {
         if (!exists()) {
             if (!exists()) {
@@ -34,6 +41,12 @@ open class UiAutomatorText(
             throw InvalidParameterException("Text button not found: $label $className")
         }
         device.findObject(selector).click()
+    }
+
+    fun clickVisible() {
+        val visibleObject = device.findObject(bySelector)
+            ?: throw InvalidParameterException("Visible text button not found: $label")
+        visibleObject.click()
     }
 
     fun exists(): Boolean {

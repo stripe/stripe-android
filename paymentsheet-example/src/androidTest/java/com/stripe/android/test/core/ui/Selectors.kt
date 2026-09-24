@@ -422,7 +422,7 @@ internal class Selectors(
         isToggleable().and(hasTestTag("BACS_MANDATE_CHECKBOX"))
     )
 
-    fun getBoletoTaxId() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getBrazilianTaxId() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
