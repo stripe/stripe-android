@@ -46,12 +46,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
-            val previousSelection = savedStateHandle.get<CheckoutControllerState>(STATE_KEY)?.paymentSelection
-            savedStateHandle[STATE_KEY] = if (previousSelection != value?.paymentSelection) {
-                value?.copy(selectionError = null)
-            } else {
-                value
-            }
+            savedStateHandle[STATE_KEY] = value
         }
 
     val stateFlow: StateFlow<CheckoutControllerState?> =

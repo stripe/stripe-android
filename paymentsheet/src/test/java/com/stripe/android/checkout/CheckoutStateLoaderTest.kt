@@ -10,6 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
@@ -264,6 +265,22 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `reload clears selection error when the chosen selection changes`() = runScenario(
+        chosenSelection = PaymentSelection.GooglePay,
+    ) {
+        val error = IllegalStateException("Selection failed")
+        stateHolder.state = committedState(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            selectionError = error.stripeErrorMessage(),
+        )
+
+        loader.reload(requireNotNull(stateHolder.state))
+
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.selectionError.value).isNull()
+    }
+
+    @Test
     fun `reload preserves a non-default selection across a mutation`() = runScenario(
         // The loader would recompute a card selection, but the customer's Google Pay pick must win.
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -272,15 +289,14 @@ internal class CheckoutStateLoaderTest {
     ) {
         // Initial load seeds the chooser's stored previous configuration.
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
-        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
 
         // The customer picks Google Pay after the initial load; in the single-state model that pick
         // lives on the committed state rather than a separate selection holder.
-        val afterPick = requireNotNull(stateHolder.state).copy(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.setSelection(PaymentSelection.GooglePay)
 
         // A mutation reloads with the same configuration, so the chooser keeps the customer's
         // selection rather than adopting the loader's recomputed one.
-        loader.reload(afterPick)
+        loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
         assertThat(stateHolder.selectionError.value).isNull()
@@ -450,6 +466,7 @@ internal class CheckoutStateLoaderTest {
     // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
     private fun committedState(
         paymentSelection: PaymentSelection? = null,
+        selectionError: ResolvableString? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
@@ -464,7 +481,7 @@ internal class CheckoutStateLoaderTest {
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-        selectionError = null,
+        selectionError = selectionError,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,

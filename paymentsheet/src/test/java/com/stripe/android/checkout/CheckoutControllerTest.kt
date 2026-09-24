@@ -492,6 +492,9 @@ internal class CheckoutControllerTest {
             putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         },
     ) {
+        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+        assertThat(stateHolder.selectionError.value).isNotNull()
+
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
 
@@ -501,6 +504,7 @@ internal class CheckoutControllerTest {
         }
         val clearedState = committedState()
         assertThat(clearedState.paymentSelection).isNull()
+        assertThat(clearedState.selectionError).isNull()
         assertThat(clearedState.temporarySelection).isNull()
         assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
     }
@@ -727,6 +731,8 @@ internal class CheckoutControllerTest {
             assertLoadingConsumed = true,
         ) {
             val selection = loadedSavedPaymentMethodSelection()
+            stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+            assertThat(stateHolder.selectionError.value).isNotNull()
             val before = committedState()
             val requestReceived = CountDownLatch(1)
             val releaseResponse = CountDownLatch(1)
@@ -759,6 +765,8 @@ internal class CheckoutControllerTest {
                 val state = committedState()
                 assertThat(state.checkoutSessionResponse.livemode).isTrue()
                 assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(state.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+                assertThat(state.selectionError).isNull()
             } finally {
                 releaseResponse.countDown()
             }
@@ -1006,7 +1014,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
 
-            stateHolder.savedSelectionState.test {
+            stateHolder.savedPaymentMethodSelectionState.test {
                 awaitSavedSelectionFailure(handler, selection, completions, stateHolder)
 
                 val requestReceived = CountDownLatch(1)
@@ -1077,7 +1085,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
 
-            stateHolder.savedSelectionState.test {
+            stateHolder.savedPaymentMethodSelectionState.test {
                 awaitSavedSelectionFailure(handler, selection, completions, stateHolder)
 
                 handler.select(PaymentSelection.GooglePay, true)

@@ -107,6 +107,9 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
+        val selectionError = carryForward.selectionError.takeIf {
+            carryForward.previousSelection == selection
+        }
 
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,
@@ -118,7 +121,7 @@ internal class CheckoutStateLoader @Inject constructor(
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
             savedPaymentMethodSelectionState = carryForward.savedPaymentMethodSelectionState,
-            selectionError = carryForward.selectionError,
+            selectionError = selectionError,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,

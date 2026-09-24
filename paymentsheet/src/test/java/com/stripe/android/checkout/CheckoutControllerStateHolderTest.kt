@@ -163,18 +163,25 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `state replacement preserves failure for equal selection and clears it for changed selection`() = testScenario {
+    fun `state replacement preserves failure for equal selection`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
         val error = IllegalStateException("Selection failed")
         stateHolder.failSavedSelection(error)
 
         stateHolder.state = requireNotNull(stateHolder.state).copy()
         assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
+    }
+
+    @Test
+    fun `state replacement preserves an explicitly provided error for a changed selection`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        val error = IllegalStateException("Selection failed")
 
         stateHolder.state = requireNotNull(stateHolder.state).copy(
             paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            selectionError = error.stripeErrorMessage(),
         )
-        assertThat(stateHolder.selectionError.value).isNull()
+        assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
     }
 
     @Test
