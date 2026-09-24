@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -89,6 +91,7 @@ class GooglePayLauncher internal constructor(
                 googlePayConfig = GooglePayConfig(context),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
+                    apiConfigurationProvider = { context.apiConfigurationFromPaymentConfiguration() },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -134,6 +137,7 @@ class GooglePayLauncher internal constructor(
                 googlePayConfig = GooglePayConfig(context),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
+                    apiConfigurationProvider = { context.apiConfigurationFromPaymentConfiguration() },
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 cardFundingFilter = DefaultCardFundingFilter
@@ -183,6 +187,7 @@ class GooglePayLauncher internal constructor(
                 googlePayConfig = GooglePayConfig(context),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
+                    apiConfigurationProvider = { context.apiConfigurationFromPaymentConfiguration() },
                     productUsage = setOf(PRODUCT_USAGE)
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -423,6 +428,7 @@ fun rememberGooglePayLauncher(
                     googlePayConfig = GooglePayConfig(context),
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
+                        apiConfigurationProvider = { context.apiConfigurationFromPaymentConfiguration() },
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,
@@ -437,4 +443,12 @@ fun rememberGooglePayLauncher(
             DefaultAnalyticsRequestExecutor()
         )
     }
+}
+
+private fun Context.apiConfigurationFromPaymentConfiguration(): ApiConfiguration.State {
+    val paymentConfiguration = PaymentConfiguration.getInstance(this)
+    return ApiConfiguration.State(
+        publishableKey = paymentConfiguration.publishableKey,
+        stripeAccountId = paymentConfiguration.stripeAccountId,
+    )
 }

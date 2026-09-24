@@ -103,7 +103,10 @@ internal class AddressElementViewModelModule {
             PlacesClientProxy.create(
                 context,
                 it,
-                errorReporter = ErrorReporter.createFallbackInstance(context),
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    apiConfigurationProvider = { args.apiConfiguration },
+                ),
             )
         }
     }
