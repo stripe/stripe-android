@@ -124,7 +124,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `changed committed selection clears failure while equal reload preserves it`() = testScenario {
+    fun `state replacement preserves failure for equal selection and clears it for changed selection`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
         val error = IllegalStateException("Selection failed")
         stateHolder.failSavedSelection(error)
