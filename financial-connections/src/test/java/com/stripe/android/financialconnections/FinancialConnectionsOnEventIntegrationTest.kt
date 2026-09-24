@@ -63,7 +63,8 @@ internal class FinancialConnectionsOnEventIntegrationTest {
     }
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        preCollectedConsent = null
     )
 
     @Test

@@ -66,7 +66,8 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = "acct_test"
+            stripeAccountId = "acct_test",
+            preCollectedConsent = null
         ),
         locale = Locale.US,
         context = ApplicationProvider.getApplicationContext<Application>(),
