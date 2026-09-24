@@ -46,6 +46,7 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
         val event = analyticsRequests.first()
 
         assertThat(event.params["event"]).isEqualTo("stripe_android.card_metadata_pk_available")
+        assertThat(event.params["publishable_key"]).isEqualTo(TestApiKeys.PUBLISHABLE)
         assertThat(event.params["product_usage"]).isEqualTo("SomeProduct")
     }
 
