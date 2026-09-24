@@ -64,30 +64,24 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
         }
 
-    private val savedSelectionAdmissionLock = Any()
-
     fun tryBeginSavedSelection(): Boolean {
-        return synchronized(savedSelectionAdmissionLock) {
-            val current = state ?: return@synchronized false
-            if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-                return@synchronized false
-            }
-
-            state = current.copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-            )
-            true
+        val current = state ?: return false
+        if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+            return false
         }
+
+        state = current.copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+        )
+        return true
     }
 
     fun finishSavedSelection() {
-        synchronized(savedSelectionAdmissionLock) {
-            val current = state ?: return
-            if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-                state = current.copy(
-                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-                )
-            }
+        val current = state ?: return
+        if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+            state = current.copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+            )
         }
     }
 
