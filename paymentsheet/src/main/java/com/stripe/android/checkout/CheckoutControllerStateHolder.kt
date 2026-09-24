@@ -32,6 +32,16 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
+    init {
+        state?.let { restoredState ->
+            if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+                state = restoredState.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                )
+            }
+        }
+    }
+
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
@@ -40,15 +50,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     val stateFlow: StateFlow<CheckoutControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
-
-    init {
-        val restoredState = savedStateHandle.get<CheckoutControllerState>(STATE_KEY)
-        if (restoredState?.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-            savedStateHandle[STATE_KEY] = restoredState.copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-            )
-        }
-    }
 
     val session: StateFlow<Session?> =
         stateFlow.mapAsStateFlow {
