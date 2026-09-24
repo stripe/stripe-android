@@ -48,6 +48,9 @@ import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -518,9 +521,12 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     fun `onPaneLaunched tracks PaneNotFound for unknown pane`() {
         val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
         val viewModel = createViewModel(eventTracker = eventTracker)
+        val pane = Json.decodeFromJsonElement<FinancialConnectionsSessionManifest.Pane>(
+            JsonPrimitive("unsupported_pane")
+        )
 
         viewModel.onPaneLaunched(
-            pane = FinancialConnectionsSessionManifest.Pane.UNKNOWN,
+            pane = pane,
             referrer = FinancialConnectionsSessionManifest.Pane.CONSENT,
         )
 
@@ -529,7 +535,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         verifyNoMoreInteractions(eventTracker)
         assertThat(eventCaptor.firstValue.eventName).isEqualTo("linked_accounts.error.pane_not_found")
         assertThat(eventCaptor.firstValue.params).containsExactly(
-            "pane", "unknown",
+            "pane", "unsupported_pane",
             "error", "PaneNotFound",
             "error_type", "PaneNotFound",
             "error_message",

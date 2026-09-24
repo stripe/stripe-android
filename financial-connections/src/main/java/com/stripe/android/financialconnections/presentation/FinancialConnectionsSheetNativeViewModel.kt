@@ -444,7 +444,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
         val event = when {
-            pane == Pane.UNKNOWN -> PaneNotFound()
+            pane == Pane.UNKNOWN -> PaneNotFound(paneName = Pane.Serializer.consumeUnknownValue())
             pane.destination.logPaneLaunched -> PaneLaunched(
                 referrer = referrer,
                 pane = pane
