@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.model.Address
@@ -325,6 +326,40 @@ internal class ExpressCheckoutElementTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalledWithRequiredBillingAddress()
+    }
+
+    @Test
+    fun testGooglePayFailsWhenAutomaticTaxUpdateChangesTotal() {
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory =
+                CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
+                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(error).isInstanceOf(LocalStripeException::class.java)
+                assertThat((error as LocalStripeException).stripeError?.code)
+                    .isEqualTo("checkout_session_total_changed")
+            },
+        ) {
+            val paymentMethod = createPaymentMethodWithBillingAddress()
+
+            enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
+            networkRule.checkoutUpdate { response ->
+                response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                    json.getJSONArray("checkout_items").getJSONObject(0)
+                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .put("total", 5399)
+                }
+            }
+            networkRule.checkoutInit(
+                responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
+            )
 
             page.clickGooglePayButton()
         }
