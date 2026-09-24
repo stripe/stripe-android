@@ -335,6 +335,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_not_supported_error_title">Card not supported</string>
   <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
   <string name="stripe_tap_to_add_developer_options_error_action">Turn developer options off and try again</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Turn off Developer options</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">For security, developer options must be off to use Tap to Add.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Open settings</string>
   <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
   <string name="stripe_tap_to_add_network_error_action">Try another network and tap again</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
