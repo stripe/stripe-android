@@ -122,6 +122,26 @@ class CryptoApiRepositoryAdditionalKycTest {
         assertThat(response.created).isNull()
     }
 
+    @Test
+    fun `submission response with only an ID is parsed`() = runScenario(
+        responseBody = """{"id":"submission_123"}""",
+    ) {
+        val response = repository.fulfillAdditionalKycRequirement(
+            liquidityProvider = "swapped",
+            documents = emptyList(),
+            questionnaire = null,
+            consumerSessionClientSecret = "secret_123",
+        ).getOrThrow()
+
+        assertThat(response.id).isEqualTo("submission_123")
+        assertThat(response.objectType).isNull()
+        assertThat(response.status).isNull()
+        assertThat(response.liquidityProvider).isNull()
+        assertThat(response.created).isNull()
+        assertThat(response.documents).isNull()
+        assertThat(response.questionnaire).isNull()
+    }
+
     private fun assertDocumentAndQuestionnaireRequest(request: ApiRequest) {
         assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
         assertThat(request.baseUrl).isEqualTo(
