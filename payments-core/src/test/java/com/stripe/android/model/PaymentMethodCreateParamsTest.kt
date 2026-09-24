@@ -487,6 +487,31 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `withoutBillingEmail removes email and preserves other billing details`() {
+        val params = PaymentMethodCreateParams.createWithOverride(
+            code = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+            requiresMandate = false,
+            overrideParamMap = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
+            productUsage = emptySet(),
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
+
+        val result = params.withoutBillingEmail()
+
+        assertThat(PaymentMethodCreateParams.getEmailFromParams(result)).isNull()
+        assertThat(result.billingDetails).isEqualTo(
+            PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder()
+                .setEmail(null)
+                .build()
+        )
+        val billingDetailsParams = result.toParamMap()["billing_details"] as Map<*, *>
+        assertThat(billingDetailsParams).doesNotContainKey("email")
+        assertThat(billingDetailsParams["name"])
+            .isEqualTo(PaymentMethodCreateParamsFixtures.BILLING_DETAILS.name)
+    }
+
+    @Test
     fun `create() with 'allow_redisplay' set for card returns expected values`() {
         val card = PaymentMethodCreateParams.Card(
             number = CardNumberFixtures.VISA_NO_SPACES,

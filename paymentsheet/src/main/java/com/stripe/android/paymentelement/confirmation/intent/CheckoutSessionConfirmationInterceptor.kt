@@ -64,8 +64,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
+        val paymentMethodCreateParams = if (integrationMetadata.checkoutSessionResponse.customerEmail == null) {
+            confirmationOption.createParams
+        } else {
+            confirmationOption.createParams.withoutBillingEmail()
+        }
         return stripeRepository.createPaymentMethod(
-            paymentMethodCreateParams = confirmationOption.createParams,
+            paymentMethodCreateParams = paymentMethodCreateParams,
             options = requestOptions,
         ).fold(
             onSuccess = { paymentMethod ->

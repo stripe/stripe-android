@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -216,6 +217,49 @@ class CheckoutSessionConfirmationInterceptorTest {
         val result = interceptNewPm()
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
+
+    @Test
+    fun `intercept omits payment method email when checkout session has customer email`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            customerEmail = "customer@example.com",
+        ),
+    ) {
+        val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+            code = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+            requiresMandate = false,
+            overrideParamMap = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
+            productUsage = emptySet(),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        )
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(createParams = paymentMethodCreateParams)
+
+        val createParams = stripeRepository.createPaymentMethodCalls.awaitItem().paymentMethodCreateParams
+        assertThat(PaymentMethodCreateParams.getEmailFromParams(createParams)).isNull()
+        assertThat(createParams.billingDetails?.name)
+            .isEqualTo(PaymentMethodCreateParamsFixtures.BILLING_DETAILS.name)
+        val billingDetailsParams = createParams.toParamMap()["billing_details"] as Map<*, *>
+        assertThat(billingDetailsParams).doesNotContainKey("email")
+        assertThat(billingDetailsParams["name"])
+            .isEqualTo(PaymentMethodCreateParamsFixtures.BILLING_DETAILS.name)
+    }
+
+    @Test
+    fun `intercept keeps payment method email when checkout session is missing customer email`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm()
+
+        val createParams = stripeRepository.createPaymentMethodCalls.awaitItem().paymentMethodCreateParams
+        assertThat(PaymentMethodCreateParams.getEmailFromParams(createParams))
+            .isEqualTo(PaymentMethodCreateParamsFixtures.BILLING_DETAILS.email)
     }
 
     @Test
@@ -610,6 +654,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
+                stripeRepository = stripeRepository,
             )
 
             scenario.block()
@@ -618,14 +663,19 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
+        val stripeRepository: FakeCreatePaymentMethodRepository,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
             intent: StripeIntent = PaymentIntentFactory.create(),
             shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
+            createParams: PaymentMethodCreateParams = NEW_PM_OPTION.createParams,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = interceptor.intercept(
             intent = intent,
-            confirmationOption = NEW_PM_OPTION.copy(shouldSave = shouldSave),
+            confirmationOption = NEW_PM_OPTION.copy(
+                createParams = createParams,
+                shouldSave = shouldSave,
+            ),
             shippingValues = shippingValues,
         )
 
@@ -648,12 +698,20 @@ class CheckoutSessionConfirmationInterceptorTest {
             Result.failure(NotImplementedError()),
     ) : AbsFakeStripeRepository() {
 
+        val createPaymentMethodCalls = Turbine<CreatePaymentMethodCall>()
+
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): Result<PaymentMethod> {
+            createPaymentMethodCalls.add(CreatePaymentMethodCall(paymentMethodCreateParams, options))
             return createPaymentMethodResult
         }
+
+        data class CreatePaymentMethodCall(
+            val paymentMethodCreateParams: PaymentMethodCreateParams,
+            val options: ApiRequest.Options,
+        )
     }
 
     private companion object {

@@ -107,6 +107,13 @@ constructor(
         )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun withoutBillingEmail(): PaymentMethodCreateParams {
+        return copy(
+            billingDetails = billingDetails?.toBuilder()?.setEmail(null)?.build(),
+        )
+    }
+
     internal constructor(
         type: PaymentMethod.Type,
         card: Card? = null,
@@ -307,10 +314,6 @@ constructor(
         val params = overrideParamMap
             ?: mapOf(
                 PARAM_TYPE to code
-            ).plus(
-                billingDetails?.let {
-                    mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
-                }.orEmpty()
             ).plus(typeParams).plus(
                 metadata?.let {
                     mapOf(PARAM_METADATA to it)
@@ -318,6 +321,10 @@ constructor(
             )
 
         return params.plus(
+            billingDetails?.let {
+                mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
             allowRedisplay?.let {
                 mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
             }.orEmpty()
@@ -1571,10 +1578,14 @@ constructor(
         fun getEmailFromParams(
             params: PaymentMethodCreateParams
         ): String? {
-            return params.billingDetails?.email ?: getBillingDetailsValueFromOverrideParams(
-                params,
-                PaymentMethod.BillingDetails.PARAM_EMAIL
-            )
+            return if (params.billingDetails != null) {
+                params.billingDetails.email
+            } else {
+                getBillingDetailsValueFromOverrideParams(
+                    params,
+                    PaymentMethod.BillingDetails.PARAM_EMAIL
+                )
+            }
         }
 
         private fun getBillingDetailsValueFromOverrideParams(
