@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -90,6 +91,21 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(linkSelection.copy(selectedPayment = updatedPayment))
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `completion clears errors when the Link selection is unchanged`() = runScenario {
+        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+        assertThat(stateHolder.selectionError.value).isNotNull()
+        presenter.present()
+
+        resultCallback(
+            LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = selectedPayment)
+        )
+
+        assertThat(stateHolder.selection.value).isEqualTo(linkSelection)
+        assertThat(stateHolder.selectionError.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -214,8 +230,8 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: PaymentSelection? = linkSelection,
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkState = com.stripe.android.paymentsheet.state.LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,

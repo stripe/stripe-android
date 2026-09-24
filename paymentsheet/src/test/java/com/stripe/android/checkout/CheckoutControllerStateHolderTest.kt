@@ -1,10 +1,13 @@
 package com.stripe.android.checkout
 
 import android.os.Bundle
+import android.os.Parcel
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -97,6 +100,11 @@ internal class CheckoutControllerStateHolderTest {
             assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
+            stateHolder.clearErrorMessages()
+            assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+            expectNoEvents()
+
             assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
             expectNoEvents()
         }
@@ -132,6 +140,107 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(restoredStateHolder.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(restoredStateHolder.tryBeginSavedSelection()).isTrue()
+    }
+
+    @Test
+    fun `finishing a failed saved selection preserves the failure until it is cleared`() = testScenario {
+        stateHolder.state = committedState()
+        val error = IllegalStateException("Selection failed")
+        stateHolder.tryBeginSavedSelection()
+        stateHolder.failSavedSelection(error)
+
+        stateHolder.finishSavedSelection()
+
+        assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+        stateHolder.clearErrorMessages()
+
+        assertThat(stateHolder.selectionError.value).isNull()
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `state replacement preserves failure for equal selection and clears it for changed selection`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        val error = IllegalStateException("Selection failed")
+        stateHolder.failSavedSelection(error)
+
+        stateHolder.state = requireNotNull(stateHolder.state).copy()
+        assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
+
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+        )
+        assertThat(stateHolder.selectionError.value).isNull()
+    }
+
+    @Test
+    fun `explicit equal selection clears failure`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+
+        assertThat(stateHolder.selectionError.value).isNull()
+    }
+
+    @Test
+    fun `failed selection error survives parcelled saved state restoration`() = runTest {
+        val handle = SavedStateHandle()
+        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
+        holder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        holder.tryBeginSavedSelection()
+        val error = APIConnectionException()
+        holder.failSavedSelection(error)
+
+        val restored = CheckoutControllerStateFactory.createStateHolder(handle.parcelledRestore())
+
+        restored.selectionError.test {
+            assertThat(awaitItem()).isEqualTo(error.stripeErrorMessage())
+        }
+        assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(restored.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        assertThat(restored.state).isNotSameInstanceAs(holder.state)
+    }
+
+    @Test
+    fun `pending retry restores idle without the cleared error`() = runTest {
+        val handle = SavedStateHandle()
+        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
+        holder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        holder.failSavedSelection(IllegalStateException("Selection failed"))
+        assertThat(holder.selectionError.value).isNotNull()
+
+        assertThat(holder.tryBeginSavedSelection()).isTrue()
+        assertThat(holder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+
+        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
+
+        assertThat(restored.selectionError.value).isNull()
+        assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(restored.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        assertThat(restored.tryBeginSavedSelection()).isTrue()
+    }
+
+    @Suppress("RestrictedApi")
+    private fun SavedStateHandle.parcelledRestore(): SavedStateHandle {
+        val parcel = Parcel.obtain()
+        return try {
+            parcel.writeBundle(savedStateProvider().saveState())
+            parcel.setDataPosition(0)
+            SavedStateHandle.createHandle(
+                requireNotNull(parcel.readBundle(CheckoutControllerState::class.java.classLoader)),
+                null,
+            )
+        } finally {
+            parcel.recycle()
+        }
     }
 
     @Test
@@ -290,6 +399,7 @@ internal class CheckoutControllerStateHolderTest {
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+        selectionError = null,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,

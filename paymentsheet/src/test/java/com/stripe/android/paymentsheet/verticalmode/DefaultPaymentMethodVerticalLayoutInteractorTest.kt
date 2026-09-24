@@ -93,10 +93,32 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(interactor.error.value).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+        }
+    }
+
+    @Test
+    fun selectionError_emitsSeparatelyFromMainState() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
+        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
+
+        interactor.state.test {
+            awaitItem()
+
+            interactor.error.test {
+                assertThat(awaitItem()).isNull()
+
+                selectionErrorSource.value = expectedErrorMessage
+
+                assertThat(awaitItem()).isEqualTo(expectedErrorMessage)
+            }
+
+            expectNoEvents()
         }
     }
 
@@ -109,6 +131,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
+        }
+    }
+
+    @Test
+    fun state_projectsFailedSelectionWithoutPending() {
+        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            initialSelectionError = expectedErrorMessage,
+        ) {
+            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(interactor.error.value).isEqualTo(expectedErrorMessage)
         }
     }
 
@@ -2003,6 +2037,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             ),
         ),
         initialProcessing: Boolean = false,
+        initialSelectionError: ResolvableString? = null,
+        initialSavedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         initialSelection: PaymentSelection? = null,
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
@@ -2024,8 +2061,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
+        val selectionError = MutableStateFlow(initialSelectionError)
         val savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
-            SavedPaymentMethodSelectionState.Idle
+            initialSavedPaymentMethodSelectionState
         )
         val temporarySelection: MutableStateFlow<PaymentMethodCode?> = MutableStateFlow(null)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)
@@ -2059,6 +2097,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             paymentMethodMetadata = paymentMethodMetadata,
             processing = processing,
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
+            error = selectionError,
             temporarySelection = temporarySelection,
             selection = selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
@@ -2113,6 +2152,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             updateSelectionTurbine = updateSelectionTurbine,
             processingSource = processing,
             savedPaymentMethodSelectionStateSource = savedPaymentMethodSelectionState,
+            selectionErrorSource = selectionError,
             temporarySelectionSource = temporarySelection,
             selectionSource = selection,
             isCurrentScreenSource = isCurrentScreen,
@@ -2143,6 +2183,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val updateSelectionTurbine: ReceiveTurbine<Boolean>,
         val processingSource: MutableStateFlow<Boolean>,
         val savedPaymentMethodSelectionStateSource: MutableStateFlow<SavedPaymentMethodSelectionState>,
+        val selectionErrorSource: MutableStateFlow<ResolvableString?>,
         val temporarySelectionSource: MutableStateFlow<PaymentMethodCode?>,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val isCurrentScreenSource: MutableStateFlow<Boolean>,

@@ -86,6 +86,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                 isHostProcessing || confirmationState is ConfirmationHandler.State.Confirming
             },
             savedPaymentMethodSelectionState = selectionHolder.savedPaymentMethodSelectionState,
+            error = selectionHolder.selectionError,
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,

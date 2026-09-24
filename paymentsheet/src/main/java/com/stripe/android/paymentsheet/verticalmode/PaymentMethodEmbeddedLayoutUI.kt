@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -60,6 +61,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     }
 
     val state by interactor.state.collectAsState()
+    val error by interactor.error.collectAsState()
 
     PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
@@ -106,6 +108,15 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         mandate = state.mandate,
     )
+
+    error?.let { error ->
+        ErrorMessage(
+            error = error.resolve(),
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
+        )
+    }
 }
 
 @VisibleForTesting
@@ -295,6 +306,9 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
         if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
+
+internal const val EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG =
+    "embedded_saved_payment_method_selection_error"
 
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(

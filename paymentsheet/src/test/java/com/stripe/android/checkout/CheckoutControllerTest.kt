@@ -15,6 +15,7 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -989,6 +990,108 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `saved selection retry clears failure and returns to idle after success`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val completions = Turbine<CheckoutControllerState>()
+            val handler = createSelectionHandler(completions)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            stateHolder.savedSelectionState.test {
+                awaitSavedSelectionFailure(handler, selection, completions, stateHolder)
+
+                val requestReceived = CountDownLatch(1)
+                val releaseResponse = CountDownLatch(1)
+                networkRule.savedPaymentMethodTaxUpdate { response ->
+                    requestReceived.countDown()
+                    check(releaseResponse.await(10, TimeUnit.SECONDS)) {
+                        "Timed out waiting to release the saved payment method retry response."
+                    }
+                    successfulSavedPaymentMethodResponse(response)
+                }
+
+                handler.select(selection, true)
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                assertThat(stateHolder.selectionError.value).isNull()
+                try {
+                    testScheduler.advanceUntilIdle()
+                    assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+                    completions.expectNoEvents()
+
+                    releaseResponse.countDown()
+                    val stateAtCompletion = withTurbineTimeout(10.seconds) {
+                        completions.awaitItem()
+                    }
+                    assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                    completions.expectNoEvents()
+                } finally {
+                    releaseResponse.countDown()
+                }
+            }
+
+            completions.ensureAllEventsConsumed()
+        }
+
+    private suspend fun ReceiveTurbine<SavedPaymentMethodSelectionState>.awaitSavedSelectionFailure(
+        handler: CheckoutPaymentSelectionHandler,
+        selection: PaymentSelection.Saved,
+        completions: Turbine<CheckoutControllerState>,
+        stateHolder: CheckoutControllerStateHolder,
+    ) {
+        assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+        handler.select(selection, true)
+        assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+        assertThat(withTurbineTimeout(10.seconds) { awaitItem() })
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        assertThat(stateHolder.selectionError.value).isEqualTo(
+            com.stripe.android.paymentsheet.R.string.stripe_something_went_wrong.resolvableString
+        )
+        completions.expectNoEvents()
+    }
+
+    @Test
+    fun `reselecting the committed wallet clears a saved selection failure`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val completions = Turbine<CheckoutControllerState>()
+            val handler = createSelectionHandler(completions)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            stateHolder.savedSelectionState.test {
+                awaitSavedSelectionFailure(handler, selection, completions, stateHolder)
+
+                handler.select(PaymentSelection.GooglePay, true)
+
+                expectNoEvents()
+                assertThat(stateHolder.selectionError.value).isNull()
+                assertThat(completions.awaitItem().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+                completions.expectNoEvents()
+            }
+
+            completions.ensureAllEventsConsumed()
+        }
+
+    @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
@@ -1613,7 +1716,7 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val result: Result<Unit>,
         val savedStateHandle: SavedStateHandle,
-        private val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutControllerStateHolder,
     ) {
         val committedState: CheckoutControllerState?
             get() = stateHolder.state

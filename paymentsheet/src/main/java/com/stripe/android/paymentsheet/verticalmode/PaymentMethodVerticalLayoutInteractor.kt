@@ -54,6 +54,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     val showsWalletsHeader: StateFlow<Boolean>
 
+    val error: StateFlow<ResolvableString?>
+
     fun handleViewAction(viewAction: ViewAction)
 
     fun close()
@@ -100,6 +102,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
+    override val error: StateFlow<ResolvableString?>,
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
     paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
@@ -160,6 +163,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
+                error = stateFlowOf(null),
                 temporarySelection = stateFlowOf(null),
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,

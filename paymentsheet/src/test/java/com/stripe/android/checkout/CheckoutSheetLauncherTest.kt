@@ -480,6 +480,37 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `manage result clears errors when the committed selection is unchanged`() = testScenario(
+        selectionHolderFactory = { savedStateHandle ->
+            CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
+                state = CheckoutControllerStateFactory.create(
+                    paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+                failSavedSelection(IllegalStateException("Selection failed"))
+                assertThat(selectionError.value).isNotNull()
+            }
+        },
+    ) {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            selection = selection.copy(),
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Manage,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat((selectionHolder as CheckoutControllerStateHolder).selectionError.value).isNull()
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
     fun `manageSheetLauncher callback does not update state on cancelled result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
@@ -970,13 +1001,16 @@ internal class CheckoutSheetLauncherTest {
     @Suppress("LongMethod")
     private fun testScenario(
         promotions: List<PaymentMethodMessagePromotion>? = null,
+        selectionHolderFactory: (SavedStateHandle) -> EmbeddedSelectionHolder = {
+            DefaultEmbeddedSelectionHolder(it)
+        },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var immediateActionInvoked = false
         val testScope = this
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = selectionHolderFactory(savedStateHandle)
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,

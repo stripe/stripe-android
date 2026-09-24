@@ -1,10 +1,14 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -13,10 +17,13 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CleanupTestRule
@@ -122,6 +129,33 @@ internal class EmbeddedContentUiTest {
         }
     }
 
+    @Test
+    fun `rebuilding content with unchanged selection preserves selection error`() {
+        runScenario(
+            selection = PaymentSelection.GooglePay,
+            selectionError = "Selection failed".resolvableString,
+        ) {
+            embeddedContentHelper.embeddedContent.test {
+                assertThat(awaitItem()).isNull()
+                val loadedState = EmbeddedContentHelperStateFactory.create()
+                state.value = loadedState
+                val firstContent = requireNotNull(awaitItem())
+                composeRule.setContent {
+                    val content by embeddedContentHelper.embeddedContent.collectAsState()
+                    content?.Content()
+                }
+                composeRule.waitForIdle()
+                composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
+
+                state.value = loadedState.copy(embeddedViewDisplaysMandateText = false)
+
+                assertThat(requireNotNull(awaitItem())).isNotSameInstanceAs(firstContent)
+                composeRule.waitForIdle()
+                composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
+            }
+        }
+    }
+
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
@@ -131,10 +165,16 @@ internal class EmbeddedContentUiTest {
     @Suppress("LongMethod")
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
+        selection: PaymentSelection? = null,
+        selectionError: ResolvableString? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = FakeEmbeddedSelectionHolder(
+            savedStateHandle = savedStateHandle,
+            initialSelectionError = selectionError,
+        )
+        selectionHolder.setSelection(selection)
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
@@ -182,7 +222,7 @@ internal class EmbeddedContentUiTest {
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                updateSelection = { updatedSelection, _ -> selectionHolder.setSelection(updatedSelection) },
                 completionAction = immediateActionHandler::invoke,
             ),
             coroutineScope = viewModelScope,
@@ -211,5 +251,12 @@ internal class EmbeddedContentUiTest {
             embeddedContentHelper = embeddedContentHelper,
             state = state,
         ).block()
+    }
+
+    private class FakeEmbeddedSelectionHolder(
+        savedStateHandle: SavedStateHandle,
+        initialSelectionError: ResolvableString?,
+    ) : EmbeddedSelectionHolder by DefaultEmbeddedSelectionHolder(savedStateHandle) {
+        override val selectionError = stateFlowOf(initialSelectionError)
     }
 }
