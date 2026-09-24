@@ -61,7 +61,6 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     }
 
     val state by interactor.state.collectAsState()
-    val error by interactor.error.collectAsState()
 
     PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
@@ -109,7 +108,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         mandate = state.mandate,
     )
 
-    error?.let { error ->
+    state.error?.let { error ->
         ErrorMessage(
             error = error.resolve(),
             modifier = Modifier

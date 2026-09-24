@@ -180,7 +180,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
-            error = stateFlowOf(null),
+            selectionError = stateFlowOf(null),
             temporarySelection = stateFlowOf(null),
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(

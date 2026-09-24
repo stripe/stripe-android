@@ -20,6 +20,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             initialShowsWalletsHeader: Boolean = true,
             selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
             mandate: ResolvableString? = null,
+            error: ResolvableString? = null,
             viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction> =
                 ViewActionRecorder()
         ): FakePaymentMethodVerticalLayoutInteractor {
@@ -39,6 +40,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = mandate,
+                error = error,
                 linkBrand = LinkBrand.Link,
             )
             return FakePaymentMethodVerticalLayoutInteractor(
@@ -52,8 +54,6 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     override val isLiveMode: Boolean = true
     val stateSource = MutableStateFlow(initialState)
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateSource
-    val errorSource = MutableStateFlow<ResolvableString?>(null)
-    override val error: StateFlow<ResolvableString?> = errorSource
     override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(initialShowsWalletsHeader)
 
     val closeCalls = Turbine<Unit>()

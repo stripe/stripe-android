@@ -54,8 +54,6 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     val showsWalletsHeader: StateFlow<Boolean>
 
-    val error: StateFlow<ResolvableString?>
-
     fun handleViewAction(viewAction: ViewAction)
 
     fun close()
@@ -67,6 +65,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val error: ResolvableString?,
         val linkBrand: LinkBrand,
     )
 
@@ -102,7 +101,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
-    override val error: StateFlow<ResolvableString?>,
+    selectionError: StateFlow<ResolvableString?>,
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
     paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
@@ -163,7 +162,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
-                error = stateFlowOf(null),
+                selectionError = stateFlowOf(null),
                 temporarySelection = stateFlowOf(null),
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
@@ -291,6 +290,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
+    private val linkAccountAndSelectionError = combineAsStateFlow(
+        linkAccount,
+        selectionError,
+    ) { linkAccount, selectionError ->
+        linkAccount to selectionError
+    }
+
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
         processing,
@@ -298,9 +304,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
-        linkAccount,
+        linkAccountAndSelectionError,
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode, linkAccount ->
+        temporarySelectionCode, linkAccountAndSelectionError ->
+        val (linkAccount, selectionError) = linkAccountAndSelectionError
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -322,6 +329,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            error = selectionError,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
     }

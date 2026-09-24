@@ -93,7 +93,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-            assertThat(interactor.error.value).isNull()
+            assertThat(interactor.state.value.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
@@ -102,23 +102,17 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun selectionError_emitsSeparatelyFromMainState() = runScenario(
+    fun state_includesSelectionError() = runScenario(
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
-            awaitItem()
+            assertThat(awaitItem().error).isNull()
 
-            interactor.error.test {
-                assertThat(awaitItem()).isNull()
+            selectionErrorSource.value = expectedErrorMessage
 
-                selectionErrorSource.value = expectedErrorMessage
-
-                assertThat(awaitItem()).isEqualTo(expectedErrorMessage)
-            }
-
-            expectNoEvents()
+            assertThat(awaitItem().error).isEqualTo(expectedErrorMessage)
         }
     }
 
@@ -142,7 +136,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialSelectionError = expectedErrorMessage,
         ) {
             assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-            assertThat(interactor.error.value).isEqualTo(expectedErrorMessage)
+            assertThat(interactor.state.value.error).isEqualTo(expectedErrorMessage)
         }
     }
 
@@ -2097,7 +2091,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             paymentMethodMetadata = paymentMethodMetadata,
             processing = processing,
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
-            error = selectionError,
+            selectionError = selectionError,
             temporarySelection = temporarySelection,
             selection = selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
