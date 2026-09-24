@@ -102,12 +102,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun selectionError_emitsSeparatelyFromMainState() = runScenario {
+    fun selectionError_emitsSeparatelyFromMainState() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
         val expectedError = IllegalStateException("selection failed")
         val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
-            val initialState = awaitItem()
+            awaitItem()
 
             interactor.error.test {
                 assertThat(awaitItem()).isNull()
@@ -115,8 +117,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(expectedError)
 
                 assertThat(awaitItem()).isEqualTo(expectedErrorMessage)
-                assertThat(interactor.state.value).isEqualTo(initialState)
             }
+
+            expectNoEvents()
         }
     }
 

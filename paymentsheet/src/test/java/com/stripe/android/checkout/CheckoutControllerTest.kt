@@ -888,6 +888,7 @@ internal class CheckoutControllerTest {
                 handler.select(selection, true)
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
                 try {
+                    testScheduler.advanceUntilIdle()
                     assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
                     completions.expectNoEvents()
 
