@@ -40,6 +40,36 @@ internal class AdditionalKycScreenTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
+    fun `proof of address displays server instructions`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentEditor,
+            requirementType = AdditionalKycRequirementType.ProofOfAddress,
+            document = documentState().copy(
+                instructions = listOf("Upload the original PDF from your utility provider."),
+            ),
+        ),
+    ) {
+        composeRule.onNodeWithText("Upload the original PDF from your utility provider.")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `source of funds displays server instructions for salary documents`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentEditor,
+            requirementType = AdditionalKycRequirementType.SourceOfFunds,
+            document = documentState().copy(
+                instructions = listOf("Documents must include your name and a balance or financial value."),
+            ),
+        ),
+    ) {
+        composeRule.onNodeWithText("Documents must include your name and a balance or financial value.")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun `proof of address context matches first collection screen`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.Context,

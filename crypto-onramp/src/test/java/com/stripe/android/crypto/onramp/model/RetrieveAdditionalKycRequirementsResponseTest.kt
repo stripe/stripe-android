@@ -20,15 +20,18 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         assertThat(requirement.awaitingActionFrom).isEqualTo("user")
         assertThat(requirement.errors).isEmpty()
         assertThat(document.acceptedSubtypes.map { it.id })
-            .containsExactly("utility_bill", "bank_statement")
+            .containsExactly(
+                "id_documents", "government_organization_documents", "utility_provider", "bank", "lease_agreement",
+            )
             .inOrder()
         assertThat(document.acceptedFormats).containsExactly("pdf", "jpeg", "png").inOrder()
         assertThat(document.minDocumentTypes).isEqualTo(1)
         assertThat(document.maxDocumentTypes).isEqualTo(2)
-        assertThat(document.maxFileSizeBytes).isEqualTo(5_000_000L)
-        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG, or PNG, up to 5 MB per file.")
-        assertThat(document.acceptedSubtypes.first().description).isEqualTo("Recent utility bill")
-        assertThat(document.instructions).hasSize(2)
+        assertThat(document.maxFileSizeBytes).isEqualTo(50_000_000L)
+        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG/JPG, or PNG, up to 50 MB per file.")
+        assertThat(document.acceptedSubtypes.first().description)
+            .isEqualTo("ID card, passport, residence permit, or driver's license.")
+        assertThat(document.instructions).hasSize(5)
         assertThat(requirement.additionalRequirements).isNull()
     }
 
@@ -40,11 +43,13 @@ class RetrieveAdditionalKycRequirementsResponseTest {
             ?.questionnaire
         val questions = requireNotNull(questionnaire).questions
 
-        assertThat(requirement.errors).isEmpty()
+        assertThat(requirement.errors.single().code).isEqualTo("document_rejected")
+        assertThat(requireNotNull(requirement.document).acceptedFormats)
+            .containsExactly("pdf", "jpeg", "png", "docx", "xlsx", "csv", "txt").inOrder()
         assertThat(questions.map { it.id })
-            .containsExactly("purchase_purpose", "third_party_advised", "funding_sources")
+            .containsExactly("purchase_purpose")
             .inOrder()
-        assertThat(questions.map { it.answerType }).containsExactly("free_text", "free_text", "free_text")
+        assertThat(questions.map { it.answerType }).containsExactly("free_text")
         assertThat(questions.all { it.required }).isTrue()
     }
 
@@ -168,9 +173,10 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         assertThat(requirement.description).isEqualTo("proof_of_address")
         assertThat(document.minDocumentTypes).isEqualTo(1)
         assertThat(document.maxDocumentTypes).isEqualTo(2)
-        assertThat(document.maxFileSizeBytes).isEqualTo(5_000_000L)
-        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG, or PNG, up to 5 MB per file.")
-        assertThat(document.acceptedSubtypes.first().description).isEqualTo("Recent utility bill")
+        assertThat(document.maxFileSizeBytes).isEqualTo(50_000_000L)
+        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG/JPG, or PNG, up to 50 MB per file.")
+        assertThat(document.acceptedSubtypes.first().description)
+            .isEqualTo("ID card, passport, residence permit, or driver's license.")
     }
 
     @Test
@@ -193,7 +199,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
         val subtypes = requireNotNull(requirement.document).acceptedSubtypes
 
-        assertThat(subtypes.first().description).isEqualTo("Recent payslip")
+        assertThat(subtypes.first().description).isEqualTo("Recent payslips from your employer")
         assertThat(subtypes.last().id).isEqualTo("bank_statement")
         assertThat(subtypes.last().label).isEqualTo("Bank statement")
         assertThat(subtypes.last().description).isNull()
@@ -202,7 +208,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     @Test
     fun `explicit null subtype description is preserved as null`() {
         val response = parseFixture("source_of_funds_required.json") { fixture ->
-            fixture.replace("\"description\": \"Recent payslip\"", "\"description\": null")
+            fixture.replace("\"description\": \"Recent payslips from your employer\"", "\"description\": null")
         }
         val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
         val subtype = requireNotNull(requirement.document).acceptedSubtypes.first()

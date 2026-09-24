@@ -3,50 +3,40 @@
     "source_of_funds": {
       "requested_by": "swapped",
       "awaiting_action_from": "user",
-      "errors": [],
+      "errors": [
+        {
+          "code": "document_rejected",
+          "description": "The submitted document could not be verified."
+        }
+      ],
       "document": {
         "accepted_subtypes": [
           {
             "id": "payslip",
             "label": "Payslip",
-            "description": "Recent payslip"
+            "description": "Recent payslips from your employer"
           },
           {
             "id": "bank_statement",
             "label": "Bank statement"
           }
         ],
-        "accepted_formats": [
-          "pdf",
-          "jpeg",
-          "png"
-        ],
-        "instructions": [
-          "Upload documents that support your past and expected transaction activity"
-        ],
+        "accepted_formats": ["pdf", "jpeg", "png", "docx", "xlsx", "csv", "txt"],
+        "max_file_size_bytes": 5000000,
         "min_document_types": 1,
         "max_document_types": 2,
-        "max_file_size_bytes": 5000000,
-        "file_requirements": "PDF, JPEG, or PNG, up to 5 MB per file."
+        "file_requirements": "PDF, JPEG/JPG, PNG, DOCX, XLSX, CSV, or TXT, up to 5 MB per file.",
+        "instructions": [
+          "Documents must include your name and a balance or financial value.",
+          "Bank statements must be original PDFs issued through online banking; screenshots aren't accepted."
+        ]
       },
       "additional_requirements": {
         "questionnaire": {
           "questions": [
             {
               "id": "purchase_purpose",
-              "prompt": "Why are you purchasing cryptocurrency?",
-              "answer_type": "free_text",
-              "required": true
-            },
-            {
-              "id": "third_party_advised",
-              "prompt": "Has anyone advised you to purchase cryptocurrency?",
-              "answer_type": "free_text",
-              "required": true
-            },
-            {
-              "id": "funding_sources",
-              "prompt": "How are you funding your transactions?",
+              "prompt": "Why are you purchasing cryptocurrency through swapped.com?",
               "answer_type": "free_text",
               "required": true
             }

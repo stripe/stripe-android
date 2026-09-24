@@ -817,6 +817,11 @@ private fun DocumentInstructions(
     subtypeId: String?,
     serverInstructions: List<String>,
 ) {
+    if (serverInstructions.isNotEmpty()) {
+        BulletList(serverInstructions)
+        return
+    }
+
     if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
         BulletList(
             items = listOf(

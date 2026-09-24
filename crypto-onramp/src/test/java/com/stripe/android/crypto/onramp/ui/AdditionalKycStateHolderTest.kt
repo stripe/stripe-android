@@ -8,10 +8,68 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementError
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
+import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
+import kotlinx.serialization.json.Json
 import org.junit.Test
 import java.io.File
 
 internal class AdditionalKycStateHolderTest {
+    @Test
+    fun `proof of address fixture preserves server categories through submission`() {
+        val stateHolder = stateHolderFromFixture("proof_of_address_required.json")
+        stateHolder.onContinue()
+
+        val document = requireNotNull(stateHolder.state.document)
+        assertThat(document.maxFileSizeMegabytes).isEqualTo(50)
+        assertThat(document.slots.single().subtypes.map { it.id }).containsExactly(
+            "id_documents", "government_organization_documents", "utility_provider", "bank", "lease_agreement",
+        ).inOrder()
+        assertThat(document.fileRequirements).isEqualTo("PDF, JPEG/JPG, or PNG, up to 50 MB per file.")
+        assertThat(document.instructions).contains("Documents must include your full name and address.")
+
+        stateHolder.onDocumentSubtypeSelected(0, "utility_provider")
+        stateHolder.onFileSelected(0, File("utility.pdf"), "utility.pdf")
+        val submission = requireNotNull(stateHolder.startSubmission())
+
+        assertThat(submission.liquidityProvider).isEqualTo("swapped")
+        assertThat(submission.documents.single().documentType).isEqualTo("proof_of_address")
+        assertThat(submission.documents.single().documentSubtype).isEqualTo("utility_provider")
+    }
+
+    @Test
+    fun `proof of address accepts files up to the server 50 MB limit`() {
+        val stateHolder = stateHolderFromFixture("proof_of_address_required.json")
+
+        assertThat(stateHolder.isAcceptedFileSize(50_000_000L)).isTrue()
+        assertThat(stateHolder.isAcceptedFileSize(50_000_001L)).isFalse()
+        assertThat(stateHolder.state.validationError).isEqualTo(AdditionalKycValidationError.FileTooLarge)
+    }
+
+    @Test
+    fun `source of funds fixture supports Word documents and its questionnaire`() {
+        val stateHolder = stateHolderFromFixture("source_of_funds_required.json")
+        stateHolder.onContinue()
+
+        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Questionnaire)
+        stateHolder.onQuestionAnswerChanged("purchase_purpose", "Long-term investment")
+        stateHolder.onContinue()
+        stateHolder.onAddDocuments()
+        assertThat(stateHolder.isAcceptedFile("payslip.docx", null)).isTrue()
+        stateHolder.onFileSelected(0, File("payslip.docx"), "payslip.docx")
+
+        val submission = requireNotNull(stateHolder.startSubmission())
+        assertThat(submission.documents.single().documentSubtype).isEqualTo("payslip")
+        assertThat(submission.questionnaire?.answers?.single()?.value).isEqualTo("Long-term investment")
+    }
+
+    private fun stateHolderFromFixture(fileName: String): AdditionalKycStateHolder {
+        val fixture = requireNotNull(
+            javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/$fileName")
+        ).bufferedReader().use { it.readText() }
+        val response = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(fixture)
+        return AdditionalKycStateHolder(response.requirements.toAdditionalKycRequirements())
+    }
+
     @Test
     fun `proof of address advances from context to document editor`() {
         val stateHolder = AdditionalKycStateHolder(
