@@ -824,7 +824,7 @@ internal class CheckoutControllerTest {
                 successfulSavedPaymentMethodResponse(response)
             }
 
-            stateHolder.savedSelectionState.test {
+            stateHolder.savedPaymentMethodSelectionState.test {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                 handler.select(selection, true)

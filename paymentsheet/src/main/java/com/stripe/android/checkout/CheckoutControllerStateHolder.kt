@@ -56,7 +56,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         SavedPaymentMethodSelectionState.Idle,
     )
 
-    val savedSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
+    override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
         _savedSelectionState.asStateFlow()
 
     fun beginSavedSelection(): Boolean {
