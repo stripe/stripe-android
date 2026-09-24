@@ -256,6 +256,7 @@ internal class PollingActivityTest {
                 clientSecret = args.clientSecret,
                 timeLimit = args.timeLimitInSeconds.seconds,
                 initialDelay = args.initialDelayInSeconds.seconds,
+                pollingInterval = args.pollingIntervalInSeconds.seconds,
                 ctaText = args.ctaText,
                 requestOptions = args.requestOptions,
                 qrCodeUrl = args.qrCodeUrl,
@@ -317,6 +318,7 @@ internal class PollingActivityTest {
             statusBarColor = null,
             timeLimitInSeconds = 60,
             initialDelayInSeconds = 0,
+            pollingIntervalInSeconds = 1,
             ctaText = R.string.stripe_blik_confirm_payment,
             requestOptions = ApiRequest.Options(
                 apiKey = DEFAULT_API_CONFIG.publishableKey,

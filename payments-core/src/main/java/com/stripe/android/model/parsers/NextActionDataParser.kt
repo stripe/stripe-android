@@ -23,6 +23,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.DisplayMultibancoDetails -> DisplayMultibancoDetailsJsonParser()
             StripeIntent.NextActionType.DisplayPayNowDetails -> DisplayPayNowDetailsJsonParser()
             StripeIntent.NextActionType.DisplayPromptPayDetails -> DisplayPromptPayDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayPixDetails -> DisplayPixDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
@@ -134,6 +135,31 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         }
 
         private companion object {
+            private const val FIELD_HOSTED_INSTRUCTIONS_URL = "hosted_instructions_url"
+        }
+    }
+
+    private class DisplayPixDetailsJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.DisplayPixDetails> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.DisplayPixDetails? {
+            val hostedInstructionsUrl = optString(json, FIELD_HOSTED_INSTRUCTIONS_URL) ?: return null
+
+            return StripeIntent.NextActionData.DisplayPixDetails(
+                data = optString(json, FIELD_DATA),
+                imageUrlPng = optString(json, FIELD_IMAGE_URL_PNG),
+                imageUrlSvg = optString(json, FIELD_IMAGE_URL_SVG),
+                expiresAt = (json.opt(FIELD_EXPIRES_AT) as? Number)?.toLong(),
+                hostedInstructionsUrl = hostedInstructionsUrl,
+            )
+        }
+
+        private companion object {
+            private const val FIELD_DATA = "data"
+            private const val FIELD_IMAGE_URL_PNG = "image_url_png"
+            private const val FIELD_IMAGE_URL_SVG = "image_url_svg"
+            private const val FIELD_EXPIRES_AT = "expires_at"
             private const val FIELD_HOSTED_INSTRUCTIONS_URL = "hosted_instructions_url"
         }
     }

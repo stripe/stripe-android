@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.transformations.Replace
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
@@ -123,6 +126,16 @@ class ResolvableStringTest {
     }
 
     @Test
+    fun `identifier resolvable string with percent sign and no args resolves without formatting`() {
+        val context = mock<android.content.Context>().also {
+            whenever(it.getString(IDENTIFIER_WITH_PERCENT)).thenReturn("A 3.5% fee applies")
+        }
+
+        assertThat(IDENTIFIER_WITH_PERCENT.resolvableString.resolve(context))
+            .isEqualTo("A 3.5% fee applies")
+    }
+
+    @Test
     fun `resolvable strings should parcelize and un-parcelize properly with raw value types`() {
         val identifierResolvable = IdentifierResolvableString(
             id = 1453235,
@@ -204,5 +217,9 @@ class ResolvableStringTest {
 
             unparcelizedResolvable
         }
+    }
+
+    private companion object {
+        const val IDENTIFIER_WITH_PERCENT = 123
     }
 }

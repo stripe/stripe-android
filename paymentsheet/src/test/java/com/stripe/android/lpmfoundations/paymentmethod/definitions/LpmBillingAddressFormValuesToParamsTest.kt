@@ -214,6 +214,7 @@ internal val lpmBillingAddressFormValuesToParamsTestCases = buildList {
     addAll(payPalTestCases)
     addAll(payPayTestCases)
     addAll(promptPayTestCases)
+    addAll(pixTestCases)
     addAll(revolutPayTestCases)
     addAll(satispayTestCases)
     addAll(scalapayTestCases)

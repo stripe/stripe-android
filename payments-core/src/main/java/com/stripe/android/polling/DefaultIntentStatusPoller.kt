@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultIntentStatusPoller @Inject constructor(
@@ -28,6 +27,7 @@ class DefaultIntentStatusPoller @Inject constructor(
     override val state: StateFlow<StripeIntent.Status?> = _state
 
     override fun startPolling(scope: CoroutineScope) {
+        pollingJob?.cancel()
         pollingJob = scope.launch(dispatcher) {
             performPoll()
         }
@@ -49,16 +49,16 @@ class DefaultIntentStatusPoller @Inject constructor(
 
         _state.value = fetchIntentStatus()
 
-        delay(1.seconds)
+        delay(config.pollingInterval)
         performPoll()
     }
 
     private suspend fun fetchIntentStatus(): StripeIntent.Status? {
-        val paymentIntent = stripeRepository.retrievePaymentIntent(
+        val stripeIntent = stripeRepository.retrieveStripeIntent(
             clientSecret = config.clientSecret,
             options = requestOptions,
         )
-        return paymentIntent.getOrNull()?.status
+        return stripeIntent.getOrNull()?.status
     }
 
     override suspend fun forcePoll(): StripeIntent.Status? {

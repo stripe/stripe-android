@@ -124,6 +124,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
                 StripeIntent.NextActionType.DisplayMultibancoDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
