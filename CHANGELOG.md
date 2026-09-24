@@ -7,6 +7,9 @@ NEXT_VERSION_BUMP: PATCH
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 * [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
 
+### Payments
+* [ADDED] Added API bindings for Pix.
+
 ## 23.20.0 - 2026-09-21
 
 ### Payments
