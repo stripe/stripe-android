@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.parcelize.Parcelize
 
 @OptIn(CheckoutSessionPreview::class)
@@ -23,6 +24,7 @@ internal data class CheckoutControllerState(
     val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
+    val savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
     val linkEagerPresentationSuppressed: Boolean,

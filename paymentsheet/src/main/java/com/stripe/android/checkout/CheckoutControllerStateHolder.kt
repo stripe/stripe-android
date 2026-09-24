@@ -13,19 +13,16 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Owns [CheckoutController]'s [CheckoutControllerState] — the single source of truth for the
  * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
- * projections (e.g. [session]) are derived from the one [stateFlow]. Transient saved-method
- * selection operation state remains in memory and is not part of the persisted controller state.
- * Kept separate from the controller so [CheckoutStateLoader] can commit loaded state directly
- * rather than reaching back into the controller.
+ * projections (e.g. [session]) are derived from the one [stateFlow]. Kept separate from the
+ * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
+ * into the controller.
  */
 @OptIn(CheckoutSessionPreview::class)
 @Singleton
@@ -44,6 +41,15 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     val stateFlow: StateFlow<CheckoutControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
+    init {
+        val restoredState = savedStateHandle.get<CheckoutControllerState>(STATE_KEY)
+        if (restoredState?.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+            savedStateHandle[STATE_KEY] = restoredState.copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+            )
+        }
+    }
+
     val session: StateFlow<Session?> =
         stateFlow.mapAsStateFlow {
             it?.asCheckoutSession(
@@ -52,24 +58,36 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             )
         }
 
-    private val _savedSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
-        SavedPaymentMethodSelectionState.Idle,
-    )
-
     override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
-        _savedSelectionState.asStateFlow()
-
-    fun tryBeginSavedSelection(): Boolean {
-        if (_savedSelectionState.value is SavedPaymentMethodSelectionState.Pending) {
-            return false
+        stateFlow.mapAsStateFlow {
+            it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
         }
 
-        _savedSelectionState.value = SavedPaymentMethodSelectionState.Pending
-        return true
+    private val savedSelectionAdmissionLock = Any()
+
+    fun tryBeginSavedSelection(): Boolean {
+        return synchronized(savedSelectionAdmissionLock) {
+            val current = state ?: return@synchronized false
+            if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+                return@synchronized false
+            }
+
+            state = current.copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            )
+            true
+        }
     }
 
     fun finishSavedSelection() {
-        _savedSelectionState.value = SavedPaymentMethodSelectionState.Idle
+        synchronized(savedSelectionAdmissionLock) {
+            val current = state ?: return
+            if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+                state = current.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                )
+            }
+        }
     }
 
     override val selection: StateFlow<PaymentSelection?> =
