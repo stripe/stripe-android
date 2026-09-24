@@ -33,7 +33,6 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     override fun onSelectionComplete() {
-        selectionHolder.clearErrorMessages()
         immediateHandler.onSelectionComplete()
     }
 

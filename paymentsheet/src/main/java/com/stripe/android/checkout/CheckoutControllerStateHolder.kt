@@ -101,10 +101,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         }
     }
 
-    fun clearErrorMessages() {
-        state = state?.copy(selectionError = null)
-    }
-
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }
 

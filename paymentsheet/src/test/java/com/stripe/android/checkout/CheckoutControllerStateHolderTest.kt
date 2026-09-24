@@ -93,17 +93,17 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `saved selection state guards pending operations`() = testScenario {
         stateHolder.state = committedState()
+        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
 
         stateHolder.savedPaymentMethodSelectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(stateHolder.selectionError.value).isNotNull()
 
             assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-            stateHolder.clearErrorMessages()
+            assertThat(stateHolder.selectionError.value).isNull()
             assertThat(stateHolder.savedPaymentMethodSelectionState.value)
                 .isEqualTo(SavedPaymentMethodSelectionState.Pending)
-            expectNoEvents()
 
             assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
             expectNoEvents()
@@ -143,7 +143,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `finishing a failed saved selection preserves the failure until it is cleared`() = testScenario {
+    fun `retrying a failed saved selection clears the failure`() = testScenario {
         stateHolder.state = committedState()
         val error = IllegalStateException("Selection failed")
         stateHolder.tryBeginSavedSelection()
@@ -155,11 +155,11 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(stateHolder.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
-        stateHolder.clearErrorMessages()
+        assertThat(stateHolder.beginSavedSelection()).isTrue()
 
         assertThat(stateHolder.selectionError.value).isNull()
         assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
     }
 
     @Test
