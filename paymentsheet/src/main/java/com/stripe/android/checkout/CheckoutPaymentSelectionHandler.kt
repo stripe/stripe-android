@@ -35,7 +35,7 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
-        if (!selectionHolder.beginSavedSelection()) return
+        if (!selectionHolder.tryBeginSavedSelection()) return
 
         coroutineScope.launch {
             try {

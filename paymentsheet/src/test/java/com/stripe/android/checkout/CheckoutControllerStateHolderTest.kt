@@ -91,10 +91,10 @@ internal class CheckoutControllerStateHolderTest {
         stateHolder.savedPaymentMethodSelectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
-            assertThat(stateHolder.beginSavedSelection()).isTrue()
+            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
-            assertThat(stateHolder.beginSavedSelection()).isFalse()
+            assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
             expectNoEvents()
 
             stateHolder.finishSavedSelection()
