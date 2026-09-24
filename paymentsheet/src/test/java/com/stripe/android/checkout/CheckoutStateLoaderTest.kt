@@ -277,6 +277,7 @@ internal class CheckoutStateLoaderTest {
         loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.selectionError.value).isNull()
     }
 
     @Test

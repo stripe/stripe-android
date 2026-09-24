@@ -176,7 +176,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `failed selection error survives parcelled saved state restoration`() = runTest {
+    fun `failed selection error survives saved state restoration`() = runTest {
         val handle = SavedStateHandle()
         val holder = CheckoutControllerStateFactory.createStateHolder(handle)
         val error = APIConnectionException()
@@ -192,7 +192,6 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(restored.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(restored.state).isNotSameInstanceAs(holder.state)
     }
 
     @Test

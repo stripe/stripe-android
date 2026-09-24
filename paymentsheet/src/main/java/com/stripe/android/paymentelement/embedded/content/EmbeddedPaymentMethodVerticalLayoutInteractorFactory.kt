@@ -121,7 +121,10 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
             updateSelection = { updatedSelection, _ ->
-                selectionHolder.setSelection(updatedSelection)
+                // Re-entering the screen re-applies the current selection without user input.
+                if (selectionHolder.selection.value != updatedSelection) {
+                    selectionHolder.setSelection(updatedSelection)
+                }
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),
