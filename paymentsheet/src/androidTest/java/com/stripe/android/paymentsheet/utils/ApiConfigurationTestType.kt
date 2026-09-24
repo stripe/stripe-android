@@ -10,7 +10,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 internal sealed class ApiConfigurationTestType(
     val paymentConfigurationPublishableKey: String?,
     val paymentConfigurationStripeAccount: String?,
-    val apiConfiguration: ApiConfiguration?
+    val apiConfiguration: ApiConfiguration?,
+    private val updatePaymentConfigurationPublishableKey: Boolean,
 ) {
     fun initializePaymentConfiguration(context: Context) {
         PaymentConfiguration.clearInstance()
@@ -25,11 +26,16 @@ internal sealed class ApiConfigurationTestType(
 
     fun withPublishableKey(publishableKey: String): ApiConfigurationTestType {
         return Configured(
-            paymentConfigurationPublishableKey = paymentConfigurationPublishableKey?.let { publishableKey },
+            paymentConfigurationPublishableKey = if (updatePaymentConfigurationPublishableKey) {
+                paymentConfigurationPublishableKey?.let { publishableKey }
+            } else {
+                paymentConfigurationPublishableKey
+            },
             paymentConfigurationStripeAccount = paymentConfigurationStripeAccount,
             apiConfiguration = apiConfiguration?.let {
                 ApiConfiguration(publishableKey).stripeAccountId(it.build().stripeAccountId)
-            }
+            },
+            updatePaymentConfigurationPublishableKey = updatePaymentConfigurationPublishableKey,
         )
     }
 
@@ -42,20 +48,40 @@ internal sealed class ApiConfigurationTestType(
     data object PaymentConfigurationOnly : ApiConfigurationTestType(
         paymentConfigurationPublishableKey = TestApiKeys.PUBLISHABLE,
         paymentConfigurationStripeAccount = TestApiKeys.ACCOUNT,
-        apiConfiguration = null
+        apiConfiguration = null,
+        updatePaymentConfigurationPublishableKey = true,
     )
 
     data object ApiConfigurationOnly : ApiConfigurationTestType(
         paymentConfigurationPublishableKey = null,
         paymentConfigurationStripeAccount = null,
-        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT)
+        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT),
+        updatePaymentConfigurationPublishableKey = false,
+    )
+
+    data object ApiConfigurationOverridesPaymentConfiguration : ApiConfigurationTestType(
+        paymentConfigurationPublishableKey = IGNORED_PAYMENT_CONFIGURATION_PUBLISHABLE_KEY,
+        paymentConfigurationStripeAccount = IGNORED_PAYMENT_CONFIGURATION_STRIPE_ACCOUNT,
+        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT),
+        updatePaymentConfigurationPublishableKey = false,
     )
 
     private class Configured(
         paymentConfigurationPublishableKey: String?,
         paymentConfigurationStripeAccount: String?,
-        apiConfiguration: ApiConfiguration?
-    ) : ApiConfigurationTestType(paymentConfigurationPublishableKey, paymentConfigurationStripeAccount, apiConfiguration)
+        apiConfiguration: ApiConfiguration?,
+        updatePaymentConfigurationPublishableKey: Boolean,
+    ) : ApiConfigurationTestType(
+        paymentConfigurationPublishableKey,
+        paymentConfigurationStripeAccount,
+        apiConfiguration,
+        updatePaymentConfigurationPublishableKey,
+    )
+
+    private companion object {
+        const val IGNORED_PAYMENT_CONFIGURATION_PUBLISHABLE_KEY = "pk_test_fake"
+        const val IGNORED_PAYMENT_CONFIGURATION_STRIPE_ACCOUNT = "acct_test_fake"
+    }
 }
 
 internal object ApiConfigurationTestTypeProvider : TestParameterValuesProvider() {
@@ -64,5 +90,6 @@ internal object ApiConfigurationTestTypeProvider : TestParameterValuesProvider()
     ): List<ApiConfigurationTestType> = listOf(
         ApiConfigurationTestType.PaymentConfigurationOnly,
         ApiConfigurationTestType.ApiConfigurationOnly,
+        ApiConfigurationTestType.ApiConfigurationOverridesPaymentConfiguration,
     )
 }
