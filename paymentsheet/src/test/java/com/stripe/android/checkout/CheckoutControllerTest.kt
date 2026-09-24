@@ -1620,7 +1620,7 @@ internal class CheckoutControllerTest {
 
     private class MutationScenario(
         val controller: CheckoutController,
-        private val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutControllerStateHolder,
         private val savedStateHandle: SavedStateHandle,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,

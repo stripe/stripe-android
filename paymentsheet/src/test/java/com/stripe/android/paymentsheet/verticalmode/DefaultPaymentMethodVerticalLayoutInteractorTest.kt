@@ -104,7 +104,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun selectionError_emitsSeparatelyFromMainState() = runScenario {
         val expectedError = IllegalStateException("selection failed")
-        val expectedErrorMessage = R.string.stripe_something_went_wrong.resolvableString
+        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
             val initialState = awaitItem()
@@ -135,7 +135,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun state_projectsFailedSelectionWithoutPending() {
         val expectedError = IllegalStateException("selection failed")
-        val expectedErrorMessage = R.string.stripe_something_went_wrong.resolvableString
+        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
         runScenario(
             initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
@@ -148,7 +148,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun enteringPaymentMethodForm_preservesSavedPaymentMethodSelectionError() {
         val expectedError = IllegalStateException("selection failed")
-        val expectedErrorMessage = R.string.stripe_something_went_wrong.resolvableString
+        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
             initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),

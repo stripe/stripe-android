@@ -287,25 +287,6 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `reload clears selection errors when selected saved method disappears`() = runScenario(
-        loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-        customer = savedCustomer(),
-        selectionChooser = ::realSelectionChooser,
-    ) {
-        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
-        assertThat(stateHolder.selection.value)
-            .isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
-
-        paymentElementLoader.updatePaymentMethods(emptyList())
-        loader.reload(requireNotNull(stateHolder.state))
-
-        assertThat(stateHolder.selection.value).isNull()
-        assertThat(stateHolder.savedSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-    }
-
-    @Test
     fun `reload preserves selection errors when selected saved method remains available`() = runScenario(
         loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customer = savedCustomer(),

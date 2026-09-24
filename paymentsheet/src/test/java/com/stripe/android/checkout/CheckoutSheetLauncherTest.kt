@@ -495,7 +495,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = null,
-            linkAccountInfo = LinkAccountUpdate.None,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
             selection = selection.copy(),
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
