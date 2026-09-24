@@ -15,8 +15,9 @@ internal class FinancialConnectionsSessionManifestTest {
     }
 
     @Test
-    fun `unknown pane decodes to unknown`() {
+    fun `unknown pane preserves its raw value`() {
         assertThat(decodePane("future_pane")).isEqualTo(Pane.UNKNOWN)
+        assertThat(Pane.Serializer.consumeUnknownValue()).isEqualTo("future_pane")
     }
 
     @Test

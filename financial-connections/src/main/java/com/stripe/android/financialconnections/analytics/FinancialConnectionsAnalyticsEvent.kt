@@ -324,10 +324,10 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         ).filterNotNullValues()
     )
 
-    class PaneNotFound : FinancialConnectionsAnalyticsEvent(
+    class PaneNotFound(paneName: String) : FinancialConnectionsAnalyticsEvent(
         name = "error.pane_not_found",
         params = mapOf(
-            "pane" to Pane.UNKNOWN.analyticsValue,
+            "pane" to paneName,
             "error" to "PaneNotFound",
             "error_type" to "PaneNotFound",
             "error_message" to "Pane not found: an unsupported pane was requested.",
