@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.os.Bundle
-import android.os.Parcel
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -185,7 +184,7 @@ internal class CheckoutControllerStateHolderTest {
             selectionError = error.stripeErrorMessage(),
         )
 
-        val restored = CheckoutControllerStateFactory.createStateHolder(handle.parcelledRestore())
+        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
 
         restored.selectionError.test {
             assertThat(awaitItem()).isEqualTo(error.stripeErrorMessage())
@@ -217,21 +216,6 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(restored.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(restored.tryBeginSavedSelection()).isTrue()
-    }
-
-    @Suppress("RestrictedApi")
-    private fun SavedStateHandle.parcelledRestore(): SavedStateHandle {
-        val parcel = Parcel.obtain()
-        return try {
-            parcel.writeBundle(savedStateProvider().saveState())
-            parcel.setDataPosition(0)
-            SavedStateHandle.createHandle(
-                requireNotNull(parcel.readBundle(CheckoutControllerState::class.java.classLoader)),
-                null,
-            )
-        } finally {
-            parcel.recycle()
-        }
     }
 
     @Test
