@@ -17,6 +17,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -264,6 +265,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration.State?,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -301,6 +303,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration.State? = null
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -537,6 +540,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            /**
+             * Sets the API credentials to use for this payment element.
+             *
+             * When not set, the payment element uses the credentials initialized through
+             * [com.stripe.android.PaymentConfiguration].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            internal fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+                this.apiConfiguration = apiConfiguration.build()
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -561,6 +575,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -592,6 +607,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .userOverrideCountry(userOverrideCountry)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
+                apiConfiguration?.let {
+                    apiConfiguration(
+                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                    )
+                }
             }
     }
 
