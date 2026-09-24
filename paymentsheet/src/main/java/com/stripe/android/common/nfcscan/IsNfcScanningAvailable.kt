@@ -33,8 +33,8 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
             return NfcScanningAvailability.Unavailable
         }
 
-        val canUseNfcScanner = isDeviceSecureForNfc.get() &&
-            nfcHardwareDelegate.isAvailable()
+        val isNfcHardwareAvailable = nfcHardwareDelegate.isAvailable()
+        val canUseNfcScanner = isDeviceSecureForNfc.get() && isNfcHardwareAvailable
 
         val variant = metadata.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK
@@ -42,7 +42,7 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
 
         logExposureIfNeeded(variant, metadata, canUseNfcScanner)
 
-        if (!canUseNfcScanner) {
+        if (!isNfcHardwareAvailable) {
             return NfcScanningAvailability.Unavailable
         }
 

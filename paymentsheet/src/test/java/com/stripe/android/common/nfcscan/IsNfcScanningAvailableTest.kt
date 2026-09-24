@@ -82,7 +82,7 @@ internal class IsNfcScanningAvailableTest {
     }
 
     @Test
-    fun `returns unavailable when device is not secure`() {
+    fun `returns available when device is not secure`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
         )
@@ -91,7 +91,9 @@ internal class IsNfcScanningAvailableTest {
             isNfcScanningAvailable.get(
                 metadata = createMetadata(isNfcScanningEnabled = true),
             )
-        ).isEqualTo(NfcScanningAvailability.Unavailable)
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test

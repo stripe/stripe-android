@@ -13,6 +13,12 @@ public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$Nfc
 	public final fun getLambda$-298415252$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcScanningScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcScanningScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$-484824842$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt;
 	public fun <init> ()V
