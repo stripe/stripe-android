@@ -3,8 +3,10 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.model.Address
@@ -263,5 +265,99 @@ internal class ExpressCheckoutElementTest {
                 allowedCountryCodes = setOf("US", "CA"),
             )
         )
+    }
+
+    @Test
+    fun testGooglePayCollectsAndConfirmsRequiredBillingAddress() {
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
+
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+            },
+        ) {
+            val paymentMethod = createPaymentMethodWithBillingAddress()
+
+            enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_amount", "5099"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalledWithRequiredBillingAddress()
+    }
+
+    @Test
+    fun testGooglePaySendsRequiredBillingAddressForAutomaticTax() {
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory =
+                CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+            },
+        ) {
+            val paymentMethod = createPaymentMethodWithBillingAddress()
+
+            enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[line2]", "Floor 3"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                CheckoutInitResponseFactory.createWithRequiredBillingAddressForAutomaticTax(response)
+            }
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_amount", "5099"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalledWithRequiredBillingAddress()
+    }
+
+    @Test
+    fun testNativeLinkCollectsAndConfirmsRequiredBillingAddress() {
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
+
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+            },
+        ) {
+            val paymentMethod = createPaymentMethodWithBillingAddress()
+
+            enqueueNativeLinkPaymentMethod(paymentMethod)
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_amount", "5099"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            page.clickLinkButton()
+        }
+
+        assertNativeLinkCalledWithRequiredBillingAddress()
     }
 }
