@@ -2,7 +2,10 @@ package com.stripe.android.crypto.onramp.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,10 +26,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +51,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -312,6 +318,7 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun QuestionnaireContent(
     state: AdditionalKycScreenState,
     onQuestionAnswerChanged: (questionId: String, answer: String) -> Unit,
@@ -328,36 +335,54 @@ private fun QuestionnaireContent(
     ) {
         ScreenTitle(state.requirementType)
         questions.forEachIndexed { index, question ->
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            val interactionSource = remember(question.id) { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            val isError = state.validationError == AdditionalKycValidationError.MissingRequiredAnswers &&
+                question.required && question.answer.isBlank()
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
                     text = question.prompt,
                     style = LinkTheme.typography.detail,
                     color = LinkTheme.colors.textPrimary,
                 )
-                OutlinedTextField(
+                TextField(
                     value = question.answer,
                     onValueChange = { answer -> onQuestionAnswerChanged(question.id, answer) },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .border(
+                            width = 1.5.dp,
+                            color = when {
+                                isError -> LinkTheme.colors.borderCritical
+                                isFocused -> LinkTheme.colors.borderSelected
+                                else -> Color.Transparent
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                        )
+                        .semantics { contentDescription = question.prompt }
                         .testTag(additionalKycQuestionTag(question.id)),
+                    interactionSource = interactionSource,
                     label = { Text(stringResource(R.string.stripe_link_onramp_additional_kyc_answer)) },
                     textStyle = LinkTheme.typography.body,
                     singleLine = false,
                     minLines = 1,
                     maxLines = 3,
-                    isError = state.validationError == AdditionalKycValidationError.MissingRequiredAnswers &&
-                        question.required && question.answer.isBlank(),
+                    isError = isError,
                     keyboardOptions = KeyboardOptions(
                         imeAction = if (index == questions.lastIndex) ImeAction.Done else ImeAction.Next,
                     ),
                     shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = TextFieldDefaults.textFieldColors(
                         textColor = LinkTheme.colors.textPrimary,
                         cursorColor = LinkTheme.colors.textPrimary,
-                        focusedBorderColor = LinkTheme.colors.borderSelected,
-                        unfocusedBorderColor = LinkTheme.colors.surfaceSecondary,
-                        errorBorderColor = LinkTheme.colors.borderCritical,
-                        backgroundColor = LinkTheme.colors.surfaceSecondary,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        backgroundColor = if (isFocused) {
+                            LinkTheme.colors.surfacePrimary
+                        } else {
+                            LinkTheme.colors.surfaceSecondary
+                        },
                         focusedLabelColor = LinkTheme.colors.textTertiary,
                         unfocusedLabelColor = LinkTheme.colors.textTertiary,
                     ),
@@ -421,68 +446,72 @@ private fun SourceDocumentsCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(24.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .clip(RoundedCornerShape(24.dp))
+            .background(LinkTheme.colors.surfaceSecondary)
+            .padding(horizontal = 16.dp),
     ) {
         groups.values.forEach { slots ->
             val first = slots.first()
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onEditDocuments(first.index) }
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 12.dp)
                     .testTag(additionalKycDocumentGroupTag(first.index)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    text = first.selectedSubtypeLabel.orEmpty(),
-                    style = LinkTheme.typography.detail,
-                    color = LinkTheme.colors.textTertiary,
-                )
-                slots.forEach { slot ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = first.selectedSubtypeLabel.orEmpty(),
+                        style = LinkTheme.typography.detail,
+                        color = LinkTheme.colors.textTertiary,
+                    )
+                    slots.forEach { slot ->
                         Row(
                             modifier = Modifier
-                                .padding(top = 4.dp)
-                                .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 6.dp, vertical = 3.dp)
-                                .weight(1f, fill = false),
+                                .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.stripe_link_document),
                                 contentDescription = null,
-                                tint = Color.Unspecified,
+                                tint = if (LinkTheme.colors.isDark) {
+                                    LinkTheme.colors.textTertiary
+                                } else {
+                                    DocumentIconLight
+                                },
                                 modifier = Modifier.size(16.dp),
                             )
-                            Spacer(Modifier.width(4.dp))
                             Text(
                                 text = slot.fileName.orEmpty(),
-                                style = LinkTheme.typography.detail,
+                                style = LinkTheme.typography.body,
                                 color = LinkTheme.colors.textPrimary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        Spacer(Modifier.weight(1f))
-                        ChevronRight()
                     }
                 }
+                ChevronRight()
             }
             Spacer(
                 Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(LinkTheme.colors.borderDefault)
+                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.08f))
             )
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onAddDocuments)
-                .padding(vertical = 10.dp)
+                .padding(vertical = 12.dp)
                 .testTag(ADDITIONAL_KYC_ADD_DOCUMENTS_TAG),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -650,7 +679,7 @@ private fun UploadDocumentControl(
     enabled: Boolean,
     onChooseFile: (slotIndex: Int) -> Unit,
 ) {
-    val borderColor = LinkTheme.colors.textTertiary
+    val borderColor = documentBorderColor()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -662,7 +691,11 @@ private fun UploadDocumentControl(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isUploading) {
-            Text("◔", style = LinkTheme.typography.title, color = LinkTheme.colors.textBrand)
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp).testTag(ADDITIONAL_KYC_FILE_PROGRESS_TAG),
+                color = documentSuccessColor(),
+                strokeWidth = 3.dp,
+            )
         } else {
             Icon(
                 painter = painterResource(R.drawable.stripe_link_upload),
@@ -672,8 +705,10 @@ private fun UploadDocumentControl(
             )
         }
         Spacer(Modifier.width(14.dp))
-        Column {
+        Column(Modifier.weight(1f).padding(vertical = 16.dp)) {
             Text(
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 text = if (isUploading && uploadingFileName != null) {
                     uploadingFileName
                 } else {
@@ -703,14 +738,15 @@ private fun UploadedFileCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 76.dp)
             .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(start = 16.dp, end = 6.dp, top = 16.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             painter = painterResource(R.drawable.stripe_link_check_circle),
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = documentSuccessColor(),
             modifier = Modifier.size(16.dp),
         )
         Spacer(Modifier.width(12.dp))
@@ -729,14 +765,10 @@ private fun UploadedFileCard(
                 color = LinkTheme.colors.textTertiary,
             )
         }
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_trash),
-            contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_remove_file),
-            tint = LinkTheme.colors.iconPrimary,
-            modifier = Modifier
-                .size(16.dp)
-                .clickable { onRemoveFile(slot.index) }
-                .testTag(additionalKycRemoveFileTag(slot.index)),
+        RemoveDocumentButton(
+            fileName = slot.fileName.orEmpty(),
+            slotIndex = slot.index,
+            onRemoveFile = onRemoveFile,
         )
     }
 }
@@ -750,8 +782,9 @@ private fun FileErrorCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LinkTheme.colors.textCritical.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .heightIn(min = 76.dp)
+            .background(documentErrorBackground(), RoundedCornerShape(12.dp))
+            .padding(start = 16.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
             .testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -777,16 +810,50 @@ private fun FileErrorCard(
                 color = LinkTheme.colors.textCritical,
             )
         }
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_trash),
-            contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_remove_file),
-            tint = LinkTheme.colors.iconPrimary,
-            modifier = Modifier
-                .size(16.dp)
-                .clickable { onRemoveFile(slotIndex) },
+        RemoveDocumentButton(
+            fileName = state.validationFileName.orEmpty(),
+            slotIndex = slotIndex,
+            onRemoveFile = onRemoveFile,
         )
     }
 }
+
+@Composable
+private fun RemoveDocumentButton(
+    fileName: String,
+    slotIndex: Int,
+    onRemoveFile: (Int) -> Unit,
+) {
+    val description = stringResource(R.string.stripe_link_onramp_additional_kyc_remove_file)
+    IconButton(
+        onClick = { onRemoveFile(slotIndex) },
+        modifier = Modifier
+            .size(48.dp)
+            .semantics { contentDescription = "$description, $fileName" }
+            .testTag(additionalKycRemoveFileTag(slotIndex)),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_trash),
+            contentDescription = null,
+            tint = LinkTheme.colors.iconPrimary,
+            modifier = Modifier.size(16.dp),
+        )
+    }
+}
+
+@Composable
+private fun documentSuccessColor(): Color =
+    if (LinkTheme.colors.isDark) DocumentSuccessDark else DocumentSuccessLight
+
+@Composable
+private fun documentBorderColor(): Color =
+    if (LinkTheme.colors.isDark) DocumentBorderDark else DocumentBorderLight
+
+@Composable
+private fun documentErrorBackground(): Color =
+    if (LinkTheme.colors.isDark) DocumentCritical.copy(alpha = 0.12f) else DocumentErrorLight
+
+internal const val ADDITIONAL_KYC_FILE_PROGRESS_TAG = "additional_kyc_file_progress"
 
 @Composable
 private fun InlineUploadError() {
@@ -794,7 +861,7 @@ private fun InlineUploadError() {
         modifier = Modifier
             .fillMaxWidth()
             .testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         Icon(
             painter = painterResource(R.drawable.stripe_link_error_circle),
@@ -1352,3 +1419,17 @@ private val MessageDarkSurface = Color(0xFF1C1C1E)
 private val MessageSuccessBackground = Color(0xFF00D66F)
 
 private val MessageSuccessForeground = Color(0xFF171717)
+
+private val DocumentIconLight = Color(0xFF3C4F69)
+
+private val DocumentSuccessDark = Color(0xFF30D158)
+
+private val DocumentSuccessLight = Color(0xFF008A45)
+
+private val DocumentBorderDark = Color(0xFF737373)
+
+private val DocumentBorderLight = Color(0xFFA3A3A3)
+
+private val DocumentCritical = Color(0xFFE61947)
+
+private val DocumentErrorLight = Color(0xFFFEF4F6)

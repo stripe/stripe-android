@@ -8,7 +8,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -38,6 +40,90 @@ internal class AdditionalKycScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `uploading document shows accessible progress and cannot be removed`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentEditor,
+        ).copy(selectingFileSlot = 0, selectingFileName = "electricity-bill.pdf"),
+    ) {
+        composeRule.onNodeWithTag(additionalKycChooseFileTag(0)).performScrollTo()
+        composeRule.onNodeWithTag(ADDITIONAL_KYC_FILE_PROGRESS_TAG)
+            .assertIsDisplayed()
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo))
+        composeRule.onNodeWithText("electricity-bill.pdf").assertIsDisplayed()
+        composeRule.onNodeWithTag(additionalKycRemoveFileTag(0)).assertDoesNotExist()
+        composeRule.onNodeWithTag(additionalKycChooseFileTag(0)).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `uploaded file removal identifies the file and forwards its slot`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentEditor,
+            requirementType = AdditionalKycRequirementType.ProofOfAddress,
+            document = documentState(slots = listOf(documentSlot(fileName = "electricity-bill.pdf"))),
+        ),
+    ) {
+        composeRule.onNodeWithTag(additionalKycRemoveFileTag(0))
+            .performScrollTo()
+            .assertContentDescriptionContains("Remove, electricity-bill.pdf")
+            .performClick()
+        assertThat(removedFileSlot).isEqualTo(0)
+    }
+
+    @Test
+    fun `failed file can be removed with large text`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentEditor,
+            validationError = AdditionalKycValidationError.UnsupportedFileType,
+            validationFileName = "electricity-bill.docx",
+        ),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithTag(additionalKycRemoveFileTag(0))
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+        assertThat(removedFileSlot).isEqualTo(0)
+    }
+
+    @Test
+    fun `answer field exposes its question and accepts focus`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.Questionnaire,
+            questions = listOf(question("purpose", "Why are you purchasing cryptocurrency?")),
+        ),
+    ) {
+        composeRule.onNodeWithTag(additionalKycQuestionTag("purpose"))
+            .assertContentDescriptionContains("Why are you purchasing cryptocurrency?")
+            .performClick()
+            .assertIsFocused()
+            .performTextReplacement("For investment")
+        assertThat(changedAnswer).isEqualTo("purpose" to "For investment")
+    }
+
+    @Test
+    fun `source groups with duplicate filenames retain distinct edit targets`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentOverview,
+            document = documentState(
+                slots = listOf(
+                    documentSlot(index = 0, fileName = "statement.pdf"),
+                    documentSlot(index = 1, fileName = "statement.pdf").copy(
+                        selectedSubtypeId = "company_profits",
+                        selectedSubtypeLabel = "Company profits",
+                    ),
+                ),
+                editingSlotIndex = null,
+            ),
+        ),
+    ) {
+        composeRule.onNodeWithTag(additionalKycDocumentGroupTag(1)).performScrollTo().performClick()
+        assertThat(editedDocumentSlot).isEqualTo(1)
+        composeRule.onNodeWithTag(additionalKycDocumentGroupTag(0)).performScrollTo().performClick()
+        assertThat(editedDocumentSlot).isEqualTo(0)
+    }
 
     @Test
     fun `proof of address displays server instructions`() = runScenario(
