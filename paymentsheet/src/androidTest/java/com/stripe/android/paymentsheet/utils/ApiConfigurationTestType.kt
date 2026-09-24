@@ -90,6 +90,15 @@ internal object ApiConfigurationTestTypeProvider : TestParameterValuesProvider()
     ): List<ApiConfigurationTestType> = listOf(
         ApiConfigurationTestType.PaymentConfigurationOnly,
         ApiConfigurationTestType.ApiConfigurationOnly,
+    )
+}
+
+internal object EmbeddedPaymentElementApiConfigurationTestTypeProvider : TestParameterValuesProvider() {
+    override fun provideValues(
+        context: Context?,
+    ): List<ApiConfigurationTestType> = listOf(
+        ApiConfigurationTestType.PaymentConfigurationOnly,
+        ApiConfigurationTestType.ApiConfigurationOnly,
         ApiConfigurationTestType.ApiConfigurationOverridesPaymentConfiguration,
     )
 }
