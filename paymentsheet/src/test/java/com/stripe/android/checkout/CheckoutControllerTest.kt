@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -823,23 +824,32 @@ internal class CheckoutControllerTest {
                 successfulSavedPaymentMethodResponse(response)
             }
 
-            handler.select(selection, true)
-            try {
-                testScheduler.advanceUntilIdle()
-                assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+            handler.state.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                 handler.select(selection, true)
-                completions.expectNoEvents()
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
-                releaseResponse.countDown()
-                val stateAtCompletion = withTurbineTimeout(10.seconds) {
-                    completions.awaitItem()
+                try {
+                    testScheduler.advanceUntilIdle()
+                    assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+
+                    handler.select(selection, true)
+                    expectNoEvents()
+                    completions.expectNoEvents()
+
+                    releaseResponse.countDown()
+                    val stateAtCompletion = withTurbineTimeout(10.seconds) {
+                        completions.awaitItem()
+                    }
+                    assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
+                    assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                    expectNoEvents()
+                    completions.expectNoEvents()
+                } finally {
+                    releaseResponse.countDown()
                 }
-                assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
-                assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
-                completions.expectNoEvents()
-            } finally {
-                releaseResponse.countDown()
             }
 
             completions.ensureAllEventsConsumed()

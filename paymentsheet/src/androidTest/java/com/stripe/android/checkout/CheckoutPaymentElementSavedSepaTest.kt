@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import okhttp3.mockwebserver.MockResponse
@@ -170,7 +171,7 @@ internal class CheckoutPaymentElementSavedSepaTest {
     }
 
     private fun waitForSepaMandate() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(hasTestTag(SEPA_MANDATE_CONTINUE_BUTTON))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
@@ -179,7 +180,7 @@ internal class CheckoutPaymentElementSavedSepaTest {
     }
 
     private fun clickPaymentOptionsPrimaryButton() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(
                 hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()

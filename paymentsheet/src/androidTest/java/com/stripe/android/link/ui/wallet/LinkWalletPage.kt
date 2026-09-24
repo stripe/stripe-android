@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.link.ui.LOGOUT_MENU_ROW_TAG
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.waitUntilWithIdle
 
 internal class LinkWalletPage(
     private val composeTestRule: ComposeTestRule,
@@ -17,9 +18,8 @@ internal class LinkWalletPage(
 
     fun waitUntilVisible() {
         val showMenuDescription = applicationContext.getString(R.string.stripe_show_menu)
-        composeTestRule.waitUntil(
+        composeTestRule.waitUntilWithIdle(
             conditionDescription = "Link wallet is visible",
-            timeoutMillis = 5_000,
         ) {
             composeTestRule.onAllNodes(hasContentDescription(showMenuDescription))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

@@ -24,6 +24,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -64,11 +65,11 @@ internal class AddressElementViewModelModule {
     @Singleton
     fun provideStripeAutocompleteRepository(
         stripeNetworkClient: StripeNetworkClient,
-        args: AddressElementActivityContract.Args,
+        requestOptionsProvider: Provider<ApiRequest.Options>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        publishableKeyProvider = { args.publishableKey },
+        requestOptionsProvider = requestOptionsProvider,
     )
 
     @Provides
@@ -106,6 +107,12 @@ internal class AddressElementViewModelModule {
             )
         }
     }
+
+    @Provides
+    @Singleton
+    fun provideApiConfiguration(
+        args: AddressElementActivityContract.Args
+    ) = args.apiConfiguration
 
     @Module
     interface Bindings {

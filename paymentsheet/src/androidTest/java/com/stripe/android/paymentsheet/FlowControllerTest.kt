@@ -17,8 +17,6 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -39,6 +37,8 @@ import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
@@ -1006,18 +1007,18 @@ internal class FlowControllerTest(
             )
         }
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
 
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_pm_67890").performClick()
@@ -1080,7 +1081,7 @@ internal class FlowControllerTest(
         val actualTags = composeTestRule
             .onNodeWithTag(TEST_TAG_LIST, true)
             .onChildren()
-            .fetchSemanticsNodes()
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
             .map { it.config[SemanticsProperties.TestTag] }
 
         assertThat(actualTags).isEqualTo(

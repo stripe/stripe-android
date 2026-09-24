@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.android.testing.waitUntilWithIdle
 
 @SuppressWarnings("TooManyFunctions")
 class VerticalModePage(
@@ -32,16 +33,18 @@ class VerticalModePage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle(
+            conditionDescription = "vertical payment method layout to appear",
+        ) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -86,7 +89,7 @@ class VerticalModePage(
     }
 
     fun assertHasSavedPaymentMethods() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).isDisplayed()
         }
         composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertExists()
@@ -95,7 +98,9 @@ class VerticalModePage(
     fun assertDoesNotHaveSavedPaymentMethods() {
         val savedText = composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT)
 
-        composeTestRule.waitUntil { savedText.isNotDisplayed() }
+        composeTestRule.waitUntilWithIdle {
+            savedText.isNotDisplayed()
+        }
         savedText.assertDoesNotExist()
     }
 
@@ -131,7 +136,9 @@ class VerticalModePage(
         val savedPaymentMethod = composeTestRule
             .onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
 
-        composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
+        composeTestRule.waitUntilWithIdle {
+            savedPaymentMethod.isDisplayed()
+        }
         savedPaymentMethod.performClick()
     }
 
@@ -145,21 +152,19 @@ class VerticalModePage(
     }
 
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
         val testTag = "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"
 
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 

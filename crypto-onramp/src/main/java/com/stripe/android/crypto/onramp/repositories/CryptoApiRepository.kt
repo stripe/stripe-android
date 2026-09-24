@@ -1,12 +1,11 @@
 package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
@@ -70,7 +69,7 @@ import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
 import java.io.File
 import javax.inject.Inject
-import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /*
@@ -83,8 +82,7 @@ internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
     private val linkController: LinkController,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?
@@ -422,7 +420,7 @@ internal class CryptoApiRepository @Inject constructor(
     ): Result<PaymentMethod> {
         val options = ApiRequest.Options(
             apiKey = platformPublishableKey,
-            stripeAccount = stripeAccountIdProvider(),
+            stripeAccount = apiConfigProvider.get().stripeAccountId,
         )
 
         return stripeRepository.createToken(
@@ -485,15 +483,16 @@ internal class CryptoApiRepository @Inject constructor(
             expandFields = listOf("payment_method"),
             options = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountIdProvider(),
+                stripeAccount = apiConfigProvider.get().stripeAccountId,
             )
         )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
+        val apiConfiguration = apiConfigProvider.get()
         return ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider(),
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
         )
     }
 

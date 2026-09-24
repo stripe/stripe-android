@@ -298,7 +298,7 @@ internal class PaymentMethodLayoutUITest(
     ) {
         assertThat(
             composeRule.onNodeWithTag(paymentMethodsTag)
-                .onChildren().fetchSemanticsNodes().size
+                .onChildren().fetchSemanticsNodes(atLeastOneRootRequired = false).size
         ).isEqualTo(allPaymentMethodsChildCount)
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
@@ -367,7 +367,7 @@ internal class PaymentMethodLayoutUITest(
         ) {
             assertThat(
                 composeRule.onNodeWithTag(paymentMethodsTag)
-                    .onChildren().fetchSemanticsNodes().size
+                    .onChildren().fetchSemanticsNodes(atLeastOneRootRequired = false).size
             ).isEqualTo(3)
 
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")

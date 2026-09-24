@@ -72,11 +72,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override val accountStatus: Flow<AccountStatus> =
         linkAccountHolder.linkAccountInfo
             .map {
-                // Don't lookup by the configured email if the user already logged out of that
-                // account *unless* the user isn't able to change emails.
                 val canLookupCustomerEmail =
-                    it.lastUpdateReason != UpdateReason.LoggedOut ||
-                        !config.allowUserEmailEdits
+                    (
+                        // Don't lookup by the configured email if the user already logged out of that
+                        // account *unless* the user isn't able to change emails.
+                        it.lastUpdateReason != UpdateReason.LoggedOut ||
+                            !config.allowUserEmailEdits
+                    ) &&
+                        // Don't look up account status if Link will not be displayed.
+                        config.shouldDisplay
                 getAccountStatus(
                     linkAccount = it.account,
                     canLookupCustomerEmail = canLookupCustomerEmail,

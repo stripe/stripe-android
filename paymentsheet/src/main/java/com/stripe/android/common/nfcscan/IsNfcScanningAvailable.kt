@@ -10,7 +10,15 @@ import com.stripe.android.ui.core.cardscan.IsStripeCardScanAvailable
 import javax.inject.Inject
 
 internal interface IsNfcScanningAvailable {
-    fun get(metadata: PaymentMethodMetadata): Boolean
+    fun get(metadata: PaymentMethodMetadata): NfcScanningAvailability
+}
+
+internal sealed interface NfcScanningAvailability {
+    data object Unavailable : NfcScanningAvailability
+
+    data class Available(
+        val shouldBePrimaryScanningOption: Boolean,
+    ) : NfcScanningAvailability
 }
 
 internal class DefaultIsNfcScanningAvailable @Inject constructor(
@@ -20,13 +28,9 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
     private val mode: EventReporter.Mode,
     private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : IsNfcScanningAvailable {
-    override fun get(metadata: PaymentMethodMetadata): Boolean {
-        val hasRequirements = metadata.isNfcScanningEnabled &&
-            !metadata.isTapToAddSupported &&
-            !canUseStripeCardScan(metadata)
-
-        if (!hasRequirements) {
-            return false
+    override fun get(metadata: PaymentMethodMetadata): NfcScanningAvailability {
+        if (!metadata.isNfcScanningEnabled) {
+            return NfcScanningAvailability.Unavailable
         }
 
         val canUseNfcScanner = isDeviceSecureForNfc.get() &&
@@ -38,9 +42,15 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
 
         logExposureIfNeeded(variant, metadata, canUseNfcScanner)
 
-        val canUseNfcScanning = variant == "treatment" || variant == null
+        if (!canUseNfcScanner) {
+            return NfcScanningAvailability.Unavailable
+        }
 
-        return canUseNfcScanning && canUseNfcScanner
+        return when (variant) {
+            "treatment" -> NfcScanningAvailability.Available(shouldBePrimaryScanningOption = true)
+            null -> NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+            else -> NfcScanningAvailability.Unavailable
+        }
     }
 
     private fun logExposureIfNeeded(
@@ -72,5 +82,7 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
 }
 
 internal class NoOpIsNfcScanningAvailable @Inject constructor() : IsNfcScanningAvailable {
-    override fun get(metadata: PaymentMethodMetadata): Boolean = false
+    override fun get(metadata: PaymentMethodMetadata): NfcScanningAvailability {
+        return NfcScanningAvailability.Unavailable
+    }
 }

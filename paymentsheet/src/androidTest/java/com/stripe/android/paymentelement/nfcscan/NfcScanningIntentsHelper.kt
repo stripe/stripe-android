@@ -9,10 +9,9 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.stripe.android.common.nfcscan.NfcScanningActivity
 import com.stripe.android.common.nfcscan.NfcScanningContract
+import com.stripe.android.testing.waitUntilWithIdle
 
 internal object NfcScanningIntentsHelper {
-    private const val UI_TIMEOUT_MS = 5_000L
-
     fun intendingNfcScanningToComplete(
         result: NfcScanningContract.Result.Complete,
     ) {
@@ -27,7 +26,7 @@ internal object NfcScanningIntentsHelper {
     fun intendedNfcScanningToBeLaunched(
         composeTestRule: ComposeTestRule,
     ) {
-        composeTestRule.waitUntil(UI_TIMEOUT_MS) {
+        composeTestRule.waitUntilWithIdle {
             try {
                 intended(hasComponent(NfcScanningActivity::class.java.name))
                 true
