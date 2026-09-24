@@ -107,6 +107,7 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
+        // Preserve the error only when the reload does not change the selected payment method.
         val selectionError = carryForward.selectionError.takeIf {
             carryForward.previousSelection == selection
         }
