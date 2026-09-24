@@ -59,7 +59,7 @@ class CryptoApiRepositoryAdditionalKycTest {
 
     @Test
     fun `fulfillment response missing required fields fails parsing`() = runScenario(
-        responseBody = minimalSubmissionResponse,
+        responseBody = missingIdSubmissionResponse,
     ) {
         val result = repository.fulfillAdditionalKycRequirement(
             liquidityProvider = "swapped",
@@ -101,6 +101,45 @@ class CryptoApiRepositoryAdditionalKycTest {
             )
         )
         assertThat(requireNotNull(result.getOrThrow().documents).single().documentSubtype).isNull()
+    }
+
+    @Test
+    fun `minimal submission response is parsed`() = runScenario(
+        responseBody = minimalSubmissionResponse,
+    ) {
+        val result = repository.fulfillAdditionalKycRequirement(
+            liquidityProvider = "swapped",
+            documents = emptyList(),
+            questionnaire = null,
+            consumerSessionClientSecret = "secret_123",
+        )
+
+        val response = result.getOrThrow()
+        assertThat(response.id).isEqualTo("submission_123")
+        assertThat(response.objectType).isEqualTo("crypto_onramp_kyc_submission")
+        assertThat(response.status).isEqualTo("pending_verification")
+        assertThat(response.liquidityProvider).isNull()
+        assertThat(response.created).isNull()
+    }
+
+    @Test
+    fun `submission response with only an ID is parsed`() = runScenario(
+        responseBody = """{"id":"submission_123"}""",
+    ) {
+        val response = repository.fulfillAdditionalKycRequirement(
+            liquidityProvider = "swapped",
+            documents = emptyList(),
+            questionnaire = null,
+            consumerSessionClientSecret = "secret_123",
+        ).getOrThrow()
+
+        assertThat(response.id).isEqualTo("submission_123")
+        assertThat(response.objectType).isNull()
+        assertThat(response.status).isNull()
+        assertThat(response.liquidityProvider).isNull()
+        assertThat(response.created).isNull()
+        assertThat(response.documents).isNull()
+        assertThat(response.questionnaire).isNull()
     }
 
     private fun assertDocumentAndQuestionnaireRequest(request: ApiRequest) {
@@ -241,11 +280,19 @@ class CryptoApiRepositoryAdditionalKycTest {
                 }
             """.trimIndent()
 
+        val missingIdSubmissionResponse =
+            """
+                {
+                  "object": "crypto_onramp_kyc_submission"
+                }
+            """.trimIndent()
+
         val minimalSubmissionResponse =
             """
                 {
                   "id": "submission_123",
-                  "object": "crypto_onramp_kyc_submission"
+                  "object": "crypto_onramp_kyc_submission",
+                  "status": "pending_verification"
                 }
             """.trimIndent()
     }
