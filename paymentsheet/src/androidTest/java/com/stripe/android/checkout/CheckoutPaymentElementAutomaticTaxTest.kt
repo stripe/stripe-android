@@ -171,7 +171,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
             immediateActionCalls.expectNoEvents()
-            assertSavedPaymentMethodSelectionErrorIsDisplayed()
+            assertSavedPaymentMethodSelectionError(isDisplayed = true)
 
             val releaseRetryResponse = CountDownLatch(1)
             enqueueSavedPaymentMethodTaxUpdate { response ->
@@ -191,7 +191,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
                 taxUpdateRequests.awaitItem()
                 assertSavedPaymentMethodSpinnerCount(1)
-                assertSavedPaymentMethodSelectionErrorIsNotDisplayed()
+                assertSavedPaymentMethodSelectionError(isDisplayed = false)
                 immediateActionCalls.expectNoEvents()
 
                 releaseRetryResponse.countDown()
@@ -228,7 +228,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertPaymentMethodRowsAreEnabled(true)
                 assertSavedPaymentMethodSpinnerCount(0)
-                assertSavedPaymentMethodSelectionErrorIsNotDisplayed()
+                assertSavedPaymentMethodSelectionError(isDisplayed = false)
                 markTestSucceeded()
             } finally {
                 releaseTaxUpdateResponse.countDown()
@@ -635,32 +635,26 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         ).assertCountEquals(expectedCount)
     }
 
-    private fun assertSavedPaymentMethodSelectionErrorIsDisplayed() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            testRules.compose.onAllNodesWithTag(
-                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
-                useUnmergedTree = true,
-            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
-        testRules.compose.onNodeWithTag(
+    private fun assertSavedPaymentMethodSelectionError(isDisplayed: Boolean) {
+        val selectionErrorNodes = testRules.compose.onAllNodesWithTag(
             EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
             useUnmergedTree = true,
-        ).assertIsDisplayed().assertTextEquals(
-            applicationContext.getString(R.string.stripe_something_went_wrong)
         )
-    }
+        testRules.compose.waitUntilWithIdle {
+            selectionErrorNodes.fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty() == isDisplayed
+        }
 
-    private fun assertSavedPaymentMethodSelectionErrorIsNotDisplayed() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
-            testRules.compose.onAllNodesWithTag(
+        if (isDisplayed) {
+            testRules.compose.onNodeWithTag(
                 EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
                 useUnmergedTree = true,
-            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
+            ).assertIsDisplayed().assertTextEquals(
+                applicationContext.getString(R.string.stripe_something_went_wrong)
+            )
+        } else {
+            selectionErrorNodes.assertCountEquals(0)
         }
-        testRules.compose.onAllNodesWithTag(
-            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
-            useUnmergedTree = true,
-        ).assertCountEquals(0)
     }
 
     private fun automaticTaxResponseWithoutRequiredBilling(
