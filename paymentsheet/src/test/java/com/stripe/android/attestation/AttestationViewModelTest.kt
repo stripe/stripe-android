@@ -3,7 +3,6 @@ package com.stripe.android.attestation
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
-import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -28,14 +27,12 @@ internal class AttestationViewModelTest {
     @Test
     fun `attest should emit Success result when integrity request succeeds`() = runTest {
         val expectedToken = "success_token"
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
-            requestResult = Result.success(expectedToken)
-        }
+        val fakeAttestationTokenProvider = FakeAttestationTokenProvider(Result.success(expectedToken))
         val fakeAnalyticsReporter = FakeAttestationAnalyticsEventsReporter()
 
-        val viewModel = createViewModel(fakeIntegrityRequestManager, fakeAnalyticsReporter)
+        val viewModel = createViewModel(fakeAttestationTokenProvider, fakeAnalyticsReporter)
 
-        assertThat(fakeIntegrityRequestManager.awaitRequestTokenCall()).isNull()
+        fakeAttestationTokenProvider.awaitGetTokenCall()
 
         viewModel.result.test {
             val result = awaitItem()
@@ -45,7 +42,7 @@ internal class AttestationViewModelTest {
 
             expectNoEvents()
         }
-        fakeIntegrityRequestManager.ensureAllEventsConsumed()
+        fakeAttestationTokenProvider.ensureAllEventsConsumed()
 
         // Verify analytics events
         assertThat(fakeAnalyticsReporter.awaitCall())
@@ -58,14 +55,12 @@ internal class AttestationViewModelTest {
     @Test
     fun `attest should emit Failed result when integrity request fails`() = runTest {
         val expectedError = IOException("Network error")
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
-            requestResult = Result.failure(expectedError)
-        }
+        val fakeAttestationTokenProvider = FakeAttestationTokenProvider(Result.failure(expectedError))
         val fakeAnalyticsReporter = FakeAttestationAnalyticsEventsReporter()
 
-        val viewModel = createViewModel(fakeIntegrityRequestManager, fakeAnalyticsReporter)
+        val viewModel = createViewModel(fakeAttestationTokenProvider, fakeAnalyticsReporter)
 
-        assertThat(fakeIntegrityRequestManager.awaitRequestTokenCall()).isNull()
+        fakeAttestationTokenProvider.awaitGetTokenCall()
 
         viewModel.result.test {
             val result = awaitItem()
@@ -73,7 +68,7 @@ internal class AttestationViewModelTest {
 
             expectNoEvents()
         }
-        fakeIntegrityRequestManager.ensureAllEventsConsumed()
+        fakeAttestationTokenProvider.ensureAllEventsConsumed()
 
         // Verify analytics events
         assertThat(fakeAnalyticsReporter.awaitCall())
@@ -84,11 +79,11 @@ internal class AttestationViewModelTest {
     }
 
     private fun createViewModel(
-        integrityRequestManager: FakeIntegrityRequestManager,
+        attestationTokenProvider: FakeAttestationTokenProvider,
         attestationAnalyticsEventsReporter: FakeAttestationAnalyticsEventsReporter =
             FakeAttestationAnalyticsEventsReporter()
     ) = AttestationViewModel(
-        integrityRequestManager = integrityRequestManager,
+        attestationTokenProvider = attestationTokenProvider,
         workContext = testDispatcher,
         attestationAnalyticsEventsReporter = attestationAnalyticsEventsReporter,
         errorReporter = FakeErrorReporter()
