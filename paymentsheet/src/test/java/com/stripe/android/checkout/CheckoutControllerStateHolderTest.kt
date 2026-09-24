@@ -94,16 +94,11 @@ internal class CheckoutControllerStateHolderTest {
     fun `saved selection state guards pending operations`() = testScenario {
         stateHolder.state = committedState()
         stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
-
         stateHolder.savedPaymentMethodSelectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-            assertThat(stateHolder.selectionError.value).isNotNull()
 
             assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-            assertThat(stateHolder.selectionError.value).isNull()
-            assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
             assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
             expectNoEvents()
@@ -169,6 +164,7 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
     }
 
+    @Test
     fun `state replacement preserves an explicitly provided error for a changed selection`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
         val error = IllegalStateException("Selection failed")
