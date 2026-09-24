@@ -211,6 +211,7 @@ internal class FormActivityScreenShotTest {
     }
 
     @Composable
+    @Suppress("LongMethod")
     private fun TestFormActivityUi(
         confirmationState: ConfirmationHandler.State,
         enabled: Boolean = false,

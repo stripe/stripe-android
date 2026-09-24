@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import app.cash.turbine.Turbine
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
