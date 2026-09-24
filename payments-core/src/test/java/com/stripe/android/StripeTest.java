@@ -923,7 +923,7 @@ public class StripeTest {
                 new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
                 fraudDetectionDataRepository,
-                new DefaultCardAccountRangeRepositoryFactory(context)
+                new DefaultCardAccountRangeRepositoryFactory(context, () -> publishableKey)
         );
     }
 
