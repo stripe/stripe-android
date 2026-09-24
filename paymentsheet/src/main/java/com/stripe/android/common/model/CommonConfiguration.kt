@@ -248,6 +248,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
