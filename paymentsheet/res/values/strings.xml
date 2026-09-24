@@ -338,7 +338,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown before NFC scanning when Android developer options are enabled. -->
   <string name="stripe_nfc_developer_options_title">Turn off Developer options</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
-  <string name="stripe_nfc_developer_options_message">For security, developer options must be off to use Tap to Add.</string>
+  <string name="stripe_nfc_developer_options_message">For security, developer options must be off to use Tap to add.</string>
   <!-- Button that opens Android developer options settings. -->
   <string name="stripe_nfc_developer_options_open_settings">Open settings</string>
   <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
