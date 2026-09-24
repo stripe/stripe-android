@@ -459,7 +459,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod: DisplayableSavedPaymentMethod? = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction: SavedPaymentMethodAction = SavedPaymentMethodAction.MANAGE_ALL,
             mandate: ResolvableString? = null,
-            error: ResolvableString? = null,
         ): PaymentMethodVerticalLayoutInteractor.State = PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
@@ -467,7 +466,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,
-            error = error,
+            error = null,
             linkBrand = LinkBrand.Link,
         )
     }

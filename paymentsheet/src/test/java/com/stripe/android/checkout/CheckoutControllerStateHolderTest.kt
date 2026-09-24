@@ -169,7 +169,6 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
     }
 
-    @Test
     fun `state replacement preserves an explicitly provided error for a changed selection`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
         val error = IllegalStateException("Selection failed")

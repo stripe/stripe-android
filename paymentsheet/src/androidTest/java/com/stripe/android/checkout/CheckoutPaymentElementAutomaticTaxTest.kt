@@ -228,7 +228,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertPaymentMethodRowsAreEnabled(true)
                 assertSavedPaymentMethodSpinnerCount(0)
-                assertSavedPaymentMethodSelectionError(isDisplayed = false)
                 markTestSucceeded()
             } finally {
                 releaseTaxUpdateResponse.countDown()

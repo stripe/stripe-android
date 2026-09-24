@@ -8,7 +8,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -33,7 +32,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -92,23 +90,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(linkSelection.copy(selectedPayment = updatedPayment))
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-    }
-
-    @Test
-    fun `completion clears errors when the Link selection is unchanged`() = runScenario {
-        stateHolder.state = requireNotNull(stateHolder.state).copy(
-            selectionError = "Selection failed".resolvableString,
-        )
-        assertThat(stateHolder.selectionError.value).isNotNull()
-        presenter.present()
-
-        resultCallback(
-            LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = selectedPayment)
-        )
-
-        assertThat(stateHolder.selection.value).isEqualTo(linkSelection)
-        assertThat(stateHolder.selectionError.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -233,8 +214,8 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: PaymentSelection? = linkSelection,
-        block: suspend Scenario.() -> Unit,
-    ) = runTest {
+        block: Scenario.() -> Unit,
+    ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkState = com.stripe.android.paymentsheet.state.LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,

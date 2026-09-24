@@ -6,7 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakePaymentMethodVerticalLayoutInteractor(
@@ -20,7 +20,6 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             initialShowsWalletsHeader: Boolean = true,
             selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
             mandate: ResolvableString? = null,
-            error: ResolvableString? = null,
             viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction> =
                 ViewActionRecorder()
         ): FakePaymentMethodVerticalLayoutInteractor {
@@ -40,7 +39,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = mandate,
-                error = error,
+                error = null,
                 linkBrand = LinkBrand.Link,
             )
             return FakePaymentMethodVerticalLayoutInteractor(
@@ -52,9 +51,8 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     }
 
     override val isLiveMode: Boolean = true
-    val stateSource = MutableStateFlow(initialState)
-    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateSource
-    override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(initialShowsWalletsHeader)
+    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlowOf(initialState)
+    override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(initialShowsWalletsHeader)
 
     val closeCalls = Turbine<Unit>()
 

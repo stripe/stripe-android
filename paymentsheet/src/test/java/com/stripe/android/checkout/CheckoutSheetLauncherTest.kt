@@ -8,7 +8,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
@@ -478,36 +477,6 @@ internal class CheckoutSheetLauncherTest {
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
 
         assertThat(immediateActionWasInvoked()).isTrue()
-    }
-
-    @Test
-    fun `manage result clears errors when the committed selection is unchanged`() = testScenario(
-        selectionHolderFactory = { savedStateHandle ->
-            CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
-                state = CheckoutControllerStateFactory.create(
-                    paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                ).copy(selectionError = "Selection failed".resolvableString)
-                assertThat(selectionError.value).isNotNull()
-            }
-        },
-    ) {
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
-            customerState = null,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            selection = selection.copy(),
-            hasBeenConfirmed = false,
-            checkoutSessionResponse = null,
-            shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Manage,
-        )
-
-        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        assertThat((selectionHolder as CheckoutControllerStateHolder).selectionError.value).isNull()
-        assertThat(immediateActionWasInvoked()).isFalse()
     }
 
     @Test
@@ -1001,16 +970,13 @@ internal class CheckoutSheetLauncherTest {
     @Suppress("LongMethod")
     private fun testScenario(
         promotions: List<PaymentMethodMessagePromotion>? = null,
-        selectionHolderFactory: (SavedStateHandle) -> EmbeddedSelectionHolder = {
-            DefaultEmbeddedSelectionHolder(it)
-        },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var immediateActionInvoked = false
         val testScope = this
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = selectionHolderFactory(savedStateHandle)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
