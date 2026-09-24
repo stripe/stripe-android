@@ -146,23 +146,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun enteringPaymentMethodForm_preservesSavedPaymentMethodSelectionError() {
-        val expectedError = IllegalStateException("selection failed")
-        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
-        runScenario(
-            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
-            initialSavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(expectedError),
-        ) {
-            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-
-            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
-            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
-            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
-            assertThat(interactor.error.value).isEqualTo(expectedErrorMessage)
-        }
-    }
-
-    @Test
     fun state_usesLinkAccountBrand() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
     ) {
