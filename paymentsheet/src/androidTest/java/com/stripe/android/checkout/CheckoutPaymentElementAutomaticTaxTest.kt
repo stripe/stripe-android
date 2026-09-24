@@ -193,8 +193,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 assertSavedPaymentMethodSpinnerCount(1)
                 assertSavedPaymentMethodSelectionError(isDisplayed = false)
                 immediateActionCalls.expectNoEvents()
-
-                releaseRetryResponse.countDown()
             } finally {
                 releaseRetryResponse.countDown()
             }
