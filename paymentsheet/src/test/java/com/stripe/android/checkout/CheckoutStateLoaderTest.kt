@@ -312,7 +312,9 @@ internal class CheckoutStateLoaderTest {
         val selection = stateHolder.selection.value
         assertThat(selection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         val error = IllegalStateException("Selection failed")
-        stateHolder.failSavedSelection(error)
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            selectionError = error.stripeErrorMessage(),
+        )
 
         loader.reload(requireNotNull(stateHolder.state))
 
@@ -327,7 +329,9 @@ internal class CheckoutStateLoaderTest {
     ) {
         stateHolder.state = committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val error = IllegalStateException("Selection failed")
-        stateHolder.failSavedSelection(error)
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            selectionError = error.stripeErrorMessage(),
+        )
 
         assertFailsWith<IllegalStateException> {
             loader.reload(requireNotNull(stateHolder.state))

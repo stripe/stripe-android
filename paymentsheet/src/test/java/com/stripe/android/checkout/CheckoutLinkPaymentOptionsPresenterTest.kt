@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -96,7 +97,9 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
     @Test
     fun `completion clears errors when the Link selection is unchanged`() = runScenario {
-        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            selectionError = "Selection failed".resolvableString,
+        )
         assertThat(stateHolder.selectionError.value).isNotNull()
         presenter.present()
 

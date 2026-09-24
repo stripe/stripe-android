@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
@@ -485,8 +486,7 @@ internal class CheckoutSheetLauncherTest {
             CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
                 state = CheckoutControllerStateFactory.create(
                     paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                )
-                failSavedSelection(IllegalStateException("Selection failed"))
+                ).copy(selectionError = "Selection failed".resolvableString)
                 assertThat(selectionError.value).isNotNull()
             }
         },

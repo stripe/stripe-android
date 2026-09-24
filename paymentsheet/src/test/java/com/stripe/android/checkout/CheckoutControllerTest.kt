@@ -492,7 +492,9 @@ internal class CheckoutControllerTest {
             putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         },
     ) {
-        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            selectionError = "Selection failed".resolvableString,
+        )
         assertThat(stateHolder.selectionError.value).isNotNull()
 
         controller.session.test {
@@ -731,7 +733,9 @@ internal class CheckoutControllerTest {
             assertLoadingConsumed = true,
         ) {
             val selection = loadedSavedPaymentMethodSelection()
-            stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
+            stateHolder.state = requireNotNull(stateHolder.state).copy(
+                selectionError = "Selection failed".resolvableString,
+            )
             assertThat(stateHolder.selectionError.value).isNotNull()
             val before = committedState()
             val requestReceived = CountDownLatch(1)
