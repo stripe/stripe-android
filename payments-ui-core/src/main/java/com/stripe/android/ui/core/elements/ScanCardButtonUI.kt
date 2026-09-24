@@ -28,65 +28,56 @@ import com.stripe.android.ui.core.cardscan.CardScanLauncher
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
-import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    cardScanLauncher: CardScanLauncher?,
+    cardScanLauncher: CardScanLauncher,
 ) {
-    if (cardScanLauncher == null) {
-        return
+    val context = LocalContext.current
+    val eventsReporter = LocalCardScanEventsReporter.current
+    var hasReportedCardScanButtonShown by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!hasReportedCardScanButtonShown) {
+            eventsReporter.onCardScanButtonShown()
+            hasReportedCardScanButtonShown = true
+        }
     }
 
-    val context = LocalContext.current
-    val isCardScanAvailable by cardScanLauncher.isAvailable.collectAsState()
-
-    if (isCardScanAvailable) {
-        val eventsReporter = LocalCardScanEventsReporter.current
-        var hasReportedCardScanButtonShown by rememberSaveable { mutableStateOf(false) }
-        LaunchedEffect(Unit) {
-            if (!hasReportedCardScanButtonShown) {
-                eventsReporter.onCardScanButtonShown()
-                hasReportedCardScanButtonShown = true
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            enabled = enabled,
+            onClick = {
+                cardScanLauncher.launch(context)
             }
+        )
+    ) {
+        val iconStyle = LocalIconStyle.current
+
+        val icon = when (iconStyle) {
+            IconStyle.Filled -> R.drawable.stripe_ic_photo_camera
+            IconStyle.Outlined -> R.drawable.stripe_ic_photo_camera_outlined
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                enabled = enabled,
-                onClick = {
-                    cardScanLauncher.launch(context)
-                }
-            )
-        ) {
-            val iconStyle = LocalIconStyle.current
-
-            val icon = when (iconStyle) {
-                IconStyle.Filled -> R.drawable.stripe_ic_photo_camera
-                IconStyle.Outlined -> R.drawable.stripe_ic_photo_camera_outlined
-            }
-
-            Image(
-                painter = painterResource(icon),
-                contentDescription = stringResource(
-                    R.string.stripe_scan_card
-                ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
-                modifier = Modifier
-                    .width(18.dp)
-                    .height(18.dp)
-            )
-            Text(
-                stringResource(R.string.stripe_scan_card),
-                Modifier
-                    .padding(start = 4.dp),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.h6
-            )
-        }
+        Image(
+            painter = painterResource(icon),
+            contentDescription = stringResource(
+                R.string.stripe_scan_card
+            ),
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+            modifier = Modifier
+                .width(18.dp)
+                .height(18.dp)
+        )
+        Text(
+            stringResource(R.string.stripe_scan_card),
+            Modifier
+                .padding(start = 4.dp),
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.h6
+        )
     }
 }
