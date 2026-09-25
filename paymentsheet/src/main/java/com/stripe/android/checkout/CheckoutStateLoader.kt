@@ -106,6 +106,7 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
+        
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
