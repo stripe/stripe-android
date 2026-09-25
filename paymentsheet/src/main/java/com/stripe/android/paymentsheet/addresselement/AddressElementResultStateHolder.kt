@@ -12,7 +12,6 @@ internal class AddressElementResultStateHolder @Inject constructor() {
 
     val result: StateFlow<AddressElementActivityContract.Result?> = _result.asStateFlow()
 
-    fun setResult(result: AddressElementActivityContract.Result) {
+    fun setResult(result: AddressElementActivityContract.Result): Boolean =
         _result.compareAndSet(expect = null, update = result)
-    }
 }

@@ -9,8 +9,8 @@ internal class AddressElementResultStateHolderTest {
         val expectedResult = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
         val resultStateHolder = AddressElementResultStateHolder()
 
-        resultStateHolder.setResult(expectedResult)
-        resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+        assertThat(resultStateHolder.setResult(expectedResult)).isTrue()
+        assertThat(resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)).isFalse()
 
         assertThat(resultStateHolder.result.value).isEqualTo(expectedResult)
     }

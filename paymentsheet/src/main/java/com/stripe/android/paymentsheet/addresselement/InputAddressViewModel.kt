@@ -264,13 +264,15 @@ internal class InputAddressViewModel @Inject constructor(
         viewModelScope.launch {
             primaryButtonAction(addressDetails).fold(
                 onSuccess = { result ->
-                    shippingAddressAnalyticsData?.let {
-                        shippingAddressElementEventReporter.onSaveCompleted(it)
-                    }
-                    completeWithAddress(
+                    val resultAccepted = completeWithAddress(
                         addressDetails = addressDetails,
                         result = result,
                     )
+                    if (resultAccepted) {
+                        shippingAddressAnalyticsData?.let {
+                            shippingAddressElementEventReporter.onSaveCompleted(it)
+                        }
+                    }
                 },
                 onFailure = { error ->
                     shippingAddressAnalyticsData?.let {
@@ -285,7 +287,7 @@ internal class InputAddressViewModel @Inject constructor(
     private fun completeWithAddress(
         addressDetails: AddressDetails,
         result: AddressElementActivityContract.Result,
-    ) {
+    ): Boolean {
         when (args) {
             is AddressElementActivityContract.Args.Standalone -> {
                 addressDetails.address?.country?.let { country ->
@@ -298,16 +300,28 @@ internal class InputAddressViewModel @Inject constructor(
             }
             is AddressElementActivityContract.Args.CheckoutShipping -> Unit
         }
-        resultStateHolder.setResult(result)
+        return resultStateHolder.setResult(result)
     }
 
     private fun addressAnalyticsData(
         addressDetails: AddressDetails,
     ): ShippingAddressElementAnalyticsData {
+        val autocompleteAddress = inlineAutocompleteController?.autocompleteFilledAddress?.let { address ->
+            AddressDetails(
+                address = PaymentSheet.Address(
+                    city = address.city,
+                    country = address.country,
+                    line1 = address.line1,
+                    line2 = address.line2,
+                    postalCode = address.postalCode,
+                    state = address.state,
+                )
+            )
+        }
         return ShippingAddressElementAnalyticsData(
             country = addressDetails.address?.country.orEmpty(),
-            autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
-            editDistance = addressDetails.editDistance(collectedAddress.value),
+            autocompleteResultSelected = autocompleteAddress != null,
+            editDistance = autocompleteAddress?.let { addressDetails.editDistance(it) },
         )
     }
 
