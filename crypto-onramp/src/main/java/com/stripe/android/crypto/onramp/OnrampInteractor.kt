@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedExceptio
 import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
+import com.stripe.android.crypto.onramp.exception.MissingLinkSessionKeyException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
@@ -481,7 +482,7 @@ internal class OnrampInteractor @Inject constructor(
             return fulfillAdditionalKycRequirementFailure(LinkAccountNotVerifiedException())
         }
 
-        val documents = uploadAdditionalKycDocuments(submission.documents)
+        val documents = uploadAdditionalKycDocuments(submission.documents, linkAccount.linkSessionKey)
             .getOrElse { error -> return fulfillAdditionalKycRequirementFailure(error) }
 
         val questionnaire = submission.questionnaire?.let { questionnaire ->
@@ -508,12 +509,16 @@ internal class OnrampInteractor @Inject constructor(
 
     private suspend fun uploadAdditionalKycDocuments(
         documents: List<AdditionalKycDocumentSubmission>,
+        linkSessionKey: String?,
     ): Result<List<AdditionalKycDocumentSubmissionRequest>> {
         val requests = mutableListOf<AdditionalKycDocumentSubmissionRequest>()
         for (document in documents) {
             val fileIds = mutableListOf<String>()
             for (file in document.files) {
-                val uploadedFile = cryptoApiRepository.uploadAdditionalKycDocument(file)
+                if (linkSessionKey.isNullOrBlank()) {
+                    return Result.failure(MissingLinkSessionKeyException())
+                }
+                val uploadedFile = cryptoApiRepository.uploadAdditionalKycDocument(file, linkSessionKey)
                     .getOrElse { error -> return Result.failure(error) }
                 val fileId = uploadedFile.id
                     ?: return Result.failure(MissingAdditionalKycFileIdException())
