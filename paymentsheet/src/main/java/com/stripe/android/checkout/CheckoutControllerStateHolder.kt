@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -78,14 +77,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
         )
         return true
-    }
-
-    fun failSavedSelection(error: Throwable) {
-        state = state?.copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                error = error.stripeErrorMessage(),
-            ),
-        )
     }
 
     override val selection: StateFlow<PaymentSelection?> =
