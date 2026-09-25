@@ -546,7 +546,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * When not set, the payment element uses the credentials initialized through
              * [com.stripe.android.PaymentConfiguration].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ApiConfigurationPreview
             fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
             }
@@ -580,6 +580,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         }
 
         @OptIn(
+            ApiConfigurationPreview::class,
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             CardFundingFilteringPrivatePreview::class,
         )
