@@ -13,6 +13,8 @@ internal fun Any.toComponentPropsJsonObject(): JsonObject {
         EmptyProps -> JsonObject(emptyMap())
         is AccountOnboardingProps -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
         is PaymentsProps.State -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
+        is NotificationBannerProps -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
+        is NotificationBannerTaskProps -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
         else -> throw IllegalArgumentException("Unsupported props type: $this")
     }
 }

@@ -25,5 +25,9 @@
             android:name=".ui.features.payments.PaymentsExampleActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".ui.features.notificationbanner.NotificationBannerExampleActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 </manifest>
