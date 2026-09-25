@@ -545,7 +545,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * global [com.stripe.android.PaymentConfiguration] singleton for all network requests made by this
              * [EmbeddedPaymentElement] instance. When not set, defaults to the value set in
              * [com.stripe.android.PaymentConfiguration.init].
-            **/
+             */
             @ApiConfigurationPreview
             fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
