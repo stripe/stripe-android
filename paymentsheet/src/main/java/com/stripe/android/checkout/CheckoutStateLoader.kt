@@ -106,12 +106,6 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
-        // Commits run under the mutation lock, where a saved selection is never in flight, so only a
-        // failure for the unchanged selection carries forward.
-        val savedPaymentMethodSelectionState = carryForward.savedPaymentMethodSelectionState.takeIf {
-            it is SavedPaymentMethodSelectionState.Failed && carryForward.previousSelection == selection
-        } ?: SavedPaymentMethodSelectionState.Idle
-
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
@@ -121,7 +115,8 @@ internal class CheckoutStateLoader @Inject constructor(
             expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
-            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
+            // A committed session update supersedes a failed saved selection.
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
@@ -188,7 +183,6 @@ internal class CheckoutStateLoader @Inject constructor(
     private data class CarryForward(
         val cachedFlagImages: Map<String, Bitmap>?,
         val previousSelection: PaymentSelection?,
-        val savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState,
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
         val linkEagerPresentationSuppressed: Boolean,
@@ -197,7 +191,6 @@ internal class CheckoutStateLoader @Inject constructor(
             fun initial() = CarryForward(
                 cachedFlagImages = null,
                 previousSelection = null,
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 linkEagerPresentationSuppressed = false,
@@ -206,7 +199,6 @@ internal class CheckoutStateLoader @Inject constructor(
             fun from(state: CheckoutControllerState) = CarryForward(
                 cachedFlagImages = state.flagImages,
                 previousSelection = state.paymentSelection,
-                savedPaymentMethodSelectionState = state.savedPaymentMethodSelectionState,
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
                 linkEagerPresentationSuppressed = state.linkEagerPresentationSuppressed,

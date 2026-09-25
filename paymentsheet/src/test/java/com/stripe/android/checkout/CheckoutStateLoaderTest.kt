@@ -264,25 +264,6 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `reload clears selection error when the chosen selection changes`() = runScenario(
-        chosenSelection = PaymentSelection.GooglePay,
-    ) {
-        val error = IllegalStateException("Selection failed")
-        stateHolder.state = committedState(
-            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                error.stripeErrorMessage(),
-            ),
-        )
-
-        loader.reload(requireNotNull(stateHolder.state))
-
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-    }
-
-    @Test
     fun `reload preserves a non-default selection across a mutation`() = runScenario(
         // The loader would recompute a card selection, but the customer's Google Pay pick must win.
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -306,7 +287,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `reload preserves selection errors when selected saved method remains available`() = runScenario(
+    fun `reload clears selection errors when selected saved method remains available`() = runScenario(
         loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customer = savedCustomer(),
         selectionChooser = ::realSelectionChooser,
@@ -325,7 +306,7 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.selection.value).isEqualTo(selection)
         assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
@@ -401,18 +382,6 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.state?.temporarySelection).isEqualTo("card")
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-    }
-
-    @Test
-    fun `reload resets a pending saved selection state to idle`() = runScenario {
-        loader.reload(
-            committedState().copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-            ),
-        )
-
-        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
