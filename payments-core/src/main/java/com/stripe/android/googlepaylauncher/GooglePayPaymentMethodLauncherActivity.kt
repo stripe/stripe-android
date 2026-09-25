@@ -40,13 +40,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val errorReporter: ErrorReporter by lazy {
         ErrorReporter.createFallbackInstance(
             context = this,
-            apiConfigurationProvider = {
-                if (::args.isInitialized) {
-                    args.apiConfiguration
-                } else {
-                    error("GooglePayPaymentMethodLauncherActivity was started without arguments.")
-                }
-            },
+            apiConfigurationProvider = { args.apiConfiguration },
         )
     }
 
