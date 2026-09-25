@@ -164,6 +164,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayPromptPayDetails -> {
                 StripeIntent.NextActionType.DisplayPromptPayDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }

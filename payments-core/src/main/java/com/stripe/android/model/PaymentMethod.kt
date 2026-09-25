@@ -517,6 +517,14 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        Pix(
+            "pix",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
         Wero(
             "wero",
             isReusable = false,
