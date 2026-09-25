@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">Bank EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Meta tikkonferma l-ħlas tiegħek permezz ta\' GCash, tkun qed tippermetti lil %s jiġbor il-ħlas mill-kont ta\' GCash tiegħek għal ħlasijiet fil-futur skont ir-regoli tagħhom.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">L-IBAN li daħħalt mhux komplut.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">L-isem fuq il-karta</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Agħżel kif trid tħallas:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Meta tikkonferma l-ħlas tiegħek, taqbel li t-tranżazzjoni tiegħek se tiġi ġestita minn Global Stack Services Limited bħala n-negozjant reġistrat u skont it-<a href=\"%s\">termini tal-użu</a> tagħhom]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Meta tikkonferma l-ħlas tiegħek, taqbel li t-tranżazzjoni tiegħek se tiġi ġestita minn Global Stack Services Limited bħala n-negozjant reġistrat u skont it-<a href=\"%s\">termini</a> tagħhom.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debitu SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Wara s-sottomissjoni, se tiġi ridirett biex tlesti l-passi li jmiss b\'mod sigur.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Meta tikkonferma l-pagament tiegħek ma\' PayPal, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' PayPal tiegħek skont ir-regoli tagħha.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Stabilixxi</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Meta tikkonferma l-ħlas tiegħek permezz ta\' Touch \'n Go, tkun qed tippermetti lil %s jiġbor il-ħlas mill-kont ta\' Touch \'n Go tiegħek għal ħlasijiet fil-futur skont it-termini tagħhom.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Meta tikkonferma l-ħlas tiegħek permezz ta\' TrueMoney, tkun qed tippermetti lil %s jiġbor il-ħlas mill-kont ta\' TrueMoney tiegħek għal ħlasijiet fil-futur skont it-termini tagħhom.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Billi tkompli, tawtorizza %1$s biex awtomatikament tħallas il-Bilanċ tiegħek ta\' Twint b\'mod ripetut skont il-pjan tax-xiri jew l-abbonament tiegħek.</string>
   <!-- Label for UPI ID number field on form -->

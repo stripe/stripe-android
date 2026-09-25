@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">A GCash segítségével történő fizetés megerősítésével engedélyezi a(z) %s számára, hogy a feltételeinek megfelelően megterhelje a GCash-számláját a jövőbeli fizetések céljából.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">A beírt IBAN-szám hiányos.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">A kártyán szereplő név</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Válassza ki, hogyan szeretne fizetni:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[A fizetés megerősítésével elfogadja, hogy a tranzakciót a Global Stack Services Limited bejegyzett kereskedőként kezeli a <a href=\"%s\">felhasználási feltételeinek</a> megfelelően.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[A fizetés megerősítésével elfogadja, hogy a tranzakciót a Global Stack Services Limited bejegyzett kereskedőként kezeli a <a href=\"%s\">feltételeinek</a> megfelelően.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA beszedés</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">A beküldést követően átirányítjuk, hogy biztonságosan elvégezze a következő lépéseket.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">A fizetés megerősítésével a PayPalon engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a PayPal számláját.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Legyen ez az alapértelmezett fizetési mód</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Beállítás</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">A Touch \'n Go segítségével történő fizetés megerősítésével engedélyezi a(z) %s számára, hogy a feltételeinek megfelelően megterhelje a Touch \'n Go-számláját a jövőbeli fizetések céljából.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">A TrueMoney segítségével történő fizetés megerősítésével engedélyezi a(z) %s számára, hogy a feltételeinek megfelelően megterhelje a TrueMoney-számláját a jövőbeli fizetések céljából.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Ha folytatja, engedélyezi, hogy a(z) %1$s automatikusan megterhelje az Ön Twint egyenlegét a vásárlása vagy előfizetése szerint.</string>
   <!-- Label for UPI ID number field on form -->

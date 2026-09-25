@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
@@ -44,8 +45,8 @@ class CryptoApiRepositoryFileUploadTest {
             ),
             requestOptions = eq(
                 ApiRequest.Options(
-                    apiKey = "pk_test_123",
-                    stripeAccount = "acct_123",
+                    apiKey = PUBLISHABLE_KEY,
+                    stripeAccount = STRIPE_ACCOUNT_ID,
                 )
             ),
         )
@@ -74,8 +75,12 @@ class CryptoApiRepositoryFileUploadTest {
                 stripeNetworkClient = mock<StripeNetworkClient>(),
                 stripeRepository = stripeRepository,
                 linkController = mock<LinkController>(),
-                publishableKeyProvider = { "pk_test_123" },
-                stripeAccountIdProvider = { "acct_123" },
+                apiConfigProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = PUBLISHABLE_KEY,
+                        stripeAccountId = STRIPE_ACCOUNT_ID,
+                    )
+                },
                 apiVersion = CRYPTO_ONRAMP_API_VERSION,
                 sdkVersion = StripeSdkVersion.VERSION,
                 appInfo = null,
@@ -90,4 +95,9 @@ class CryptoApiRepositoryFileUploadTest {
         val stripeRepository: StripeRepository,
         val file: File,
     )
+
+    private companion object {
+        const val PUBLISHABLE_KEY = "pk_test_123"
+        const val STRIPE_ACCOUNT_ID = "acct_123"
+    }
 }

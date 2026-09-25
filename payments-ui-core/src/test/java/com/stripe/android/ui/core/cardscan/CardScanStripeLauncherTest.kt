@@ -1,9 +1,16 @@
 package com.stripe.android.ui.core.cardscan
 
 import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -15,6 +22,16 @@ import com.stripe.android.stripecardscan.payment.card.ScannedCard as StripeScann
 
 @RunWith(RobolectricTestRunner::class)
 class CardScanStripeLauncherTest {
+
+    @Test
+    fun `launch passes API configuration to Card Scan`() = runScenario {
+        launcher.launch(ApplicationProvider.getApplicationContext())
+
+        val configuration = fakeActivityLauncher.launchCalls.awaitItem().cardScanConfiguration
+        assertThat(configuration.apiConfiguration).isEqualTo(API_CONFIGURATION)
+        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation)
+            .isEqualTo("stripe_card_scan")
+    }
 
     @Test
     fun `parseActivityResult with Completed result returns Completed with PAN only`() = runScenario {
@@ -97,28 +114,60 @@ class CardScanStripeLauncherTest {
     private class Scenario(
         val launcher: CardScanStripeLauncher,
         val fakeEventsReporter: FakeCardScanEventsReporter,
+        val fakeActivityLauncher: FakeActivityLauncher,
     )
 
     private fun runScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val fakeEventsReporter = FakeCardScanEventsReporter()
+        val fakeActivityLauncher = FakeActivityLauncher()
         val launcher = CardScanStripeLauncher(
             context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
+            apiConfiguration = API_CONFIGURATION,
             enableMlKitCardScan = false,
             elementsSessionId = null,
             disableSsdOcrCardScan = false,
             isLaunchingState = mutableStateOf(false),
-        )
+        ).apply {
+            activityLauncher = fakeActivityLauncher
+        }
 
         val scenario = Scenario(
             launcher = launcher,
             fakeEventsReporter = fakeEventsReporter,
+            fakeActivityLauncher = fakeActivityLauncher,
         )
 
         scenario.block()
 
         fakeEventsReporter.validate()
+        fakeActivityLauncher.validate()
+    }
+
+    private class FakeActivityLauncher : ActivityResultLauncher<CardScanSheetParams>() {
+        private val _launchCalls = Turbine<CardScanSheetParams>()
+        val launchCalls: ReceiveTurbine<CardScanSheetParams> = _launchCalls
+
+        override val contract: ActivityResultContract<CardScanSheetParams, *>
+            get() = error("Not implemented")
+
+        override fun launch(input: CardScanSheetParams, options: ActivityOptionsCompat?) {
+            _launchCalls.add(input)
+        }
+
+        override fun unregister() = error("Not implemented")
+
+        fun validate() {
+            _launchCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    private companion object {
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = "acct_123",
+        )
     }
 }

@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections.example
 
 import android.os.Build
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -47,14 +49,19 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.MarkdownParser
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
 import com.stripe.android.financialconnections.example.Experience.LinkCardBrand
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
+import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForSetupIntent
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
+import com.stripe.android.financialconnections.example.data.model.IssuedConsent
 import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.financialconnections.example.settings.SettingsUi
@@ -128,6 +135,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     is OpenForData -> effect.launch(financialConnectionsSheetForData)
                     is OpenForToken -> effect.launch(financialConnectionsSheetForToken)
                     is OpenForPaymentIntent -> effect.launch(state, paymentSheet)
+                    is OpenForSetupIntent -> effect.launch()
                 }
             }
         }
@@ -142,13 +150,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     private fun OpenForData.launch(
         financialConnectionsSheet: FinancialConnectionsSheet
     ) {
-        financialConnectionsSheet.present(configuration)
+        financialConnectionsSheet.present(configuration, preCollectedConsent)
     }
 
     private fun OpenForToken.launch(
         financialConnectionsSheet: FinancialConnectionsSheet
     ) {
-        financialConnectionsSheet.present(configuration)
+        financialConnectionsSheet.present(configuration, preCollectedConsent)
     }
 
     private fun OpenForPaymentIntent.launch(
@@ -176,7 +184,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 configuration = CollectBankAccountConfiguration.USBankAccount(
                     name = "Sample name",
                     email = email,
-                )
+                ),
+                preCollectedConsent = preCollectedConsent,
             )
             InstantDebits,
             LinkCardBrand -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
@@ -189,6 +198,19 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 )
             )
         }
+    }
+
+    private fun OpenForSetupIntent.launch() {
+        collectBankAccountForAchLauncher.presentWithSetupIntent(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = setupIntentSecret,
+            configuration = CollectBankAccountConfiguration.USBankAccount(
+                name = "Sample name",
+                email = "",
+            ),
+            preCollectedConsent = preCollectedConsent,
+        )
     }
 
     private fun OpenForPaymentIntent.launchPaymentSheet(
@@ -229,6 +251,14 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onButtonClick: () -> Unit
     ) {
         val (showEventsDialog, setShowEventsDialog) = remember { mutableStateOf(false) }
+
+        state.pendingPreCollectedConsent?.let { pendingConsent ->
+            PreCollectedConsentDialog(
+                consent = pendingConsent.consent,
+                onAccept = viewModel::onPreCollectedConsentAccepted,
+                onCancel = viewModel::onPreCollectedConsentCancelled,
+            )
+        }
 
         if (showEventsDialog) {
             EventsDialog(setShowEventsDialog, state)
@@ -395,6 +425,47 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     Text("Close")
                 }
             }
+        )
+    }
+
+    @Composable
+    private fun PreCollectedConsentDialog(
+        consent: IssuedConsent,
+        onAccept: () -> Unit,
+        onCancel: () -> Unit,
+    ) {
+        AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text("Financial Connections consent") },
+            text = {
+                LazyColumn {
+                    item {
+                        Text("Stripe-issued text (${consent.locale})")
+                    }
+                    item {
+                        AndroidView(
+                            modifier = Modifier.padding(top = 12.dp),
+                            factory = { context ->
+                                TextView(context).apply {
+                                    movementMethod = LinkMovementMethod.getInstance()
+                                }
+                            },
+                            update = { textView ->
+                                textView.text = HtmlCompat.fromHtml(
+                                    MarkdownParser.toHtml(consent.consentText),
+                                    HtmlCompat.FROM_HTML_MODE_LEGACY,
+                                )
+                            },
+                        )
+                    }
+                }
+            },
+            dismissButton = {
+                Button(onClick = onCancel) { Text("Cancel") }
+            },
+            confirmButton = {
+                Button(onClick = onAccept) { Text("Agree and continue") }
+            },
         )
     }
 

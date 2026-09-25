@@ -119,6 +119,7 @@ internal object LinkTestUtils {
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = linkBrand,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 }

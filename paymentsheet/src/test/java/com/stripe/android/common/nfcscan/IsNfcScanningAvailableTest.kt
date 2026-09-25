@@ -19,18 +19,18 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class IsNfcScanningAvailableTest {
     @Test
-    fun `returns false when NFC scanning is disabled on metadata`() {
+    fun `returns unavailable when NFC scanning is disabled on metadata`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
         assertThat(
             isNfcScanningAvailable.get(
                 metadata = createMetadata(isNfcScanningEnabled = false),
             )
-        ).isFalse()
+        ).isEqualTo(NfcScanningAvailability.Unavailable)
     }
 
     @Test
-    fun `returns false when tap to add is supported`() {
+    fun `returns available as secondary when tap to add is supported`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
         assertThat(
@@ -40,11 +40,13 @@ internal class IsNfcScanningAvailableTest {
                     isTapToAddSupported = true,
                 ),
             )
-        ).isFalse()
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test
-    fun `returns false when stripe card scan is allowed and SDK is imported`() {
+    fun `returns available as secondary when stripe card scan is allowed and SDK is imported`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(result = true),
         )
@@ -56,11 +58,13 @@ internal class IsNfcScanningAvailableTest {
                     isStripeCardScanAllowed = true,
                 ),
             )
-        ).isFalse()
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test
-    fun `returns true when stripe card scan is allowed but SDK is not imported`() {
+    fun `returns available as secondary when stripe card scan is allowed but SDK is not imported`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(result = false),
         )
@@ -72,11 +76,13 @@ internal class IsNfcScanningAvailableTest {
                     isStripeCardScanAllowed = true,
                 ),
             )
-        ).isTrue()
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test
-    fun `returns false when device is not secure`() {
+    fun `returns available when device is not secure`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
         )
@@ -85,11 +91,13 @@ internal class IsNfcScanningAvailableTest {
             isNfcScanningAvailable.get(
                 metadata = createMetadata(isNfcScanningEnabled = true),
             )
-        ).isFalse()
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test
-    fun `returns false when NFC hardware is unavailable`() {
+    fun `returns unavailable when NFC hardware is unavailable`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             nfcHardwareDelegate = FakeNfcHardwareDelegate(result = false),
         )
@@ -98,11 +106,11 @@ internal class IsNfcScanningAvailableTest {
             isNfcScanningAvailable.get(
                 metadata = createMetadata(isNfcScanningEnabled = true),
             )
-        ).isFalse()
+        ).isEqualTo(NfcScanningAvailability.Unavailable)
     }
 
     @Test
-    fun `returns false when assigned to control`() {
+    fun `returns unavailable when assigned to control`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
         assertThat(
@@ -112,11 +120,11 @@ internal class IsNfcScanningAvailableTest {
                     experimentVariant = "control",
                 ),
             )
-        ).isFalse()
+        ).isEqualTo(NfcScanningAvailability.Unavailable)
     }
 
     @Test
-    fun `returns true when assigned to treatment and NFC is enabled and secure`() {
+    fun `returns available as primary when assigned to treatment and NFC is enabled and secure`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
         assertThat(
@@ -126,18 +134,22 @@ internal class IsNfcScanningAvailableTest {
                     experimentVariant = "treatment",
                 ),
             )
-        ).isTrue()
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = true)
+        )
     }
 
     @Test
-    fun `returns true when experiment is unassigned and NFC is enabled and secure`() {
+    fun `returns available as secondary when experiment is unassigned and NFC is enabled and secure`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
         assertThat(
             isNfcScanningAvailable.get(
                 metadata = createMetadata(isNfcScanningEnabled = true),
             )
-        ).isTrue()
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test

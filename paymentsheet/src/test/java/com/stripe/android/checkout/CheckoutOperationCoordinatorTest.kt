@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResp
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -38,6 +40,9 @@ import kotlin.test.assertFailsWith
 
 @Suppress("LargeClass")
 internal class CheckoutOperationCoordinatorTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `runMutation returns the block result`() = runScenario {
@@ -757,6 +762,7 @@ internal class CheckoutOperationCoordinatorTest {
             sessionRefresher = sessionRefresher,
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
+            viewModelScope = backgroundScope,
         )
         val observerJob = backgroundScope.launch {
             coordinator.observeConfirmationResults()

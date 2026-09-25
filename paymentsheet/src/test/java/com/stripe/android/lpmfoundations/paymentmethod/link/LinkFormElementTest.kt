@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.flow.Flow
@@ -123,9 +124,9 @@ class LinkFormElementTest {
     }
 
     private fun ComposeTestRule.waitForRemainingLinkFields() {
-        waitUntil(timeoutMillis = 5000L) {
+        waitUntilWithIdle {
             onAllNodesWithTag(testTag = LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -186,6 +187,7 @@ class LinkFormElementTest {
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 

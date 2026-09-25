@@ -46,17 +46,34 @@ class FinancialConnectionsSheet internal constructor(
     fun present(
         configuration: Configuration
     ) {
+        present(configuration = configuration, preCollectedConsent = null)
+    }
+
+    /**
+     * Present the [FinancialConnectionsSheet].
+     *
+     * @param configuration the [FinancialConnectionsSheet] configuration
+     * @param preCollectedConsent evidence of consent to link a bank account, collected by the
+     * merchant prior to presenting the sheet.
+     */
+    fun present(
+        configuration: Configuration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) {
         financialConnectionsSheetLauncher.present(
-            configuration = configuration.toInternal(),
+            configuration = configuration.toInternal(preCollectedConsent),
             elementsSessionContext = null,
         )
     }
 
-    private fun Configuration.toInternal(): FinancialConnectionsSheetConfiguration {
+    private fun Configuration.toInternal(
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ): FinancialConnectionsSheetConfiguration {
         return FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = financialConnectionsSessionClientSecret,
             publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId
+            stripeAccountId = stripeAccountId,
+            preCollectedConsent = preCollectedConsent,
         )
     }
 

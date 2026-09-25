@@ -15,7 +15,9 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.sepa.SepaMandateConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -37,7 +39,9 @@ import javax.inject.Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
+        ApiRequestOptionsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        SepaMandateConfirmationModule::class,
         TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         ApiConfigurationModule::class,

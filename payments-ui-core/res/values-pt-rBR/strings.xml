@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">Banco EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Banco do FPX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Ao confirmar seu pagamento com GCash, você permite que %s cobre sua conta GCash para pagamentos futuros de acordo com os termos.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">O IBAN inserido está incompleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">Nome no cartão</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Selecione como você deseja pagar:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Ao confirmar seu pagamento, você concorda que sua transação será processada pela Global Stack Services Limited como comerciante de registro e de acordo com os <a href=\"%s\">termos de uso</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Ao confirmar seu pagamento, você concorda que sua transação será processada pela Global Stack Services Limited como comerciante de registro e de acordo com os <a href=\"%s\">termos</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banco Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Débito SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Após o envio, redirecionaremos você para concluir as próximas etapas com segurança.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Ao confirmar seu pagamento com o PayPal, você permite que %s cobre sua conta do PayPal por pagamentos futuros em conformidade com os termos definidos pela empresa.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Definir como forma de pagamento padrão</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurar</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Ao confirmar seu pagamento com Touch \'n Go, você permite que %s cobre sua conta Touch \'n Go para pagamentos futuros de acordo com os termos.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Ao confirmar seu pagamento com TrueMoney, você permite que %s cobre sua conta TrueMoney para pagamentos futuros de acordo com os termos.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Ao continuar, você autoriza %1$s a debitar automaticamente seu saldo Twint de forma recorrente, de acordo com sua compra ou plano de assinatura.</string>
   <!-- Label for UPI ID number field on form -->

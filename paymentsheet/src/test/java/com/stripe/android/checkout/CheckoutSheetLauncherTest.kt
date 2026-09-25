@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -63,6 +64,9 @@ internal class CheckoutSheetLauncherTest {
 
     @get:Rule
     val paymentConfigurationTestRule = PaymentConfigurationTestRule(applicationContext)
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `launchForm launches activity with correct parameters`() = testScenario {
@@ -991,7 +995,8 @@ internal class CheckoutSheetLauncherTest {
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
-            resultCallback = CheckoutController.ResultCallback {},
+            resultCallback = {},
+            viewModelScope = backgroundScope,
         )
         val launcherState = CheckoutSheetLauncherState(savedStateHandle)
         val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(

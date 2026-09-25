@@ -108,13 +108,15 @@ composeRule.onNodeWithTag(SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
 
 ## Waiting for Recomposition
 
-```kotlin
-// Wait for pending recompositions
-composeRule.waitForIdle()
 
-// Wait for async content with timeout
-composeRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-    composeRule.onAllNodesWithTag(MY_TAG).fetchSemanticsNodes().isNotEmpty()
+```kotlin
+// Wait for pending recompositions and then for async content
+composeRule.waitUntilWithIdle(
+    conditionDescription = "node with tag $MY_TAG to appear",
+) {
+    composeRule.onAllNodesWithTag(MY_TAG)
+        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+        .isNotEmpty()
 }
 ```
 
@@ -124,3 +126,7 @@ composeRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
 - **Missing `@RunWith(RobolectricTestRunner::class)`** — Compose tests need Android framework
 - **Using `onNodeWithText` for dynamic content** — prefer test tags for stability
 - **Not calling `waitForIdle()` after state changes** — assertions may run before recomposition
+- **Calling `waitUntil` directly for async UI** — use `waitUntilWithIdle` for the standard idle
+  synchronization and 5,000 ms timeout
+- **Requiring a Compose root while polling** — pass `atLeastOneRootRequired = false` to
+  `fetchSemanticsNodes`

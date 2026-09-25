@@ -237,6 +237,30 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
+    fun `custom API is always visible and custom credentials require custom merchant`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        val session = CheckoutPlaygroundDefinitions.session
+        page.value(session.customStripeApi).performScrollTo().assertIsDisplayed()
+        page.value(session.customSecretKey).assertDoesNotExist()
+        page.value(session.customPublishableKey).assertDoesNotExist()
+
+        settings.update(session.merchant, com.stripe.android.paymentsheet.example.playground.settings.Merchant.Custom)
+        composeRule.waitForIdle()
+
+        page.value(session.customSecretKey)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performTextReplacement("sk_test_custom")
+        page.value(session.customPublishableKey)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performTextReplacement("pk_test_custom")
+        assertThat(settings[session.customSecretKey]).isEqualTo("sk_test_custom")
+        assertThat(settings[session.customPublishableKey]).isEqualTo("pk_test_custom")
+    }
+
+    @Test
     fun `payment method saving is displayed only for customers`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
     ) {

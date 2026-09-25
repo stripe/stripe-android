@@ -13,6 +13,8 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
+import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,12 +45,24 @@ internal class AttestationViewModel @Inject constructor(
                 _result.emit(AttestationActivityResult.Success(token))
             }.onFailure { error ->
                 errorReporter.report(
-                    errorEvent = ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED,
+                    errorEvent = errorEventFor(error),
                     stripeException = StripeException.create(error)
                 )
                 attestationAnalyticsEventsReporter.requestTokenFailed(error)
                 _result.emit(AttestationActivityResult.Failed)
             }
+    }
+
+    private fun errorEventFor(error: Throwable): ErrorReporter.ErrorEvent {
+        return when ((error as? AttestationError)?.errorType) {
+            AttestationError.ErrorType.CLOUD_PROJECT_NUMBER_IS_INVALID ->
+                UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_CLOUD_PROJECT_NUMBER_IS_INVALID
+            AttestationError.ErrorType.INTEGRITY_TOKEN_PROVIDER_INVALID ->
+                UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_INTEGRITY_TOKEN_PROVIDER_INVALID
+            AttestationError.ErrorType.REQUEST_HASH_TOO_LONG ->
+                UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_HASH_TOO_LONG
+            else -> ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED
+        }
     }
 
     internal class NoArgsException : IllegalArgumentException("No args received for AttestationActivity")

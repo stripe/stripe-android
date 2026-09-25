@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.experiment.DefaultLogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -19,6 +20,7 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
+import javax.inject.Provider
 import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 
@@ -58,6 +60,7 @@ internal class LinkHoldbackExposureModule {
     @LinkDisabledApiRepository
     fun providesLinkRepository(
         application: Application,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
@@ -76,6 +79,7 @@ internal class LinkHoldbackExposureModule {
         )
         return LinkApiRepository(
             application = application,
+            apiConfigurationProvider = apiConfigurationProvider,
             requestSurface = requestSurface,
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,

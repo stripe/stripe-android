@@ -1,6 +1,9 @@
 package com.stripe.android.common.nfcscan.analytics
 
 import com.stripe.android.common.nfcscan.scanner.NfcScanningError
+import com.stripe.android.common.nfcscan.tapzone.DeviceManufacturer
+import com.stripe.android.common.nfcscan.tapzone.DeviceModel
+import com.stripe.android.common.nfcscan.tapzone.SdkVersion
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -14,6 +17,11 @@ internal interface NfcScanningEventReporter {
      * running in the background
      */
     fun onNfcScanStarted()
+
+    /**
+     * The user was blocked from using the NFC scanning flow because their device is not secure.
+     */
+    fun onNfcScanBlocked()
 
     /**
      * User attempts to scan their card using NFC, meaning the scanner has detected a readable NFC card placed
@@ -60,10 +68,17 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @EventPrefix private val eventPrefix: String,
+    @DeviceManufacturer private val deviceManufacturer: String,
+    @DeviceModel private val deviceModel: String,
+    @SdkVersion private val sdkVersion: Int,
 ) : NfcScanningEventReporter {
     override fun onNfcScanStarted() {
         durationProvider.start(DurationProvider.Key.NfcScan)
         fireEvent(eventName = SCAN_STARTED_EVENT_NAME)
+    }
+
+    override fun onNfcScanBlocked() {
+        fireEvent(eventName = SCAN_BLOCKED_EVENT_NAME)
     }
 
     override fun onNfcScanSucceeded(numberOfAttempts: Int) {
@@ -77,12 +92,18 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
 
     override fun onNfcScanAttemptStarted() {
         durationProvider.start(DurationProvider.Key.NfcScanAttempt)
-        fireEvent(eventName = SCAN_ATTEMPT_STARTED_EVENT_NAME)
+        fireEvent(
+            eventName = SCAN_ATTEMPT_STARTED_EVENT_NAME,
+            additionalParams = deviceParams,
+        )
     }
 
     override fun onNfcScanAttemptSucceeded() {
         val duration = durationProvider.end(DurationProvider.Key.NfcScanAttempt)
-        fireEvent(eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
+        fireEvent(
+            eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME,
+            additionalParams = duration.mapOfDurationInSeconds() + deviceParams,
+        )
     }
 
     override fun onNfcScanAttemptFailed(error: NfcScanningError) {
@@ -92,7 +113,8 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
             eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME,
             additionalParams = duration.mapOfDurationInSeconds() +
                 mapOf(FIELD_ERROR_CODE to error.errorCode) +
-                error.parameters,
+                error.parameters +
+                deviceParams,
         )
     }
 
@@ -126,13 +148,24 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         )
     }
 
+    private val deviceParams: Map<String, Any>
+        get() = mapOf(
+            FIELD_MANUFACTURER to deviceManufacturer,
+            FIELD_MODEL to deviceModel,
+            FIELD_SDK_VERSION to sdkVersion,
+        )
+
     private companion object {
         const val FIELD_ERROR_CODE = "error_code"
+        const val FIELD_MANUFACTURER = "manufacturer"
+        const val FIELD_MODEL = "model"
+        const val FIELD_SDK_VERSION = "sdk_version"
 
         const val FIELD_CANCELLATION_REASON = "cancellation_reason"
         const val FIELD_NUMBER_OF_ATTEMPTS = "number_of_attempts"
 
         const val SCAN_STARTED_EVENT_NAME = "nfc_scan_started"
+        const val SCAN_BLOCKED_EVENT_NAME = "nfc_scan_blocked"
         const val SCAN_SUCCESS_EVENT_NAME = "nfc_scan_success"
         const val SCAN_CANCELED_EVENT_NAME = "nfc_scan_canceled"
         const val SCAN_ATTEMPT_STARTED_EVENT_NAME = "nfc_scan_attempt_started"

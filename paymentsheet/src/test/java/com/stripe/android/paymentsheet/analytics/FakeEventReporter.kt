@@ -104,8 +104,8 @@ internal class FakeEventReporter : EventReporter {
     val billingAddressCompletedCalls: ReceiveTurbine<BillingAddressCompletedCall> =
         _billingAddressCompletedCalls
 
-    private val _pmmPromotionsFetched = Turbine<Unit>()
-    val pmmPromotionsFetched: ReceiveTurbine<Unit> =
+    private val _pmmPromotionsFetched = Turbine<String>()
+    val pmmPromotionsFetched: ReceiveTurbine<String> =
         _pmmPromotionsFetched
 
     private val _pmmPromotionsDisplayed = Turbine<Boolean>()
@@ -301,8 +301,8 @@ internal class FakeEventReporter : EventReporter {
         )
     }
 
-    override fun onPaymentMethodMessagePromotionsFetchBegin() {
-        _pmmPromotionsFetched.add(Unit)
+    override fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String) {
+        _pmmPromotionsFetched.add(publishableKey)
     }
 
     override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {

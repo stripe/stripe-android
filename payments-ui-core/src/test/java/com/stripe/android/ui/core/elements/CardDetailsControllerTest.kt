@@ -22,6 +22,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.ApiKeyFixtures
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -278,7 +279,7 @@ class CardDetailsControllerTest {
             ensureAllEventsConsumed()
         }
 
-        assertThat(cardController.cardPillElement.value).isNotNull()
+        assertThat(cardController.cardPillElement.value?.controller?.expirationDate).isEqualTo("06/30")
     }
 
     @Test
@@ -354,6 +355,7 @@ class CardDetailsControllerTest {
             val cardPillElement = after[0] as CardPillElement
 
             assertThat(cardPillElement.controller.cardNumber).isEqualTo("4242424242424242")
+            assertThat(cardPillElement.controller.expirationDate).isEqualTo("06/30")
             assertThat(after[1]).isSameInstanceAs(cardController.cvcElement)
             ensureAllEventsConsumed()
         }
@@ -543,7 +545,10 @@ class CardDetailsControllerTest {
                         enabled = true,
                         field = CardDetailsElement(
                             identifier = FormFieldId.Generic("card_details"),
-                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                                context = context,
+                                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                            ),
                             initialValues = mapOf(),
                             coroutineScope = coroutineScope,
                         ),
@@ -572,7 +577,10 @@ class CardDetailsControllerTest {
     ): CardDetailsController {
         return CardDetailsController(
             cardBrandFilter = cardBrandFilter,
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                context = context,
+                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            ),
             initialValues = initialValues,
             coroutineScope = coroutineScope,
             cbcEligibility = cbcEligibility,
