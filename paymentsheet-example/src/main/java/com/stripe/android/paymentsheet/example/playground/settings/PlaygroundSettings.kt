@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
@@ -143,6 +144,9 @@ internal class PlaygroundSettings private constructor(
             appSettings: Settings,
         ): PaymentSheet.Configuration {
             val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
+            if (this[UseApiConfigurationSettingsDefinition]) {
+                builder.apiConfiguration(apiConfiguration())
+            }
             val paymentSheetConfigurationData =
                 PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
@@ -172,6 +176,9 @@ internal class PlaygroundSettings private constructor(
             playgroundState: PlaygroundState.Payment
         ): EmbeddedPaymentElement.Configuration {
             val builder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            if (this[UseApiConfigurationSettingsDefinition]) {
+                builder.apiConfiguration(apiConfiguration())
+            }
             val embeddedConfigurationData = PlaygroundSettingDefinition.EmbeddedConfigurationData(builder)
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData, settings)
@@ -310,6 +317,15 @@ internal class PlaygroundSettings private constructor(
                 settingDefinition.configure(builder, value)
             }
             return builder.build()
+        }
+
+        private fun apiConfiguration(): ApiConfiguration {
+            val resolved = this[ResolvedApiConfigurationSettingsDefinition]
+            return ApiConfiguration(
+                requireNotNull(resolved.publishableKey) {
+                    "No publishable key was resolved for ApiConfiguration."
+                }
+            ).stripeAccountId(resolved.stripeAccountId)
         }
 
         private fun <T> PlaygroundSettingDefinition<T>.configure(
@@ -573,6 +589,7 @@ internal class PlaygroundSettings private constructor(
             CaptureMethodSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanning),
             FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanningSecurity),
+            UseApiConfigurationSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
@@ -580,6 +597,7 @@ internal class PlaygroundSettings private constructor(
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
             ConfirmationTokenSettingsDefinition,
+            ResolvedApiConfigurationSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
