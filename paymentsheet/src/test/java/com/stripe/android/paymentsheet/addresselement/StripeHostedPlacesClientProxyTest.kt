@@ -304,8 +304,9 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
 
-        val token = eventReporter.autocompleteSessionStartedCalls.awaitItem()
-        assertThat(token).isNotEmpty()
+        val sessionStartedCall = eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        assertThat(sessionStartedCall.sessionToken).isNotEmpty()
+        assertThat(sessionStartedCall.country).isEqualTo("US")
         repository.findPredictionsCalls.awaitItem()
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
@@ -341,7 +342,7 @@ class StripeHostedPlacesClientProxyTest {
         val proxy = createProxy(repository = repository, eventReporter = eventReporter)
 
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
-        val initialToken = eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        val initialToken = eventReporter.autocompleteSessionStartedCalls.awaitItem().sessionToken
         repository.findPredictionsCalls.awaitItem()
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
         eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
@@ -349,7 +350,7 @@ class StripeHostedPlacesClientProxyTest {
         proxy.resetSession()
 
         proxy.findAutocompletePredictions(query = "456 Oak", country = "US", limit = 4)
-        val newToken = eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        val newToken = eventReporter.autocompleteSessionStartedCalls.awaitItem().sessionToken
         assertThat(newToken).isNotEqualTo(initialToken)
         repository.findPredictionsCalls.awaitItem()
         eventReporter.autocompleteFetchStartedCalls.awaitItem()
@@ -371,6 +372,7 @@ class StripeHostedPlacesClientProxyTest {
 
         val suggestionsCall = eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
         assertThat(suggestionsCall.resultCount).isEqualTo(1)
+        assertThat(suggestionsCall.country).isEqualTo("US")
         repository.ensureAllEventsConsumed()
         eventReporter.validate()
     }
@@ -390,6 +392,7 @@ class StripeHostedPlacesClientProxyTest {
 
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Network error")
+        assertThat(errorCall.country).isEqualTo("US")
         repository.ensureAllEventsConsumed()
         eventReporter.validate()
     }
@@ -413,6 +416,7 @@ class StripeHostedPlacesClientProxyTest {
         val selectedCall = eventReporter.autocompleteSelectedCalls.awaitItem()
         assertThat(selectedCall.queryLength).isEqualTo("123 Main".length)
         assertThat(selectedCall.placeId).isEqualTo("place_123")
+        assertThat(selectedCall.country).isEqualTo("US")
         repository.ensureAllEventsConsumed()
         eventReporter.validate()
     }
@@ -467,6 +471,60 @@ class StripeHostedPlacesClientProxyTest {
 
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Details error")
+        assertThat(errorCall.country).isEqualTo("US")
+        repository.ensureAllEventsConsumed()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `autocomplete events report the country of the latest query`() = runTest {
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val repository = defaultRepository()
+        val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+
+        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        assertThat(eventReporter.autocompleteSessionStartedCalls.awaitItem().country).isEqualTo("US")
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
+        assertThat(eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem().country).isEqualTo("US")
+
+        proxy.findAutocompletePredictions(query = "123 Main", country = "CA", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
+        assertThat(eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem().country).isEqualTo("CA")
+
+        proxy.fetchPlace("place_123", Locale.US)
+        eventReporter.autocompleteDetailsFetchStartedCalls.awaitItem()
+        repository.fetchPlaceDetailsCalls.awaitItem()
+        assertThat(eventReporter.autocompleteSelectedCalls.awaitItem().country).isEqualTo("CA")
+
+        repository.ensureAllEventsConsumed()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `selection reports the country of the shown results when a later query fails`() = runTest {
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val repository = defaultRepository()
+        val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+
+        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
+        eventReporter.autocompleteSuggestionsReturnedCalls.awaitItem()
+
+        repository.predictionsResult = Result.failure(RuntimeException("Network error"))
+        proxy.findAutocompletePredictions(query = "123 Main", country = "CA", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
+        assertThat(eventReporter.autocompleteErrorCalls.awaitItem().country).isEqualTo("CA")
+
+        proxy.fetchPlace("place_123", Locale.US)
+
+        eventReporter.autocompleteDetailsFetchStartedCalls.awaitItem()
+        repository.fetchPlaceDetailsCalls.awaitItem()
+        assertThat(eventReporter.autocompleteSelectedCalls.awaitItem().country).isEqualTo("US")
         repository.ensureAllEventsConsumed()
         eventReporter.validate()
     }
