@@ -4,8 +4,11 @@ import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescriptionExactly
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
@@ -18,6 +21,7 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
@@ -44,6 +48,8 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            error = null,
         )
     ) {
         assertThat(
@@ -72,6 +78,8 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -90,6 +98,8 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            error = null,
         )
     ) {
         assertThat(
@@ -123,6 +133,8 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -143,6 +155,8 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                error = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -160,6 +174,8 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            error = null,
         )
     ) {
         assertThat(
@@ -185,6 +201,8 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                error = null,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -208,6 +226,8 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                isProcessing = false,
+                error = null,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -230,6 +250,8 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            error = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -247,11 +269,53 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            error = null,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[1]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[2]).assertExists()
+    }
+
+    @Test
+    fun processingDisablesRowsAndShowsSpinnerOnPendingRow() {
+        val pendingPaymentMethods = displayableSavedPaymentMethods.mapIndexed { index, paymentMethod ->
+            paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
+                isSelectionPending = index == 1,
+            )
+        }
+
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = pendingPaymentMethods,
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+                isProcessing = true,
+                error = null,
+            )
+        ) {
+            pendingPaymentMethods.forEach {
+                val isPending = it.isSelectionPending
+                val row = composeRule.onNodeWithTag(
+                    "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
+                    useUnmergedTree = true,
+                )
+                    .assertIsNotEnabled()
+                val hasLoadingIndicator = hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG))
+                val hasPaymentMethodIcon = hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES))
+
+                if (isPending) {
+                    row.assert(hasLoadingIndicator).assert(hasPaymentMethodIcon.not())
+                } else {
+                    row.assert(hasLoadingIndicator.not()).assert(hasPaymentMethodIcon)
+                }
+            }
+            composeRule.onAllNodesWithTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG, useUnmergedTree = true)
+                .assertCountEquals(1)
+        }
     }
 
     private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {

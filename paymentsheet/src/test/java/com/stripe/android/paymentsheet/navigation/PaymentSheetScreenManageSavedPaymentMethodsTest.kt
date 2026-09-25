@@ -87,6 +87,8 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
             isEditing = isEditing,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            isProcessing = false,
+            error = null,
         )
     }
 }

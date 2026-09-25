@@ -130,6 +130,7 @@ internal class ManageSavedPaymentMethodMutatorFactoryTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = true,
+                    pendingPaymentMethodId = null,
                 )
             ),
             onContinueClick = {},

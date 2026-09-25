@@ -2,8 +2,12 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import app.cash.turbine.Turbine
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -29,16 +33,20 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
+import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
@@ -60,6 +68,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
+    private val managePage = ManagePage(testRules.compose)
     private val verticalModePage = VerticalModePage(testRules.compose)
 
     @After
@@ -178,6 +187,58 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 )
             )
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodTaxUpdateFromManageSheetShowsPendingSelectionUntilResponse() {
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponseWithSavedCards(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_COMPLETE,
+                defaultPaymentMethodId = FIRST_SAVED_PAYMENT_METHOD_ID,
+            ),
+            holdTaxUpdateResponse = true,
+        ) {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                automaticTaxResponseWithSavedCards(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    defaultPaymentMethodId = SECOND_SAVED_PAYMENT_METHOD_ID,
+                )(response)
+            }
+
+            contentPage.assertHasSelectedSavedPaymentMethod(FIRST_SAVED_PAYMENT_METHOD_ID)
+            contentPage.clickViewMore()
+            managePage.waitUntilVisible()
+
+            try {
+                managePage.selectPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
+                taxUpdateRequests.awaitItem()
+
+                val firstRow = savedPaymentMethodRow(FIRST_SAVED_PAYMENT_METHOD_ID)
+                val secondRow = savedPaymentMethodRow(SECOND_SAVED_PAYMENT_METHOD_ID)
+                firstRow.assertIsSelected()
+                    .assertIsNotEnabled()
+                    .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
+                    .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
+                secondRow.assertIsNotEnabled()
+                    .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)))
+                    .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)).not())
+                testRules.compose.onAllNodesWithTag(
+                    SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                    useUnmergedTree = true,
+                ).assertCountEquals(1)
+            } finally {
+                releaseTaxUpdateResponse.countDown()
+            }
+
+            managePage.waitUntilNotVisible()
+            contentPage.assertHasSelectedSavedPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            markTestSucceeded()
         }
     }
 
@@ -628,6 +689,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         taxStatus: String,
         billingAddressCollection: String = "required",
         hasSavedPaymentMethod: Boolean = false,
+        jsonModifier: (JSONObject) -> Unit = {},
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -687,14 +749,73 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                     )
                 )
             }
+            jsonModifier(json)
         }
     }
+
+    private fun automaticTaxResponseWithSavedCards(
+        total: Long,
+        taxStatus: String,
+        defaultPaymentMethodId: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        jsonModifier = { json ->
+            json.put("account_settings", JSONObject("""{"country":"US"}"""))
+            json.put(
+                "customer",
+                JSONObject()
+                    .put("id", "cus_saved_cards")
+                    .put(
+                        "payment_methods",
+                        JSONArray()
+                            .put(savedCard(FIRST_SAVED_PAYMENT_METHOD_ID, "4242"))
+                            .put(savedCard(SECOND_SAVED_PAYMENT_METHOD_ID, "5555")),
+                    )
+                    .put("can_detach_payment_method", true),
+            )
+            json.getJSONObject("server_built_elements_session_params")
+                .put("client_default_payment_method", defaultPaymentMethodId)
+        },
+    )
+
+    private fun savedCard(id: String, last4: String): JSONObject = JSONObject(
+        """
+        {
+            "id": "$id",
+            "object": "payment_method",
+            "type": "card",
+            "billing_details": {
+                "address": {
+                    "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
+                    "city": "$SAVED_BILLING_ADDRESS_CITY",
+                    "state": "$SAVED_BILLING_ADDRESS_STATE",
+                    "country": "US",
+                    "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
+                }
+            },
+            "card": {
+                "brand": "visa",
+                "exp_month": 12,
+                "exp_year": 2034,
+                "last4": "$last4"
+            }
+        }
+        """.trimIndent()
+    )
+
+    private fun savedPaymentMethodRow(paymentMethodId: String) = testRules.compose.onNodeWithTag(
+        "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId",
+        useUnmergedTree = true,
+    )
 
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INITIAL_TOTAL = 5_099L
         const val UPDATED_TOTAL = 5_399L
         const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
+        const val FIRST_SAVED_PAYMENT_METHOD_ID = "pm_first"
+        const val SECOND_SAVED_PAYMENT_METHOD_ID = "pm_second"
         const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
         const val BILLING_ADDRESS_CITY = "San Francisco"
         const val BILLING_ADDRESS_STATE = "CA"
