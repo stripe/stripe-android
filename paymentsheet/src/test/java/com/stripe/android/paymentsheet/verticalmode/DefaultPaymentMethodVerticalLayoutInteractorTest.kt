@@ -657,10 +657,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "link" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handlerUpdateSelectionTurbine.awaitItem()).isFalse()
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handlerUpdateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -672,7 +672,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
             interactor.state.value.displayablePaymentMethods.first { it.code == "link" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handlerUpdateSelectionTurbine.awaitItem()).isFalse()
 
             walletsState.value = linkAndGooglePayWalletState.copy(
                 link = WalletsState.Link(
@@ -683,7 +683,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
 
             assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
         }
     }
 
@@ -695,7 +695,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
             interactor.state.value.displayablePaymentMethods.first { it.code == "link" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handlerUpdateSelectionTurbine.awaitItem()).isFalse()
 
             walletsState.value = linkAndGooglePayWalletState.copy(
                 walletsAllowedInHeader = emptyList(),
@@ -714,7 +714,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
             interactor.state.value.displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(handlerUpdateSelectionTurbine.awaitItem()).isFalse()
 
             walletsState.value = linkAndGooglePayWalletState.copy(
                 link = WalletsState.Link(
@@ -1143,7 +1143,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             assertThat((selection.value as PaymentSelection.Saved).paymentMethod)
                 .isEqualTo(savedPaymentMethod.paymentMethod)
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
-            assertThat(updateSelectionTurbine.awaitItem()).isTrue()
+            assertThat(handlerUpdateSelectionTurbine.awaitItem()).isTrue()
         }
     }
 
@@ -1221,7 +1221,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isNull()
                 }
             }
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         }
     }
 
@@ -1523,7 +1523,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isCurrentScreenSource.value = true
 
             assertThat(selection.value).isEqualTo(verticalModeSelection)
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(verticalModeSelection)
         }
     }
 
@@ -2038,7 +2038,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
 
-        val updateSelectionTurbine = Turbine<Boolean>()
+        val updateSelectionTurbine = Turbine<PaymentSelection?>()
+        val handlerUpdateSelectionTurbine = Turbine<Boolean>()
         val transitionToManageScreenTurbine = Turbine<Unit>()
         val transitionToFormScreenTurbine = Turbine<String>()
         val onUpdatePaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
@@ -2050,7 +2051,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             ?: ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { paymentSelection, isUserInput ->
                     selection.value = paymentSelection
-                    updateSelectionTurbine.add(isUserInput)
+                    handlerUpdateSelectionTurbine.add(isUserInput)
                 },
                 completionAction = null,
             )
@@ -2078,9 +2079,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsState = walletsState,
             canUpdateCardExpiryAndBillingDetails = stateFlowOf(canUpdateCardExpiryAndBillingDetails),
             canChangeCbc = stateFlowOf(canChangeCbc),
-            updateSelection = { paymentSelection, isFormScreen ->
+            updateSelection = { paymentSelection ->
                 selection.value = paymentSelection
-                updateSelectionTurbine.add(isFormScreen)
+                updateSelectionTurbine.add(paymentSelection)
             },
             verticalPaymentSelectionHandler = defaultVerticalPaymentSelectionHandler,
             isCurrentScreen = isCurrentScreen,
@@ -2111,6 +2112,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         TestParams(
             selection = selection,
             updateSelectionTurbine = updateSelectionTurbine,
+            handlerUpdateSelectionTurbine = handlerUpdateSelectionTurbine,
             processingSource = processing,
             savedPaymentMethodSelectionStateSource = savedPaymentMethodSelectionState,
             temporarySelectionSource = temporarySelection,
@@ -2140,7 +2142,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     private class TestParams(
         val selection: MutableStateFlow<PaymentSelection?>,
-        val updateSelectionTurbine: ReceiveTurbine<Boolean>,
+        val updateSelectionTurbine: ReceiveTurbine<PaymentSelection?>,
+        val handlerUpdateSelectionTurbine: ReceiveTurbine<Boolean>,
         val processingSource: MutableStateFlow<Boolean>,
         val savedPaymentMethodSelectionStateSource: MutableStateFlow<SavedPaymentMethodSelectionState>,
         val temporarySelectionSource: MutableStateFlow<PaymentMethodCode?>,
@@ -2165,6 +2168,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             (verticalPaymentSelectionHandler as? FakeVerticalPaymentSelectionHandler)
                 ?.ensureAllEventsConsumed()
             updateSelectionTurbine.ensureAllEventsConsumed()
+            handlerUpdateSelectionTurbine.ensureAllEventsConsumed()
             transitionToManageScreenTurbine.ensureAllEventsConsumed()
             transitionToFormScreenTurbine.ensureAllEventsConsumed()
             onUpdatePaymentMethodTurbine.ensureAllEventsConsumed()

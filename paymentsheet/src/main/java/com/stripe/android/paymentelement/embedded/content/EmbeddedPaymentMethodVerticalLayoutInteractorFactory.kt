@@ -121,7 +121,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
-            updateSelection = { updatedSelection, _ ->
+            updateSelection = { updatedSelection ->
                 selectionHolder.setSelection(updatedSelection)
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
