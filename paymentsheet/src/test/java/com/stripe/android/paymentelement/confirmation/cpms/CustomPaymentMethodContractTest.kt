@@ -10,7 +10,9 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -21,7 +23,7 @@ internal class CustomPaymentMethodContractTest {
 
     @Test
     fun `on create intent, should have expected extras`() {
-        val paymentElementCallbackIdentifier = "CustomPaymentMethodTestIdentifier"
+        val paymentElementCallbackIdentifier = createTestIdentifier("CustomPaymentMethodTestIdentifier")
         val customPaymentMethodType = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now".resolvableString,
@@ -43,7 +45,13 @@ internal class CustomPaymentMethodContractTest {
         val extras = intent.extras
 
         assertThat(
-            extras?.getString(CustomPaymentMethodProxyActivity.EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
+            extras?.let {
+                BundleCompat.getParcelable(
+                    it,
+                    CustomPaymentMethodProxyActivity.EXTRA_PAYMENT_ELEMENT_IDENTIFIER,
+                    Identifiable::class.java,
+                )
+            }
         ).isEqualTo(paymentElementCallbackIdentifier)
         assertThat(
             extras?.let {

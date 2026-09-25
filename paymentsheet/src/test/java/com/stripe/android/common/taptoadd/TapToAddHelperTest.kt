@@ -9,8 +9,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -276,7 +278,7 @@ class TapToAddHelperTest {
     fun `startPaymentMethodCollection calls launch with expected params`() = runScenario(
         tapToAddMode = TapToAddMode.Continue,
         eventMode = EventReporter.Mode.Embedded,
-        paymentElementCallbackIdentifier = "mpe_callback_id",
+        paymentElementCallbackIdentifier = createTestIdentifier("mpe_callback_id"),
         productUsage = setOf("PaymentSheet", "FlowController")
     ) {
         helper.register(
@@ -297,7 +299,7 @@ class TapToAddHelperTest {
 
         assertThat(tapToAddArgs.paymentMethodMetadata).isEqualTo(DEFAULT_METADATA)
         assertThat(tapToAddArgs.eventMode).isEqualTo(EventReporter.Mode.Embedded)
-        assertThat(tapToAddArgs.paymentElementCallbackIdentifier).isEqualTo("mpe_callback_id")
+        assertThat(tapToAddArgs.paymentElementCallbackIdentifier).isEqualTo(createTestIdentifier("mpe_callback_id"))
         assertThat(tapToAddArgs.productUsage).containsExactly("PaymentSheet", "FlowController")
         assertThat(tapToAddArgs.mode).isEqualTo(TapToAddMode.Continue)
 
@@ -307,7 +309,7 @@ class TapToAddHelperTest {
     private fun runScenario(
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,
         eventMode: EventReporter.Mode = EventReporter.Mode.Complete,
-        paymentElementCallbackIdentifier: String = "callback_id",
+        paymentElementCallbackIdentifier: Identifiable = createTestIdentifier("callback_id"),
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
@@ -344,7 +346,7 @@ class TapToAddHelperTest {
     private suspend fun createTapToAddHelper(
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,
         eventMode: EventReporter.Mode = EventReporter.Mode.Complete,
-        paymentElementCallbackIdentifier: String = "callback_id",
+        paymentElementCallbackIdentifier: Identifiable = createTestIdentifier("callback_id"),
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},

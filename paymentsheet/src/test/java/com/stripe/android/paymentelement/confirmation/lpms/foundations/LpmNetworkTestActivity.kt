@@ -34,6 +34,7 @@ import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
@@ -103,7 +104,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
     @Parcelize
     data class Args(
         val apiConfiguration: ApiConfiguration.State,
-        val paymentElementCallbackIdentifier: String,
+        val paymentElementCallbackIdentifier: Identifiable,
         val allowsManualConfirmation: Boolean,
     ) : ActivityStarter.Args {
         companion object {
@@ -154,7 +155,7 @@ internal interface LpmNetworkTestViewModelComponent {
             allowsManualConfirmation: Boolean,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance
             savedStateHandle: SavedStateHandle,
             @BindsInstance

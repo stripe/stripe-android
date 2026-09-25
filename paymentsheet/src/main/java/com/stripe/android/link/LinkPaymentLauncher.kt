@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: Identifiable,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore
 ) : LinkPaymentPresenter {

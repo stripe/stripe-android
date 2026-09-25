@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -31,8 +32,8 @@ internal object PaymentSheetFixtures {
     internal const val CLIENT_SECRET = "pi_1234_secret_1234"
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
     internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
-    internal const val PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER = "PaymentSheetTestIdentifier"
-    internal const val FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER = "FlowControllerTestIdentifier"
+    internal val PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER = createTestIdentifier("PaymentSheetTestIdentifier")
+    internal val FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER = createTestIdentifier("FlowControllerTestIdentifier")
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)

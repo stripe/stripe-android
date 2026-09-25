@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -1142,6 +1143,6 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private companion object {
-        const val CALLBACK_IDENTIFIER = "CheckoutTestIdentifier"
+        val CALLBACK_IDENTIFIER = createTestIdentifier("CheckoutTestIdentifier")
     }
 }

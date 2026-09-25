@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
@@ -33,7 +34,8 @@ internal class PaymentOptionsViewModelModule {
 
     @Provides
     @PaymentElementCallbackIdentifier
-    fun provideCallbackIdentifier(args: PaymentOptionContract.Args): String = args.paymentElementCallbackIdentifier
+    fun provideCallbackIdentifier(args: PaymentOptionContract.Args): Identifiable =
+        args.paymentElementCallbackIdentifier
 
     @Provides
     @Named(PRODUCT_USAGE)

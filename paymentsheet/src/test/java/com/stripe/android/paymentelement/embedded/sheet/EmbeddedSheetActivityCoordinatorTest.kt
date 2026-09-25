@@ -14,8 +14,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -87,7 +89,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     fun `valid loading to ready transition replaces and registers presentation`() = runScenario {
         val readyArgs = createArgs(
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
-            callbackIdentifier = "updated_callback_identifier",
+            callbackIdentifier = createTestIdentifier("updated_callback_identifier"),
         )
         val readyIntent = createIntent(readyArgs)
 
@@ -278,7 +280,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         fun createArgs(
             presentationState: EmbeddedActivityArgs.PresentationState,
             launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
-            callbackIdentifier: String = "callback_identifier",
+            callbackIdentifier: Identifiable = createTestIdentifier("callback_identifier"),
         ): EmbeddedActivityArgs {
             return EmbeddedActivityArgs(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

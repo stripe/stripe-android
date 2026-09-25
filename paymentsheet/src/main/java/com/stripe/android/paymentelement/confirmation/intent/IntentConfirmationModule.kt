@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
@@ -16,14 +17,14 @@ import dagger.multibindings.IntoSet
 internal class IntentConfirmationModule {
     @Provides
     fun providesCreateIntentCallback(
-        @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
     ): CreateIntentCallback? {
         return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.createIntentCallback
     }
 
     @Provides
     fun providesCreateIntentWithConfirmationTokenCallback(
-        @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
     ): CreateIntentWithConfirmationTokenCallback? {
         return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
             ?.createIntentWithConfirmationTokenCallback
@@ -32,7 +33,7 @@ internal class IntentConfirmationModule {
     @OptIn(SharedPaymentTokenSessionPreview::class)
     @Provides
     fun providesPreparePaymentMethodHandler(
-        @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
     ): PreparePaymentMethodHandler? {
         return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.preparePaymentMethodHandler
     }

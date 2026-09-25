@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -153,7 +154,7 @@ class NativeLinkActivityContractTest {
     }
 
     private companion object {
-        const val LINK_CALLBACK_TEST_IDENTIFIER = "LinkTestIdentifier"
+        val LINK_CALLBACK_TEST_IDENTIFIER = createTestIdentifier("LinkTestIdentifier")
         val REQUEST_SURFACE = RequestSurface.PaymentElement
     }
 }

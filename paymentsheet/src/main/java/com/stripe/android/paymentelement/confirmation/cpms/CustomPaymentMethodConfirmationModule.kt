@@ -4,6 +4,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,7 +22,7 @@ internal interface CustomPaymentMethodConfirmationModule {
     companion object {
         @Provides
         fun provideConfirmCustomPaymentMethodCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
         ): ConfirmCustomPaymentMethodCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
                 ?.confirmCustomPaymentMethodCallback

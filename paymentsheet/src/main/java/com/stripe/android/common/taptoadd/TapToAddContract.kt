@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.parcelize.Parcelize
 
@@ -26,7 +27,7 @@ internal object TapToAddContract : ActivityResultContract<TapToAddContract.Args,
         val mode: TapToAddMode,
         val eventMode: EventReporter.Mode,
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val paymentElementCallbackIdentifier: String,
+        val paymentElementCallbackIdentifier: Identifiable,
         val productUsage: Set<String>,
         val statusBarColor: Int?,
     ) : Parcelable {

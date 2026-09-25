@@ -40,6 +40,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -47,6 +48,7 @@ import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
@@ -182,7 +184,8 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
 
         @Provides
         @PaymentElementCallbackIdentifier
-        fun providesPaymentElementCallbackIdentifier(): String = "ExtendedConfirmationTestIdentifier"
+        fun providesPaymentElementCallbackIdentifier(): Identifiable =
+            createTestIdentifier("ExtendedConfirmationTestIdentifier")
 
         @Provides
         fun providesContext(application: Application): Context = application

@@ -14,6 +14,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.utils.PaymentElementCallbackTestRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -22,6 +24,8 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultPaymentSheetLauncherTest {
+    @get:Rule
+    val callbackTestRule = PaymentElementCallbackTestRule()
 
     @BeforeTest
     fun setup() {

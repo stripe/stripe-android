@@ -10,11 +10,12 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import javax.inject.Inject
 import javax.inject.Provider
 
 internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: Identifiable,
     private val confirmCustomPaymentMethodCallbackProvider: Provider<ConfirmCustomPaymentMethodCallback?>,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<

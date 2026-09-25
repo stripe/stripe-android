@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.parcelize.Parcelize
@@ -17,7 +18,7 @@ internal data class EmbeddedActivityArgs(
     val paymentMethodMetadata: PaymentMethodMetadata,
     val configuration: EmbeddedPaymentElement.Configuration,
     val productUsage: Set<String>,
-    val paymentElementCallbackIdentifier: String,
+    val paymentElementCallbackIdentifier: Identifiable,
     val statusBarColor: Int?,
     val selection: PaymentSelection?,
     val previousNewSelections: Bundle,

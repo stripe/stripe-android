@@ -40,6 +40,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkAuthIntent
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -162,7 +163,7 @@ internal class LinkActivityViewModelTest {
                 account = null,
                 lastUpdateReason = null
             ),
-            paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
+            paymentElementCallbackIdentifier = createTestIdentifier("LinkNativeTestIdentifier"),
             launchMode = LinkLaunchMode.Full,
             statusBarColor = null,
         )

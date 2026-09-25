@@ -6,7 +6,9 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -76,7 +78,7 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     private fun testScenario(
         lifecycleOwner: TestLifecycleOwner = TestLifecycleOwner(),
-        paymentElementCallbackIdentifier: String = PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
+        paymentElementCallbackIdentifier: Identifiable = PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val sheetStateHolder = SheetStateHolder(SavedStateHandle())
@@ -106,6 +108,7 @@ internal class EmbeddedPaymentElementInitializerTest {
     )
 
     private companion object {
-        private const val PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER = "EmbeddedPaymentElementTestIdentifier"
+        private val PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER =
+            createTestIdentifier("EmbeddedPaymentElementTestIdentifier")
     }
 }

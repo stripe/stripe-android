@@ -11,7 +11,7 @@ class PaymentElementCallbackReferencesTest {
 
     @Test
     fun `On get with no callbacks available, should return null`() {
-        assertThat(PaymentElementCallbackReferences["Key1"]).isNull()
+        assertThat(PaymentElementCallbackReferences[createTestIdentifier("Key1")]).isNull()
     }
 
     @Test
@@ -24,12 +24,26 @@ class PaymentElementCallbackReferencesTest {
     }
 
     @Test
+    fun `Callbacks with different identifiers are independent`() {
+        val firstKey = DEFAULT_TEST_KEY
+        val secondKey = createTestIdentifier("Another callback")
+        val firstCallbacks = createCallbacks()
+        val secondCallbacks = createCallbacks()
+
+        PaymentElementCallbackReferences[firstKey] = firstCallbacks
+        PaymentElementCallbackReferences[secondKey] = secondCallbacks
+
+        assertThat(PaymentElementCallbackReferences[firstKey]).isSameInstanceAs(firstCallbacks)
+        assertThat(PaymentElementCallbackReferences[secondKey]).isSameInstanceAs(secondCallbacks)
+    }
+
+    @Test
     fun `On get with callbacks not assigned to a given key but has callbacks set, should return the first set`() {
         val initialRegisteredCallbacks = createCallbacks()
 
-        PaymentElementCallbackReferences["Key2"] = initialRegisteredCallbacks
-        PaymentElementCallbackReferences["Key3"] = createCallbacks()
-        PaymentElementCallbackReferences["Key4"] = createCallbacks()
+        PaymentElementCallbackReferences[createTestIdentifier("Key2")] = initialRegisteredCallbacks
+        PaymentElementCallbackReferences[createTestIdentifier("Key3")] = createCallbacks()
+        PaymentElementCallbackReferences[createTestIdentifier("Key4")] = createCallbacks()
 
         assertThat(PaymentElementCallbackReferences[DEFAULT_TEST_KEY]).isEqualTo(initialRegisteredCallbacks)
     }
@@ -67,6 +81,6 @@ class PaymentElementCallbackReferencesTest {
     }
 
     private companion object {
-        const val DEFAULT_TEST_KEY = "Key1"
+        val DEFAULT_TEST_KEY = createTestIdentifier("Key1")
     }
 }

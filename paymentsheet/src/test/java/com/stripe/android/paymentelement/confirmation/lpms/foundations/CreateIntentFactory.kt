@@ -9,11 +9,12 @@ import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.M
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 
 internal class CreateIntentFactory(
-    private val paymentElementCallbackIdentifier: String,
+    private val paymentElementCallbackIdentifier: Identifiable,
     private val paymentMethodType: PaymentMethod.Type,
     private val testClient: StripeNetworkTestClient
 ) {

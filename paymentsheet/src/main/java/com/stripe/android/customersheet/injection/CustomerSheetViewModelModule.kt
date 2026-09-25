@@ -32,6 +32,8 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.Identifiable
+import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -97,10 +99,10 @@ internal interface CustomerSheetViewModelModule {
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
+        @CustomerSheetViewModelScope
         @PaymentElementCallbackIdentifier
-        fun providesPaymentElementCallbackIdentifier(): String {
-            // We currently do not support multiple instances of Customer Sheet
-            return "CustomerSheet"
+        fun providesPaymentElementCallbackIdentifier(): Identifiable {
+            return Identifiable()
         }
 
         @Provides

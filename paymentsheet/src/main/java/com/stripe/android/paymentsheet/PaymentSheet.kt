@@ -57,6 +57,8 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
+import java.util.UUID
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
@@ -64,6 +66,8 @@ import kotlinx.parcelize.Parcelize
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
+    internal val id: Identifiable = Identifiable()
+
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
@@ -4442,6 +4446,9 @@ class PaymentSheet internal constructor(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    interface Identifiable : Serializable
+
     companion object {
         private fun setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
             PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
@@ -4465,3 +4472,10 @@ class PaymentSheet internal constructor(
         }
     }
 }
+
+internal fun Identifiable(id: UUID = UUID.randomUUID()): PaymentSheet.Identifiable {
+    return UuidIdentifiable(id)
+}
+
+@JvmInline
+private value class UuidIdentifiable(private val uuid: UUID) : PaymentSheet.Identifiable

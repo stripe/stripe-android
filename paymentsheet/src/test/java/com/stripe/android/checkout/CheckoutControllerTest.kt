@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -553,28 +554,35 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `default integration name is used as the payment element callback identifier`() = runTest {
-        val controller = createController()
+    fun `controllers with the default integration name have distinct callback identifiers`() = runTest {
+        val first = createController()
+        val second = createController()
 
-        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo(DEFAULT_INTEGRATION_NAME)
+        assertThat(first.paymentElementCallbackIdentifier).isNotEqualTo(second.paymentElementCallbackIdentifier)
     }
 
     @Test
-    fun `custom integration name is used as the payment element callback identifier`() = runTest {
-        val controller = createController(integrationName = "merchant_checkout")
+    fun `controllers with the same custom integration name have distinct callback identifiers`() = runTest {
+        val first = createController(integrationName = "merchant_checkout")
+        val second = createController(integrationName = "merchant_checkout")
 
-        assertThat(controller.paymentElementCallbackIdentifier).isEqualTo("merchant_checkout")
+        assertThat(first.paymentElementCallbackIdentifier).isNotEqualTo(second.paymentElementCallbackIdentifier)
     }
 
     @Test
-    fun `integration name keys the controller into its own global callback references entry`() = runTest {
-        val callbacks = PaymentElementCallbacks.Builder().build()
-        PaymentElementCallbackReferences["merchant_checkout"] = callbacks
+    fun `controllers with the same integration name keep separate callback references`() = runTest {
+        val first = createController(integrationName = "merchant_checkout")
+        val second = createController(integrationName = "merchant_checkout")
+        val firstCallbacks = PaymentElementCallbacks.Builder().build()
+        val secondCallbacks = PaymentElementCallbacks.Builder().build()
 
-        val controller = createController(integrationName = "merchant_checkout")
+        PaymentElementCallbackReferences[first.paymentElementCallbackIdentifier] = firstCallbacks
+        PaymentElementCallbackReferences[second.paymentElementCallbackIdentifier] = secondCallbacks
 
-        assertThat(PaymentElementCallbackReferences[controller.paymentElementCallbackIdentifier])
-            .isSameInstanceAs(callbacks)
+        assertThat(PaymentElementCallbackReferences[first.paymentElementCallbackIdentifier])
+            .isSameInstanceAs(firstCallbacks)
+        assertThat(PaymentElementCallbackReferences[second.paymentElementCallbackIdentifier])
+            .isSameInstanceAs(secondCallbacks)
     }
 
     @Test
@@ -1428,7 +1436,7 @@ internal class CheckoutControllerTest {
         val controller = destroyControllerRule.track(
             DaggerCheckoutControllerComponent.factory().create(
                 application = applicationContext,
-                paymentElementCallbackIdentifier = integrationName,
+                paymentElementCallbackIdentifier = Identifiable(),
                 resultCallback = CheckoutController.ResultCallback {},
                 rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
                 checkoutControllerSavedState = controllerSavedState,

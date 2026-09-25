@@ -13,7 +13,6 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
-import java.util.UUID
 
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
@@ -144,7 +143,7 @@ internal fun internalRememberPaymentSheetFlowController(
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
     val paymentElementCallbackIdentifier = rememberSaveable {
-        UUID.randomUUID().toString()
+        Identifiable()
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)

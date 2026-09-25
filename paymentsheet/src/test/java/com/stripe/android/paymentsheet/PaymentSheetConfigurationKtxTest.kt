@@ -8,6 +8,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -41,7 +42,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithBlankEphemeralKeySecret.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 isLiveMode = false,
-                callbackIdentifier = "",
+                callbackIdentifier = createTestIdentifier(""),
             )
         }
     }
@@ -61,17 +62,17 @@ class PaymentSheetConfigurationKtxTest {
         getConfig("ek_askljdlkasfhgasdfjls").validate(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             isLiveMode = false,
-            callbackIdentifier = "",
+            callbackIdentifier = createTestIdentifier(""),
         )
         getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             isLiveMode = false,
-            callbackIdentifier = "",
+            callbackIdentifier = createTestIdentifier(""),
         )
         getConfig("uk_12345").validate(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             isLiveMode = false,
-            callbackIdentifier = "",
+            callbackIdentifier = createTestIdentifier(""),
         )
     }
 
@@ -85,7 +86,7 @@ class PaymentSheetConfigurationKtxTest {
                 getConfig(ephemeralKeySecret).validate(
                     initializationMode = DEFAULT_INITIALIZATION_MODE,
                     isLiveMode = false,
-                    callbackIdentifier = "",
+                    callbackIdentifier = createTestIdentifier(""),
                 )
             }
         }
@@ -116,7 +117,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithBlankCustomerSessionClientSecret.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 isLiveMode = false,
-                callbackIdentifier = "",
+                callbackIdentifier = createTestIdentifier(""),
             )
         }
     }
@@ -139,7 +140,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 isLiveMode = false,
-                callbackIdentifier = "",
+                callbackIdentifier = createTestIdentifier(""),
             )
         }
     }
@@ -162,7 +163,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithInvalidCustomerSessionClientSecret.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 isLiveMode = false,
-                callbackIdentifier = "",
+                callbackIdentifier = createTestIdentifier(""),
             )
         }
     }
@@ -178,7 +179,7 @@ class PaymentSheetConfigurationKtxTest {
         configWithValidExternalPaymentMethods.validate(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             isLiveMode = false,
-            callbackIdentifier = "",
+            callbackIdentifier = createTestIdentifier(""),
         )
     }
 
@@ -199,7 +200,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithInvalidExternalPaymentMethod.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 isLiveMode = false,
-                callbackIdentifier = "",
+                callbackIdentifier = createTestIdentifier(""),
             )
         }
     }
@@ -215,7 +216,7 @@ class PaymentSheetConfigurationKtxTest {
         configWithEmptyExternalPaymentMethods.validate(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             isLiveMode = false,
-            callbackIdentifier = "",
+            callbackIdentifier = createTestIdentifier(""),
         )
     }
 
@@ -236,7 +237,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithMultipleInvalidExternalPaymentMethods.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 isLiveMode = false,
-                callbackIdentifier = "",
+                callbackIdentifier = createTestIdentifier(""),
             )
         }
     }
@@ -252,13 +253,13 @@ class PaymentSheetConfigurationKtxTest {
         configWithInvalidExternalPaymentMethods.validate(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             isLiveMode = true,
-            callbackIdentifier = "",
+            callbackIdentifier = createTestIdentifier(""),
         )
     }
 
     @Test
     fun `'validate' should fail when CT callback is set with LegacyCustomerEphemeralKey in test mode`() {
-        val callbackIdentifier = "test_identifier"
+        val callbackIdentifier = createTestIdentifier("test_identifier")
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createIntentCallback { _ -> error("Should not be called!") }
@@ -288,7 +289,7 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when CT callback is set with LegacyCustomerEphemeralKey in live mode`() {
-        val callbackIdentifier = "test_identifier"
+        val callbackIdentifier = createTestIdentifier("test_identifier")
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createIntentCallback { _ -> error("Should not be called!") }
@@ -313,7 +314,7 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when createIntentWithConfirmationTokenCallback is set with CustomerSession`() {
-        val callbackIdentifier = "test_identifier"
+        val callbackIdentifier = createTestIdentifier("test_identifier")
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createIntentCallback { _ -> error("Should not be called!") }
@@ -338,7 +339,7 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when customer is null and createIntentWithConfirmationTokenCallback is set`() {
-        val callbackIdentifier = "test_identifier"
+        val callbackIdentifier = createTestIdentifier("test_identifier")
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createIntentCallback { _ -> error("Should not be called!") }
@@ -375,7 +376,7 @@ class PaymentSheetConfigurationKtxTest {
             configWithCustomer.validate(
                 initializationMode = checkoutSessionMode,
                 isLiveMode = false,
-                callbackIdentifier = ""
+                callbackIdentifier = createTestIdentifier("")
             )
         }
     }
@@ -399,7 +400,7 @@ class PaymentSheetConfigurationKtxTest {
         configWithoutCustomer.validate(
             initializationMode = checkoutSessionMode,
             isLiveMode = false,
-            callbackIdentifier = ""
+            callbackIdentifier = createTestIdentifier("")
         )
     }
 
@@ -421,7 +422,7 @@ class PaymentSheetConfigurationKtxTest {
         configWithoutEmail.validate(
             initializationMode = checkoutSessionMode,
             isLiveMode = false,
-            callbackIdentifier = ""
+            callbackIdentifier = createTestIdentifier("")
         )
     }
 
@@ -449,7 +450,7 @@ class PaymentSheetConfigurationKtxTest {
             config.validate(
                 initializationMode = checkoutSessionMode,
                 isLiveMode = false,
-                callbackIdentifier = ""
+                callbackIdentifier = createTestIdentifier("")
             )
         }
     }
@@ -486,7 +487,7 @@ class PaymentSheetConfigurationKtxTest {
             config.validate(
                 initializationMode = checkoutSessionMode,
                 isLiveMode = false,
-                callbackIdentifier = ""
+                callbackIdentifier = createTestIdentifier("")
             )
         }
     }
@@ -494,7 +495,7 @@ class PaymentSheetConfigurationKtxTest {
     @OptIn(TapToAddPreview::class)
     @Test
     fun `'validate' should fail when Tap to Add callback is set and billing details collection collects anything`() {
-        val callbackIdentifier = "tap_to_add_common_configuration_test"
+        val callbackIdentifier = createTestIdentifier("tap_to_add_common_configuration_test")
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createCardPresentSetupIntentCallback {
@@ -527,7 +528,7 @@ class PaymentSheetConfigurationKtxTest {
     @OptIn(TapToAddPreview::class)
     @Test
     fun `'validate' should succeed when Tap to Add callback is set and billing details collection collects nothing`() {
-        val callbackIdentifier = "tap_to_add_common_configuration_test"
+        val callbackIdentifier = createTestIdentifier("tap_to_add_common_configuration_test")
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createCardPresentSetupIntentCallback {

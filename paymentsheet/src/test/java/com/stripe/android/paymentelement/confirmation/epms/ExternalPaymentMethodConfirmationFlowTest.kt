@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.epms
 
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -19,7 +20,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         confirmationOption = EPM_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = ExternalPaymentMethodConfirmationDefinition(
-            paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
+            paymentElementCallbackIdentifier = createTestIdentifier("ExternalPaymentMethodTestIdentifier"),
             externalPaymentMethodConfirmHandlerProvider = {
                 ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")
@@ -34,7 +35,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         confirmationOption = EPM_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = ExternalPaymentMethodConfirmationDefinition(
-            paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
+            paymentElementCallbackIdentifier = createTestIdentifier("ExternalPaymentMethodTestIdentifier"),
             externalPaymentMethodConfirmHandlerProvider = {
                 ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")
