@@ -255,9 +255,10 @@ internal class InputAddressViewModel @Inject constructor(
         viewModelScope.launch {
             primaryButtonAction(addressDetails).fold(
                 onSuccess = { result ->
-                    if (resultStateHolder.setResult(result)) {
-                        eventReporter.onSaveCompleted(analyticsSnapshot)
-                    }
+                    completeWithAddress(
+                        addressDetails = addressDetails,
+                        result = result,
+                    )
                 },
                 onFailure = { error ->
                     eventReporter.onSaveFailed(analyticsSnapshot, error)
@@ -265,6 +266,15 @@ internal class InputAddressViewModel @Inject constructor(
                     _formEnabled.value = true
                 },
             )
+        }
+    }
+
+    private fun completeWithAddress(
+        addressDetails: AddressDetails,
+        result: AddressElementActivityContract.Result,
+    ) {
+        if (resultStateHolder.setResult(result)) {
+            eventReporter.onSaveCompleted(analyticsSnapshot(addressDetails))
         }
     }
 
