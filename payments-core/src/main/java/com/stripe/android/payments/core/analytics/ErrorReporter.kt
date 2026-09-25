@@ -45,23 +45,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun createFallbackInstance(
-            context: Context,
-            productUsage: Set<String> = emptySet(),
-        ): ErrorReporter {
-            return createFallbackInstance(
-                context = context,
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
-                productUsage = productUsage,
-            )
-        }
-
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -82,6 +65,28 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                     productUsage = productUsage,
                 )
                 .errorReporter
+        }
+
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component and ApiConfiguration.
+         */
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
+                productUsage = productUsage,
+            )
         }
 
         fun getAdditionalParamsFromError(error: Throwable): Map<String, String> {

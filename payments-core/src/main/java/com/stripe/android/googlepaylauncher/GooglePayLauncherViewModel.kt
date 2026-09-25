@@ -19,6 +19,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
@@ -303,6 +304,12 @@ internal class GooglePayLauncherViewModel(
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = stripeAccountId,
+                    )
+                },
                 productUsage = productUsageTokens
             )
 
