@@ -16,7 +16,9 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -83,6 +85,53 @@ internal class CheckoutControllerStateHolderTest {
 
             assertThat(stateHolder.session.value).isNotNull()
         }
+    }
+
+    @Test
+    fun `saved selection state guards pending operations`() = testScenario {
+        stateHolder.state = committedState()
+
+        stateHolder.savedPaymentMethodSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+
+            assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `session does not emit when saved selection becomes pending`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        stateHolder.session.test {
+            assertThat(awaitItem()).isNotNull()
+
+            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `restored pending saved selection is reset to idle and can be retried`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        assertThat(restoredStateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        assertThat(restoredStateHolder.tryBeginSavedSelection()).isTrue()
     }
 
     @Test
@@ -201,6 +250,8 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(stateHolder.temporarySelection.value).isEqualTo("card")
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
@@ -223,6 +274,7 @@ internal class CheckoutControllerStateHolderTest {
         expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,

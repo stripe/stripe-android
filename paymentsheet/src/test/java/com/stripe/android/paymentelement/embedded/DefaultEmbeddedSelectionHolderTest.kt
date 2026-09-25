@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder.Companion.EMBEDDED_TEMPORARY_SELECTION_KEY
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -22,6 +23,12 @@ internal class DefaultEmbeddedSelectionHolderTest {
             selectionHolder.setSelection(PaymentSelection.GooglePay)
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
+    }
+
+    @Test
+    fun `saved payment method selection starts idle`() = testScenario {
+        assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
