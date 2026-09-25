@@ -54,6 +54,8 @@
   <string name="stripe_iban_invalid_country">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Your IBAN should start with a two-letter country code.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">The ID number you entered is incomplete.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Your BLIK code is incomplete.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -109,6 +111,8 @@
   <string name="stripe_paymentsheet_redirect_instructions">After submission, you will be redirected to securely complete next steps.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">By confirming your payment with PayPal, you allow %s to charge your PayPal account for future payments in accordance with their terms.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[This is an international purchase and excludes a 3.5% IOF fee. By proceeding, you acknowledge and accept <terms>Ebanx’s terms and conditions</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">By confirming your payment with RevolutPay, you allow %s to charge your RevolutPay account for future payments in accordance with their terms.</string>
   <!-- Satispay mandate text -->
