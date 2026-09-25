@@ -81,7 +81,7 @@ internal fun InputAddressScreen(
                 saveError?.let {
                     ErrorMessage(
                         error = it.resolve(),
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier.padding(top = 2.dp),
                     )
                 }
                 PrimaryButton(
