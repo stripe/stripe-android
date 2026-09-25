@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.InstitutionSelected
@@ -181,7 +180,7 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
                         resultCount = result.data.count()
                     )
                 )
-                FinancialConnections.emitEvent(Name.SEARCH_INITIATED)
+                eventTracker.emitEvent(Name.SEARCH_INITIATED, Metadata())
                 result
             } else {
                 InstitutionResponse(
@@ -203,7 +202,7 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
                     institutionId = institution.id
                 )
             )
-            FinancialConnections.emitEvent(
+            eventTracker.emitEvent(
                 name = Name.INSTITUTION_SELECTED,
                 metadata = Metadata(institutionName = institution.name)
             )
