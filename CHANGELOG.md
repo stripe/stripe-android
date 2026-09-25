@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### PaymentSheet
 * [ADDED] `EmbeddedPaymentElement.Configuration.apiConfiguration` to set publishable key and stripe account ID is now available in public preview.
+* [ADDED] Added support for MB WAY payments.
 
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
@@ -28,7 +29,6 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Added Arabic (Saudi Arabia) localization.
 
 ### PaymentSheet
-* [ADDED] Added support for MB WAY payments.
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
 
 ## 23.18.0 - 2026-09-08
