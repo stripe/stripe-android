@@ -772,7 +772,7 @@ internal class CheckoutControllerTest {
                 assertThat(state.paymentSelection).isEqualTo(selection)
                 assertThat(state.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
                 assertThat(state.savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
             } finally {
                 releaseResponse.countDown()
             }
@@ -992,6 +992,8 @@ internal class CheckoutControllerTest {
                     }
                     assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
                     assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(stateAtCompletion.savedPaymentMethodSelectionState)
+                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     expectNoEvents()
                     completions.expectNoEvents()
@@ -1045,6 +1047,8 @@ internal class CheckoutControllerTest {
                         completions.awaitItem()
                     }
                     assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(stateAtCompletion.savedPaymentMethodSelectionState)
+                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     completions.expectNoEvents()
                 } finally {

@@ -225,9 +225,7 @@ class CheckoutController @Inject internal constructor(
             )
         }
         return withCheckoutState(
-            additionalStateMutations = {
-                withSelection(selection)
-            },
+            additionalStateMutations = { withSelection(selection) },
         ) {
             val address = selection.billingDetails?.address?.toCheckoutAddress()
                 ?: return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
