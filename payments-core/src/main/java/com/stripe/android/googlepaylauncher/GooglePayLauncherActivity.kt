@@ -12,10 +12,8 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -45,16 +43,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     }
 
     private val errorReporter: ErrorReporter by lazy {
-        ErrorReporter.createFallbackInstance(
-            context = this,
-            apiConfigurationProvider = {
-                val paymentConfiguration = PaymentConfiguration.getInstance(this)
-                ApiConfiguration.State(
-                    publishableKey = paymentConfiguration.publishableKey,
-                    stripeAccountId = paymentConfiguration.stripeAccountId,
-                )
-            },
-        )
+        ErrorReporter.createFallbackInstance(context = this)
     }
 
     private lateinit var args: GooglePayLauncherContract.Args

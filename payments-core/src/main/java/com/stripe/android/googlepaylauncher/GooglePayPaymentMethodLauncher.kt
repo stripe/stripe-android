@@ -199,13 +199,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     googlePayConfig = googlePayConfig,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
-                        apiConfigurationProvider = {
-                            val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                            ApiConfiguration.State(
-                                publishableKey = paymentConfiguration.publishableKey,
-                                stripeAccountId = paymentConfiguration.stripeAccountId,
-                            )
-                        },
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
                     ),
                     cardFundingFilter = cardFundingFilter,
