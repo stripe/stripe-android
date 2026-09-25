@@ -64,8 +64,8 @@ import kotlinx.parcelize.Parcelize
  */
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher,
-    identifiable: Identifiable
-): Identifiable by identifiable {
+    private val identifiable: Identifiable,
+) {
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
@@ -82,7 +82,9 @@ class PaymentSheet internal constructor(
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, callback),
         identifiable = Identifiable()
-    )
+    ) {
+        setPaymentSheetCallbacks(PaymentElementCallbacks.Builder().build())
+    }
 
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and external payment methods are
@@ -200,7 +202,9 @@ class PaymentSheet internal constructor(
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(fragment, callback),
         identifiable = Identifiable()
-    )
+    ) {
+        setPaymentSheetCallbacks(PaymentElementCallbacks.Builder().build())
+    }
 
     /**
      * Constructor to be used when launching the payment sheet from a [Fragment] and external payment methods
@@ -451,7 +455,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null
     ) {
         paymentSheetLauncher.present(
-            id = this,
+            id = identifiable,
             mode = InitializationMode.PaymentIntent(paymentIntentClientSecret),
             configuration = configuration,
         )
@@ -472,7 +476,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null
     ) {
         paymentSheetLauncher.present(
-            id = this,
+            id = identifiable,
             mode = InitializationMode.SetupIntent(setupIntentClientSecret),
             configuration = configuration,
         )
@@ -490,7 +494,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null,
     ) {
         paymentSheetLauncher.present(
-            id = this,
+            id = identifiable,
             mode = InitializationMode.DeferredIntent(intentConfiguration),
             configuration = configuration,
         )
@@ -4457,11 +4461,9 @@ class PaymentSheet internal constructor(
         }
     }
 
-
-
     companion object {
         private fun PaymentSheet.setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
-            PaymentElementCallbackReferences[this] = callbacks
+            PaymentElementCallbackReferences[identifiable] = callbacks
         }
 
         private fun setPaymentSheetCallbacks(identifiable: Identifiable, callbacks: PaymentElementCallbacks) {
