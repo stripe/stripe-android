@@ -262,7 +262,7 @@ internal interface EventReporter : CardScanEventsReporter {
     /**
      * Promotions fetched from PMM API.
      */
-    fun onPaymentMethodMessagePromotionsFetchBegin()
+    fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String)
 
     /**
      * Attempted to display promotions.

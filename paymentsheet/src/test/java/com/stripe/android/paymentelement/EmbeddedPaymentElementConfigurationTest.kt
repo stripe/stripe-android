@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 
+@OptIn(ApiConfigurationPreview::class)
 class EmbeddedPaymentElementConfigurationTest {
 
     @Test

@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -157,6 +158,8 @@ class AddressElementViewModelModuleTest {
                 assertThat(awaitItem()).isFalse()
                 assertThat(awaitItem()).isTrue()
             }
+            assertThat(viewModel.saveError.value)
+                .isEqualTo(IllegalStateException("Invalid tax region").stripeErrorMessage())
             assertThat(resultStateHolder.result.value).isNull()
 
             resultStateHolder.result.test {

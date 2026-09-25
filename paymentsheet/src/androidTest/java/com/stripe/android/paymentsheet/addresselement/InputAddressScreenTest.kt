@@ -14,6 +14,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Rule
 import org.junit.Test
@@ -60,6 +62,20 @@ class InputAddressScreenTest {
         assertThat(counter).isEqualTo(1)
     }
 
+    @Test
+    fun save_error_is_displayed() {
+        setContent(saveError = "Something went wrong.".resolvableString)
+
+        composeTestRule.onNodeWithText("Something went wrong.").assertIsDisplayed()
+    }
+
+    @Test
+    fun save_error_is_not_displayed_when_null() {
+        setContent(saveError = null)
+
+        composeTestRule.onNodeWithText("Something went wrong.").assertDoesNotExist()
+    }
+
     private fun setContent(
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         primaryButtonEnabled: Boolean = true,
@@ -67,6 +83,7 @@ class InputAddressScreenTest {
         primaryButtonCallback: () -> Unit = {},
         onCloseCallback: () -> Unit = {},
         formContent: @Composable ColumnScope.() -> Unit = {},
+        saveError: ResolvableString? = null,
     ) {
         composeTestRule.setContent {
             InputAddressScreen(
@@ -81,6 +98,7 @@ class InputAddressScreenTest {
                 topContent = {},
                 formContent = formContent,
                 bottomContent = {},
+                saveError = saveError,
             )
         }
     }

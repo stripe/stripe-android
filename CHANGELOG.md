@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED] `EmbeddedPaymentElement.Configuration.apiConfiguration` to set publishable key and stripe account ID is now available in public preview.
+
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 * [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
@@ -14,6 +17,9 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [ADDED] Added support for Bizum.
+
+### Identity
+* [FIXED][14617](https://github.com/stripe/stripe-android/pull/14617) Updated the top app bar to use the host app background color instead of its primary color.
 
 ## 23.19.0 - 2026-09-15
 

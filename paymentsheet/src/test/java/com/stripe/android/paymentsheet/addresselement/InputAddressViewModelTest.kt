@@ -5,6 +5,8 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
@@ -236,10 +238,14 @@ class InputAddressViewModelTest {
             eventReporter = eventReporter,
         )
 
+        assertThat(viewModel.saveError.value).isNull()
+
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.saveError.value)
+            .isEqualTo(IllegalStateException("first submission failed").stripeErrorMessage())
         eventReporter.completedCalls.expectNoEvents()
         assertThat(resultStateHolder.result.value).isNull()
 
@@ -247,6 +253,7 @@ class InputAddressViewModelTest {
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(viewModel.saveError.value).isNull()
         assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
         assertThat(resultStateHolder.result.value).isEqualTo(
             AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
@@ -255,6 +262,66 @@ class InputAddressViewModelTest {
         primaryButtonAction.calls.expectNoEvents()
         primaryButtonAction.validate()
         eventReporter.validate()
+    }
+
+    @Test
+    fun `clickPrimaryButton replaces save error when retry fails`() = runTest {
+        val firstError = LocalStripeException("first submission failed", null)
+        val secondError = LocalStripeException("second submission failed", null)
+        val results = ArrayDeque<Result<AddressElementActivityContract.Result>>(
+            listOf(
+                Result.failure(firstError),
+                Result.failure(secondError),
+            )
+        )
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            results.removeFirst()
+        }
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = createViewModel(
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
+        assertThat(viewModel.formEnabled.value).isTrue()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(secondError.stripeErrorMessage())
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(resultStateHolder.result.value).isNull()
+        eventReporter.completedCalls.expectNoEvents()
+
+        primaryButtonAction.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `editing the form clears the save error`() = runTest {
+        val error = LocalStripeException("submission failed", null)
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            Result.failure(error)
+        }
+        val viewModel = createViewModel(
+            address = EXPECTED_ADDRESS,
+            primaryButtonAction = primaryButtonAction,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(error.stripeErrorMessage())
+
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to ""))
+
+        assertThat(viewModel.saveError.value).isNull()
+
+        primaryButtonAction.validate()
     }
 
     @Test
