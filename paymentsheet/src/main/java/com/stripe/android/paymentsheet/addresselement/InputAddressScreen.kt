@@ -39,6 +39,7 @@ import javax.inject.Provider
 internal fun InputAddressScreen(
     appearance: PaymentSheet.Appearance,
     primaryButtonEnabled: Boolean,
+    primaryButtonLoading: Boolean,
     primaryButtonText: String,
     title: String,
     onPrimaryButtonClick: () -> Unit,
@@ -91,12 +92,13 @@ internal fun InputAddressScreen(
                     }
                     PrimaryButton(
                         isEnabled = primaryButtonEnabled,
+                        isLoading = primaryButtonLoading,
                         label = primaryButtonText,
                         onButtonClick = {
                             focusManager.clearFocus()
                             onPrimaryButtonClick()
                         },
-                        canClickWhileDisabled = true,
+                        canClickWhileDisabled = !primaryButtonLoading,
                         onDisabledButtonClick = {
                             focusManager.clearFocus()
                             onDisabledButtonClick()
@@ -138,7 +140,8 @@ internal fun InputAddressScreen(
 
     InputAddressScreen(
         appearance = viewModel.args.config?.appearance ?: PaymentSheet.Appearance(),
-        primaryButtonEnabled = completeValues != null,
+        primaryButtonEnabled = completeValues != null && formEnabled,
+        primaryButtonLoading = !formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
