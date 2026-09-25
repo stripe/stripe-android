@@ -65,7 +65,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
         runScenario(paymentMethodMetadata = CHECKOUT_SESSION_METADATA) {
             continueCoordinator.onContinue()
-            selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
             testScope.runCurrent()
 
             assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
@@ -105,7 +105,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
-            setSelection(selection)
+            setSelection(selection, isUserInput = true)
         }
         val customerStateHolder = FakeCustomerStateHolder()
         val stateHolder = FakeSheetActivityStateHolder()

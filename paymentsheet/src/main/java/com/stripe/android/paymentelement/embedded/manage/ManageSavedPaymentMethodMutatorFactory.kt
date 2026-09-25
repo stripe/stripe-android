@@ -44,7 +44,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             uiContext = uiContext,
             savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::setSelection,
+            setSelection = { selectionHolder.setSelection(it, isUserInput = true) },
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 val shouldNavigateBack = when (launchMode) {

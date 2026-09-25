@@ -44,7 +44,7 @@ internal class EmbeddedFormHelperFactoryTest {
         // Enter and stash a Klarna selection (with a billing email), then switch the live
         // selection to a different payment method code (card).
         selectionHolder.setSelection(
-            PaymentSelection.New.GenericPaymentMethod(
+            updatedSelection = PaymentSelection.New.GenericPaymentMethod(
                 label = "Klarna".resolvableString,
                 iconResource = 0,
                 iconResourceNight = null,
@@ -56,9 +56,10 @@ internal class EmbeddedFormHelperFactoryTest {
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
-            )
+            ),
+            isUserInput = true,
         )
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
 
         val formHelper = createFormHelper(
             selectionHolder = selectionHolder,
@@ -201,7 +202,7 @@ internal class EmbeddedFormHelperFactoryTest {
         openCardScanAutomatically: Boolean,
     ): AutomaticallyLaunchedCardScanFormDataHelper {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        selectionHolder.setSelection(selection)
+        selectionHolder.setSelection(selection, isUserInput = true)
         val factory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,

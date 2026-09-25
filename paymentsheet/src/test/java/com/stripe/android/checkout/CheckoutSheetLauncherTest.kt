@@ -116,7 +116,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchForm launches activity with current selection when selection matches code`() = testScenario {
         val code = "card"
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -131,8 +131,8 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchForm launches activity with previous form details`() = testScenario {
         val code = "card"
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -147,7 +147,10 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchForm launches activity with null selection when selection is a saved card`() = testScenario {
         val code = "card"
-        selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        selectionHolder.setSelection(
+            updatedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            isUserInput = true,
+        )
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -162,7 +165,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchForm launches activity with null selection when selection is for another LPM`() = testScenario {
         val code = "card"
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -205,7 +208,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `formActivityLauncher sets selection and customer state on complete result`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         launchForm("cashapp")
 
         val customerState = createCustomerState()
@@ -318,7 +321,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `formActivityLauncher sets customer state but keeps selection on cancelled result`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         launchForm("card")
 
         val customerState = createCustomerState()
@@ -340,7 +343,7 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `formActivityLauncher does not update state on error result`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         launchForm("card")
 
         val result = EmbeddedActivityResult.Error(
@@ -576,7 +579,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = refreshedConfiguration,
         )
         customerStateHolder.setCustomerState(refreshedCustomer)
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         mutationGate.complete(Unit)
         runCurrent()
 
@@ -723,8 +726,8 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `launchPaymentOptions forwards previously entered new selections into the sheet`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -899,7 +902,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `paymentOptionsResult cancelled clears stale saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
+        selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod), isUserInput = true)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
         sheetStateHolder.sheetIsOpen = true
@@ -919,7 +922,7 @@ internal class CheckoutSheetLauncherTest {
     fun `paymentOptionsResult cancelled preserves valid saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
-        selectionHolder.setSelection(savedSelection)
+        selectionHolder.setSelection(savedSelection, isUserInput = true)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
         sheetStateHolder.sheetIsOpen = true

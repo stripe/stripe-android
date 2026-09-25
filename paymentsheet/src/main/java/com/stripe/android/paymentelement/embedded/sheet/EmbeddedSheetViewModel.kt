@@ -58,7 +58,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
             component.customerStateHolder.setCustomerState(args.customerState)
             component.linkAccountHolder.set(args.linkAccountInfo)
             component.selectionHolder.setPreviousNewSelections(args.previousNewSelections)
-            component.selectionHolder.setSelection(args.selection)
+            component.selectionHolder.setSelection(args.selection, isUserInput = true)
 
             return component.viewModel as T
         }

@@ -132,7 +132,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
         // A separate scope so the interactor's never-completing state collectors don't keep runTest from finishing.
         val viewModelScope = TestScope(UnconfinedTestDispatcher())
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
-            setSelection(initialSelection)
+            setSelection(initialSelection, isUserInput = true)
         }
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

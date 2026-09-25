@@ -38,7 +38,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
             onSelectPaymentMethod = {
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                selectionHolder.setSelection(savedPmSelection)
+                selectionHolder.setSelection(savedPmSelection, isUserInput = true)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,

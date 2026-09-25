@@ -35,6 +35,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
 ) {
+    @Suppress("LongMethod")
     fun create(
         paymentMethodCode: PaymentMethodCode,
         hasSavedPaymentMethods: Boolean
@@ -50,7 +51,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                     selectedPaymentMethodCode = paymentMethodCode,
                     paymentMethodMetadata = paymentMethodMetadata,
                 ),
-            selectionUpdater = { embeddedSelectionHolder.setSelection(it) },
+            selectionUpdater = { embeddedSelectionHolder.setSelection(it, isUserInput = true) },
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
@@ -58,7 +59,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         val bankFormInteractor = BankFormInteractor(
-            updateSelection = embeddedSelectionHolder::setSelection,
+            updateSelection = { embeddedSelectionHolder.setSelection(it, isUserInput = true) },
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ),
@@ -74,12 +75,13 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
             embeddedSelectionHolder.setSelection(
-                formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
+                updatedSelection = formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
                     paymentMethod = requireNotNull(
                         paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
                     ),
                     paymentMethodMetadata = paymentMethodMetadata,
-                )
+                ),
+                isUserInput = true,
             )
         }
         return DefaultVerticalModeFormInteractor(

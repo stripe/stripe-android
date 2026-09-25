@@ -155,7 +155,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-        selectionHolder.setSelection(result.selection)
+        selectionHolder.setSelection(result.selection, isUserInput = true)
     }
 
     private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
@@ -179,7 +179,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             val paymentMethodId = currentSelection.paymentMethod.id
             val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
             if (!stillExists) {
-                selectionHolder.setSelection(null)
+                selectionHolder.setSelection(null, isUserInput = true)
             }
         }
     }

@@ -128,7 +128,7 @@ internal class EmbeddedInitialScreenFactoryTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        selection?.let(selectionHolder::setSelection)
+        selection?.let { selectionHolder.setSelection(it, isUserInput = true) }
         val customerStateHolder = FakeCustomerStateHolder(customerState = customerState)
         val eventReporter = FakeEventReporter()
         val viewModelScope = TestScope(UnconfinedTestDispatcher())
@@ -189,7 +189,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             uiContext = viewModelScope.coroutineContext,
             savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::setSelection,
+            setSelection = { selectionHolder.setSelection(it, isUserInput = true) },
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},

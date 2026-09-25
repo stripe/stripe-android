@@ -275,7 +275,7 @@ internal class CheckoutStateLoaderTest {
 
         // The customer picks Google Pay after the initial load; in the single-state model that pick
         // lives on the committed state rather than a separate selection holder.
-        stateHolder.setSelection(PaymentSelection.GooglePay)
+        stateHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
 
         // A mutation reloads with the same configuration, so the chooser keeps the customer's
         // selection rather than adopting the loader's recomputed one.

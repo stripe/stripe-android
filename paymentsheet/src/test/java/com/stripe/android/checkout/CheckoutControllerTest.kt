@@ -1736,7 +1736,7 @@ internal class CheckoutControllerTest {
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
-        paymentSelection?.let(setup.stateHolder::setSelection)
+        paymentSelection?.let { setup.stateHolder.setSelection(it, isUserInput = true) }
         temporarySelection?.let(setup.stateHolder::setTemporarySelection)
         if (!previousNewSelections.isEmpty) {
             setup.stateHolder.setPreviousNewSelections(previousNewSelections)

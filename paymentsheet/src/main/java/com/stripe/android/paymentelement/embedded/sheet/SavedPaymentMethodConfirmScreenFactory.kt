@@ -20,7 +20,9 @@ internal class SavedPaymentMethodConfirmScreenFactory @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
 ) {
     fun create(selection: PaymentSelection.Saved) = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
-        interactor = interactorFactory.create(selection, embeddedSelectionHolder::setSelection),
+        interactor = interactorFactory.create(selection) {
+            embeddedSelectionHolder.setSelection(it, isUserInput = true)
+        },
         isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
         sheetActivityStateHolder = sheetActivityStateHolder,
         confirmationHelper = confirmationHelper,

@@ -12,7 +12,7 @@ internal interface EmbeddedSelectionHolder {
     val temporarySelection: StateFlow<String?>
     val previousNewSelections: Bundle
 
-    fun setSelection(updatedSelection: PaymentSelection?)
+    fun setSelection(updatedSelection: PaymentSelection?, isUserInput: Boolean)
 
     fun setTemporarySelection(code: PaymentMethodCode?)
 

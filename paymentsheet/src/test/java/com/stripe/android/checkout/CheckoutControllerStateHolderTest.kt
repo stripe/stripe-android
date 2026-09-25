@@ -116,8 +116,40 @@ internal class CheckoutControllerStateHolderTest {
             ),
         )
 
-        stateHolder.setSelection(PaymentSelection.GooglePay)
+        stateHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
 
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `equal selection without user input keeps failure`() = testScenario {
+        val error = IllegalStateException("Selection failed")
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
+        )
+
+        stateHolder.setSelection(PaymentSelection.GooglePay, isUserInput = false)
+
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
+    }
+
+    @Test
+    fun `different selection without user input clears failure`() = testScenario {
+        val error = IllegalStateException("Selection failed")
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
+        )
+
+        stateHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = false)
+
+        assertThat(stateHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         assertThat(stateHolder.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
@@ -146,7 +178,7 @@ internal class CheckoutControllerStateHolderTest {
 
         stateHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.setSelection(PaymentSelection.GooglePay)
+            stateHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
             assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay)
         }
 
@@ -162,7 +194,7 @@ internal class CheckoutControllerStateHolderTest {
         stateHolder.savedPaymentMethodSelectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
-            stateHolder.setSelection(PaymentSelection.GooglePay)
+            stateHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
 
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
@@ -173,7 +205,7 @@ internal class CheckoutControllerStateHolderTest {
         stateHolder.state = committedState()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
 
-        stateHolder.setSelection(selection)
+        stateHolder.setSelection(selection, isUserInput = true)
 
         assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
     }
@@ -185,7 +217,7 @@ internal class CheckoutControllerStateHolderTest {
 
         stateHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            stateHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
             assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         }
 
@@ -234,7 +266,7 @@ internal class CheckoutControllerStateHolderTest {
 
     @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
-        stateHolder.setSelection(PaymentSelection.GooglePay)
+        stateHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
         assertSetBeforeLoadError(operation = "setSelection")
 
         stateHolder.setTemporarySelection("card")

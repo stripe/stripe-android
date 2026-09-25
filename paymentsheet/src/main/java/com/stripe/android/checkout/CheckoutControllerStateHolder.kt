@@ -72,8 +72,10 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     override val previousNewSelections: Bundle
         get() = state?.previousNewSelections ?: Bundle()
 
-    override fun setSelection(updatedSelection: PaymentSelection?) {
+    override fun setSelection(updatedSelection: PaymentSelection?, isUserInput: Boolean) {
         val current = requireState(operation = "setSelection") ?: return
+        // A selection re-applied without user input must not clear a saved selection failure.
+        if (!isUserInput && current.paymentSelection == updatedSelection) return
         state = current.withSelection(updatedSelection)
     }
 

@@ -217,7 +217,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
             immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
         ): VerticalPaymentSelectionHandler {
             return ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                updateSelection = { selection, _ -> selectionHolder.setSelection(selection, isUserInput = true) },
                 completionAction = immediateActionHandler::invoke,
             )
         }

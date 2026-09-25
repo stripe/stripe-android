@@ -354,7 +354,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         hasSavedPaymentMethods: Boolean = false,
     ): DefaultVerticalModeFormInteractor {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        selectionHolder.setSelection(paymentSelection)
+        selectionHolder.setSelection(paymentSelection, isUserInput = true)
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,

@@ -89,7 +89,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
                 stateHolder.state = stateHolder.state?.copy(linkEagerPresentationSuppressed = true)
             }
             is LinkPaymentMethodSelectionOutcome.UpdateSelection -> {
-                stateHolder.setSelection(outcome.selection)
+                stateHolder.setSelection(outcome.selection, isUserInput = true)
                 if (outcome.showPaymentOptions) {
                     presentDefault()
                 } else {

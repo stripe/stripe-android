@@ -230,7 +230,9 @@ internal class EmbeddedContentUiTest {
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { updatedSelection, _ -> selectionHolder.setSelection(updatedSelection) },
+                updateSelection = { updatedSelection, _ ->
+                    selectionHolder.setSelection(updatedSelection, isUserInput = true)
+                },
                 completionAction = immediateActionHandler::invoke,
             ),
             coroutineScope = viewModelScope,

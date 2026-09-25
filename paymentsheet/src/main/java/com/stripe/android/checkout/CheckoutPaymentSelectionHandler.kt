@@ -21,7 +21,7 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {
     private val immediateHandler = ImmediateVerticalPaymentSelectionHandler(
-        updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+        updateSelection = { selection, _ -> selectionHolder.setSelection(selection, isUserInput = true) },
         completionAction = immediateActionHandler::invoke,
     )
 

@@ -50,7 +50,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         confirmationStateHolder.state = state.confirmationState
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
-        selectionHolder.setSelection(state.confirmationState.selection)
+        selectionHolder.setSelection(state.confirmationState.selection, isUserInput = true)
         contentStateHolder.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
             embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
@@ -80,7 +80,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private fun clearState() {
         contentStateHolder.clearEmbeddedContent()
         confirmationStateHolder.state = null
-        selectionHolder.setSelection(null)
+        selectionHolder.setSelection(null, isUserInput = true)
         selectionHolder.previousNewSelections.clear()
         customerStateHolder.setCustomerState(null)
     }

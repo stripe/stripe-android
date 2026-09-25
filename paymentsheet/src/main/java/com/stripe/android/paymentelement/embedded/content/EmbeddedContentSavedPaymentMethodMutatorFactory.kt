@@ -40,7 +40,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
             uiContext = uiContext,
             savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::setSelection,
+            setSelection = { selectionHolder.setSelection(it, isUserInput = true) },
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},

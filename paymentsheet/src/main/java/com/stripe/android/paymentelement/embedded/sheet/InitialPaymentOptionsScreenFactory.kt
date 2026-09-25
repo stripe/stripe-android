@@ -150,7 +150,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
-            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            updateSelection = { selection, _ -> selectionHolder.setSelection(selection, isUserInput = true) },
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
@@ -166,7 +166,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = { selectionHolder.setSelection(it) },
+            selectionUpdater = { selectionHolder.setSelection(it, isUserInput = true) },
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
@@ -199,10 +199,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = stateFlowOf(walletsState()),
             updateSelection = { updatedSelection, _ ->
-                selectionHolder.setSelection(updatedSelection)
+                selectionHolder.setSelection(updatedSelection, isUserInput = true)
             },
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                updateSelection = { selection, _ -> selectionHolder.setSelection(selection, isUserInput = true) },
                 completionAction = null,
             ),
             isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.VerticalPaymentOptions>(),

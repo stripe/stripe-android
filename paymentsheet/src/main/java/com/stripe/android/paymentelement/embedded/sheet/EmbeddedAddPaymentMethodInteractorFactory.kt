@@ -53,7 +53,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
                     selectedPaymentMethodCode = initialCode,
                     paymentMethodMetadata = paymentMethodMetadata,
                 ),
-            selectionUpdater = { embeddedSelectionHolder.setSelection(it) },
+            selectionUpdater = { embeddedSelectionHolder.setSelection(it, isUserInput = true) },
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
@@ -61,7 +61,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         val bankFormInteractor = BankFormInteractor(
-            updateSelection = embeddedSelectionHolder::setSelection,
+            updateSelection = { embeddedSelectionHolder.setSelection(it, isUserInput = true) },
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ),

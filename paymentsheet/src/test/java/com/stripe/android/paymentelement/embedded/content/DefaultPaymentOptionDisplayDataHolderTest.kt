@@ -22,7 +22,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     fun `null confirmationState emits null paymentOption`() = testScenario {
         paymentOptionDisplayDataHolder.paymentOption.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.setSelection(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
         }
     }
 
@@ -32,7 +32,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     ) {
         paymentOptionDisplayDataHolder.paymentOption.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.setSelection(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
     }

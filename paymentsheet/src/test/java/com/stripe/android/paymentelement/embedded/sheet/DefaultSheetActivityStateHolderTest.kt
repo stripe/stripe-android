@@ -146,7 +146,7 @@ internal class DefaultSheetActivityStateHolderTest {
     fun `state updates isEnabled when selection is set`() = testScenario {
         stateHolder.state.test {
             assertThat(awaitItem().isEnabled).isFalse()
-            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
             assertThat(awaitItem().isEnabled).isTrue()
         }
     }
@@ -157,7 +157,7 @@ internal class DefaultSheetActivityStateHolderTest {
             awaitAndVerifyInitialState()
 
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            selectionHolder.setSelection(selection)
+            selectionHolder.setSelection(selection, isUserInput = true)
 
             val enabledState = awaitItem()
             assertThat(enabledState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
@@ -189,7 +189,7 @@ internal class DefaultSheetActivityStateHolderTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            selectionHolder.setSelection(selection)
+            selectionHolder.setSelection(selection, isUserInput = true)
 
             // State emitted from setting selection
             assertThat(awaitItem().isEnabled).isTrue()
@@ -274,7 +274,7 @@ internal class DefaultSheetActivityStateHolderTest {
     @Test
     fun `updateProcessing stops processing and re-enables for selection`() = testScenario {
         val error = "Something went wrong".resolvableString
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         stateHolder.updateProcessing(true)
         stateHolder.updateError(error)
 
@@ -392,7 +392,7 @@ internal class DefaultSheetActivityStateHolderTest {
             val updateState = awaitItem()
             assertThat(updateState.isEnabled).isTrue()
 
-            selectionHolder.setSelection(null)
+            selectionHolder.setSelection(null, isUserInput = true)
 
             expectNoEvents()
         }
@@ -403,10 +403,10 @@ internal class DefaultSheetActivityStateHolderTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
             assertThat(awaitItem().isEnabled).isTrue()
 
-            selectionHolder.setSelection(null)
+            selectionHolder.setSelection(null, isUserInput = true)
             assertThat(awaitItem().isEnabled).isFalse()
         }
     }
@@ -422,7 +422,7 @@ internal class DefaultSheetActivityStateHolderTest {
             assertThat(processingState.isProcessing).isTrue()
             assertThat(processingState.isEnabled).isFalse()
 
-            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
             expectNoEvents()
         }
     }

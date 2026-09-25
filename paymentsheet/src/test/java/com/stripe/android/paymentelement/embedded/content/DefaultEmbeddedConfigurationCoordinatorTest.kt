@@ -96,7 +96,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             )
         )
 
-        selectionHolder.setSelection(PaymentSelection.GooglePay)
+        selectionHolder.setSelection(PaymentSelection.GooglePay, isUserInput = true)
         assertThat(confirmationStateHolder.state).isNull()
 
         assertThat(

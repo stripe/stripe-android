@@ -103,7 +103,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
     ) {
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
 
         val screens = factory.createInitialScreen()
 
@@ -121,7 +121,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
     ) {
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
 
         val screens = factory.createInitialScreen()
 
@@ -165,7 +165,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethods = PaymentMethodFixtures.createCards(1),
         ),
     ) {
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
 
         val screens = factory.createInitialScreen()
 
@@ -306,7 +306,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             uiContext = testScope.coroutineContext,
             savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::setSelection,
+            setSelection = { selectionHolder.setSelection(it, isUserInput = true) },
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},

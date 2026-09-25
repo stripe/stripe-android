@@ -67,7 +67,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = {
-                selectionHolder.setSelection(it)
+                selectionHolder.setSelection(it, isUserInput = true)
                 verticalPaymentSelectionHandler.onSelectionComplete()
             },
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
@@ -120,10 +120,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
             updateSelection = { updatedSelection, isUserInput ->
-                // Screen re-entry re-applies the current selection without user input and must not clear a failure.
-                if (isUserInput || selectionHolder.selection.value != updatedSelection) {
-                    selectionHolder.setSelection(updatedSelection)
-                }
+                selectionHolder.setSelection(updatedSelection, isUserInput)
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),

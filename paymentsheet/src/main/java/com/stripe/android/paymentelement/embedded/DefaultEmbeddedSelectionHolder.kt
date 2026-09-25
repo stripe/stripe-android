@@ -25,7 +25,7 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
             savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = it
         }
 
-    override fun setSelection(updatedSelection: PaymentSelection?) {
+    override fun setSelection(updatedSelection: PaymentSelection?, isUserInput: Boolean) {
         savedStateHandle[EMBEDDED_SELECTION_KEY] = updatedSelection
         previousNewSelections.stashNewSelection(updatedSelection)
         savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = previousNewSelections

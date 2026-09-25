@@ -109,7 +109,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct current selection if selection matches`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -125,8 +125,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with previous form details`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, isUserInput = true)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -142,7 +142,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct current selection if selection is saved card`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        selectionHolder.setSelection(
+            updatedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            isUserInput = true,
+        )
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -158,7 +161,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct current selection if selection is for another LPM`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -207,7 +210,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `formActivityLauncher clears selection holder and invokes callback on complete result`() = testScenario {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        selectionHolder.setSelection(selection)
+        selectionHolder.setSelection(selection, isUserInput = true)
         launchForm("test_code")
 
         val result = EmbeddedActivityResult.Complete(
@@ -236,7 +239,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         shouldRowSelectionBeInvoked = true
     ) {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        selectionHolder.setSelection(selection)
+        selectionHolder.setSelection(selection, isUserInput = true)
         launchForm("cashapp")
 
         val result = EmbeddedActivityResult.Complete(
@@ -267,7 +270,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             shouldRowSelectionBeInvoked = true
         ) {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            selectionHolder.setSelection(selection)
+            selectionHolder.setSelection(selection, isUserInput = true)
             launchForm("cashapp")
 
             val result = EmbeddedActivityResult.Complete(
@@ -294,7 +297,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             shouldRowSelectionBeInvoked = false
         ) {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-            selectionHolder.setSelection(selection)
+            selectionHolder.setSelection(selection, isUserInput = true)
             launchForm("cashapp")
 
             val result = EmbeddedActivityResult.Complete(
@@ -665,7 +668,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `launchPaymentOptions forwards previously entered new selections`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, isUserInput = true)
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -779,7 +782,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `paymentOptionsResult cancelled clears stale saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
-        selectionHolder.setSelection(savedSelection)
+        selectionHolder.setSelection(savedSelection, isUserInput = true)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
         sheetStateHolder.sheetIsOpen = true
@@ -799,7 +802,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `paymentOptionsResult cancelled preserves valid saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
-        selectionHolder.setSelection(savedSelection)
+        selectionHolder.setSelection(savedSelection, isUserInput = true)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
         sheetStateHolder.sheetIsOpen = true

@@ -195,7 +195,7 @@ internal interface EmbeddedActivityModule {
                     EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
                     EmbeddedPaymentElement.FormSheetAction.Confirm -> TapToAddMode.Complete
                 },
-                updateSelection = embeddedSelectionHolder::setSelection,
+                updateSelection = { embeddedSelectionHolder.setSelection(it, isUserInput = true) },
                 customerStateHolder = customerStateHolder,
                 linkSignupMode = stateFlowOf(paymentMethodMetadata.linkState?.signupMode),
                 statusBarColor = statusBarColor,
