@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 class DefaultIntentStatusPollerTest {
 
@@ -24,7 +25,8 @@ class DefaultIntentStatusPollerTest {
 
         val poller = createIntentStatusPoller(
             enqueuedStatuses = statuses,
-            dispatcher = testDispatcher
+            dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
         )
 
         assertThat(poller.state.value).isNull()
@@ -42,6 +44,24 @@ class DefaultIntentStatusPollerTest {
     }
 
     @Test
+    fun `Updates state when polling a SetupIntent`() = runTest(testDispatcher) {
+        val poller = createIntentStatusPoller(
+            enqueuedStatuses = listOf(RequiresAction, Succeeded),
+            dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
+            isSetupIntent = true,
+        )
+
+        poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(RequiresAction)
+
+        advanceTimeBy(delayTimeInMillis)
+        assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        poller.stopPolling()
+    }
+
+    @Test
     fun `Updates state when polling result changes - fixed intervals`() = runTest(testDispatcher) {
         val statuses = listOf(
             RequiresAction,
@@ -51,6 +71,7 @@ class DefaultIntentStatusPollerTest {
         val poller = createIntentStatusPoller(
             enqueuedStatuses = statuses,
             dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
         )
 
         assertThat(poller.state.value).isNull()
@@ -75,6 +96,7 @@ class DefaultIntentStatusPollerTest {
                 RequiresAction,
             ),
             dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
         )
 
         assertThat(poller.state.value).isNull()
@@ -95,7 +117,8 @@ class DefaultIntentStatusPollerTest {
                 RequiresAction,
                 Succeeded,
             ),
-            dispatcher = testDispatcher
+            dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
         )
 
         assertThat(poller.state.value).isNull()
@@ -123,7 +146,8 @@ class DefaultIntentStatusPollerTest {
                 RequiresAction,
                 Succeeded
             ),
-            dispatcher = testDispatcher
+            dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
         )
 
         assertThat(poller.state.value).isNull()
@@ -144,6 +168,50 @@ class DefaultIntentStatusPollerTest {
         assertThat(poller.state.value).isEqualTo(RequiresAction)
 
         poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        poller.stopPolling()
+    }
+
+    @Test
+    fun `Starting polling again replaces the active polling job`() = runTest(testDispatcher) {
+        val poller = createIntentStatusPoller(
+            enqueuedStatuses = listOf(
+                RequiresAction,
+                RequiresCapture,
+                Succeeded,
+            ),
+            dispatcher = testDispatcher,
+            pollingInterval = 1.seconds,
+        )
+
+        poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(RequiresAction)
+
+        poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(RequiresCapture)
+
+        advanceTimeBy(delayTimeInMillis)
+        assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        poller.stopPolling()
+    }
+
+    @Test
+    fun `Uses configured polling interval`() = runTest(testDispatcher) {
+        val poller = createIntentStatusPoller(
+            enqueuedStatuses = listOf(RequiresAction, Succeeded),
+            dispatcher = testDispatcher,
+            pollingInterval = 2.seconds,
+        )
+
+        poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(RequiresAction)
+
+        advanceTimeBy(1_010L)
+        assertThat(poller.state.value).isEqualTo(RequiresAction)
+
+        advanceTimeBy(1_000L)
         assertThat(poller.state.value).isEqualTo(Succeeded)
 
         poller.stopPolling()

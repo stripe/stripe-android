@@ -513,6 +513,7 @@ class PollingViewModelTest {
                 clientSecret = "secret",
                 timeLimit = timeLimit,
                 initialDelay = initialDelay,
+                pollingInterval = 1.seconds,
                 ctaText = R.string.stripe_blik_confirm_payment,
                 requestOptions = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
