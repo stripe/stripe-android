@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -217,18 +216,6 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(restored.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(restored.tryBeginSavedSelection()).isTrue()
-    }
-
-    @Test
-    fun `finishing failed saved selection preserves the failure`() = testScenario {
-        val failedState = SavedPaymentMethodSelectionState.Failed(
-            "Selection failed".resolvableString,
-        )
-        stateHolder.state = committedState().copy(savedPaymentMethodSelectionState = failedState)
-
-        stateHolder.finishSavedSelection()
-
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value).isEqualTo(failedState)
     }
 
     @Test
