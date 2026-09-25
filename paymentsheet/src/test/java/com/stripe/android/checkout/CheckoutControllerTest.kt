@@ -11,10 +11,12 @@ import app.cash.turbine.turbineScope
 import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.Logger
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -29,15 +31,22 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +65,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -803,26 +813,24 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `selectSavedPaymentMethod skips tax update when saved payment method has no billing address`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            // Construct this state directly to exercise the invariant that filtering normally
-            // prevents from reaching saved-method selection.
-            val selection = loadedSavedPaymentMethodSelection()
-            val addresslessSelection = selection.copy(
-                paymentMethod = selection.paymentMethod.copy(billingDetails = null),
+    fun `selectSavedPaymentMethod reports missing billing address as unexpected error`() =
+        runUnexpectedErrorScenario {
+            val selection = PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    billingDetails = null,
+                ),
             )
-            val before = committedState().checkoutSessionResponse
 
-            val result = controller.selectSavedPaymentMethod(addresslessSelection)
+            val result = controller.selectSavedPaymentMethod(selection)
 
-            result.getOrThrow()
-            assertThat(committedState().checkoutSessionResponse).isSameInstanceAs(before)
+            assertThat(result.isSuccess).isTrue()
+            val reportCall = errorReporter.awaitCall()
+            assertThat(reportCall.errorEvent).isEqualTo(
+                ErrorReporter.UnexpectedErrorEvent
+                    .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
+            )
+            assertThat(reportCall.stripeException).isNull()
+            assertThat(reportCall.additionalNonPiiParams).isEmpty()
         }
 
     @Test
@@ -1465,11 +1473,119 @@ internal class CheckoutControllerTest {
         )
     }
 
+    private fun runUnexpectedErrorScenario(
+        block: suspend UnexpectedErrorScenario.() -> Unit,
+    ) = runTest {
+        val errorReporter = FakeErrorReporter()
+        val scenario = createUnexpectedErrorScenario(errorReporter, backgroundScope)
+
+        scenario.block()
+
+        errorReporter.ensureAllEventsConsumed()
+        scenario.confirmationHandler.validate()
+        scenario.sessionRefresher.ensureAllEventsConsumed()
+        scenario.eventReporter.validate()
+    }
+
+    private fun createUnexpectedErrorScenario(
+        errorReporter: FakeErrorReporter,
+        viewModelScope: CoroutineScope,
+    ): UnexpectedErrorScenario {
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = SavedStateHandle(),
+            errorReporter = errorReporter,
+        ).apply {
+            state = CheckoutControllerStateFactory.create(
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            )
+        }
+        val operation = createUnexpectedErrorOperation(viewModelScope)
+        val eventReporter = FakeEventReporter()
+        val analyticsPerformer = CheckoutAnalyticsPerformer(
+            confirmationHandler = operation.confirmationHandler,
+            eventReporter = eventReporter,
+            savedStateHandle = SavedStateHandle(),
+        )
+        val checkoutSessionRepository = mock<CheckoutSessionRepository>()
+        val controller = destroyControllerRule.track(
+            CheckoutController(
+                viewModelScope = viewModelScope,
+                checkoutSessionRepository = checkoutSessionRepository,
+                elementsSessionClientParams = ElementsSessionClientParams(
+                    mobileAppId = "test",
+                    mobileSessionIdProvider = { "test" },
+                ),
+                checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
+                    checkoutSessionRepository = checkoutSessionRepository,
+                ),
+                errorReporter = errorReporter,
+                checkoutStateLoader = mock(),
+                stateHolder = stateHolder,
+                sheetStateHolder = operation.sheetStateHolder,
+                operationCoordinator = operation.coordinator,
+                checkoutPresenterSubcomponentFactory = mock<CheckoutPresenterSubcomponent.Factory>(),
+                paymentElementCallbackIdentifier = "checkout_unexpected_error_test",
+                savedState = CheckoutControllerSavedState(
+                    parentHandle = SavedStateHandle(),
+                    integrationName = "checkout_unexpected_error_test",
+                ),
+                checkoutAnalyticsPerformer = analyticsPerformer,
+            ),
+        )
+
+        return UnexpectedErrorScenario(
+            controller = controller,
+            errorReporter = errorReporter,
+            confirmationHandler = operation.confirmationHandler,
+            sessionRefresher = operation.sessionRefresher,
+            eventReporter = eventReporter,
+        )
+    }
+
+    private fun createUnexpectedErrorOperation(
+        viewModelScope: CoroutineScope,
+    ): UnexpectedErrorOperation {
+        val sheetStateHolder = SheetStateHolder(SavedStateHandle())
+        val confirmationHandler = FakeConfirmationHandler()
+        val sessionRefresher = FakeCheckoutSessionRefresher()
+        return UnexpectedErrorOperation(
+            coordinator = CheckoutOperationCoordinator(
+                confirmationHandler = confirmationHandler,
+                sheetStateHolder = sheetStateHolder,
+                sessionRefresher = sessionRefresher,
+                logger = Logger.noop(),
+                resultCallback = {},
+                viewModelScope = viewModelScope,
+            ),
+            sheetStateHolder = sheetStateHolder,
+            confirmationHandler = confirmationHandler,
+            sessionRefresher = sessionRefresher,
+        )
+    }
+
     private class ControllerSetup(
         val controller: CheckoutController,
         val stateHolder: CheckoutControllerStateHolder,
         val sheetStateHolder: SheetStateHolder,
         val savedStateHandle: SavedStateHandle,
+    )
+
+    private class UnexpectedErrorScenario(
+        val controller: CheckoutController,
+        val errorReporter: FakeErrorReporter,
+        val confirmationHandler: FakeConfirmationHandler,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
+        val eventReporter: FakeEventReporter,
+    )
+
+    private class UnexpectedErrorOperation(
+        val coordinator: CheckoutOperationCoordinator,
+        val sheetStateHolder: SheetStateHolder,
+        val confirmationHandler: FakeConfirmationHandler,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
     )
 
     private fun runConfigureScenario(
