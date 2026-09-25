@@ -31,6 +31,8 @@ internal object CheckoutControllerStateFactory {
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection: PaymentSelection? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         linkEagerPresentationSuppressed: Boolean = false,
@@ -44,7 +46,7 @@ internal object CheckoutControllerStateFactory {
             expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfiguration,
             paymentSelection = paymentSelection,
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
             linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,

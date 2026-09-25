@@ -1,22 +1,30 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CleanupTestRule
@@ -42,7 +50,7 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(WalletButtonsPreview::class)
+@OptIn(CheckoutSessionPreview::class, WalletButtonsPreview::class)
 internal class EmbeddedContentUiTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -122,8 +130,41 @@ internal class EmbeddedContentUiTest {
         }
     }
 
+    @Test
+    fun `rebuilding content with unchanged selection preserves selection error`() {
+        val error = "Selection failed".resolvableString
+        runScenario(
+            selection = PaymentSelection.GooglePay,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(error),
+        ) {
+            embeddedContentHelper.embeddedContent.test {
+                assertThat(awaitItem()).isNull()
+                val loadedState = EmbeddedContentHelperStateFactory.create()
+                state.value = loadedState
+                val firstContent = requireNotNull(awaitItem())
+                assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
+                composeRule.setContent {
+                    val content by embeddedContentHelper.embeddedContent.collectAsState()
+                    content?.Content()
+                }
+                composeRule.waitForIdle()
+                composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
+
+                state.value = loadedState.copy(embeddedViewDisplaysMandateText = false)
+
+                assertThat(requireNotNull(awaitItem())).isNotSameInstanceAs(firstContent)
+                assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
+                composeRule.waitForIdle()
+                composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
+            }
+        }
+    }
+
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
+        val selectionHolder: CheckoutControllerStateHolder,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 
@@ -131,10 +172,17 @@ internal class EmbeddedContentUiTest {
     @Suppress("LongMethod")
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
+        selection: PaymentSelection? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        selectionHolder.state = CheckoutControllerStateFactory.create(
+            paymentSelection = selection,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
+        )
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
@@ -182,7 +230,7 @@ internal class EmbeddedContentUiTest {
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                updateSelection = { updatedSelection, _ -> selectionHolder.setSelection(updatedSelection) },
                 completionAction = immediateActionHandler::invoke,
             ),
             coroutineScope = viewModelScope,
@@ -209,6 +257,7 @@ internal class EmbeddedContentUiTest {
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
+            selectionHolder = selectionHolder,
             state = state,
         ).block()
     }

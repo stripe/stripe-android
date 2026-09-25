@@ -15,6 +15,7 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -30,14 +31,17 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +72,6 @@ internal class CheckoutControllerTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
-
     private val expectedMerchantDisplayName = "Mobile Example Account"
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
@@ -491,6 +494,12 @@ internal class CheckoutControllerTest {
             putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         },
     ) {
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                "Selection failed".resolvableString,
+            ),
+        )
+
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
 
@@ -500,6 +509,8 @@ internal class CheckoutControllerTest {
         }
         val clearedState = committedState()
         assertThat(clearedState.paymentSelection).isNull()
+        assertThat(clearedState.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(clearedState.temporarySelection).isNull()
         assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
     }
@@ -758,6 +769,9 @@ internal class CheckoutControllerTest {
                 val state = committedState()
                 assertThat(state.checkoutSessionResponse.livemode).isTrue()
                 assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(state.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+                assertThat(state.savedPaymentMethodSelectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
             } finally {
                 releaseResponse.countDown()
             }
@@ -795,7 +809,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `failed saved selection returns to idle and a retry is admitted`() =
+    fun `failed saved selection is retained and a retry is admitted`() =
         runMutationScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
@@ -813,9 +827,16 @@ internal class CheckoutControllerTest {
             val result = controller.selectSavedPaymentMethod(selection)
 
             assertThat(result.isFailure).isTrue()
-            assertThat(committedState()).isEqualTo(before)
-            assertThat(committedState().savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(
+                committedState().copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                ),
+            ).isEqualTo(before)
+            assertThat(committedState().savedPaymentMethodSelectionState).isEqualTo(
+                SavedPaymentMethodSelectionState.Failed(
+                    R.string.stripe_something_went_wrong.resolvableString,
+                ),
+            )
 
             networkRule.savedPaymentMethodTaxUpdate(::successfulSavedPaymentMethodResponse)
 
@@ -823,6 +844,30 @@ internal class CheckoutControllerTest {
 
             assertThat(retryResult.isSuccess).isTrue()
             assertThat(committedState().paymentSelection).isEqualTo(selection)
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod rejects a pending admission without overwriting it`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            stateHolder.state = requireNotNull(stateHolder.state).copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            )
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo(
+                "A saved payment method selection is already pending.",
+            )
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
         }
 
     @Test
@@ -915,6 +960,62 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `saved selection without a billing address reports missing tax address`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val loadedSelection = loadedSavedPaymentMethodSelection()
+            val selection = loadedSelection.copy(
+                paymentMethod = loadedSelection.paymentMethod.copy(billingDetails = null),
+            )
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(committedState().paymentSelection).isEqualTo(loadedSelection)
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(
+                errorReporter.getLoggedErrors().count {
+                    it == ErrorReporter.UnexpectedErrorEvent
+                        .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS.eventName
+                },
+            ).isEqualTo(1)
+        }
+
+    @Test
+    fun `saved selection without a billing address does not report when tax uses shipping`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val loadedSelection = loadedSavedPaymentMethodSelection()
+            val selection = loadedSelection.copy(
+                paymentMethod = loadedSelection.paymentMethod.copy(billingDetails = null),
+            )
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(committedState().paymentSelection).isEqualTo(loadedSelection)
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(
+                errorReporter.getLoggedErrors().count {
+                    it == ErrorReporter.UnexpectedErrorEvent
+                        .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS.eventName
+                },
+            ).isEqualTo(0)
+        }
+
+    @Test
     fun `selectSavedPaymentMethod skips tax update when automatic tax targets shipping`() =
         runMutationScenario(
             initModifier = combine(
@@ -977,12 +1078,117 @@ internal class CheckoutControllerTest {
                     }
                     assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
                     assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(stateAtCompletion.savedPaymentMethodSelectionState)
+                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     expectNoEvents()
                     completions.expectNoEvents()
                 } finally {
                     releaseResponse.countDown()
                 }
+            }
+
+            completions.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `saved selection retry clears failure and returns to idle after success`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val completions = Turbine<CheckoutControllerState>()
+            val handler = createSelectionHandler(completions)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            stateHolder.savedPaymentMethodSelectionState.test {
+                awaitSavedSelectionFailure(handler, selection, completions)
+
+                val requestReceived = CountDownLatch(1)
+                val releaseResponse = CountDownLatch(1)
+                networkRule.savedPaymentMethodTaxUpdate { response ->
+                    requestReceived.countDown()
+                    check(releaseResponse.await(10, TimeUnit.SECONDS)) {
+                        "Timed out waiting to release the saved payment method retry response."
+                    }
+                    successfulSavedPaymentMethodResponse(response)
+                }
+
+                handler.select(selection, true)
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                try {
+                    testScheduler.advanceUntilIdle()
+                    assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+                    completions.expectNoEvents()
+
+                    releaseResponse.countDown()
+                    val stateAtCompletion = withTurbineTimeout(10.seconds) {
+                        completions.awaitItem()
+                    }
+                    assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(stateAtCompletion.savedPaymentMethodSelectionState)
+                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                    completions.expectNoEvents()
+                } finally {
+                    releaseResponse.countDown()
+                }
+            }
+
+            completions.ensureAllEventsConsumed()
+        }
+
+    private suspend fun ReceiveTurbine<SavedPaymentMethodSelectionState>.awaitSavedSelectionFailure(
+        handler: CheckoutPaymentSelectionHandler,
+        selection: PaymentSelection.Saved,
+        completions: Turbine<CheckoutControllerState>,
+    ) {
+        assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+        handler.select(selection, true)
+        assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+        val failure = withTurbineTimeout(10.seconds) { awaitItem() }
+        assertThat(failure).isEqualTo(
+            SavedPaymentMethodSelectionState.Failed(
+                R.string.stripe_something_went_wrong.resolvableString,
+            ),
+        )
+        completions.expectNoEvents()
+    }
+
+    @Test
+    fun `reselecting the committed wallet clears a saved selection failure`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val completions = Turbine<CheckoutControllerState>()
+            val handler = createSelectionHandler(completions)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            stateHolder.savedPaymentMethodSelectionState.test {
+                awaitSavedSelectionFailure(handler, selection, completions)
+
+                handler.select(PaymentSelection.GooglePay, true)
+
+                assertThat(awaitItem())
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                assertThat(completions.awaitItem().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+                completions.expectNoEvents()
             }
 
             completions.ensureAllEventsConsumed()
@@ -1567,6 +1773,7 @@ internal class CheckoutControllerTest {
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,
         integrationName: String,
+        errorReporter: FakeErrorReporter = FakeErrorReporter(),
     ): ControllerSetup {
         val controllerSavedState = CheckoutControllerSavedState(
             parentHandle = savedStateHandle,
@@ -1579,13 +1786,18 @@ internal class CheckoutControllerTest {
                 resultCallback = CheckoutController.ResultCallback {},
                 rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
                 checkoutControllerSavedState = controllerSavedState,
+                errorReporterOverride = errorReporter,
             ).checkoutController
         )
         return ControllerSetup(
             controller = controller,
-            stateHolder = CheckoutControllerStateFactory.createStateHolder(controllerSavedState.handle),
+            stateHolder = CheckoutControllerStateFactory.createStateHolder(
+                savedStateHandle = controllerSavedState.handle,
+                errorReporter = errorReporter,
+            ),
             sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
             savedStateHandle = controllerSavedState.handle,
+            errorReporter = errorReporter,
         )
     }
 
@@ -1594,6 +1806,7 @@ internal class CheckoutControllerTest {
         val stateHolder: CheckoutControllerStateHolder,
         val sheetStateHolder: SheetStateHolder,
         val savedStateHandle: SavedStateHandle,
+        val errorReporter: FakeErrorReporter,
     )
 
     private fun runConfigureScenario(
@@ -1613,7 +1826,7 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val result: Result<Unit>,
         val savedStateHandle: SavedStateHandle,
-        private val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutControllerStateHolder,
     ) {
         val committedState: CheckoutControllerState?
             get() = stateHolder.state
@@ -1657,6 +1870,7 @@ internal class CheckoutControllerTest {
                     controller = controller,
                     stateHolder = setup.stateHolder,
                     savedStateHandle = setup.savedStateHandle,
+                    errorReporter = setup.errorReporter,
                     sheetStateHolder = setup.sheetStateHolder,
                     testScope = this@runTest,
                     isUpdatingTurbine = isUpdatingTurbine,
@@ -1674,6 +1888,7 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val stateHolder: CheckoutControllerStateHolder,
         private val savedStateHandle: SavedStateHandle,
+        val errorReporter: FakeErrorReporter,
         val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,

@@ -65,6 +65,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val selectionError: ResolvableString?,
         val linkBrand: LinkBrand,
     )
 
@@ -235,13 +236,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
-        savedPaymentMethodSelectionState,
-    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
+    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
         getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending,
         )
     }
 
@@ -290,13 +289,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
         processing,
+        savedPaymentMethodSelectionState,
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
         linkAccount,
-    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode, linkAccount ->
+    ) { displayablePaymentMethods, isProcessing, savedSelectionState, mostRecentSelection,
+        displayedSavedPaymentMethod, action, temporarySelectionCode, linkAccount ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -311,13 +311,21 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         } else {
             null
         }
+        val displayableSavedPaymentMethod = displayedSavedPaymentMethod?.paymentMethod
+            ?.toDisplayableSavedPaymentMethod(
+                paymentMethodMetadata = paymentMethodMetadata,
+                defaultPaymentMethodId = null,
+                isSelectionPending = savedSelectionState is SavedPaymentMethodSelectionState.Pending,
+            )
+
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
-            isProcessing = isProcessing,
+            isProcessing = isProcessing || savedSelectionState is SavedPaymentMethodSelectionState.Pending,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
-            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            displayedSavedPaymentMethod = displayableSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            selectionError = (savedSelectionState as? SavedPaymentMethodSelectionState.Failed)?.error,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
     }
@@ -479,7 +487,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
-        isSelectionPending: Boolean,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -488,7 +495,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = paymentMethodMetadata,
             defaultPaymentMethodId = null,
-            isSelectionPending = isSelectionPending,
         )
     }
 

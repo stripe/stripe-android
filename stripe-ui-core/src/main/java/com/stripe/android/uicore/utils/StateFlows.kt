@@ -232,6 +232,58 @@ fun <T1, T2, T3, T4, T5, T6, T7, R> combineAsStateFlow(
 }
 
 /**
+ * Combines eight [StateFlow]s into another, instead of loosening the result to a [Flow].
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combineAsStateFlow(
+    flow1: StateFlow<T1>,
+    flow2: StateFlow<T2>,
+    flow3: StateFlow<T3>,
+    flow4: StateFlow<T4>,
+    flow5: StateFlow<T5>,
+    flow6: StateFlow<T6>,
+    flow7: StateFlow<T7>,
+    flow8: StateFlow<T8>,
+    transform: (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
+): StateFlow<R> {
+    @Suppress("DEPRECATION", "UNCHECKED_CAST", "MagicNumber")
+    return FlowToStateFlow(
+        flow = combine(listOf(flow1, flow2, flow3, flow4, flow5, flow6, flow7, flow8)) { values ->
+            val flow1Value = values[0] as T1
+            val flow2Value = values[1] as T2
+            val flow3Value = values[2] as T3
+            val flow4Value = values[3] as T4
+            val flow5Value = values[4] as T5
+            val flow6Value = values[5] as T6
+            val flow7Value = values[6] as T7
+            val flow8Value = values[7] as T8
+            transform(
+                flow1Value,
+                flow2Value,
+                flow3Value,
+                flow4Value,
+                flow5Value,
+                flow6Value,
+                flow7Value,
+                flow8Value,
+            )
+        },
+        produceValue = {
+            transform(
+                flow1.value,
+                flow2.value,
+                flow3.value,
+                flow4.value,
+                flow5.value,
+                flow6.value,
+                flow7.value,
+                flow8.value,
+            )
+        },
+    )
+}
+
+/**
  * Combines a list of [StateFlow]s into another, instead of loosening the result to a [Flow].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
