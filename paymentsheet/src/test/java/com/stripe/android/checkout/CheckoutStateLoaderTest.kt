@@ -282,7 +282,7 @@ internal class CheckoutStateLoaderTest {
         loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
@@ -305,7 +305,7 @@ internal class CheckoutStateLoaderTest {
         loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.selection.value).isEqualTo(selection)
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
@@ -327,7 +327,7 @@ internal class CheckoutStateLoaderTest {
         }
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
     }
 

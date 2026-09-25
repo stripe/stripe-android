@@ -48,6 +48,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     private val savedPaymentMethodMutatorFactory: EmbeddedContentSavedPaymentMethodMutatorFactory,
     private val linkAccountHolder: LinkAccountHolder,
     @EmbeddedHostProcessing private val hostProcessing: StateFlow<Boolean>,
+    private val savedPaymentMethodSelectionState: StateFlow<@JvmSuppressWildcards SavedPaymentMethodSelectionState>,
 ) : EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
     @Suppress("LongMethod")
@@ -83,13 +84,13 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             processing = combineAsStateFlow(
                 hostProcessing,
                 confirmationHandler.state,
-                selectionHolder.savedPaymentMethodSelectionState,
+                savedPaymentMethodSelectionState,
             ) { isHostProcessing, confirmationState, savedPaymentMethodSelectionState ->
                 isHostProcessing ||
                     confirmationState is ConfirmationHandler.State.Confirming ||
                     savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending
             },
-            savedPaymentMethodSelectionState = selectionHolder.savedPaymentMethodSelectionState,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,

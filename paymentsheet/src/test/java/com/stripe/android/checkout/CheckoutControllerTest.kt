@@ -11,6 +11,7 @@ import app.cash.turbine.turbineScope
 import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.injection.CheckoutControllerModule
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
@@ -995,7 +996,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
 
-            stateHolder.savedPaymentMethodSelectionState.test {
+            CheckoutControllerModule.provideSavedPaymentMethodSelectionState(stateHolder).test {
                 awaitSavedSelectionFailure(handler, selection, completions)
 
                 val requestReceived = CountDownLatch(1)
@@ -1067,7 +1068,7 @@ internal class CheckoutControllerTest {
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
 
-            stateHolder.savedPaymentMethodSelectionState.test {
+            CheckoutControllerModule.provideSavedPaymentMethodSelectionState(stateHolder).test {
                 awaitSavedSelectionFailure(handler, selection, completions)
 
                 handler.select(PaymentSelection.GooglePay, true)

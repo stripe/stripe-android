@@ -9,6 +9,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.injection.CheckoutControllerModule
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -148,7 +149,7 @@ internal class EmbeddedContentUiTest {
                 val loadedState = EmbeddedContentHelperStateFactory.create()
                 state.value = loadedState
                 val firstContent = requireNotNull(awaitItem())
-                assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+                assertThat(selectionHolder.state?.savedPaymentMethodSelectionState)
                     .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
                 composeRule.setContent {
                     val content by embeddedContentHelper.embeddedContent.collectAsState()
@@ -160,7 +161,7 @@ internal class EmbeddedContentUiTest {
                 state.value = loadedState.copy(embeddedViewDisplaysMandateText = false)
 
                 assertThat(requireNotNull(awaitItem())).isNotSameInstanceAs(firstContent)
-                assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+                assertThat(selectionHolder.state?.savedPaymentMethodSelectionState)
                     .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
                 composeRule.waitForIdle()
                 composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
@@ -269,6 +270,9 @@ internal class EmbeddedContentUiTest {
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
             linkAccountHolder = linkAccountHolder,
             hostProcessing = stateFlowOf(false),
+            savedPaymentMethodSelectionState = CheckoutControllerModule.provideSavedPaymentMethodSelectionState(
+                stateHolder = selectionHolder,
+            ),
         )
 
         val embeddedContentHelper =

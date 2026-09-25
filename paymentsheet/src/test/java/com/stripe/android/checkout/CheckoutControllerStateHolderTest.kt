@@ -103,8 +103,6 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(restoredStateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
@@ -118,7 +116,7 @@ internal class CheckoutControllerStateHolderTest {
 
         stateHolder.setSelection(PaymentSelection.GooglePay)
 
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
@@ -136,7 +134,7 @@ internal class CheckoutControllerStateHolderTest {
         val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
 
         assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(restored.savedPaymentMethodSelectionState.value)
+        assertThat(restored.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
     }
 
@@ -159,12 +157,14 @@ internal class CheckoutControllerStateHolderTest {
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
         )
 
-        stateHolder.savedPaymentMethodSelectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+        stateHolder.stateFlow.test {
+            assertThat(awaitItem()?.savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
 
             stateHolder.setSelection(PaymentSelection.GooglePay)
 
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(awaitItem()?.savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
     }
 
@@ -271,8 +271,6 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(stateHolder.temporarySelection.value).isEqualTo("card")
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
