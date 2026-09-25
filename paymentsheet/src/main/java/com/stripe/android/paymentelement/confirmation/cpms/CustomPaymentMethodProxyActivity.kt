@@ -7,12 +7,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 
 /**

@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement.callbacks
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.Identifiable
+import com.stripe.android.core.Identifiable
 
 internal object PaymentElementCallbackReferences {
     private val instanceCallbackMap = mutableMapOf<Identifiable, PaymentElementCallbacks>()

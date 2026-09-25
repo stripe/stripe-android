@@ -11,8 +11,8 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.utils.rememberActivity
 
 /**

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -26,7 +27,6 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter

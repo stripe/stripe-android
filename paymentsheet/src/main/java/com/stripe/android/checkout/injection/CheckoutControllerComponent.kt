@@ -20,6 +20,7 @@ import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -62,7 +63,6 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter

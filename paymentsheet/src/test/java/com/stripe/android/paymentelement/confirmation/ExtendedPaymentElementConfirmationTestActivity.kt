@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -47,7 +48,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.FakePrefsRepository
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger

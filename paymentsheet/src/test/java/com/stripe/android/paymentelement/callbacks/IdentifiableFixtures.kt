@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.callbacks
 
-import com.stripe.android.paymentsheet.Identifiable
+import com.stripe.android.core.Identifiable
 
 internal fun createTestIdentifier(name: String): Identifiable = StringIdentifiable(name)
 

@@ -18,6 +18,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -35,7 +36,6 @@ import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDa
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails

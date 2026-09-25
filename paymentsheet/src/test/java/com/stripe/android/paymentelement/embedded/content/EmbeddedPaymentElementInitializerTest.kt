@@ -4,11 +4,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest

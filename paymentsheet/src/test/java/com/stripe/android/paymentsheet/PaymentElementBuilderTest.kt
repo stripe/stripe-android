@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.utils.PaymentElementCallbackTestRule

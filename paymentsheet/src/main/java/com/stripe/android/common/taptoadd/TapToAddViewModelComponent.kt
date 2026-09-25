@@ -25,6 +25,7 @@ import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddDelayInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddStateHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -63,7 +64,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter

@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
@@ -29,7 +30,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse

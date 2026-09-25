@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
@@ -46,7 +47,6 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionContract

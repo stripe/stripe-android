@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -20,7 +21,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
@@ -21,7 +22,6 @@ import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetAutocompleteModule
 import dagger.BindsInstance

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.lpms.foundations
 
+import com.stripe.android.core.Identifiable
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -8,7 +9,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.MerchantCountry
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory

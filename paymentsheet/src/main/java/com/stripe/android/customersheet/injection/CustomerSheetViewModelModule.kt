@@ -7,6 +7,7 @@ import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -32,7 +33,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.model.PaymentSelection

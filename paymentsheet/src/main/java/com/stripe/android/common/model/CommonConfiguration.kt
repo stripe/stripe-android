@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -12,7 +13,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails

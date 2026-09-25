@@ -8,6 +8,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -51,7 +52,6 @@ import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext

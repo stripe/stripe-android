@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
@@ -29,7 +30,6 @@ import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfir
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavigationManager

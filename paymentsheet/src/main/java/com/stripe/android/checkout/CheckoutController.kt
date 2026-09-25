@@ -14,6 +14,7 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -24,7 +25,6 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository

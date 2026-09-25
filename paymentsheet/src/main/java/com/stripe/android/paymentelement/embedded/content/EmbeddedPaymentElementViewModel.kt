@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.paymentsheet.Identifiable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject

@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -43,7 +44,6 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory

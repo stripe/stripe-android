@@ -3,12 +3,12 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentsheet.Identifiable
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.parcelize.Parcelize
 

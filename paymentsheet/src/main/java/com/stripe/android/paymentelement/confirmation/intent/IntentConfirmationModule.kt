@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -8,7 +9,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.Identifiable
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet

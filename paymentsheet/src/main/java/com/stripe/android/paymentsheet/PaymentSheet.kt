@@ -11,7 +11,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -22,6 +21,7 @@ import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
@@ -58,8 +58,6 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
-import java.util.UUID
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
@@ -4484,15 +4482,3 @@ class PaymentSheet internal constructor(
         }
     }
 }
-
-@Stable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface Identifiable : Serializable
-
-internal fun Identifiable(id: UUID = UUID.randomUUID()): Identifiable {
-    return UuidIdentifiable(id)
-}
-
-@Stable
-@JvmInline
-private value class UuidIdentifiable(private val id: UUID) : Identifiable

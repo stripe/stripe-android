@@ -6,12 +6,12 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.createTestIdentifier
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 import org.junit.runner.RunWith

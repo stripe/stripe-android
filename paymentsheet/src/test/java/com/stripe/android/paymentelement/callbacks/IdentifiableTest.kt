@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.callbacks
 
 import android.os.Parcel
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.Identifiable
+import com.stripe.android.core.Identifiable
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import org.junit.Rule
 import org.junit.Test

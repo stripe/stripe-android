@@ -4,11 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.parcelize.Parcelize
