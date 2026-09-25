@@ -148,6 +148,21 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `setSelection returns a pending saved selection to idle`() = testScenario {
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+        )
+
+        stateHolder.savedPaymentMethodSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+
+            stateHolder.setSelection(PaymentSelection.GooglePay)
+
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        }
+    }
+
+    @Test
     fun `setSelection acknowledges the SEPA mandate`() = testScenario {
         stateHolder.state = committedState()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)

@@ -758,6 +758,7 @@ internal class CheckoutControllerTest {
                 val state = committedState()
                 assertThat(state.checkoutSessionResponse.livemode).isTrue()
                 assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(state.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
             } finally {
                 releaseResponse.countDown()
             }

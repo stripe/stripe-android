@@ -8,7 +8,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.previousNewSelection
-import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -91,14 +90,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
-        updatedSelection?.hasAcknowledgedSepaMandate = true
-        val previousNewSelections = Bundle(current.previousNewSelections).apply {
-            stashNewSelection(updatedSelection)
-        }
-        state = current.copy(
-            paymentSelection = updatedSelection,
-            previousNewSelections = previousNewSelections,
-        )
+        state = current.withSelection(updatedSelection)
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {
