@@ -18,10 +18,10 @@ import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteR
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.DefaultShippingAddressElementEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.NoOpShippingAddressElementEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.ShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.CheckoutShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -29,6 +29,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -66,36 +67,34 @@ internal class AddressElementViewModelModule {
     }
 
     @Provides
-    @Singleton
-    fun provideStripeAutocompleteRepository(
-        stripeNetworkClient: StripeNetworkClient,
+    internal fun provideAddressElementEventReporter(
         args: AddressElementActivityContract.Args,
-    ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
-        stripeNetworkClient = stripeNetworkClient,
-        apiRequestFactory = ApiRequest.Factory(),
-        publishableKeyProvider = { args.publishableKey },
-    )
+        addressLauncherEventReporter: AddressLauncherEventReporter,
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+        analyticsRequestFactory: AnalyticsRequestFactory,
+    ): AddressElementEventReporter = when (args) {
+        is AddressElementActivityContract.Args.Standalone -> {
+            StandaloneAddressElementEventReporter(addressLauncherEventReporter)
+        }
+        is AddressElementActivityContract.Args.CheckoutShipping -> {
+            CheckoutShippingAddressElementEventReporter(
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                analyticsRequestFactory = analyticsRequestFactory,
+                checkoutSessionId = args.checkoutSessionResponse.id,
+            )
+        }
+    }
 
     @Provides
     @Singleton
-    internal fun provideShippingAddressElementEventReporter(
-        args: AddressElementActivityContract.Args,
-        analyticsRequestExecutor: AnalyticsRequestExecutor,
-        analyticsRequestFactory: AnalyticsRequestFactory,
-    ): ShippingAddressElementEventReporter {
-        return when (args) {
-            is AddressElementActivityContract.Args.Standalone -> {
-                NoOpShippingAddressElementEventReporter
-            }
-            is AddressElementActivityContract.Args.CheckoutShipping -> {
-                DefaultShippingAddressElementEventReporter(
-                    analyticsRequestExecutor = analyticsRequestExecutor,
-                    analyticsRequestFactory = analyticsRequestFactory,
-                    checkoutSessionId = args.checkoutSessionResponse.id,
-                )
-            }
-        }
-    }
+    fun provideStripeAutocompleteRepository(
+        stripeNetworkClient: StripeNetworkClient,
+        requestOptionsProvider: Provider<ApiRequest.Options>,
+    ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
+        stripeNetworkClient = stripeNetworkClient,
+        apiRequestFactory = ApiRequest.Factory(),
+        requestOptionsProvider = requestOptionsProvider,
+    )
 
     @Provides
     @Singleton
@@ -128,10 +127,19 @@ internal class AddressElementViewModelModule {
             PlacesClientProxy.create(
                 context,
                 it,
-                errorReporter = ErrorReporter.createFallbackInstance(context),
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    apiConfigurationProvider = { args.apiConfiguration },
+                ),
             )
         }
     }
+
+    @Provides
+    @Singleton
+    fun provideApiConfiguration(
+        args: AddressElementActivityContract.Args
+    ) = args.apiConfiguration
 
     @Module
     interface Bindings {

@@ -6,8 +6,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -22,7 +25,6 @@ import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepo
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.NoOpShippingAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -58,7 +60,7 @@ class AddressElementViewModelModuleTest {
     fun `providePrimaryButtonAction completes standalone through the view model`() =
         runTest(UnconfinedTestDispatcher()) {
             val args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
             )
             val resultStateHolder = AddressElementResultStateHolder()
@@ -157,6 +159,8 @@ class AddressElementViewModelModuleTest {
                 assertThat(awaitItem()).isFalse()
                 assertThat(awaitItem()).isTrue()
             }
+            assertThat(viewModel.saveError.value)
+                .isEqualTo(IllegalStateException("Invalid tax region").stripeErrorMessage())
             assertThat(resultStateHolder.result.value).isNull()
 
             resultStateHolder.result.test {
@@ -200,11 +204,71 @@ class AddressElementViewModelModuleTest {
         }
 
     @Test
+    fun `provideAddressElementEventReporter forwards standalone computed values`() = runTest {
+        val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val eventReporter = module.provideAddressElementEventReporter(
+            args = AddressElementActivityContract.Args.Standalone(
+                apiConfiguration = DEFAULT_API_CONFIG,
+                config = AddressLauncher.Configuration(),
+            ),
+            addressLauncherEventReporter = addressLauncherEventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = createAnalyticsRequestFactory(),
+        )
+
+        eventReporter.onShown(country = "CA")
+        eventReporter.onSaveCompleted(
+            country = "US",
+            autocompleteResultSelected = true,
+            editDistance = 1,
+        )
+
+        assertThat(addressLauncherEventReporter.showCalls.awaitItem()).isEqualTo("CA")
+        assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+            FakeAddressLauncherEventReporter.CompletedCall(
+                country = "US",
+                autocompleteResultSelected = true,
+                editDistance = 1,
+            )
+        )
+        assertThat(analyticsRequestExecutor.getExecutedRequests()).isEmpty()
+        addressLauncherEventReporter.validate()
+    }
+
+    @Test
+    fun `provideAddressElementEventReporter reports Checkout shipping events for the Checkout Session`() = runTest {
+        val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
+        val eventReporter = module.provideAddressElementEventReporter(
+            args = AddressElementActivityContract.Args.CheckoutShipping(
+                apiConfiguration = DEFAULT_API_CONFIG,
+                config = AddressLauncher.Configuration(),
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            addressLauncherEventReporter = addressLauncherEventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = createAnalyticsRequestFactory(),
+        )
+
+        eventReporter.onShown(country = "CA")
+
+        val params = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(params).containsEntry("event", "elements.shipping_address.shown")
+        assertThat(params).containsEntry("checkout_session_id", checkoutSessionResponse.id)
+        assertThat(params["address_data_blob"]).isEqualTo(
+            mapOf("address_country_code" to "CA")
+        )
+        addressLauncherEventReporter.validate()
+    }
+
+    @Test
     fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -221,7 +285,7 @@ class AddressElementViewModelModuleTest {
         val placesClient = module.provideGooglePlacesClient(
             context = mock<Context>(),
             args = AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
+                apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(billingAddress = null),
             ),
         )
@@ -241,7 +305,7 @@ class AddressElementViewModelModuleTest {
         )
         val resultStateHolder = AddressElementResultStateHolder()
         val args = AddressElementActivityContract.Args.CheckoutShipping(
-            publishableKey = "pk_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             config = AddressLauncher.Configuration(),
             checkoutSessionResponse = checkoutSessionResponse,
         )
@@ -267,13 +331,21 @@ class AddressElementViewModelModuleTest {
         navigator = mock<AddressElementNavigator>(),
         resultStateHolder = resultStateHolder,
         eventReporter = mock(),
-        shippingAddressElementEventReporter = NoOpShippingAddressElementEventReporter,
         placesClient = null,
         primaryButtonAction = module.providePrimaryButtonAction(
             args = args,
             taxRegionUpdater = taxRegionUpdater,
         ),
     ).also(viewModelStoreRule::track)
+
+    private fun createAnalyticsRequestFactory() = AnalyticsRequestFactory(
+        packageManager = null,
+        packageInfo = null,
+        packageName = "",
+        publishableKeyProvider = { "" },
+        networkTypeProvider = { "" },
+        pluginTypeProvider = { null },
+    )
 
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
