@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +48,7 @@ class StripeAutocompleteRepositoryTest {
         assertThat(params["session_token"]).isEqualTo("session_abc")
         assertThat(params["client_type"]).isEqualTo("mobile")
         assertThat(params["locale"]).isEqualTo("en")
+        assertThat(request.options).isEqualTo(OPTIONS)
     }
 
     @Test
@@ -113,7 +115,7 @@ class StripeAutocompleteRepositoryTest {
         val repository = DefaultStripeAutocompleteRepository(
             stripeNetworkClient = networkClient,
             apiRequestFactory = ApiRequest.Factory(),
-            publishableKeyProvider = { "pk_test_123" },
+            requestOptionsProvider = { OPTIONS },
         )
         return Scenario(networkClient = networkClient, repository = repository)
     }
@@ -150,5 +152,10 @@ class StripeAutocompleteRepositoryTest {
             {"address":{"line1":"123 Main St","city":"San Francisco",
             "state":"CA","postal_code":"94105","country":"US"}}
         """.trimIndent()
+
+        val OPTIONS = ApiRequest.Options(
+            apiKey = DEFAULT_API_CONFIG.publishableKey,
+            stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
+        )
     }
 }

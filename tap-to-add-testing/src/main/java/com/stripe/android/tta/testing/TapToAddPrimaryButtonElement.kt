@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.testing.waitUntilWithIdle
 
 class TapToAddPrimaryButtonElement(
     private val composeTestRule: ComposeTestRule
@@ -23,7 +24,7 @@ class TapToAddPrimaryButtonElement(
                 } ?: this
             }
 
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(matcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

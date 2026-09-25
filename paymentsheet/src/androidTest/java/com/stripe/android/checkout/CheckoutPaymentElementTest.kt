@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -136,7 +137,7 @@ internal class CheckoutPaymentElementTest {
                     controller.applyPromotionCode("10OFF")
                 }
                 try {
-                    testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                    testRules.compose.waitUntilWithIdle {
                         controller.isUpdating.value
                     }
                     contentPage.assertLpmIsEnabled("card", isEnabled = false)
@@ -145,7 +146,7 @@ internal class CheckoutPaymentElementTest {
                 }
 
                 assertThat(update.await().isSuccess).isTrue()
-                testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                testRules.compose.waitUntilWithIdle {
                     !controller.isUpdating.value
                 }
                 contentPage.assertLpmIsEnabled("card", isEnabled = true)
@@ -222,6 +223,68 @@ internal class CheckoutPaymentElementTest {
             runBlocking {
                 controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             }
+            context.markTestSucceeded()
+        }
+    }
+    
+    @Test
+    fun testLinkAccountStatusIsLoaded_forLinkDisplayAutomatic() {
+        runLinkLoadingTest(
+            linkDisplay = PaymentElement.Configuration.LinkConfiguration.Display.Automatic,
+            expectedToLoadLinkAccount = true,
+        )
+    }
+
+    @Test
+    fun testLinkAccountStatusIsLoaded_forLinkDisplayNever() {
+        runLinkLoadingTest(
+            linkDisplay = PaymentElement.Configuration.LinkConfiguration.Display.Never,
+            expectedToLoadLinkAccount = false,
+        )
+    }
+
+    private fun runLinkLoadingTest(
+        linkDisplay: PaymentElement.Configuration.LinkConfiguration.Display,
+        expectedToLoadLinkAccount: Boolean,
+    ) {
+        val checkoutInitResponse: (MockResponse) -> Unit = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "test@stripe.com")
+            }
+        }
+        val configuration = CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration()
+                .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+                .linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration().display(
+                        linkDisplay
+                    )
+                )
+        )
+
+        if (expectedToLoadLinkAccount) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
+                    json.put("exists", true)
+                }
+            }
+        }
+
+
+        lateinit var controller: CheckoutController
+
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            checkoutInitResponse = checkoutInitResponse,
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            },
+        ) { context ->
+            // Just testing loading events, mark test succeeded once that has completed.
             context.markTestSucceeded()
         }
     }

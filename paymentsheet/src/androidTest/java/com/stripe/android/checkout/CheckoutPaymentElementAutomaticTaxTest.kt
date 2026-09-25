@@ -2,9 +2,11 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import app.cash.turbine.Turbine
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -29,8 +31,10 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
@@ -98,9 +102,41 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
             taxUpdateRequests.awaitItem()
             contentPage.assertPaymentMethodRowsAreEnabled(false)
+            assertSavedPaymentMethodSpinnerCount(1)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
+            immediateActionCalls.expectNoEvents()
+
+            releaseTaxUpdateResponse.countDown()
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionKeepsSpinnerAcrossHostRecreation() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            taxUpdateRequests.awaitItem()
+            assertSavedPaymentMethodSpinnerCount(1)
+
+            recreateHost()
+
+            assertSavedPaymentMethodSpinnerCount(1)
+            taxUpdateRequests.expectNoEvents()
             immediateActionCalls.expectNoEvents()
 
             releaseTaxUpdateResponse.countDown()
@@ -122,10 +158,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
             taxUpdateRequests.awaitItem()
             contentPage.assertPaymentMethodRowsAreEnabled(false)
+            assertSavedPaymentMethodSpinnerCount(1)
 
             releaseTaxUpdateResponse.countDown()
 
             contentPage.assertPaymentMethodRowsAreEnabled(true)
+            assertSavedPaymentMethodSpinnerCount(0)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
@@ -169,6 +207,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertPaymentMethodRowsAreEnabled(true)
+                assertSavedPaymentMethodSpinnerCount(0)
                 markTestSucceeded()
             } finally {
                 releaseTaxUpdateResponse.countDown()
@@ -439,6 +478,10 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             runnerContext.confirm()
         }
 
+        fun recreateHost() {
+            runnerContext.recreateHost()
+        }
+
         fun markTestSucceeded() {
             runnerContext.markTestSucceeded()
         }
@@ -488,7 +531,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
             PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
         }
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(hasTestTag(layoutTag))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
@@ -496,7 +539,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun clickPaymentOptionsPrimaryButton() {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(
                 hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
@@ -553,9 +596,22 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
-        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+        testRules.compose.waitUntilWithIdle {
             controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
         }
+    }
+
+    private fun assertSavedPaymentMethodSpinnerCount(expectedCount: Int) {
+        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+            testRules.compose.onAllNodesWithTag(
+                SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).size == expectedCount
+        }
+        testRules.compose.onAllNodesWithTag(
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(expectedCount)
     }
 
     private fun automaticTaxResponseWithoutRequiredBilling(

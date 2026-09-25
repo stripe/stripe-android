@@ -1115,6 +1115,7 @@ class LinkApiRepositoryTest {
     ): LinkApiRepository {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
+            apiConfigurationProvider = { DEFAULT_API_CONFIGURATION },
             requestSurface = RequestSurface.PaymentElement,
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,

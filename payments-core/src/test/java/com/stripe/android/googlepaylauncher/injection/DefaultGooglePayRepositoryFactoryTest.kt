@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Rule
@@ -39,6 +40,13 @@ internal class DefaultGooglePayRepositoryFactoryTest {
     private val googlePayConfig = GooglePayConfig(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         connectedAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+    )
+
+    @get:Rule
+    val paymentConfigTestRule = PaymentConfigurationTestRule(
+        context,
+        "pk_payment_configuration",
+        "acct_payment_configuration"
     )
 
     @Test
@@ -81,11 +89,6 @@ internal class DefaultGooglePayRepositoryFactoryTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         allowNoExistingPaymentMethodForGooglePayRule.setEnabled(allowNoExistingPaymentMethodForGooglePay)
-        PaymentConfiguration.init(
-            context = context,
-            publishableKey = "pk_payment_configuration",
-            stripeAccountId = "acct_payment_configuration",
-        )
         val requests = Turbine<IsReadyToPayRequest>()
         GooglePayRepository.googlePayAvailabilityClientFactory =
             object : GooglePayAvailabilityClient.Factory {

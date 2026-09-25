@@ -22,6 +22,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.ApiKeyFixtures
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -544,7 +545,10 @@ class CardDetailsControllerTest {
                         enabled = true,
                         field = CardDetailsElement(
                             identifier = FormFieldId.Generic("card_details"),
-                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                                context = context,
+                                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                            ),
                             initialValues = mapOf(),
                             coroutineScope = coroutineScope,
                         ),
@@ -573,7 +577,10 @@ class CardDetailsControllerTest {
     ): CardDetailsController {
         return CardDetailsController(
             cardBrandFilter = cardBrandFilter,
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                context = context,
+                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            ),
             initialValues = initialValues,
             coroutineScope = coroutineScope,
             cbcEligibility = cbcEligibility,

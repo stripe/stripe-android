@@ -72,7 +72,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
         lifecycleOwner = lifecycleOwner,
         activityResultLauncher = activityResultLauncher,
         onPaymentDataChangedCallback = null,
-        context = context,
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor,
     )

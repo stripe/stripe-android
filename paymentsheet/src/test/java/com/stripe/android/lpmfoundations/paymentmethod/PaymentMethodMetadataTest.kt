@@ -2421,6 +2421,7 @@ internal class PaymentMethodMetadataTest {
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 

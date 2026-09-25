@@ -149,8 +149,9 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `configure() sets new configuration and loads it`() = runTest {
+    fun `configure() loads configuration without updating PaymentConfiguration`() = runTest {
         val interactor = createInteractor()
+        PaymentConfiguration.init(application, "pk_original", "acct_original")
 
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(
@@ -169,8 +170,8 @@ class LinkControllerInteractorTest {
         assertThat(interactor.configure(controllerConfig).isSuccess).isTrue()
         assertThat(linkComponent.configuration).isEqualTo(loadedConfiguration)
         val paymentConfiguration = PaymentConfiguration.getInstance(application)
-        assertThat(paymentConfiguration.publishableKey).isEqualTo("pk_123")
-        assertThat(paymentConfiguration.stripeAccountId).isEqualTo("acct_123")
+        assertThat(paymentConfiguration.publishableKey).isEqualTo("pk_original")
+        assertThat(paymentConfiguration.stripeAccountId).isEqualTo("acct_original")
     }
 
     @Test

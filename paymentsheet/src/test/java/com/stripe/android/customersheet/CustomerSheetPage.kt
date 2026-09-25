@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.testing.waitUntilWithIdle
 
 internal class CustomerSheetPage(
     private val composeTestRule: ComposeTestRule,
@@ -18,10 +19,10 @@ internal class CustomerSheetPage(
     }
 
     fun clickPaymentOptionItem(text: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasText(text, ignoreCase = true))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
         composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$text")
@@ -31,18 +32,18 @@ internal class CustomerSheetPage(
     }
 
     fun waitForText(text: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasText(text, ignoreCase = true))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 
     fun waitForTextExactly(text: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTextExactly(text))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 

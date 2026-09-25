@@ -205,6 +205,7 @@ class WalletViewModelTest {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
+                    preCollectedConsent = null,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }

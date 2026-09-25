@@ -107,7 +107,7 @@ internal class FlowControllerAnalyticsTest(
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -191,7 +191,7 @@ internal class FlowControllerAnalyticsTest(
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = verticalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(verticalModeConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -290,7 +290,7 @@ internal class FlowControllerAnalyticsTest(
                         currency = "usd"
                     )
                 ),
-                configuration = horizontalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -385,13 +385,15 @@ internal class FlowControllerAnalyticsTest(
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration.newBuilder()
-                    .customer(
-                        PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
-                        )
-                    ).build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    horizontalModeConfiguration.newBuilder()
+                        .customer(
+                            PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        ).build()
+                ),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
