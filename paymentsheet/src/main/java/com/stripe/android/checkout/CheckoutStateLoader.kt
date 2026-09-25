@@ -36,12 +36,43 @@ internal class CheckoutStateLoader @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ) {
-        commit(
+        loadInitial(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+        ) { response, _ -> response }
+    }
+
+    suspend fun loadInitial(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        initialSelectionResponseUpdater: suspend (
+            CheckoutSessionResponse,
+            PaymentSelection?,
+        ) -> CheckoutSessionResponse,
+    ) {
+        val initialState = prepare(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
             carryForward = CarryForward.initial(),
         )
+        val updatedResponse = initialSelectionResponseUpdater(
+            initialState.state.checkoutSessionResponse,
+            initialState.state.paymentSelection,
+        )
+        val finalState = if (updatedResponse === initialState.state.checkoutSessionResponse) {
+            initialState
+        } else {
+            // The tax updater returns the original response when no server update is needed. A new
+            // response must be fully reloaded so all response-derived metadata stays consistent.
+            prepare(
+                configuration = configuration,
+                response = updatedResponse,
+                collectedDetails = initialState.state.collectedDetails,
+                carryForward = CarryForward.from(initialState.state),
+            )
+        }
+        publish(finalState)
     }
 
     suspend fun reload(state: CheckoutControllerState) {
@@ -64,6 +95,22 @@ internal class CheckoutStateLoader @Inject constructor(
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
     ) {
+        publish(
+            prepare(
+                configuration = configuration,
+                response = response,
+                collectedDetails = collectedDetails,
+                carryForward = carryForward,
+            )
+        )
+    }
+
+    private suspend fun prepare(
+        configuration: CheckoutController.Configuration.State,
+        response: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
+        carryForward: CarryForward,
+    ): PreparedState {
         // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
@@ -106,22 +153,33 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        stateHolder.state = CheckoutControllerState(
-            configuration = configuration,
-            checkoutSessionResponse = response,
-            flagImages = flagImages,
-            collectedDetails = collectedDetails,
-            paymentMethodMetadata = loadResults.paymentMethodMetadata,
-            expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
-            embeddedConfiguration = embeddedConfig,
-            paymentSelection = selection,
-            temporarySelection = carryForward.temporarySelection,
-            previousNewSelections = carryForward.previousNewSelections,
-            linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
+        return PreparedState(
+            state = CheckoutControllerState(
+                configuration = configuration,
+                checkoutSessionResponse = response,
+                flagImages = flagImages,
+                collectedDetails = collectedDetails,
+                paymentMethodMetadata = loadResults.paymentMethodMetadata,
+                expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
+                embeddedConfiguration = embeddedConfig,
+                paymentSelection = selection,
+                temporarySelection = carryForward.temporarySelection,
+                previousNewSelections = carryForward.previousNewSelections,
+                linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
+            ),
+            customer = loadResults.customer,
         )
-
-        customerStateHolder.setCustomerState(loadResults.customer)
     }
+
+    private fun publish(preparedState: PreparedState) {
+        stateHolder.state = preparedState.state
+        customerStateHolder.setCustomerState(preparedState.customer)
+    }
+
+    private data class PreparedState(
+        val state: CheckoutControllerState,
+        val customer: CustomerState?,
+    )
 
     private suspend fun loadPaymentElements(
         initializationMode: PaymentElementLoader.InitializationMode,

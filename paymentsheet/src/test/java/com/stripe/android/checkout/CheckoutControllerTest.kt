@@ -20,6 +20,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -183,6 +184,96 @@ internal class CheckoutControllerTest {
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
     }
+
+    @Test
+    fun `configure synchronizes tax for the initially selected saved payment method`() =
+        runConfigureScenario(
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithBillingAddress(),
+                        ),
+                    ),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[city]", "San Francisco"),
+                    bodyPart("tax_region[state]", "CA"),
+                    bodyPart("tax_region[postal_code]", "94111"),
+                    bodyPart("tax_region[line1]", "1234 Main Street"),
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithBillingAddress(),
+                            { json ->
+                                json.put("livemode", true)
+                                checkoutItemJson(json).put("total", 6099).put("subtotal", 6099)
+                                json.getJSONObject("server_built_elements_session_params")
+                                    .getJSONObject("deferred_intent")
+                                    .put("amount", 6099)
+                            },
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            val state = requireNotNull(committedState)
+            val selection = state.paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_saved_card")
+            assertThat(state.checkoutSessionResponse.livemode).isTrue()
+            assertThat(state.checkoutSessionResponse.amount).isEqualTo(6099L)
+            assertThat((state.paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+                .isEqualTo(6099L)
+        }
+
+    @Test
+    fun `configure does not commit initial selection when its tax update fails`() =
+        runConfigureScenario(
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithBillingAddress(),
+                        ),
+                    ),
+                )
+                networkRule.checkoutUpdate { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                }
+            },
+        ) {
+            assertThat(result.isFailure).isTrue()
+            assertThat(committedState).isNull()
+            assertThat(controller.session.value).isNull()
+        }
+
+    @Test
+    fun `configure skips initial saved payment method tax update when tax targets shipping`() =
+        runConfigureScenario(
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("shipping"),
+                            savedCustomerWithBillingAddress(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            val selection = requireNotNull(committedState).paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_saved_card")
+        }
 
     @Test
     fun `configure keeps a valid default shipping address in session when SAE is configured`() =

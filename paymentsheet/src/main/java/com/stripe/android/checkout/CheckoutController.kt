@@ -130,6 +130,7 @@ class CheckoutController @Inject internal constructor(
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
+                    initialSelectionResponseUpdater = ::updateInitialSelectionResponse,
                 )
             }
         }
@@ -217,18 +218,40 @@ class CheckoutController @Inject internal constructor(
     internal suspend fun selectSavedPaymentMethod(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {
-        val address = selection.billingDetails?.address?.toCheckoutAddress()
         return withCheckoutState(
             additionalStateMutations = { copy(paymentSelection = selection) },
         ) {
-            address?.let {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                    address = it,
-                )
-            } ?: kotlin.Result.success(checkoutSessionResponse)
+            updateSavedPaymentMethodTaxRegion(
+                checkoutSessionResponse = checkoutSessionResponse,
+                selection = selection,
+            )
         }
+    }
+
+    private suspend fun updateInitialSelectionResponse(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        paymentSelection: PaymentSelection?,
+    ): CheckoutSessionResponse {
+        val selection = paymentSelection as? PaymentSelection.Saved
+            ?: return checkoutSessionResponse
+        return updateSavedPaymentMethodTaxRegion(
+            checkoutSessionResponse = checkoutSessionResponse,
+            selection = selection,
+        ).getOrThrow()
+    }
+
+    private suspend fun updateSavedPaymentMethodTaxRegion(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        selection: PaymentSelection.Saved,
+    ): kotlin.Result<CheckoutSessionResponse> {
+        val address = selection.billingDetails?.address?.toCheckoutAddress()
+        return address?.let {
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = it,
+            )
+        } ?: kotlin.Result.success(checkoutSessionResponse)
     }
 
     /**
