@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
@@ -217,17 +218,31 @@ class CheckoutController @Inject internal constructor(
     internal suspend fun selectSavedPaymentMethod(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {
-        val address = selection.billingDetails?.address?.toCheckoutAddress()
+        mutationPreconditionFailure()?.let { return it }
+        if (!stateHolder.tryBeginSavedSelection()) {
+            return kotlin.Result.failure(
+                IllegalStateException("A saved payment method selection is already pending.")
+            )
+        }
         return withCheckoutState(
-            additionalStateMutations = { copy(paymentSelection = selection) },
-        ) {
-            address?.let {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                    address = it,
+            additionalStateMutations = {
+                copy(
+                    paymentSelection = selection,
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 )
-            } ?: kotlin.Result.success(checkoutSessionResponse)
+            },
+        ) {
+            val address = selection.billingDetails?.address?.toCheckoutAddress()
+                ?: return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = address,
+            ).onFailure {
+                stateHolder.state = stateHolder.state?.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                )
+            }
         }
     }
 
@@ -287,15 +302,7 @@ class CheckoutController @Inject internal constructor(
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
         block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> {
-        stateHolder.state
-            ?: return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        if (sheetStateHolder.sheetIsOpen) {
-            return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
-            )
-        }
+        mutationPreconditionFailure()?.let { return it }
         return operationCoordinator.runMutation {
             runCatching {
                 // Re-read the latest committed state inside the lock so serialized mutations
@@ -310,6 +317,20 @@ class CheckoutController @Inject internal constructor(
                 checkoutStateLoader.reload(newState)
             }
         }
+    }
+
+    private fun mutationPreconditionFailure(): kotlin.Result<Nothing>? {
+        if (stateHolder.state == null) {
+            return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate checkout session before it is configured.")
+            )
+        }
+        if (sheetStateHolder.sheetIsOpen) {
+            return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
+            )
+        }
+        return null
     }
 
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
