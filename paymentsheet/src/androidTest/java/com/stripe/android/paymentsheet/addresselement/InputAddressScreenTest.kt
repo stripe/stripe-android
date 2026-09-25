@@ -56,6 +56,7 @@ class InputAddressScreenTest {
             InputAddressScreen(
                 appearance = appearance,
                 primaryButtonEnabled = primaryButtonEnabled,
+                primaryButtonLoading = false,
                 primaryButtonText = "Save Address",
                 title = "Address",
                 onPrimaryButtonClick = primaryButtonCallback,

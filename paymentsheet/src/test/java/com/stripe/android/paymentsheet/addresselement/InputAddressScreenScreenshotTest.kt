@@ -99,6 +99,7 @@ internal class InputAddressScreenScreenshotTest {
         InputAddressScreen(
             appearance = appearance,
             primaryButtonEnabled = addressFormController.completeFormValues.value != null,
+            primaryButtonLoading = false,
             primaryButtonText = primaryButtonText,
             title = title,
             onPrimaryButtonClick = {},
