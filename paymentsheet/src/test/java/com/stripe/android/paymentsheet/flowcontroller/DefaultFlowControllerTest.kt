@@ -70,7 +70,6 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
@@ -2475,7 +2474,7 @@ internal class DefaultFlowControllerTest {
             errorReporter = errorReporter,
             initializedViaCompose = false,
             linkHandler = linkHandler ?: mock(),
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+            id = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
             flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
@@ -2490,7 +2489,6 @@ internal class DefaultFlowControllerTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 listOf(KLARNA_PROMOTION)
             ),
-            id = Identifiable(),
         )
     }
 

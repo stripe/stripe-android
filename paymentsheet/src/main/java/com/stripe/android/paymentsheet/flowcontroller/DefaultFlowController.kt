@@ -106,9 +106,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: Identifiable,
+    @PaymentElementCallbackIdentifier internal val id: Identifiable,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
-    internal val id: Identifiable,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
 
@@ -157,7 +156,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentOptionActivityLauncher.unregister()
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
-                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
+                    PaymentElementCallbackReferences.remove(id)
                 }
             }
         )
@@ -311,7 +310,7 @@ internal class DefaultFlowController @Inject internal constructor(
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             walletButtonsRendered = viewModel.walletButtonsRendered,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            paymentElementCallbackIdentifier = id,
             promotions = paymentMethodMessagePromotionsHelper.getPromotions()
         )
 

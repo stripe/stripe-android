@@ -23,10 +23,10 @@ internal class IdentifiableTest {
 
         val parcel = Parcel.obtain()
         val restoredId = try {
-            parcel.writeParcelable(id, 0)
+            parcel.writeSerializable(id)
             parcel.setDataPosition(0)
             @Suppress("DEPRECATION")
-            requireNotNull(parcel.readParcelable<Identifiable>(Identifiable::class.java.classLoader))
+            parcel.readSerializable() as Identifiable
         } finally {
             parcel.recycle()
         }

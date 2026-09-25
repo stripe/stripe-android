@@ -26,7 +26,7 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
         savedInstanceState?.getBoolean(HAS_CONFIRM_STARTED_KEY)?.let { hasConfirmStarted = it }
 
         val type = intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE)
-        val paymentElementCallbackIdentifier = IntentCompat.getParcelableExtra(
+        val paymentElementCallbackIdentifier = IntentCompat.getSerializableExtra(
             intent,
             EXTRA_PAYMENT_ELEMENT_IDENTIFIER,
             Identifiable::class.java,

@@ -150,7 +150,7 @@ internal fun internalRememberPaymentSheet(
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
             callback = paymentResultCallback,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            id = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         )
         PaymentSheet(launcher)

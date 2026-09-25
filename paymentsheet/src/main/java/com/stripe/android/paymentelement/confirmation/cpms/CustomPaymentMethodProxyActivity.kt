@@ -40,7 +40,7 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
                 PaymentSheet.CustomPaymentMethod::class.java,
             )
         }
-        val paymentElementCallbackIdentifier = IntentCompat.getParcelableExtra(
+        val paymentElementCallbackIdentifier = IntentCompat.getSerializableExtra(
             intent,
             EXTRA_PAYMENT_ELEMENT_IDENTIFIER,
             Identifiable::class.java,

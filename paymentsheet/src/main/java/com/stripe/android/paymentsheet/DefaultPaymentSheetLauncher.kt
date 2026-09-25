@@ -30,15 +30,14 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: Identifiable = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+    override val id: Identifiable,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
-                    super.onDestroy(owner)
+                    PaymentElementCallbackReferences.remove(id)
                 }
             }
         )
@@ -57,6 +56,7 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
+        id = Identifiable(),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -77,6 +77,7 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
+        id = Identifiable(),
     )
 
     constructor(
@@ -92,6 +93,7 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
+        id = Identifiable(),
     )
 
     @TestOnly
@@ -110,6 +112,7 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
+        id = Identifiable(),
     )
 
     override fun present(
@@ -120,7 +123,7 @@ internal class DefaultPaymentSheetLauncher(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = StatusBarCompat.color(activity),
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            paymentElementCallbackIdentifier = id,
             initializedViaCompose = initializedViaCompose,
         )
 

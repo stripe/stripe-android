@@ -46,7 +46,7 @@ internal class CustomPaymentMethodContractTest {
 
         assertThat(
             extras?.let {
-                BundleCompat.getParcelable(
+                BundleCompat.getSerializable(
                     it,
                     CustomPaymentMethodProxyActivity.EXTRA_PAYMENT_ELEMENT_IDENTIFIER,
                     Identifiable::class.java,
