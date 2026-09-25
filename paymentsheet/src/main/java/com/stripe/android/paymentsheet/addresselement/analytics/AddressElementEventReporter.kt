@@ -47,15 +47,11 @@ internal class StandaloneAddressElementEventReporter(
 }
 
 internal class CheckoutShippingAddressElementEventReporter(
-    private val addressLauncherEventReporter: AddressLauncherEventReporter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val checkoutSessionId: String,
 ) : AddressElementEventReporter {
     override fun onShown(snapshot: AddressElementAnalyticsSnapshot) {
-        addressLauncherEventReporter.updateAutocompleteCountry(
-            snapshot.initialAddress?.address?.country.orEmpty()
-        )
         fireEvent(
             ShippingAddressElementEvent.Shown(
                 ShippingAddressElementAnalyticsData(

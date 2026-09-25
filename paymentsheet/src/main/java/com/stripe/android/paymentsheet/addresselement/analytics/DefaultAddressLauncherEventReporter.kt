@@ -18,20 +18,13 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     @IOContext private val workContext: CoroutineContext
 ) : AddressLauncherEventReporter {
 
-    private var lastCountry: String = ""
-
     override fun onShow(country: String) {
-        updateAutocompleteCountry(country)
         durationProvider.start(DurationProvider.Key.AddressElementCompletion, reset = true)
         fireEvent(
             AddressLauncherEvent.Show(
                 country = country
             )
         )
-    }
-
-    override fun updateAutocompleteCountry(country: String) {
-        lastCountry = country
     }
 
     override fun onCompleted(
@@ -50,11 +43,11 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteSessionStarted(sessionToken: String) {
+    override fun onAutocompleteSessionStarted(sessionToken: String, country: String) {
         durationProvider.start(DurationProvider.Key.AddressAutocompleteSession, reset = true)
         fireEvent(
             AddressLauncherEvent.AutocompleteStarted(
-                country = lastCountry,
+                country = country,
                 autocompleteSessionToken = sessionToken,
             )
         )
@@ -70,6 +63,7 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
 
     override fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
+        country: String,
         resultCount: Int,
         source: String?,
     ) {
@@ -77,7 +71,7 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         fireEvent(
             AddressLauncherEvent.AutocompleteSuggestions(
-                country = lastCountry,
+                country = country,
                 autocompleteSessionToken = sessionToken,
                 timeToFetch = fetchDuration,
                 resultCount = resultCount,
@@ -87,12 +81,18 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?) {
+    override fun onAutocompleteSelected(
+        sessionToken: String,
+        country: String,
+        queryLength: Int,
+        placeId: String?,
+        source: String?,
+    ) {
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         val timeToFetch = durationProvider.end(DurationProvider.Key.AddressAutocompleteDetailsFetch)
         fireEvent(
             AddressLauncherEvent.AutocompleteSelected(
-                country = lastCountry,
+                country = country,
                 autocompleteSessionToken = sessionToken,
                 queryLength = queryLength,
                 placeId = placeId,
@@ -103,11 +103,11 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onAutocompleteError(sessionToken: String, error: Throwable) {
+    override fun onAutocompleteError(sessionToken: String, country: String, error: Throwable) {
         val sessionElapsed = durationProvider.elapsed(DurationProvider.Key.AddressAutocompleteSession)
         fireEvent(
             AddressLauncherEvent.AutocompleteError(
-                country = lastCountry,
+                country = country,
                 autocompleteSessionToken = sessionToken,
                 error = error,
                 sessionElapsed = sessionElapsed,

@@ -140,6 +140,7 @@ internal class InputAddressScreenScreenshotTest {
         InputAddressScreen(
             appearance = appearance,
             primaryButtonEnabled = addressFormController.completeFormValues.value != null,
+            primaryButtonLoading = false,
             primaryButtonText = primaryButtonText,
             title = title,
             onPrimaryButtonClick = {},
@@ -172,6 +173,7 @@ internal class InputAddressScreenScreenshotTest {
         InputAddressScreen(
             appearance = PaymentSheet.Appearance(),
             primaryButtonEnabled = completeValues != null,
+            primaryButtonLoading = false,
             primaryButtonText = stringResource(R.string.stripe_paymentsheet_address_element_primary_button),
             title = stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
             onPrimaryButtonClick = {},

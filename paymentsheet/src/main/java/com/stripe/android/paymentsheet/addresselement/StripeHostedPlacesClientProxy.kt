@@ -17,6 +17,7 @@ internal class StripeHostedPlacesClientProxy(
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
     private var lastQueryLength: Int = 0
+    private var lastResultCountry: String = ""
     private var sessionStartReported: Boolean = false
     private var lastSource: String? = null
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
@@ -25,6 +26,7 @@ internal class StripeHostedPlacesClientProxy(
         synchronized(lock) {
             sessionToken = newSessionToken()
             lastQueryLength = 0
+            lastResultCountry = ""
             sessionStartReported = false
             lastSource = null
             predictionCache.clear()
@@ -46,7 +48,7 @@ internal class StripeHostedPlacesClientProxy(
             sessionToken
         }
         if (isFirstQuery) {
-            eventReporter.onAutocompleteSessionStarted(token)
+            eventReporter.onAutocompleteSessionStarted(sessionToken = token, country = country)
         }
         eventReporter.onAutocompleteFetchStarted()
         var responseSource: String? = null
@@ -60,6 +62,7 @@ internal class StripeHostedPlacesClientProxy(
             responseSource = result.source
             synchronized(lock) {
                 lastSource = result.source
+                lastResultCountry = country
                 limitedPredictions.forEach { predictionCache[it.placeId] = it }
             }
             FindAutocompletePredictionsResponse(
@@ -74,11 +77,12 @@ internal class StripeHostedPlacesClientProxy(
         }.onSuccess { response ->
             eventReporter.onAutocompleteSuggestionsReturned(
                 sessionToken = token,
+                country = country,
                 resultCount = response.autocompletePredictions.size,
                 source = responseSource,
             )
         }.onFailure { error ->
-            eventReporter.onAutocompleteError(sessionToken = token, error = error)
+            eventReporter.onAutocompleteError(sessionToken = token, country = country, error = error)
         }
     }
 
@@ -86,16 +90,19 @@ internal class StripeHostedPlacesClientProxy(
         val cached: AutocompleteSuggestion?
         val token: String
         val queryLength: Int
+        val country: String
         val source: String?
         synchronized(lock) {
             cached = predictionCache[placeId]
             token = sessionToken
             queryLength = lastQueryLength
+            country = lastResultCountry
             source = lastSource
         }
         if (cached?.address != null) {
             eventReporter.onAutocompleteSelected(
                 sessionToken = token,
+                country = country,
                 queryLength = queryLength,
                 placeId = placeId,
                 source = source,
@@ -118,12 +125,13 @@ internal class StripeHostedPlacesClientProxy(
         }.map { it.address.toAddress() }.onSuccess {
             eventReporter.onAutocompleteSelected(
                 sessionToken = token,
+                country = country,
                 queryLength = queryLength,
                 placeId = placeId,
                 source = source,
             )
         }.onFailure { error ->
-            eventReporter.onAutocompleteError(sessionToken = token, error = error)
+            eventReporter.onAutocompleteError(sessionToken = token, country = country, error = error)
         }
     }
 

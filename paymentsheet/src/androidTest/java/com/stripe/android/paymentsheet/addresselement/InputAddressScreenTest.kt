@@ -4,7 +4,10 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -41,6 +44,17 @@ class InputAddressScreenTest {
     }
 
     @Test
+    fun loading_primary_button_displays_indicator_and_is_disabled() {
+        setContent(primaryButtonEnabled = false, primaryButtonLoading = true)
+
+        composeTestRule.onNodeWithText("Save Address").assertIsNotEnabled()
+        composeTestRule.onNode(
+            matcher = hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate),
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+    }
+
+    @Test
     fun clicking_close_button_triggers_callback() {
         var counter = 0
         setContent(onCloseCallback = { counter++ })
@@ -65,6 +79,7 @@ class InputAddressScreenTest {
     private fun setContent(
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         primaryButtonEnabled: Boolean = true,
+        primaryButtonLoading: Boolean = false,
         primaryButtonCallback: () -> Unit = {},
         onCloseCallback: () -> Unit = {},
         formContent: @Composable ColumnScope.() -> Unit = {},
@@ -74,6 +89,7 @@ class InputAddressScreenTest {
             InputAddressScreen(
                 appearance = appearance,
                 primaryButtonEnabled = primaryButtonEnabled,
+                primaryButtonLoading = primaryButtonLoading,
                 primaryButtonText = "Save Address",
                 title = "Address",
                 onPrimaryButtonClick = primaryButtonCallback,

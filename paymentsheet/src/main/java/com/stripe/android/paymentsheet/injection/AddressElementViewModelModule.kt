@@ -78,7 +78,6 @@ internal class AddressElementViewModelModule {
         }
         is AddressElementActivityContract.Args.CheckoutShipping -> {
             CheckoutShippingAddressElementEventReporter(
-                addressLauncherEventReporter = addressLauncherEventReporter,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 analyticsRequestFactory = analyticsRequestFactory,
                 checkoutSessionId = args.checkoutSessionResponse.id,

@@ -28,6 +28,24 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withMbWay_shouldCreateExpectedType() {
+        val paymentMethod = PaymentMethodJsonParser().parse(
+            JSONObject(
+                """
+                {
+                    "id": "pm_mb_way",
+                    "type": "mb_way",
+                    "mb_way": {}
+                }
+                """.trimIndent()
+            )
+        )
+
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.MbWay)
+        assertThat(paymentMethod.code).isEqualTo("mb_way")
+    }
+
+    @Test
     fun parse_withCardWithNetworks_shouldCreateExpectedObject() {
         val actualNetworks =
             PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITH_NETWORKS_JSON)

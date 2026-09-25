@@ -96,8 +96,6 @@ internal class AddressElementEventReporterTest {
             "address_data_blob",
             mapOf("address_country_code" to "CA"),
         )
-        assertThat(addressLauncherEventReporter.autocompleteCountryUpdatedCalls.awaitItem()).isEqualTo("US")
-        addressLauncherEventReporter.showCalls.expectNoEvents()
     }
 
     @Test
@@ -189,7 +187,6 @@ internal class AddressElementEventReporterTest {
         Scenario(
             standaloneReporter = StandaloneAddressElementEventReporter(addressLauncherEventReporter),
             checkoutShippingReporter = CheckoutShippingAddressElementEventReporter(
-                addressLauncherEventReporter = addressLauncherEventReporter,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 analyticsRequestFactory = AnalyticsRequestFactory(
                     packageManager = null,

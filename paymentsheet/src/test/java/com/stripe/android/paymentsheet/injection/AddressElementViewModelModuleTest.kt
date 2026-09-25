@@ -246,7 +246,6 @@ class AddressElementViewModelModuleTest {
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.shown")
         assertThat(params).containsEntry("checkout_session_id", checkoutSessionResponse.id)
-        assertThat(addressLauncherEventReporter.autocompleteCountryUpdatedCalls.awaitItem()).isEqualTo("US")
         addressLauncherEventReporter.validate()
     }
 
