@@ -4,7 +4,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
+import com.stripe.android.paymentsheet.Identifiable
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

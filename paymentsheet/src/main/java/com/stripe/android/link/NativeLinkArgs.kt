@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
+import com.stripe.android.paymentsheet.Identifiable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

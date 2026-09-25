@@ -12,7 +12,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
 internal class FlowControllerFactory(

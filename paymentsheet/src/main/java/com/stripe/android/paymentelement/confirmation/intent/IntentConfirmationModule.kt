@@ -8,7 +8,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
+import com.stripe.android.paymentsheet.Identifiable
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet

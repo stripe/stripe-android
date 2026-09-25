@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
+import com.stripe.android.paymentsheet.Identifiable
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize

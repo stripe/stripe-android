@@ -429,7 +429,7 @@ internal class PaymentElementBuilderTest {
         assertThat(PaymentElementCallbackReferences[second.id]?.createIntentCallback).isNull()
     }
 
-    private fun PaymentSheet.callbackIdentifier(activity: Activity): PaymentSheet.Identifiable {
+    private fun PaymentSheet.callbackIdentifier(activity: Activity): Identifiable {
         presentWithPaymentIntent("pi_fake")
         val intent = shadowOf(activity).nextStartedActivity
         return requireNotNull(PaymentSheetContract.Args.fromIntent(intent)).paymentElementCallbackIdentifier

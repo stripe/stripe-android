@@ -7,7 +7,7 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
+import com.stripe.android.paymentsheet.Identifiable
 import java.lang.IllegalArgumentException
 
 internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
