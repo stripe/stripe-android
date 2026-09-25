@@ -72,12 +72,12 @@ internal class DefaultStripeNetworkClientTest {
         client.executeRequest(
             FakeStripeRequest(
                 method = StripeRequest.Method.GET,
-                url = "https://q.stripe.com?event=mc_complete&client_secret=pi_secret",
+                url = "https://r.stripe.com/0?event=mc_complete&client_secret=pi_secret",
             )
         )
 
         verify(mockLogger).info(
-            "Request: GET q.stripe.com/, Request-Id: absent, Status Code: 200"
+            "Request: GET r.stripe.com/0, Request-Id: absent, Status Code: 200"
         )
     }
 

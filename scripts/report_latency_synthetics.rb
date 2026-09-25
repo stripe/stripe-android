@@ -12,7 +12,7 @@ require_relative 'latency_test_utils'
 
 PROJECT_ROOT = LatencyTestUtils::PROJECT_ROOT
 APP_PACKAGE = 'com.stripe.android.paymentsheet.example'
-ANALYTICS_HOST = ENV.fetch('STRIPE_SYNTHETICS_ANALYTICS_HOST', 'https://q.stripe.com')
+ANALYTICS_HOST = ENV.fetch('STRIPE_SYNTHETICS_ANALYTICS_HOST', 'https://r.stripe.com/0')
 ANALYTICS_UA = 'analytics.stripe_android-1.0'
 
 def adb_getprop(property)

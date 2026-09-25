@@ -3,7 +3,7 @@ package com.stripe.android.core.networking
 import androidx.annotation.RestrictTo
 
 /**
- * Analytics request sent to q.stripe.com, which is a legacy analytics service used mostly by
+ * Analytics request sent to r.stripe.com/0, which is an analytics service used mostly by
  * Payment SDK, analytics are saved in a shared DB table with payment-specific schema.
  *
  * For other SDKs, it is recommended to create a dedicated DB table just for the SDK and write to
@@ -29,6 +29,6 @@ data class AnalyticsRequest(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val HOST = "https://q.stripe.com"
+        const val HOST = "https://r.stripe.com/0"
     }
 }
