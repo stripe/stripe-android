@@ -184,10 +184,10 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `lookupConsumer sends analytics event when call succeeds`() = runSuspendTest {
+        val calls = Turbine<String>()
         val linkEventsReporter = object : AccountManagerEventsReporter() {
-            var callCount = 0
-            override fun onAccountLookupComplete() {
-                callCount += 1
+            override fun onAccountLookupComplete(publishableKey: String) {
+                calls.add(publishableKey)
             }
         }
         val fakeLinkAuth = fakeLinkAuth()
@@ -200,7 +200,8 @@ class DefaultLinkAccountManagerTest {
                 customerId = null
             )
 
-        assertThat(linkEventsReporter.callCount).isEqualTo(1)
+        assertThat(calls.awaitItem()).isEqualTo(TestFactory.LINK_CONFIGURATION.apiConfiguration.publishableKey)
+        calls.ensureAllEventsConsumed()
     }
 
     @Test

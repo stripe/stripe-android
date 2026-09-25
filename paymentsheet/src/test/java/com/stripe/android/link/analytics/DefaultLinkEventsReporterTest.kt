@@ -59,6 +59,17 @@ class DefaultLinkEventsReporterTest {
             assertThat(loggedParams.get("analytics_value")).isEqualTo("apiError")
         }
 
+    @Test
+    fun `onAccountLookupComplete uses publishable key override`() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.onAccountLookupComplete(publishableKey = "pk_override")
+
+            testScheduler.advanceUntilIdle()
+
+            val request = fakeAnalyticsRequestExecutor.getExecutedRequests().single()
+            assertThat(request.params["publishable_key"]).isEqualTo("pk_override")
+        }
+
     private fun runScenario(
         testBlock: (LinkEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
     ) {

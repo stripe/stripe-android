@@ -58,6 +58,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkAuth: LinkAuth,
 ) : LinkAccountManager {
 
+    private val publishableKey = config.apiConfiguration.publishableKey
+
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
         get() = linkAccountHolder.linkAccountInfo
 
@@ -164,7 +166,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
         return when (val status = getAccountStatus(currentAccount, canLookupCustomerEmail = true)) {
             is AccountStatus.Verified -> {
-                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
+                linkEventsReporter.onInvalidSessionState(
+                    LinkEventsReporter.SessionState.Verified,
+                    publishableKey,
+                )
 
                 Result.failure(
                     AlreadyLoggedInLinkException(
@@ -175,7 +180,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
             is AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
-                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
+                linkEventsReporter.onInvalidSessionState(
+                    LinkEventsReporter.SessionState.RequiresVerification,
+                    publishableKey,
+                )
 
                 Result.failure(
                     AlreadyLoggedInLinkException(
@@ -194,9 +202,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     name = name,
                     consentAction = consentAction
                 ).onSuccess {
-                    linkEventsReporter.onSignupCompleted(true)
+                    linkEventsReporter.onSignupCompleted(isInline = true, publishableKey = publishableKey)
                 }.onFailure { error ->
-                    linkEventsReporter.onSignupFailure(true, error)
+                    linkEventsReporter.onSignupFailure(
+                        isInline = true,
+                        error = error,
+                        publishableKey = publishableKey,
+                    )
                 }
             }
         }
@@ -390,14 +402,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
-        linkEventsReporter.on2FAStart()
+        linkEventsReporter.on2FAStart(publishableKey)
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
             isResendSmsCode = isResendSmsCode,
             apiConfiguration = config.apiConfiguration,
         )
             .onFailure {
-                linkEventsReporter.on2FAStartFailure()
+                linkEventsReporter.on2FAStartFailure(publishableKey)
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
@@ -416,9 +428,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             apiConfiguration = config.apiConfiguration,
         )
             .onSuccess {
-                linkEventsReporter.on2FAComplete()
+                linkEventsReporter.on2FAComplete(publishableKey)
             }.onFailure {
-                linkEventsReporter.on2FAFailure()
+                linkEventsReporter.on2FAFailure(publishableKey)
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
@@ -591,9 +603,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             supportedVerificationTypes = supportedVerificationTypes.takeIf { startSession },
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
-            linkEventsReporter.onAccountLookupFailure(error)
+            linkEventsReporter.onAccountLookupFailure(error, publishableKey)
         }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete()
+            linkEventsReporter.onAccountLookupComplete(publishableKey)
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -616,9 +628,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             supportedVerificationTypes = supportedVerificationTypes,
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
-            linkEventsReporter.onAccountLookupFailure(error)
+            linkEventsReporter.onAccountLookupFailure(error, publishableKey)
         }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete()
+            linkEventsReporter.onAccountLookupComplete(publishableKey)
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -638,9 +650,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkAuthIntentId = null,
             customerId = null
         ).onFailure { error ->
-            linkEventsReporter.onAccountLookupFailure(error)
+            linkEventsReporter.onAccountLookupFailure(error, publishableKey)
         }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete()
+            linkEventsReporter.onAccountLookupComplete(publishableKey)
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -658,7 +670,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             supportedVerificationTypes = supportedVerificationTypes,
         )
             .onFailure { error ->
-                linkEventsReporter.onAccountRefreshFailure(error)
+                linkEventsReporter.onAccountRefreshFailure(error, publishableKey)
             }.onSuccess {
                 setAccount(consumerSession = it.consumerSession)
             }
