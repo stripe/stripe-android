@@ -92,7 +92,6 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `saved selection state guards pending operations`() = testScenario {
         stateHolder.state = committedState()
-        stateHolder.failSavedSelection(IllegalStateException("Selection failed"))
         stateHolder.savedPaymentMethodSelectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 

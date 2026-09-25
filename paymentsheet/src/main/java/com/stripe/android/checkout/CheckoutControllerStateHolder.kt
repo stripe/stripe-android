@@ -88,15 +88,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         )
     }
 
-    fun finishSavedSelection() {
-        val current = state ?: return
-        if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-            state = current.copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-            )
-        }
-    }
-
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }
 
