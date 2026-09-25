@@ -26,6 +26,14 @@ internal class DefaultNfcScanningEventReporterTest {
     }
 
     @Test
+    fun `onNfcScanBlocked fires event`() = runScenario {
+        reporter.onNfcScanBlocked()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_blocked")
+    }
+
+    @Test
     fun `onNfcScanSucceeded ends duration and fires event with duration and number of attempts`() = runScenario {
         durationProvider.start(DurationProvider.Key.NfcScan)
 
