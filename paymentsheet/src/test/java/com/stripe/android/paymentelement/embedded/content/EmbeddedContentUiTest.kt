@@ -12,6 +12,7 @@ import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -21,8 +22,10 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
@@ -134,7 +137,10 @@ internal class EmbeddedContentUiTest {
     fun `rebuilding content with unchanged selection preserves selection error`() {
         val error = "Selection failed".resolvableString
         runScenario(
-            selection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            ),
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(error),
         ) {
             embeddedContentHelper.embeddedContent.test {
@@ -162,9 +168,32 @@ internal class EmbeddedContentUiTest {
         }
     }
 
+    @Test
+    fun `pending saved payment method selection marks interactor as processing`() = runScenario {
+        val loadedState = EmbeddedContentHelperStateFactory.create()
+        val interactor = verticalLayoutInteractorFactory.create(
+            paymentMethodMetadata = loadedState.paymentMethodMetadata,
+            configuration = loadedState.configuration,
+            walletsState = stateFlowOf(null),
+            isImmediateAction = false,
+            embeddedViewDisplaysMandateText = loadedState.embeddedViewDisplaysMandateText,
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().isProcessing).isFalse()
+
+            selectionHolder.state = CheckoutControllerStateFactory.create(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            )
+
+            assertThat(awaitItem().isProcessing).isTrue()
+        }
+    }
+
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val selectionHolder: CheckoutControllerStateHolder,
+        val verticalLayoutInteractorFactory: EmbeddedPaymentMethodVerticalLayoutInteractorFactory,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 
@@ -173,6 +202,7 @@ internal class EmbeddedContentUiTest {
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         selection: PaymentSelection? = null,
+        customerState: CustomerState? = null,
         savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
             SavedPaymentMethodSelectionState.Idle,
         block: suspend Scenario.() -> Unit,
@@ -207,6 +237,7 @@ internal class EmbeddedContentUiTest {
             ),
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
+        customerStateHolder.setCustomerState(customerState)
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
 
@@ -258,6 +289,7 @@ internal class EmbeddedContentUiTest {
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             selectionHolder = selectionHolder,
+            verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
             state = state,
         ).block()
     }

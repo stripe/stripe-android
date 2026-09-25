@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -108,7 +109,8 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         mandate = state.mandate,
     )
 
-    state.selectionError?.let { error ->
+    val selectionState = state.displayedSavedPaymentMethod?.selectionState
+    (selectionState as? SavedPaymentMethodSelectionState.Failed)?.error?.let { error ->
         ErrorMessage(
             error = error.resolve(),
             modifier = Modifier

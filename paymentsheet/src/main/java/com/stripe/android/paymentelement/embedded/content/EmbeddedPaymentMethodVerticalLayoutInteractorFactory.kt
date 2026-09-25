@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
@@ -82,8 +83,11 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             processing = combineAsStateFlow(
                 hostProcessing,
                 confirmationHandler.state,
-            ) { isHostProcessing, confirmationState ->
-                isHostProcessing || confirmationState is ConfirmationHandler.State.Confirming
+                selectionHolder.savedPaymentMethodSelectionState,
+            ) { isHostProcessing, confirmationState, savedPaymentMethodSelectionState ->
+                isHostProcessing ||
+                    confirmationState is ConfirmationHandler.State.Confirming ||
+                    savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending
             },
             savedPaymentMethodSelectionState = selectionHolder.savedPaymentMethodSelectionState,
             temporarySelection = selectionHolder.temporarySelection,

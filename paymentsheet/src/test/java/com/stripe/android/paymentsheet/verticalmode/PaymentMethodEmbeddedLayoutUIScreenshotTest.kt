@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -147,7 +148,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
-                    isSelectionPending = true,
+                    selectionState = SavedPaymentMethodSelectionState.Pending,
                 ),
                 savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
@@ -331,11 +332,16 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayablePaymentMethods = paymentMethods,
                 isProcessing = false,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
-                displayedSavedPaymentMethod = savedPaymentMethod,
+                displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+                    displayName = savedPaymentMethod.displayName,
+                    paymentMethod = savedPaymentMethod.paymentMethod,
+                    selectionState = SavedPaymentMethodSelectionState.Failed(
+                        R.string.stripe_something_went_wrong.resolvableString,
+                    ),
+                ),
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = "Mandate".resolvableString,
-                selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 linkBrand = LinkBrand.Link,
             ),
             viewActionRecorder = ViewActionRecorder(),
