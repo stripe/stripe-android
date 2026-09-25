@@ -910,6 +910,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
+            linkPaymentMethodBankAccountDataConsent = null,
             linkBrand = LinkBrand.Link,
         )
     }
@@ -959,6 +960,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 forceSetupFutureUseBehaviorAndNewMandate = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
+                linkPaymentMethodBankAccountDataConsent = null,
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,

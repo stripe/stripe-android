@@ -139,6 +139,30 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `link bank account data consent is parsed`() {
+        val consent = "Merchant can access balances. [Learn more](https://stripe.com)."
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
+        json.getJSONObject("link_settings").put(
+            "link_payment_session_context",
+            JSONObject().put("link_payment_method_bank_account_data_consent", consent),
+        )
+
+        val elementsSession = parseElementsSession(json)
+
+        assertThat(elementsSession?.linkSettings?.linkPaymentMethodBankAccountDataConsent)
+            .isEqualTo(consent)
+    }
+
+    @Test
+    fun `missing link bank account data consent is parsed as null`() {
+        val elementsSession = parseElementsSession(
+            JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
+        )
+
+        assertThat(elementsSession?.linkSettings?.linkPaymentMethodBankAccountDataConsent).isNull()
+    }
+
+    @Test
     fun parsePaymentIntent_shouldDisableLinkSignUp() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
