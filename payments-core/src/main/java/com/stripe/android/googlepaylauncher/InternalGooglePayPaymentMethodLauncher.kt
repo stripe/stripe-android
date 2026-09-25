@@ -8,6 +8,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -25,7 +26,7 @@ import dagger.assisted.AssistedInject
 @JvmSuppressWildcards
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructor(
-    @Assisted private val instanceId: String,
+    @Assisted private val instanceId: Identifiable,
     @Assisted private val lifecycleOwner: LifecycleOwner,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,

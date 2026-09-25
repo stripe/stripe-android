@@ -81,7 +81,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         )
 
         return googlePayPaymentMethodLauncherFactory.create(
-            instanceId = instanceId.toString(),
+            instanceId = instanceId,
             lifecycleOwner = lifecycleOwner,
             activityResultLauncher = activityResultLauncher,
             onPaymentDataChangedCallback = onPaymentDataChangedCallback,

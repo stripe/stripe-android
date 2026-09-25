@@ -23,6 +23,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -68,7 +69,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
 ) {
     private var isReady = false
     private val internalLauncher = InternalGooglePayPaymentMethodLauncher(
-        instanceId = INSTANCE_ID,
+        instanceId = Identifiable(),
         lifecycleOwner = lifecycleOwner,
         activityResultLauncher = activityResultLauncher,
         onPaymentDataChangedCallback = null,
@@ -426,8 +427,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
     annotation class ErrorCode
 
     companion object {
-        private const val INSTANCE_ID = "GOOGLE_PAY_PAYMENT_METHOD_LAUNCHER"
-
         internal const val PRODUCT_USAGE_TOKEN = "GooglePayPaymentMethodLauncher"
         internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
 
