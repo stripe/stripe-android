@@ -244,7 +244,7 @@ class InputAddressViewModelTest {
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         assertThat(viewModel.formEnabled.value).isTrue()
         assertThat(viewModel.saveError.value)
-            .isEqualTo(LocalStripeException("first submission failed", null).stripeErrorMessage())
+            .isEqualTo(IllegalStateException("first submission failed").stripeErrorMessage())
         eventReporter.completedCalls.expectNoEvents()
         assertThat(resultStateHolder.result.value).isNull()
 
@@ -298,6 +298,29 @@ class InputAddressViewModelTest {
 
         primaryButtonAction.validate()
         eventReporter.validate()
+    }
+
+    @Test
+    fun `editing the form clears the save error`() = runTest {
+        val error = LocalStripeException("submission failed", null)
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            Result.failure(error)
+        }
+        val viewModel = createViewModel(
+            address = EXPECTED_ADDRESS,
+            primaryButtonAction = primaryButtonAction,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(error.stripeErrorMessage())
+
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to ""))
+
+        assertThat(viewModel.saveError.value).isNull()
+
+        primaryButtonAction.validate()
     }
 
     @Test
