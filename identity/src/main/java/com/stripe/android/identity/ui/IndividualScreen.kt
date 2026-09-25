@@ -108,7 +108,8 @@ internal fun IndividualScreen(
 
             LoadingButton(
                 modifier = Modifier.testTag(INDIVIDUAL_SUBMIT_BUTTON_TAG),
-                text = individualPage.buttonText.uppercase(),
+                text = individualPage.buttonText,
+                uppercase = true,
                 state = submitButtonState
             ) {
                 submitButtonState = LoadingButtonState.Loading

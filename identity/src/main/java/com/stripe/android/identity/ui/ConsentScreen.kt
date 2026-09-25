@@ -200,10 +200,11 @@ private fun SuccessUI(
                 .semantics { testTag = ACCEPT_BUTTON_TAG },
             text =
             if (scrolledToBottom) {
-                consentPage.acceptButtonText.uppercase()
+                consentPage.acceptButtonText
             } else {
-                consentPage.scrollToContinueButtonText.uppercase()
+                consentPage.scrollToContinueButtonText
             },
+            uppercase = true,
             state = if (scrolledToBottom) {
                 acceptState
             } else {
@@ -218,7 +219,8 @@ private fun SuccessUI(
         LoadingTextButton(
             modifier = Modifier
                 .semantics { testTag = DECLINE_BUTTON_TAG },
-            text = consentPage.declineButtonText.uppercase(),
+            text = consentPage.declineButtonText,
+            uppercase = true,
             state = declineState
         ) {
             acceptState = LoadingButtonState.Disabled

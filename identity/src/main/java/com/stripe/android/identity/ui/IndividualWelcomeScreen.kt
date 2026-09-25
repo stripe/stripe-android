@@ -129,7 +129,8 @@ private fun SuccessUI(
         LoadingButton(
             modifier = Modifier
                 .semantics { testTag = INDIVIDUAL_WELCOME_GET_STARTED_BUTTON_TAG },
-            text = welcomePage.getStartedButtonText.uppercase(),
+            text = welcomePage.getStartedButtonText,
+            uppercase = true,
             state = acceptState
         ) {
             acceptState = LoadingButtonState.Disabled

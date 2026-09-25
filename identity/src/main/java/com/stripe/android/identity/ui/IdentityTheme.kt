@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import com.google.accompanist.themeadapter.material.createMdcTheme
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.LocalShapes
@@ -33,7 +34,9 @@ import java.lang.reflect.Method
  */
 @Composable
 internal fun IdentityTheme(
-    brandColor: Int? = null,
+    brandColor: Int?,
+    primaryButtonStyle: IdentityVerificationSheet.Configuration.PrimaryButtonStyle?,
+    secondaryButtonStyle: IdentityVerificationSheet.Configuration.SecondaryButtonStyle?,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -69,6 +72,8 @@ internal fun IdentityTheme(
         hostingAppTypography = hostingAppTypography,
         hostingAppShapes = hostingAppShapes,
         inspectionMode = inspectionMode,
+        primaryButtonStyle = primaryButtonStyle,
+        secondaryButtonStyle = secondaryButtonStyle,
         content = content
     )
 }
@@ -79,6 +84,8 @@ internal fun AdoptForStripeTheme(
     hostingAppTypography: Typography,
     hostingAppShapes: Shapes,
     inspectionMode: Boolean,
+    primaryButtonStyle: IdentityVerificationSheet.Configuration.PrimaryButtonStyle?,
+    secondaryButtonStyle: IdentityVerificationSheet.Configuration.SecondaryButtonStyle?,
     content: @Composable () -> Unit
 ) {
     val stripeTypography: StripeTypography = StripeThemeDefaults.typography.copy(
@@ -107,6 +114,8 @@ internal fun AdoptForStripeTheme(
         LocalInspectionMode provides inspectionMode,
         LocalSectionStyle provides StripeThemeDefaults.sectionStyle,
         LocalTextFieldInsets provides StripeThemeDefaults.textFieldInsets,
+        LocalIdentityPrimaryButtonStyle provides primaryButtonStyle,
+        LocalIdentitySecondaryButtonStyle provides secondaryButtonStyle,
     ) {
         MaterialTheme(
             colors = hostingAppColors,
