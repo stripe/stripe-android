@@ -298,7 +298,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         savedPaymentMethodSelectionState,
     ) { isProcessing, savedSelectionState ->
         ProcessingState(
-            isProcessing = isProcessing,
+            isProcessing = isProcessing || savedSelectionState is SavedPaymentMethodSelectionState.Pending,
             error = (savedSelectionState as? SavedPaymentMethodSelectionState.Failed)?.error,
         )
     }

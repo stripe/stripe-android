@@ -735,9 +735,6 @@ internal class CheckoutControllerTest {
             assertLoadingConsumed = true,
         ) {
             val selection = loadedSavedPaymentMethodSelection()
-            stateHolder.state = requireNotNull(stateHolder.state).copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-            )
             val before = committedState()
             val requestReceived = CountDownLatch(1)
             val releaseResponse = CountDownLatch(1)
@@ -838,6 +835,30 @@ internal class CheckoutControllerTest {
 
             assertThat(retryResult.isSuccess).isTrue()
             assertThat(committedState().paymentSelection).isEqualTo(selection)
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod rejects a pending admission without overwriting it`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            stateHolder.state = requireNotNull(stateHolder.state).copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            )
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo(
+                "A saved payment method selection is already pending.",
+            )
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
         }
 
     @Test

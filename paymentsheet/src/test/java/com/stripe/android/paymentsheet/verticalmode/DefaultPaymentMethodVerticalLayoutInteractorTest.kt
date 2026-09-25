@@ -88,15 +88,22 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         interactor.state.test {
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            awaitItem().run {
+                assertThat(isProcessing).isFalse()
+                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            }
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            awaitState { state ->
+                state.isProcessing && state.displayedSavedPaymentMethod?.isSelectionPending == true
+            }
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            awaitState { state ->
+                !state.isProcessing && state.displayedSavedPaymentMethod?.isSelectionPending == false
+            }
         }
     }
 
@@ -114,14 +121,24 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun state_doesNotMarkMissingDisplayedSavedPaymentMethodPending() = runScenario {
+    fun state_marksProcessingWhenSelectionIsPendingWithoutDisplayedSavedPaymentMethod() = runScenario {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
-            expectNoEvents()
-            assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
+            awaitState { state -> state.isProcessing }.run {
+                assertThat(displayedSavedPaymentMethod).isNull()
+            }
+        }
+    }
+
+    private suspend fun ReceiveTurbine<PaymentMethodVerticalLayoutInteractor.State>.awaitState(
+        predicate: (PaymentMethodVerticalLayoutInteractor.State) -> Boolean,
+    ): PaymentMethodVerticalLayoutInteractor.State {
+        while (true) {
+            val state = awaitItem()
+            if (predicate(state)) return state
         }
     }
 

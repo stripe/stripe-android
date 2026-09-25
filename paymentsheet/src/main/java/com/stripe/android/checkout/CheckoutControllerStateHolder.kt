@@ -99,12 +99,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
-        state = current.withSelection(updatedSelection).copy(
-            savedPaymentMethodSelectionState = when (current.savedPaymentMethodSelectionState) {
-                is SavedPaymentMethodSelectionState.Failed -> SavedPaymentMethodSelectionState.Idle
-                else -> current.savedPaymentMethodSelectionState
-            },
-        )
+        state = current.withSelection(updatedSelection)
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {
