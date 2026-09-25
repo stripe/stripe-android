@@ -547,7 +547,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * [com.stripe.android.PaymentConfiguration].
              */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            internal fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+            fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
             }
 
