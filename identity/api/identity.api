@@ -79,7 +79,6 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$BottomShe
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$BottomSheetKt;
 	public fun <init> ()V
 	public final fun getLambda$-642111401$identity_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1967370484$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt {
@@ -98,14 +97,6 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentWe
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt;
 	public fun <init> ()V
 	public final fun getLambda$1416929192$identity_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/identity/ui/ComposableSingletons$DebugScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$DebugScreenKt;
-	public fun <init> ()V
-	public final fun getLambda$-1314258076$identity_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-780294704$identity_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$1318755751$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt {
