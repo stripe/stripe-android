@@ -7,9 +7,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.ShippingAddressElementAnalyticsData
-import com.stripe.android.paymentsheet.addresselement.analytics.ShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementAnalyticsSnapshot
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -19,7 +18,6 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,8 +35,7 @@ internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
     val resultStateHolder: AddressElementResultStateHolder,
-    private val eventReporter: AddressLauncherEventReporter,
-    private val shippingAddressElementEventReporter: ShippingAddressElementEventReporter,
+    private val eventReporter: AddressElementEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
     private val primaryButtonAction: AddressElementPrimaryButtonAction,
@@ -136,34 +133,15 @@ internal class InputAddressViewModel @Inject constructor(
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
     fun onScreenShown() {
-        val initialCountry = _collectedAddress.value?.address?.country.orEmpty()
-        when (args) {
-            is AddressElementActivityContract.Args.Standalone -> {
-                eventReporter.onShow(initialCountry)
-            }
-            is AddressElementActivityContract.Args.CheckoutShipping -> {
-                eventReporter.updateAutocompleteCountry(initialCountry)
-                shippingAddressElementEventReporter.onShown(
-                    ShippingAddressElementAnalyticsData(
-                        country = getCurrentAddress().address?.country.orEmpty(),
-                        autocompleteResultSelected = null,
-                        editDistance = null,
-                    )
-                )
-            }
-        }
+        eventReporter.onShown(analyticsSnapshot(getCurrentAddress()))
     }
 
     init {
 
         viewModelScope.launch {
             resultStateHolder.result.collect { result ->
-                if (result is AddressElementActivityContract.Result.Canceled &&
-                    args is AddressElementActivityContract.Args.CheckoutShipping
-                ) {
-                    shippingAddressElementEventReporter.onCanceled(
-                        addressAnalyticsData(getCurrentAddress())
-                    )
+                if (result is AddressElementActivityContract.Result.Canceled) {
+                    eventReporter.onCanceled(analyticsSnapshot(getCurrentAddress()))
                 }
             }
         }
@@ -272,33 +250,17 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
-        val shippingAddressAnalyticsData = if (
-            args is AddressElementActivityContract.Args.CheckoutShipping
-        ) {
-            addressAnalyticsData(addressDetails)
-        } else {
-            null
-        }
-        shippingAddressAnalyticsData?.let {
-            shippingAddressElementEventReporter.onSaveStarted(it)
-        }
+        val analyticsSnapshot = analyticsSnapshot(addressDetails)
+        eventReporter.onSaveStarted(analyticsSnapshot)
         viewModelScope.launch {
             primaryButtonAction(addressDetails).fold(
                 onSuccess = { result ->
-                    val resultAccepted = completeWithAddress(
-                        addressDetails = addressDetails,
-                        result = result,
-                    )
-                    if (resultAccepted) {
-                        shippingAddressAnalyticsData?.let {
-                            shippingAddressElementEventReporter.onSaveCompleted(it)
-                        }
+                    if (resultStateHolder.setResult(result)) {
+                        eventReporter.onSaveCompleted(analyticsSnapshot)
                     }
                 },
                 onFailure = { error ->
-                    shippingAddressAnalyticsData?.let {
-                        shippingAddressElementEventReporter.onSaveFailed(it, error)
-                    }
+                    eventReporter.onSaveFailed(analyticsSnapshot, error)
                     _saveError.value = error.stripeErrorMessage()
                     _formEnabled.value = true
                 },
@@ -306,29 +268,10 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
-    private fun completeWithAddress(
+    private fun analyticsSnapshot(
         addressDetails: AddressDetails,
-        result: AddressElementActivityContract.Result,
-    ): Boolean {
-        when (args) {
-            is AddressElementActivityContract.Args.Standalone -> {
-                addressDetails.address?.country?.let { country ->
-                    eventReporter.onCompleted(
-                        country = country,
-                        autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
-                        editDistance = addressDetails.editDistance(collectedAddress.value)
-                    )
-                }
-            }
-            is AddressElementActivityContract.Args.CheckoutShipping -> Unit
-        }
-        return resultStateHolder.setResult(result)
-    }
-
-    private fun addressAnalyticsData(
-        addressDetails: AddressDetails,
-    ): ShippingAddressElementAnalyticsData {
-        val autocompleteAddress = inlineAutocompleteController?.autocompleteFilledAddress?.let { address ->
+    ): AddressElementAnalyticsSnapshot {
+        val autocompleteSelectedAddress = inlineAutocompleteController?.autocompleteFilledAddress?.let { address ->
             AddressDetails(
                 address = PaymentSheet.Address(
                     city = address.city,
@@ -340,10 +283,10 @@ internal class InputAddressViewModel @Inject constructor(
                 )
             )
         }
-        return ShippingAddressElementAnalyticsData(
-            country = addressDetails.address?.country.orEmpty(),
-            autocompleteResultSelected = autocompleteAddress != null,
-            editDistance = autocompleteAddress?.let { addressDetails.editDistance(it) },
+        return AddressElementAnalyticsSnapshot(
+            address = addressDetails,
+            initialAddress = collectedAddress.value,
+            autocompleteSelectedAddress = autocompleteSelectedAddress,
         )
     }
 
