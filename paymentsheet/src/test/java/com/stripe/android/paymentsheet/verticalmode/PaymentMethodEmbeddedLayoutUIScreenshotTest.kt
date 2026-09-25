@@ -335,7 +335,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = "Mandate".resolvableString,
-                error = R.string.stripe_something_went_wrong.resolvableString,
+                selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 linkBrand = LinkBrand.Link,
             ),
             viewActionRecorder = ViewActionRecorder(),

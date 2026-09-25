@@ -148,7 +148,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     @Test
     fun testSavedPaymentMethodSelectionFailureDoesNotInvokeImmediateActionAndCanRetry() {
-        runSavedPaymentMethodSelectionFromCashAppScenario {
+        runSavedPaymentMethodSelectionFromCashAppScenario(
+            awaitSavedPaymentMethodImmediateAction = false,
+        ) {
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 taxUpdateRequests.add(Unit)
                 check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
@@ -196,10 +198,18 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             } finally {
                 releaseRetryResponse.countDown()
             }
+
+            contentPage.assertPaymentMethodRowsAreEnabled(true)
+            assertSavedPaymentMethodSpinnerCount(0)
+            assertSavedPaymentMethodSelectionError(isDisplayed = false)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
+                .isEqualTo(UPDATED_TOTAL.toDouble())
+            immediateActionCalls.awaitItem()
         }
     }
 
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
+        awaitSavedPaymentMethodImmediateAction: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) {
         lateinit var scenario: Scenario
@@ -221,7 +231,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 selectCashAppAndAwaitCallback()
                 block()
 
-                immediateActionCalls.awaitItem()
+                if (awaitSavedPaymentMethodImmediateAction) {
+                    immediateActionCalls.awaitItem()
+                }
                 assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertPaymentMethodRowsAreEnabled(true)

@@ -108,7 +108,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         mandate = state.mandate,
     )
 
-    state.error?.let { error ->
+    state.selectionError?.let { error ->
         ErrorMessage(
             error = error.resolve(),
             modifier = Modifier
