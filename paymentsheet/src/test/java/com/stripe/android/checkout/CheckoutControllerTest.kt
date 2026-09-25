@@ -771,7 +771,6 @@ internal class CheckoutControllerTest {
                 assertThat(state.checkoutSessionResponse.livemode).isTrue()
                 assertThat(state.paymentSelection).isEqualTo(selection)
                 assertThat(state.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
-                assertThat(state.selectionError).isNull()
                 assertThat(state.savedPaymentMethodSelectionState)
                     .isEqualTo(SavedPaymentMethodSelectionState.Pending)
             } finally {

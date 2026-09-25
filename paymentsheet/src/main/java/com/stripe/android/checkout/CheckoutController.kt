@@ -226,7 +226,7 @@ class CheckoutController @Inject internal constructor(
         }
         return withCheckoutState(
             additionalStateMutations = {
-                withSelection(selection).copy(selectionError = null)
+                withSelection(selection)
             },
         ) {
             val address = selection.billingDetails?.address?.toCheckoutAddress()

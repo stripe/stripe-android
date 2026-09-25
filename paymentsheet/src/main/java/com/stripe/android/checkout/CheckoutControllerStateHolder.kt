@@ -113,7 +113,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
                 is SavedPaymentMethodSelectionState.Failed -> SavedPaymentMethodSelectionState.Idle
                 else -> current.savedPaymentMethodSelectionState
             },
-            selectionError = null,
         )
     }
 
