@@ -21,6 +21,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.CardArtImage
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
@@ -91,7 +92,7 @@ private fun SavedPaymentMethodIcon(
             .height(iconHeight),
         contentAlignment = Alignment.Center,
     ) {
-        if (displayableSavedPaymentMethod.isSelectionPending) {
+        if (displayableSavedPaymentMethod.selectionState is SavedPaymentMethodSelectionState.Pending) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(iconHeight)

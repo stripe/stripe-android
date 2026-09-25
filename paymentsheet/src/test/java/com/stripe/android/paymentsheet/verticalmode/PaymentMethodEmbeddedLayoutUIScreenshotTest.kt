@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -16,6 +18,9 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -143,7 +148,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
-                    isSelectionPending = true,
+                    selectionState = SavedPaymentMethodSelectionState.Pending,
                 ),
                 savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
@@ -158,6 +163,30 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
 
         imageLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionErrorWithMandate() {
+        val interactor = createSavedPaymentMethodSelectionErrorInteractor()
+
+        paparazziRule.snapshot {
+            TestSavedPaymentMethodSelectionError(
+                interactor = interactor,
+                embeddedViewDisplaysMandateText = true,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionErrorWithoutMandate() {
+        val interactor = createSavedPaymentMethodSelectionErrorInteractor()
+
+        paparazziRule.snapshot {
+            TestSavedPaymentMethodSelectionError(
+                interactor = interactor,
+                embeddedViewDisplaysMandateText = false,
+            )
+        }
     }
 
     @Test
@@ -280,6 +309,42 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             imageLoader = mock(),
             appearance = Embedded(rowStyle),
             modifier = Modifier.verticalScroll(scrollState),
+        )
+    }
+
+    @Composable
+    private fun TestSavedPaymentMethodSelectionError(
+        interactor: PaymentMethodVerticalLayoutInteractor,
+        embeddedViewDisplaysMandateText: Boolean,
+    ) {
+        Column {
+            PaymentMethodEmbeddedLayoutUI(
+                interactor = interactor,
+                embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+    }
+
+    private fun createSavedPaymentMethodSelectionErrorInteractor(): FakePaymentMethodVerticalLayoutInteractor {
+        return FakePaymentMethodVerticalLayoutInteractor(
+            initialState = PaymentMethodVerticalLayoutInteractor.State(
+                displayablePaymentMethods = paymentMethods,
+                isProcessing = false,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+                    displayName = savedPaymentMethod.displayName,
+                    paymentMethod = savedPaymentMethod.paymentMethod,
+                    selectionState = SavedPaymentMethodSelectionState.Failed(
+                        R.string.stripe_something_went_wrong.resolvableString,
+                    ),
+                ),
+                availableSavedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                mandate = "Mandate".resolvableString,
+                linkBrand = LinkBrand.Link,
+            ),
+            viewActionRecorder = ViewActionRecorder(),
         )
     }
 

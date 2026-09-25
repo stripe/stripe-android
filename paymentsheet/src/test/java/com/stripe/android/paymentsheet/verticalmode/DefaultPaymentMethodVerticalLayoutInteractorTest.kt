@@ -73,30 +73,38 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(isProcessing).isFalse()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+                assertThat(displayedSavedPaymentMethod?.selectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
             }
             processingSource.value = true
             awaitItem().run {
                 assertThat(isProcessing).isTrue()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+                assertThat(displayedSavedPaymentMethod?.selectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
             }
         }
     }
 
     @Test
-    fun state_marksDisplayedSavedPaymentMethodPendingWhenSelectionIsPending() = runScenario(
+    fun state_setsSelectionStateOnDisplayedSavedPaymentMethod() = runScenario(
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
+        val failed = SavedPaymentMethodSelectionState.Failed(
+            PaymentSheetR.string.stripe_something_went_wrong.resolvableString,
+        )
+
         interactor.state.test {
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            savedPaymentMethodSelectionStateSource.value = failed
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState).isEqualTo(failed)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
-
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
         }
     }
 

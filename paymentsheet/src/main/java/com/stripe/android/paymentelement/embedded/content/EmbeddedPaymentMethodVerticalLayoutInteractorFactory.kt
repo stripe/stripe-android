@@ -84,8 +84,11 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             processing = combineAsStateFlow(
                 hostProcessing,
                 confirmationHandler.state,
-            ) { isHostProcessing, confirmationState ->
-                isHostProcessing || confirmationState is ConfirmationHandler.State.Confirming
+                savedPaymentMethodSelectionState,
+            ) { isHostProcessing, confirmationState, savedPaymentMethodSelectionState ->
+                isHostProcessing ||
+                    confirmationState is ConfirmationHandler.State.Confirming ||
+                    savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending
             },
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = selectionHolder.temporarySelection,
@@ -122,7 +125,10 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
             updateSelection = { updatedSelection ->
-                selectionHolder.setSelection(updatedSelection)
+                // Screen re-entry re-applies the current selection and must not clear a failure.
+                if (selectionHolder.selection.value != updatedSelection) {
+                    selectionHolder.setSelection(updatedSelection)
+                }
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),

@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -16,7 +18,9 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -86,6 +90,55 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `restored pending saved selection is reset to idle`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `explicit equal selection clears failure`() = testScenario {
+        val error = IllegalStateException("Selection failed")
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
+        )
+
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `failed selection error survives saved state restoration`() = runTest {
+        val handle = SavedStateHandle()
+        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
+        val error = APIConnectionException()
+        holder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
+        )
+
+        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
+
+        assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(restored.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
+    }
+
+    @Test
     fun `setSelection updates paymentSelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 
@@ -96,6 +149,23 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `setSelection returns a pending saved selection to idle`() = testScenario {
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+        )
+
+        stateHolder.stateFlow.test {
+            assertThat(awaitItem()?.savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+
+            stateHolder.setSelection(PaymentSelection.GooglePay)
+
+            assertThat(awaitItem()?.savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        }
     }
 
     @Test
@@ -223,6 +293,7 @@ internal class CheckoutControllerStateHolderTest {
         expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,
