@@ -7,19 +7,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.LocalFormScrollContext
+import com.stripe.android.uicore.elements.FormFieldId
+import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,6 +68,39 @@ internal class InputAddressScreenScreenshotTest {
                     scrollToBottom = true,
                 )
             }
+        }
+    }
+
+    @Test
+    fun `save error renders above the primary button`() {
+        paparazziRule.snapshot {
+            val formController = remember { createFilledFormController() }
+
+            SaveErrorTestScreen(
+                formController = formController,
+                saveError = SAVE_ERROR,
+            )
+        }
+    }
+
+    @Test
+    fun `save error clears on edit before validation error shows`() {
+        paparazziRule.gif(end = 3000L) {
+            val formController = remember { createFilledFormController() }
+            var saveError by remember { mutableStateOf<ResolvableString?>(SAVE_ERROR) }
+
+            LaunchedEffect(Unit) {
+                delay(1000L)
+                formController.setRawValues(FILLED_VALUES + (FormFieldId.Line1 to ""))
+                saveError = null
+                delay(1000L)
+                formController.elements.forEach { it.onValidationStateChanged(true) }
+            }
+
+            SaveErrorTestScreen(
+                formController = formController,
+                saveError = saveError,
+            )
         }
     }
 
@@ -117,8 +158,44 @@ internal class InputAddressScreenScreenshotTest {
                 )
             },
             bottomContent = {},
+            saveError = null,
         )
     }
+
+    @Composable
+    private fun SaveErrorTestScreen(
+        formController: AddressFormController,
+        saveError: ResolvableString?,
+    ) {
+        val completeValues by formController.completeFormValues.collectAsState()
+
+        InputAddressScreen(
+            appearance = PaymentSheet.Appearance(),
+            primaryButtonEnabled = completeValues != null,
+            primaryButtonText = stringResource(R.string.stripe_paymentsheet_address_element_primary_button),
+            title = stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
+            onPrimaryButtonClick = {},
+            onDisabledButtonClick = {},
+            onCloseClick = {},
+            topContent = {},
+            formContent = {
+                FormUI(
+                    hiddenIdentifiers = emptySet(),
+                    enabled = true,
+                    elements = formController.elements,
+                    lastTextFieldIdentifier = formController.lastTextFieldIdentifier.value,
+                )
+            },
+            bottomContent = {},
+            saveError = saveError,
+        )
+    }
+
+    private fun createFilledFormController() = AddressFormController(
+        initialValues = FILLED_VALUES,
+        config = AddressLauncher.Configuration(),
+        interactor = TestAutocompleteAddressInteractor.noOp(),
+    )
 
     @Composable
     private fun ScrollToBottom() {
@@ -182,4 +259,16 @@ internal class InputAddressScreenScreenshotTest {
             ),
         ),
     )
+
+    private companion object {
+        val SAVE_ERROR = "Taxes can't be calculated for this address.".resolvableString
+        val FILLED_VALUES = mapOf(
+            FormFieldId.Name to "Jenny Rosen",
+            FormFieldId.Country to "US",
+            FormFieldId.Line1 to "510 Townsend St",
+            FormFieldId.City to "San Francisco",
+            FormFieldId.State to "CA",
+            FormFieldId.PostalCode to "94103",
+        )
+    }
 }
