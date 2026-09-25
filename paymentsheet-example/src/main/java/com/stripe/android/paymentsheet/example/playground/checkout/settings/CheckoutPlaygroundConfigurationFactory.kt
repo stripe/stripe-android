@@ -10,6 +10,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.Controller
 
@@ -22,6 +23,9 @@ internal fun CheckoutPlaygroundSettings.Snapshot.checkoutControllerConfiguration
             }
             if (this@checkoutControllerConfiguration[Controller.currencySelector.shouldSetConfiguration]) {
                 currencySelectorElement(currencySelectorConfiguration())
+            }
+            if (this@checkoutControllerConfiguration[Controller.shippingAddress.shouldSetConfiguration]) {
+                shippingAddressElement(ShippingAddressElement.Configuration())
             }
             if (this@checkoutControllerConfiguration[Controller.express.shouldSetConfiguration]) {
                 expressCheckoutElement(expressCheckoutConfiguration())

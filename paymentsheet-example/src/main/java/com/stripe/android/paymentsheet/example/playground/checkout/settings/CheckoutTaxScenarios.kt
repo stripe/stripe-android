@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 
 internal object CheckoutTaxScenarios {
     private val session = CheckoutPlaygroundDefinitions.session
+    private val controller = CheckoutPlaygroundDefinitions.Controller
 
     val group = group(
         "tax",
@@ -26,6 +27,7 @@ internal object CheckoutTaxScenarios {
         leaf("automatic_tax_shipping", "Automatic tax — shipping") {
             set(session.merchant, Merchant.US_TAX)
             set(session.automaticTax, true)
+            set(controller.shippingAddress.shouldSetConfiguration, true)
             set(session.shippingAddressCollection, true)
         },
     )
