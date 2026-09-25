@@ -67,6 +67,11 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                 .errorReporter
         }
 
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component and ApiConfiguration.
+         */
         fun createFallbackInstance(
             context: Context,
             productUsage: Set<String> = emptySet(),
