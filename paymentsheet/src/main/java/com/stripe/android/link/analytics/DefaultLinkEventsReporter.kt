@@ -24,18 +24,10 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     private val durationProvider: DurationProvider,
 ) : LinkEventsReporter {
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
-        reportInvalidSessionState(state, publishableKey = null)
-    }
-
-    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState, publishableKey: String) {
-        reportInvalidSessionState(state, publishableKey)
-    }
-
-    private fun reportInvalidSessionState(state: LinkEventsReporter.SessionState, publishableKey: String?) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
 
         errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_INVALID_SESSION_STATE)
-        fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params, publishableKey)
+        fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
 
     override fun onInlineSignupCheckboxChecked() {
@@ -52,27 +44,11 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onSignupCompleted(isInline: Boolean) {
-        reportSignupCompleted(publishableKey = null)
-    }
-
-    override fun onSignupCompleted(isInline: Boolean, publishableKey: String) {
-        reportSignupCompleted(publishableKey)
-    }
-
-    private fun reportSignupCompleted(publishableKey: String?) {
         val duration = durationProvider.end(DurationProvider.Key.LinkSignup)
-        fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(duration), publishableKey)
+        fireEvent(LinkEvent.SignUpComplete, durationInSecondsFromStart(duration))
     }
 
     override fun onSignupFailure(isInline: Boolean, error: Throwable) {
-        reportSignupFailure(error, publishableKey = null)
-    }
-
-    override fun onSignupFailure(isInline: Boolean, error: Throwable, publishableKey: String) {
-        reportSignupFailure(error, publishableKey)
-    }
-
-    private fun reportSignupFailure(error: Throwable, publishableKey: String?) {
         val preferredParams = if (error is APIException) {
             error.stripeError?.message?.let {
                 mapOf(FIELD_ERROR_MESSAGE to it)
@@ -84,7 +60,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         val params = (preferredParams ?: mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage))
             .plus(ErrorReporter.getAdditionalParamsFromError(error))
 
-        fireEvent(LinkEvent.SignUpFailure, params, publishableKey)
+        fireEvent(LinkEvent.SignUpFailure, params)
     }
 
     override fun onEmailSuggestionAccepted() {
@@ -92,75 +68,39 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onAccountLookupFailure(error: Throwable) {
-        reportAccountLookupFailure(error, publishableKey = null)
-    }
-
-    override fun onAccountLookupFailure(error: Throwable, publishableKey: String) {
-        reportAccountLookupFailure(error, publishableKey)
-    }
-
-    private fun reportAccountLookupFailure(error: Throwable, publishableKey: String?) {
         val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
             ErrorReporter.getAdditionalParamsFromError(error)
         )
 
-        fireEvent(LinkEvent.AccountLookupFailure, params, publishableKey)
+        fireEvent(LinkEvent.AccountLookupFailure, params)
     }
 
     override fun onAccountLookupComplete() {
-        fireEvent(LinkEvent.AccountLookupComplete, publishableKey = null)
-    }
-
-    override fun onAccountLookupComplete(publishableKey: String) {
-        fireEvent(LinkEvent.AccountLookupComplete, publishableKey = publishableKey)
+        fireEvent(LinkEvent.AccountLookupComplete)
     }
 
     override fun onAccountRefreshFailure(error: Throwable) {
-        reportAccountRefreshFailure(error, publishableKey = null)
-    }
-
-    override fun onAccountRefreshFailure(error: Throwable, publishableKey: String) {
-        reportAccountRefreshFailure(error, publishableKey)
-    }
-
-    private fun reportAccountRefreshFailure(error: Throwable, publishableKey: String?) {
         val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
             ErrorReporter.getAdditionalParamsFromError(error)
         )
 
-        fireEvent(LinkEvent.AccountRefreshFailure, params, publishableKey)
+        fireEvent(LinkEvent.AccountRefreshFailure, params)
     }
 
     override fun on2FAStart() {
-        fireEvent(LinkEvent.TwoFAStart, publishableKey = null)
-    }
-
-    override fun on2FAStart(publishableKey: String) {
-        fireEvent(LinkEvent.TwoFAStart, publishableKey = publishableKey)
+        fireEvent(LinkEvent.TwoFAStart)
     }
 
     override fun on2FAStartFailure() {
-        fireEvent(LinkEvent.TwoFAStartFailure, publishableKey = null)
-    }
-
-    override fun on2FAStartFailure(publishableKey: String) {
-        fireEvent(LinkEvent.TwoFAStartFailure, publishableKey = publishableKey)
+        fireEvent(LinkEvent.TwoFAStartFailure)
     }
 
     override fun on2FAComplete() {
-        fireEvent(LinkEvent.TwoFAComplete, publishableKey = null)
-    }
-
-    override fun on2FAComplete(publishableKey: String) {
-        fireEvent(LinkEvent.TwoFAComplete, publishableKey = publishableKey)
+        fireEvent(LinkEvent.TwoFAComplete)
     }
 
     override fun on2FAFailure() {
-        fireEvent(LinkEvent.TwoFAFailure, publishableKey = null)
-    }
-
-    override fun on2FAFailure(publishableKey: String) {
-        fireEvent(LinkEvent.TwoFAFailure, publishableKey = publishableKey)
+        fireEvent(LinkEvent.TwoFAFailure)
     }
 
     override fun on2FACancel() {
@@ -208,16 +148,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
 
     private fun fireEvent(
         event: LinkEvent,
-        additionalParams: Map<String, Any>? = null,
-        publishableKey: String? = null,
+        additionalParams: Map<String, Any>? = null
     ) {
         logger.debug("Link event: ${event.eventName} $additionalParams")
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event,
-                    additionalParams ?: emptyMap(),
-                    publishableKeyOverride = publishableKey,
+                    additionalParams ?: emptyMap()
                 )
             )
         }

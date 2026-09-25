@@ -75,7 +75,8 @@ import kotlin.coroutines.CoroutineContext
 @Module(
     includes = [
         StripeRepositoryModule::class,
-        PaymentsIntegrityModule::class
+        PaymentsIntegrityModule::class,
+        LinkAccountAnalyticsModule::class,
     ],
     subcomponents = [
         OAuthConsentViewModelComponent::class,

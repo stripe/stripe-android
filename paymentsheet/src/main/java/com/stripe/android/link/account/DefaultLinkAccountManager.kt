@@ -14,6 +14,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkAccountAnalytics
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
@@ -52,13 +53,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
-    private val linkEventsReporter: LinkEventsReporter,
+    @LinkAccountAnalytics private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
     private val linkLaunchMode: LinkLaunchMode?,
     private val linkAuth: LinkAuth,
 ) : LinkAccountManager {
-
-    private val publishableKey = config.apiConfiguration.publishableKey
 
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
         get() = linkAccountHolder.linkAccountInfo
@@ -166,10 +165,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
         return when (val status = getAccountStatus(currentAccount, canLookupCustomerEmail = true)) {
             is AccountStatus.Verified -> {
-                linkEventsReporter.onInvalidSessionState(
-                    LinkEventsReporter.SessionState.Verified,
-                    publishableKey,
-                )
+                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
                 Result.failure(
                     AlreadyLoggedInLinkException(
@@ -180,10 +176,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
             is AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
-                linkEventsReporter.onInvalidSessionState(
-                    LinkEventsReporter.SessionState.RequiresVerification,
-                    publishableKey,
-                )
+                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
 
                 Result.failure(
                     AlreadyLoggedInLinkException(
@@ -202,13 +195,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     name = name,
                     consentAction = consentAction
                 ).onSuccess {
-                    linkEventsReporter.onSignupCompleted(isInline = true, publishableKey = publishableKey)
+                    linkEventsReporter.onSignupCompleted(true)
                 }.onFailure { error ->
-                    linkEventsReporter.onSignupFailure(
-                        isInline = true,
-                        error = error,
-                        publishableKey = publishableKey,
-                    )
+                    linkEventsReporter.onSignupFailure(true, error)
                 }
             }
         }
@@ -402,14 +391,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
-        linkEventsReporter.on2FAStart(publishableKey)
+        linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
             isResendSmsCode = isResendSmsCode,
             apiConfiguration = config.apiConfiguration,
         )
             .onFailure {
-                linkEventsReporter.on2FAStartFailure(publishableKey)
+                linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
@@ -428,9 +417,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             apiConfiguration = config.apiConfiguration,
         )
             .onSuccess {
-                linkEventsReporter.on2FAComplete(publishableKey)
+                linkEventsReporter.on2FAComplete()
             }.onFailure {
-                linkEventsReporter.on2FAFailure(publishableKey)
+                linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
@@ -603,9 +592,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             supportedVerificationTypes = supportedVerificationTypes.takeIf { startSession },
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
-            linkEventsReporter.onAccountLookupFailure(error, publishableKey)
+            linkEventsReporter.onAccountLookupFailure(error)
         }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete(publishableKey)
+            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -628,9 +617,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             supportedVerificationTypes = supportedVerificationTypes,
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
-            linkEventsReporter.onAccountLookupFailure(error, publishableKey)
+            linkEventsReporter.onAccountLookupFailure(error)
         }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete(publishableKey)
+            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -650,9 +639,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkAuthIntentId = null,
             customerId = null
         ).onFailure { error ->
-            linkEventsReporter.onAccountLookupFailure(error, publishableKey)
+            linkEventsReporter.onAccountLookupFailure(error)
         }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete(publishableKey)
+            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -670,7 +659,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             supportedVerificationTypes = supportedVerificationTypes,
         )
             .onFailure { error ->
-                linkEventsReporter.onAccountRefreshFailure(error, publishableKey)
+                linkEventsReporter.onAccountRefreshFailure(error)
             }.onSuccess {
                 setAccount(consumerSession = it.consumerSession)
             }
