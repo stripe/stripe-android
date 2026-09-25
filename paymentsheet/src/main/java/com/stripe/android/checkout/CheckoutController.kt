@@ -225,12 +225,7 @@ class CheckoutController @Inject internal constructor(
             )
         }
         return withCheckoutState(
-            additionalStateMutations = {
-                copy(
-                    paymentSelection = selection,
-                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-                )
-            },
+            additionalStateMutations = { withSelection(selection) },
         ) {
             val address = selection.billingDetails?.address?.toCheckoutAddress()
                 ?: return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
