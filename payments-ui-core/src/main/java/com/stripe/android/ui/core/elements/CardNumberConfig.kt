@@ -19,7 +19,8 @@ import com.stripe.android.R as StripeR
 internal class CardNumberConfig(
     private val isCardBrandChoiceEligible: Boolean,
     private val cardBrandFilter: CardBrandFilter,
-    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    override val autofillAllowed: Boolean = true,
 ) : CardNumberTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"

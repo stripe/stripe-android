@@ -61,7 +61,7 @@ internal sealed class CardNumberController : TextFieldController {
 
     abstract val selectedCardBrandFlow: StateFlow<CardBrand>
 
-    override val autofillType: ContentType = ContentType.CreditCardNumber
+    override val autofillType: ContentType? = ContentType.CreditCardNumber
 }
 
 /*
@@ -89,6 +89,8 @@ internal class DefaultCardNumberController(
         coroutineScope = coroutineScope
     ),
 ) : CardNumberController() {
+    override val autofillType: ContentType?
+        get() = super.autofillType.takeIf { cardTextFieldConfig.autofillAllowed }
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val debugLabel = cardTextFieldConfig.debugLabel
