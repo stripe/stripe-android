@@ -168,7 +168,10 @@ internal suspend fun createIntentConfirmationInterceptor(
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     checkoutSessionRepository = checkoutSessionRepository,
-                    checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+                    checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
+                        checkoutSessionRepository = checkoutSessionRepository,
+                        errorReporter = errorReporter,
+                    ),
                     requestOptions = requestOptions,
                 )
             }

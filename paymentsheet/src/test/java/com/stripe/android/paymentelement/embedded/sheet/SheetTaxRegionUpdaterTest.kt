@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -180,7 +181,7 @@ internal class SheetTaxRegionUpdaterTest {
             },
         )
 
-        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository, FakeErrorReporter())
     }
 
     private fun paymentMethodMetadata(

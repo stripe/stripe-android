@@ -393,8 +393,8 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
         ),
-        CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS(
-            partialEventName = "checkout.saved_payment_method.missing_tax_address"
+        CHECKOUT_TAX_REGION_UPDATE_MISSING_ADDRESS(
+            partialEventName = "checkout.tax_region_update.missing_address"
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"

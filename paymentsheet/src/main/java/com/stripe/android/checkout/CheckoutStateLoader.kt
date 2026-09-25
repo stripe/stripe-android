@@ -106,13 +106,11 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
-        val savedPaymentMethodSelectionState = when {
-            carryForward.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending ->
-                SavedPaymentMethodSelectionState.Pending
-            carryForward.previousSelection == selection ->
-                carryForward.savedPaymentMethodSelectionState
-            else -> SavedPaymentMethodSelectionState.Idle
-        }
+        // Commits run under the mutation lock, where a saved selection is never in flight, so only a
+        // failure for the unchanged selection carries forward.
+        val savedPaymentMethodSelectionState = carryForward.savedPaymentMethodSelectionState.takeIf {
+            it is SavedPaymentMethodSelectionState.Failed && carryForward.previousSelection == selection
+        } ?: SavedPaymentMethodSelectionState.Idle
 
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,

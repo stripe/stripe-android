@@ -404,7 +404,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `reload carries pending saved selection state forward`() = runScenario {
+    fun `reload resets a pending saved selection state to idle`() = runScenario {
         loader.reload(
             committedState().copy(
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
@@ -412,7 +412,7 @@ internal class CheckoutStateLoaderTest {
         )
 
         assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
-            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test

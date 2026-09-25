@@ -105,8 +105,6 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
 
-private const val CHECKOUT_ERROR_REPORTER_OVERRIDE = "checkout_error_reporter_override"
-
 @Singleton
 @Component(
     modules = [
@@ -146,8 +144,6 @@ internal interface CheckoutControllerComponent {
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
             @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
             @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
-            @BindsInstance @Named(CHECKOUT_ERROR_REPORTER_OVERRIDE)
-            errorReporterOverride: ErrorReporter?,
         ): CheckoutControllerComponent
     }
 }
@@ -201,6 +197,9 @@ internal interface CheckoutControllerModule {
     fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
 
     @Binds
+    fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
+
+    @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     @Binds
@@ -243,12 +242,6 @@ internal interface CheckoutControllerModule {
     fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
 
     companion object {
-        @Provides
-        fun provideErrorReporter(
-            realErrorReporter: RealErrorReporter,
-            @Named(CHECKOUT_ERROR_REPORTER_OVERRIDE) errorReporterOverride: ErrorReporter?,
-        ): ErrorReporter = errorReporterOverride ?: realErrorReporter
-
         @Provides
         fun provideSavedStateHandle(
             checkoutControllerSavedState: CheckoutControllerSavedState,

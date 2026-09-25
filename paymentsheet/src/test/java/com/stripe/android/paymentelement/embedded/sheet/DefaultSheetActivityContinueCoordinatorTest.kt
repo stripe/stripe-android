@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -151,7 +152,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             },
         )
 
-        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository, FakeErrorReporter())
     }
 
     private data class Scenario(

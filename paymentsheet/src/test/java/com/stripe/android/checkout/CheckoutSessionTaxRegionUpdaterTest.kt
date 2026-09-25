@@ -13,10 +13,12 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -91,6 +93,48 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
     }
 
+    @Test
+    fun `updateServerStateIfNeeded reports and skips the update when a required address is missing`() = runScenario {
+        val result = updater.updateServerStateIfNeeded(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            address = null,
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(errorReporter.awaitCall()).isEqualTo(
+            FakeErrorReporter.Call(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_TAX_REGION_UPDATE_MISSING_ADDRESS,
+                stripeException = null,
+                additionalNonPiiParams = mapOf("address_source" to "BILLING"),
+            )
+        )
+    }
+
+    @Test
+    fun `updateServerStateIfNeeded does not report a missing address when address source does not match`() =
+        runScenario {
+            val result = updater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                address = null,
+            )
+
+            assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        }
+
+    @Test
+    fun `updateServerStateIfNeeded does not report a missing address when automatic tax is disabled`() =
+        runScenario(automaticTaxEnabled = false) {
+            val result = updater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = null,
+            )
+
+            assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        }
+
     private fun runScenario(
         automaticTaxEnabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
@@ -110,7 +154,11 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             },
         )
 
-        val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        val errorReporter = FakeErrorReporter()
+        val updater = CheckoutSessionTaxRegionUpdater(
+            checkoutSessionRepository = checkoutSessionRepository,
+            errorReporter = errorReporter,
+        )
 
         val scenario = Scenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -119,15 +167,19 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             ),
             checkoutSessionRepository = checkoutSessionRepository,
             updater = updater,
+            errorReporter = errorReporter,
         )
 
         scenario.block()
+
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val checkoutSessionResponse: CheckoutSessionResponse,
         val checkoutSessionRepository: CheckoutSessionRepository,
         val updater: CheckoutSessionTaxRegionUpdater,
+        val errorReporter: FakeErrorReporter,
     )
 
     private companion object {

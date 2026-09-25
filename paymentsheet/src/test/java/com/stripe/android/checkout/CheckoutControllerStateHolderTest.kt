@@ -90,34 +90,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `saved selection state guards pending operations`() = testScenario {
-        stateHolder.state = committedState()
-        stateHolder.savedPaymentMethodSelectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-            assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `session does not emit when saved selection becomes pending`() = testScenario {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
-
-        stateHolder.session.test {
-            assertThat(awaitItem()).isNotNull()
-
-            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
-
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `restored pending saved selection is reset to idle and can be retried`() = runTest {
+    fun `restored pending saved selection is reset to idle`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = committedState().copy(
@@ -132,21 +105,6 @@ internal class CheckoutControllerStateHolderTest {
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(restoredStateHolder.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(restoredStateHolder.tryBeginSavedSelection()).isTrue()
-    }
-
-    @Test
-    fun `retrying a failed saved selection clears the failure`() = testScenario {
-        val error = IllegalStateException("Selection failed")
-        val failedState = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
-        stateHolder.state = committedState().copy(savedPaymentMethodSelectionState = failedState)
-
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value).isEqualTo(failedState)
-
-        assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
-
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
     }
 
     @Test
@@ -180,29 +138,6 @@ internal class CheckoutControllerStateHolderTest {
         assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(restored.savedPaymentMethodSelectionState.value)
             .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
-    }
-
-    @Test
-    fun `pending retry restores idle without the cleared error`() = runTest {
-        val handle = SavedStateHandle()
-        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
-        val error = IllegalStateException("Selection failed")
-        holder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                error.stripeErrorMessage(),
-            ),
-        )
-
-        assertThat(holder.tryBeginSavedSelection()).isTrue()
-        assertThat(holder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
-
-        assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(restored.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(restored.tryBeginSavedSelection()).isTrue()
     }
 
     @Test

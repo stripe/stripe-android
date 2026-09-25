@@ -51,33 +51,17 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
     val session: StateFlow<Session?> =
-        stateFlow
-            .mapAsStateFlow {
-                it?.copy(savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle)
-            }
-            .mapAsStateFlow {
-                it?.asCheckoutSession(
-                    paymentOptionFactory,
-                    availableExpressButtonTypesFactory,
-                )
-            }
+        stateFlow.mapAsStateFlow {
+            it?.asCheckoutSession(
+                paymentOptionFactory,
+                availableExpressButtonTypesFactory,
+            )
+        }
 
     override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
         stateFlow.mapAsStateFlow {
             it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
         }
-
-    fun tryBeginSavedSelection(): Boolean {
-        val current = state ?: return false
-        if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-            return false
-        }
-
-        state = current.copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-        )
-        return true
-    }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }
