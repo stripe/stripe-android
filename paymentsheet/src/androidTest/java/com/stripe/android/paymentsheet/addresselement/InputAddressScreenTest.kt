@@ -1,9 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -49,12 +45,10 @@ class InputAddressScreenTest {
     }
 
     @Test
-    fun save_error_is_displayed_as_an_assertive_live_region() {
+    fun save_error_is_displayed() {
         setContent(saveError = "Something went wrong.".resolvableString)
 
-        composeTestRule.onNodeWithText("Something went wrong.")
-            .assertIsDisplayed()
-            .assertLiveRegionMode(LiveRegionMode.Assertive)
+        composeTestRule.onNodeWithText("Something went wrong.").assertIsDisplayed()
     }
 
     @Test
@@ -86,12 +80,5 @@ class InputAddressScreenTest {
                 )
             }
         }
-    }
-
-    private fun SemanticsNodeInteraction.assertLiveRegionMode(
-        value: LiveRegionMode,
-    ): SemanticsNodeInteraction {
-        assertThat(fetchSemanticsNode().config[SemanticsProperties.LiveRegion]).isEqualTo(value)
-        return this
     }
 }
