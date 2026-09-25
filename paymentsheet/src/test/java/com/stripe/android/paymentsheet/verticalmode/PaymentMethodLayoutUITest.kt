@@ -466,6 +466,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,
+            selectionError = null,
             linkBrand = LinkBrand.Link,
         )
     }

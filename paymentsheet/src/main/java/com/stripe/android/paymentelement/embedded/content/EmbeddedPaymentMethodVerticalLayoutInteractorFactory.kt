@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
@@ -48,7 +47,6 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     private val savedPaymentMethodMutatorFactory: EmbeddedContentSavedPaymentMethodMutatorFactory,
     private val linkAccountHolder: LinkAccountHolder,
     @EmbeddedHostProcessing private val hostProcessing: StateFlow<Boolean>,
-    private val savedPaymentMethodSelectionState: StateFlow<@JvmSuppressWildcards SavedPaymentMethodSelectionState>,
 ) : EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
     @Suppress("LongMethod")
@@ -87,7 +85,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             ) { isHostProcessing, confirmationState ->
                 isHostProcessing || confirmationState is ConfirmationHandler.State.Confirming
             },
-            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
+            savedPaymentMethodSelectionState = selectionHolder.savedPaymentMethodSelectionState,
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
@@ -121,8 +119,11 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
-            updateSelection = { updatedSelection, _ ->
-                selectionHolder.setSelection(updatedSelection)
+            updateSelection = { updatedSelection, isUserInput ->
+                // Screen re-entry re-applies the current selection without user input and must not clear a failure.
+                if (isUserInput || selectionHolder.selection.value != updatedSelection) {
+                    selectionHolder.setSelection(updatedSelection)
+                }
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),

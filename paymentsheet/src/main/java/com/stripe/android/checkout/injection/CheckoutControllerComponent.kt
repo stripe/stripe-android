@@ -89,7 +89,6 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
@@ -105,6 +104,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
+
+private const val CHECKOUT_ERROR_REPORTER_OVERRIDE = "checkout_error_reporter_override"
 
 @Singleton
 @Component(
@@ -145,6 +146,8 @@ internal interface CheckoutControllerComponent {
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
             @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
             @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
+            @BindsInstance @Named(CHECKOUT_ERROR_REPORTER_OVERRIDE)
+            errorReporterOverride: ErrorReporter?,
         ): CheckoutControllerComponent
     }
 }
@@ -198,9 +201,6 @@ internal interface CheckoutControllerModule {
     fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
 
     @Binds
-    fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
-
-    @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     @Binds
@@ -243,6 +243,12 @@ internal interface CheckoutControllerModule {
     fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
 
     companion object {
+        @Provides
+        fun provideErrorReporter(
+            realErrorReporter: RealErrorReporter,
+            @Named(CHECKOUT_ERROR_REPORTER_OVERRIDE) errorReporterOverride: ErrorReporter?,
+        ): ErrorReporter = errorReporterOverride ?: realErrorReporter
+
         @Provides
         fun provideSavedStateHandle(
             checkoutControllerSavedState: CheckoutControllerSavedState,
@@ -359,13 +365,6 @@ internal interface CheckoutControllerModule {
             operationCoordinator: CheckoutOperationCoordinator,
         ): StateFlow<Boolean> {
             return operationCoordinator.isUpdating
-        }
-
-        @Provides
-        fun provideSavedPaymentMethodSelectionState(
-            handler: CheckoutPaymentSelectionHandler,
-        ): StateFlow<SavedPaymentMethodSelectionState> {
-            return handler.state
         }
     }
 }

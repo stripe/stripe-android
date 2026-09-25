@@ -39,6 +39,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = mandate,
+                selectionError = null,
                 linkBrand = LinkBrand.Link,
             )
             return FakePaymentMethodVerticalLayoutInteractor(
