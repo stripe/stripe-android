@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -291,7 +290,6 @@ class AddressElementViewModelModuleTest {
                     )
                 },
             ),
-            FakeErrorReporter(),
         )
     }
 

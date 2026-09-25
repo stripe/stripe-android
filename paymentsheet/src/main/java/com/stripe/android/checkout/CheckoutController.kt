@@ -25,6 +25,7 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -71,6 +72,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val errorReporter: ErrorReporter,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -225,10 +227,26 @@ class CheckoutController @Inject internal constructor(
             stateHolder.state = copy(
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
             )
+            val address = selection.billingDetails?.address?.toCheckoutAddress()
+            if (address == null) {
+                if (
+                    checkoutSessionTaxRegionUpdater.requiresUpdate(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    )
+                ) {
+                    // Saved payment methods without a billing address are filtered out when tax depends on it.
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS,
+                    )
+                }
+                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            }
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address = selection.billingDetails?.address?.toCheckoutAddress(),
+                address = address,
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
