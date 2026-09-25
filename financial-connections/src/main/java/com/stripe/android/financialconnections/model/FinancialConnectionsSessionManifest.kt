@@ -9,6 +9,7 @@ import com.stripe.android.model.LinkBrand
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  *
@@ -211,6 +212,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "unexpected_error")
         UNEXPECTED_ERROR("unexpected_error"),
 
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown"),
+
         // CLIENT SIDE PANES
         @SerialName(value = "link_account_picker")
         LINK_ACCOUNT_PICKER("link_account_picker"),
@@ -236,8 +240,17 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "exit")
         EXIT("exit");
 
-        internal object Serializer :
-            EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
+        internal object Serializer : EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNKNOWN) {
+            private val unknownValue = AtomicReference(UNKNOWN.value)
+
+            override fun onDeserialize(value: String, result: Pane) {
+                if (result == UNKNOWN) {
+                    unknownValue.set(value)
+                }
+            }
+
+            fun consumeUnknownValue(): String = unknownValue.getAndSet(UNKNOWN.value)
+        }
     }
 
     @Serializable(with = Product.Serializer::class)
