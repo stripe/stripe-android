@@ -64,6 +64,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+    private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -72,7 +73,6 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
-    private val errorReporter: ErrorReporter,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -235,10 +235,10 @@ class CheckoutController @Inject internal constructor(
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                     )
                 ) {
-                    // Saved payment methods without a billing address are filtered out when tax depends on it.
+                    // Billing-tax filtering should prevent this state from reaching selection.
                     errorReporter.report(
                         errorEvent = ErrorReporter.UnexpectedErrorEvent
-                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS,
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
                     )
                 }
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)

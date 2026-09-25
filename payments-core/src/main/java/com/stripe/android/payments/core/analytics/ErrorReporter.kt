@@ -45,23 +45,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun createFallbackInstance(
-            context: Context,
-            productUsage: Set<String> = emptySet(),
-        ): ErrorReporter {
-            return createFallbackInstance(
-                context = context,
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
-                productUsage = productUsage,
-            )
-        }
-
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -82,6 +65,28 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                     productUsage = productUsage,
                 )
                 .errorReporter
+        }
+
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component and ApiConfiguration.
+         */
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
+                productUsage = productUsage,
+            )
         }
 
         fun getAdditionalParamsFromError(error: Throwable): Map<String, String> {
@@ -393,8 +398,8 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
         ),
-        CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS(
-            partialEventName = "checkout.saved_payment_method.missing_tax_address"
+        CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS(
+            partialEventName = "checkout.saved_payment_method.missing_billing_address"
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"

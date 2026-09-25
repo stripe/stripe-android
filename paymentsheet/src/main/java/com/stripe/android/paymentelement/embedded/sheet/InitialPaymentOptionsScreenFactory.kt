@@ -198,7 +198,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = stateFlowOf(walletsState()),
-            updateSelection = { updatedSelection, _ ->
+            updateSelection = { updatedSelection ->
                 selectionHolder.setSelection(updatedSelection)
             },
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(

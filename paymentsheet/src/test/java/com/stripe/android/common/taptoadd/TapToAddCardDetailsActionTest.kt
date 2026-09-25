@@ -2,8 +2,10 @@ package com.stripe.android.common.taptoadd
 
 import android.os.Build
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -36,6 +38,27 @@ internal class TapToAddCardDetailsActionTest {
         .around(composeTestRule)
         .around(composeCleanupRule)
         .around(coroutineScopeCleanupRule)
+
+    @Test
+    fun `shows Tap to add label`() = runTest {
+        FakeTapToAddHelper.test {
+            val action = TapToAddCardDetailsAction(
+                tapToAddHelper = helper,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+
+            composeTestRule.setContent {
+                action.Content(
+                    enabled = true,
+                    onScannedCard = { throw IllegalStateException("Should not be called!") }
+                )
+            }
+
+            composeTestRule.onNodeWithText("Tap to add", substring = true).assertIsDisplayed()
+
+            assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
+        }
+    }
 
     @Test
     fun `clicking button calls startPaymentMethodCollection`() = runTest {

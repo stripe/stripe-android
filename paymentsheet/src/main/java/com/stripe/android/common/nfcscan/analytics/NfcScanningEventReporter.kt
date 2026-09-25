@@ -16,6 +16,11 @@ internal interface NfcScanningEventReporter {
     fun onNfcScanStarted()
 
     /**
+     * The user was blocked from using the NFC scanning flow because their device is not secure.
+     */
+    fun onNfcScanBlocked()
+
+    /**
      * User attempts to scan their card using NFC, meaning the scanner has detected a readable NFC card placed
      * against the device.
      */
@@ -64,6 +69,10 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
     override fun onNfcScanStarted() {
         durationProvider.start(DurationProvider.Key.NfcScan)
         fireEvent(eventName = SCAN_STARTED_EVENT_NAME)
+    }
+
+    override fun onNfcScanBlocked() {
+        fireEvent(eventName = SCAN_BLOCKED_EVENT_NAME)
     }
 
     override fun onNfcScanSucceeded(numberOfAttempts: Int) {
@@ -133,6 +142,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         const val FIELD_NUMBER_OF_ATTEMPTS = "number_of_attempts"
 
         const val SCAN_STARTED_EVENT_NAME = "nfc_scan_started"
+        const val SCAN_BLOCKED_EVENT_NAME = "nfc_scan_blocked"
         const val SCAN_SUCCESS_EVENT_NAME = "nfc_scan_success"
         const val SCAN_CANCELED_EVENT_NAME = "nfc_scan_canceled"
         const val SCAN_ATTEMPT_STARTED_EVENT_NAME = "nfc_scan_attempt_started"
