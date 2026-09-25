@@ -9,7 +9,11 @@ internal class DefaultShippingAddressElementEventReporterTest {
     @Test
     fun `onShown reports the Checkout Session and address country`() = runScenario {
         reporter.onShown(
-            ShippingAddressElementAnalyticsData(country = "US")
+            ShippingAddressElementAnalyticsData(
+                country = "US",
+                autocompleteResultSelected = null,
+                editDistance = null,
+            )
         )
 
         val params = executor.getExecutedRequests().single().params
@@ -45,7 +49,11 @@ internal class DefaultShippingAddressElementEventReporterTest {
     @Test
     fun `onSaveFailed reports standard error parameters`() = runScenario {
         reporter.onSaveFailed(
-            addressData = ShippingAddressElementAnalyticsData(country = "US"),
+            addressData = ShippingAddressElementAnalyticsData(
+                country = "US",
+                autocompleteResultSelected = null,
+                editDistance = null,
+            ),
             error = IllegalStateException("sensitive details"),
         )
 

@@ -58,8 +58,8 @@ internal sealed class ShippingAddressElementEvent : AnalyticsEvent {
 
 internal data class ShippingAddressElementAnalyticsData(
     val country: String,
-    val autocompleteResultSelected: Boolean? = null,
-    val editDistance: Int? = null,
+    val autocompleteResultSelected: Boolean?,
+    val editDistance: Int?,
 ) {
     fun toAnalyticsParams(): Map<String, Any> = buildMap {
         put(ShippingAddressElementEvent.FIELD_ADDRESS_COUNTRY_CODE, country)
