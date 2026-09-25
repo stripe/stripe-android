@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.lpms.foundations
 
+import com.stripe.android.core.Identifiable
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -13,7 +14,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 
 internal class CreateIntentFactory(
-    private val paymentElementCallbackIdentifier: String,
+    private val paymentElementCallbackIdentifier: Identifiable,
     private val paymentMethodType: PaymentMethod.Type,
     private val testClient: StripeNetworkTestClient
 ) {

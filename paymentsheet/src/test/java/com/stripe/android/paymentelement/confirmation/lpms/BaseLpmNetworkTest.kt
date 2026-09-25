@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.CreateIntentFactory
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.LpmAssertionParams
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.LpmNetworkTestActivity
@@ -122,6 +123,6 @@ internal open class BaseLpmNetworkTest(
     }
 
     private companion object {
-        const val LPM_NETWORK_PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER = "LpmNetworkTestIdentifier"
+        val LPM_NETWORK_PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER = createTestIdentifier("LpmNetworkTestIdentifier")
     }
 }

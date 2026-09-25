@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +23,7 @@ internal class EmbeddedPaymentElementViewModel @Inject constructor(
     }
 
     class Factory(
-        private val paymentElementCallbackIdentifier: String,
+        private val paymentElementCallbackIdentifier: Identifiable,
         private val statusBarColor: Int?,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {

@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -97,7 +98,7 @@ internal interface EmbeddedPaymentElementViewModelComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance
             @Named(STATUS_BAR_COLOR)
             statusBarColor: Int?,
@@ -306,7 +307,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
         @Provides
         fun providesInternalRowSelectionCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
         ): InternalRowSelectionCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
         }

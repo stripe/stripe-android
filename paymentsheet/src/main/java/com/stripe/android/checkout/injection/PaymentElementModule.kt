@@ -3,6 +3,7 @@ package com.stripe.android.checkout.injection
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
+import com.stripe.android.core.Identifiable
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
@@ -89,7 +90,7 @@ internal interface PaymentElementModule {
         fun provideCheckoutLinkPaymentLauncher(
             linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
             linkActivityContract: LinkActivityContract,
-            @PaymentElementCallbackIdentifier identifier: String,
+            @PaymentElementCallbackIdentifier identifier: Identifiable,
             linkStore: LinkStore,
         ): LinkPaymentLauncher {
             return LinkPaymentLauncher(

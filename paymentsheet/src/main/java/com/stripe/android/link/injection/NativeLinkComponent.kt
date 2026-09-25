@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
@@ -83,7 +84,7 @@ internal interface NativeLinkComponent {
             paymentMethodMetadata: PaymentMethodMetadata,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance
             context: Context,
             @BindsInstance

@@ -13,6 +13,7 @@ import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.DurationProvider
@@ -278,7 +279,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
     private val apiConfigurationResolver: ApiConfigurationResolver,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: Identifiable,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
     private val createCustomerState: CreateCustomerState,

@@ -2474,7 +2474,7 @@ internal class DefaultFlowControllerTest {
             errorReporter = errorReporter,
             initializedViaCompose = false,
             linkHandler = linkHandler ?: mock(),
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+            id = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
             flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
@@ -2488,7 +2488,7 @@ internal class DefaultFlowControllerTest {
             confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 listOf(KLARNA_PROMOTION)
-            )
+            ),
         )
     }
 

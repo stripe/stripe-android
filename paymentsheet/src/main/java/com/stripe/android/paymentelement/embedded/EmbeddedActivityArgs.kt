@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -17,7 +18,7 @@ internal data class EmbeddedActivityArgs(
     val paymentMethodMetadata: PaymentMethodMetadata,
     val configuration: EmbeddedPaymentElement.Configuration,
     val productUsage: Set<String>,
-    val paymentElementCallbackIdentifier: String,
+    val paymentElementCallbackIdentifier: Identifiable,
     val statusBarColor: Int?,
     val selection: PaymentSelection?,
     val previousNewSelections: Bundle,

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -75,7 +76,7 @@ internal interface FlowControllerStateComponent {
             application: Application,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance
             flowControllerViewModel: FlowControllerViewModel,
             @BindsInstance

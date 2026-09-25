@@ -6,7 +6,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -18,7 +21,6 @@ internal class FlowControllerFactory(
     private val statusBarColor: () -> Int?,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: String = "FlowController",
     private val initializedViaCompose: Boolean = false,
 ) {
     constructor(
@@ -47,19 +49,25 @@ internal class FlowControllerFactory(
         paymentResultCallback = paymentResultCallback,
     )
 
-    fun create(): PaymentSheet.FlowController =
+    fun create(callbacks: PaymentElementCallbacks): PaymentSheet.FlowController {
+        val id = Identifiable()
+        PaymentElementCallbackReferences[id] = callbacks
+        return create(id)
+    }
+
+    fun create(id: Identifiable): PaymentSheet.FlowController =
         DefaultFlowController.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "FlowController(instance = $paymentElementCallbackIdentifier)",
+                key = "FlowController(instance = $id)",
                 registryOwner = activityResultRegistryOwner,
             ),
             activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = statusBarColor,
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            paymentElementCallbackIdentifier = id,
             initializedViaCompose = initializedViaCompose,
         )
 }

@@ -25,6 +25,7 @@ import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddDelayInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddStateHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -116,7 +117,7 @@ internal interface TapToAddViewModelComponent {
             @BindsInstance eventMode: EventReporter.Mode,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @Named(PRODUCT_USAGE)
             @BindsInstance
             productUsage: Set<String>,
@@ -264,7 +265,7 @@ internal interface TapToAddViewModelModule {
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
         fun providesAnalyticEventCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }

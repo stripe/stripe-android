@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
@@ -69,7 +68,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             statusBarColor = null,
         ).also { viewModelStoreRule.track(it) }
     }

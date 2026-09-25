@@ -7,6 +7,7 @@ import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -97,10 +98,10 @@ internal interface CustomerSheetViewModelModule {
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
+        @CustomerSheetViewModelScope
         @PaymentElementCallbackIdentifier
-        fun providesPaymentElementCallbackIdentifier(): String {
-            // We currently do not support multiple instances of Customer Sheet
-            return "CustomerSheet"
+        fun providesPaymentElementCallbackIdentifier(): Identifiable {
+            return Identifiable()
         }
 
         @Provides

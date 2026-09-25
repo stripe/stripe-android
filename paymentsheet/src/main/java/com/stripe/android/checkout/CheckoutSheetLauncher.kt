@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
@@ -76,7 +77,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: Identifiable,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
 ) : EmbeddedSheetLauncher {

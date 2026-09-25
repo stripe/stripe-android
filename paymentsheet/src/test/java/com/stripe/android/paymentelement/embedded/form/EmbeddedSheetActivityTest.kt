@@ -31,6 +31,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -259,7 +260,7 @@ internal class EmbeddedSheetActivityTest {
                     configuration = configuration,
                     productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
-                    paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+                    paymentElementCallbackIdentifier = createTestIdentifier("EmbeddedFormTestIdentifier"),
                     selection = null,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),

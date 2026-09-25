@@ -20,6 +20,7 @@ import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -141,7 +142,7 @@ internal interface CheckoutControllerComponent {
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
             @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
             @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
@@ -306,7 +307,7 @@ internal interface CheckoutControllerModule {
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
         fun providesAnalyticEventCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }

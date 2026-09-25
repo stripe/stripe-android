@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -54,7 +55,8 @@ internal class CustomPaymentMethodConfirmationActivityTest {
 
     @Before
     fun setup() {
-        PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks.Builder()
+        val callbackIdentifier = createTestIdentifier("ConfirmationTestIdentifier")
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
             }

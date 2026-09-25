@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -182,7 +183,7 @@ internal suspend fun createIntentConfirmationInterceptor(
 }
 
 internal fun createTestConfirmationHandlerFactory(
-    paymentElementCallbackIdentifier: String,
+    paymentElementCallbackIdentifier: Identifiable,
     intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,

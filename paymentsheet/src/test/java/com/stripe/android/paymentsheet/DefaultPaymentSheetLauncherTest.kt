@@ -11,9 +11,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.utils.FakeActivityResultLauncher
+import com.stripe.android.utils.PaymentElementCallbackTestRule
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -22,6 +27,10 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultPaymentSheetLauncherTest {
+    private val callbackIdentifier = Identifiable()
+
+    @get:Rule
+    val callbackTestRule = PaymentElementCallbackTestRule()
 
     @BeforeTest
     fun setup() {
@@ -50,7 +59,10 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
+                launcher.present(
+                    mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"),
+                    configuration = null,
+                )
                 assertThat(results).containsExactly(PaymentSheetResult.Completed())
             }
         }
@@ -75,7 +87,10 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.DESTROYED)
-                launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
+                launcher.present(
+                    mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"),
+                    configuration = null,
+                )
                 assertThat(results).hasSize(1)
                 assertThat((results.first() as PaymentSheetResult.Failed).error).hasMessageThat().isEqualTo(
                     "The host activity is not in a valid state (INITIALIZED)."
@@ -86,7 +101,7 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .createIntentCallback { _, _ ->
                 error("I’m alive")
             }
@@ -100,21 +115,22 @@ class DefaultPaymentSheetLauncherTest {
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
             callback = mock(),
+            id = callbackIdentifier,
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]).isNotNull()
+        assertThat(PaymentElementCallbackReferences[callbackIdentifier]).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]).isNotNull()
+        assertThat(PaymentElementCallbackReferences[callbackIdentifier]).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]).isNull()
+        assertThat(PaymentElementCallbackReferences[callbackIdentifier]).isNull()
     }
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .externalPaymentMethodConfirmHandler { _, _ ->
                 error("I’m alive")
             }
@@ -128,30 +144,31 @@ class DefaultPaymentSheetLauncherTest {
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
             callback = mock(),
+            id = callbackIdentifier,
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         assertThat(
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[callbackIdentifier]
                 ?.externalPaymentMethodConfirmHandler
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         assertThat(
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[callbackIdentifier]
                 ?.externalPaymentMethodConfirmHandler
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[callbackIdentifier]
                 ?.externalPaymentMethodConfirmHandler
         ).isNull()
     }
 
     @Test
     fun `Clears out confirmCustomPaymentMethodCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
             .confirmCustomPaymentMethodCallback { _, _ ->
                 error("I’m alive")
             }
@@ -165,25 +182,55 @@ class DefaultPaymentSheetLauncherTest {
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
             callback = mock(),
+            id = callbackIdentifier,
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         assertThat(
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[callbackIdentifier]
                 ?.confirmCustomPaymentMethodCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         assertThat(
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[callbackIdentifier]
                 ?.confirmCustomPaymentMethodCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[callbackIdentifier]
                 ?.confirmCustomPaymentMethodCallback
         ).isNull()
+    }
+
+    @Test
+    fun `present uses the launcher ID for every presentation`() = runTest {
+        val activityResultLauncher = FakeActivityResultLauncher<PaymentSheetContract.Args>()
+        val id = Identifiable()
+
+        launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }.use { scenario ->
+            scenario.onFragment { fragment ->
+                val sheet = PaymentSheet(
+                    DefaultPaymentSheetLauncher(
+                        activityResultLauncher = activityResultLauncher,
+                        activity = fragment.requireActivity(),
+                        lifecycleOwner = fragment,
+                        application = fragment.requireActivity().application,
+                        callback = { error("Result callback should not be called") },
+                        id = id,
+                        initializedViaCompose = false,
+                    )
+                )
+                sheet.presentWithPaymentIntent("pi_first")
+                sheet.presentWithSetupIntent("seti_first")
+            }
+
+            assertThat(activityResultLauncher.calls.awaitItem().input.paymentElementCallbackIdentifier).isEqualTo(id)
+            assertThat(activityResultLauncher.calls.awaitItem().input.paymentElementCallbackIdentifier).isEqualTo(id)
+            activityResultLauncher.calls.expectNoEvents()
+            activityResultLauncher.unregisterCalls.expectNoEvents()
+        }
     }
 
     private class FakeActivityResultRegistry(

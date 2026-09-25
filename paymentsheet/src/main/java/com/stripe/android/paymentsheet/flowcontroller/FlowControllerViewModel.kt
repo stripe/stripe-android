@@ -10,6 +10,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 internal class FlowControllerViewModel(
     application: Application,
     val handle: SavedStateHandle,
-    paymentElementCallbackIdentifier: String,
+    paymentElementCallbackIdentifier: Identifiable,
     @ColorInt val statusBarColor: Int?,
 ) : AndroidViewModel(application) {
 
@@ -85,7 +86,7 @@ internal class FlowControllerViewModel(
 
     class Factory(
         @ColorInt private val statusBarColor: Int?,
-        private val paymentElementCallbackIdentifier: String,
+        private val paymentElementCallbackIdentifier: Identifiable,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

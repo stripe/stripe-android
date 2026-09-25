@@ -10,6 +10,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
@@ -29,19 +30,8 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
-    init {
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
-                    super.onDestroy(owner)
-                }
-            }
-        )
-    }
 
     constructor(
         activity: ComponentActivity,
@@ -112,14 +102,24 @@ internal class DefaultPaymentSheetLauncher(
     )
 
     override fun present(
+        id: Identifiable,
         mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration?
     ) {
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    PaymentElementCallbackReferences.remove(id)
+                    super.onDestroy(owner)
+                }
+            }
+        )
+
         val args = PaymentSheetContract.Args(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = StatusBarCompat.color(activity),
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            paymentElementCallbackIdentifier = id,
             initializedViaCompose = initializedViaCompose,
         )
 

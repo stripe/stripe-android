@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
@@ -55,7 +56,7 @@ internal object FlowControllerModule {
     fun provideFlowControllerLinkLauncher(
         linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
-        @PaymentElementCallbackIdentifier identifier: String,
+        @PaymentElementCallbackIdentifier identifier: Identifiable,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
         linkAnalyticsComponentFactory,
@@ -70,7 +71,7 @@ internal object FlowControllerModule {
     fun provideWalletsButtonLinkLauncher(
         linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
-        @PaymentElementCallbackIdentifier identifier: String,
+        @PaymentElementCallbackIdentifier identifier: Identifiable,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
         linkAnalyticsComponentFactory,

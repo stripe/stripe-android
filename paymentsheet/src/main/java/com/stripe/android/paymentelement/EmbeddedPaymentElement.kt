@@ -18,6 +18,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -798,7 +799,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             activityResultCaller: ActivityResultCaller,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             resultCallback: ResultCallback,
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(

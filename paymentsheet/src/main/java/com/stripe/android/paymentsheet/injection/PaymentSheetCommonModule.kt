@@ -7,6 +7,7 @@ import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -224,7 +225,7 @@ internal abstract class PaymentSheetCommonModule {
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
         fun providesAnalyticEventCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: Identifiable,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -16,7 +17,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: Identifiable,
 ) {
     fun initialize(applicationIsTaskOwner: Boolean) {
         if (!applicationIsTaskOwner && !savedStateHandle.previouslySentDeepLinkEvent) {

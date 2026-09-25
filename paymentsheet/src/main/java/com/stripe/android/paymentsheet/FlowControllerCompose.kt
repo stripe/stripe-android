@@ -9,11 +9,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
-import java.util.UUID
 
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
@@ -143,11 +143,11 @@ internal fun internalRememberPaymentSheetFlowController(
     paymentOptionResultCallback: PaymentOptionResultCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    val paymentElementCallbackIdentifier = rememberSaveable {
-        UUID.randomUUID().toString()
+    val flowControllerId = rememberSaveable {
+        Identifiable()
     }
 
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+    UpdateCallbacks(paymentElementCallbackIdentifier = flowControllerId, callbacks)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -171,9 +171,8 @@ internal fun internalRememberPaymentSheetFlowController(
             statusBarColor = { StatusBarCompat.color(activity) },
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
-        ).create()
+        ).create(flowControllerId)
     }
 }
 

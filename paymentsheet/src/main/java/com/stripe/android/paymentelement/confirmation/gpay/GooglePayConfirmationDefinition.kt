@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -26,7 +27,7 @@ import javax.inject.Inject
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
-    @PaymentElementCallbackIdentifier val instanceId: String,
+    @PaymentElementCallbackIdentifier val instanceId: Identifiable,
     private val context: Context,
     private val googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,

@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
@@ -105,8 +106,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
+    @PaymentElementCallbackIdentifier internal val id: Identifiable,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
 
@@ -155,7 +156,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentOptionActivityLauncher.unregister()
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
-                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
+                    PaymentElementCallbackReferences.remove(id)
                 }
             }
         )
@@ -309,7 +310,7 @@ internal class DefaultFlowController @Inject internal constructor(
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             walletButtonsRendered = viewModel.walletButtonsRendered,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            paymentElementCallbackIdentifier = id,
             promotions = paymentMethodMessagePromotionsHelper.getPromotions()
         )
 
@@ -771,7 +772,7 @@ internal class DefaultFlowController @Inject internal constructor(
             statusBarColor: () -> Int?,
             paymentOptionResultCallback: PaymentOptionResultCallback,
             paymentResultCallback: PaymentSheetResultCallback,
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             initializedViaCompose: Boolean,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
         ): PaymentSheet.FlowController {

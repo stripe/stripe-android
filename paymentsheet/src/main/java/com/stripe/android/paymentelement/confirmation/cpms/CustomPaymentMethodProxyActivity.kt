@@ -5,7 +5,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.Identifiable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
@@ -38,7 +40,11 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
                 PaymentSheet.CustomPaymentMethod::class.java,
             )
         }
-        val paymentElementCallbackIdentifier = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
+        val paymentElementCallbackIdentifier = IntentCompat.getSerializableExtra(
+            intent,
+            EXTRA_PAYMENT_ELEMENT_IDENTIFIER,
+            Identifiable::class.java,
+        )
 
         val billingDetails = extras?.let {
             BundleCompat.getParcelable(

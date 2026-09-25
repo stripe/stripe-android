@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -34,7 +35,7 @@ internal class PaymentOptionContract :
         val enableLogging: Boolean,
         val walletButtonsRendered: Boolean,
         val productUsage: Set<String>,
-        val paymentElementCallbackIdentifier: String,
+        val paymentElementCallbackIdentifier: Identifiable,
         val promotions: List<PaymentMethodMessagePromotion>?
     ) : ActivityStarter.Args {
         internal companion object {

@@ -14,6 +14,7 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -66,7 +67,7 @@ class CheckoutController @Inject internal constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
-    @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: Identifiable,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
 ) {
@@ -1017,10 +1018,9 @@ class CheckoutController @Inject internal constructor(
          * Sets a unique name identifying this integration, allowing multiple [CheckoutController]
          * instances to coexist.
          *
-         * The name namespaces the controller's persisted state within [savedStateHandle] and its
-         * entry in global callback state, so instances built from the same [savedStateHandle] stay
-         * isolated from one another. Defaults to `"stripe_checkout"`; provide a distinct name for
-         * each controller when building more than one.
+         * The name namespaces the controller's persisted state within [savedStateHandle], so
+         * instances built from the same [savedStateHandle] keep separate persisted state.
+         * Defaults to `"stripe_checkout"`; provide a distinct name for each controller when building more than one.
          */
         fun integrationName(
             integrationName: String
@@ -1038,7 +1038,7 @@ class CheckoutController @Inject internal constructor(
             )
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
-                paymentElementCallbackIdentifier = integrationName,
+                paymentElementCallbackIdentifier = Identifiable(),
                 resultCallback = resultCallback,
                 rowSelectionBehavior = rowSelectionBehavior,
                 checkoutControllerSavedState = checkoutControllerSavedState,

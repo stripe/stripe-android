@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
@@ -63,7 +64,7 @@ internal interface EmbeddedSheetComponent {
             productUsage: Set<String>,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotions: List<PaymentMethodMessagePromotion>,

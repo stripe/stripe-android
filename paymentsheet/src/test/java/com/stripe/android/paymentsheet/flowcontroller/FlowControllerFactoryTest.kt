@@ -1,17 +1,15 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -38,21 +36,7 @@ class FlowControllerFactoryTest {
     }
 
     @Test
-    fun `create() should return a FlowController instance`() {
-        ActivityScenario.launch<TestActivity>(
-            Intent(context, TestActivity::class.java)
-        ).moveToState(Lifecycle.State.CREATED)
-            .use { activityScenario ->
-                activityScenario.onActivity { activity ->
-                    val factory = createFactory(activity)
-                    assertThat(factory.create())
-                        .isNotNull()
-                }
-            }
-    }
-
-    @Test
-    fun `create() with Fragment should return a FlowController instance`() {
+    fun `create() with Fragment uses the provided ID`() {
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
                 TestFragment()
@@ -60,20 +44,12 @@ class FlowControllerFactoryTest {
         ) {
             onFragment { fragment ->
                 val factory = createFactory(fragment)
-                assertThat(factory.create())
-                    .isNotNull()
+                val id = Identifiable()
+                val flowController = factory.create(id) as DefaultFlowController
+
+                assertThat(flowController.id).isEqualTo(id)
             }
         }
-    }
-
-    private fun createFactory(
-        activity: ComponentActivity
-    ): FlowControllerFactory {
-        return FlowControllerFactory(
-            activity,
-            mock(),
-            mock()
-        )
     }
 
     private fun createFactory(

@@ -10,6 +10,7 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -26,6 +27,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 internal class LinkPaymentLauncherTest {
+    private val callbackIdentifier = createTestIdentifier("PaymentElementCallbackIdentifier")
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -347,7 +349,7 @@ internal class LinkPaymentLauncherTest {
     ) {
         whenever(
             activityResultRegistry.register(
-                eq("LinkPaymentLauncher"),
+                eq("${callbackIdentifier}_LinkPaymentLauncher"),
                 any<ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>>(),
                 any()
             )
@@ -359,7 +361,7 @@ internal class LinkPaymentLauncherTest {
         linkActivityContract: LinkActivityContract
     ) {
         verify(activityResultRegistry).register(
-            eq("PaymentElementCallbackIdentifier_LinkPaymentLauncher"),
+            eq("${callbackIdentifier}_LinkPaymentLauncher"),
             eq(linkActivityContract),
             any()
         )
@@ -378,7 +380,7 @@ internal class LinkPaymentLauncherTest {
             },
             linkActivityContract = linkActivityContract,
             linkStore = linkStore,
-            paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier"
+            paymentElementCallbackIdentifier = callbackIdentifier,
         )
     }
 }

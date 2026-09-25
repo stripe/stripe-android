@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -54,7 +55,7 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
 }
 
 internal data class ExternalPaymentMethodInput(
-    val paymentElementCallbackIdentifier: String,
+    val paymentElementCallbackIdentifier: Identifiable,
     val type: String,
     val billingDetails: PaymentMethod.BillingDetails?,
 )

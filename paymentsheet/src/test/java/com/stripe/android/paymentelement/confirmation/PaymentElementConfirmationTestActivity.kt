@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -40,6 +41,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.createTestIdentifier
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -178,7 +180,8 @@ internal interface PaymentElementConfirmationTestModule {
 
         @Provides
         @PaymentElementCallbackIdentifier
-        fun providesPaymentElementCallbackIdentifier(): String = "ConfirmationTestIdentifier"
+        fun providesPaymentElementCallbackIdentifier(): Identifiable =
+            createTestIdentifier("ConfirmationTestIdentifier")
 
         @Provides
         fun providesContext(application: Application): Context = application

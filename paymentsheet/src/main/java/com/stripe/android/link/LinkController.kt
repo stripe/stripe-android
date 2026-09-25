@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.Identifiable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
@@ -990,7 +991,7 @@ class LinkController @Inject internal constructor(
                 .build(
                     application = application,
                     savedStateHandle = savedStateHandle,
-                    paymentElementCallbackIdentifier = "LinkController",
+                    paymentElementCallbackIdentifier = Identifiable(),
                     requestSurface = requestSurface,
                 )
                 .linkController

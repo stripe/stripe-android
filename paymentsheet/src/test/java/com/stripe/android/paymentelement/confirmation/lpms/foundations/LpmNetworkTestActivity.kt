@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.Identifiable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -103,7 +104,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
     @Parcelize
     data class Args(
         val apiConfiguration: ApiConfiguration.State,
-        val paymentElementCallbackIdentifier: String,
+        val paymentElementCallbackIdentifier: Identifiable,
         val allowsManualConfirmation: Boolean,
     ) : ActivityStarter.Args {
         companion object {
@@ -154,7 +155,7 @@ internal interface LpmNetworkTestViewModelComponent {
             allowsManualConfirmation: Boolean,
             @BindsInstance
             @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
+            paymentElementCallbackIdentifier: Identifiable,
             @BindsInstance
             savedStateHandle: SavedStateHandle,
             @BindsInstance
