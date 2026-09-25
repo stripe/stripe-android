@@ -142,11 +142,11 @@ internal fun internalRememberPaymentSheetFlowController(
     paymentOptionResultCallback: PaymentOptionResultCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    val paymentElementCallbackIdentifier = rememberSaveable {
+    val flowControllerId = rememberSaveable {
         Identifiable()
     }
 
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+    UpdateCallbacks(paymentElementCallbackIdentifier = flowControllerId, callbacks)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -171,7 +171,7 @@ internal fun internalRememberPaymentSheetFlowController(
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
             initializedViaCompose = true,
-        ).create(id = paymentElementCallbackIdentifier)
+        ).create(flowControllerId)
     }
 }
 

@@ -15,7 +15,6 @@ import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
@@ -30,18 +29,8 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    override val id: Identifiable,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
-    init {
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    PaymentElementCallbackReferences.remove(id)
-                }
-            }
-        )
-    }
 
     constructor(
         activity: ComponentActivity,
@@ -56,7 +45,6 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
-        id = Identifiable(),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -77,7 +65,6 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
-        id = Identifiable(),
     )
 
     constructor(
@@ -93,7 +80,6 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
-        id = Identifiable(),
     )
 
     @TestOnly
@@ -112,13 +98,22 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
-        id = Identifiable(),
     )
 
     override fun present(
+        id: Identifiable,
         mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration?
     ) {
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    PaymentElementCallbackReferences.remove(id)
+                    super.onDestroy(owner)
+                }
+            }
+        )
+
         val args = PaymentSheetContract.Args(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),

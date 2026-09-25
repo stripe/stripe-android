@@ -25,7 +25,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.Identifiable
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository

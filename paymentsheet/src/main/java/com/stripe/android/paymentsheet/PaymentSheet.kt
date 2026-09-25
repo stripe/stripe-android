@@ -11,6 +11,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -65,11 +66,8 @@ import java.util.UUID
  */
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher,
-) {
-    private fun setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
-        PaymentElementCallbackReferences[paymentSheetLauncher.id] = callbacks
-    }
-
+    identifiable: Identifiable
+): Identifiable by identifiable {
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
@@ -85,9 +83,8 @@ class PaymentSheet internal constructor(
         callback: PaymentSheetResultCallback
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, callback),
-    ) {
-        setPaymentSheetCallbacks(PaymentElementCallbacks.Builder().build())
-    }
+        identifiable = Identifiable()
+    )
 
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and external payment methods are
@@ -111,6 +108,7 @@ class PaymentSheet internal constructor(
         callback: PaymentSheetResultCallback,
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, callback),
+        identifiable = Identifiable()
     ) {
         setPaymentSheetCallbacks(
             PaymentElementCallbacks.Builder()
@@ -142,6 +140,7 @@ class PaymentSheet internal constructor(
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, paymentResultCallback),
+        identifiable = Identifiable()
     ) {
         setPaymentSheetCallbacks(
             PaymentElementCallbacks.Builder()
@@ -177,6 +176,7 @@ class PaymentSheet internal constructor(
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, paymentResultCallback),
+        identifiable = Identifiable()
     ) {
         setPaymentSheetCallbacks(
             PaymentElementCallbacks.Builder()
@@ -201,9 +201,8 @@ class PaymentSheet internal constructor(
         callback: PaymentSheetResultCallback
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(fragment, callback),
-    ) {
-        setPaymentSheetCallbacks(PaymentElementCallbacks.Builder().build())
-    }
+        identifiable = Identifiable()
+    )
 
     /**
      * Constructor to be used when launching the payment sheet from a [Fragment] and external payment methods
@@ -227,6 +226,7 @@ class PaymentSheet internal constructor(
         callback: PaymentSheetResultCallback,
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(fragment, callback),
+        identifiable = Identifiable()
     ) {
         setPaymentSheetCallbacks(
             PaymentElementCallbacks.Builder()
@@ -258,6 +258,7 @@ class PaymentSheet internal constructor(
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(fragment, paymentResultCallback),
+        identifiable = Identifiable()
     ) {
         setPaymentSheetCallbacks(
             PaymentElementCallbacks.Builder()
@@ -293,6 +294,7 @@ class PaymentSheet internal constructor(
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         paymentSheetLauncher = DefaultPaymentSheetLauncher(fragment, paymentResultCallback),
+        identifiable = Identifiable()
     ) {
         setPaymentSheetCallbacks(
             PaymentElementCallbacks.Builder()
@@ -384,13 +386,23 @@ class PaymentSheet internal constructor(
          * @param activity The Activity that is presenting [PaymentSheet].
          */
         fun build(activity: ComponentActivity): PaymentSheet {
-            return build(DefaultPaymentSheetLauncher(activity, resultCallback))
+            val identifiable = Identifiable()
+            initializeCallbacks(identifiable)
+            return PaymentSheet(
+                paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, resultCallback),
+                identifiable = identifiable
+            )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
-            return build(DefaultPaymentSheetLauncher(activity, signal, resultCallback))
+            val identifiable = Identifiable()
+            initializeCallbacks(identifiable)
+            return PaymentSheet(
+                paymentSheetLauncher = DefaultPaymentSheetLauncher(activity, signal, resultCallback),
+                identifiable = identifiable
+            )
         }
 
         /**
@@ -399,7 +411,12 @@ class PaymentSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          */
         fun build(fragment: Fragment): PaymentSheet {
-            return build(DefaultPaymentSheetLauncher(fragment, resultCallback))
+            val identifiable = Identifiable()
+            initializeCallbacks(identifiable)
+            return PaymentSheet(
+                paymentSheetLauncher = DefaultPaymentSheetLauncher(fragment, resultCallback),
+                identifiable = identifiable
+            )
         }
 
         /**
@@ -416,10 +433,8 @@ class PaymentSheet internal constructor(
             )
         }
 
-        private fun build(launcher: PaymentSheetLauncher): PaymentSheet {
-            return PaymentSheet(launcher).apply {
-                setPaymentSheetCallbacks(callbacksBuilder.build())
-            }
+        private fun initializeCallbacks(identifiable: Identifiable) {
+            setPaymentSheetCallbacks(identifiable, callbacksBuilder.build())
         }
     }
 
@@ -438,6 +453,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null
     ) {
         paymentSheetLauncher.present(
+            id = this,
             mode = InitializationMode.PaymentIntent(paymentIntentClientSecret),
             configuration = configuration,
         )
@@ -458,6 +474,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null
     ) {
         paymentSheetLauncher.present(
+            id = this,
             mode = InitializationMode.SetupIntent(setupIntentClientSecret),
             configuration = configuration,
         )
@@ -475,6 +492,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null,
     ) {
         paymentSheetLauncher.present(
+            id = this,
             mode = InitializationMode.DeferredIntent(intentConfiguration),
             configuration = configuration,
         )
@@ -4441,10 +4459,17 @@ class PaymentSheet internal constructor(
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    interface Identifiable : Serializable
+
 
     companion object {
+        private fun PaymentSheet.setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences[this] = callbacks
+        }
+
+        private fun setPaymentSheetCallbacks(identifiable: Identifiable, callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences[identifiable] = callbacks
+        }
+
         /**
          * Deletes all persisted authentication state associated with a customer.
          *
@@ -4460,9 +4485,14 @@ class PaymentSheet internal constructor(
     }
 }
 
-internal fun Identifiable(id: UUID = UUID.randomUUID()): PaymentSheet.Identifiable {
+@Stable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface Identifiable : Serializable
+
+internal fun Identifiable(id: UUID = UUID.randomUUID()): Identifiable {
     return UuidIdentifiable(id)
 }
 
+@Stable
 @JvmInline
-private value class UuidIdentifiable(private val uuid: UUID) : PaymentSheet.Identifiable
+private value class UuidIdentifiable(private val id: UUID) : Identifiable

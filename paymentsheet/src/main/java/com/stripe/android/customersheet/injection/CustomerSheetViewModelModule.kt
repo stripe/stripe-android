@@ -33,7 +33,6 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.Identifiable
-import com.stripe.android.paymentsheet.PaymentSheet.Identifiable
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.model.PaymentSelection

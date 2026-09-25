@@ -123,11 +123,11 @@ internal fun internalRememberPaymentSheet(
     callbacks: PaymentElementCallbacks,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    val paymentElementCallbackIdentifier = rememberSaveable {
+    val paymentSheetId = rememberSaveable {
         Identifiable()
     }
 
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+    UpdateCallbacks(paymentElementCallbackIdentifier = paymentSheetId, callbacks)
 
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
@@ -150,9 +150,11 @@ internal fun internalRememberPaymentSheet(
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
             callback = paymentResultCallback,
-            id = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         )
-        PaymentSheet(launcher)
+        PaymentSheet(
+            paymentSheetLauncher = launcher,
+            identifiable = paymentSheetId
+        )
     }
 }
