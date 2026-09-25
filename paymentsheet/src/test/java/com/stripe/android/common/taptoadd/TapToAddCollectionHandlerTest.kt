@@ -1172,7 +1172,7 @@ class TapToAddCollectionHandlerTest {
 
         override fun hasCallback(): Boolean = callbackResult.isSuccess
 
-        override suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback {
+        override suspend fun waitForCallback(isLiveMode: Boolean): CreateCardPresentSetupIntentCallback {
             waitForCallbackCalls.add(Unit)
             return callbackResult.getOrThrow()
         }
@@ -1211,7 +1211,10 @@ class TapToAddCollectionHandlerTest {
             action = StripeCoreR.string.stripe_try_again_later.resolvableString,
         )
 
-        val tapToPayUxConfiguration = createTapToAddUxConfiguration()
+        val tapToPayUxConfiguration = createTapToAddUxConfiguration(
+            appearance = PaymentSheet.Appearance(),
+            isSystemDark = false,
+        )
         val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,

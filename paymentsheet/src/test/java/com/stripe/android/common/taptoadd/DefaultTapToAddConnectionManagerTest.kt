@@ -745,7 +745,7 @@ class DefaultTapToAddConnectionManagerTest {
     ) : CreateCardPresentSetupIntentCallbackRetriever {
         override fun hasCallback(): Boolean = hasCallback
 
-        override suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback {
+        override suspend fun waitForCallback(isLiveMode: Boolean): CreateCardPresentSetupIntentCallback {
             error("Not expected to be called in connection manager tests")
         }
     }

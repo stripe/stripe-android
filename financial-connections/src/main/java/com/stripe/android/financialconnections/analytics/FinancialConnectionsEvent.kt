@@ -98,6 +98,11 @@ data class FinancialConnectionsEvent internal constructor(
         ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
 
         /**
+         * Error when no eligible accounts are available for the selected institution.
+         */
+        NO_ELIGIBLE_ACCOUNTS("no_eligible_accounts"),
+
+        /**
          * Error when no debitable account is available at the selected institution for payments flows.
          */
         NO_DEBITABLE_ACCOUNT("no_debitable_account"),

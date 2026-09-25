@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -130,6 +131,33 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 newPaymentMethods = listOf()
             )
         }
+    }
+
+    @Test
+    fun testSavedPaymentMethodLoading() {
+        val imageLoader = FakeStripeImageLoader()
+
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+                    displayName = savedPaymentMethod.displayName,
+                    paymentMethod = savedPaymentMethod.paymentMethod,
+                    isSelectionPending = true,
+                ),
+                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                linkBrand = LinkBrand.Link,
+                isEnabled = false,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = imageLoader,
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+
+        imageLoader.ensureAllEventsConsumed()
     }
 
     @Test

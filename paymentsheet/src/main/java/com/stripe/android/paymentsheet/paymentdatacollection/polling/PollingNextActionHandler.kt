@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityOptionsCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -44,7 +45,15 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
 
         val localPollingAuthenticator = pollingLauncher
         if (localPollingAuthenticator == null) {
-            ErrorReporter.createFallbackInstance(host.application)
+            ErrorReporter.createFallbackInstance(
+                context = host.application,
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = requestOptions.apiKey,
+                        stripeAccountId = requestOptions.stripeAccount,
+                    )
+                },
+            )
                 .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
         } else {
             localPollingAuthenticator.launch(args, options)

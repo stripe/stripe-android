@@ -3,6 +3,9 @@ package com.stripe.android.paymentelement
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
@@ -14,7 +17,23 @@ import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 
+@OptIn(ApiConfigurationPreview::class)
 class EmbeddedPaymentElementConfigurationTest {
+
+    @Test
+    fun `api configuration is included in common configuration`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Test Merchant")
+            .apiConfiguration(
+                ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
+                    .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
+            )
+            .build()
+
+        val apiConfiguration = configuration.asCommonConfiguration().apiConfiguration
+
+        assertThat(apiConfiguration?.publishableKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
+        assertThat(apiConfiguration?.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+    }
 
     @OptIn(
         ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
@@ -68,6 +87,10 @@ class EmbeddedPaymentElementConfigurationTest {
             .termsDisplay(mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER))
             .opensCardScannerAutomatically(true)
             .userOverrideCountry("GB")
+            .apiConfiguration(
+                ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
+                    .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
+            )
             .build()
 
         val roundTripped = original.newBuilder().build()
@@ -85,6 +108,6 @@ class EmbeddedPaymentElementConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(23)
+        assertThat(propertyCount).isEqualTo(24)
     }
 }

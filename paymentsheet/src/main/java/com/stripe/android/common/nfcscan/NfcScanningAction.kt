@@ -8,9 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityOptionsCompat
-import com.stripe.android.common.taptoadd.TapToButtonUI
+import com.stripe.android.common.taptoadd.TapButtonUI
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.ScannedCardDetails
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -46,7 +48,10 @@ internal class NfcScanningAction(
             }
         }
 
-        TapToButtonUI(enabled = enabled) {
+        TapButtonUI(
+            label = stringResource(R.string.stripe_nfc_scan_card_button_label),
+            enabled = enabled,
+        ) {
             launcher.launch(
                 NfcScanningContract.Args(paymentMethodMetadata),
                 ActivityOptionsCompat.makeCustomAnimation(

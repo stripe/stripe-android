@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -22,12 +23,15 @@ import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirm
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
@@ -395,6 +399,62 @@ internal class EmbeddedNavigatorTest {
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
         eventReporter.validate()
+    }
+
+    @Test
+    fun `initial screen HorizontalSavedPaymentOptions calls onShowExistingPaymentOptions`() = runTest {
+        val eventReporter = FakeEventReporter()
+        EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = createHorizontalSavedPaymentOptionsScreen(),
+        )
+
+        assertThat(eventReporter.showExistingPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `HorizontalSavedPaymentOptions topBarState maps state and handles edit`() {
+        val viewActionRecorder = ViewActionRecorder<SelectSavedPaymentMethodsInteractor.ViewAction>()
+        val screen = createHorizontalSavedPaymentOptionsScreen(
+            interactor = FakeSelectSavedPaymentMethodsInteractor(
+                initialState = SelectSavedPaymentMethodsInteractor.State(
+                    paymentOptionsItems = emptyList(),
+                    selectedPaymentOptionsItem = null,
+                    linkBrand = LinkBrand.Link,
+                    isEditing = false,
+                    isProcessing = false,
+                    canEdit = true,
+                    canRemove = true,
+                ),
+                viewActionRecorder = viewActionRecorder,
+            ),
+        )
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isTrue()
+        assertThat(topBarState.isEditing).isFalse()
+
+        topBarState.onEditIconPressed()
+        viewActionRecorder.consume(SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit)
+    }
+
+    @Test
+    fun `HorizontalSavedPaymentOptions title selects payment method`() {
+        val screen = createHorizontalSavedPaymentOptionsScreen()
+
+        assertThat(screen.title().value).isEqualTo(
+            PaymentSheetR.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+        )
+    }
+
+    @Test
+    fun `HorizontalSavedPaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createHorizontalSavedPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test
@@ -820,6 +880,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
     }
 
@@ -867,6 +928,26 @@ internal class EmbeddedNavigatorTest {
         )
     }
 
+    private fun createHorizontalSavedPaymentOptionsScreen(
+        interactor: SelectSavedPaymentMethodsInteractor = FakeSelectSavedPaymentMethodsInteractor(),
+        isProcessing: Boolean = false,
+    ): EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions {
+        return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
+            interactor = interactor,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = isProcessing,
+                    shouldDisplayLockIcon = true,
+                )
+            ),
+            onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
+        )
+    }
+
     private fun createFormScreen(
         isLiveMode: Boolean = true,
     ): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
@@ -877,6 +958,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
@@ -905,6 +987,7 @@ internal class EmbeddedNavigatorTest {
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
         return screen to interactor

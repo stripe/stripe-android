@@ -9,15 +9,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
@@ -47,6 +48,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -86,6 +88,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -101,7 +104,7 @@ internal class CustomerSheetViewModel(
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    paymentConfiguration: PaymentConfiguration,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -121,7 +124,7 @@ internal class CustomerSheetViewModel(
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
-        paymentConfiguration: PaymentConfiguration,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
@@ -141,7 +144,7 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         productUsage = productUsage,
-        paymentConfiguration = paymentConfiguration,
+        apiConfigurationProvider = apiConfigurationProvider,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         isNfcScanningAvailable = isNfcScanningAvailable,
@@ -153,6 +156,9 @@ internal class CustomerSheetViewModel(
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
         context = application,
         productUsageTokens = productUsage,
+        requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        apiConfigurationProvider = apiConfigurationProvider,
     )
 
     private val customerState = MutableStateFlow(
@@ -169,7 +175,7 @@ internal class CustomerSheetViewModel(
         )
     )
 
-    private val isConfiguredLiveMode = paymentConfiguration.isLiveMode()
+    private val isConfiguredLiveMode = apiConfigurationProvider.get().isLiveMode()
     private val isLiveMode
         get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
 

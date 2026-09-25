@@ -318,6 +318,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
         apiConfiguration = apiConfiguration,
+        shouldDisplay = configuration.link.shouldDisplay,
     )
 
     private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {

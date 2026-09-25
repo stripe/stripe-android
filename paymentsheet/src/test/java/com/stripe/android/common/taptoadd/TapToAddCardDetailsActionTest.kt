@@ -2,7 +2,9 @@ package com.stripe.android.common.taptoadd
 
 import android.os.Build
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -38,6 +40,27 @@ internal class TapToAddCardDetailsActionTest {
         .around(coroutineScopeCleanupRule)
 
     @Test
+    fun `shows Tap to add label`() = runTest {
+        FakeTapToAddHelper.test {
+            val action = TapToAddCardDetailsAction(
+                tapToAddHelper = helper,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+
+            composeTestRule.setContent {
+                action.Content(
+                    enabled = true,
+                    onScannedCard = { throw IllegalStateException("Should not be called!") }
+                )
+            }
+
+            composeTestRule.onNodeWithText("Tap to add", substring = true).assertIsDisplayed()
+
+            assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
     fun `clicking button calls startPaymentMethodCollection`() = runTest {
         FakeTapToAddHelper.test {
             val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
@@ -57,7 +80,7 @@ internal class TapToAddCardDetailsActionTest {
 
             assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
 
-            composeTestRule.onNodeWithText("Tap to add").performClick()
+            composeTestRule.onNodeWithTag(TAP_TO_BUTTON_UI_TEST_TAG).performClick()
 
             assertThat(collectCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
         }
@@ -83,7 +106,7 @@ internal class TapToAddCardDetailsActionTest {
 
             assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
 
-            composeTestRule.onNodeWithText("Tap to add").performClick()
+            composeTestRule.onNodeWithTag(TAP_TO_BUTTON_UI_TEST_TAG).performClick()
 
             collectCalls.expectNoEvents()
         }

@@ -7,6 +7,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -31,7 +33,7 @@ internal class AddressElementActivityTest {
     @Test
     fun `standalone contract creates intent with standalone args`() {
         val args = AddressElementActivityContract.Args.Standalone(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             config = null,
         )
 
@@ -47,8 +49,9 @@ internal class AddressElementActivityTest {
     @Test
     fun `checkout shipping contract creates intent with checkout shipping args`() {
         val args = AddressElementActivityContract.Args.CheckoutShipping(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             config = null,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
         )
 
         val intent = AddressElementActivityContract.CheckoutShipping.createIntent(
@@ -96,7 +99,10 @@ internal class AddressElementActivityTest {
 
     @Test
     fun `standalone contract maps checkout shipping success to canceled`() {
-        val result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(AddressDetails())
+        val result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+            address = AddressDetails(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        )
 
         val parsed = AddressElementActivityContract.Standalone.parseResult(
             resultCode = result.resultCode,
@@ -108,7 +114,10 @@ internal class AddressElementActivityTest {
 
     @Test
     fun `checkout shipping contract preserves checkout shipping success`() {
-        val result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(AddressDetails())
+        val result = AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+            address = AddressDetails(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 2000L),
+        )
 
         val parsed = AddressElementActivityContract.CheckoutShipping.parseResult(
             resultCode = result.resultCode,

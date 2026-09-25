@@ -46,6 +46,8 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Genom att bekräfta betalningen med GCash tillåter du att %s debiterar ditt GCash-konto för framtida betalningar i enlighet med deras villkor.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Angivet IBAN är ofullständigt.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -73,6 +75,10 @@
   <string name="stripe_name_on_card">Namn på kortet</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Välj hur du vill betala:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Genom att bekräfta din betalning godkänner du att din transaktion kommer att behandlas av Global Stack Services Limited som ansvarig säljare och i enlighet med deras <a href=\"%s\">villkor</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Genom att bekräfta din betalning godkänner du att din transaktion kommer att behandlas av Global Stack Services Limited som ansvarig säljare och i enlighet med deras <a href=\"%s\">villkor</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">När du har skickat in informationen blir du omdirigerad så att de kommande stegen kan slutföras på ett säkert sätt.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Genom att bekräfta betalningen med PayPal tillåter du %s att debitera ditt PayPal-konto för framtida betalningar i enlighet med deras villkor.</string>
   <!-- Revolut mandate text -->
@@ -119,6 +127,10 @@
   <string name="stripe_set_as_default_payment_method">Ställ in som standardbetalningsmetod</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Konfigurera</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Genom att bekräfta betalningen med Touch \'n Go tillåter du att %s debiterar ditt Touch \'n Go-konto för framtida betalningar i enlighet med deras villkor.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Genom att bekräfta betalningen med TrueMoney tillåter du %s att debitera ditt TrueMoney-konto för framtida betalningar i enlighet med deras villkor.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Genom att fortsätta ger du %1$s rätt att automatiskt debitera ditt Twint-saldo på återkommande basis i enlighet med ditt köp eller din prenumerationsplan.</string>
   <!-- Label for UPI ID number field on form -->

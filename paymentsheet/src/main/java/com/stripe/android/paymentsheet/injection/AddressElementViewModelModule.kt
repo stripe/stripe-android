@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -15,12 +17,14 @@ import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavig
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -37,43 +41,35 @@ internal class AddressElementViewModelModule {
     }
 
     @Provides
-    @Singleton
-    fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
-
-    @Provides
     @Named(PRODUCT_USAGE)
-    @Singleton
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
-    @Singleton
+    @OptIn(CheckoutSessionPreview::class)
     internal fun providePrimaryButtonAction(
         args: AddressElementActivityContract.Args,
+        taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     ): AddressElementPrimaryButtonAction = when (args) {
         is AddressElementActivityContract.Args.Standalone -> {
             StandalonePrimaryButtonAction
         }
         is AddressElementActivityContract.Args.CheckoutShipping -> {
-            CheckoutShippingPrimaryButtonAction
+            CheckoutShippingPrimaryButtonAction(
+                checkoutSessionResponse = args.checkoutSessionResponse,
+                taxRegionUpdater = taxRegionUpdater,
+            )
         }
     }
-
-    @Provides
-    @Named(PUBLISHABLE_KEY)
-    @Singleton
-    fun providesPublishableKey(
-        args: AddressElementActivityContract.Args
-    ): String = args.publishableKey
 
     @Provides
     @Singleton
     fun provideStripeAutocompleteRepository(
         stripeNetworkClient: StripeNetworkClient,
-        args: AddressElementActivityContract.Args,
+        requestOptionsProvider: Provider<ApiRequest.Options>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
-        publishableKeyProvider = { args.publishableKey },
+        requestOptionsProvider = requestOptionsProvider,
     )
 
     @Provides
@@ -107,10 +103,19 @@ internal class AddressElementViewModelModule {
             PlacesClientProxy.create(
                 context,
                 it,
-                errorReporter = ErrorReporter.createFallbackInstance(context),
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    apiConfigurationProvider = { args.apiConfiguration },
+                ),
             )
         }
     }
+
+    @Provides
+    @Singleton
+    fun provideApiConfiguration(
+        args: AddressElementActivityContract.Args
+    ) = args.apiConfiguration
 
     @Module
     interface Bindings {
@@ -129,12 +134,26 @@ private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction
     }
 }
 
-private object CheckoutShippingPrimaryButtonAction : AddressElementPrimaryButtonAction {
+@OptIn(CheckoutSessionPreview::class)
+private class CheckoutShippingPrimaryButtonAction(
+    private val checkoutSessionResponse: CheckoutSessionResponse,
+    private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+) : AddressElementPrimaryButtonAction {
     override suspend fun invoke(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result> {
-        return Result.success(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
-        )
+        val address = addressDetails.address?.toCheckoutAddress()
+            ?: return Result.failure(IllegalArgumentException("Country is required."))
+
+        return taxRegionUpdater.updateServerStateIfNeeded(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = TaxAddressSource.SHIPPING,
+            address = address,
+        ).map { response ->
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                address = addressDetails,
+                checkoutSessionResponse = response,
+            )
+        }
     }
 }

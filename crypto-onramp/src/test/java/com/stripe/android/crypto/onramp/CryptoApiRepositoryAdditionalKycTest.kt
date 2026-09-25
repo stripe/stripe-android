@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -166,8 +167,12 @@ class CryptoApiRepositoryAdditionalKycTest {
                 stripeNetworkClient = stripeNetworkClient,
                 stripeRepository = mock<StripeRepository>(),
                 linkController = mock<LinkController>(),
-                publishableKeyProvider = { "pk_test_123" },
-                stripeAccountIdProvider = { null },
+                apiConfigProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    )
+                },
                 apiVersion = CRYPTO_ONRAMP_API_VERSION,
                 sdkVersion = StripeSdkVersion.VERSION,
                 appInfo = null,
@@ -189,6 +194,8 @@ class CryptoApiRepositoryAdditionalKycTest {
     }
 
     private companion object {
+        const val PUBLISHABLE_KEY = "pk_test_123"
+
         val documentSubmissionResponse =
             """
                 {

@@ -19,6 +19,7 @@ import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -41,8 +42,10 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
@@ -84,6 +87,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             scenario.result.resultData,
         ) as EmbeddedActivityResult.Cancelled
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(result.linkAccountInfo.lastUpdateReason)
+            .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
         assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
     }
 
@@ -183,6 +188,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             assertThat(result.selection).isEqualTo(selection)
             assertThat(result.previousNewSelections.previousNewSelection("cashapp"))
                 .isEqualTo(previousNewSelection)
+            assertThat(result.linkAccountInfo.lastUpdateReason)
+                .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
             assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
         }
     }
@@ -211,6 +218,37 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         ),
     ) {
         formPage.waitUntilVisible()
+    }
+
+    @Test
+    fun `horizontal saved payment options selects saved method and continues`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        launchHorizontal(customerState = customerStateWith(paymentMethod)) { scenario ->
+            composeTestRule.onNodeWithTag(
+                "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 4242\u2069"
+            ).performClick()
+            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+                .performScrollTo()
+                .assertIsEnabled()
+                .performClick()
+            onIdle()
+
+            val result = EmbeddedSheetContract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            ) as EmbeddedActivityResult.Complete
+            assertThat(result.selection).isEqualTo(PaymentSelection.Saved(paymentMethod))
+        }
+    }
+
+    @Test
+    fun `horizontal saved payment options add opens payment method form`() {
+        launchHorizontal(customerState = customerStateWith(PaymentMethodFixtures.CARD_PAYMENT_METHOD)) {
+            composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
+                .performClick()
+
+            formPage.waitUntilVisible()
+        }
     }
 
     @Test
@@ -260,7 +298,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
             primaryButton.performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.waitUntilWithIdle {
                 composeTestRule.onAllNodesWithText(expectedError)
                     .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
@@ -297,12 +335,12 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 val processingLabel = applicationContext.getString(
                     R.string.stripe_paymentsheet_primary_button_processing
                 )
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodesWithText(processingLabel)
                         .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isNotEmpty()
                 }
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     requestReceived.count == 0L
                 }
                 cardRow.assertIsNotEnabled()
@@ -381,6 +419,25 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         }
     }
 
+    private fun launchHorizontal(
+        customerState: CustomerState,
+        block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
+    ) = launch(
+        selection = null,
+        previousNewSelections = Bundle(),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = customerState,
+        block = block,
+    )
+
+    private fun customerStateWith(paymentMethod: PaymentMethod): CustomerState {
+        return PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(paymentMethod),
+        )
+    }
+
     private fun createArgs(
         selection: PaymentSelection? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -399,6 +456,10 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             selection = selection,
             previousNewSelections = previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
+            ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,

@@ -82,6 +82,7 @@ internal fun PaymentSelection.Saved.toConfirmationOption(
             shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
+            hasAcknowledgedSepaMandate = hasAcknowledgedSepaMandate,
         )
     }
 }
