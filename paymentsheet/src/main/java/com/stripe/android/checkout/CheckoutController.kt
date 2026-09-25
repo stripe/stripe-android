@@ -381,7 +381,6 @@ class CheckoutController @Inject internal constructor(
             additionalStateMutations = {
                 copy(
                     paymentSelection = null,
-                    selectionError = null,
                     temporarySelection = null,
                     previousNewSelections = Bundle(),
                 )

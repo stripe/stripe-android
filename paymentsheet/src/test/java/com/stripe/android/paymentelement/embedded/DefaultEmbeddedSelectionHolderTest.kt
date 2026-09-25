@@ -32,11 +32,6 @@ internal class DefaultEmbeddedSelectionHolderTest {
     }
 
     @Test
-    fun `selection error starts null`() = testScenario {
-        assertThat(selectionHolder.selectionError.value).isNull()
-    }
-
-    @Test
     fun `setting selection updates savedStateHandle`() = testScenario {
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isNull()

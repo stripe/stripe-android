@@ -10,7 +10,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
@@ -271,13 +270,16 @@ internal class CheckoutStateLoaderTest {
         val error = IllegalStateException("Selection failed")
         stateHolder.state = committedState(
             paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-            selectionError = error.stripeErrorMessage(),
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
         )
 
         loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(stateHolder.selectionError.value).isNull()
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
@@ -299,7 +301,8 @@ internal class CheckoutStateLoaderTest {
         loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(stateHolder.selectionError.value).isNull()
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
@@ -313,13 +316,16 @@ internal class CheckoutStateLoaderTest {
         assertThat(selection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         val error = IllegalStateException("Selection failed")
         stateHolder.state = requireNotNull(stateHolder.state).copy(
-            selectionError = error.stripeErrorMessage(),
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
         )
 
         loader.reload(requireNotNull(stateHolder.state))
 
         assertThat(stateHolder.selection.value).isEqualTo(selection)
-        assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
     }
 
     @Test
@@ -330,7 +336,9 @@ internal class CheckoutStateLoaderTest {
         stateHolder.state = committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val error = IllegalStateException("Selection failed")
         stateHolder.state = requireNotNull(stateHolder.state).copy(
-            selectionError = error.stripeErrorMessage(),
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
         )
 
         assertFailsWith<IllegalStateException> {
@@ -338,7 +346,8 @@ internal class CheckoutStateLoaderTest {
         }
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(stateHolder.selectionError.value).isEqualTo(error.stripeErrorMessage())
+        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
     }
 
     @Test
@@ -470,7 +479,8 @@ internal class CheckoutStateLoaderTest {
     // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
     private fun committedState(
         paymentSelection: PaymentSelection? = null,
-        selectionError: ResolvableString? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
@@ -484,8 +494,7 @@ internal class CheckoutStateLoaderTest {
         expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
-        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-        selectionError = selectionError,
+        savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,

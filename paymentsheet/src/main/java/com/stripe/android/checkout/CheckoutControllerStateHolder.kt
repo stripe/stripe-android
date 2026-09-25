@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -68,9 +68,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
         }
 
-    override val selectionError: StateFlow<ResolvableString?> =
-        stateFlow.mapAsStateFlow { it?.selectionError }
-
     fun tryBeginSavedSelection(): Boolean {
         val current = state ?: return false
         if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
@@ -79,15 +76,15 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
         state = current.copy(
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-            selectionError = null,
         )
         return true
     }
 
     fun failSavedSelection(error: Throwable) {
         state = state?.copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-            selectionError = error.stripeErrorMessage(),
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error = error.stripeErrorMessage(),
+            ),
         )
     }
 
@@ -111,7 +108,13 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
-        state = current.withSelection(updatedSelection).copy(selectionError = null)
+        state = current.withSelection(updatedSelection).copy(
+            savedPaymentMethodSelectionState = when (current.savedPaymentMethodSelectionState) {
+                is SavedPaymentMethodSelectionState.Failed -> SavedPaymentMethodSelectionState.Idle
+                else -> current.savedPaymentMethodSelectionState
+            },
+            selectionError = null,
+        )
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {

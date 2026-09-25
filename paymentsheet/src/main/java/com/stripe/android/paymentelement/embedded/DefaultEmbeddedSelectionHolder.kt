@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.embedded
 
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -19,8 +18,6 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
         savedStateHandle.getStateFlow(EMBEDDED_SELECTION_KEY, null)
     override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
         stateFlowOf(SavedPaymentMethodSelectionState.Idle)
-    override val selectionError: StateFlow<ResolvableString?> =
-        stateFlowOf(null)
     override val temporarySelection: StateFlow<String?> =
         savedStateHandle.getStateFlow(EMBEDDED_TEMPORARY_SELECTION_KEY, null)
     override val previousNewSelections: Bundle = savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY]

@@ -493,9 +493,10 @@ internal class CheckoutControllerTest {
         },
     ) {
         stateHolder.state = requireNotNull(stateHolder.state).copy(
-            selectionError = "Selection failed".resolvableString,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                "Selection failed".resolvableString,
+            ),
         )
-        assertThat(stateHolder.selectionError.value).isNotNull()
 
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
@@ -506,7 +507,8 @@ internal class CheckoutControllerTest {
         }
         val clearedState = committedState()
         assertThat(clearedState.paymentSelection).isNull()
-        assertThat(clearedState.selectionError).isNull()
+        assertThat(clearedState.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(clearedState.temporarySelection).isNull()
         assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
     }
@@ -734,9 +736,8 @@ internal class CheckoutControllerTest {
         ) {
             val selection = loadedSavedPaymentMethodSelection()
             stateHolder.state = requireNotNull(stateHolder.state).copy(
-                selectionError = "Selection failed".resolvableString,
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
             )
-            assertThat(stateHolder.selectionError.value).isNotNull()
             val before = committedState()
             val requestReceived = CountDownLatch(1)
             val releaseResponse = CountDownLatch(1)
@@ -771,6 +772,8 @@ internal class CheckoutControllerTest {
                 assertThat(state.paymentSelection).isEqualTo(selection)
                 assertThat(state.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
                 assertThat(state.selectionError).isNull()
+                assertThat(state.savedPaymentMethodSelectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Pending)
             } finally {
                 releaseResponse.countDown()
             }
@@ -1019,7 +1022,7 @@ internal class CheckoutControllerTest {
             }
 
             stateHolder.savedPaymentMethodSelectionState.test {
-                awaitSavedSelectionFailure(handler, selection, completions, stateHolder)
+                awaitSavedSelectionFailure(handler, selection, completions)
 
                 val requestReceived = CountDownLatch(1)
                 val releaseResponse = CountDownLatch(1)
@@ -1033,7 +1036,6 @@ internal class CheckoutControllerTest {
 
                 handler.select(selection, true)
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-                assertThat(stateHolder.selectionError.value).isNull()
                 try {
                     testScheduler.advanceUntilIdle()
                     assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
@@ -1058,16 +1060,16 @@ internal class CheckoutControllerTest {
         handler: CheckoutPaymentSelectionHandler,
         selection: PaymentSelection.Saved,
         completions: Turbine<CheckoutControllerState>,
-        stateHolder: CheckoutControllerStateHolder,
     ) {
         assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
         handler.select(selection, true)
         assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-        assertThat(withTurbineTimeout(10.seconds) { awaitItem() })
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(stateHolder.selectionError.value).isEqualTo(
-            com.stripe.android.paymentsheet.R.string.stripe_something_went_wrong.resolvableString
+        val failure = withTurbineTimeout(10.seconds) { awaitItem() }
+        assertThat(failure).isEqualTo(
+            SavedPaymentMethodSelectionState.Failed(
+                com.stripe.android.paymentsheet.R.string.stripe_something_went_wrong.resolvableString,
+            ),
         )
         completions.expectNoEvents()
     }
@@ -1090,12 +1092,13 @@ internal class CheckoutControllerTest {
             }
 
             stateHolder.savedPaymentMethodSelectionState.test {
-                awaitSavedSelectionFailure(handler, selection, completions, stateHolder)
+                awaitSavedSelectionFailure(handler, selection, completions)
 
                 handler.select(PaymentSelection.GooglePay, true)
 
                 expectNoEvents()
-                assertThat(stateHolder.selectionError.value).isNull()
+                assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                 assertThat(completions.awaitItem().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
                 completions.expectNoEvents()
             }

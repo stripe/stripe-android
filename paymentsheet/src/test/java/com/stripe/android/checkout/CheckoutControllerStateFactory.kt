@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -32,8 +31,8 @@ internal object CheckoutControllerStateFactory {
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection: PaymentSelection? = null,
-        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-        selectionError: ResolvableString? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         linkEagerPresentationSuppressed: Boolean = false,
@@ -48,7 +47,6 @@ internal object CheckoutControllerStateFactory {
             embeddedConfiguration = embeddedConfiguration,
             paymentSelection = paymentSelection,
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
-            selectionError = selectionError,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
             linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,

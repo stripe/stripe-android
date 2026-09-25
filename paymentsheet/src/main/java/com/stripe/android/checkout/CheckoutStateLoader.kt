@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -107,9 +106,12 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
-        // Preserve the error only when the reload does not change the selected payment method.
-        val selectionError = carryForward.selectionError.takeIf {
-            carryForward.previousSelection == selection
+        val savedPaymentMethodSelectionState = when {
+            carryForward.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending ->
+                SavedPaymentMethodSelectionState.Pending
+            carryForward.previousSelection == selection ->
+                carryForward.savedPaymentMethodSelectionState
+            else -> SavedPaymentMethodSelectionState.Idle
         }
 
         stateHolder.state = CheckoutControllerState(
@@ -121,8 +123,7 @@ internal class CheckoutStateLoader @Inject constructor(
             expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
-            savedPaymentMethodSelectionState = carryForward.savedPaymentMethodSelectionState,
-            selectionError = selectionError,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
@@ -190,7 +191,6 @@ internal class CheckoutStateLoader @Inject constructor(
         val cachedFlagImages: Map<String, Bitmap>?,
         val previousSelection: PaymentSelection?,
         val savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState,
-        val selectionError: ResolvableString?,
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
         val linkEagerPresentationSuppressed: Boolean,
@@ -200,7 +200,6 @@ internal class CheckoutStateLoader @Inject constructor(
                 cachedFlagImages = null,
                 previousSelection = null,
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-                selectionError = null,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 linkEagerPresentationSuppressed = false,
@@ -210,7 +209,6 @@ internal class CheckoutStateLoader @Inject constructor(
                 cachedFlagImages = state.flagImages,
                 previousSelection = state.paymentSelection,
                 savedPaymentMethodSelectionState = state.savedPaymentMethodSelectionState,
-                selectionError = state.selectionError,
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
                 linkEagerPresentationSuppressed = state.linkEagerPresentationSuppressed,

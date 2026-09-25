@@ -9,7 +9,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -24,6 +23,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -135,14 +135,15 @@ internal class EmbeddedContentUiTest {
         val error = "Selection failed".resolvableString
         runScenario(
             selection = PaymentSelection.GooglePay,
-            selectionError = error,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(error),
         ) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
                 val loadedState = EmbeddedContentHelperStateFactory.create()
                 state.value = loadedState
                 val firstContent = requireNotNull(awaitItem())
-                assertThat(selectionHolder.selectionError.value).isEqualTo(error)
+                assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
                 composeRule.setContent {
                     val content by embeddedContentHelper.embeddedContent.collectAsState()
                     content?.Content()
@@ -153,7 +154,8 @@ internal class EmbeddedContentUiTest {
                 state.value = loadedState.copy(embeddedViewDisplaysMandateText = false)
 
                 assertThat(requireNotNull(awaitItem())).isNotSameInstanceAs(firstContent)
-                assertThat(selectionHolder.selectionError.value).isEqualTo(error)
+                assertThat(selectionHolder.savedPaymentMethodSelectionState.value)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Failed(error))
                 composeRule.waitForIdle()
                 composeRule.onNodeWithTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG).assertExists()
             }
@@ -171,14 +173,16 @@ internal class EmbeddedContentUiTest {
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         selection: PaymentSelection? = null,
-        selectionError: ResolvableString? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         selectionHolder.state = CheckoutControllerStateFactory.create(
             paymentSelection = selection,
-        ).copy(selectionError = selectionError)
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
+        )
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,

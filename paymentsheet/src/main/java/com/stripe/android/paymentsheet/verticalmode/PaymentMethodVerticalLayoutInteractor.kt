@@ -101,7 +101,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
-    selectionError: StateFlow<ResolvableString?>,
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
     paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
@@ -167,7 +166,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
-                selectionError = stateFlowOf(null),
                 temporarySelection = stateFlowOf(null),
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
@@ -297,11 +295,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val processingState = combineAsStateFlow(
         processing,
-        selectionError,
-    ) { isProcessing, error ->
+        savedPaymentMethodSelectionState,
+    ) { isProcessing, savedSelectionState ->
         ProcessingState(
             isProcessing = isProcessing,
-            error = error,
+            error = (savedSelectionState as? SavedPaymentMethodSelectionState.Failed)?.error,
         )
     }
 
