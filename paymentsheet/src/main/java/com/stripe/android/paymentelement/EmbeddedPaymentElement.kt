@@ -541,11 +541,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
-             * Sets the API credentials to use for this payment element.
-             *
-             * When not set, the payment element uses the credentials initialized through
-             * [com.stripe.android.PaymentConfiguration].
-             */
+             * An optional [ApiConfiguration] for this payment session. When set, overrides the
+             * global [com.stripe.android.PaymentConfiguration] singleton for all network requests made by this
+             * [EmbeddedPaymentElement] instance. When not set, defaults to the value set in
+             * [com.stripe.android.PaymentConfiguration.init].
+            **/
             @ApiConfigurationPreview
             fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
