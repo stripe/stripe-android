@@ -381,6 +381,7 @@ class CheckoutController @Inject internal constructor(
             additionalStateMutations = {
                 copy(
                     paymentSelection = null,
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                     temporarySelection = null,
                     previousNewSelections = Bundle(),
                 )

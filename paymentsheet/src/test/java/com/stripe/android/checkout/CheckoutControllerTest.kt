@@ -1096,8 +1096,7 @@ internal class CheckoutControllerTest {
 
                 handler.select(PaymentSelection.GooglePay, true)
 
-                expectNoEvents()
-                assertThat(stateHolder.savedPaymentMethodSelectionState.value)
+                assertThat(awaitItem())
                     .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                 assertThat(completions.awaitItem().paymentSelection).isEqualTo(PaymentSelection.GooglePay)
                 completions.expectNoEvents()
