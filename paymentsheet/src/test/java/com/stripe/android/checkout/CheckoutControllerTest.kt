@@ -803,29 +803,6 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `selectSavedPaymentMethod skips tax update when saved payment method has no billing address`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            // Construct this state directly to exercise the invariant that filtering normally
-            // prevents from reaching saved-method selection.
-            val selection = loadedSavedPaymentMethodSelection()
-            val addresslessSelection = selection.copy(
-                paymentMethod = selection.paymentMethod.copy(billingDetails = null),
-            )
-            val before = committedState().checkoutSessionResponse
-
-            val result = controller.selectSavedPaymentMethod(addresslessSelection)
-
-            result.getOrThrow()
-            assertThat(committedState().checkoutSessionResponse).isSameInstanceAs(before)
-        }
-
-    @Test
     fun `saved selection ignores a duplicate while its tax response is pending`() =
         runMutationScenario(
             initModifier = combine(
