@@ -88,7 +88,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `saved selection state guards pending operations and returns to idle`() = testScenario {
+    fun `saved selection state guards pending operations`() = testScenario {
         stateHolder.state = committedState()
 
         stateHolder.savedPaymentMethodSelectionState.test {
@@ -99,9 +99,19 @@ internal class CheckoutControllerStateHolderTest {
 
             assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
             expectNoEvents()
+        }
+    }
 
-            stateHolder.finishSavedSelection()
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    @Test
+    fun `session does not emit when saved selection becomes pending`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        stateHolder.session.test {
+            assertThat(awaitItem()).isNotNull()
+
+            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
+
+            expectNoEvents()
         }
     }
 
