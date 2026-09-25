@@ -590,10 +590,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onPaymentMethodMessagePromotionsFetchBegin() {
+    override fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String) {
         durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
         fireEvent(
-            PaymentSheetEvent.PaymentMethodMessaging.Fetched()
+            event = PaymentSheetEvent.PaymentMethodMessaging.Fetched(),
+            publishableKey = publishableKey,
         )
     }
 
