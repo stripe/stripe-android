@@ -136,25 +136,26 @@ class CryptoApiRepositoryTest {
             """
                 {
                     "requirements": {
-                        "entries": [
-                            {
-                                "description": "proof_of_address",
-                                "requested_by": "swapped",
-                                "awaiting_action_from": "user",
-                                "errors": [],
-                                "document": {
-                                    "accepted_subtypes": [
-                                        {
-                                            "id": "utility_bill",
-                                            "label": "Utility bill"
-                                        }
-                                    ],
-                                    "accepted_formats": ["pdf", "jpeg", "png"],
-                                    "min_documents": 1,
-                                    "instructions": []
-                                }
+                        "proof_of_address": {
+                            "requested_by": "swapped",
+                            "awaiting_action_from": "user",
+                            "errors": [],
+                            "document": {
+                                "accepted_subtypes": [
+                                    {
+                                        "id": "utility_bill",
+                                        "label": "Utility bill",
+                                        "description": "Recent utility bill"
+                                    }
+                                ],
+                                "accepted_formats": ["pdf", "jpeg", "png"],
+                                "min_document_types": 1,
+                                "max_document_types": 2,
+                                "max_file_size_bytes": 5000000,
+                                "file_requirements": "PDF, JPEG, or PNG, up to 5 MB per file.",
+                                "instructions": []
                             }
-                        ]
+                        }
                     }
                 }
             """.trimIndent(),
@@ -172,8 +173,7 @@ class CryptoApiRepositoryTest {
         assertThat(apiRequest.url).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
         assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
         val response = result.getOrThrow()
-        assertThat(response.requirements.entries.single().description)
-            .isEqualTo("proof_of_address")
+        assertThat(response.requirements.entries).containsKey("proof_of_address")
     }
 
     @Test

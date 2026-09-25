@@ -45,14 +45,12 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     @Test
-    fun `document questionnaire is normalized`() = runScenario(
+    fun `requirement questionnaire is normalized without a document`() = runScenario(
         entries = listOf(
             requirement(
                 description = "source_of_funds",
                 awaitingActionFrom = "user",
-                document = document(
-                    questionnaire = questionnaire(questionId = "document_question"),
-                ),
+                questionnaire = questionnaire(questionId = "document_question"),
             )
         )
     ) {
@@ -71,7 +69,7 @@ class AdditionalKycRequirementsResponseTest {
                 errors = listOf(
                     AdditionalKycRequirementErrorResponse(
                         code = "document_unreadable",
-                        message = "Raw verification detail",
+                        description = "Raw verification detail",
                     )
                 ),
             )
@@ -84,11 +82,11 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     private fun runScenario(
-        entries: List<AdditionalKycRequirementResponse> = emptyList(),
+        entries: List<Pair<String, AdditionalKycRequirementResponse>> = emptyList(),
         block: Scenario.() -> Unit,
     ) {
         Scenario(
-            requirements = AdditionalKycRequirementsResponse(entries).toAdditionalKycRequirements(),
+            requirements = AdditionalKycRequirementsResponse(entries.toMap()).toAdditionalKycRequirements(),
         ).block()
     }
 
@@ -100,29 +98,15 @@ class AdditionalKycRequirementsResponseTest {
         fun requirement(
             description: String,
             awaitingActionFrom: String,
-            document: AdditionalKycDocumentRequirementResponse? = null,
+            questionnaire: AdditionalKycQuestionnaireResponse? = null,
             errors: List<AdditionalKycRequirementErrorResponse> = emptyList(),
-        ): AdditionalKycRequirementResponse {
-            return AdditionalKycRequirementResponse(
-                description = description,
+        ): Pair<String, AdditionalKycRequirementResponse> {
+            return description to AdditionalKycRequirementResponse(
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
                 errors = errors,
-                document = document,
-            )
-        }
-
-        fun document(
-            questionnaire: AdditionalKycQuestionnaireResponse?,
-        ): AdditionalKycDocumentRequirementResponse {
-            return AdditionalKycDocumentRequirementResponse(
-                acceptedSubtypes = emptyList(),
-                acceptedFormats = emptyList(),
-                minDocuments = 1,
-                instructions = emptyList(),
-                additionalRequirements = AdditionalKycCollectionRequirementsResponse(
-                    questionnaire = questionnaire,
-                ),
+                document = null,
+                additionalRequirements = AdditionalKycCollectionRequirementsResponse(questionnaire),
             )
         }
 
