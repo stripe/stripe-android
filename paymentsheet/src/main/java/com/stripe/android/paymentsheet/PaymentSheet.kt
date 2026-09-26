@@ -14,6 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
@@ -57,13 +63,23 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
  */
 class PaymentSheet internal constructor(
-    private val paymentSheetLauncher: PaymentSheetLauncher
+    private val paymentSheetLauncher: PaymentSheetLauncher,
+    private val storeViewModel: StoreViewModel
 ) {
+    private constructor(
+        storeViewModel: StoreViewModel,
+        launcherFactory: (String) -> PaymentSheetLauncher,
+    ) : this(
+        paymentSheetLauncher = launcherFactory(storeViewModel.paymentElementCallbackIdentifier),
+        storeViewModel = storeViewModel,
+    )
+
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
@@ -78,7 +94,17 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(activity, callback)
+        storeViewModel = ViewModelProvider.create(
+            owner = activity,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                activity = activity,
+                callback = callback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     )
 
     /**
@@ -102,9 +128,20 @@ class PaymentSheet internal constructor(
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         callback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(activity, callback)
+        storeViewModel = ViewModelProvider.create(
+            owner = activity,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                activity = activity,
+                callback = callback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     ) {
         setPaymentSheetCallbacks(
+            storeViewModel.paymentElementCallbackIdentifier,
             PaymentElementCallbacks.Builder()
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                 .build()
@@ -133,9 +170,20 @@ class PaymentSheet internal constructor(
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+        storeViewModel = ViewModelProvider.create(
+            owner = activity,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                activity = activity,
+                callback = paymentResultCallback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     ) {
         setPaymentSheetCallbacks(
+            storeViewModel.paymentElementCallbackIdentifier,
             PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .build()
@@ -168,9 +216,20 @@ class PaymentSheet internal constructor(
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+        storeViewModel = ViewModelProvider.create(
+            owner = activity,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                activity = activity,
+                callback = paymentResultCallback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     ) {
         setPaymentSheetCallbacks(
+            storeViewModel.paymentElementCallbackIdentifier,
             PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
@@ -192,7 +251,17 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, callback)
+        storeViewModel = ViewModelProvider.create(
+            owner = fragment,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                fragment = fragment,
+                callback = callback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     )
 
     /**
@@ -216,9 +285,20 @@ class PaymentSheet internal constructor(
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         callback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, callback)
+        storeViewModel = ViewModelProvider.create(
+            owner = fragment,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                fragment = fragment,
+                callback = callback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     ) {
         setPaymentSheetCallbacks(
+            storeViewModel.paymentElementCallbackIdentifier,
             PaymentElementCallbacks.Builder()
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                 .build()
@@ -247,9 +327,20 @@ class PaymentSheet internal constructor(
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+        storeViewModel = ViewModelProvider.create(
+            owner = fragment,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                fragment = fragment,
+                callback = paymentResultCallback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     ) {
         setPaymentSheetCallbacks(
+            storeViewModel.paymentElementCallbackIdentifier,
             PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .build()
@@ -282,9 +373,20 @@ class PaymentSheet internal constructor(
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+        storeViewModel = ViewModelProvider.create(
+            owner = fragment,
+            factory = StoreViewModel.Factory
+        )[StoreViewModel::class],
+        launcherFactory = { id ->
+            DefaultPaymentSheetLauncher(
+                fragment = fragment,
+                callback = paymentResultCallback,
+                paymentElementCallbackIdentifier = id,
+            )
+        }
     ) {
         setPaymentSheetCallbacks(
+            storeViewModel.paymentElementCallbackIdentifier,
             PaymentElementCallbacks.Builder()
                 .createIntentCallback(createIntentCallback)
                 .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
@@ -374,15 +476,38 @@ class PaymentSheet internal constructor(
          * @param activity The Activity that is presenting [PaymentSheet].
          */
         fun build(activity: ComponentActivity): PaymentSheet {
-            initializeCallbacks()
-            return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
+            val storeViewModel = ViewModelProvider.create(
+                owner = activity,
+                factory = StoreViewModel.Factory
+            )[StoreViewModel::class]
+            initializeCallbacks(storeViewModel.paymentElementCallbackIdentifier)
+            return PaymentSheet(
+                paymentSheetLauncher = DefaultPaymentSheetLauncher(
+                    activity = activity,
+                    callback = resultCallback,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
+                ),
+                storeViewModel = storeViewModel,
+            )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
-            initializeCallbacks()
-            return PaymentSheet(DefaultPaymentSheetLauncher(activity, signal, resultCallback))
+            val storeViewModel = ViewModelProvider.create(
+                owner = activity,
+                factory = StoreViewModel.Factory
+            )[StoreViewModel::class]
+            initializeCallbacks(storeViewModel.paymentElementCallbackIdentifier)
+            return PaymentSheet(
+                paymentSheetLauncher = DefaultPaymentSheetLauncher(
+                    activity = activity,
+                    signal = signal,
+                    callback = resultCallback,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
+                ),
+                storeViewModel = storeViewModel,
+            )
         }
 
         /**
@@ -391,8 +516,19 @@ class PaymentSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          */
         fun build(fragment: Fragment): PaymentSheet {
-            initializeCallbacks()
-            return PaymentSheet(DefaultPaymentSheetLauncher(fragment, resultCallback))
+            val storeViewModel = ViewModelProvider.create(
+                owner = fragment,
+                factory = StoreViewModel.Factory
+            )[StoreViewModel::class]
+            initializeCallbacks(storeViewModel.paymentElementCallbackIdentifier)
+            return PaymentSheet(
+                paymentSheetLauncher = DefaultPaymentSheetLauncher(
+                    fragment = fragment,
+                    callback = resultCallback,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
+                ),
+                storeViewModel = storeViewModel,
+            )
         }
 
         /**
@@ -409,8 +545,8 @@ class PaymentSheet internal constructor(
             )
         }
 
-        private fun initializeCallbacks() {
-            setPaymentSheetCallbacks(callbacksBuilder.build())
+        private fun initializeCallbacks(callbackIdentifier: String) {
+            setPaymentSheetCallbacks(callbackIdentifier, callbacksBuilder.build())
         }
     }
 
@@ -4442,9 +4578,30 @@ class PaymentSheet internal constructor(
         }
     }
 
+    internal class StoreViewModel(
+        private val savedStateHandle: SavedStateHandle
+    ) : ViewModel() {
+        val paymentElementCallbackIdentifier: String
+            get() {
+                val storeId = savedStateHandle.get<String>(ID_KEY) ?: UUID.randomUUID().toString()
+                savedStateHandle[ID_KEY] = storeId
+                return storeId
+            }
+
+        companion object {
+            private const val ID_KEY = "PAYMENTSHEET_ID"
+
+            val Factory = viewModelFactory {
+                initializer {
+                    StoreViewModel(createSavedStateHandle())
+                }
+            }
+        }
+    }
+
     companion object {
-        private fun setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
-            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
+        private fun setPaymentSheetCallbacks(callbackIdentifier: String, callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences[callbackIdentifier] = callbacks
         }
 
         private fun setFlowControllerCallbacks(callbacks: PaymentElementCallbacks) {
