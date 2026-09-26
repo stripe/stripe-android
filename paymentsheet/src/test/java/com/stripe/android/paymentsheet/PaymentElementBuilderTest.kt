@@ -382,7 +382,7 @@ internal class PaymentElementBuilderTest {
         return ViewModelProvider.create(
             owner = owner,
             factory = PaymentSheet.StoreViewModel.Factory,
-        )[PaymentSheet.StoreViewModel::class].id
+        )[PaymentSheet.StoreViewModel::class].paymentElementCallbackIdentifier
     }
 
     private fun testWithActivity(test: (ComponentActivity) -> Unit) = runTest {

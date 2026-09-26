@@ -125,7 +125,7 @@ internal fun internalRememberPaymentSheet(
 ): PaymentSheet {
     val viewModel = viewModel<PaymentSheet.StoreViewModel>(factory = PaymentSheet.StoreViewModel.Factory)
 
-    UpdateCallbacks(viewModel.id, callbacks)
+    UpdateCallbacks(viewModel.paymentElementCallbackIdentifier, callbacks)
 
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
@@ -148,7 +148,7 @@ internal fun internalRememberPaymentSheet(
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
             callback = paymentResultCallback,
-            paymentElementCallbackIdentifier = viewModel.id,
+            paymentElementCallbackIdentifier = viewModel.paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         )
         PaymentSheet(
