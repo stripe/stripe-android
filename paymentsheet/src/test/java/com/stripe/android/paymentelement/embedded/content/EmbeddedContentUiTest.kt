@@ -169,32 +169,9 @@ internal class EmbeddedContentUiTest {
         }
     }
 
-    @Test
-    fun `pending saved payment method selection marks interactor as processing`() = runScenario {
-        val loadedState = EmbeddedContentHelperStateFactory.create()
-        val interactor = verticalLayoutInteractorFactory.create(
-            paymentMethodMetadata = loadedState.paymentMethodMetadata,
-            configuration = loadedState.configuration,
-            walletsState = stateFlowOf(null),
-            isImmediateAction = false,
-            embeddedViewDisplaysMandateText = loadedState.embeddedViewDisplaysMandateText,
-        )
-
-        interactor.state.test {
-            assertThat(awaitItem().isProcessing).isFalse()
-
-            selectionHolder.state = CheckoutControllerStateFactory.create(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-            )
-
-            assertThat(awaitItem().isProcessing).isTrue()
-        }
-    }
-
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val selectionHolder: CheckoutControllerStateHolder,
-        val verticalLayoutInteractorFactory: EmbeddedPaymentMethodVerticalLayoutInteractorFactory,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 
@@ -293,7 +270,6 @@ internal class EmbeddedContentUiTest {
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             selectionHolder = selectionHolder,
-            verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
             state = state,
         ).block()
     }

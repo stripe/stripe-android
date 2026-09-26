@@ -84,11 +84,8 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             processing = combineAsStateFlow(
                 hostProcessing,
                 confirmationHandler.state,
-                savedPaymentMethodSelectionState,
-            ) { isHostProcessing, confirmationState, savedPaymentMethodSelectionState ->
-                isHostProcessing ||
-                    confirmationState is ConfirmationHandler.State.Confirming ||
-                    savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending
+            ) { isHostProcessing, confirmationState ->
+                isHostProcessing || confirmationState is ConfirmationHandler.State.Confirming
             },
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = selectionHolder.temporarySelection,
