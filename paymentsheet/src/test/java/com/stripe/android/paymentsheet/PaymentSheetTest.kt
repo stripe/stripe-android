@@ -113,7 +113,7 @@ internal class PaymentSheetTest {
         val callbackIdentifier = ViewModelProvider.create(
             owner = owner,
             factory = PaymentSheet.StoreViewModel.Factory,
-        )[PaymentSheet.StoreViewModel::class].id
+        )[PaymentSheet.StoreViewModel::class].paymentElementCallbackIdentifier
         controller.start().resume()
 
         return try {
