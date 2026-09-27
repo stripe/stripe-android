@@ -758,7 +758,9 @@ internal class CheckoutControllerTest {
                 assertThat(isUpdatingTurbine.awaitItem()).isTrue()
                 assertThat(committedState()).isEqualTo(
                     before.copy(
-                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                            selection.paymentMethod.id,
+                        ),
                     )
                 )
 
@@ -873,14 +875,18 @@ internal class CheckoutControllerTest {
 
                 assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
                 assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                    .isEqualTo(
+                        SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+                    )
 
                 val emailUpdate = async { controller.updateEmail("checkout@example.com") }
                 testScheduler.advanceUntilIdle()
 
                 assertThat(emailUpdate.isCompleted).isFalse()
                 assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                    .isEqualTo(
+                        SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+                    )
 
                 releaseResponse.countDown()
 
@@ -889,7 +895,9 @@ internal class CheckoutControllerTest {
                 assertThat(committedState().savedPaymentMethodSelectionState)
                     .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                 assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isNotEqualTo(SavedPaymentMethodSelectionState.Pending)
+                    .isNotEqualTo(
+                        SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+                    )
 
                 val retryRequestReceived = CountDownLatch(1)
                 networkRule.savedPaymentMethodTaxUpdate { response ->
@@ -1010,7 +1018,9 @@ internal class CheckoutControllerTest {
                 }
 
                 handler.select(selection, true)
-                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                assertThat(awaitItem()).isEqualTo(
+                    SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+                )
                 try {
                     testScheduler.advanceUntilIdle()
                     assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
@@ -1041,7 +1051,9 @@ internal class CheckoutControllerTest {
         assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
         handler.select(selection, true)
-        assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
+        assertThat(awaitItem()).isEqualTo(
+            SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+        )
         val failure = withTurbineTimeout(10.seconds) { awaitItem() }
         assertThat(failure).isEqualTo(
             SavedPaymentMethodSelectionState.Failed(

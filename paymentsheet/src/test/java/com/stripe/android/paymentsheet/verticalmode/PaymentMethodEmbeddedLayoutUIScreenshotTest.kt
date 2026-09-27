@@ -148,7 +148,9 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
-                    selectionState = SavedPaymentMethodSelectionState.Pending,
+                    selectionState = SavedPaymentMethodSelectionState.Pending(
+                        savedPaymentMethod.paymentMethod.id,
+                    ),
                 ),
                 savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,

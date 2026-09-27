@@ -40,7 +40,9 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
     @Test
     fun `pending row is disabled and replaces its icon with a spinner`() {
         val scenario = runScenario(
-            selectionState = SavedPaymentMethodSelectionState.Pending,
+            selectionState = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            ),
             isEnabled = false,
         )
 

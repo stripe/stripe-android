@@ -94,7 +94,9 @@ internal class CheckoutControllerStateHolderTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = committedState().copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                "pm_restored",
+            ),
         )
 
         val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
@@ -154,12 +156,16 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `setSelection returns a pending saved selection to idle`() = testScenario {
         stateHolder.state = committedState().copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                "pm_pending",
+            ),
         )
 
         stateHolder.stateFlow.test {
             assertThat(awaitItem()?.savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                .isEqualTo(
+                    SavedPaymentMethodSelectionState.Pending("pm_pending"),
+                )
 
             stateHolder.setSelection(PaymentSelection.GooglePay)
 

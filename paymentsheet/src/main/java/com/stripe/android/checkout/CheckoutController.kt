@@ -225,7 +225,9 @@ class CheckoutController @Inject internal constructor(
             additionalStateMutations = { withSelection(selection) },
         ) {
             stateHolder.state = copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                    selection.paymentMethod.id,
+                ),
             )
             val address = selection.billingDetails?.address?.toCheckoutAddress()
             if (address == null) {

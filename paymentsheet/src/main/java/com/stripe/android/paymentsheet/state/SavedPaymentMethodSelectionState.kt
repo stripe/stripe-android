@@ -9,7 +9,7 @@ internal sealed class SavedPaymentMethodSelectionState : Parcelable {
     data object Idle : SavedPaymentMethodSelectionState()
 
     @Parcelize
-    data object Pending : SavedPaymentMethodSelectionState()
+    data class Pending(val paymentMethodId: String) : SavedPaymentMethodSelectionState()
 
     @Parcelize
     data class Failed(val error: ResolvableString) : SavedPaymentMethodSelectionState()

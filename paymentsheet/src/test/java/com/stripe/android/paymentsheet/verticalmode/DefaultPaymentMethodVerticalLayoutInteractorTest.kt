@@ -101,10 +101,31 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState).isEqualTo(failed)
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            )
 
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState).isEqualTo(
+                SavedPaymentMethodSelectionState.Pending(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
+            )
+        }
+    }
+
+    @Test
+    fun state_doesNotMarkDisplayedSavedPaymentMethodPendingForDifferentId() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
+        interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Pending)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                "pm_other",
+            )
+
+            expectNoEvents()
+            assertThat(interactor.state.value.displayedSavedPaymentMethod?.selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
     }
 
@@ -113,7 +134,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                "pm_missing",
+            )
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
