@@ -1,11 +1,11 @@
-package com.stripe.android.paymentelement.embedded.sheet
+package com.stripe.android.paymentelement.embedded.manage
 
 import app.cash.turbine.Turbine
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal class FakeSheetSavedPaymentMethodSelectionCoordinator(
+internal class FakeEmbeddedSavedPaymentMethodSelector(
     var result: Result<Unit>,
-) : SheetSavedPaymentMethodSelectionCoordinator {
+) : EmbeddedSavedPaymentMethodSelector {
     val selectCalls = Turbine<PaymentSelection.Saved>()
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
@@ -13,7 +13,7 @@ internal class FakeSheetSavedPaymentMethodSelectionCoordinator(
         return result
     }
 
-    fun validate() {
+    fun ensureAllEventsConsumed() {
         selectCalls.ensureAllEventsConsumed()
     }
 }

@@ -8,7 +8,6 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -19,10 +18,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -36,31 +32,27 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
-internal class DefaultSheetSavedPaymentMethodSelectionCoordinatorTest {
+internal class DefaultSheetSavedPaymentMethodSelectorTest {
 
     @get:Rule
     val networkRule = NetworkRule()
 
     @Test
-    fun `selection without tax update sets selection and emits complete result`() = runScenario(
+    fun `selection without tax update clears prior response and commits selection`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         initialSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT),
         selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        initialResponse = CheckoutSessionResponseFactory.create(id = "previous_response"),
     ) {
-        val result = coordinator.select(selection)
+        val result = selector.select(selection)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
-
-        val complete = stateHolder.resultTurbine.awaitItem() as EmbeddedActivityResult.Complete
-        assertThat(complete.selection).isEqualTo(selection)
-        assertThat(complete.checkoutSessionResponse).isNull()
-        assertThat(complete.shouldInvokeSelectionCallback).isTrue()
-        assertThat(complete.launchMode).isEqualTo(LAUNCH_MODE)
+        assertThat(responseHolder.response).isNull()
     }
 
     @Test
-    fun `successful tax update emits refreshed response`() {
+    fun `successful tax update stores refreshed response and commits selection`() {
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -69,22 +61,18 @@ internal class DefaultSheetSavedPaymentMethodSelectionCoordinatorTest {
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
             initialSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT),
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            initialResponse = null,
         ) {
-            val result = coordinator.select(selection)
+            val result = selector.select(selection)
 
             assertThat(result.isSuccess).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
-
-            val complete = stateHolder.resultTurbine.awaitItem() as EmbeddedActivityResult.Complete
-            assertThat(complete.selection).isEqualTo(selection)
-            assertThat(complete.checkoutSessionResponse?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(complete.shouldInvokeSelectionCallback).isTrue()
-            assertThat(complete.launchMode).isEqualTo(LAUNCH_MODE)
+            assertThat(responseHolder.response?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
     @Test
-    fun `failed tax update leaves selection and result unchanged`() {
+    fun `failed tax update leaves selection and stored response unchanged`() {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Tax region update failed"}}""")
@@ -92,16 +80,18 @@ internal class DefaultSheetSavedPaymentMethodSelectionCoordinatorTest {
 
         val initialSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val initialResponse = CheckoutSessionResponseFactory.create(id = "previous_response")
         runScenario(
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
             initialSelection = initialSelection,
             selection = selection,
+            initialResponse = initialResponse,
         ) {
-            val result = coordinator.select(selection)
+            val result = selector.select(selection)
 
             assertThat(result.isFailure).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(initialSelection)
-            stateHolder.resultTurbine.expectNoEvents()
+            assertThat(responseHolder.response).isEqualTo(initialResponse)
         }
     }
 
@@ -109,37 +99,30 @@ internal class DefaultSheetSavedPaymentMethodSelectionCoordinatorTest {
         paymentMethodMetadata: PaymentMethodMetadata,
         initialSelection: PaymentSelection?,
         selection: PaymentSelection.Saved,
+        initialResponse: CheckoutSessionResponse?,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(initialSelection)
         }
-        val customerStateHolder = FakeCustomerStateHolder()
-        val stateHolder = FakeSheetActivityStateHolder()
-        val coordinator = DefaultSheetSavedPaymentMethodSelectionCoordinator(
+        val responseHolder = SheetCheckoutSessionResponseHolder(SavedStateHandle()).apply {
+            set(initialResponse)
+        }
+        val selector = DefaultSheetSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(
                 taxRegionUpdater = checkoutSessionTaxRegionUpdater(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
-            stateHolder = stateHolder,
             selectionHolder = selectionHolder,
-            customerStateHolder = customerStateHolder,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            launchMode = LAUNCH_MODE,
+            responseHolder = responseHolder,
         )
 
         Scenario(
-            coordinator = coordinator,
-            stateHolder = stateHolder,
+            selector = selector,
             selectionHolder = selectionHolder,
-            customerStateHolder = customerStateHolder,
+            responseHolder = responseHolder,
             selection = selection,
         ).block()
-
-        stateHolder.updateProcessingTurbine.expectNoEvents()
-        stateHolder.updateErrorTurbine.expectNoEvents()
-        stateHolder.validate()
-        customerStateHolder.validate()
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
@@ -162,15 +145,13 @@ internal class DefaultSheetSavedPaymentMethodSelectionCoordinatorTest {
     }
 
     private data class Scenario(
-        val coordinator: DefaultSheetSavedPaymentMethodSelectionCoordinator,
-        val stateHolder: FakeSheetActivityStateHolder,
+        val selector: DefaultSheetSavedPaymentMethodSelector,
         val selectionHolder: EmbeddedSelectionHolder,
-        val customerStateHolder: FakeCustomerStateHolder,
+        val responseHolder: SheetCheckoutSessionResponseHolder,
         val selection: PaymentSelection.Saved,
     )
 
     private companion object {
-        val LAUNCH_MODE = EmbeddedLaunchMode.Manage
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = "cs_test_123",

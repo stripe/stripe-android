@@ -353,7 +353,7 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `immediate selection navigates back without entering pending`() {
+    fun `synchronous selector navigates back without entering pending`() {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val navigateBackCalls = Turbine<Boolean>()
         runScenario(
@@ -361,26 +361,29 @@ class DefaultManageScreenInteractorTest {
             currentSelection = null,
             handleBackPressed = navigateBackCalls::add,
         ) {
-            val displayable = interactor.state.value.paymentMethods.single()
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+            interactor.state.test {
+                val displayable = awaitItem().paymentMethods.single()
+                interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
 
-            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
-            assertThat(navigateBackCalls.awaitItem()).isTrue()
-            assertThat(interactor.state.value.isProcessing).isFalse()
-            assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isFalse()
+                expectNoEvents()
+                assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
+                assertThat(navigateBackCalls.awaitItem()).isTrue()
+                assertThat(interactor.state.value.isProcessing).isFalse()
+                assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isFalse()
+            }
         }
         navigateBackCalls.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `coordinated selection sets pending before suspend and ignores duplicate taps`() {
+    fun `suspending selector sets pending before suspension and ignores duplicate taps`() {
         val sourcePaymentMethods = PaymentMethodFixtures.createCards(2)
         val updateResult = CompletableDeferred<Result<Unit>>()
         val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
         val navigateBackCalls = Turbine<Boolean>()
         val failure = IllegalStateException("tax update failed")
 
-        runCoordinatedScenario(
+        runSelectorScenario(
             initialPaymentMethods = sourcePaymentMethods,
             currentSelection = null,
             selectPaymentMethod = { selected ->
@@ -425,14 +428,14 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `coordinated selection can retry after failure`() {
+    fun `selector can retry after failure and navigates back on success`() {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
         val updateResults = Turbine<CompletableDeferred<Result<Unit>>>()
         val failure = IllegalStateException("tax update failed")
         val navigateBackCalls = Turbine<Boolean>()
 
-        runCoordinatedScenario(
+        runSelectorScenario(
             initialPaymentMethods = listOf(paymentMethod),
             currentSelection = null,
             selectPaymentMethod = { selected ->
@@ -466,6 +469,7 @@ class DefaultManageScreenInteractorTest {
 
                 assertThat(interactor.state.value.isProcessing).isTrue()
                 assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
+                assertThat(navigateBackCalls.awaitItem()).isTrue()
                 navigateBackCalls.expectNoEvents()
             }
         }
@@ -475,13 +479,13 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `coordinated success stays pending without navigating back`() {
+    fun `suspending selector navigates back once after success`() {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val updateResult = CompletableDeferred<Result<Unit>>()
         val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
         val navigateBackCalls = Turbine<Boolean>()
 
-        runCoordinatedScenario(
+        runSelectorScenario(
             initialPaymentMethods = listOf(paymentMethod),
             currentSelection = null,
             selectPaymentMethod = { selected ->
@@ -505,6 +509,7 @@ class DefaultManageScreenInteractorTest {
 
                 assertThat(interactor.state.value.isProcessing).isTrue()
                 assertThat(interactor.state.value.selectionError).isNull()
+                assertThat(navigateBackCalls.awaitItem()).isTrue()
                 navigateBackCalls.expectNoEvents()
             }
         }
@@ -513,14 +518,14 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `auto select does not repeat after coordinated failure`() {
+    fun `auto select does not repeat after selector failure`() {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val updateResult = CompletableDeferred<Result<Unit>>()
         val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
         val failure = IllegalStateException("tax update failed")
         val navigateBackCalls = Turbine<Boolean>()
 
-        runCoordinatedScenario(
+        runSelectorScenario(
             initialPaymentMethods = listOf(paymentMethod),
             currentSelection = null,
             selectPaymentMethod = { selected ->
@@ -554,7 +559,7 @@ class DefaultManageScreenInteractorTest {
         val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
         val navigateBackCalls = Turbine<Boolean>()
 
-        runCoordinatedScenario(
+        runSelectorScenario(
             initialPaymentMethods = listOf(paymentMethod),
             currentSelection = null,
             selectPaymentMethod = { selected ->
@@ -573,6 +578,7 @@ class DefaultManageScreenInteractorTest {
                 assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
                 updateResult.complete(Result.success(Unit))
                 assertThat(interactor.state.value.isProcessing).isTrue()
+                assertThat(navigateBackCalls.awaitItem()).isTrue()
                 navigateBackCalls.expectNoEvents()
                 updateCalls.expectNoEvents()
             }
@@ -592,49 +598,51 @@ class DefaultManageScreenInteractorTest {
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
-        runScenarioWithSelectionBehavior(
+        runScenarioWithSelector(
             initialPaymentMethods = initialPaymentMethods,
             currentSelection = currentSelection,
             isLiveMode = isLiveMode,
             isEditing = isEditing,
             configuredLinkBrand = configuredLinkBrand,
             handleBackPressed = handleBackPressed,
-            selectionBehaviorFactory = { calls ->
-                SelectionBehavior.Immediate(onSelectPaymentMethod = calls::add)
+            selectorFactory = { calls ->
+                { paymentMethod ->
+                    calls.add(paymentMethod)
+                    Result.success(Unit)
+                }
             },
             testBlock = testBlock,
         )
     }
 
-    private fun runCoordinatedScenario(
+    private fun runSelectorScenario(
         initialPaymentMethods: List<PaymentMethod>,
         currentSelection: PaymentSelection?,
         selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
         handleBackPressed: (withDelay: Boolean) -> Unit,
         testBlock: suspend TestParams.() -> Unit,
     ) {
-        runScenarioWithSelectionBehavior(
+        runScenarioWithSelector(
             initialPaymentMethods = initialPaymentMethods,
             currentSelection = currentSelection,
             isLiveMode = false,
             isEditing = false,
             configuredLinkBrand = LinkBrand.Link,
             handleBackPressed = handleBackPressed,
-            selectionBehaviorFactory = {
-                SelectionBehavior.Coordinated(selectPaymentMethod = selectPaymentMethod)
-            },
+            selectorFactory = { selectPaymentMethod },
             testBlock = testBlock,
         )
     }
 
-    private fun runScenarioWithSelectionBehavior(
+    private fun runScenarioWithSelector(
         initialPaymentMethods: List<PaymentMethod>,
         currentSelection: PaymentSelection?,
         isLiveMode: Boolean,
         isEditing: Boolean,
         configuredLinkBrand: LinkBrand,
         handleBackPressed: (withDelay: Boolean) -> Unit,
-        selectionBehaviorFactory: (Turbine<DisplayableSavedPaymentMethod>) -> SelectionBehavior,
+        selectorFactory: (Turbine<DisplayableSavedPaymentMethod>) ->
+            suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
@@ -662,7 +670,7 @@ class DefaultManageScreenInteractorTest {
             toggleEdit = {
                 toggleEditTurbine.add(Unit)
             },
-            selectionBehavior = selectionBehaviorFactory(onSelectPaymentMethodTurbine),
+            selectPaymentMethod = selectorFactory(onSelectPaymentMethodTurbine),
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,

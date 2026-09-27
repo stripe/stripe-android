@@ -12,11 +12,11 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -46,7 +46,7 @@ import javax.inject.Singleton
 @Singleton
 internal interface EmbeddedSheetComponent {
     val viewModel: EmbeddedSheetViewModel
-    val selectionHolder: EmbeddedSelectionHolder
+    val selectionHolder: DefaultEmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
     val linkAccountHolder: LinkAccountHolder
 

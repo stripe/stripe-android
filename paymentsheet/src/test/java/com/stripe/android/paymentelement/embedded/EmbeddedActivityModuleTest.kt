@@ -4,22 +4,22 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.embedded.sheet.FakeSheetSavedPaymentMethodSelectionCoordinator
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelector
+import com.stripe.android.paymentelement.embedded.sheet.SheetCheckoutSessionResponseHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
+import javax.inject.Provider
 
+@OptIn(CheckoutSessionPreview::class)
 internal class EmbeddedActivityModuleTest {
 
     @Test
@@ -45,28 +45,28 @@ internal class EmbeddedActivityModuleTest {
         }
 
     @Test
-    fun `Manage launch coordinates saved selection and reports selected option`() =
-        runSelectionBehaviorScenario(EmbeddedLaunchMode.Manage) {
-            val behavior = selectionBehavior as SelectionBehavior.Coordinated
-            val result = behavior.selectPaymentMethod(displayableSavedPaymentMethod)
+    fun `Manage launch provides tax updating selector`() {
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val taxUpdatingSelector = createTaxUpdatingSelector(selectionHolder)
 
-            assertThat(result.isSuccess).isTrue()
-            assertThat(selectionCoordinator.selectCalls.awaitItem()).isEqualTo(selection)
-            verify(eventReporter).onSelectPaymentOption(selection)
-            assertThat(selectionHolder.selection.value).isNull()
-        }
+        val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
+            launchMode = EmbeddedLaunchMode.Manage,
+            selectionHolder = selectionHolder,
+            sheetSelectorProvider = Provider { taxUpdatingSelector },
+        )
 
-    @Test
-    fun `PaymentOptions launch selects immediately and reports selected option`() =
-        runSelectionBehaviorScenario(EmbeddedLaunchMode.PaymentOptions) {
-            selectImmediately()
-        }
+        assertThat(selector).isSameInstanceAs(taxUpdatingSelector)
+    }
 
     @Test
-    fun `Form launch selects immediately and reports selected option`() =
-        runSelectionBehaviorScenario(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card")) {
-            selectImmediately()
-        }
+    fun `PaymentOptions launch commits selection without creating tax selector`() = runTest {
+        assertImmediateSelection(EmbeddedLaunchMode.PaymentOptions)
+    }
+
+    @Test
+    fun `Form launch commits selection without creating tax selector`() = runTest {
+        assertImmediateSelection(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+    }
 
     private fun runScenario(
         shouldUseAutocompleteProxyEndpoints: Boolean,
@@ -87,53 +87,35 @@ internal class EmbeddedActivityModuleTest {
         eventReporter.validate()
     }
 
-    private fun runSelectionBehaviorScenario(
-        launchMode: EmbeddedLaunchMode,
-        block: suspend SelectionScenario.() -> Unit,
-    ) = runTest {
+    private fun createTaxUpdatingSelector(
+        selectionHolder: DefaultEmbeddedSelectionHolder,
+    ): DefaultSheetSavedPaymentMethodSelector = DefaultSheetSavedPaymentMethodSelector(
+        taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ ->
+            error("Tax update is not invoked by this provider test")
+        },
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selectionHolder = selectionHolder,
+        responseHolder = SheetCheckoutSessionResponseHolder(SavedStateHandle()),
+    )
+
+    private suspend fun assertImmediateSelection(launchMode: EmbeddedLaunchMode) {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        val selectionCoordinator = FakeSheetSavedPaymentMethodSelectionCoordinator(Result.success(Unit))
-        val eventReporter = mock<EventReporter>()
-        val displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
-        val selectionBehavior = EmbeddedActivityModule.provideManageScreenSelectionBehavior(
+        val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
             launchMode = launchMode,
-            eventReporter = eventReporter,
             selectionHolder = selectionHolder,
-            selectionCoordinator = selectionCoordinator,
+            sheetSelectorProvider = Provider {
+                throw AssertionError("Non-Manage launch must not create the tax selector")
+            },
         )
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
-        SelectionScenario(
-            selectionBehavior = selectionBehavior,
-            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            selection = selection,
-            selectionHolder = selectionHolder,
-            selectionCoordinator = selectionCoordinator,
-            eventReporter = eventReporter,
-        ).block()
+        val result = selector.select(selection)
 
-        selectionCoordinator.validate()
-    }
-
-    private suspend fun SelectionScenario.selectImmediately() {
-        val behavior = selectionBehavior as SelectionBehavior.Immediate
-        behavior.onSelectPaymentMethod(displayableSavedPaymentMethod)
-
+        assertThat(result.isSuccess).isTrue()
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        verify(eventReporter).onSelectPaymentOption(selection)
-        selectionCoordinator.selectCalls.expectNoEvents()
     }
 
     private data class Scenario(
         val interactor: AutocompleteAddressInteractor,
-    )
-
-    private data class SelectionScenario(
-        val selectionBehavior: SelectionBehavior,
-        val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-        val selection: PaymentSelection.Saved,
-        val selectionHolder: DefaultEmbeddedSelectionHolder,
-        val selectionCoordinator: FakeSheetSavedPaymentMethodSelectionCoordinator,
-        val eventReporter: EventReporter,
     )
 }

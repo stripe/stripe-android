@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
@@ -34,7 +35,7 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConf
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
-import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelectionCoordinator
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
@@ -42,7 +43,6 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmatio
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
-import com.stripe.android.paymentelement.embedded.sheet.SheetSavedPaymentMethodSelectionCoordinator
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -54,12 +54,10 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -71,6 +69,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -134,11 +133,6 @@ internal interface EmbeddedActivityModule {
     ): SheetActivityContinueCoordinator
 
     @Binds
-    fun bindsSavedPaymentMethodSelectionCoordinator(
-        coordinator: DefaultSheetSavedPaymentMethodSelectionCoordinator
-    ): SheetSavedPaymentMethodSelectionCoordinator
-
-    @Binds
     fun bindsAddressLauncherEventReporter(
         eventReporter: DefaultAddressLauncherEventReporter
     ): AddressLauncherEventReporter
@@ -165,27 +159,17 @@ internal interface EmbeddedActivityModule {
         }
 
         @Provides
-        fun provideManageScreenSelectionBehavior(
+        fun provideEmbeddedSavedPaymentMethodSelector(
             launchMode: EmbeddedLaunchMode,
-            eventReporter: EventReporter,
             selectionHolder: EmbeddedSelectionHolder,
-            selectionCoordinator: SheetSavedPaymentMethodSelectionCoordinator,
-        ): SelectionBehavior = when (launchMode) {
-            is EmbeddedLaunchMode.Manage -> SelectionBehavior.Coordinated(
-                selectPaymentMethod = { displayableSavedPaymentMethod ->
-                    val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
-                    eventReporter.onSelectPaymentOption(selection)
-                    selectionCoordinator.select(selection)
-                },
-            )
+            sheetSelectorProvider: Provider<DefaultSheetSavedPaymentMethodSelector>,
+        ): EmbeddedSavedPaymentMethodSelector = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> sheetSelectorProvider.get()
             EmbeddedLaunchMode.PaymentOptions,
-            is EmbeddedLaunchMode.Form -> SelectionBehavior.Immediate(
-                onSelectPaymentMethod = { displayableSavedPaymentMethod ->
-                    val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
-                    eventReporter.onSelectPaymentOption(selection)
-                    selectionHolder.setSelection(selection)
-                },
-            )
+            is EmbeddedLaunchMode.Form -> EmbeddedSavedPaymentMethodSelector { selection ->
+                selectionHolder.setSelection(selection)
+                Result.success(Unit)
+            }
         }
 
         @Provides

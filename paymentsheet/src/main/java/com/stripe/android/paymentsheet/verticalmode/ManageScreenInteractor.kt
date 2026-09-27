@@ -20,14 +20,15 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
@@ -106,16 +107,6 @@ internal interface ManageScreenInteractor {
     }
 }
 
-internal sealed interface SelectionBehavior {
-    data class Immediate(
-        val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    ) : SelectionBehavior
-
-    data class Coordinated(
-        val selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
-    ) : SelectionBehavior
-}
-
 internal class DefaultManageScreenInteractor(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
@@ -123,7 +114,7 @@ internal class DefaultManageScreenInteractor(
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val selectionBehavior: SelectionBehavior,
+    private val selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
@@ -181,9 +172,9 @@ internal class DefaultManageScreenInteractor(
 
     init {
         coroutineScope.launch {
-            state.map { currentState ->
-                if (!currentState.isEditing && !currentState.canEdit) {
-                    currentState.paymentMethods.singleOrNull()
+            combine(displayableSavedPaymentMethods, editing, canEdit) { paymentMethods, isEditing, canEdit ->
+                if (!isEditing && !canEdit) {
+                    paymentMethods.singleOrNull()
                 } else {
                     null
                 }
@@ -216,27 +207,26 @@ internal class DefaultManageScreenInteractor(
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        when (val behavior = selectionBehavior) {
-            is SelectionBehavior.Immediate -> {
-                behavior.onSelectPaymentMethod(paymentMethod)
-                safeNavigateBack(true)
-            }
-            is SelectionBehavior.Coordinated -> {
-                if (selectionState.value is SavedPaymentMethodSelectionState.Pending) {
-                    return
-                }
+        if (selectionState.value is SavedPaymentMethodSelectionState.Pending) {
+            return
+        }
 
-                selectionState.value = SavedPaymentMethodSelectionState.Pending(
-                    paymentMethod.paymentMethod.id,
-                )
-                coroutineScope.launch {
-                    behavior.selectPaymentMethod(paymentMethod).onFailure { error ->
-                        selectionState.value = SavedPaymentMethodSelectionState.Failed(
-                            error.stripeErrorMessage(),
-                        )
-                    }
-                }
-            }
+        val job = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            selectPaymentMethod(paymentMethod).fold(
+                onSuccess = {
+                    safeNavigateBack(true)
+                },
+                onFailure = { error ->
+                    selectionState.value = SavedPaymentMethodSelectionState.Failed(
+                        error.stripeErrorMessage(),
+                    )
+                },
+            )
+        }
+        if (job.isActive) {
+            selectionState.value = SavedPaymentMethodSelectionState.Pending(
+                paymentMethod.paymentMethod.id,
+            )
         }
     }
 
@@ -260,13 +250,12 @@ internal class DefaultManageScreenInteractor(
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                selectionBehavior = SelectionBehavior.Immediate(
-                    onSelectPaymentMethod = {
-                        val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                        viewModel.updateSelection(savedPmSelection)
-                        viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
-                    },
-                ),
+                selectPaymentMethod = {
+                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                    viewModel.updateSelection(savedPmSelection)
+                    viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
+                    Result.success(Unit)
+                },
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->
                     if (withDelay) {
