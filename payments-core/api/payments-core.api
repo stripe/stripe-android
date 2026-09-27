@@ -2140,6 +2140,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Konbini Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field KrCard Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Link Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field MbWay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field MobilePay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Multibanco Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field NaverPay Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3693,6 +3694,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionType : java/l
 	public static final field DisplayOxxoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayPayNowDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayPromptPayDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field MbWayAwaitAuthorization Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field RedirectToUrl Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field SwishRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field UseStripeSdk Lcom/stripe/android/model/StripeIntent$NextActionType;
