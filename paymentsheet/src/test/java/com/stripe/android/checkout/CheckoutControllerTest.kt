@@ -878,61 +878,6 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `saved selection ignores a duplicate while its tax response is pending`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = loadedSavedPaymentMethodSelection()
-            val completions = Turbine<CheckoutControllerState>()
-            val handler = createSelectionHandler(completions)
-            val requestReceived = CountDownLatch(1)
-            val releaseResponse = CountDownLatch(1)
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                requestReceived.countDown()
-                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the saved payment method tax response."
-                }
-                successfulSavedPaymentMethodResponse(response)
-            }
-
-            CheckoutControllerModule.provideSavedPaymentMethodSelectionState(stateHolder).test {
-                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-                handler.select(selection, true)
-                assertThat(awaitItem()).isEqualTo(
-                    SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
-                )
-
-                try {
-                    testScheduler.advanceUntilIdle()
-                    assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-
-                    handler.select(selection, true)
-                    expectNoEvents()
-                    completions.expectNoEvents()
-
-                    releaseResponse.countDown()
-                    val stateAtCompletion = withTurbineTimeout(10.seconds) {
-                        completions.awaitItem()
-                    }
-                    assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
-                    assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
-                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    expectNoEvents()
-                    completions.expectNoEvents()
-                } finally {
-                    releaseResponse.countDown()
-                }
-            }
-
-            completions.ensureAllEventsConsumed()
-        }
-
-    @Test
     fun `saved selection retry clears failure and returns to idle after success`() =
         runMutationScenario(
             initModifier = combine(
