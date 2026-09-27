@@ -21,7 +21,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.CardArtImage
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
@@ -92,7 +91,7 @@ private fun SavedPaymentMethodIcon(
             .height(iconHeight),
         contentAlignment = Alignment.Center,
     ) {
-        if (displayableSavedPaymentMethod.selectionState is SavedPaymentMethodSelectionState.Pending) {
+        if (displayableSavedPaymentMethod.isSelectionPending) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(iconHeight)
@@ -141,6 +140,8 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
                 last4 = "4242",
             )
         ),
+        isSelectionPending = false,
+        shouldShowDefaultBadge = false,
     )
 
     DefaultStripeTheme {
@@ -169,7 +170,6 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
 internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
     val defaultSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = "4242".resolvableString,
-        shouldShowDefaultBadge = true,
         paymentMethod = PaymentMethod(
             id = "002",
             created = null,
@@ -181,6 +181,8 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 last4 = "4444",
             )
         ),
+        isSelectionPending = false,
+        shouldShowDefaultBadge = true,
     )
 
     DefaultStripeTheme {

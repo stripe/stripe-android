@@ -350,6 +350,8 @@ private fun PreviewUpdatePaymentMethodUI() {
             type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(CardBrand.Visa)
         ),
+        isSelectionPending = false,
+        shouldShowDefaultBadge = false,
     )
     UpdatePaymentMethodUI(
         interactor = DefaultUpdatePaymentMethodInteractor(

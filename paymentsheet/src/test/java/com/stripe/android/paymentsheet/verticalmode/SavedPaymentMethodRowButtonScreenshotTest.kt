@@ -40,6 +40,8 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 last4 = "4242",
             )
         ),
+        isSelectionPending = false,
+        shouldShowDefaultBadge = false,
     )
 
     @Test
@@ -215,6 +217,8 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                     last4 = "4242",
                 )
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         )
 
         val savedVisaWithCardArt = createSavedVisaWithCardArt(
@@ -253,6 +257,8 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                         )
                     )
                 ),
+                isSelectionPending = false,
+                shouldShowDefaultBadge = false,
             )
         }
     }

@@ -39,6 +39,8 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = it.second.resolvableString,
                 paymentMethod = it.first,
+                isSelectionPending = false,
+                shouldShowDefaultBadge = false,
             )
         }
 
@@ -50,12 +52,16 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = it.second.resolvableString,
                 paymentMethod = it.first,
+                isSelectionPending = false,
+                shouldShowDefaultBadge = false,
             )
         }
 
     private val displayableBankAccount = DisplayableSavedPaymentMethod.create(
         displayName = US_BANK_ACCOUNT.usBankAccount!!.last4!!.resolvableString,
         paymentMethod = US_BANK_ACCOUNT,
+        isSelectionPending = false,
+        shouldShowDefaultBadge = false,
     )
 
     @Test

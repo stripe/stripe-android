@@ -30,6 +30,7 @@ internal object PaymentOptionsStateFactory {
                 DisplayableSavedPaymentMethod.create(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
+                    isSelectionPending = false,
                     shouldShowDefaultBadge = it.id == defaultPaymentMethodId,
                 ),
             )

@@ -710,6 +710,7 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
+            isSelectionPending = false,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }
