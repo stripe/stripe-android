@@ -32,6 +32,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
             StripeIntent.NextActionType.SwishRedirect -> SwishRedirectParser()
             StripeIntent.NextActionType.AwaitAuthorization -> AwaitAuthorizationParser()
+            StripeIntent.NextActionType.MbWayAwaitAuthorization -> MbWayAwaitAuthorizationParser()
             null -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -41,6 +42,13 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         ModelJsonParser<StripeIntent.NextActionData.AwaitAuthorization> {
         override fun parse(json: JSONObject): StripeIntent.NextActionData.AwaitAuthorization {
             return StripeIntent.NextActionData.AwaitAuthorization
+        }
+    }
+
+    private class MbWayAwaitAuthorizationParser :
+        ModelJsonParser<StripeIntent.NextActionData.MbWayAwaitAuthorization> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.MbWayAwaitAuthorization {
+            return StripeIntent.NextActionData.MbWayAwaitAuthorization
         }
     }
 

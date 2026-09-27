@@ -14,4 +14,13 @@ class PaymentSheetNextActionHandlersTest {
 
         assertThat(handler).isInstanceOf(PollingNextActionHandler::class.java)
     }
+
+    @Test
+    fun `MB WAY await authorization uses polling next action handler`() {
+        val handler = PaymentSheetNextActionHandlers.get()[
+            StripeIntent.NextActionData.MbWayAwaitAuthorization::class.java
+        ]
+
+        assertThat(handler).isInstanceOf(PollingNextActionHandler::class.java)
+    }
 }

@@ -31,6 +31,7 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     private val countDownLatch: CountDownLatch,
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
+    @OptIn(ApiConfigurationPreview::class)
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")

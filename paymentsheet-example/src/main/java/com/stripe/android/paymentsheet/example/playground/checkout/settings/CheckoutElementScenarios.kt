@@ -31,9 +31,11 @@ internal object CheckoutElementScenarios {
             "sae",
             "SAE",
             leaf("collect_new_shipping", "Collect a new shipping address") {
+                set(controller.shippingAddress.shouldSetConfiguration, true)
                 set(session.shippingAddressCollection, true)
             },
             leaf("prefilled_us_shipping", "Prefilled US shipping address") {
+                set(controller.shippingAddress.shouldSetConfiguration, true)
                 set(controller.defaults.shipping.enabled, true)
                 set(controller.defaults.shipping.name, "Jenny Rosen")
                 set(controller.defaults.shipping.address.enabled, true)
@@ -55,6 +57,7 @@ internal object CheckoutElementScenarios {
             set(controller.express.shouldSetConfiguration, true)
             showWalletsInExpressOnly()
             set(controller.currencySelector.shouldSetConfiguration, true)
+            set(controller.shippingAddress.shouldSetConfiguration, true)
             set(session.shippingAddressCollection, true)
             set(session.adaptivePricingCountry, AdaptivePricingCountry.France)
         },

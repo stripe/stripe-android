@@ -23,6 +23,8 @@ private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
 private const val BIZUM_TIME_LIMIT_IN_SECONDS = 70 * 60
 private const val BIZUM_INITIAL_DELAY_IN_SECONDS = 5
+private const val MB_WAY_TIME_LIMIT_IN_SECONDS = 4 * 60
+private const val MB_WAY_INITIAL_DELAY_IN_SECONDS = 5
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -68,56 +70,101 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 "Received null payment method type in PollingAuthenticator"
             }
         ) {
-            PaymentMethod.Type.Blik ->
-                PollingContract.Args(
-                    clientSecret = requireNotNull(actionable.clientSecret),
-                    statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_blik_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = null,
-                    paymentMethodType = paymentMethodType.code,
-                )
-            PaymentMethod.Type.PayNow ->
-                PollingContract.Args(
-                    clientSecret = requireNotNull(actionable.clientSecret),
-                    statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = getQrCodeForPayNow(actionable),
-                    paymentMethodType = paymentMethodType.code,
-                )
-            PaymentMethod.Type.PromptPay ->
-                PollingContract.Args(
-                    clientSecret = requireNotNull(actionable.clientSecret),
-                    statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = getQrCodeForPromptPay(actionable),
-                    paymentMethodType = paymentMethodType.code,
-                )
-            PaymentMethod.Type.Bizum ->
-                PollingContract.Args(
-                    clientSecret = requireNotNull(actionable.clientSecret),
-                    statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_bizum_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = null,
-                    paymentMethodType = paymentMethodType.code,
-                )
-            else ->
-                error(
-                    "Received invalid payment method type " +
-                        "${paymentMethodType.code} in PollingAuthenticator"
-                )
+            PaymentMethod.Type.Blik -> getBlikArgs(actionable, host, requestOptions)
+            PaymentMethod.Type.PayNow -> getPayNowArgs(actionable, host, requestOptions)
+            PaymentMethod.Type.PromptPay -> getPromptPayArgs(actionable, host, requestOptions)
+            PaymentMethod.Type.Bizum -> getBizumArgs(actionable, host, requestOptions)
+            PaymentMethod.Type.MbWay -> getMbWayArgs(actionable, host, requestOptions)
+            else -> error(
+                "Received invalid payment method type " +
+                    "${paymentMethodType.code} in PollingAuthenticator"
+            )
         }
+    }
+
+    private fun getBlikArgs(
+        actionable: StripeIntent,
+        host: AuthActivityStarterHost,
+        requestOptions: ApiRequest.Options,
+    ): PollingContract.Args {
+        return PollingContract.Args(
+            clientSecret = requireNotNull(actionable.clientSecret),
+            statusBarColor = host.statusBarColor,
+            timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_blik_confirm_payment,
+            requestOptions = requestOptions,
+            qrCodeUrl = null,
+            paymentMethodType = PaymentMethod.Type.Blik.code,
+        )
+    }
+
+    private fun getPayNowArgs(
+        actionable: StripeIntent,
+        host: AuthActivityStarterHost,
+        requestOptions: ApiRequest.Options,
+    ): PollingContract.Args {
+        return PollingContract.Args(
+            clientSecret = requireNotNull(actionable.clientSecret),
+            statusBarColor = host.statusBarColor,
+            timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
+            requestOptions = requestOptions,
+            qrCodeUrl = getQrCodeForPayNow(actionable),
+            paymentMethodType = PaymentMethod.Type.PayNow.code,
+        )
+    }
+
+    private fun getPromptPayArgs(
+        actionable: StripeIntent,
+        host: AuthActivityStarterHost,
+        requestOptions: ApiRequest.Options,
+    ): PollingContract.Args {
+        return PollingContract.Args(
+            clientSecret = requireNotNull(actionable.clientSecret),
+            statusBarColor = host.statusBarColor,
+            timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
+            requestOptions = requestOptions,
+            qrCodeUrl = getQrCodeForPromptPay(actionable),
+            paymentMethodType = PaymentMethod.Type.PromptPay.code,
+        )
+    }
+
+    private fun getBizumArgs(
+        actionable: StripeIntent,
+        host: AuthActivityStarterHost,
+        requestOptions: ApiRequest.Options,
+    ): PollingContract.Args {
+        return PollingContract.Args(
+            clientSecret = requireNotNull(actionable.clientSecret),
+            statusBarColor = host.statusBarColor,
+            timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_bizum_confirm_payment,
+            requestOptions = requestOptions,
+            qrCodeUrl = null,
+            paymentMethodType = PaymentMethod.Type.Bizum.code,
+        )
+    }
+
+    private fun getMbWayArgs(
+        actionable: StripeIntent,
+        host: AuthActivityStarterHost,
+        requestOptions: ApiRequest.Options,
+    ): PollingContract.Args {
+        return PollingContract.Args(
+            clientSecret = requireNotNull(actionable.clientSecret),
+            statusBarColor = host.statusBarColor,
+            timeLimitInSeconds = MB_WAY_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = MB_WAY_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_mb_way_confirm_payment,
+            requestOptions = requestOptions,
+            qrCodeUrl = null,
+            paymentMethodType = PaymentMethod.Type.MbWay.code,
+        )
     }
 
     private fun getQrCodeForPayNow(actionable: StripeIntent): String {
