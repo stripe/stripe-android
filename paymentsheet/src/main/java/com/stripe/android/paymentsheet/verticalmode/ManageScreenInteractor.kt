@@ -121,7 +121,6 @@ internal class DefaultManageScreenInteractor(
                 it.toDisplayableSavedPaymentMethod(
                     paymentMethodMetadata,
                     defaultPaymentMethodId,
-                    isSelectionPending = false,
                 )
             }
         }

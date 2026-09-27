@@ -88,7 +88,6 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
             displayName = card.displayName,
             paymentMethod = card.paymentMethod,
             isSelectionPending = isSelectionPending,
-            shouldShowDefaultBadge = false,
         )
         composeRule.setContent {
             EmbeddedSavedPaymentMethodRowButton(

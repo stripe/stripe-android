@@ -81,8 +81,6 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = paymentMethod.id.resolvableString,
                     paymentMethod = paymentMethod,
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 )
             },
             currentSelection = null,

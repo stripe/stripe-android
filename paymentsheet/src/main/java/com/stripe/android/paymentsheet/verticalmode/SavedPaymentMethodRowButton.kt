@@ -140,8 +140,6 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
                 last4 = "4242",
             )
         ),
-        isSelectionPending = false,
-        shouldShowDefaultBadge = false,
     )
 
     DefaultStripeTheme {
@@ -181,7 +179,6 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 last4 = "4444",
             )
         ),
-        isSelectionPending = false,
         shouldShowDefaultBadge = true,
     )
 

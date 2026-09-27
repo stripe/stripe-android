@@ -265,7 +265,7 @@ class ManageScreenUITest {
         PaymentMethodFixtures.createCards(2)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
-                it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = false)
+                it.toDisplayableSavedPaymentMethod()
             }
 
     private val displayableSavedPaymentMethodsWithDefault =
