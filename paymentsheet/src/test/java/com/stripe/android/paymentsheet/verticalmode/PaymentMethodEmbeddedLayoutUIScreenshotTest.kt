@@ -148,7 +148,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
                     isSelectionPending = true,
-                    shouldShowDefaultBadge = false,
                 ),
                 savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
@@ -335,8 +334,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
                 selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 availableSavedPaymentMethodAction =

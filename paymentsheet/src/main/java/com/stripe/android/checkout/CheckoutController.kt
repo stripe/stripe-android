@@ -222,7 +222,7 @@ class CheckoutController @Inject internal constructor(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {
         return withCheckoutState(
-            additionalStateMutations = { withSelection(selection) },
+            additionalStateMutations = { commitSelection(selection) },
         ) {
             stateHolder.state = copy(
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(

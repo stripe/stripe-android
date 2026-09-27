@@ -138,23 +138,28 @@ internal class DefaultManageScreenInteractor(
         SavedPaymentMethodSelectionState.Idle,
     )
 
+    private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
+        combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
+            paymentMethods.map {
+                it.toDisplayableSavedPaymentMethod(
+                    paymentMethodMetadata,
+                    defaultPaymentMethodId,
+                )
+            }
+        }
+
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state = combineAsStateFlow(
-        paymentMethods,
-        defaultPaymentMethodId,
+        displayableSavedPaymentMethods,
         selection,
         editing,
         canEdit,
         linkAccount,
         selectionState,
-    ) { paymentMethods, defaultPaymentMethodId, paymentSelection, editing, canEdit, linkAccount, selectionState ->
-        val displayablePaymentMethods = paymentMethods.map {
-            it.toDisplayableSavedPaymentMethod(
-                paymentMethodMetadata = paymentMethodMetadata,
-                defaultPaymentMethodId = defaultPaymentMethodId,
-                isSelectionPending = selectionState.isPendingFor(it.id),
-            )
+    ) { displayableSavedPaymentMethods, paymentSelection, editing, canEdit, linkAccount, selectionState ->
+        val displayablePaymentMethods = displayableSavedPaymentMethods.map {
+            it.copy(isSelectionPending = selectionState.isPendingFor(it.paymentMethod.id))
         }
 
         val currentSelection = if (editing) {

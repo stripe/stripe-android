@@ -23,8 +23,6 @@ class PaymentOptionsStateFactoryTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = savedPaymentMethod,
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 )
             ).toPaymentSelection()
         ).isEqualTo(PaymentSelection.Saved(savedPaymentMethod))

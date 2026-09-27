@@ -57,7 +57,7 @@ internal data class CheckoutControllerState(
  * payment method selection state to [SavedPaymentMethodSelectionState.Idle].
  */
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutControllerState.withSelection(
+internal fun CheckoutControllerState.commitSelection(
     selection: PaymentSelection?,
 ): CheckoutControllerState {
     selection?.hasAcknowledgedSepaMandate = true

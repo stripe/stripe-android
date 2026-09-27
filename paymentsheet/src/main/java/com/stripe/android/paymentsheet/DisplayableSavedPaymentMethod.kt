@@ -10,8 +10,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,
-    val isSelectionPending: Boolean,
-    val shouldShowDefaultBadge: Boolean,
+    val isSelectionPending: Boolean = false,
+    val shouldShowDefaultBadge: Boolean = false,
 ) {
     val isCard: Boolean
         get() = when (savedPaymentMethod) {
@@ -101,8 +101,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         fun create(
             displayName: ResolvableString,
             paymentMethod: PaymentMethod,
-            isSelectionPending: Boolean,
-            shouldShowDefaultBadge: Boolean,
+            isSelectionPending: Boolean = false,
+            shouldShowDefaultBadge: Boolean = false,
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> {

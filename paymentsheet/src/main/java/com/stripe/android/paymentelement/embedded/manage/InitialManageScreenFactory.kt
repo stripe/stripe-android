@@ -23,8 +23,6 @@ internal class InitialManageScreenFactory @Inject constructor(
             val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                 displayName = displayName,
                 paymentMethod = paymentMethod,
-                isSelectionPending = false,
-                shouldShowDefaultBadge = false,
             )
             EmbeddedNavigator.Screen.ManageUpdate(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(

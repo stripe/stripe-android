@@ -53,24 +53,18 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
         )
@@ -91,24 +85,18 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
         )
@@ -128,24 +116,18 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234", addNetworks = true),
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = false,
                 ),
             ),
         )
@@ -216,8 +198,6 @@ class PaymentOptionsScreenshotTest {
                                 funding = "CREDIT",
                             ),
                         ),
-                        isSelectionPending = false,
-                        shouldShowDefaultBadge = false,
                     ),
                 )
             ),
@@ -232,7 +212,6 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("8431"),
-                isSelectionPending = false,
                 shouldShowDefaultBadge = true,
             ),
         ),
@@ -240,16 +219,12 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("4000"),
-                isSelectionPending = false,
-                shouldShowDefaultBadge = false,
             ),
         ),
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("1234", addNetworks = true),
-                isSelectionPending = false,
-                shouldShowDefaultBadge = false,
             ),
         ),
     )

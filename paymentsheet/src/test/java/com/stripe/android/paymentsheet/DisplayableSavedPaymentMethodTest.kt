@@ -24,8 +24,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = visaCardUsingCartesBancaires,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
@@ -41,8 +39,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = cardWithoutDisplayBrand,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
@@ -57,8 +53,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         assertThat(displayableSavedPaymentMethod.savedPaymentMethod).isInstanceOf<SavedPaymentMethod.Card>()
@@ -71,8 +65,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         assertThat(displayableSavedPaymentMethod.savedPaymentMethod).isInstanceOf<SavedPaymentMethod.USBankAccount>()
@@ -85,8 +77,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         assertThat(displayableSavedPaymentMethod.savedPaymentMethod).isInstanceOf<SavedPaymentMethod.SepaDebit>()
@@ -101,8 +91,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         assertThat(displayableSavedPaymentMethod.savedPaymentMethod).isInstanceOf<SavedPaymentMethod.Unexpected>()
@@ -115,8 +103,6 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
         )
 
         assertThat(displayableSavedPaymentMethod.savedPaymentMethod).isInstanceOf<SavedPaymentMethod.Unexpected>()
