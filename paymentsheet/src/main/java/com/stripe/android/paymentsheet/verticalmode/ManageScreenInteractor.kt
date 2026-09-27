@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -16,11 +17,11 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
@@ -103,11 +104,15 @@ internal interface ManageScreenInteractor {
     }
 }
 
-internal data class SelectionBehavior(
-    val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    val selectionState: StateFlow<SavedPaymentMethodSelectionState>,
-    val navigateBackAfterSelection: Boolean,
-)
+internal sealed interface SelectionBehavior {
+    data class Immediate(
+        val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    ) : SelectionBehavior
+
+    data class Coordinated(
+        val selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
+    ) : SelectionBehavior
+}
 
 internal class DefaultManageScreenInteractor(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
@@ -127,6 +132,9 @@ internal class DefaultManageScreenInteractor(
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
+    private val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
+        SavedPaymentMethodSelectionState.Idle,
+    )
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
@@ -137,7 +145,7 @@ internal class DefaultManageScreenInteractor(
         editing,
         canEdit,
         linkAccount,
-        selectionBehavior.selectionState,
+        selectionState,
     ) { paymentMethods, defaultPaymentMethodId, paymentSelection, editing, canEdit, linkAccount, selectionState ->
         val displayablePaymentMethods = paymentMethods.map {
             val rowSelectionState =
@@ -211,9 +219,27 @@ internal class DefaultManageScreenInteractor(
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        selectionBehavior.onSelectPaymentMethod(paymentMethod)
-        if (selectionBehavior.navigateBackAfterSelection) {
-            safeNavigateBack(true)
+        when (val behavior = selectionBehavior) {
+            is SelectionBehavior.Immediate -> {
+                behavior.onSelectPaymentMethod(paymentMethod)
+                safeNavigateBack(true)
+            }
+            is SelectionBehavior.Coordinated -> {
+                if (selectionState.value is SavedPaymentMethodSelectionState.Pending) {
+                    return
+                }
+
+                selectionState.value = SavedPaymentMethodSelectionState.Pending(
+                    paymentMethod.paymentMethod.id,
+                )
+                coroutineScope.launch {
+                    behavior.selectPaymentMethod(paymentMethod).onFailure { error ->
+                        selectionState.value = SavedPaymentMethodSelectionState.Failed(
+                            error.stripeErrorMessage(),
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -237,14 +263,12 @@ internal class DefaultManageScreenInteractor(
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                selectionBehavior = SelectionBehavior(
+                selectionBehavior = SelectionBehavior.Immediate(
                     onSelectPaymentMethod = {
                         val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                         viewModel.updateSelection(savedPmSelection)
                         viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                     },
-                    selectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
-                    navigateBackAfterSelection = true,
                 ),
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->

@@ -1,20 +1,18 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
-import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetSavedPaymentMethodSelectionCoordinator
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -35,79 +33,17 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `manage launch coordinates selection without navigating`() = runTest {
+    fun `manage launch coordinates selection and reports selected option`() = runTest {
         runScenario(launchMode = EmbeddedLaunchMode.Manage) {
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
 
-            assertThat(sheetActivityStateHolder.selectSavedPaymentMethodTurbine.awaitItem())
-                .isEqualTo(selection)
+            assertThat(selectionCoordinator.selectCalls.awaitItem()).isEqualTo(selection)
+            verify(eventReporter).onSelectPaymentOption(selection)
             assertThat(selectionHolder.selection.value).isNull()
+            assertThat(interactor.state.value.isProcessing).isTrue()
+            assertThat(interactor.state.value.paymentMethods.single().selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id))
             verifyNoInteractions(navigator)
-        }
-    }
-
-    @Test
-    fun `manage launch maps saved payment method selection state`() = runTest {
-        runScenario(launchMode = EmbeddedLaunchMode.Manage) {
-            val pending = SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
-            val error = R.string.stripe_something_went_wrong.resolvableString
-
-            interactor.state.test {
-                awaitItem()
-                sheetActivityStateHolder.updateState {
-                    it.copy(savedPaymentMethodSelectionState = pending)
-                }
-                awaitItem().run {
-                    assertThat(isProcessing).isTrue()
-                    assertThat(this.error).isNull()
-                    assertThat(paymentMethods.single().selectionState).isEqualTo(pending)
-                }
-
-                sheetActivityStateHolder.updateState {
-                    it.copy(savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(error))
-                }
-                awaitItem().run {
-                    assertThat(isProcessing).isFalse()
-                    assertThat(this.error).isEqualTo(error)
-                    assertThat(paymentMethods.single().selectionState).isEqualTo(
-                        SavedPaymentMethodSelectionState.Idle,
-                    )
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `payment options launch uses idle selection state`() = runTest {
-        runScenario(launchMode = EmbeddedLaunchMode.PaymentOptions) {
-            sheetActivityStateHolder.updateState {
-                it.copy(
-                    savedPaymentMethodSelectionState =
-                        SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id),
-                )
-            }
-
-            assertThat(interactor.state.value.isProcessing).isFalse()
-            assertThat(interactor.state.value.paymentMethods.single().selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        }
-    }
-
-    @Test
-    fun `form launch uses idle selection state`() = runTest {
-        runScenario(
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
-        ) {
-            sheetActivityStateHolder.updateState {
-                it.copy(
-                    savedPaymentMethodSelectionState =
-                        SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id),
-                )
-            }
-
-            assertThat(interactor.state.value.isProcessing).isFalse()
-            assertThat(interactor.state.value.paymentMethods.single().selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
     }
 
@@ -116,9 +52,30 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
         runScenario(launchMode = EmbeddedLaunchMode.PaymentOptions) {
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
 
-            sheetActivityStateHolder.selectSavedPaymentMethodTurbine.expectNoEvents()
+            verify(eventReporter).onSelectPaymentOption(selection)
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
+            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.paymentMethods.single().selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            selectionCoordinator.selectCalls.expectNoEvents()
             verify(navigator).performAction(EmbeddedNavigator.Action.Back)
+        }
+    }
+
+    @Test
+    fun `form launch selects immediately and closes`() = runTest {
+        runScenario(
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        ) {
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
+
+            verify(eventReporter).onSelectPaymentOption(selection)
+            assertThat(selectionHolder.selection.value).isEqualTo(selection)
+            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.paymentMethods.single().selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            selectionCoordinator.selectCalls.expectNoEvents()
+            verify(navigator).performAction(EmbeddedNavigator.Action.Close(true))
         }
     }
 
@@ -134,9 +91,9 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             whenever(it.canEdit).thenReturn(stateFlowOf(true))
             whenever(it.defaultPaymentMethodId).thenReturn(stateFlowOf(null))
         }
-        val eventReporter = FakeEventReporter()
+        val eventReporter = mock<EventReporter>()
         val navigator = mock<EmbeddedNavigator>()
-        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
+        val selectionCoordinator = FakeSheetSavedPaymentMethodSelectionCoordinator(Result.success(Unit))
         val interactor = DefaultEmbeddedManageScreenInteractorFactory(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerStateHolder = customerStateHolder,
@@ -146,7 +103,7 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { navigator },
             launchMode = launchMode,
-            sheetActivityStateHolder = sheetActivityStateHolder,
+            selectionCoordinator = selectionCoordinator,
         ).createManageScreenInteractor()
         val displayablePaymentMethod = interactor.state.value.paymentMethods.single()
         val selection = PaymentSelection.Saved(paymentMethod)
@@ -156,22 +113,23 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             paymentMethod = displayablePaymentMethod,
             selection = selection,
             selectionHolder = selectionHolder,
-            sheetActivityStateHolder = sheetActivityStateHolder,
+            selectionCoordinator = selectionCoordinator,
+            eventReporter = eventReporter,
             navigator = navigator,
         ).block()
 
         interactor.close()
         customerStateHolder.validate()
-        eventReporter.validate()
-        sheetActivityStateHolder.validate()
+        selectionCoordinator.validate()
     }
 
     private data class Scenario(
         val interactor: ManageScreenInteractor,
-        val paymentMethod: com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod,
+        val paymentMethod: DisplayableSavedPaymentMethod,
         val selection: PaymentSelection.Saved,
         val selectionHolder: DefaultEmbeddedSelectionHolder,
-        val sheetActivityStateHolder: FakeSheetActivityStateHolder,
+        val selectionCoordinator: FakeSheetSavedPaymentMethodSelectionCoordinator,
+        val eventReporter: EventReporter,
         val navigator: EmbeddedNavigator,
     )
 }

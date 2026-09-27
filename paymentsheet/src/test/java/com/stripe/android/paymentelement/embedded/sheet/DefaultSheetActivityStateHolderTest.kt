@@ -5,7 +5,6 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
@@ -32,7 +31,6 @@ import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirmi
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -51,10 +49,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 @Suppress("LargeClass")
@@ -64,179 +58,6 @@ internal class DefaultSheetActivityStateHolderTest {
 
     @get:Rule
     val closeFormInteractorRule = CleanupTestRule(VerticalModeFormInteractor::close)
-
-    @Test
-    fun `saved payment method selection stays pending until tax update succeeds`() {
-        val updater = mock<SheetTaxRegionUpdater>()
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val response = com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.create()
-        val releaseUpdate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        whenever(updater.prepareUpdate(any(), eq(selection))).thenReturn {
-            releaseUpdate.await()
-            Result.success(response)
-        }
-
-        testScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            sheetTaxRegionUpdaterProvider = Provider { updater },
-        ) {
-            val initialState = stateHolder.state.value
-            stateHolder.result.test {
-                stateHolder.selectSavedPaymentMethod(selection)
-                assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-                assertThat(stateHolder.state.value.isProcessing).isEqualTo(initialState.isProcessing)
-                assertThat(stateHolder.state.value.processingState).isEqualTo(initialState.processingState)
-                assertThat(stateHolder.state.value.error).isEqualTo(initialState.error)
-                assertThat(selectionHolder.selection.value).isNull()
-                expectNoEvents()
-
-                releaseUpdate.complete(Unit)
-
-                val result = awaitItem() as EmbeddedActivityResult.Complete
-                assertThat(result.selection).isEqualTo(selection)
-                assertThat(result.checkoutSessionResponse).isEqualTo(response)
-                assertThat(result.shouldInvokeSelectionCallback).isTrue()
-                assertThat(selectionHolder.selection.value).isEqualTo(selection)
-                assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-            }
-        }
-    }
-
-    @Test
-    fun `second saved payment method selection is ignored while update is pending`() {
-        val updater = mock<SheetTaxRegionUpdater>()
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val response = com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.create()
-        val releaseUpdate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        val updateCalls = Turbine<Unit>()
-        whenever(updater.prepareUpdate(any(), eq(selection))).thenReturn {
-            updateCalls.add(Unit)
-            releaseUpdate.await()
-            Result.success(response)
-        }
-
-        testScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            sheetTaxRegionUpdaterProvider = Provider { updater },
-        ) {
-            stateHolder.result.test {
-                stateHolder.selectSavedPaymentMethod(selection)
-                updateCalls.awaitItem()
-                stateHolder.selectSavedPaymentMethod(selection)
-
-                assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-                updateCalls.expectNoEvents()
-                expectNoEvents()
-
-                releaseUpdate.complete(Unit)
-                assertThat(awaitItem()).isInstanceOf(EmbeddedActivityResult.Complete::class.java)
-                expectNoEvents()
-            }
-            updateCalls.ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `failed saved payment method selection keeps prior selection and sheet open`() {
-        val updater = mock<SheetTaxRegionUpdater>()
-        val priorSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val nextSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
-        val updateFailure = IllegalStateException("update failed")
-        whenever(updater.prepareUpdate(any(), eq(nextSelection))).thenReturn {
-            Result.failure(updateFailure)
-        }
-
-        testScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            sheetTaxRegionUpdaterProvider = Provider { updater },
-        ) {
-            selectionHolder.setSelection(priorSelection)
-            val initialState = stateHolder.state.value
-            stateHolder.result.test {
-                stateHolder.selectSavedPaymentMethod(nextSelection)
-
-                expectNoEvents()
-                assertThat(selectionHolder.selection.value).isEqualTo(priorSelection)
-                assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                    .isEqualTo(
-                        SavedPaymentMethodSelectionState.Failed(updateFailure.stripeErrorMessage()),
-                    )
-                assertThat(stateHolder.state.value.isProcessing).isEqualTo(initialState.isProcessing)
-                assertThat(stateHolder.state.value.processingState).isEqualTo(initialState.processingState)
-                assertThat(stateHolder.state.value.error).isEqualTo(initialState.error)
-            }
-        }
-    }
-
-    @Test
-    fun `saved payment method selection can retry after failure`() {
-        val updater = mock<SheetTaxRegionUpdater>()
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val response = com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.create()
-        val updateFailure = IllegalStateException("update failed")
-        val releaseRetry = kotlinx.coroutines.CompletableDeferred<Unit>()
-        val updateCalls = Turbine<Unit>()
-        whenever(updater.prepareUpdate(any(), eq(selection))).thenReturn(
-            {
-                updateCalls.add(Unit)
-                Result.failure(updateFailure)
-            },
-            {
-                updateCalls.add(Unit)
-                releaseRetry.await()
-                Result.success(response)
-            },
-        )
-
-        testScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            sheetTaxRegionUpdaterProvider = Provider { updater },
-        ) {
-            stateHolder.result.test {
-                stateHolder.selectSavedPaymentMethod(selection)
-                updateCalls.awaitItem()
-                assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Failed(updateFailure.stripeErrorMessage()))
-
-                stateHolder.selectSavedPaymentMethod(selection)
-                updateCalls.awaitItem()
-                assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-
-                releaseRetry.complete(Unit)
-                assertThat(awaitItem()).isInstanceOf(EmbeddedActivityResult.Complete::class.java)
-                expectNoEvents()
-            }
-            updateCalls.ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `saved payment method without tax update emits one result for two quick selections`() {
-        val updater = mock<SheetTaxRegionUpdater>()
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        whenever(updater.prepareUpdate(any(), eq(selection))).thenReturn(null)
-
-        testScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            sheetTaxRegionUpdaterProvider = Provider { updater },
-        ) {
-            stateHolder.result.test {
-                stateHolder.selectSavedPaymentMethod(selection)
-                stateHolder.selectSavedPaymentMethod(selection)
-
-                val result = awaitItem() as EmbeddedActivityResult.Complete
-                assertThat(result.selection).isEqualTo(selection)
-                expectNoEvents()
-            }
-            assertThat(selectionHolder.selection.value).isEqualTo(selection)
-            assertThat(stateHolder.state.value.savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-        }
-    }
 
     @Test
     fun `state initializes correctly`() = testScenario {
@@ -816,7 +637,6 @@ internal class DefaultSheetActivityStateHolderTest {
         initialBackStack: List<EmbeddedNavigator.Screen> = listOf(initialScreen),
         savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory =
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
-        sheetTaxRegionUpdaterProvider: Provider<SheetTaxRegionUpdater> = Provider { error("Not expected") },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
@@ -844,7 +664,6 @@ internal class DefaultSheetActivityStateHolderTest {
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
-            sheetTaxRegionUpdaterProvider = sheetTaxRegionUpdaterProvider,
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
@@ -933,7 +752,6 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
-                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 )
             ),
             onContinueClick = {},
@@ -951,7 +769,6 @@ internal class DefaultSheetActivityStateHolderTest {
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     shouldDisplayLockIcon = false,
-                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 )
             ),
             onContinueClick = {},
