@@ -91,6 +91,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactoryTest {
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Suppress("LongMethod")
     private fun runScenario(
         selection: PaymentSelection.Saved,
         savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState,
