@@ -8,6 +8,7 @@ import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.payments.core.analytics.ErrorReporter
 
@@ -34,6 +35,12 @@ internal class StripeGooglePayPaymentDataCallbacks(
         ),
         errorReporter = ErrorReporter.createFallbackInstance(
             context = context,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = paymentConfiguration.publishableKey,
+                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                )
+            },
             productUsage = emptySet(),
         ),
     )

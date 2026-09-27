@@ -3,10 +3,13 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.ui.core.cardscan.CardScanLoadingState
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.rememberCardScanLauncher
+import com.stripe.android.uicore.utils.collectAsState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardScanAction(
@@ -15,6 +18,7 @@ class CardScanAction(
     private val disableSsdOcrCardScan: Boolean,
     private val apiConfiguration: ApiConfiguration.State,
     val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+    private val backupAction: CardDetailsAction?,
 ) : CardDetailsAction {
     @Composable
     override fun Content(enabled: Boolean, onScannedCard: (ScannedCardDetails) -> Unit) {
@@ -37,16 +41,37 @@ class CardScanAction(
             },
         )
 
-        if (
-            automaticallyLaunchedCardScanFormDataHelper?.shouldLaunchCardScanAutomatically == true &&
-            launcher != null
-        ) {
-            SideEffect {
-                automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = true
-                launcher.launch(context)
-            }
+        if (launcher == null) {
+            backupAction?.Content(
+                enabled = enabled,
+                onScannedCard = onScannedCard,
+            )
+            return
         }
 
-        ScanCardButtonUI(enabled = enabled, cardScanLauncher = launcher)
+        val loadingState by launcher.loadingState.collectAsState()
+
+        when (loadingState) {
+            CardScanLoadingState.Loading -> Unit
+            CardScanLoadingState.Available -> {
+                if (automaticallyLaunchedCardScanFormDataHelper?.shouldLaunchCardScanAutomatically == true) {
+                    SideEffect {
+                        automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = true
+                        launcher.launch(context)
+                    }
+                }
+
+                ScanCardButtonUI(
+                    enabled = enabled,
+                    cardScanLauncher = launcher,
+                )
+            }
+            CardScanLoadingState.Unavailable -> {
+                backupAction?.Content(
+                    enabled = enabled,
+                    onScannedCard = onScannedCard,
+                )
+            }
+        }
     }
 }

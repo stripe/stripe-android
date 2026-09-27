@@ -102,7 +102,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         ) {
             enqueueSuccessfulNativeLinkPayment()
 
-            networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+            networkRule.checkoutInit()
 
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")

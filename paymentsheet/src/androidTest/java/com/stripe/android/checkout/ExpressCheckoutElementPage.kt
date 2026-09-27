@@ -4,6 +4,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
@@ -24,6 +25,14 @@ internal class ExpressCheckoutElementPage(
             testTag = LinkButtonTestTag,
             name = "Link",
         )
+    }
+
+    fun assertGooglePayButtonExists() {
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
+    }
+
+    fun assertLinkButtonDoesNotExist() {
+        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
     }
 
     private fun clickButton(testTag: String, name: String) {

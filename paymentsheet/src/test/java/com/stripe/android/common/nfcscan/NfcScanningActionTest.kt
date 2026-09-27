@@ -9,8 +9,10 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.core.app.ActivityOptionsCompat
 import app.cash.turbine.ReceiveTurbine
@@ -37,6 +39,11 @@ internal class NfcScanningActionTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @Test
+    fun `shows Tap card label`() = test {
+        composeTestRule.onNodeWithText("Tap card", substring = true).assertIsDisplayed()
+    }
 
     @Test
     fun `when disabled clicking does not launch contract or invoke callback`() = test(

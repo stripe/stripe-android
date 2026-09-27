@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.NfcScanningAction
+import com.stripe.android.common.nfcscan.NfcScanningAvailability
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -208,23 +209,34 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): CardDetailsAction {
-        return if (metadata.isTapToAddSupported && arguments.tapToAddHelper != null) {
-            TapToAddCardDetailsAction(
+        if (metadata.isTapToAddSupported && arguments.tapToAddHelper != null) {
+            return TapToAddCardDetailsAction(
                 tapToAddHelper = arguments.tapToAddHelper,
                 paymentMethodMetadata = metadata,
             )
-        } else if (arguments.isNfcScanningAvailable?.get(metadata) == true) {
-            NfcScanningAction(paymentMethodMetadata = metadata)
-        } else {
-            CardScanAction(
-                isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
-                enableMlKitCardScan = metadata.enableMlKitCardScan,
-                disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
-                apiConfiguration = metadata.apiConfiguration,
-                automaticallyLaunchedCardScanFormDataHelper =
-                    arguments.automaticallyLaunchedCardScanFormDataHelper,
-            )
         }
+
+        val nfcScanningAvailability = arguments.isNfcScanningAvailable?.get(metadata)
+        val nfcScanningAction = NfcScanningAction(paymentMethodMetadata = metadata)
+
+        if (
+            nfcScanningAvailability is NfcScanningAvailability.Available &&
+            nfcScanningAvailability.shouldBePrimaryScanningOption
+        ) {
+            return nfcScanningAction
+        }
+
+        return CardScanAction(
+            isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
+            enableMlKitCardScan = metadata.enableMlKitCardScan,
+            disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+            apiConfiguration = metadata.apiConfiguration,
+            automaticallyLaunchedCardScanFormDataHelper =
+                arguments.automaticallyLaunchedCardScanFormDataHelper,
+            backupAction = nfcScanningAction.takeIf {
+                nfcScanningAvailability is NfcScanningAvailability.Available
+            },
+        )
     }
 
     private fun MutableList<FormElement>.addCardBillingElements(

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NfcScanningAction
+import com.stripe.android.common.nfcscan.NfcScanningAvailability
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -764,7 +765,30 @@ class CardDefinitionTest {
         }
 
     @Test
-    fun `createFormElements has TapToAddCardDetailsAction when tap to add on even if NFC scanning enabled`() =
+    fun `createFormElements has NfcScanningAction when NFC scanning is primary and card scan is allowed`() =
+        cardDetailsActionTest(
+            isStripeCardScanAllowed = true,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<NfcScanningAction>()
+        }
+
+    @Test
+    fun `createFormElements has CardScanAction when NFC scanning is a secondary option`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = false,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(
+                result = NfcScanningAvailability.Available(
+                    shouldBePrimaryScanningOption = false,
+                )
+            ),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<CardScanAction>()
+        }
+
+    @Test
+    fun `createFormElements has TapToAddCardDetailsAction when NFC scanning is the primary option`() =
         cardDetailsActionTest(
             isTapToAddSupported = true,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
@@ -775,12 +799,14 @@ class CardDefinitionTest {
 
     private fun cardDetailsActionTest(
         isTapToAddSupported: Boolean = false,
+        isStripeCardScanAllowed: Boolean = false,
         isNfcScanningAvailable: IsNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         tapToAddHelper: TapToAddHelper? = null,
         block: (CardDetailsAction?) -> Unit,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
             isTapToAddSupported = isTapToAddSupported,
+            isStripeCardScanAllowed = isStripeCardScanAllowed,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             ),

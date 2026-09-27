@@ -14,6 +14,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -39,7 +40,9 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
     @Test
     fun `pending row is disabled and replaces its icon with a spinner`() {
         val scenario = runScenario(
-            isSelectionPending = true,
+            selectionState = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            ),
             isEnabled = false,
         )
 
@@ -54,7 +57,7 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
     @Test
     fun `idle row is enabled and keeps its icon`() {
         val scenario = runScenario(
-            isSelectionPending = false,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
             isEnabled = true,
         )
 
@@ -68,7 +71,7 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
     @Test
     fun `disabled row that is not pending keeps its icon`() {
         val scenario = runScenario(
-            isSelectionPending = false,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
             isEnabled = false,
         )
 
@@ -80,14 +83,14 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
     }
 
     private fun runScenario(
-        isSelectionPending: Boolean,
+        selectionState: SavedPaymentMethodSelectionState,
         isEnabled: Boolean,
     ): Scenario {
         val card = PaymentMethodFixtures.displayableCard()
         val paymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = card.displayName,
             paymentMethod = card.paymentMethod,
-            isSelectionPending = isSelectionPending,
+            selectionState = selectionState,
         )
         composeRule.setContent {
             EmbeddedSavedPaymentMethodRowButton(

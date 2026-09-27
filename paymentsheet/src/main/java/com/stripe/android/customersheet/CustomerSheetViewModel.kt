@@ -18,6 +18,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
@@ -47,6 +48,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -154,6 +156,9 @@ internal class CustomerSheetViewModel(
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
         context = application,
         productUsageTokens = productUsage,
+        requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        apiConfigurationProvider = apiConfigurationProvider,
     )
 
     private val customerState = MutableStateFlow(

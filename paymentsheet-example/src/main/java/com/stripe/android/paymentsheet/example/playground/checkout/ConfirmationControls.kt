@@ -50,7 +50,7 @@ internal fun ConfirmationControls(
     Button(
         onClick = onSetShippingAddress,
         modifier = Modifier.fillMaxWidth(),
-    ) { Text("Set shipping address (WIP)") }
+    ) { Text("Set shipping address") }
     Button(
         onClick = onConfirm,
         enabled = !isUpdating,

@@ -121,8 +121,11 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
-            updateSelection = { updatedSelection, _ ->
-                selectionHolder.setSelection(updatedSelection)
+            updateSelection = { updatedSelection ->
+                // Screen re-entry re-applies the current selection and must not clear a failure.
+                if (selectionHolder.selection.value != updatedSelection) {
+                    selectionHolder.setSelection(updatedSelection)
+                }
             },
             verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),

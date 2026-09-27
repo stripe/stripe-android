@@ -24,6 +24,7 @@ internal object CheckoutPlaygroundDefinitions {
         val defaults = CheckoutDefaultsDefinitions
         val payment = CheckoutPaymentDefinitions
         val currencySelector = CheckoutCurrencySelectorDefinitions
+        val shippingAddress = CheckoutShippingAddressDefinitions
         val express = CheckoutExpressDefinitions
 
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration by lazy {
@@ -35,6 +36,7 @@ internal object CheckoutPlaygroundDefinitions {
                     defaults.configuration,
                     payment.configuration,
                     currencySelector.configuration,
+                    shippingAddress.configuration,
                     express.configuration,
                 ),
             )

@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.BuildConfig
@@ -32,6 +32,14 @@ internal interface PollingViewModelModule {
     companion object {
 
         @Provides
+        fun provideApiConfiguration(requestOptions: ApiRequest.Options): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = requestOptions.apiKey,
+                stripeAccountId = requestOptions.stripeAccount,
+            )
+        }
+
+        @Provides
         fun providesAppContext(application: Application): Context = application
 
         @Provides
@@ -41,11 +49,5 @@ internal interface PollingViewModelModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKeyProvider(
-            requestOptions: ApiRequest.Options
-        ): () -> String = { requestOptions.apiKey }
     }
 }

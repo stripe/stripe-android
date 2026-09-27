@@ -86,7 +86,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             taxAddressSource = parseTaxAddressSource(taxContext),
             allowedShippingCountries = json.optionalObject("shipping_address_collection")
                 ?.requiredArray("allowed_countries")?.strings(),
-            requiresShippingAddress = json.has("shipping_address_collection"),
+            requiresShippingAddress = json.optionalObject("shipping_address_collection") != null,
             requiresBillingAddress = json.optString("billing_address_collection") == "required",
             merchantCountry = merchantCountry,
             businessName = StripeJsonUtils.optString(elementsJson, "business_name"),

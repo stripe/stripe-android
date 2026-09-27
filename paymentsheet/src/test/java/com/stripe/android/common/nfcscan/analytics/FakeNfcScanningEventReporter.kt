@@ -5,6 +5,7 @@ import com.stripe.android.common.nfcscan.scanner.NfcScanningError
 
 internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
     val onNfcScanStartedCalls = Turbine<Unit>()
+    val onNfcScanBlockedCalls = Turbine<Unit>()
     val onNfcScanAttemptStartedCalls = Turbine<Unit>()
     val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
     val onNfcScanAttemptFailedCalls = Turbine<NfcScanningError>()
@@ -18,6 +19,10 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
 
     override fun onNfcScanStarted() {
         onNfcScanStartedCalls.add(Unit)
+    }
+
+    override fun onNfcScanBlocked() {
+        onNfcScanBlockedCalls.add(Unit)
     }
 
     override fun onNfcScanAttemptStarted() {
@@ -50,6 +55,7 @@ internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
 
     fun ensureAllEventsConsumed() {
         onNfcScanStartedCalls.ensureAllEventsConsumed()
+        onNfcScanBlockedCalls.ensureAllEventsConsumed()
         onNfcScanAttemptStartedCalls.ensureAllEventsConsumed()
         onNfcScanAttemptSucceededCalls.ensureAllEventsConsumed()
         onNfcScanAttemptFailedCalls.ensureAllEventsConsumed()
