@@ -41,7 +41,8 @@ class SavedPaymentMethodsExtensionTest {
 
         return paymentMethod.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = null,
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSelectionPending = false,
         )
     }
 }
