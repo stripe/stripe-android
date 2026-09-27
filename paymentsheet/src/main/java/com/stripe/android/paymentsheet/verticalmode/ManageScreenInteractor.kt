@@ -150,7 +150,12 @@ internal class DefaultManageScreenInteractor(
         selectionState,
     ) { displayableSavedPaymentMethods, paymentSelection, editing, canEdit, linkAccount, selectionState ->
         val displayablePaymentMethods = displayableSavedPaymentMethods.map {
-            it.copy(isSelectionPending = selectionState.isPendingFor(it.paymentMethod.id))
+            DisplayableSavedPaymentMethod.create(
+                displayName = it.displayName,
+                paymentMethod = it.paymentMethod,
+                isSelectionPending = selectionState.isPendingFor(it.paymentMethod.id),
+                shouldShowDefaultBadge = it.shouldShowDefaultBadge,
+            )
         }
 
         val currentSelection = if (editing) {
