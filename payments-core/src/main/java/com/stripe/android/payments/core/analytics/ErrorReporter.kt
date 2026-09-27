@@ -401,6 +401,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS(
             partialEventName = "checkout.saved_payment_method.missing_billing_address"
         ),
+        CHECKOUT_SHEET_RESULT_REFRESH_FAILED(
+            partialEventName = "checkout.sheet_result.refresh_failed"
+        ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"
         ),

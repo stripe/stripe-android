@@ -21,7 +21,6 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest
@@ -48,7 +47,8 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        assertThat(responseHolder.response).isNull()
+        assertThat(sheetActivityStateHolder.checkoutSessionResponse).isNull()
+        assertThat(sheetActivityStateHolder.checkoutSessionResponseCalls.awaitItem()).isNull()
     }
 
     @Test
@@ -67,7 +67,9 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
 
             assertThat(result.isSuccess).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
-            assertThat(responseHolder.response?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(sheetActivityStateHolder.checkoutSessionResponse?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(sheetActivityStateHolder.checkoutSessionResponseCalls.awaitItem()?.id)
+                .isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -91,7 +93,8 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(initialSelection)
-            assertThat(responseHolder.response).isEqualTo(initialResponse)
+            assertThat(sheetActivityStateHolder.checkoutSessionResponse).isEqualTo(initialResponse)
+            sheetActivityStateHolder.checkoutSessionResponseCalls.expectNoEvents()
         }
     }
 
@@ -105,8 +108,8 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(initialSelection)
         }
-        val responseHolder = SheetCheckoutSessionResponseHolder(SavedStateHandle()).apply {
-            set(initialResponse)
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder().apply {
+            setInitialCheckoutSessionResponse(initialResponse)
         }
         val selector = DefaultSheetSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(
@@ -114,15 +117,17 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
             ),
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
-            responseHolder = responseHolder,
+            sheetActivityStateHolder = sheetActivityStateHolder,
         )
 
-        Scenario(
+        val scenario = Scenario(
             selector = selector,
             selectionHolder = selectionHolder,
-            responseHolder = responseHolder,
+            sheetActivityStateHolder = sheetActivityStateHolder,
             selection = selection,
-        ).block()
+        )
+        scenario.block()
+        sheetActivityStateHolder.validate()
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
@@ -147,7 +152,7 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
     private data class Scenario(
         val selector: DefaultSheetSavedPaymentMethodSelector,
         val selectionHolder: EmbeddedSelectionHolder,
-        val responseHolder: SheetCheckoutSessionResponseHolder,
+        val sheetActivityStateHolder: FakeSheetActivityStateHolder,
         val selection: PaymentSelection.Saved,
     )
 

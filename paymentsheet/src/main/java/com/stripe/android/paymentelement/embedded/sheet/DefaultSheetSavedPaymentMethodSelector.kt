@@ -10,13 +10,13 @@ internal class DefaultSheetSavedPaymentMethodSelector @Inject constructor(
     private val taxRegionUpdater: SheetTaxRegionUpdater,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val responseHolder: SheetCheckoutSessionResponseHolder,
+    private val sheetActivityStateHolder: SheetActivityStateHolder,
 ) : EmbeddedSavedPaymentMethodSelector {
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
         val response = update?.let { it().getOrElse { error -> return Result.failure(error) } }
 
-        responseHolder.set(response)
+        sheetActivityStateHolder.setCheckoutSessionResponse(response)
         selectionHolder.setSelection(selection)
         return Result.success(Unit)
     }

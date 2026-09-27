@@ -2,9 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,21 +42,6 @@ internal class DefaultCheckoutSessionRefresherTest {
         )
         assertThat(refreshActions.reloadCalls.awaitItem())
             .isEqualTo(stateAtCommit.copy(checkoutSessionResponse = response))
-    }
-
-    @Test
-    fun `refresh with response and selection commits them atomically`() = runScenario {
-        val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-
-        refresher.refresh(response, selection)
-
-        assertThat(refreshActions.reloadCalls.awaitItem()).isEqualTo(
-            initialState.copy(
-                checkoutSessionResponse = response,
-                paymentSelection = selection,
-            )
-        )
     }
 
     private fun runScenario(

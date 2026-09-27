@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
@@ -15,10 +14,6 @@ internal interface CheckoutSessionRefresher {
     suspend fun refresh()
 
     suspend fun refresh(response: CheckoutSessionResponse)
-
-    suspend fun refresh(response: CheckoutSessionResponse, selection: PaymentSelection?) {
-        refresh(response)
-    }
 }
 
 @OptIn(CheckoutSessionPreview::class)
@@ -59,15 +54,5 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     override suspend fun refresh(response: CheckoutSessionResponse) {
         val state = stateHolder.state ?: return
         reloadState(state.copy(checkoutSessionResponse = response))
-    }
-
-    override suspend fun refresh(response: CheckoutSessionResponse, selection: PaymentSelection?) {
-        val state = stateHolder.state ?: return
-        reloadState(
-            state.copy(
-                checkoutSessionResponse = response,
-                paymentSelection = selection,
-            )
-        )
     }
 }

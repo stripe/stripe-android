@@ -162,9 +162,9 @@ internal interface EmbeddedActivityModule {
         fun provideEmbeddedSavedPaymentMethodSelector(
             launchMode: EmbeddedLaunchMode,
             selectionHolder: EmbeddedSelectionHolder,
-            sheetSelectorProvider: Provider<DefaultSheetSavedPaymentMethodSelector>,
+            sheetSelector: DefaultSheetSavedPaymentMethodSelector,
         ): EmbeddedSavedPaymentMethodSelector = when (launchMode) {
-            is EmbeddedLaunchMode.Manage -> sheetSelectorProvider.get()
+            is EmbeddedLaunchMode.Manage -> sheetSelector
             EmbeddedLaunchMode.PaymentOptions,
             is EmbeddedLaunchMode.Form -> EmbeddedSavedPaymentMethodSelector { selection ->
                 selectionHolder.setSelection(selection)

@@ -48,7 +48,6 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val embeddedNavigator: EmbeddedNavigator,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val checkoutSessionResponseHolder: SheetCheckoutSessionResponseHolder,
     private val sheetActivityRegistrar: SheetActivityRegistrar,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
 ) : EmbeddedSheetPresentation {
@@ -131,7 +130,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            checkoutSessionResponse = checkoutSessionResponseHolder.response,
+            checkoutSessionResponse = sheetActivityStateHolder.checkoutSessionResponse,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             launchMode = launchMode,
         )

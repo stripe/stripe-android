@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,6 +25,21 @@ internal class FakeSheetActivityStateHolder(
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(initialState)
     override val state: StateFlow<SheetActivityStateHolder.State> = _state.asStateFlow()
+
+    private var _checkoutSessionResponse: CheckoutSessionResponse? = null
+    override val checkoutSessionResponse: CheckoutSessionResponse?
+        get() = _checkoutSessionResponse
+
+    val checkoutSessionResponseCalls = Turbine<CheckoutSessionResponse?>()
+
+    override fun setCheckoutSessionResponse(response: CheckoutSessionResponse?) {
+        _checkoutSessionResponse = response
+        checkoutSessionResponseCalls.add(response)
+    }
+
+    fun setInitialCheckoutSessionResponse(response: CheckoutSessionResponse?) {
+        _checkoutSessionResponse = response
+    }
 
     fun updateState(transform: (SheetActivityStateHolder.State) -> SheetActivityStateHolder.State) {
         _state.update(transform)
@@ -59,6 +75,7 @@ internal class FakeSheetActivityStateHolder(
     }
 
     fun validate() {
+        checkoutSessionResponseCalls.ensureAllEventsConsumed()
         resultTurbine.ensureAllEventsConsumed()
         updateErrorTurbine.ensureAllEventsConsumed()
         updateProcessingTurbine.ensureAllEventsConsumed()

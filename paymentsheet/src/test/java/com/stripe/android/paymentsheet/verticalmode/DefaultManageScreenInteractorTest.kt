@@ -670,7 +670,7 @@ class DefaultManageScreenInteractorTest {
             toggleEdit = {
                 toggleEditTurbine.add(Unit)
             },
-            selectPaymentMethod = selectorFactory(onSelectPaymentMethodTurbine),
+            onSelectPaymentMethod = selectorFactory(onSelectPaymentMethodTurbine),
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,

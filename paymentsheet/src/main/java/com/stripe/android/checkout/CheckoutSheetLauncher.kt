@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -118,7 +119,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 if (!result.hasBeenConfirmed) {
                     result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                refreshCheckoutSession(result.checkoutSessionResponse) {}
             }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
@@ -128,20 +129,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                val response = result.checkoutSessionResponse
-                if (response == null) {
-                    applyManageResult(result)
-                } else {
-                    coroutineScope.launch {
-                        operationCoordinator.runMutation {
-                            runCatching { sessionRefresher.refresh(response, result.selection) }
-                                .onSuccess { applyManageResult(result) }
-                        }.onFailure {
-                            logger.error(
-                                "Failed to refresh the checkout session after selecting a saved payment method.",
-                                it,
-                            )
-                        }
+                applyCompleteResult(result)
+                refreshCheckoutSession(result.checkoutSessionResponse) {
+                    if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
+                        rowSelectionImmediateActionHandler.invoke()
                     }
                 }
             }
@@ -150,18 +141,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
     }
 
-    private fun applyManageResult(result: EmbeddedActivityResult.Complete) {
-        applyCompleteResult(result)
-        if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-            rowSelectionImmediateActionHandler.invoke()
-        }
-    }
-
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                refreshCheckoutSession(result.checkoutSessionResponse) {}
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
@@ -177,13 +161,25 @@ internal class CheckoutSheetLauncher @Inject constructor(
         selectionHolder.setSelection(result.selection)
     }
 
-    private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
-        response ?: return
+    private fun refreshCheckoutSession(
+        response: CheckoutSessionResponse?,
+        onRefreshed: () -> Unit,
+    ) {
+        if (response == null) {
+            onRefreshed()
+            return
+        }
         coroutineScope.launch {
             operationCoordinator.runMutation {
                 runCatching { sessionRefresher.refresh(response) }
+            }.onSuccess {
+                onRefreshed()
             }.onFailure {
                 logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHEET_RESULT_REFRESH_FAILED,
+                    StripeException.create(it),
+                )
             }
         }
     }

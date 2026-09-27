@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -40,6 +41,8 @@ internal interface SheetActivityStateHolder {
     val state: StateFlow<State>
     val result: SharedFlow<EmbeddedActivityResult>
     val validationRequested: SharedFlow<Unit>
+    val checkoutSessionResponse: CheckoutSessionResponse?
+    fun setCheckoutSessionResponse(response: CheckoutSessionResponse?)
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
@@ -86,6 +89,13 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
+
+    override var checkoutSessionResponse: CheckoutSessionResponse? = null
+        private set
+
+    override fun setCheckoutSessionResponse(response: CheckoutSessionResponse?) {
+        checkoutSessionResponse = response
+    }
 
     private val _result = MutableSharedFlow<EmbeddedActivityResult>()
     override val result: SharedFlow<EmbeddedActivityResult> = _result

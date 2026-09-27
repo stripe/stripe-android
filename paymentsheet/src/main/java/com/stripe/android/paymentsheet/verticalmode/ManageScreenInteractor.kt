@@ -114,7 +114,7 @@ internal class DefaultManageScreenInteractor(
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
+    private val onSelectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
@@ -217,7 +217,7 @@ internal class DefaultManageScreenInteractor(
         }
 
         val job = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            selectPaymentMethod(paymentMethod).fold(
+            onSelectPaymentMethod(paymentMethod).fold(
                 onSuccess = {
                     safeNavigateBack(true)
                 },
@@ -255,7 +255,7 @@ internal class DefaultManageScreenInteractor(
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                selectPaymentMethod = {
+                onSelectPaymentMethod = {
                     val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                     viewModel.updateSelection(savedPmSelection)
                     viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)

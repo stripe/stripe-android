@@ -6,7 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelector
-import com.stripe.android.paymentelement.embedded.sheet.SheetCheckoutSessionResponseHolder
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class EmbeddedActivityModuleTest {
@@ -52,19 +51,19 @@ internal class EmbeddedActivityModuleTest {
         val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
             launchMode = EmbeddedLaunchMode.Manage,
             selectionHolder = selectionHolder,
-            sheetSelectorProvider = Provider { taxUpdatingSelector },
+            sheetSelector = taxUpdatingSelector,
         )
 
         assertThat(selector).isSameInstanceAs(taxUpdatingSelector)
     }
 
     @Test
-    fun `PaymentOptions launch commits selection without creating tax selector`() = runTest {
+    fun `PaymentOptions launch commits selection without invoking tax selector`() = runTest {
         assertImmediateSelection(EmbeddedLaunchMode.PaymentOptions)
     }
 
     @Test
-    fun `Form launch commits selection without creating tax selector`() = runTest {
+    fun `Form launch commits selection without invoking tax selector`() = runTest {
         assertImmediateSelection(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
     }
 
@@ -91,11 +90,11 @@ internal class EmbeddedActivityModuleTest {
         selectionHolder: DefaultEmbeddedSelectionHolder,
     ): DefaultSheetSavedPaymentMethodSelector = DefaultSheetSavedPaymentMethodSelector(
         taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ ->
-            error("Tax update is not invoked by this provider test")
+            error("Tax update is not invoked by this selector test")
         },
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         selectionHolder = selectionHolder,
-        responseHolder = SheetCheckoutSessionResponseHolder(SavedStateHandle()),
+        sheetActivityStateHolder = FakeSheetActivityStateHolder(),
     )
 
     private suspend fun assertImmediateSelection(launchMode: EmbeddedLaunchMode) {
@@ -103,9 +102,7 @@ internal class EmbeddedActivityModuleTest {
         val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
             launchMode = launchMode,
             selectionHolder = selectionHolder,
-            sheetSelectorProvider = Provider {
-                throw AssertionError("Non-Manage launch must not create the tax selector")
-            },
+            sheetSelector = createTaxUpdatingSelector(selectionHolder),
         )
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 

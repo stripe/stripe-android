@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentelement.embedded.stashNewSelection
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -299,6 +300,47 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `formActivityLauncher reports checkout session refresh failure after invoking immediate action`() =
+        run {
+            val immediateActionCalls = Turbine<Unit>()
+            testScenario(
+                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
+            ) {
+                val response = CheckoutSessionResponseFactory.create()
+                val expectedError = IllegalStateException("Refresh failed")
+                sessionRefresher.enqueueRefreshAction {
+                    assertThat(immediateActionCalls.expectMostRecentItem()).isEqualTo(Unit)
+                    immediateActionCalls.expectNoEvents()
+                    throw expectedError
+                }
+                val selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+                val result = EmbeddedActivityResult.Complete(
+                    previousNewSelections = Bundle(),
+                    selection = selection,
+                    hasBeenConfirmed = false,
+                    customerState = null,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    checkoutSessionResponse = response,
+                    shouldInvokeSelectionCallback = false,
+                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+                )
+
+                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                runCurrent()
+
+                assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+                immediateActionCalls.expectNoEvents()
+                assertRefreshFailureReported(expectedError)
+                assertThat(logger.errorLogs).containsExactly(
+                    "Failed to refresh the checkout session after the sheet closed." to expectedError
+                )
+                assertThat(operationCoordinator.isUpdating.value).isFalse()
+                immediateActionCalls.ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
     fun `formActivityLauncher does not refresh checkout session when complete result has no response`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
@@ -466,85 +508,112 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `manageSheetLauncher invokes immediate action for saved selection when flagged`() = testScenario {
-        val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
-            customerState = null,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            hasBeenConfirmed = false,
-            checkoutSessionResponse = null,
-            shouldInvokeSelectionCallback = true,
-            launchMode = EmbeddedLaunchMode.Manage,
-        )
+    fun `manageSheetLauncher commits no-response selection before invoking immediate action synchronously`() =
+        run {
+            val immediateActionCalls = Turbine<Unit>()
+            testScenario(
+                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
+            ) {
+                selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
+                val result = EmbeddedActivityResult.Complete(
+                    previousNewSelections = Bundle(),
+                    customerState = null,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    hasBeenConfirmed = false,
+                    checkoutSessionResponse = null,
+                    shouldInvokeSelectionCallback = true,
+                    launchMode = EmbeddedLaunchMode.Manage,
+                )
 
-        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
 
-        assertThat(immediateActionWasInvoked()).isTrue()
-    }
-
-    @Test
-    fun `manageSheetLauncher refreshes session and selection before invoking immediate action`() = testScenario {
-        val response = CheckoutSessionResponseFactory.create()
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val releaseRefresh = kotlinx.coroutines.CompletableDeferred<Unit>()
-        sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
-        val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
-            customerState = null,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            selection = selection,
-            hasBeenConfirmed = false,
-            checkoutSessionResponse = response,
-            shouldInvokeSelectionCallback = true,
-            launchMode = EmbeddedLaunchMode.Manage,
-        )
-
-        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-        runCurrent()
-
-        assertThat(awaitRefreshCall()).isEqualTo(
-            FakeCheckoutSessionRefresher.Call.CommitWithSelection(response, selection)
-        )
-        assertThat(immediateActionWasInvoked()).isFalse()
-
-        releaseRefresh.complete(Unit)
-        runCurrent()
-
-        assertThat(immediateActionWasInvoked()).isTrue()
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
-    }
+                assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
+                assertThat(immediateActionCalls.expectMostRecentItem()).isEqualTo(Unit)
+                immediateActionCalls.expectNoEvents()
+                expectNoRefreshCalls()
+                immediateActionCalls.ensureAllEventsConsumed()
+            }
+        }
 
     @Test
-    fun `manageSheetLauncher logs refresh failure and does not apply result`() = testScenario {
-        val response = CheckoutSessionResponseFactory.create()
-        val expectedError = IllegalStateException("Refresh failed")
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        sessionRefresher.enqueueRefreshAction { throw expectedError }
-        val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
-            customerState = null,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            selection = selection,
-            hasBeenConfirmed = false,
-            checkoutSessionResponse = response,
-            shouldInvokeSelectionCallback = true,
-            launchMode = EmbeddedLaunchMode.Manage,
-        )
+    fun `manageSheetLauncher commits selection before refreshing response and invokes action after success`() =
+        run {
+            val immediateActionCalls = Turbine<Unit>()
+            testScenario(
+                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
+            ) {
+                val response = CheckoutSessionResponseFactory.create()
+                val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                val releaseRefresh = CompletableDeferred<Unit>()
+                sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
+                val result = EmbeddedActivityResult.Complete(
+                    previousNewSelections = Bundle(),
+                    customerState = null,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    selection = selection,
+                    hasBeenConfirmed = false,
+                    checkoutSessionResponse = response,
+                    shouldInvokeSelectionCallback = true,
+                    launchMode = EmbeddedLaunchMode.Manage,
+                )
 
-        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-        runCurrent()
+                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
 
-        assertThat(awaitRefreshCall()).isEqualTo(
-            FakeCheckoutSessionRefresher.Call.CommitWithSelection(response, selection)
-        )
-        assertThat(selectionHolder.selection.value).isNull()
-        assertThat(immediateActionWasInvoked()).isFalse()
-        assertThat(logger.errorLogs).containsExactly(
-            "Failed to refresh the checkout session after selecting a saved payment method." to expectedError,
-        )
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
-    }
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                immediateActionCalls.expectNoEvents()
+                runCurrent()
+
+                assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+                immediateActionCalls.expectNoEvents()
+
+                releaseRefresh.complete(Unit)
+                runCurrent()
+
+                assertThat(immediateActionCalls.expectMostRecentItem()).isEqualTo(Unit)
+                immediateActionCalls.expectNoEvents()
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                immediateActionCalls.ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `manageSheetLauncher keeps committed selection and skips immediate action after refresh failure`() =
+        run {
+            val immediateActionCalls = Turbine<Unit>()
+            testScenario(
+                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
+            ) {
+                val response = CheckoutSessionResponseFactory.create()
+                val expectedError = IllegalStateException("Refresh failed")
+                val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
+                sessionRefresher.enqueueRefreshAction { throw expectedError }
+                val result = EmbeddedActivityResult.Complete(
+                    previousNewSelections = Bundle(),
+                    customerState = null,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    selection = selection,
+                    hasBeenConfirmed = false,
+                    checkoutSessionResponse = response,
+                    shouldInvokeSelectionCallback = true,
+                    launchMode = EmbeddedLaunchMode.Manage,
+                )
+
+                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                runCurrent()
+
+                assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+                immediateActionCalls.expectNoEvents()
+                assertThat(logger.errorLogs).containsExactly(
+                    "Failed to refresh the checkout session after the sheet closed." to expectedError,
+                )
+                assertRefreshFailureReported(expectedError)
+                assertThat(operationCoordinator.isUpdating.value).isFalse()
+                immediateActionCalls.ensureAllEventsConsumed()
+            }
+        }
 
     @Test
     fun `manageSheetLauncher does not log an apply failure as a refresh failure`() = run {
@@ -571,9 +640,7 @@ internal class CheckoutSheetLauncherTest {
             registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
             runCurrent()
 
-            assertThat(awaitRefreshCall()).isEqualTo(
-                FakeCheckoutSessionRefresher.Call.CommitWithSelection(response, selection)
-            )
+            assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
             assertThat(callbackFailures.awaitItem()).isSameInstanceAs(expectedError)
             callbackFailures.expectNoEvents()
             assertThat(logger.errorLogs).isEmpty()
@@ -947,6 +1014,7 @@ internal class CheckoutSheetLauncherTest {
         assertThat(logger.errorLogs).containsExactly(
             "Failed to refresh the checkout session after the sheet closed." to expectedError
         )
+        assertRefreshFailureReported(expectedError)
         assertThat(operationCoordinator.isUpdating.value).isFalse()
     }
 
@@ -1241,6 +1309,15 @@ internal class CheckoutSheetLauncherTest {
 
         suspend fun awaitRefreshCall(): FakeCheckoutSessionRefresher.Call {
             return sessionRefresher.calls.awaitItem()
+        }
+
+        suspend fun assertRefreshFailureReported(expectedError: Throwable) {
+            val call = errorReporter.awaitCall()
+            assertThat(call.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHEET_RESULT_REFRESH_FAILED)
+            assertThat(call.stripeException?.cause).isSameInstanceAs(expectedError)
+            assertThat(errorReporter.getLoggedErrors())
+                .containsExactly("unexpected_error.checkout.sheet_result.refresh_failed")
         }
 
         fun expectNoRefreshCalls() {

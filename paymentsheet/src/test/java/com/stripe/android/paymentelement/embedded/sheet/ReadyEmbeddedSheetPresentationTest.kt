@@ -62,8 +62,8 @@ internal class ReadyEmbeddedSheetPresentationTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle).apply {
             setInitialSelectionIfNeeded(args.selection)
         }
-        val responseHolder = SheetCheckoutSessionResponseHolder(savedStateHandle).apply {
-            set(response)
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder().apply {
+            setInitialCheckoutSessionResponse(response)
         }
         val presentation = ReadyEmbeddedSheetPresentation(
             activity = activity,
@@ -74,9 +74,8 @@ internal class ReadyEmbeddedSheetPresentationTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             embeddedNavigator = mock(),
             selectionHolder = selectionHolder,
-            checkoutSessionResponseHolder = responseHolder,
             sheetActivityRegistrar = mock(),
-            sheetActivityStateHolder = mock(),
+            sheetActivityStateHolder = sheetActivityStateHolder,
         )
 
         presentation.onDismissed()
