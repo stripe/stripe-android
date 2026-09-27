@@ -134,10 +134,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 } else {
                     coroutineScope.launch {
                         operationCoordinator.runMutation {
-                            runCatching {
-                                sessionRefresher.refresh(response, result.selection)
-                                applyManageResult(result)
-                            }
+                            runCatching { sessionRefresher.refresh(response, result.selection) }
+                                .onSuccess { applyManageResult(result) }
                         }.onFailure {
                             logger.error(
                                 "Failed to refresh the checkout session after selecting a saved payment method.",

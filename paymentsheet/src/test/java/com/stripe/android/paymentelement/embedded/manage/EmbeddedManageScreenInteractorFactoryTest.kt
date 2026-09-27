@@ -1,7 +1,9 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -10,9 +12,11 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -39,6 +43,71 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
                 .isEqualTo(selection)
             assertThat(selectionHolder.selection.value).isNull()
             verifyNoInteractions(navigator)
+        }
+    }
+
+    @Test
+    fun `manage launch maps saved payment method selection state`() = runTest {
+        runScenario(launchMode = EmbeddedLaunchMode.Manage) {
+            val pending = SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
+            val error = R.string.stripe_something_went_wrong.resolvableString
+
+            interactor.state.test {
+                awaitItem()
+                sheetActivityStateHolder.updateState {
+                    it.copy(savedPaymentMethodSelectionState = pending)
+                }
+                awaitItem().run {
+                    assertThat(isProcessing).isTrue()
+                    assertThat(this.error).isNull()
+                    assertThat(paymentMethods.single().selectionState).isEqualTo(pending)
+                }
+
+                sheetActivityStateHolder.updateState {
+                    it.copy(savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(error))
+                }
+                awaitItem().run {
+                    assertThat(isProcessing).isFalse()
+                    assertThat(this.error).isEqualTo(error)
+                    assertThat(paymentMethods.single().selectionState).isEqualTo(
+                        SavedPaymentMethodSelectionState.Idle,
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `payment options launch uses idle selection state`() = runTest {
+        runScenario(launchMode = EmbeddedLaunchMode.PaymentOptions) {
+            sheetActivityStateHolder.updateState {
+                it.copy(
+                    savedPaymentMethodSelectionState =
+                        SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id),
+                )
+            }
+
+            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.paymentMethods.single().selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        }
+    }
+
+    @Test
+    fun `form launch uses idle selection state`() = runTest {
+        runScenario(
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        ) {
+            sheetActivityStateHolder.updateState {
+                it.copy(
+                    savedPaymentMethodSelectionState =
+                        SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id),
+                )
+            }
+
+            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.paymentMethods.single().selectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
     }
 

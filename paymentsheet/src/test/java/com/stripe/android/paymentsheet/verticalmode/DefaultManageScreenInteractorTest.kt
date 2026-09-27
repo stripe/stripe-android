@@ -16,11 +16,13 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -369,6 +371,102 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `selection state marks only matching row pending and exposes failure at screen level`() {
+        val sourcePaymentMethods = PaymentMethodFixtures.createCards(2)
+        val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
+            SavedPaymentMethodSelectionState.Idle,
+        )
+        val pending = SavedPaymentMethodSelectionState.Pending(sourcePaymentMethods[1].id)
+        val failure = R.string.stripe_something_went_wrong.resolvableString
+
+        runScenario(
+            initialPaymentMethods = sourcePaymentMethods,
+            currentSelection = null,
+            navigateBackAfterSelection = false,
+            selectionState = selectionState,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().paymentMethods.map { it.selectionState })
+                    .containsExactly(
+                        SavedPaymentMethodSelectionState.Idle,
+                        SavedPaymentMethodSelectionState.Idle,
+                    ).inOrder()
+
+                selectionState.value = pending
+                awaitItem().run {
+                    assertThat(isProcessing).isTrue()
+                    assertThat(error).isNull()
+                    assertThat(
+                        paymentMethods.first { it.paymentMethod.id == sourcePaymentMethods[0].id }.selectionState,
+                    )
+                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                    assertThat(
+                        paymentMethods.first { it.paymentMethod.id == sourcePaymentMethods[1].id }.selectionState,
+                    )
+                        .isEqualTo(pending)
+                }
+
+                selectionState.value = SavedPaymentMethodSelectionState.Failed(failure)
+                awaitItem().run {
+                    assertThat(isProcessing).isFalse()
+                    assertThat(error).isEqualTo(failure)
+                    assertThat(paymentMethods.map { it.selectionState })
+                        .containsExactly(
+                            SavedPaymentMethodSelectionState.Idle,
+                            SavedPaymentMethodSelectionState.Idle,
+                        ).inOrder()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `auto select does not repeat when selection state changes`() {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
+            SavedPaymentMethodSelectionState.Idle,
+        )
+        val failure = R.string.stripe_something_went_wrong.resolvableString
+
+        runScenario(
+            initialPaymentMethods = listOf(paymentMethod),
+            currentSelection = null,
+            navigateBackAfterSelection = false,
+            selectionState = selectionState,
+            onSelect = {
+                if (selectionState.value == SavedPaymentMethodSelectionState.Idle) {
+                    selectionState.value = SavedPaymentMethodSelectionState.Pending(it.paymentMethod.id)
+                    selectionState.value = SavedPaymentMethodSelectionState.Failed(failure)
+                }
+            },
+        ) {
+            canEditSource.value = false
+
+            assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod.id)
+                .isEqualTo(paymentMethod.id)
+            onSelectPaymentMethodTurbine.expectNoEvents()
+            assertThat(interactor.state.value.error).isEqualTo(failure)
+        }
+    }
+
+    @Test
+    fun `auto select still selects the only payment method when editing is unavailable`() {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+
+        runScenario(
+            initialPaymentMethods = listOf(paymentMethod),
+            currentSelection = null,
+            navigateBackAfterSelection = false,
+        ) {
+            canEditSource.value = false
+
+            assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod.id)
+                .isEqualTo(paymentMethod.id)
+            onSelectPaymentMethodTurbine.expectNoEvents()
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -379,6 +477,9 @@ class DefaultManageScreenInteractorTest {
         configuredLinkBrand: LinkBrand = LinkBrand.Link,
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
         navigateBackAfterSelection: Boolean = true,
+        selectionState: StateFlow<SavedPaymentMethodSelectionState> =
+            stateFlowOf(SavedPaymentMethodSelectionState.Idle),
+        onSelect: (DisplayableSavedPaymentMethod) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
@@ -409,8 +510,9 @@ class DefaultManageScreenInteractorTest {
             selectionBehavior = SelectionBehavior(
                 onSelectPaymentMethod = {
                     onSelectPaymentMethodTurbine.add(it)
+                    onSelect(it)
                 },
-                selectionState = stateFlowOf(SelectionState(false, null, null)),
+                selectionState = selectionState,
                 navigateBackAfterSelection = navigateBackAfterSelection,
             ),
             onUpdatePaymentMethod = { notImplemented() },

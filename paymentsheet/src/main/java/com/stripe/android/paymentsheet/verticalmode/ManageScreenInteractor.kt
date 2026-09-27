@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -21,6 +22,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
@@ -101,14 +105,8 @@ internal interface ManageScreenInteractor {
 
 internal data class SelectionBehavior(
     val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    val selectionState: StateFlow<SelectionState>,
+    val selectionState: StateFlow<SavedPaymentMethodSelectionState>,
     val navigateBackAfterSelection: Boolean,
-)
-
-internal data class SelectionState(
-    val isProcessing: Boolean,
-    val pendingPaymentMethodId: String?,
-    val error: ResolvableString?,
 )
 
 internal class DefaultManageScreenInteractor(
@@ -142,10 +140,20 @@ internal class DefaultManageScreenInteractor(
         selectionBehavior.selectionState,
     ) { paymentMethods, defaultPaymentMethodId, paymentSelection, editing, canEdit, linkAccount, selectionState ->
         val displayablePaymentMethods = paymentMethods.map {
+            val rowSelectionState =
+                if (
+                    selectionState is SavedPaymentMethodSelectionState.Pending &&
+                    selectionState.paymentMethodId == it.id
+                ) {
+                    selectionState
+                } else {
+                    SavedPaymentMethodSelectionState.Idle
+                }
+
             it.toDisplayableSavedPaymentMethod(
                 paymentMethodMetadata = paymentMethodMetadata,
                 defaultPaymentMethodId = defaultPaymentMethodId,
-                isSelectionPending = it.id == selectionState.pendingPaymentMethodId,
+                selectionState = rowSelectionState,
             )
         }
 
@@ -161,18 +169,23 @@ internal class DefaultManageScreenInteractor(
             isEditing = editing,
             canEdit = canEdit,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
-            isProcessing = selectionState.isProcessing,
-            error = selectionState.error,
+            isProcessing = selectionState is SavedPaymentMethodSelectionState.Pending,
+            error = (selectionState as? SavedPaymentMethodSelectionState.Failed)?.error,
         )
     }
 
     init {
         coroutineScope.launch {
-            state.collect { state ->
-                if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
-                    handlePaymentMethodSelected(state.paymentMethods.first())
+            state.map { currentState ->
+                if (!currentState.isEditing && !currentState.canEdit) {
+                    currentState.paymentMethods.singleOrNull()
+                } else {
+                    null
                 }
             }
+                .distinctUntilChangedBy { it?.paymentMethod?.id }
+                .filterNotNull()
+                .collect(::handlePaymentMethodSelected)
         }
 
         coroutineScope.launch {
@@ -230,13 +243,7 @@ internal class DefaultManageScreenInteractor(
                         viewModel.updateSelection(savedPmSelection)
                         viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                     },
-                    selectionState = stateFlowOf(
-                        SelectionState(
-                            isProcessing = false,
-                            pendingPaymentMethodId = null,
-                            error = null,
-                        )
-                    ),
+                    selectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
                     navigateBackAfterSelection = true,
                 ),
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },

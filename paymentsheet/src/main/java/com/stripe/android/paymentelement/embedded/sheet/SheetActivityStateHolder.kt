@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -59,7 +60,7 @@ internal interface SheetActivityStateHolder {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
-        val pendingPaymentMethodId: String?,
+        val savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState,
     )
 }
 
@@ -88,7 +89,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isProcessing = false,
             shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
-            pendingPaymentMethodId = null,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
@@ -227,9 +228,18 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     }
 
     override fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
-        if (_state.value.isProcessing) return
+        if (
+            _state.value.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending
+        ) {
+            return
+        }
 
-        _state.update { it.copy(pendingPaymentMethodId = selection.paymentMethod.id, error = null) }
+        _state.update {
+            it.copy(
+                savedPaymentMethodSelectionState =
+                    SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+            )
+        }
 
         val update = sheetTaxRegionUpdaterProvider.get().prepareUpdate(paymentMethodMetadata, selection)
         if (update == null) {
@@ -239,16 +249,18 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         }
 
         coroutineScope.launch {
-            updateProcessing(true)
             update().fold(
                 onSuccess = { response ->
                     selectionHolder.setSelection(selection)
                     setResult(createSavedPaymentMethodResult(selection, response))
                 },
                 onFailure = { error ->
-                    updateProcessing(false)
-                    _state.update { it.copy(pendingPaymentMethodId = null) }
-                    updateError(error.stripeErrorMessage())
+                    _state.update {
+                        it.copy(
+                            savedPaymentMethodSelectionState =
+                                SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()),
+                        )
+                    }
                 },
             )
         }

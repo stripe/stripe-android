@@ -10,10 +10,10 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
-import com.stripe.android.paymentsheet.verticalmode.SelectionState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Inject
@@ -43,11 +43,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                     sheetActivityStateHolder.selectSavedPaymentMethod(savedPmSelection)
                 },
                 selectionState = sheetActivityStateHolder.state.mapAsStateFlow {
-                    SelectionState(
-                        isProcessing = it.isProcessing,
-                        pendingPaymentMethodId = it.pendingPaymentMethodId,
-                        error = it.error,
-                    )
+                    it.savedPaymentMethodSelectionState
                 },
                 navigateBackAfterSelection = false,
             )
@@ -58,13 +54,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                     eventReporter.onSelectPaymentOption(savedPmSelection)
                     selectionHolder.setSelection(savedPmSelection)
                 },
-                selectionState = stateFlowOf(
-                    SelectionState(
-                        isProcessing = false,
-                        pendingPaymentMethodId = null,
-                        error = null,
-                    )
-                ),
+                selectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
                 navigateBackAfterSelection = true,
             )
         }

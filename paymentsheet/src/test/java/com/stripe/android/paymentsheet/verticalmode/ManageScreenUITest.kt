@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.PaymentMethodFactory
@@ -282,7 +283,11 @@ class ManageScreenUITest {
     fun processingDisablesRowsAndShowsSpinnerOnPendingRow() {
         val pendingPaymentMethods = displayableSavedPaymentMethods.mapIndexed { index, paymentMethod ->
             paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
-                isSelectionPending = index == 1,
+                selectionState = if (index == 1) {
+                    SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
+                } else {
+                    SavedPaymentMethodSelectionState.Idle
+                },
             )
         }
 
@@ -298,7 +303,7 @@ class ManageScreenUITest {
             )
         ) {
             pendingPaymentMethods.forEach {
-                val isPending = it.isSelectionPending
+                val isPending = it.selectionState is SavedPaymentMethodSelectionState.Pending
                 val row = composeRule.onNodeWithTag(
                     "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
                     useUnmergedTree = true,
