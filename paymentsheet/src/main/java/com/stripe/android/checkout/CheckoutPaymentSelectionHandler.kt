@@ -16,10 +16,12 @@ import javax.inject.Singleton
 @Singleton
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
     private val checkoutController: CheckoutController,
-    private val selectionHolder: EmbeddedSelectionHolder,
+    selectionHolder: EmbeddedSelectionHolder,
     immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {
+    private var isSavedSelectionInFlight = false
+
     private val immediateHandler = ImmediateVerticalPaymentSelectionHandler(
         updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
         completionAction = immediateActionHandler::invoke,
@@ -37,9 +39,17 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
+        // Pending is only committed once the mutation holds the checkout lock, so drop repeat taps here.
+        if (isSavedSelectionInFlight) return
+
+        isSavedSelectionInFlight = true
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            checkoutController.selectSavedPaymentMethod(selection).onSuccess {
-                onSelectionComplete()
+            try {
+                checkoutController.selectSavedPaymentMethod(selection).onSuccess {
+                    onSelectionComplete()
+                }
+            } finally {
+                isSavedSelectionInFlight = false
             }
         }
     }

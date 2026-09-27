@@ -108,16 +108,30 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `explicit equal selection clears failure`() = testScenario {
-        val error = IllegalStateException("Selection failed")
+    fun `setSelection with the current selection keeps a saved selection failure`() = testScenario {
+        val failure = SavedPaymentMethodSelectionState.Failed(
+            IllegalStateException("Selection failed").stripeErrorMessage(),
+        )
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                error.stripeErrorMessage(),
-            ),
+            savedPaymentMethodSelectionState = failure,
         )
 
         stateHolder.setSelection(PaymentSelection.GooglePay)
 
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState).isEqualTo(failure)
+    }
+
+    @Test
+    fun `setSelection with a different selection resets a saved selection failure to idle`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                IllegalStateException("Selection failed").stripeErrorMessage(),
+            ),
+        )
+
+        stateHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
@@ -151,27 +165,6 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    @Test
-    fun `setSelection returns a pending saved selection to idle`() = testScenario {
-        stateHolder.state = committedState().copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
-                "pm_pending",
-            ),
-        )
-
-        stateHolder.stateFlow.test {
-            assertThat(awaitItem()?.savedPaymentMethodSelectionState)
-                .isEqualTo(
-                    SavedPaymentMethodSelectionState.Pending("pm_pending"),
-                )
-
-            stateHolder.setSelection(PaymentSelection.GooglePay)
-
-            assertThat(awaitItem()?.savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        }
     }
 
     @Test

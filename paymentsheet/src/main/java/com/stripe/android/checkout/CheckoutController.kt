@@ -249,13 +249,7 @@ class CheckoutController @Inject internal constructor(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = address,
-            ).onFailure {
-                stateHolder.state = stateHolder.state?.copy(
-                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                        error = it.stripeErrorMessage(),
-                    ),
-                )
-            }
+            )
         }
     }
 
@@ -336,6 +330,17 @@ class CheckoutController @Inject internal constructor(
                 // reload resolves flag images (reusing newState's carried-over cache) and commits
                 // the fully reloaded state to the holder.
                 checkoutStateLoader.reload(newState)
+            }.onFailure { error ->
+                // Only a saved selection sets Pending, inside this lock. Mark it failed so a tax update or reload
+                // failure doesn't leave the row loading.
+                val current = stateHolder.state
+                if (current?.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+                    stateHolder.state = current.copy(
+                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                            error = error.stripeErrorMessage(),
+                        ),
+                    )
+                }
             }
         }
     }
