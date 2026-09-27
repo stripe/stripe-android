@@ -63,6 +63,8 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     private val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = displayName,
         paymentMethod = initialSelection.paymentMethod,
+        isSelectionPending = false,
+        shouldShowDefaultBadge = false,
     )
 
     override val state = combineAsStateFlow(

@@ -199,6 +199,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     last4 = "4242",
                 )
             ),
+            isSelectionPending = false,
             shouldShowDefaultBadge = true,
         ),
     ),
@@ -212,6 +213,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                 code = PaymentMethod.Type.SepaDebit.code,
                 type = PaymentMethod.Type.SepaDebit,
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -228,6 +231,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     last4 = "4242",
                 )
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
 )
@@ -251,6 +256,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
                     funding = "CREDIT",
                 ),
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -273,6 +280,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
                     routingNumber = null,
                 ),
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -289,6 +298,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
                     last4 = "3456",
                 ),
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -305,6 +316,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
                     last4 = "5678",
                 ),
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -327,6 +340,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
                     routingNumber = null,
                 ),
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -343,6 +358,8 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
                     last4 = "7890",
                 ),
             ),
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
         ),
     ),
 )

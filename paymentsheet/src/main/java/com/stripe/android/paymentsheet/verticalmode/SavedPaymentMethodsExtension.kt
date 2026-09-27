@@ -4,17 +4,16 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 
 internal fun PaymentMethod.toDisplayableSavedPaymentMethod(
     paymentMethodMetadata: PaymentMethodMetadata?,
     defaultPaymentMethodId: String?,
-    selectionState: SavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+    isSelectionPending: Boolean,
 ): DisplayableSavedPaymentMethod {
     return DisplayableSavedPaymentMethod.create(
         displayName = paymentMethodMetadata?.displayNameForCode(type?.code).orEmpty(),
         paymentMethod = this,
-        selectionState = selectionState,
+        isSelectionPending = isSelectionPending,
         shouldShowDefaultBadge = id == defaultPaymentMethodId,
     )
 }

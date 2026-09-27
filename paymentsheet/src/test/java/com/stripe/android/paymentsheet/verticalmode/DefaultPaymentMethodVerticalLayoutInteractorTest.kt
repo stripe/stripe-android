@@ -73,41 +73,39 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(isProcessing).isFalse()
-                assertThat(displayedSavedPaymentMethod?.selectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             }
             processingSource.value = true
             awaitItem().run {
                 assertThat(isProcessing).isTrue()
-                assertThat(displayedSavedPaymentMethod?.selectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             }
         }
     }
 
     @Test
-    fun state_setsSelectionStateOnDisplayedSavedPaymentMethod() = runScenario(
+    fun state_projectsSelectionErrorAndMatchingPendingRow() = runScenario(
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
-        val failed = SavedPaymentMethodSelectionState.Failed(
-            PaymentSheetR.string.stripe_something_went_wrong.resolvableString,
-        )
+        val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(awaitItem().selectionError).isNull()
+            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
-            savedPaymentMethodSelectionStateSource.value = failed
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState).isEqualTo(failed)
+            val failedState = awaitItem()
+            assertThat(failedState.selectionError).isEqualTo(error)
+            assertThat(failedState.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState).isEqualTo(
-                SavedPaymentMethodSelectionState.Pending(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
-            )
+            val pendingState = awaitItem()
+            assertThat(pendingState.selectionError).isNull()
+            assertThat(pendingState.displayedSavedPaymentMethod?.isSelectionPending).isTrue()
         }
     }
 
@@ -116,16 +114,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         interactor.state.test {
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 "pm_other",
             )
 
             expectNoEvents()
-            assertThat(interactor.state.value.displayedSavedPaymentMethod?.selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(interactor.state.value.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
 
@@ -140,6 +136,22 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
+        }
+    }
+
+    @Test
+    fun state_keepsSelectionErrorWhenDisplayedSavedPaymentMethodIsMissing() = runScenario {
+        val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
+
+        interactor.state.test {
+            assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            awaitItem().run {
+                assertThat(displayedSavedPaymentMethod).isNull()
+                assertThat(selectionError).isEqualTo(error)
+            }
         }
     }
 

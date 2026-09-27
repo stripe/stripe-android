@@ -5,14 +5,13 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 
 internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,
-    val selectionState: SavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-    val shouldShowDefaultBadge: Boolean = false,
+    val isSelectionPending: Boolean,
+    val shouldShowDefaultBadge: Boolean,
 ) {
     val isCard: Boolean
         get() = when (savedPaymentMethod) {
@@ -102,8 +101,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         fun create(
             displayName: ResolvableString,
             paymentMethod: PaymentMethod,
-            selectionState: SavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-            shouldShowDefaultBadge: Boolean = false,
+            isSelectionPending: Boolean,
+            shouldShowDefaultBadge: Boolean,
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> {
@@ -131,7 +130,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 displayName = displayName,
                 paymentMethod = paymentMethod,
                 savedPaymentMethod = savedPaymentMethod ?: SavedPaymentMethod.Unexpected,
-                selectionState = selectionState,
+                isSelectionPending = isSelectionPending,
                 shouldShowDefaultBadge = shouldShowDefaultBadge,
             )
         }

@@ -13,6 +13,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.state.error
+import com.stripe.android.paymentsheet.state.isPendingFor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -148,20 +150,10 @@ internal class DefaultManageScreenInteractor(
         selectionState,
     ) { paymentMethods, defaultPaymentMethodId, paymentSelection, editing, canEdit, linkAccount, selectionState ->
         val displayablePaymentMethods = paymentMethods.map {
-            val rowSelectionState =
-                if (
-                    selectionState is SavedPaymentMethodSelectionState.Pending &&
-                    selectionState.paymentMethodId == it.id
-                ) {
-                    selectionState
-                } else {
-                    SavedPaymentMethodSelectionState.Idle
-                }
-
             it.toDisplayableSavedPaymentMethod(
                 paymentMethodMetadata = paymentMethodMetadata,
                 defaultPaymentMethodId = defaultPaymentMethodId,
-                selectionState = rowSelectionState,
+                isSelectionPending = selectionState.isPendingFor(it.id),
             )
         }
 
@@ -178,7 +170,7 @@ internal class DefaultManageScreenInteractor(
             canEdit = canEdit,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
             isProcessing = selectionState is SavedPaymentMethodSelectionState.Pending,
-            error = (selectionState as? SavedPaymentMethodSelectionState.Failed)?.error,
+            error = selectionState.error,
         )
     }
 

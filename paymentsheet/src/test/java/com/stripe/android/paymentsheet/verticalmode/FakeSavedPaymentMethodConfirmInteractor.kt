@@ -36,6 +36,8 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
                         last4 = "4242",
                     )
                 ),
+                isSelectionPending = false,
+                shouldShowDefaultBadge = false,
             ),
             linkBrand = LinkBrand.Link,
             form = SavedPaymentMethodConfirmInteractor.State.Form(

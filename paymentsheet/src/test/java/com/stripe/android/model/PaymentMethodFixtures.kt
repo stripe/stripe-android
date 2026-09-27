@@ -9,6 +9,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.state.isPendingFor
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -730,7 +731,7 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
-            selectionState = selectionState,
+            isSelectionPending = selectionState.isPendingFor(id),
             shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }
