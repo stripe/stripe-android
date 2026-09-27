@@ -20,7 +20,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.PaymentMethodFactory
@@ -50,7 +49,7 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            error = null,
+            selectionError = null,
         )
     ) {
         assertThat(
@@ -80,7 +79,7 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -100,7 +99,7 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            error = null,
+            selectionError = null,
         )
     ) {
         assertThat(
@@ -135,7 +134,7 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -157,7 +156,7 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -176,7 +175,7 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            error = null,
+            selectionError = null,
         )
     ) {
         assertThat(
@@ -203,7 +202,7 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -228,7 +227,7 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -252,7 +251,7 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            error = null,
+            selectionError = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -271,7 +270,7 @@ class ManageScreenUITest {
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            error = null,
+            selectionError = null,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -283,11 +282,8 @@ class ManageScreenUITest {
     fun processingDisablesRowsAndShowsSpinnerOnPendingRow() {
         val pendingPaymentMethods = displayableSavedPaymentMethods.mapIndexed { index, paymentMethod ->
             paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
-                selectionState = if (index == 1) {
-                    SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
-                } else {
-                    SavedPaymentMethodSelectionState.Idle
-                },
+                isSelectionPending = index == 1,
+                shouldShowDefaultBadge = false,
             )
         }
 
@@ -299,11 +295,11 @@ class ManageScreenUITest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = true,
-                error = null,
+                selectionError = null,
             )
         ) {
             pendingPaymentMethods.forEach {
-                val isPending = it.selectionState is SavedPaymentMethodSelectionState.Pending
+                val isPending = it.isSelectionPending
                 val row = composeRule.onNodeWithTag(
                     "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
                     useUnmergedTree = true,
@@ -334,14 +330,20 @@ class ManageScreenUITest {
         PaymentMethodFixtures.createCards(2)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
-                it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = false)
+                it.toDisplayableSavedPaymentMethod(
+                    isSelectionPending = false,
+                    shouldShowDefaultBadge = false,
+                )
             }
 
     private val displayableSavedPaymentMethodsWithDefault =
         PaymentMethodFixtures.createCards(3)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .mapIndexed { idx, it ->
-                it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = idx == 0)
+                it.toDisplayableSavedPaymentMethod(
+                    isSelectionPending = false,
+                    shouldShowDefaultBadge = idx == 0,
+                )
             }
 
     private fun runScenario(

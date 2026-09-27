@@ -10,7 +10,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.delay
@@ -32,7 +31,12 @@ internal class ManageScreenUITransitionScreenshotTest {
         val paymentMethods = listOf(
             createCard(id = "pm_4242", last4 = "4242"),
             createCard(id = "pm_5555", last4 = "5555"),
-        ).map { it.toDisplayableSavedPaymentMethod() }
+        ).map {
+            it.toDisplayableSavedPaymentMethod(
+                isSelectionPending = false,
+                shouldShowDefaultBadge = false,
+            )
+        }
         val interactor = FakeManageScreenInteractor(
             initialState = ManageScreenInteractor.State(
                 paymentMethods = paymentMethods,
@@ -41,7 +45,7 @@ internal class ManageScreenUITransitionScreenshotTest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         )
 
@@ -53,11 +57,8 @@ internal class ManageScreenUITransitionScreenshotTest {
                     it.copy(
                         paymentMethods = paymentMethods.mapIndexed { index, paymentMethod ->
                             paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
-                                selectionState = if (index == 1) {
-                                    SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
-                                } else {
-                                    SavedPaymentMethodSelectionState.Idle
-                                },
+                                isSelectionPending = index == 1,
+                                shouldShowDefaultBadge = false,
                             )
                         },
                         isProcessing = true,

@@ -92,9 +92,16 @@ internal class EmbeddedContentPage(
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
-        composeTestRule.onNode(
+        val selectedRowMatcher =
             hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId").and(isSelected())
-        ).assertExists()
+        composeTestRule.waitUntilWithIdle(
+            conditionDescription = "saved payment method $paymentMethodId to be selected",
+        ) {
+            composeTestRule.onAllNodes(selectedRowMatcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNode(selectedRowMatcher).assertExists()
 
         if (cardBrand != null) {
             composeTestRule.onNode(

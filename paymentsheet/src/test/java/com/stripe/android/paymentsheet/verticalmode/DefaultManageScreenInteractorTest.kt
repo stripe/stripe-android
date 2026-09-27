@@ -17,7 +17,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -368,8 +367,7 @@ class DefaultManageScreenInteractorTest {
             assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
             assertThat(navigateBackCalls.awaitItem()).isTrue()
             assertThat(interactor.state.value.isProcessing).isFalse()
-            assertThat(interactor.state.value.paymentMethods.single().selectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isFalse()
         }
         navigateBackCalls.ensureAllEventsConsumed()
     }
@@ -400,13 +398,9 @@ class DefaultManageScreenInteractorTest {
 
                 awaitItem().run {
                     assertThat(isProcessing).isTrue()
-                    assertThat(error).isNull()
-                    assertThat(paymentMethods[0].selectionState)
-                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    assertThat(
-                        paymentMethods[1].selectionState,
-                    )
-                        .isEqualTo(SavedPaymentMethodSelectionState.Pending(selectedPaymentMethod.paymentMethod.id))
+                    assertThat(selectionError).isNull()
+                    assertThat(paymentMethods[0].isSelectionPending).isFalse()
+                    assertThat(paymentMethods[1].isSelectionPending).isTrue()
                 }
                 assertThat(updateResult.isCompleted).isFalse()
                 assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
@@ -420,12 +414,9 @@ class DefaultManageScreenInteractorTest {
                 updateResult.complete(Result.failure(failure))
                 awaitItem().run {
                     assertThat(isProcessing).isFalse()
-                    assertThat(error).isEqualTo(failure.stripeErrorMessage())
-                    assertThat(paymentMethods.map { it.selectionState })
-                        .containsExactly(
-                            SavedPaymentMethodSelectionState.Idle,
-                            SavedPaymentMethodSelectionState.Idle,
-                        ).inOrder()
+                    assertThat(selectionError).isEqualTo(failure.stripeErrorMessage())
+                    assertThat(paymentMethods.map { it.isSelectionPending })
+                        .containsExactly(false, false).inOrder()
                 }
             }
         }
@@ -462,20 +453,19 @@ class DefaultManageScreenInteractorTest {
 
                 val failedState = awaitItem()
                 assertThat(failedState.isProcessing).isFalse()
-                assertThat(failedState.error).isEqualTo(failure.stripeErrorMessage())
+                assertThat(failedState.selectionError).isEqualTo(failure.stripeErrorMessage())
 
                 interactor.handleViewAction(
                     ManageScreenInteractor.ViewAction.SelectPaymentMethod(selectedPaymentMethod)
                 )
                 val retryState = awaitItem()
                 assertThat(retryState.isProcessing).isTrue()
-                assertThat(retryState.error).isNull()
+                assertThat(retryState.selectionError).isNull()
                 assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
                 updateResults.awaitItem().complete(Result.success(Unit))
 
                 assertThat(interactor.state.value.isProcessing).isTrue()
-                assertThat(interactor.state.value.paymentMethods.single().selectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(selectedPaymentMethod.paymentMethod.id))
+                assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
                 navigateBackCalls.expectNoEvents()
             }
         }
@@ -509,13 +499,12 @@ class DefaultManageScreenInteractorTest {
 
                 val pendingState = awaitItem()
                 assertThat(pendingState.isProcessing).isTrue()
-                assertThat(pendingState.paymentMethods.single().selectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(selectedPaymentMethod.paymentMethod.id))
+                assertThat(pendingState.paymentMethods.single().isSelectionPending).isTrue()
                 assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
                 updateResult.complete(Result.success(Unit))
 
                 assertThat(interactor.state.value.isProcessing).isTrue()
-                assertThat(interactor.state.value.error).isNull()
+                assertThat(interactor.state.value.selectionError).isNull()
                 navigateBackCalls.expectNoEvents()
             }
         }
@@ -549,7 +538,7 @@ class DefaultManageScreenInteractorTest {
                 updateResult.complete(Result.failure(failure))
                 val failedState = awaitItem()
                 assertThat(failedState.isProcessing).isFalse()
-                assertThat(failedState.error).isEqualTo(failure.stripeErrorMessage())
+                assertThat(failedState.selectionError).isEqualTo(failure.stripeErrorMessage())
                 updateCalls.expectNoEvents()
                 navigateBackCalls.expectNoEvents()
             }
@@ -581,8 +570,7 @@ class DefaultManageScreenInteractorTest {
                 val pendingState = awaitItem()
                 assertThat(pendingState.isProcessing).isTrue()
                 assertThat(updateCalls.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
-                assertThat(interactor.state.value.paymentMethods.single().selectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending(paymentMethod.id))
+                assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
                 updateResult.complete(Result.success(Unit))
                 assertThat(interactor.state.value.isProcessing).isTrue()
                 navigateBackCalls.expectNoEvents()

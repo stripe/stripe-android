@@ -492,6 +492,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = response,
@@ -523,6 +524,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
             customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = response,
@@ -558,6 +560,7 @@ internal class CheckoutSheetLauncherTest {
             val result = EmbeddedActivityResult.Complete(
                 previousNewSelections = Bundle(),
                 customerState = null,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
                 selection = selection,
                 hasBeenConfirmed = false,
                 checkoutSessionResponse = response,

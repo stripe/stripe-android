@@ -65,7 +65,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
                     canEdit = true,
                     linkBrand = LinkBrand.Link,
                     isProcessing = false,
-                    error = null,
+                    selectionError = null,
                 ),
             ),
         )

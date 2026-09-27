@@ -48,7 +48,7 @@ internal interface ManageScreenInteractor {
         val canEdit: Boolean,
         val linkBrand: LinkBrand,
         val isProcessing: Boolean,
-        val error: ResolvableString?,
+        val selectionError: ResolvableString?,
     ) {
         private val containsOnlyCards: Boolean by lazy {
             paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
@@ -170,7 +170,7 @@ internal class DefaultManageScreenInteractor(
             canEdit = canEdit,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
             isProcessing = selectionState is SavedPaymentMethodSelectionState.Pending,
-            error = selectionState.error,
+            selectionError = selectionState.error,
         )
     }
 

@@ -311,7 +311,7 @@ internal class EmbeddedNavigatorTest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -332,7 +332,7 @@ internal class EmbeddedNavigatorTest {
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
                 isProcessing = false,
-                error = null,
+                selectionError = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)

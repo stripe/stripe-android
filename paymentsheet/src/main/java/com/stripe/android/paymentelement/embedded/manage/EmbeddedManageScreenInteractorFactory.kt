@@ -5,11 +5,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
-import com.stripe.android.paymentelement.embedded.sheet.SheetSavedPaymentMethodSelectionCoordinator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
@@ -26,30 +23,11 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
     private val linkAccountHolder: LinkAccountHolder,
-    private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val launchMode: EmbeddedLaunchMode,
-    private val selectionCoordinator: SheetSavedPaymentMethodSelectionCoordinator,
+    private val selectionBehavior: SelectionBehavior,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
-        val selectionBehavior = when (launchMode) {
-            is EmbeddedLaunchMode.Manage -> SelectionBehavior.Coordinated(
-                selectPaymentMethod = {
-                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                    eventReporter.onSelectPaymentOption(savedPmSelection)
-                    selectionCoordinator.select(savedPmSelection)
-                },
-            )
-            EmbeddedLaunchMode.PaymentOptions,
-            is EmbeddedLaunchMode.Form -> SelectionBehavior.Immediate(
-                onSelectPaymentMethod = {
-                    val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                    eventReporter.onSelectPaymentOption(savedPmSelection)
-                    selectionHolder.setSelection(savedPmSelection)
-                },
-            )
-        }
-
         return DefaultManageScreenInteractor(
             paymentMethods = customerStateHolder.paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,

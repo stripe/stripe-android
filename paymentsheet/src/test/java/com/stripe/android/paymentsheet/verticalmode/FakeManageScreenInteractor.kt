@@ -24,7 +24,7 @@ internal class FakeManageScreenInteractor(
             canEdit = true,
             linkBrand = LinkBrand.Link,
             isProcessing = false,
-            error = null,
+            selectionError = null,
         )
     )
     override val state: StateFlow<ManageScreenInteractor.State> = _state.asStateFlow()

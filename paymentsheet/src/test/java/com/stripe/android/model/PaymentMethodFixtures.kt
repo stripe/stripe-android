@@ -8,8 +8,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentM
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
-import com.stripe.android.paymentsheet.state.isPendingFor
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -700,27 +698,25 @@ internal object PaymentMethodFixtures {
         ).toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
     }
 
-    fun PaymentMethod.toDisplayableSavedPaymentMethod(
-        shouldShowDefaultBadge: Boolean = false,
-    ): DisplayableSavedPaymentMethod {
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
         return toDisplayableSavedPaymentMethod(
-            shouldShowDefaultBadge = shouldShowDefaultBadge,
-            selectionState = SavedPaymentMethodSelectionState.Idle,
-        )
-    }
-
-    fun PaymentMethod.toDisplayableSavedPaymentMethod(
-        selectionState: SavedPaymentMethodSelectionState,
-    ): DisplayableSavedPaymentMethod {
-        return toDisplayableSavedPaymentMethod(
+            isSelectionPending = false,
             shouldShowDefaultBadge = false,
-            selectionState = selectionState,
         )
     }
 
-    private fun PaymentMethod.toDisplayableSavedPaymentMethod(
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(
         shouldShowDefaultBadge: Boolean,
-        selectionState: SavedPaymentMethodSelectionState,
+    ): DisplayableSavedPaymentMethod {
+        return toDisplayableSavedPaymentMethod(
+            isSelectionPending = false,
+            shouldShowDefaultBadge = shouldShowDefaultBadge,
+        )
+    }
+
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(
+        isSelectionPending: Boolean,
+        shouldShowDefaultBadge: Boolean,
     ): DisplayableSavedPaymentMethod {
         val displayName = linkPaymentDetails?.label
             ?: this.card?.last4?.resolvableString
@@ -731,7 +727,7 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
-            isSelectionPending = selectionState.isPendingFor(id),
+            isSelectionPending = isSelectionPending,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }

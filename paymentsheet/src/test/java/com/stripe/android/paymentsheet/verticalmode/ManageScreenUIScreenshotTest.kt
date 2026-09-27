@@ -34,7 +34,7 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        error = null,
+                        selectionError = null,
                     )
                 ),
             )
@@ -53,7 +53,7 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        error = null,
+                        selectionError = null,
                     )
                 ),
             )
@@ -72,7 +72,7 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        error = null,
+                        selectionError = null,
                     )
                 ),
             )
@@ -91,7 +91,7 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        error = null,
+                        selectionError = null,
                     )
                 ),
             )
@@ -105,14 +105,17 @@ internal class ManageScreenUIScreenshotTest {
                 interactor = FakeManageScreenInteractor(
                     initialState = ManageScreenInteractor.State(
                         paymentMethods = listOf(
-                            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+                            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(
+                                isSelectionPending = false,
+                                shouldShowDefaultBadge = false,
+                            )
                         ),
                         currentSelection = null,
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        error = null,
+                        selectionError = null,
                     )
                 ),
             )
@@ -124,7 +127,12 @@ internal class ManageScreenUIScreenshotTest {
         createCard("4000"),
         createUsBank("1001"),
         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
-    ).map { it.toDisplayableSavedPaymentMethod() }
+    ).map {
+        it.toDisplayableSavedPaymentMethod(
+            isSelectionPending = false,
+            shouldShowDefaultBadge = false,
+        )
+    }
 
     private fun createCard(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
@@ -147,7 +155,7 @@ internal class ManageScreenUIScreenshotTest {
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
                         isProcessing = false,
-                        error = null,
+                        selectionError = null,
                     )
                 ),
             )

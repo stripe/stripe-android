@@ -56,7 +56,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 }
             )
         }
-        state.error?.let {
+        state.selectionError?.let {
             ErrorMessage(error = it.resolve())
         }
     }

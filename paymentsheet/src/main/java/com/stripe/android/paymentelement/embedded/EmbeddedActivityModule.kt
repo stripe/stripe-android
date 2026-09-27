@@ -54,10 +54,12 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.SelectionBehavior
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -159,6 +161,30 @@ internal interface EmbeddedActivityModule {
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
                 initialBackStack = initialScreenFactory.create(),
+            )
+        }
+
+        @Provides
+        fun provideManageScreenSelectionBehavior(
+            launchMode: EmbeddedLaunchMode,
+            eventReporter: EventReporter,
+            selectionHolder: EmbeddedSelectionHolder,
+            selectionCoordinator: SheetSavedPaymentMethodSelectionCoordinator,
+        ): SelectionBehavior = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> SelectionBehavior.Coordinated(
+                selectPaymentMethod = { displayableSavedPaymentMethod ->
+                    val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
+                    eventReporter.onSelectPaymentOption(selection)
+                    selectionCoordinator.select(selection)
+                },
+            )
+            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.Form -> SelectionBehavior.Immediate(
+                onSelectPaymentMethod = { displayableSavedPaymentMethod ->
+                    val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
+                    eventReporter.onSelectPaymentOption(selection)
+                    selectionHolder.setSelection(selection)
+                },
             )
         }
 
