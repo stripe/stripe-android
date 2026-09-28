@@ -70,13 +70,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
-        val committed = current.commitSelection(updatedSelection)
-        // Re-applying the current selection (e.g. rebuilt embedded content) re-acknowledges SEPA but keeps a failure.
-        state = if (updatedSelection == current.paymentSelection) {
-            committed.copy(savedPaymentMethodSelectionState = current.savedPaymentMethodSelectionState)
-        } else {
-            committed
-        }
+        state = current.commitSelection(updatedSelection)
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {
