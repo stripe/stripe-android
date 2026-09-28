@@ -219,7 +219,8 @@ private fun BoxScope.CloseButtonLayout(
     }
 }
 
-private val DefaultEdgePadding = 20.dp
-private val BottomCenterEdgePadding = 68.dp
+// Position the icon at the intended inset while allowing its larger tap target to extend around it.
+private val DefaultEdgePadding = 20.dp - NfcCloseButtonTapTargetInset
+private val BottomCenterEdgePadding = 68.dp - NfcCloseButtonTapTargetInset
 
 internal const val NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG = "nfc_open_developer_options"
