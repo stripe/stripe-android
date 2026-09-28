@@ -53,11 +53,10 @@ internal data class CheckoutControllerState(
 }
 
 /**
- * Acknowledges the passed selection's SEPA mandate, stashes new selections, and returns the saved
- * payment method selection state to [SavedPaymentMethodSelectionState.Idle].
+ * Acknowledges the passed selection's SEPA mandate and stashes new selections.
  */
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutControllerState.withSelection(
+internal fun CheckoutControllerState.commitSelection(
     selection: PaymentSelection?,
 ): CheckoutControllerState {
     selection?.hasAcknowledgedSepaMandate = true
@@ -66,7 +65,6 @@ internal fun CheckoutControllerState.withSelection(
     }
     return copy(
         paymentSelection = selection,
-        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         previousNewSelections = updatedPreviousNewSelections,
     )
 }
