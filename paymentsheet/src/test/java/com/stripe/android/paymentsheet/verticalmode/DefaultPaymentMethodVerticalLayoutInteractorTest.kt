@@ -90,7 +90,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            )
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
@@ -105,7 +107,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                "pm_missing",
+            )
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()

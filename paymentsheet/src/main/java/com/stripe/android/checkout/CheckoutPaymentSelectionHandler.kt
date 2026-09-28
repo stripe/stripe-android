@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Singleton
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
     private val checkoutController: CheckoutController,
-    private val selectionHolder: EmbeddedSelectionHolder,
+    selectionHolder: EmbeddedSelectionHolder,
     immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {
@@ -37,6 +37,7 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
+        // Undispatched so Pending is set within the tap when the checkout lock is free.
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             checkoutController.selectSavedPaymentMethod(selection).onSuccess {
                 onSelectionComplete()

@@ -349,18 +349,6 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `reload carries pending saved selection state forward`() = runScenario {
-        loader.reload(
-            committedState().copy(
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-            ),
-        )
-
-        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
-            .isEqualTo(SavedPaymentMethodSelectionState.Pending)
-    }
-
-    @Test
     fun `reload preserves eager Link suppression`() = runScenario {
         loader.reload(committedState(linkEagerPresentationSuppressed = true))
 
