@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
@@ -163,6 +164,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
                 embeddedConfiguration = embeddedConfig,
                 paymentSelection = selection,
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 temporarySelection = carryForward.temporarySelection,
                 previousNewSelections = carryForward.previousNewSelections,
                 linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,

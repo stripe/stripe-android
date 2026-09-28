@@ -404,12 +404,6 @@ public final class com/stripe/android/link/onramp/ui/ComposableSingletons$Onramp
 	public final fun getLambda$-1308679633$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/onramp/ui/ComposableSingletons$UserAttestationScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/link/onramp/ui/ComposableSingletons$UserAttestationScreenKt;
-	public fun <init> ()V
-	public final fun getLambda$2076034739$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/link/ui/ComposableSingletons$ErrorTextKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$ErrorTextKt;
 	public fun <init> ()V
@@ -641,6 +635,9 @@ public abstract interface class com/stripe/android/paymentelement/AnalyticEventC
 	public abstract fun onEvent (Lcom/stripe/android/paymentelement/AnalyticEvent;)V
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/ApiConfigurationPreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/paymentelement/AppearanceAPIAdditionsPreview : java/lang/annotation/Annotation {
 }
 
@@ -719,6 +716,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun apiConfiguration (Lcom/stripe/android/core/ApiConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;

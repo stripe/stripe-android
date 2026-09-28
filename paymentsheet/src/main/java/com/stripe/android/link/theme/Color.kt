@@ -1,5 +1,6 @@
 package com.stripe.android.link.theme
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.RadioButtonDefaults
@@ -34,7 +35,8 @@ private val Critical400 = Color(0xFFFA4A67)
 internal val EceLinkWhiteTextPrimary = Neutral900
 internal val EceLinkWhiteBackground = Neutral0
 
-internal data class LinkColors(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+data class LinkColors(
     val isDark: Boolean,
     val surfacePrimary: Color,
     val surfaceSecondary: Color,

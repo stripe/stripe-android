@@ -3,9 +3,12 @@ package com.stripe.android.paymentelement
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
@@ -13,11 +16,13 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
+import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_EDIT_SAVED_CARD
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -113,6 +118,29 @@ internal class EmbeddedContentPage(
         }
     }
 
+    fun assertHasSavedPaymentMethodSelectionError(error: String) {
+        composeTestRule.waitUntilWithIdle {
+            savedPaymentMethodSelectionErrorNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(
+            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertIsDisplayed().assertTextEquals(error)
+    }
+
+    fun assertNoSavedPaymentMethodSelectionError() {
+        composeTestRule.waitUntilWithIdle {
+            savedPaymentMethodSelectionErrorNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        savedPaymentMethodSelectionErrorNodes().assertCountEquals(0)
+    }
+
     fun clickOnSavedPM(paymentMethodId: String) {
         waitUntilVisible()
 
@@ -132,4 +160,9 @@ internal class EmbeddedContentPage(
 
         composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
     }
+
+    private fun savedPaymentMethodSelectionErrorNodes() = composeTestRule.onAllNodesWithTag(
+        EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
+        useUnmergedTree = true,
+    )
 }

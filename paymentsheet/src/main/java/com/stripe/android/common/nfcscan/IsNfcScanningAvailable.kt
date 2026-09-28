@@ -48,7 +48,7 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
 
         return when (variant) {
             "treatment" -> NfcScanningAvailability.Available(shouldBePrimaryScanningOption = true)
-            null -> NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+            null -> NfcScanningAvailability.Available(shouldBePrimaryScanningOption = metadata.preferNfcOverCameraScan)
             else -> NfcScanningAvailability.Unavailable
         }
     }

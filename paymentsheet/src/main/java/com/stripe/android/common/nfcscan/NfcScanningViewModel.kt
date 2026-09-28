@@ -60,6 +60,8 @@ internal class NfcScanningViewModel @Inject constructor(
 
         if (isInitiallySecure) {
             timeoutManager.start()
+        } else {
+            eventReporter.onNfcScanBlocked()
         }
 
         viewModelScope.launch {

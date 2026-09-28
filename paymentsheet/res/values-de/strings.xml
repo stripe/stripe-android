@@ -279,6 +279,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Die Kartenmarke wurde nicht geändert. Bitte versuchen Sie es erneut.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Bestätigen Sie die Zahlung in Ihrer Bank- oder Zahlungs-App innerhalb von %s, um den Kauf abzuschließen.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Führen Sie die Zahlung mit Pix durch, um den Kauf abzuschließen.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Als Standard-Zahlungsmethode festlegen</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

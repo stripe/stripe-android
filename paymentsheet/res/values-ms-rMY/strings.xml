@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Log keluar dari Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Log keluar daripada %s?</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Sahkan pembayaran dalam aplikasi MB WAY anda dalam masa %s untuk melengkapkan pembelian.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ralat berlaku. Periksa sambungan Internet anda dan cuba lagi.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Untuk keselamatan, pilihan pembangun mesti dimatikan untuk menggunakan Ketik untuk tambah.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Buka Tetapan</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Matikan Pilihan pembangun</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kad telah tamat tempoh. Cuba kad lain.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Ketik kad</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kad ditolak. Cuba kad lain.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Jenama kad tidak dikemaskinikan. Sila cuba lagi.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Sahkan pembayaran dalam bank atau aplikasi pembayaran anda dalam masa %s untuk melengkapkan pembelian.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Lengkapkan pembayaran menggunakan Pix untuk menyelesaikan pembelian.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Tetapkan sebagai kaedah pembayaran tetapan asal</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

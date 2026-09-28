@@ -113,6 +113,36 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     @Test
+    fun testSavedPaymentMethodSelectionIgnoresDuplicateTapWhileTaxResponseIsPending() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            taxUpdateRequests.awaitItem()
+            contentPage.assertPaymentMethodRowsAreEnabled(false)
+
+            // An accepted second tap would queue another tax update that no response is enqueued for.
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            immediateActionCalls.expectNoEvents()
+
+            releaseTaxUpdateResponse.countDown()
+        }
+    }
+
+    @Test
     fun testSavedPaymentMethodSelectionKeepsSpinnerAcrossHostRecreation() {
         runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
@@ -168,6 +198,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
             immediateActionCalls.expectNoEvents()
+            contentPage.assertHasSavedPaymentMethodSelectionError(
+                applicationContext.getString(R.string.stripe_something_went_wrong)
+            )
 
             enqueueSavedPaymentMethodTaxUpdate(
                 automaticTaxResponse(
@@ -178,6 +211,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 )
             )
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+            contentPage.assertNoSavedPaymentMethodSelectionError()
         }
     }
 

@@ -54,6 +54,8 @@
   <string name="stripe_iban_invalid_country">Antamasi IBAN on virheellinen, \"%s\" ei ole tuettu maakoodi.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN-tilinumero alkaa kaksikirjaimisella maakoodilla.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Antamasi tunnusnumero on puutteellinen.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK-koodisi on puutteellinen.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -109,6 +111,8 @@
   <string name="stripe_paymentsheet_redirect_instructions">Lähetyksen jälkeen sinut ohjataan eteenpäin suorittamaan seuraavat vaiheet turvallisesti.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Vahvistamalla maksusi PayPalin kanssa valtuutat kohteen %s veloittamaan tulevia maksuja PayPal-tililtäsi heidän ehtojensa mukaisesti.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Tämä on kansainvälinen ostos, eikä siihen sisälly 3,5 %:n IOF-maksua. Jatkamalla ostoa hyväksyt <terms>Ebanxin ehdot</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Vahvistamalla maksusi RevolutPayn kanssa, valtuutat yrityksen %s veloittamaan tulevia maksuja RevolutPay-tililtäsi heidän ehtojensa mukaisesti.</string>
   <!-- Satispay mandate text -->
@@ -121,6 +125,8 @@
   <string name="stripe_scan_card">Skannaa kortti</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Tyhjennä skannattu kortti</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Vanhenee %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Antamalla maksutiedot ja vahvistamalla tämän maksun, valtuutat (A) %s ja Stripen, maksupalvelun tarjoajamme, lähettämään ohjeita pankillesi tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi annettujen ohjeiden mukaisesti. Oikeuksiesi mukaisesti olet oikeutettu maksun palautukseen pankiltasi heidän kanssaan tekemäsi sopimuksen mukaisesti. Maksun palautus on lunastettava kahdeksan viikon kuluessa tilisi veloituksesta. Oikeutesi kerrotaan lausunnossa, jonka voit hankkia pankiltasi. Hyväksyt vastaanottamaan ilmoituksia tulevista veloituksista kaksi päivää ennen niiden tapahtumista.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
