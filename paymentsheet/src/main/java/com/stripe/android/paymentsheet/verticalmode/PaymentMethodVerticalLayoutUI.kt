@@ -156,6 +156,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
+                        isEnabled = isEnabled,
+                        viewMoreShowChevron = true,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -190,7 +192,8 @@ internal fun PaymentMethodVerticalLayoutUI(
 
 @Composable
 internal fun SavedPaymentMethodTrailingContent(
-    viewMoreShowChevron: Boolean = true,
+    isEnabled: Boolean,
+    viewMoreShowChevron: Boolean,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
@@ -198,19 +201,26 @@ internal fun SavedPaymentMethodTrailingContent(
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
+            EditButton(
+                isEnabled = isEnabled,
+                onClick = onManageOneSavedPaymentMethod,
+            )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
+                isEnabled = isEnabled,
                 showChevron = viewMoreShowChevron,
-                onViewMorePaymentMethods = onViewMorePaymentMethods
+                onViewMorePaymentMethods = onViewMorePaymentMethods,
             )
         }
     }
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(
+    isEnabled: Boolean,
+    onClick: () -> Unit,
+) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -218,7 +228,7 @@ private fun EditButton(onClick: () -> Unit) {
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
-            .clickable(onClick = onClick)
+            .clickable(enabled = isEnabled, onClick = onClick)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     )
@@ -226,14 +236,15 @@ private fun EditButton(onClick: () -> Unit) {
 
 @Composable
 private fun ViewMoreButton(
-    showChevron: Boolean = true,
+    isEnabled: Boolean,
+    showChevron: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
-            .clickable(onClick = onViewMorePaymentMethods)
+            .clickable(enabled = isEnabled, onClick = onViewMorePaymentMethods)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     ) {
