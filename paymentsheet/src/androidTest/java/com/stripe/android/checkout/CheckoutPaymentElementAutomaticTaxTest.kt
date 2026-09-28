@@ -4,11 +4,9 @@ import android.app.Application
 import app.cash.turbine.Turbine
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
@@ -38,7 +36,6 @@ import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
-import com.stripe.android.paymentsheet.verticalmode.EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
@@ -125,6 +122,36 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     @Test
+    fun testSavedPaymentMethodSelectionIgnoresDuplicateTapWhileTaxResponseIsPending() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            taxUpdateRequests.awaitItem()
+            contentPage.assertPaymentMethodRowsAreEnabled(false)
+
+            // An accepted second tap would queue another tax update that no response is enqueued for.
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            immediateActionCalls.expectNoEvents()
+
+            releaseTaxUpdateResponse.countDown()
+        }
+    }
+
+    @Test
     fun testSavedPaymentMethodSelectionKeepsSpinnerAcrossHostRecreation() {
         runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
@@ -157,9 +184,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     @Test
     fun testSavedPaymentMethodSelectionFailureDoesNotInvokeImmediateActionAndCanRetry() {
-        runSavedPaymentMethodSelectionFromCashAppScenario(
-            awaitSavedPaymentMethodImmediateAction = false,
-        ) {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 taxUpdateRequests.add(Unit)
                 check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
@@ -182,38 +207,20 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
             immediateActionCalls.expectNoEvents()
-            assertSavedPaymentMethodSelectionError(isDisplayed = true)
+            contentPage.assertHasSavedPaymentMethodSelectionError(
+                applicationContext.getString(R.string.stripe_something_went_wrong)
+            )
 
-            val releaseRetryResponse = CountDownLatch(1)
-            enqueueSavedPaymentMethodTaxUpdate { response ->
-                taxUpdateRequests.add(Unit)
-                check(releaseRetryResponse.await(10, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the Checkout Session retry response."
-                }
+            enqueueSavedPaymentMethodTaxUpdate(
                 automaticTaxResponse(
                     total = UPDATED_TOTAL,
                     taxStatus = TAX_STATUS_COMPLETE,
                     billingAddressCollection = "auto",
                     hasSavedPaymentMethod = true,
-                )(response)
-            }
-            try {
-                contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
-
-                taxUpdateRequests.awaitItem()
-                assertSavedPaymentMethodSpinnerCount(1)
-                assertSavedPaymentMethodSelectionError(isDisplayed = false)
-                immediateActionCalls.expectNoEvents()
-            } finally {
-                releaseRetryResponse.countDown()
-            }
-
-            contentPage.assertPaymentMethodRowsAreEnabled(true)
-            assertSavedPaymentMethodSpinnerCount(0)
-            assertSavedPaymentMethodSelectionError(isDisplayed = false)
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(UPDATED_TOTAL.toDouble())
-            immediateActionCalls.awaitItem()
+                )
+            )
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+            contentPage.assertNoSavedPaymentMethodSelectionError()
         }
     }
 
@@ -270,7 +277,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
-        awaitSavedPaymentMethodImmediateAction: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) {
         lateinit var scenario: Scenario
@@ -292,9 +298,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 selectCashAppAndAwaitCallback()
                 block()
 
-                if (awaitSavedPaymentMethodImmediateAction) {
-                    immediateActionCalls.awaitItem()
-                }
+                immediateActionCalls.awaitItem()
                 assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
                 contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 contentPage.assertPaymentMethodRowsAreEnabled(true)
@@ -703,28 +707,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
             useUnmergedTree = true,
         ).assertCountEquals(expectedCount)
-    }
-
-    private fun assertSavedPaymentMethodSelectionError(isDisplayed: Boolean) {
-        val selectionErrorNodes = testRules.compose.onAllNodesWithTag(
-            EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
-            useUnmergedTree = true,
-        )
-        testRules.compose.waitUntilWithIdle {
-            selectionErrorNodes.fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty() == isDisplayed
-        }
-
-        if (isDisplayed) {
-            testRules.compose.onNodeWithTag(
-                EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG,
-                useUnmergedTree = true,
-            ).assertIsDisplayed().assertTextEquals(
-                applicationContext.getString(R.string.stripe_something_went_wrong)
-            )
-        } else {
-            selectionErrorNodes.assertCountEquals(0)
-        }
     }
 
     private fun automaticTaxResponseWithoutRequiredBilling(

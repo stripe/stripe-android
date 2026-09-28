@@ -54,6 +54,8 @@
   <string name="stripe_iban_invalid_country">Podany IBAN jest nieprawidłowy. „%s” nie jest prawidłowym kodem kraju.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Wprowadzony numer identyfikacyjny jest niekompletny.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Kod BLIK jest niekompletny.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -109,6 +111,8 @@
   <string name="stripe_paymentsheet_redirect_instructions">Po przesłaniu nastąpi przekierowanie w celu bezpiecznego wykonania kolejnych kroków.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Zatwierdzając płatność z PayPal, zezwalasz %s na obciążenie Twojego konta PayPal przyszłymi płatnościami zgodnie z ich warunkami.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Jest to zakup międzynarodowy i nie obejmuje opłat w wysokości 3,5% IOF. Kontynuując, uznajesz i akceptujesz <terms>warunki Ebanx</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Zatwierdzając płatność z RevolutPay, zezwalasz %s na obciążenie Twojego konta RevolutPay przyszłymi płatnościami zgodnie z ich warunkami.</string>
   <!-- Satispay mandate text -->
@@ -121,6 +125,8 @@
   <string name="stripe_scan_card">Skanuj kartę</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Wyczyść zeskanowaną kartę</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Wygasa %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Podając dane płatności i potwierdzając tę płatność, upoważniasz (A) %s i Stripe, naszego dostawcę usług płatności, do wysłania instrukcji do Twojego banku w celu obciążenia Twojego konta oraz (B) Twój bank do obciążenia Twojego konta zgodnie z tymi instrukcjami. W ramach swoich praw jesteś uprawniony(-a) do otrzymania zwrotu od Twojego banku zgodnie z zasadami i warunkami umowy z bankiem. Zwrot należy odebrać w ciągu 8 tygodni, licząc od daty obciążenia konta. Twoje prawa są wyjaśnione w oświadczeniu, które możesz otrzymać z banku. Wyrażasz zgodę na otrzymywanie powiadomień w przypadku przyszłych obciążeń do 2 dni przed ich wystąpieniem.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

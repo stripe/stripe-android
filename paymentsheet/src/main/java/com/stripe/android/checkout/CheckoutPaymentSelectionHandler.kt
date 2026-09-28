@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Singleton
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
     private val checkoutController: CheckoutController,
-    private val selectionHolder: EmbeddedSelectionHolder,
+    selectionHolder: EmbeddedSelectionHolder,
     immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : VerticalPaymentSelectionHandler {

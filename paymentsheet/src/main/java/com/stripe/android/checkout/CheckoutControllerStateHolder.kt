@@ -32,6 +32,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
     init {
+        // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
         state?.let { restoredState ->
             if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
                 state = restoredState.copy(

@@ -168,6 +168,7 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
 internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
     val defaultSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = "4242".resolvableString,
+        shouldShowDefaultBadge = true,
         paymentMethod = PaymentMethod(
             id = "002",
             created = null,
@@ -179,7 +180,6 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 last4 = "4444",
             )
         ),
-        shouldShowDefaultBadge = true,
     )
 
     DefaultStripeTheme {

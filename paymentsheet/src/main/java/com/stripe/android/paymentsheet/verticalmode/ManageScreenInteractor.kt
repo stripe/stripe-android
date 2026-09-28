@@ -134,7 +134,7 @@ internal class DefaultManageScreenInteractor(
             paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
                     paymentMethodMetadata,
-                    defaultPaymentMethodId,
+                    defaultPaymentMethodId
                 )
             }
         }

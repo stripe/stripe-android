@@ -334,8 +334,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
+                    selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 ),
-                selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = "Mandate".resolvableString,

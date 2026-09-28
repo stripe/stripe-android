@@ -277,6 +277,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marca de la targeta no s\'ha actualitzat. Torneu-ho a provar.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %s.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Completeu el pagament amb Pix per finalitzar la compra.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Configura com a mètode de pagament per defecte</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

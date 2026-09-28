@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Link 로그아웃</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">%s에서 로그아웃</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">구매를 완료하려면 %s 이내에 MB WAY 앱에서 결제를 확인하십시오.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">오류가 발생했습니다. 연결을 확인하고 다시 시도하십시오.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">보안을 위해, ‘탭하여 추가’ 기능을 사용하려면 개발자 옵션을 꺼야 합니다.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">설정 열기</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">개발자 옵션 끄기</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">카드가 만료되었습니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">카드 탭하기</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">카드가 거절되었습니다. 다른 카드를 사용해 주십시오.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">카드 브랜드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">%s 이내에 귀하의 은행 또는 결제 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">구매를 마치려면 Pix를 사용하여 결제를 완료하십시오.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">기본 결제 방식으로 설정</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
