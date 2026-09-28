@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.SearchSettingsField
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
@@ -161,6 +162,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                     onOpenGroup = { scenarioNavigationPath += it.key },
                                     onSelect = { scenario ->
                                         scenarioNavigationPath = emptyList()
+                                        FeatureFlags.reset()
                                         viewModel.settings.applyPreset(scenario.preset)
                                         viewModel.start()
                                     },
