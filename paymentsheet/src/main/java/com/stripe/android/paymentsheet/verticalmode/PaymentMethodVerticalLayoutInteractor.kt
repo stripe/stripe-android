@@ -233,18 +233,22 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
-    private val displayedSavedPaymentMethod = combineAsStateFlow(
+    // Derives the pending row and the error from one emission so they never disagree mid-update.
+    private val savedPaymentMethodSelection = combineAsStateFlow(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
         savedPaymentMethodSelectionState,
     ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
-        getDisplayedSavedPaymentMethod(
+        val displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending,
         )
+        displayedSavedPaymentMethod to selectionState.error
     }
+
+    private val displayedSavedPaymentMethod = savedPaymentMethodSelection.mapAsStateFlow { it.first }
 
     private val availableSavedPaymentMethodAction = combineAsStateFlow(
         paymentMethods,
@@ -292,13 +296,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayablePaymentMethods,
         processing,
         verticalModeScreenSelection,
-        displayedSavedPaymentMethod,
+        savedPaymentMethodSelection,
         availableSavedPaymentMethodAction,
         temporarySelection,
         linkAccount,
-        savedPaymentMethodSelectionState,
-    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode, linkAccount, selectionState ->
+    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, savedPaymentMethodSelection, action,
+        temporarySelectionCode, linkAccount ->
+        val (displayedSavedPaymentMethod, savedPaymentMethodSelectionError) = savedPaymentMethodSelection
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -318,7 +322,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             isProcessing = isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
-            savedPaymentMethodSelectionError = selectionState.error,
+            savedPaymentMethodSelectionError = savedPaymentMethodSelectionError,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
