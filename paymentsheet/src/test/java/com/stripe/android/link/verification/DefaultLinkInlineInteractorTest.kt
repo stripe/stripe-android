@@ -19,6 +19,7 @@ import com.stripe.android.link.verification.VerificationState.Loading
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -38,6 +39,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -101,7 +103,7 @@ class DefaultLinkInlineInteractorTest {
     fun `when account status is LoggedIn, should render button`() = runTest(testDispatcher) {
         // Setup
         linkAccountManager.setLinkAccount(
-            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.Verified(true, null)))
+            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.Verified(consentPresentation = null)))
         )
         val metadata = createPaymentMethodMetadata()
         val interactor = createInteractor()
@@ -139,6 +141,34 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
+    fun `when account status is NeedsVerification with Onelink brand, view state uses Onelink`() =
+        runTest(testDispatcher) {
+            linkAccountManager.setLinkAccount(
+                LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification()))
+            )
+            val metadata = createPaymentMethodMetadata(
+                linkState = LinkState(
+                    loginState = LoginState.NeedsVerification,
+                    configuration = createLinkConfiguration(linkBrand = LinkBrand.Onelink),
+                    signupMode = null
+                )
+            )
+
+            val interactor = createInteractor()
+
+            interactor.state.test {
+                assertThat(awaitItem().verificationState).isEqualTo(Loading)
+
+                interactor.setup(paymentMethodMetadata = metadata)
+
+                linkAccountManager.awaitStartVerificationCall()
+
+                val state = awaitItem().verificationState as Render2FA
+                assertThat(state.viewState.linkBrand).isEqualTo(LinkBrand.Onelink)
+            }
+        }
+
+    @Test
     fun `when otp complete and confirmation succeeds, keeps status as Render2FA and launches Link`() =
         runTest(testDispatcher) {
             val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
@@ -163,6 +193,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
+                statusBarColor = anyOrNull(),
             )
         }
 
@@ -196,6 +227,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
+                statusBarColor = anyOrNull(),
             )
 
             assertThat(pmmCaptor.firstValue.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
@@ -243,7 +275,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         interactor.setup(createPaymentMethodMetadata())
@@ -287,7 +320,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -335,7 +369,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -393,7 +428,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -440,7 +476,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -493,6 +530,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
+                statusBarColor = anyOrNull(),
             )
 
             assertThat(pmmCaptor.firstValue.attestOnIntentConfirmation).isTrue()
@@ -518,7 +556,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(

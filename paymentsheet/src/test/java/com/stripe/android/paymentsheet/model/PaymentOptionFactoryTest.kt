@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import android.graphics.drawable.ShapeDrawable
+import androidx.compose.ui.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -8,33 +10,36 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionFactoryTest {
 
-    private val factory = PaymentOptionFactory(
-        iconLoader = PaymentSelection.IconLoader(
-            resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            imageLoader = StripeImageLoader(ApplicationProvider.getApplicationContext()),
-        ),
-        context = ApplicationProvider.getApplicationContext(),
-    )
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `create() with GooglePay should return expected object`() {
-        val paymentOption = factory.create(
-            PaymentSelection.GooglePay
-        )
+        val factory = createFactory()
+        val paymentOption = factory.create(PaymentSelection.GooglePay, null, appearance = null)
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
         assertThat(paymentOption.paymentMethodType).isEqualTo("google_pay")
@@ -43,21 +48,25 @@ class PaymentOptionFactoryTest {
 
     @Test
     fun `create() with card PaymentMethod should return expected object`() {
+        val factory = createFactory()
         val paymentOption = factory.create(
             PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                     billingDetails = PAYMENT_METHOD_BILLING_DETAILS
                 )
-            )
+            ),
+            null,
+            appearance = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
 
     @Test
     fun `create() with card params should return expected object`() {
+        val factory = createFactory()
         val paymentOption = factory.create(
             PaymentSelection.New.Card(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
@@ -65,86 +74,19 @@ class PaymentOptionFactoryTest {
                 ),
                 brand = CardBrand.Visa,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
-            )
+            ),
+            null,
+            appearance = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
 
     @Test
-    fun `create() with saved card params with known brand from wallet should return expected object`() {
-        val paymentOption = factory.create(
-            PaymentSelection.Saved(
-                paymentMethod = card(CardBrand.Visa),
-                walletType = PaymentSelection.Saved.WalletType.GooglePay
-            )
-        )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
-        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(paymentOption.billingDetails).isNull()
-    }
-
-    @Test
-    fun `create() with saved card params with unknown brand from Link wallet should return expected object`() {
-        val paymentOption = factory.create(
-            PaymentSelection.Saved(
-                paymentMethod = card(),
-                walletType = PaymentSelection.Saved.WalletType.Link
-            )
-        )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
-        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(paymentOption.billingDetails).isNull()
-    }
-
-    @Test
-    fun `create() with saved card params without last 4 digits from Link wallet should return expected object`() {
-        val paymentOption = factory.create(
-            PaymentSelection.Saved(
-                paymentMethod = card(last4 = null),
-                walletType = PaymentSelection.Saved.WalletType.Link
-            )
-        )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
-        assertThat(paymentOption.label).isEqualTo("Link")
-        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(paymentOption.billingDetails).isNull()
-    }
-
-    @Test
-    fun `create() with saved card params with unknown brand from Google wallet should return expected object`() {
-        val paymentOption = factory.create(
-            PaymentSelection.Saved(
-                paymentMethod = card(),
-                walletType = PaymentSelection.Saved.WalletType.GooglePay
-            )
-        )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
-        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(paymentOption.billingDetails).isNull()
-    }
-
-    @Test
-    fun `create() with saved card params without last 4 digits from Google wallet should return expected object`() {
-        val paymentOption = factory.create(
-            PaymentSelection.Saved(
-                paymentMethod = card(last4 = null),
-                walletType = PaymentSelection.Saved.WalletType.GooglePay
-            )
-        )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
-        assertThat(paymentOption.label).isEqualTo("Google Pay")
-        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(paymentOption.billingDetails).isNull()
-    }
-
-    @Test
     fun `create() with card and Link inline signup should return card icon and label`() {
+        val factory = createFactory()
         val paymentOption = factory.create(
             PaymentSelection.New.Card(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
@@ -159,16 +101,19 @@ class PaymentOptionFactoryTest {
                     name = null,
                     consentAction = SignUpConsentAction.Checkbox,
                 )
-            )
+            ),
+            null,
+            appearance = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
-        assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
 
     @Test
     fun `create() with saved card should include billing details when present`() {
+        val factory = createFactory()
         val paymentMethod = PaymentMethod.Builder()
             .setId("pm_1")
             .setCode("card")
@@ -177,13 +122,14 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod))
+        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, appearance = null)
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
 
     @Test
     fun `create() with saved card should not include billing details when null`() {
+        val factory = createFactory()
         val paymentMethod = PaymentMethod.Builder()
             .setId("pm_1")
             .setCode("card")
@@ -191,13 +137,14 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod))
+        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, appearance = null)
 
         assertThat(paymentOption.billingDetails).isNull()
     }
 
     @Test
     fun `create() with new generic payment method should include billing details when present`() {
+        val factory = createFactory()
         val paymentOption = factory.create(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = R.drawable.stripe_ic_paymentsheet_card_unknown_ref,
@@ -209,7 +156,9 @@ class PaymentOptionFactoryTest {
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null
-            )
+            ),
+            null,
+            appearance = null,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -217,20 +166,27 @@ class PaymentOptionFactoryTest {
 
     @Test
     fun `create() with Google Pay should not include billing details`() {
-        val paymentOption = factory.create(PaymentSelection.GooglePay)
+        val factory = createFactory()
+        val paymentOption = factory.create(PaymentSelection.GooglePay, null, appearance = null)
 
         assertThat(paymentOption.billingDetails).isNull()
     }
 
     @Test
     fun `create() with Link should not include billing details`() {
-        val paymentOption = factory.create(PaymentSelection.Link())
+        val factory = createFactory()
+        val paymentOption = factory.create(
+            PaymentSelection.Link(brand = LinkBrand.Link),
+            null,
+            appearance = null,
+        )
 
         assertThat(paymentOption.billingDetails).isNull()
     }
 
     @Test
     fun `create() with CPM should include billing details when present`() {
+        val factory = createFactory()
         val paymentOption = factory.create(
             PaymentSelection.CustomPaymentMethod(
                 id = "cpm_123",
@@ -238,7 +194,9 @@ class PaymentOptionFactoryTest {
                 label = "CPM".resolvableString,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
-            )
+            ),
+            null,
+            appearance = null,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -246,6 +204,7 @@ class PaymentOptionFactoryTest {
 
     @Test
     fun `create() with EPM should include billing details when present`() {
+        val factory = createFactory()
         val paymentOption = factory.create(
             PaymentSelection.ExternalPaymentMethod(
                 type = "external_paypal",
@@ -254,7 +213,9 @@ class PaymentOptionFactoryTest {
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
-            )
+            ),
+            null,
+            appearance = null,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -262,6 +223,7 @@ class PaymentOptionFactoryTest {
 
     @Test
     fun `create() with partial billing details should map correctly`() {
+        val factory = createFactory()
         val partialBillingDetails = PaymentMethod.BillingDetails(
             email = "test@example.com",
             name = "John Doe"
@@ -275,9 +237,7 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(
-            PaymentSelection.Saved(paymentMethod)
-        )
+        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, appearance = null)
 
         assertThat(paymentOption.billingDetails).isEqualTo(
             PaymentSheet.BillingDetails(
@@ -296,19 +256,136 @@ class PaymentOptionFactoryTest {
         )
     }
 
-    private fun card(
-        brand: CardBrand = CardBrand.Unknown,
-        last4: String? = "4242"
-    ): PaymentMethod {
-        return PaymentMethod.Builder()
-            .setId("pm_1")
-            .setCode("card")
-            .setType(PaymentMethod.Type.Card)
-            .setCard(PaymentMethod.Card(last4 = last4, brand = brand, displayBrand = brand.code))
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `always dark uses dark icon on light system`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        lightComponent = Color.White,
+        darkComponent = Color.Black,
+    ) {
+        assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `always light uses light icon on dark system`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+        lightComponent = Color.White,
+        darkComponent = Color.Black,
+    ) {
+        assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `always dark with bright component uses light icon`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        lightComponent = Color.Black,
+        darkComponent = Color.White,
+    ) {
+        assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `always light with dark component uses dark icon`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+        lightComponent = Color.Black,
+        darkComponent = Color.White,
+    ) {
+        assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
+    fun `icon() returns card art drawable when loader provides one`() {
+        val cardArtDrawable = ShapeDrawable()
+        val factory = createFactory(
+            cardArtDrawableLoader = { cardArtDrawable },
+        )
+
+        val option = factory.create(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            null,
+            appearance = null,
+        )
+        val icon = option.icon()
+
+        assertThat(icon.current).isEqualTo(cardArtDrawable)
+    }
+
+    @Test
+    fun `icon() falls back to icon loader when card art loader returns null`() {
+        val factory = createFactory(
+            cardArtDrawableLoader = { null },
+        )
+
+        val option = factory.create(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            null,
+            appearance = null,
+        )
+        val icon = option.icon()
+
+        assertThat(icon.current).isNotInstanceOf(ShapeDrawable::class.java)
+    }
+
+    private fun runIconScenario(
+        themeMode: PaymentSheet.ThemeMode,
+        lightComponent: Color,
+        darkComponent: Color,
+        block: IconScenario.() -> Unit,
+    ) = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val imageLoader = FakeStripeImageLoader()
+        val factory = PaymentOptionFactory(
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = imageLoader,
+            ),
+            cardArtDrawableLoader = { null },
+            context = context,
+        )
+        val appearance = PaymentSheet.Appearance.Builder()
+            .colorsLight(PaymentSheet.Colors.Builder.light().component(lightComponent).build())
+            .colorsDark(PaymentSheet.Colors.Builder.dark().component(darkComponent).build())
+            .themeMode(themeMode)
             .build()
+        val selection = PaymentSelection.CustomPaymentMethod(
+            id = "cpm_123",
+            billingDetails = null,
+            label = "CPM".resolvableString,
+            lightThemeIconUrl = LIGHT_ICON_URL,
+            darkThemeIconUrl = DARK_ICON_URL,
+        )
+
+        factory.create(
+            selection = selection,
+            linkBrand = null,
+            appearance = appearance,
+        ).icon()
+
+        IconScenario(loadedUrl = imageLoader.awaitLoadCall().url).apply(block)
+        imageLoader.ensureAllEventsConsumed()
+    }
+
+    private fun createFactory(
+        cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader = PaymentOptionCardArtDrawableLoader { null },
+    ): PaymentOptionFactory {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        return PaymentOptionFactory(
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = DefaultStripeImageLoader(context),
+            ),
+            cardArtDrawableLoader = cardArtDrawableLoader,
+            context = context,
+        )
     }
 
     private companion object {
+        const val LIGHT_ICON_URL = "light_icon_url"
+        const val DARK_ICON_URL = "dark_icon_url"
+
         val PAYMENT_METHOD_BILLING_DETAILS = PaymentMethod.BillingDetails(
             address = Address(
                 city = "San Francisco",
@@ -337,4 +414,8 @@ class PaymentOptionFactoryTest {
             phone = "+15555555555"
         )
     }
+
+    private data class IconScenario(
+        val loadedUrl: String,
+    )
 }

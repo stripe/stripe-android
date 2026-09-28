@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
@@ -24,7 +26,10 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class DefaultPaymentMethodsConfirmationTest {
+internal class DefaultPaymentMethodsConfirmationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val testRules: TestRules = TestRules.create()
 
     @get:Rule
@@ -45,10 +50,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     lateinit var paymentMethodType: PaymentMethodType
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
-    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
+    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical
 
     @Test
     fun setNewPMAsDefault_withSavedPaymentMethods_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             confirmationType.createIntentCallback?.let {
@@ -96,11 +102,13 @@ internal class DefaultPaymentMethodsConfirmationTest {
         paymentSheetPage.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController()
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
     fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             builder = {
                 confirmationType.createIntentCallback?.let {
@@ -145,11 +153,13 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentSheetPage.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController()
+            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
     fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             builder = {
                 confirmationType.createIntentCallback?.let {
@@ -195,10 +205,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentSheetPage.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController()
+            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
     fun payWithNewPM_savePM_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             confirmationType.createIntentCallback?.let {
@@ -238,10 +250,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
         paymentSheetPage.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController()
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
     fun payWithNewPM_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         builder = {
             confirmationType.createIntentCallback?.let {
@@ -281,6 +295,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
         paymentSheetPage.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController()
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     private fun navigateToFormForLpm() {

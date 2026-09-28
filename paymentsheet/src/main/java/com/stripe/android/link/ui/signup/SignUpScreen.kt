@@ -35,6 +35,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,6 +52,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
@@ -104,7 +106,7 @@ internal fun SignUpBody(
     }
 
     ScrollableTopLevelColumn {
-        SignUpHeader()
+        SignUpHeader(linkBrand = signUpScreenState.linkBrand)
         StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
                 canEditForm = signUpScreenState.canEditForm,
@@ -253,6 +255,7 @@ private fun SecondaryFields(
                     .padding(top = 8.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center,
                 type = LinkTermsType.Full,
+                linkBrand = signUpScreenState.linkBrand,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
@@ -267,7 +270,7 @@ private fun SecondaryFields(
 }
 
 @Composable
-private fun ColumnScope.SignUpHeader() {
+private fun ColumnScope.SignUpHeader(linkBrand: LinkBrand) {
     Text(
         text = stringResource(R.string.stripe_link_sign_up_header_v2),
         modifier = Modifier
@@ -278,7 +281,10 @@ private fun ColumnScope.SignUpHeader() {
         color = LinkTheme.colors.textPrimary
     )
     Text(
-        text = stringResource(R.string.stripe_link_sign_up_message_v2),
+        text = stringResource(
+            R.string.stripe_link_sign_up_message_v2_with_brand,
+            linkBrand.brandName(),
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp, bottom = 30.dp),
@@ -300,7 +306,7 @@ private fun SignUpButton(
         label = if (isSigningUp) {
             stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
         } else {
-            stringResource(R.string.stripe_link_log_in_or_sign_up)
+            stringResource(R.string.stripe_link_sign_in_or_sign_up)
         },
         state = when {
             signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
@@ -377,6 +383,7 @@ private fun buildEmailSuggestionAnnotatedString(
 @Composable
 private fun detailSpanStyle(color: androidx.compose.ui.graphics.Color) = SpanStyle(
     color = color,
+    textDecoration = TextDecoration.None,
     fontSize = LinkTheme.typography.detail.fontSize,
     fontFamily = LinkTheme.typography.detail.fontFamily,
     fontWeight = LinkTheme.typography.detail.fontWeight
@@ -399,6 +406,7 @@ private fun SignUpScreenLoadingPreview() {
                 signUpState = SignUpState.VerifyingEmail,
                 requiresNameCollection = true,
                 canEditEmail = true,
+                linkBrand = LinkBrand.Link,
             ),
             onSignUpClick = {},
             onSuggestedEmailClick = {}
@@ -420,6 +428,7 @@ private fun SignUpScreenPreview() {
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
                 canEditEmail = true,
+                linkBrand = LinkBrand.Link,
             ),
             onSignUpClick = {},
             onSuggestedEmailClick = {}

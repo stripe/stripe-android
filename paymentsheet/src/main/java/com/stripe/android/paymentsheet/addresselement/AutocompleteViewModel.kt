@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -14,7 +15,6 @@ import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcompone
 import com.stripe.android.paymentsheet.injection.DaggerAutocompleteViewModelFactoryComponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.R as StripeR
@@ -102,39 +103,39 @@ internal class AutocompleteViewModel @Inject constructor(
                 }
             }
         }
-        autocompleteArgs.country?.let { country ->
-            eventReporter.onShow(country)
-        }
     }
 
     fun selectPrediction(prediction: AutocompletePrediction) {
         viewModelScope.launch {
             _loading.value = true
-            placesClient?.fetchPlace(
-                placeId = prediction.placeId
-            )?.fold(
-                onSuccess = {
-                    _loading.value = false
-                    val address = it.place.transformGoogleToStripeAddress(getApplication())
-
-                    _event.emit(
-                        Event.GoBack(
-                            address = PaymentSheet.Address(
-                                city = address.city,
-                                country = address.country,
-                                line1 = address.line1,
-                                line2 = address.line2,
-                                postalCode = address.postalCode,
-                                state = address.state
+            val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+            try {
+                placesClient?.fetchPlace(
+                    placeId = prediction.placeId,
+                    locale = locale,
+                )?.fold(
+                    onSuccess = { address ->
+                        _event.emit(
+                            Event.GoBack(
+                                address = PaymentSheet.Address(
+                                    city = address.city,
+                                    country = address.country,
+                                    line1 = address.line1,
+                                    line2 = address.line2,
+                                    postalCode = address.postalCode,
+                                    state = address.state
+                                )
                             )
                         )
-                    )
-                },
-                onFailure = {
-                    _loading.value = false
-                    _event.emit(Event.GoBack(address = null))
-                }
-            )
+                    },
+                    onFailure = {
+                        _event.emit(Event.GoBack(address = null))
+                    }
+                )
+            } finally {
+                _loading.value = false
+                placesClient?.resetSession()
+            }
         }
     }
 
@@ -200,11 +201,10 @@ internal class AutocompleteViewModel @Inject constructor(
         }
 
         constructor(
-            autoCompleteViewModelSubcomponentBuilderProvider:
-            Provider<AutocompleteViewModelSubcomponent.Builder>,
+            autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
             args: Args,
         ) : this(
-            Type.WithinAddressElement(autoCompleteViewModelSubcomponentBuilderProvider, args)
+            Type.WithinAddressElement(autoCompleteViewModelSubcomponentFactoryProvider, args)
         )
 
         constructor(
@@ -217,16 +217,17 @@ internal class AutocompleteViewModel @Inject constructor(
             fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T
 
             class WithinAddressElement(
-                private val autoCompleteViewModelSubcomponentBuilderProvider:
-                Provider<AutocompleteViewModelSubcomponent.Builder>,
+                private val autoCompleteViewModelSubcomponentFactoryProvider:
+                Provider<AutocompleteViewModelSubcomponent.Factory>,
                 private val args: Args,
             ) : Type {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return autoCompleteViewModelSubcomponentBuilderProvider.get()
-                        .application(extras.requireApplication())
-                        .configuration(args)
-                        .build().autoCompleteViewModel as T
+                    return autoCompleteViewModelSubcomponentFactoryProvider.get()
+                        .create(
+                            application = extras.requireApplication(),
+                            configuration = args,
+                        ).autoCompleteViewModel as T
                 }
             }
 
@@ -262,6 +263,6 @@ internal class AutocompleteViewModel @Inject constructor(
     companion object {
         const val SEARCH_DEBOUNCE_MS = 400L
         const val MAX_DISPLAYED_RESULTS = 4
-        const val MIN_CHARS_AUTOCOMPLETE = 2
+        const val MIN_CHARS_AUTOCOMPLETE = 3
     }
 }

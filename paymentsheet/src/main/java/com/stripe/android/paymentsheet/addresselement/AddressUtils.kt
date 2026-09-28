@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.stripe.android.uicore.FormScrollProvider
 import kotlin.math.min
 
 // https://gist.github.com/ademar111190/34d3de41308389a0d0d8
@@ -56,19 +57,37 @@ internal fun AddressDetails.editDistance(otherAddress: AddressDetails?): Int {
     return editDistance
 }
 
+internal fun computeBillingEditDistance(
+    autocompleteAddress: com.stripe.android.model.Address,
+    billingAddress: com.stripe.android.model.Address,
+): Int {
+    var editDistance = 0
+    editDistance += (autocompleteAddress.line1 ?: "").levenshtein(billingAddress.line1 ?: "")
+    editDistance += (autocompleteAddress.line2 ?: "").levenshtein(billingAddress.line2 ?: "")
+    editDistance += (autocompleteAddress.city ?: "").levenshtein(billingAddress.city ?: "")
+    editDistance += (autocompleteAddress.state ?: "").levenshtein(billingAddress.state ?: "")
+    editDistance += (autocompleteAddress.postalCode ?: "").levenshtein(billingAddress.postalCode ?: "")
+    return editDistance
+}
+
 @Composable
 internal fun ScrollableColumn(
     modifier: Modifier = Modifier,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
-    ) {
-        Column(
-            modifier = modifier,
-            horizontalAlignment = horizontalAlignment,
-            content = content
-        )
+    val scrollState = rememberScrollState()
+    FormScrollProvider(scrollState) { viewportModifier ->
+        Box(
+            modifier = Modifier
+                .then(viewportModifier)
+                .verticalScroll(scrollState)
+        ) {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = horizontalAlignment,
+                content = content
+            )
+        }
     }
 }

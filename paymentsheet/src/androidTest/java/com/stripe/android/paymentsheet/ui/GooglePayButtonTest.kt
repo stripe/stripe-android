@@ -7,7 +7,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import org.junit.Rule
@@ -25,6 +27,7 @@ class GooglePayButtonTest {
 
         composeTestRule.setContent {
             GooglePayButton(
+                apiConfiguration = TEST_API_CONFIGURATION,
                 state = null,
                 isEnabled = true,
                 allowCreditCards = true,
@@ -32,7 +35,9 @@ class GooglePayButtonTest {
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
                 buttonType = GooglePayButtonType.Pay,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -52,6 +57,7 @@ class GooglePayButtonTest {
 
         composeTestRule.setContent {
             GooglePayButton(
+                apiConfiguration = TEST_API_CONFIGURATION,
                 state = null,
                 isEnabled = false,
                 allowCreditCards = true,
@@ -59,7 +65,9 @@ class GooglePayButtonTest {
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
                 buttonType = GooglePayButtonType.Pay,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -70,5 +78,12 @@ class GooglePayButtonTest {
         composeTestRule.waitForIdle()
 
         assertThat(didCallOnPressed).isFalse()
+    }
+
+    private companion object {
+        val TEST_API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = "acct_123",
+        )
     }
 }

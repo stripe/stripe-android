@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
@@ -14,8 +13,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class KycRetrieveResponse(
+internal data class KycRetrieveResponse(
     @SerialName("first_name")
     val firstName: String,
     @SerialName("last_name")
@@ -27,7 +25,6 @@ data class KycRetrieveResponse(
     @SerialName("dob")
     @Serializable(with = DateOfBirthSerializer::class)
     val dateOfBirth: DateOfBirth,
-
     @SerialName("address")
     @Serializable(with = PaymentSheetAddressSerializer::class)
     val address: PaymentSheet.Address

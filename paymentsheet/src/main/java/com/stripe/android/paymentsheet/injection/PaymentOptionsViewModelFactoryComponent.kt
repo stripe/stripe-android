@@ -2,13 +2,14 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -16,13 +17,17 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,
+        PaymentSheetAutocompleteModule::class,
+        ElementsSessionClientParamsModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

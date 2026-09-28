@@ -16,6 +16,16 @@ class ChallengeZoneWebViewTest {
             .isEqualTo(HTML_VALID)
     }
 
+    @Test
+    fun dispose_clearsCallbackAndRemovesWebView() {
+        webView.setOnClickListener { }
+
+        webView.dispose()
+
+        assertThat(webView.onClickListener).isNull()
+        assertThat(webView.childCount).isEqualTo(0)
+    }
+
     companion object {
         private const val HTML_INVALID =
             """

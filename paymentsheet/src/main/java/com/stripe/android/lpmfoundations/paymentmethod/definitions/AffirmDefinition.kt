@@ -1,13 +1,16 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.AffirmHeaderElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -24,19 +27,41 @@ internal object AffirmDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AffirmUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AffirmUiDefinitionFactory
 }
 
-private object AffirmUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
-        paymentMethodDefinition = AffirmDefinition,
-        sharedDataSpec = sharedDataSpec,
+private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
+        code = PaymentMethod.Type.Affirm.code,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
         displayNameResource = UiCoreR.string.stripe_paymentsheet_payment_method_affirm,
         iconResource = UiCoreR.drawable.stripe_ic_paymentsheet_pm_affirm,
         iconResourceNight = null,
         subtitle = StripeR.string.stripe_affirm_buy_now_pay_later_plaintext.resolvableString
     )
+
+    override fun buildFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
+            PaymentMethod.Type.Affirm.code,
+            metadata
+        )
+        val header = if (message != null) {
+            PaymentMethodMessageHeaderElement(
+                identifier = FormFieldId.Generic("affirm_promotion"),
+                promotion = message
+            )
+        } else {
+            AffirmHeaderElement(
+                identifier = FormFieldId.Generic("affirm_header")
+            )
+        }
+        builder.header(header)
+    }
 }

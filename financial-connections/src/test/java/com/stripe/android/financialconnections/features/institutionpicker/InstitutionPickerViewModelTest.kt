@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -49,6 +50,9 @@ internal class InstitutionPickerViewModelTest {
     @get:Rule
     val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
     private val sync = mock<GetOrFetchSync>()
@@ -61,7 +65,8 @@ internal class InstitutionPickerViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val defaultConfiguration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        preCollectedConsent = null,
     )
 
     private fun buildViewModel(
@@ -81,7 +86,7 @@ internal class InstitutionPickerViewModelTest {
             handleError = handleError,
             initialState = state,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test

@@ -41,12 +41,16 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -71,6 +75,9 @@ internal class WalletScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `wallet list is collapsed on start`() = runTest(dispatcher) {
@@ -381,7 +388,7 @@ internal class WalletScreenTest {
 
         onWalletPayButton().assertIsNotEnabled()
 
-        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.expiryDateController.onRawValueChange("12${getTwoDigitFutureYear()}")
         viewModel.cvcController.onRawValueChange("123")
 
         composeTestRule.waitForIdle()
@@ -414,7 +421,7 @@ internal class WalletScreenTest {
 
         onWalletPayButton().assertIsNotEnabled()
 
-        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.expiryDateController.onRawValueChange("12${getTwoDigitFutureYear()}")
         viewModel.cvcController.onRawValueChange("123")
 
         composeTestRule.waitForIdle()
@@ -769,7 +776,10 @@ internal class WalletScreenTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                linkBrand = LinkBrand.Link,
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
+            linkBrand = LinkBrand.Link,
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
@@ -793,10 +803,15 @@ internal class WalletScreenTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         navigationManager: TestNavigationManager = TestNavigationManager(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        configuration: com.stripe.android.link.LinkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        ),
     ): WalletViewModel {
         return WalletViewModel(
-            configuration = TestFactory.LINK_CONFIGURATION,
+            configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = FakeLogger(),
@@ -813,10 +828,10 @@ internal class WalletScreenTest {
             ),
             addPaymentMethodOptions = AddPaymentMethodOptions(
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                configuration = TestFactory.LINK_CONFIGURATION,
+                configuration = configuration,
                 linkLaunchMode = linkLaunchMode
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun onWalletCollapsedHeader() =

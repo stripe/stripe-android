@@ -2,6 +2,7 @@ package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 
 internal object AccountRangeFixtures {
     val VISA = AccountRange(
@@ -11,7 +12,8 @@ internal object AccountRangeFixtures {
         ),
         panLength = 16,
         brandInfo = AccountRange.BrandInfo.Visa,
-        country = "GB"
+        country = "GB",
+        funding = CardFunding.Unknown
     )
 
     val AMERICANEXPRESS = AccountRange(
@@ -21,7 +23,8 @@ internal object AccountRangeFixtures {
         ),
         panLength = 15,
         brandInfo = AccountRange.BrandInfo.AmericanExpress,
-        country = "US"
+        country = "US",
+        funding = CardFunding.Unknown
     )
 
     val MASTERCARD = AccountRange(
@@ -30,7 +33,8 @@ internal object AccountRangeFixtures {
             high = "5599999999999999"
         ),
         panLength = 16,
-        brandInfo = AccountRange.BrandInfo.Mastercard
+        brandInfo = AccountRange.BrandInfo.Mastercard,
+        funding = CardFunding.Unknown
     )
 
     val JCB = AccountRange(
@@ -39,7 +43,8 @@ internal object AccountRangeFixtures {
             high = "3589999999999999"
         ),
         panLength = 16,
-        brandInfo = AccountRange.BrandInfo.JCB
+        brandInfo = AccountRange.BrandInfo.JCB,
+        funding = CardFunding.Unknown
     )
 
     val DINERSCLUB14 = AccountRange(
@@ -48,7 +53,8 @@ internal object AccountRangeFixtures {
             high = "36999999999999"
         ),
         panLength = 14,
-        brandInfo = AccountRange.BrandInfo.DinersClub
+        brandInfo = AccountRange.BrandInfo.DinersClub,
+        funding = CardFunding.Unknown
     )
 
     val DINERSCLUB16 = AccountRange(
@@ -57,7 +63,8 @@ internal object AccountRangeFixtures {
             high = "3059999999999999"
         ),
         panLength = 16,
-        brandInfo = AccountRange.BrandInfo.DinersClub
+        brandInfo = AccountRange.BrandInfo.DinersClub,
+        funding = CardFunding.Unknown
     )
 
     val DISCOVER = AccountRange(
@@ -67,7 +74,8 @@ internal object AccountRangeFixtures {
         ),
         panLength = 16,
         brandInfo = AccountRange.BrandInfo.Discover,
-        country = "US"
+        country = "US",
+        funding = CardFunding.Unknown
     )
 
     val UNIONPAY19 = AccountRange(
@@ -77,7 +85,8 @@ internal object AccountRangeFixtures {
         ),
         panLength = 19,
         brandInfo = AccountRange.BrandInfo.UnionPay,
-        country = "CN"
+        country = "CN",
+        funding = CardFunding.Unknown
     )
 
     val UNIONPAY16 = AccountRange(
@@ -87,7 +96,8 @@ internal object AccountRangeFixtures {
         ),
         panLength = 16,
         brandInfo = AccountRange.BrandInfo.UnionPay,
-        country = "CN"
+        country = "CN",
+        funding = CardFunding.Unknown
     )
 
     val DEFAULT = listOf(
@@ -98,7 +108,8 @@ internal object AccountRangeFixtures {
             ),
             panLength = 16,
             brandInfo = AccountRange.BrandInfo.Visa,
-            country = "GB"
+            country = "GB",
+            funding = CardFunding.Unknown
         ),
         VISA
     )

@@ -10,15 +10,14 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.UsBankPaymentMethodDetails
@@ -61,7 +60,6 @@ internal class VerticalModePaymentSheetActivityTest {
         .around(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(RetryRule(3))
 
     @Test
     fun `Allows paying with card`() = runTest(
@@ -93,10 +91,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Displays saved payment methods`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -119,11 +119,13 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `When the payment intent only has card it launches directly into the form with customer`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -149,10 +151,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Updates selected saved payment method`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -170,10 +174,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Removing card selects next available card`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -200,10 +206,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Removing last card navigates back`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
             networkRule.setupPaymentMethodDetachResponse("pm_67890")
         },
@@ -230,10 +238,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Removing only card navigates back`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -250,14 +260,16 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Updating a card brand updates the icon in the list`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+    fun `Updating a card brand with selector updates the icon in the list`() = runTest(
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
             networkRule.setupV1PaymentMethodsResponse(
                 card1.copy(addCbcNetworks = true),
                 card2.copy(addCbcNetworks = true)
             )
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
@@ -272,7 +284,7 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.clickEdit("pm_12345")
 
         editPage.assertIsVisible()
-        editPage.setCardBrand("Visa")
+        editPage.setCardBrandWithSelector("Visa")
         editPage.update()
         managePage.waitUntilVisible()
         managePage.clickDone()
@@ -286,10 +298,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Displayed saved payment method is correct`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -312,10 +326,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Selection is preserved after opening form`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -346,10 +362,12 @@ internal class VerticalModePaymentSheetActivityTest {
     @Test
     fun `Primary button label is correctly applied`() = runTest(
         primaryButtonLabel = "Gimme money!",
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -360,11 +378,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Saved payment method mandates work correctly`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -395,11 +414,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Default saved payment method is loaded with mandate`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
             networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -410,11 +430,12 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Manage screen should not display mandates`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
             networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -438,7 +459,6 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
             )
         ),
@@ -468,14 +488,15 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
             )
         ),
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         // Saved Visa card should be filtered out
@@ -484,20 +505,21 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
+    fun `Disallowed brands are disabled in the CBC selector`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
             )
         ),
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = TestApiKeys.EPHEMERAL),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
             networkRule.setupV1PaymentMethodsResponse(
                 card1.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires),
                 card2.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires)
             )
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -514,10 +536,10 @@ internal class VerticalModePaymentSheetActivityTest {
         editPage.assertIsVisible()
 
         // Even though our card is co-branded, Visa should not show up in the dropdown as it is disallowed
-        editPage.assertInDropdownButDisabled("Visa (not accepted)")
+        editPage.assertInSelectorButDisabled("visa")
 
         // Cartes Bancaires item should be in the drop down and selectable
-        editPage.assertInDropdownAndEnabled("Cartes Bancaires")
+        editPage.assertInSelectorAndEnabled("cartes_bancaires")
     }
 
     private fun runTest(
@@ -571,11 +593,7 @@ internal class VerticalModePaymentSheetActivityTest {
         lpms: List<String> = listOf("card", "cashapp"),
         isCbcEligible: Boolean = false,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             val replacements = mutableListOf<ResponseReplacement>()
             replacements += ResponseReplacement(
                 original = "PAYMENT_METHOD_TYPES_GO_HERE",

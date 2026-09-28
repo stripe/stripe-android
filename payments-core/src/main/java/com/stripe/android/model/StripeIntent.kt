@@ -4,9 +4,11 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
+import androidx.core.net.toUri
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import dev.drewhamilton.poko.Poko
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -98,14 +100,15 @@ sealed interface StripeIntent : StripeModel {
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
-        UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
         DisplayMultibancoDetails("multibanco_display_details"),
         DisplayPayNowDetails("paynow_display_qr_code"),
         DisplayPromptPayDetails("promptpay_display_qr_code"),
-        SwishRedirect("swish_handle_redirect_or_display_qr_code");
+        SwishRedirect("swish_handle_redirect_or_display_qr_code"),
+        AwaitAuthorization("await_authorization"),
+        MbWayAwaitAuthorization("mb_way_await_authorization");
 
         @Keep
         override fun toString(): String {
@@ -190,12 +193,10 @@ sealed interface StripeIntent : StripeModel {
              * The timestamp after which the OXXO expires.
              */
             val expiresAfter: Int = 0,
-
             /**
              * The OXXO number.
              */
             val number: String? = null,
-
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */
@@ -266,17 +267,45 @@ sealed interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        internal data class AlipayRedirect constructor(
-            val data: String,
-            val authCompleteUrl: String?,
+        internal data class AlipayRedirect(
+            val type: Type,
             val webViewUrl: Uri,
-            val returnUrl: String? = null
+            val returnUrl: String?
         ) : NextActionData() {
+            sealed interface Type : Parcelable {
+                @Parcelize
+                data object Default : Type
 
-            internal constructor(data: String, webViewUrl: String, returnUrl: String? = null) :
-                this(data, extractReturnUrl(data), Uri.parse(webViewUrl), returnUrl)
+                @Parcelize
+                data class WithNativeData(val data: String) : Type {
+                    @IgnoredOnParcel
+                    val authCompleteUrl: String? by lazy {
+                        extractReturnUrl(data)
+                    }
+                }
+            }
 
-            private companion object {
+            internal companion object {
+                fun create(
+                    data: String?,
+                    webViewUrl: String,
+                    returnUrl: String? = null
+                ): AlipayRedirect {
+                    val webViewUri = webViewUrl.toUri()
+
+                    val type = if (data != null) {
+                        Type.WithNativeData(data = data)
+                    } else {
+                        Type.Default
+                    }
+
+                    return AlipayRedirect(
+                        type = type,
+                        webViewUrl = webViewUri,
+                        returnUrl = returnUrl,
+                    )
+                }
+
                 /**
                  * The alipay data string is formatted as query parameters.
                  * When authenticate is complete, we make a request to the
@@ -284,10 +313,9 @@ sealed interface StripeIntent : StripeModel {
                  * the updated state
                  */
                 private fun extractReturnUrl(data: String): String? = runCatching {
-                    Uri.parse("alipay://url?$data")
-                        .getQueryParameter("return_url")?.takeIf {
-                            StripeUrlUtils.isStripeUrl(it)
-                        }
+                    "alipay://url?$$data".toUri().getQueryParameter("return_url")?.takeIf {
+                        StripeUrlUtils.isStripeUrl(it)
+                    }
                 }.getOrNull()
             }
         }
@@ -332,11 +360,27 @@ sealed interface StripeIntent : StripeModel {
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data object IntentConfirmationChallenge : SdkData()
+            data class IntentConfirmationChallenge(
+                val stripeJs: StripeJs
+            ) : SdkData() {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class StripeJs(
+                    val captchaVendorName: String?
+                ) : Parcelable
+            }
         }
 
         @Parcelize
         data object BlikAuthorize : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data object AwaitAuthorization : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data object MbWayAwaitAuthorization : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
@@ -349,9 +393,6 @@ sealed interface StripeIntent : StripeModel {
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
         ) : NextActionData()
-
-        @Parcelize
-        data object UpiAwaitNotification : NextActionData()
 
         /**
          * Contains the authentication URL for redirecting your customer to Cash App.

@@ -2,20 +2,20 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt$DefaultStripeNetworkClientTest.FailingConnection${ }</ID>
-    <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt$DefaultStripeNetworkClientTest.ResponseCodeOverrideConnection${ }</ID>
-    <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
-    <ID>MagicNumber:NetworkTypeDetector.kt$NetworkTypeDetector$19</ID>
-    <ID>MagicNumber:StripeJsonUtils.kt$StripeJsonUtils$3</ID>
-    <ID>MaxLineLength:QueryStringFactoryTest.kt$QueryStringFactoryTest$"colors[]=blue&amp;colors[]=green&amp;empty_list=&amp;person[age]=45&amp;person[city]=San Francisco&amp;person[wishes]=&amp;person[friends][]=Alice&amp;person[friends][]=Bob"</ID>
-    <ID>MaxLineLength:StripeErrorJsonParserTest.kt$StripeErrorJsonParserTest$message = "The Stripe API is only accessible over HTTPS. Please see &lt;https://stripe.com/docs> for more information."</ID>
-    <ID>SerialVersionUIDInSerializableClass:StripeError.kt$StripeError : StripeModelSerializable</ID>
-    <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$classCastException: ClassCastException</ID>
-    <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$jsonException: JSONException</ID>
-    <ID>ThrowsCount:RequestExecutor.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( stripeNetworkClient: StripeNetworkClient, stripeErrorJsonParser: StripeErrorJsonParser, request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, ): Response</ID>
-    <ID>TooGenericExceptionCaught:Storage.kt$SharedPreferencesStorage$t: Throwable</ID>
-    <ID>TooManyFunctions:Storage.kt$SharedPreferencesStorage : Storage</ID>
-    <ID>TooManyFunctions:Storage.kt$Storage</ID>
-    <ID>TooManyFunctions:StripeJsonUtils.kt$StripeJsonUtils</ID>
+    <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt:DefaultStripeNetworkClientTest.FailingConnection${ }</ID>
+    <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt:DefaultStripeNetworkClientTest.ResponseCodeOverrideConnection${ }</ID>
+    <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt:FraudDetectionDataRequestParamsFactory.Companion$60</ID>
+    <ID>MagicNumber:NetworkTypeDetector.kt:NetworkTypeDetector$19</ID>
+    <ID>MagicNumber:StripeJsonUtils.kt:StripeJsonUtils$3</ID>
+    <ID>MaxLineLength:QueryStringFactoryTest.kt:QueryStringFactoryTest$"colors[]=blue&amp;colors[]=green&amp;empty_list=&amp;person[age]=45&amp;person[city]=San Francisco&amp;person[wishes]=&amp;person[friends][]=Alice&amp;person[friends][]=Bob"</ID>
+    <ID>MaxLineLength:StripeErrorJsonParserTest.kt:StripeErrorJsonParserTest$message = "The Stripe API is only accessible over HTTPS. Please see &lt;https://stripe.com/docs> for more information."</ID>
+    <ID>SerialVersionUIDInSerializableClass:StripeError.kt:StripeError : StripeModelSerializable</ID>
+    <ID>SwallowedException:StripeJsonUtils.kt:StripeJsonUtils$classCastException: ClassCastException</ID>
+    <ID>SwallowedException:StripeJsonUtils.kt:StripeJsonUtils$jsonException: JSONException</ID>
+    <ID>ThrowsCount:RequestExecutor.kt:@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser: Response</ID>
+    <ID>TooGenericExceptionCaught:Storage.kt:SharedPreferencesStorage$t: Throwable</ID>
+    <ID>TooManyFunctions:Storage.kt:SharedPreferencesStorage : Storage</ID>
+    <ID>TooManyFunctions:Storage.kt:Storage</ID>
+    <ID>TooManyFunctions:StripeJsonUtils.kt:StripeJsonUtils</ID>
   </CurrentIssues>
 </SmellBaseline>

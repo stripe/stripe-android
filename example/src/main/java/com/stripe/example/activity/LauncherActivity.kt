@@ -106,10 +106,6 @@ class LauncherActivity : AppCompatActivity() {
                 IDEALPaymentMethodActivity::class.java
             ),
             Item(
-                activity.getString(R.string.upi_example),
-                UpiPaymentActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.netbanking_example),
                 NetbankingPaymentActivity::class.java
             ),
@@ -160,6 +156,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.mobilepay_example),
                 MobilePayExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.twint_example),
+                TwintExampleActivity::class.java
             ),
             Item(
                 activity.getString(R.string.alma_example),

@@ -12,12 +12,14 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.NavigationManager
 import org.mockito.kotlin.mock
 
 internal object ConsentViewModelFactory {
 
     fun create(
+        viewModelStoreTestRule: ViewModelStoreTestRule,
         initialState: ConsentState = ConsentState(),
         nativeAuthFlowCoordinator: NativeAuthFlowCoordinator = NativeAuthFlowCoordinator(),
         acceptConsent: AcceptConsent = mock(),
@@ -43,6 +45,6 @@ internal object ConsentViewModelFactory {
             lookupAccount = lookupAccount,
             isLinkWithStripe = isLinkWithStripe,
             prefillDetails = prefillDetails,
-        )
+        ).also { viewModelStoreTestRule.track(it) }
     }
 }

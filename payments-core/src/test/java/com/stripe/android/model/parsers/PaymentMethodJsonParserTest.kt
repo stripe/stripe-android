@@ -4,9 +4,46 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import org.json.JSONObject
 import kotlin.test.Test
 
 class PaymentMethodJsonParserTest {
+
+    @Test
+    fun parse_withBizum_shouldCreateExpectedType() {
+        val paymentMethod = PaymentMethodJsonParser().parse(
+            JSONObject(
+                """
+                {
+                    "id": "pm_bizum",
+                    "type": "bizum",
+                    "bizum": { "buyer_id": null }
+                }
+                """.trimIndent()
+            )
+        )
+
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Bizum)
+        assertThat(paymentMethod.code).isEqualTo("bizum")
+    }
+
+    @Test
+    fun parse_withMbWay_shouldCreateExpectedType() {
+        val paymentMethod = PaymentMethodJsonParser().parse(
+            JSONObject(
+                """
+                {
+                    "id": "pm_mb_way",
+                    "type": "mb_way",
+                    "mb_way": {}
+                }
+                """.trimIndent()
+            )
+        )
+
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.MbWay)
+        assertThat(paymentMethod.code).isEqualTo("mb_way")
+    }
 
     @Test
     fun parse_withCardWithNetworks_shouldCreateExpectedObject() {
@@ -171,5 +208,27 @@ class PaymentMethodJsonParserTest {
             PaymentMethodFixtures.CARD_WITH_LINK_WALLET_TYPE_JSON
         )
         assertThat(usBankAccount.isLinkPassthroughMode).isTrue()
+    }
+
+    @Test
+    fun `parse card JSON with card_art should return expected cardArt`() {
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITH_CARD_ART_JSON)
+
+        assertThat(paymentMethod.card?.cardArt).isEqualTo(
+            PaymentMethod.Card.CardArt(
+                artImage = PaymentMethod.Card.CardArt.ArtImage(
+                    format = "image/png",
+                    url = "https://example.com/card_art.png"
+                ),
+                programName = "My Card Program"
+            )
+        )
+    }
+
+    @Test
+    fun `parse card JSON without card_art should return null cardArt`() {
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITHOUT_CARD_ART_JSON)
+
+        assertThat(paymentMethod.card?.cardArt).isNull()
     }
 }

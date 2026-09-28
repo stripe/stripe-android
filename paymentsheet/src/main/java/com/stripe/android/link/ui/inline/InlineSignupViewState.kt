@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.requiresNameCollection
+import com.stripe.android.model.LinkBrand
 
 /**
  * The LinkInlineSignup view state.
@@ -24,6 +25,7 @@ constructor(
     val prefillEligibleFields: Set<LinkSignupField>,
     val allowsDefaultOptIn: Boolean,
     val linkSignUpOptInFeatureEnabled: Boolean,
+    val linkBrand: LinkBrand,
     val didAskToChangeSignupDetails: Boolean = false,
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,
@@ -118,6 +120,7 @@ constructor(
                 isExpanded = isExpanded || allowsDefaultOptIn,
                 allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode),
                 linkSignUpOptInFeatureEnabled = linkSignupOptInFeatureEnabled(config, signupMode),
+                linkBrand = config.linkBrand,
                 signUpState = signupState,
                 userHasInteracted = userHasInteracted,
             )

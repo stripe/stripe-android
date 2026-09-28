@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessi
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
@@ -38,7 +39,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
     ) { settings ->
         settings[MerchantSettingsDefinition] = Merchant.FR
         settings[DelayedPaymentMethodsSettingsDefinition] = true
-        settings[GooglePaySettingsDefinition] = false
+        settings[GooglePaySettingsDefinition] = GooglePayMode.Off
         settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
     }.copy(
         authorizationAction = null,
@@ -103,7 +104,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(IBAN.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )

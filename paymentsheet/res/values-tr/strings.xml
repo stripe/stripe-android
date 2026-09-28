@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Link ile daha hızlı ödeme için bilgilerimi kaydet</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">%s ile daha hızlı ödeme yapmak için bilgilerimi kaydet</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Web genelinde daha hızlı ödeme yapmak için Link ile bir hesap oluşturun</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Web genelinde daha hızlı ödeme için %s ile bir hesap oluşturun</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredisi</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +48,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Evet, güncelle</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Oturum açın veya kaydolun</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Kabul et</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">İptal et</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Beyanlar</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Adres</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -58,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Bilgilerinizi onaylayın</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN\'nin son 4 hanesi</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Oturum açın veya kaydolun</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Kabul et ve devam et</string>
   <!-- Title for the Link signup screen -->
@@ -68,6 +78,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Bilgilerinizi Link\'e kaydedin ve Link tarafından desteklenen sitelerde 1 tıklamayla güvenle ödeme yapın.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Link\'in kabul edildiği her yerde daha hızlı ödeme yapın.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">%s kabul edildiği her yerde daha hızlı ödeme yapın.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Devam ettiğinizde <terms>Koşulları</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,10 +96,34 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Kartı güncelle</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link\'ten çıkış yap</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">%s oturumu kapatılsın mı?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Bir hata oluştu. Bağlantınızı kontrol edip tekrar deneyin.</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">Kartın süresi doldu. Başka bir kart deneyin.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Kart reddedildi. Başka bir kart deneyin.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">Kartın süresi doldu. Başka bir kart deneyin.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Mobil cüzdanlar desteklenmiyor. Fiziksel bir kart deneyin.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Kartı telefonun arkasında tutun</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Bir hata oluştu. Başka bir kart deneyin.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">Kart desteklenmiyor. Başka bir kart deneyin.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Tekrar deneyin.</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">veya manuel olarak girin</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Link ile öde</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">%s ile öde</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">%s ile öde</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Devam ettiğinizde ödemeleri <terms>bu koşullara</terms> göre yetkilendirmeyi kabul etmiş olursunuz.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -98,6 +134,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ekle</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Ödeme bilgilerinizi ekleyin</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Kart eklendi</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Adresi kaydet</string>
   <!-- Title for shipping address entry section -->
@@ -134,6 +172,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Devam ederek, bilgilerinizi gelecekteki %s satın alımları için kaydetmeyi kabul etmiş olursunuz ve <link>Link</link> (bkz. <terms>Koşullar</terms> ve <privacy>Gizlilik</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Devam ederek, bilgilerinizi gelecekteki %s ve <link>Link satın alımları için</link> Link <terms>koşulları</terms> ve <privacy>gizlilik kuralları</privacy> uyarınca kaydetmeyi kabul etmiş olursunuz.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Devam ederek, %1$s ve <link>%2$s</link> ile gelecekteki satın alımlar için bilgilerinizi %2$s <terms>koşulları</terms> ve <privacy>gizlilik</privacy> şartları uyarınca kaydetmeyi kabul etmiş olursunuz.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kart güncellenmedi. Lütfen tekrar deneyin.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -153,6 +193,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Kartları yönet</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Banka hesabını yönet</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Ödeme yöntemini yönetin</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Ödeme yöntemlerini yönetin</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -211,6 +253,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Kaydedildi</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Kayıtlı kart</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Kart seçin</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -223,6 +267,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Varsayılan ödeme yöntemi değiştirilmedi. Lütfen tekrar deneyin.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Ödeme yöntemi ayrıntıları değiştirilemiyor.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kart markası güncellenmedi. Lütfen tekrar deneyin.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -235,6 +281,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Mağaza Ödemesi düğmesi</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Menüyü göster</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Link oturumunu kapatın</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">%s oturumunu kapatın</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Link\'e katıl</string>
   <!-- Title for the Link signup screen -->
@@ -245,22 +295,54 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link\'e katılarak <terms>Hükümleri</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[E-postanızı vererek <terms>Link Şartları</terms> ve <privacy>Gizlilik Politikası</privacy> uyarınca bir Link hesabı oluşturmayı ve ödeme bilgilerinizi Link\'e kaydetmeyi kabul edersiniz.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[E-posta adresinizi sağlayarak, %1$s hesabı oluşturmayı ve ödeme bilgilerinizi <terms>%1$s Koşulları</terms> ve <privacy>Gizlilik Politikasına</privacy> göre %1$s’e kaydetmeyi kabul etmiş olursunuz.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Telefon numaranızı vererek <terms>Link Şartları</terms> ve <privacy>Gizlilik Politikası</privacy> uyarınca bir Link hesabı oluşturmayı ve ödeme bilgilerinizi Link\'e kaydetmeyi kabul edersiniz.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Telefon numaranızı vererek %1$s hesabı oluşturmayı ve ödeme bilgilerinizi <terms>%1$s Koşulları</terms> ve <privacy>Gizlilik Politikasına</privacy> göre %1$s’e kaydetmeyi kabul etmiş olursunuz.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[%1$s’e katılarak <terms>Koşulları</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Telefon numarası ve e-posta adresi vererek Link <terms>Şartları</terms> ve <privacy>Gizlilik Politikası</privacy>\'na tabi bir Link hesabı oluşturmayı kabul etmiş olursunuz.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Telefon numarası ve e-posta adresini sağlayarak, %1$s <terms>Koşulları</terms> ve <privacy>Gizlilik Politikası</privacy> kapsamındaki bir %1$s hesabı oluşturmayı kabul etmiş olursunuz.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Hesabınız devre dışı bırakıldı</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Bir sorun oluştu</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">İşlem tamamlandı</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Kart eklendi</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">Kart eklemek için dokunun</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Kart reddedildi</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Kartınızı tekrar okutmayı deneyin</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Kart desteklenmiyor</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Geliştirici seçeneklerini kapatın ve tekrar deneyin</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Başka bir ağ deneyin ve tekrar okutun</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">%s ödendi</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Geri dönün ve kartınızı tekrar okutun</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Eklemek için dokunun cihazınız tarafından desteklenmiyor</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Başka bir cihaz deneyin</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Cihaz desteklenmiyor</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Başka bir kart deneyin</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">İptal edip başka bir yöntemle ödeyin</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Ödemeyi onaylayın</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Ödemenizi onaylamak için %s içinde UPI uygulamanızı açın</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Lütfen geri gidip başka bir ödeme yöntemi seçin</string>
   <!-- Text on a screen that indicates a payment has failed -->

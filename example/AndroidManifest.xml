@@ -55,8 +55,6 @@
         <activity android:name=".activity.BacsDebitPaymentMethodActivity" />
         <activity android:name=".activity.MultibancoActivity" />
         <activity android:name=".activity.IDEALPaymentMethodActivity" />
-        <activity android:name=".activity.UpiPaymentActivity" />
-        <activity android:name=".activity.UpiWaitingActivity" />
         <activity android:name=".activity.CardBrandsActivity" />
         <activity android:name=".activity.NetbankingPaymentActivity" />
         <activity android:name=".activity.SimpleConfirmationActivity" />
@@ -75,6 +73,7 @@
         <activity android:name=".activity.RevolutPayActivity"/>
         <activity android:name=".activity.SwishExampleActivity"/>
         <activity android:name=".activity.MobilePayExampleActivity"/>
+        <activity android:name=".activity.TwintExampleActivity"/>
         <activity android:name=".activity.AlmaActivity"/>
         <activity android:name=".activity.SunbitActivity"/>
         <activity android:name=".activity.BillieActivity"/>

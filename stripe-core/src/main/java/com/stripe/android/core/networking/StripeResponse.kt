@@ -24,7 +24,6 @@ data class StripeResponse<ResponseBody>(
      * the response body
      */
     val body: ResponseBody?,
-
     /**
      * the response headers
      */

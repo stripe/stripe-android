@@ -1,12 +1,12 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -15,39 +15,35 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         PaymentLauncherModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
-        CoreCommonModule::class
+        CoreCommonModule::class,
+        PollingAnalyticsModule::class,
     ]
 )
 internal interface PaymentLauncherViewModelFactoryComponent {
 
-    val viewModelSubcomponentBuilder: PaymentLauncherViewModelSubcomponent.Builder
+    val viewModelSubcomponentFactory: PaymentLauncherViewModelSubcomponent.Factory
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun includePaymentSheetNextHandlers(
-            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean
-        ): Builder
-
-        fun build(): PaymentLauncherViewModelFactoryComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(ENABLE_LOGGING)
+            enableLogging: Boolean,
+            @BindsInstance
+            apiConfiguration: ApiConfiguration.State,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS)
+            includePaymentSheetNextHandlers: Boolean,
+        ): PaymentLauncherViewModelFactoryComponent
     }
 }

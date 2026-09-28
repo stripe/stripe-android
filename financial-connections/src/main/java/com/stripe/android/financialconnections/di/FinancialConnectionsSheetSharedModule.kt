@@ -3,12 +3,13 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -17,10 +18,8 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Storage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
-import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
@@ -49,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -66,7 +66,7 @@ import kotlin.coroutines.CoroutineContext
  * saving and restoring user-provided configuration dependencies.
  */
 @Module(
-    includes = [FinancialConnectionsSheetConfigurationModule::class]
+    includes = [FinancialConnectionsSheetConfigurationModule::class, StripeNetworkClientModule::class]
 )
 internal interface FinancialConnectionsSheetSharedModule {
 
@@ -120,12 +120,14 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            @Named(PUBLISHABLE_KEY) publishableKey: String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?
-        ): ApiRequest.Options = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
-        )
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
+        ): ApiRequest.Options {
+            val apiConfiguration = apiConfigurationProvider.get()
+            return ApiRequest.Options(
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId
+            )
+        }
 
         @Provides
         @ActivityRetainedScope
@@ -135,16 +137,6 @@ internal interface FinancialConnectionsSheetSharedModule {
             isLenient = true
             encodeDefaults = true
         }
-
-        @Provides
-        @ActivityRetainedScope
-        fun provideStripeNetworkClient(
-            @IOContext context: CoroutineContext,
-            logger: Logger
-        ): StripeNetworkClient = DefaultStripeNetworkClient(
-            workContext = context,
-            logger = logger
-        )
 
         @Provides
         @ActivityRetainedScope
@@ -192,14 +184,16 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            @Named(PUBLISHABLE_KEY) publishableKey: String
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = application.packageManager,
-            packageName = application.packageName.orEmpty(),
-            packageInfo = application.packageInfo,
-            publishableKeyProvider = { publishableKey },
-            networkTypeProvider = NetworkTypeDetector(application)::invoke,
-        )
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
+        ): AnalyticsRequestFactory {
+            return AnalyticsRequestFactory(
+                packageManager = application.packageManager,
+                packageName = application.packageName.orEmpty(),
+                packageInfo = application.packageInfo,
+                publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+                networkTypeProvider = NetworkTypeDetector(application)::invoke,
+            )
+        }
 
         @Provides
         @ActivityRetainedScope

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -10,6 +11,7 @@ import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -17,7 +19,7 @@ import java.util.concurrent.TimeUnit
 internal fun <
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     > runLaunchTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
@@ -30,6 +32,7 @@ internal fun <
     DummyActivityResultCaller.test {
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {}
         )
 
@@ -47,11 +50,10 @@ internal fun <
         launchAction.launch()
 
         val savedParameters = savedStateHandle
-            .get<Parameters<TConfirmationOption>>("${definition.key}Parameters")
+            .get<Parameters<TConfirmationOption, TLauncherArgs>>("${definition.key}Parameters")
 
         assertThat(savedParameters?.confirmationOption).isEqualTo(confirmationOption)
         assertThat(savedParameters?.confirmationArgs).isEqualTo(parameters)
-        assertThat(savedParameters?.deferredIntentConfirmationType).isNull()
 
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitLaunchCall()).isNotNull()
@@ -61,12 +63,13 @@ internal fun <
 internal fun <
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     > runResultTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
     parameters: ConfirmationHandler.Args,
+    launcherArgs: TLauncherArgs,
     launcherResult: TLauncherResult,
     definitionResult: ConfirmationDefinition.Result,
 ) = runTest {
@@ -78,7 +81,7 @@ internal fun <
             Parameters(
                 confirmationOption = confirmationOption,
                 confirmationArgs = parameters,
-                deferredIntentConfirmationType = null,
+                launcherArgs = launcherArgs,
             )
         )
     }
@@ -90,6 +93,7 @@ internal fun <
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {
                 result = it
 
@@ -108,6 +112,10 @@ internal fun <
         assertThat(result).isEqualTo(definitionResult)
     }
 }
+
+internal fun fakeLifecycleOwner() = TestLifecycleOwner(
+    coroutineDispatcher = UnconfinedTestDispatcher(),
+)
 
 @Suppress("UNCHECKED_CAST")
 internal fun <T : ConfirmationHandler.Option> ConfirmationHandler.Option.asOption(): T {
@@ -199,4 +207,5 @@ internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
         stripeIntent = PAYMENT_INTENT,
         passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
     ),
+    statusBarColor = null,
 )

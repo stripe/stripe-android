@@ -17,6 +17,8 @@ object AnalyticsFields {
     const val DEVICE_TYPE = "device_type"
     const val DEVICE_ID = "device_id"
     const val EVENT = "event"
+    const val LIBRARY_NAME = "library_name"
+    const val LIBRARY_VERSION = "library_version"
     const val PLUGIN_TYPE = "plugin_type"
     const val OS_NAME = "os_name"
     const val OS_RELEASE = "os_release"
@@ -26,4 +28,6 @@ object AnalyticsFields {
     const val TIMESTAMP = "timestamp"
     const val NETWORK_TYPE = "network_type"
     const val LOCALE = "locale"
+    const val REACT_NATIVE_IS_NEW_ARCHITECTURE = "react_native_is_new_architecture"
+    const val REACT_NATIVE_VERSION = "react_native_version"
 }

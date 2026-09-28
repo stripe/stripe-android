@@ -18,10 +18,11 @@ import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -34,6 +35,9 @@ class UpdateCardScreenViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `viewmodel initializes with valid card details`() = runTest(dispatcher) {
@@ -166,14 +170,14 @@ class UpdateCardScreenViewModelTest {
                     val nonNullBillingElements = requireNotNull(billingElements)
 
                     assertThat(nonNullBillingElements).hasSize(1)
-                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<BillingAddressElement>()
 
-                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+                    val cardBillingAddressElement = nonNullBillingElements[0] as BillingAddressElement
 
                     val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
 
                     val doesNotHavePhoneElement = addressFields.none { element ->
-                        element.identifier == IdentifierSpec.Phone
+                        element.identifier == FormFieldId.Phone
                     }
 
                     assertThat(doesNotHavePhoneElement).isTrue()
@@ -212,14 +216,14 @@ class UpdateCardScreenViewModelTest {
                     val nonNullBillingElements = requireNotNull(billingElements)
 
                     assertThat(nonNullBillingElements).hasSize(1)
-                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<BillingAddressElement>()
 
-                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+                    val cardBillingAddressElement = nonNullBillingElements[0] as BillingAddressElement
 
                     val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
 
                     val hasPhoneElement = addressFields.any { element ->
-                        element.identifier == IdentifierSpec.Phone
+                        element.identifier == FormFieldId.Phone
                     }
 
                     assertThat(hasPhoneElement).isTrue()
@@ -258,19 +262,19 @@ class UpdateCardScreenViewModelTest {
                     val nonNullBillingElements = requireNotNull(billingElements)
 
                     assertThat(nonNullBillingElements).hasSize(1)
-                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<BillingAddressElement>()
 
-                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+                    val cardBillingAddressElement = nonNullBillingElements[0] as BillingAddressElement
 
                     val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
 
                     val hasCountryElement = addressFields.any {
-                        it.identifier == IdentifierSpec.Country
+                        it.identifier == FormFieldId.Country
                     }
 
                     val hasPostalCodeElement = addressFields.any {
                         it is RowElement && it.fields.any {
-                            it.identifier == IdentifierSpec.PostalCode
+                            it.identifier == FormFieldId.PostalCode
                         }
                     }
 
@@ -311,9 +315,9 @@ class UpdateCardScreenViewModelTest {
                     val nonNullBillingElements = requireNotNull(billingElements)
 
                     assertThat(nonNullBillingElements).hasSize(1)
-                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<BillingAddressElement>()
 
-                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+                    val cardBillingAddressElement = nonNullBillingElements[0] as BillingAddressElement
 
                     assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
                         .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -352,9 +356,9 @@ class UpdateCardScreenViewModelTest {
                     val nonNullBillingElements = requireNotNull(billingElements)
 
                     assertThat(nonNullBillingElements).hasSize(1)
-                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<BillingAddressElement>()
 
-                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+                    val cardBillingAddressElement = nonNullBillingElements[0] as BillingAddressElement
 
                     // Billing details update flow should respect country filtering
                     assertThat(cardBillingAddressElement.countryElement.controller.displayItems).containsExactly(
@@ -396,9 +400,9 @@ class UpdateCardScreenViewModelTest {
                     val nonNullBillingElements = requireNotNull(billingElements)
 
                     assertThat(nonNullBillingElements).hasSize(1)
-                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<BillingAddressElement>()
 
-                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+                    val cardBillingAddressElement = nonNullBillingElements[0] as BillingAddressElement
 
                     // Regular edit flow should show all countries, ignoring filter
                     assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
@@ -447,9 +451,9 @@ class UpdateCardScreenViewModelTest {
                     val expiryDateState = requireNotNull(state.cardDetailsState?.expiryDateState)
 
                     assertThat(expiryDateState.shouldShowError()).isTrue()
-                    assertThat(expiryDateState.sectionError()).isNotNull()
+                    assertThat(expiryDateState.sectionValidationMessage()).isNotNull()
 
-                    requireNotNull(state.billingDetailsForm).addressSectionElement.controller.error.test {
+                    requireNotNull(state.billingDetailsForm).addressSectionElement.controller.validationMessage.test {
                         assertThat(awaitItem()).isNotNull()
                     }
                 }
@@ -481,6 +485,6 @@ class UpdateCardScreenViewModelTest {
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
             linkLaunchMode = LinkLaunchMode.Full,
             dismissWithResult = {}
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

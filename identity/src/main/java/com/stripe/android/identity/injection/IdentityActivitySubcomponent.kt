@@ -10,6 +10,7 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
+import com.stripe.android.identity.networking.DefaultIdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
@@ -18,6 +19,7 @@ import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.mlcore.base.InterpreterInitializer
+import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
@@ -26,6 +28,7 @@ import dagger.Subcomponent
 @IdentityVerificationScope
 @Subcomponent(
     modules = [
+        IdentityVerificationModule::class,
         IdentityViewModelModule::class
     ]
 )
@@ -42,32 +45,27 @@ internal interface IdentityActivitySubcomponent {
     val identityImageHandler: IdentityImageHandler
     val tfLiteInitializer: InterpreterInitializer
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun args(args: IdentityVerificationSheetContract.Args): Builder
-
-        @BindsInstance
-        fun cameraPermissionEnsureable(cameraPermissionEnsureable: CameraPermissionEnsureable): Builder
-
-        @BindsInstance
-        fun appSettingsOpenable(appSettingsOpenable: AppSettingsOpenable): Builder
-
-        @BindsInstance
-        fun verificationFlowFinishable(verificationFlowFinishable: VerificationFlowFinishable): Builder
-
-        @BindsInstance
-        fun identityViewModelFactory(identityViewModelFactory: ViewModelProvider.Factory): Builder
-
-        @BindsInstance
-        fun viewModelStoreOwner(viewModelStore0wner: ViewModelStoreOwner): Builder
-
-        @BindsInstance
-        fun fallbackUrlLauncher(fallbackUrlLauncher: FallbackUrlLauncher): Builder
-
-        fun build(): IdentityActivitySubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance args: IdentityVerificationSheetContract.Args,
+            @BindsInstance cameraPermissionEnsureable: CameraPermissionEnsureable,
+            @BindsInstance appSettingsOpenable: AppSettingsOpenable,
+            @BindsInstance verificationFlowFinishable: VerificationFlowFinishable,
+            @BindsInstance identityViewModelFactory: ViewModelProvider.Factory,
+            @BindsInstance viewModelStoreOwner: ViewModelStoreOwner,
+            @BindsInstance fallbackUrlLauncher: FallbackUrlLauncher,
+        ): IdentityActivitySubcomponent
     }
+}
+
+@Module
+internal abstract class IdentityVerificationModule {
+    @Binds
+    @IdentityVerificationScope
+    abstract fun bindIdentityModelFetcher(
+        defaultIdentityModelFetcher: DefaultIdentityModelFetcher
+    ): IdentityModelFetcher
 }
 
 @Module

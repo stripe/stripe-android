@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState.Verified
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType.SignUp
+import com.stripe.android.model.LinkBrand
 import getRedactedPhoneNumber
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -18,6 +20,7 @@ internal data class CachedConsumerSession(
     val clientSecret: String,
     val publishableKey: String?,
     val isVerified: Boolean,
+    val linkBrand: LinkBrand?,
 ) : Parcelable
 
 internal fun interface ConsumerSessionProvider {
@@ -25,6 +28,8 @@ internal fun interface ConsumerSessionProvider {
 }
 
 internal interface ConsumerSessionRepository : ConsumerSessionProvider {
+    val consumerSessionFlow: StateFlow<CachedConsumerSession?>
+
     fun storeNewConsumerSession(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
@@ -38,6 +43,9 @@ internal interface ConsumerSessionRepository : ConsumerSessionProvider {
 internal class RealConsumerSessionRepository @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ConsumerSessionRepository {
+
+    override val consumerSessionFlow: StateFlow<CachedConsumerSession?> =
+        savedStateHandle.getStateFlow(key = KeyConsumerSession, initialValue = null)
 
     override fun provideConsumerSession(): CachedConsumerSession? {
         return savedStateHandle[KeyConsumerSession]
@@ -64,5 +72,6 @@ internal class RealConsumerSessionRepository @Inject constructor(
         clientSecret = clientSecret,
         publishableKey = publishableKey,
         isVerified = verificationSessions.any { it.state == Verified || it.type == SignUp },
+        linkBrand = linkBrand,
     )
 }

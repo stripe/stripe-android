@@ -7,8 +7,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -45,13 +46,13 @@ import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.Attention300
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.KeyboardController
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-private val LOGO_WIDTH = 50.dp
 private val LOGO_HEIGHT = 20.dp
 private val PILL_HORIZONTAL_PADDING = 4.dp
 private val PILL_VERTICAL_PADDING = 2.dp
@@ -71,6 +72,7 @@ internal fun FinancialConnectionsTopAppBar(
         hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
         testMode = state.isTestMode,
         theme = state.theme,
+        linkBrand = state.linkBrand,
         elevation = elevation,
         allowBackNavigation = state.allowBackNavigation,
         onCloseClick = onCloseClick,
@@ -82,6 +84,7 @@ private fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean,
     testMode: Boolean,
     theme: Theme,
+    linkBrand: LinkBrand,
     elevation: State<Dp>,
     allowBackNavigation: Boolean,
     onCloseClick: () -> Unit,
@@ -102,6 +105,7 @@ private fun FinancialConnectionsTopAppBar(
                 hideStripeLogo = hideStripeLogo,
                 testmode = testMode,
                 theme = theme,
+                linkBrand = linkBrand,
             )
         },
         elevation = 0.dp,
@@ -184,6 +188,7 @@ private fun Title(
     hideStripeLogo: Boolean,
     testmode: Boolean,
     theme: Theme,
+    linkBrand: LinkBrand,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -191,8 +196,9 @@ private fun Title(
     ) {
         if (hideStripeLogo.not()) {
             Image(
-                modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
-                painter = painterResource(id = theme.icon),
+                modifier = Modifier.height(LOGO_HEIGHT),
+                contentScale = ContentScale.FillHeight,
+                painter = painterResource(id = theme.icon(linkBrand)),
                 colorFilter = if (isSystemInDarkTheme()) {
                     ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
                 } else {
@@ -244,7 +250,7 @@ private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
 internal fun TopAppBarWithStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
-            state = TopAppBarState(hideStripeLogo = false),
+            state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
             onCloseClick = {},
         )
     }
@@ -258,6 +264,7 @@ internal fun TopAppBarWithLinkLogoPreview() {
             state = TopAppBarState(
                 hideStripeLogo = false,
                 theme = Theme.LinkLight,
+                linkBrand = LinkBrand.Link,
             ),
             onCloseClick = {},
         )
@@ -269,7 +276,7 @@ internal fun TopAppBarWithLinkLogoPreview() {
 internal fun TopAppBarNoStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
-            state = TopAppBarState(hideStripeLogo = true),
+            state = TopAppBarState(hideStripeLogo = true, linkBrand = LinkBrand.Link),
             onCloseClick = {},
         )
     }

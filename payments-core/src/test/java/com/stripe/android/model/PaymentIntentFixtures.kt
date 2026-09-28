@@ -43,6 +43,26 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
     }
 
+    private val PI_WITH_NULL_ID_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "object": "payment_intent",
+            "amount": 1099,
+            "client_secret": "pi_1IRg6VCRMbs6F_secret_7oH5g4v8GaCrHfsGYS6kiSnwF",
+            "currency": "usd",
+            "livemode": false,
+            "payment_method_types": ["card"],
+            "status": "succeeded"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val PI_WITH_NULL_ID by lazy {
+        requireNotNull(PARSER.parse(PI_WITH_NULL_ID_JSON))
+    }
+
     val PI_VISA_3DS2_JSON by lazy {
         JSONObject(
             """
@@ -195,7 +215,6 @@ internal object PaymentIntentFixtures {
 
     val PI_REQUIRES_MASTERCARD_3DS2_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -1401,7 +1420,6 @@ internal object PaymentIntentFixtures {
 
     val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
@@ -1459,7 +1477,6 @@ internal object PaymentIntentFixtures {
 
     val KONBINI_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
@@ -1583,6 +1600,71 @@ internal object PaymentIntentFixtures {
 
     val ALIPAY_REQUIRES_ACTION by lazy {
         PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+    }
+
+    val ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA_JSON by lazy {
+        JSONObject(
+            """
+        {
+          "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
+          "object": "payment_intent",
+          "amount": 100,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_1HDEFVKlwPmebFhpCobFP55H_secret_XW8sADccCxtusewAwn5z9kAiw",
+          "confirmation_method": "automatic",
+          "created": 1596740133,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "alipay_handle_redirect": {
+              "native_data": null,
+              "native_url": null,
+              "return_url": "example://return_url",
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"
+            },
+            "type": "alipay_handle_redirect"
+          },
+          "payment_method": {
+            "id": "pm_1HDEFVKlwPmebFhpKYYkSm8H",
+            "object": "payment_method",
+            "alipay": {},
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1596740133,
+            "customer": null,
+            "livemode": true,
+            "type": "alipay"
+          },
+          "payment_method_types": [
+            "alipay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA by lazy {
+        PARSER.parse(ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA_JSON)!!
     }
 
     val ALIPAY_TEST_MODE_JSON by lazy {

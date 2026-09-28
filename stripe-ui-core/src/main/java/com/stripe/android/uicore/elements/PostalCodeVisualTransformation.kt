@@ -14,8 +14,34 @@ class PostalCodeVisualTransformation(
     override fun filter(text: AnnotatedString): TransformedText {
         return when (format) {
             is PostalCodeConfig.CountryPostalFormat.CA -> postalForCanada(text)
+            is PostalCodeConfig.CountryPostalFormat.GB -> postalForGB(text)
             else -> TransformedText(text, OffsetMapping.Identity)
         }
+    }
+
+    @Suppress("MagicNumber")
+    private fun postalForGB(text: AnnotatedString): TransformedText {
+        val raw = text.text
+        // UK postcodes have a space before the last 3 characters (the inward code)
+        // e.g., "SW1X7XL" -> "SW1X 7XL"
+        if (raw.length <= 3) {
+            return TransformedText(text, OffsetMapping.Identity)
+        }
+
+        val splitIndex = raw.length - 3
+        val out = raw.take(splitIndex) + " " + raw.substring(splitIndex)
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                return if (offset <= splitIndex) offset else offset + 1
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                return if (offset <= splitIndex) offset else offset - 1
+            }
+        }
+
+        return TransformedText(AnnotatedString(out), offsetMapping)
     }
 
     private fun postalForCanada(text: AnnotatedString): TransformedText {

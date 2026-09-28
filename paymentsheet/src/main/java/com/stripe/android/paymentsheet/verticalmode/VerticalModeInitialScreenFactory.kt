@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
+import com.stripe.android.paymentsheet.DefaultFormDefinitionFactory
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal object VerticalModeInitialScreenFactory {
@@ -13,16 +15,16 @@ internal object VerticalModeInitialScreenFactory {
         viewModel: BaseSheetViewModel,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
     ): List<PaymentSheetScreen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
         val bankFormInteractor = BankFormInteractor.create(viewModel)
-        val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
 
-        if (
-            supportedPaymentMethodTypes.size == 1 &&
-            customerStateHolder.paymentMethods.value.isEmpty() &&
-            formHelper.formTypeForCode(supportedPaymentMethodTypes[0]) == FormHelper.FormType.UserInteractionRequired
-        ) {
+        if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
+            paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(
+                supportedPaymentMethodTypes.first(),
+                paymentMethodMetadata
+            )
             return listOf(
                 PaymentSheetScreen.VerticalModeForm(
                     interactor = DefaultVerticalModeFormInteractor.create(
@@ -31,8 +33,11 @@ internal object VerticalModeInitialScreenFactory {
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
                         bankFormInteractor = bankFormInteractor,
+                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     ),
-                    showsWalletHeader = true,
+                    showsWalletHeader = paymentMethodMetadata.availableWallets.any {
+                        it != WalletType.Link || paymentMethodMetadata.shouldShowLinkButton
+                    },
                 )
             )
         }
@@ -43,6 +48,7 @@ internal object VerticalModeInitialScreenFactory {
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 bankFormInteractor = bankFormInteractor,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             val verticalModeScreen = PaymentSheetScreen.VerticalMode(interactor = interactor)
             add(verticalModeScreen)
@@ -50,7 +56,12 @@ internal object VerticalModeInitialScreenFactory {
             (viewModel.selection.value as? PaymentSelection.New?)?.let { newPaymentSelection ->
                 val paymentMethodCode = newPaymentSelection.paymentMethodCreateParams.typeCode
 
-                if (formHelper.formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired) {
+                val formType = DefaultFormDefinitionFactory.create(
+                    viewModel = viewModel,
+                    paymentMethodMetadata = paymentMethodMetadata
+                ).formTypeForCode(paymentMethodCode)
+
+                if (formType == FormHelper.FormType.UserInteractionRequired) {
                     add(
                         PaymentSheetScreen.VerticalModeForm(
                             interactor = DefaultVerticalModeFormInteractor.create(
@@ -59,6 +70,7 @@ internal object VerticalModeInitialScreenFactory {
                                 paymentMethodMetadata = paymentMethodMetadata,
                                 customerStateHolder = customerStateHolder,
                                 bankFormInteractor = bankFormInteractor,
+                                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                             ),
                         )
                     )

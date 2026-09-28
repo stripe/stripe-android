@@ -4,7 +4,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
@@ -20,11 +19,11 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     @Test
     fun `initialize init and clear sheetLauncher`() = testScenario {
-        assertThat(contentHelper.testSheetLauncher).isNull()
+        assertThat(sheetStateHolder.sheetLauncher).isNull()
         initializer.initialize(true)
-        assertThat(contentHelper.testSheetLauncher).isNotNull()
+        assertThat(sheetStateHolder.sheetLauncher).isNotNull()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(contentHelper.testSheetLauncher).isNull()
+        assertThat(sheetStateHolder.sheetLauncher).isNull()
     }
 
     @Test
@@ -36,7 +35,6 @@ internal class EmbeddedPaymentElementInitializerTest {
     }
 
     @Test
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     fun `when lifecycle is destroyed, should un-initialize callbacks`() {
         val owner = TestLifecycleOwner()
         val callbacks = PaymentElementCallbacks.Builder()
@@ -81,11 +79,11 @@ internal class EmbeddedPaymentElementInitializerTest {
         paymentElementCallbackIdentifier: String = PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val contentHelper = FakeEmbeddedContentHelper()
+        val sheetStateHolder = SheetStateHolder(SavedStateHandle())
         val eventReporter = FakeEventReporter()
         val initializer = EmbeddedPaymentElementInitializer(
             sheetLauncher = FakeEmbeddedSheetLauncher(),
-            contentHelper = contentHelper,
+            sheetStateHolder = sheetStateHolder,
             lifecycleOwner = lifecycleOwner,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
@@ -93,7 +91,7 @@ internal class EmbeddedPaymentElementInitializerTest {
         )
         Scenario(
             initializer = initializer,
-            contentHelper = contentHelper,
+            sheetStateHolder = sheetStateHolder,
             lifecycleOwner = lifecycleOwner,
             eventReporter = eventReporter,
         ).block()
@@ -102,7 +100,7 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     private class Scenario(
         val initializer: EmbeddedPaymentElementInitializer,
-        val contentHelper: FakeEmbeddedContentHelper,
+        val sheetStateHolder: SheetStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val eventReporter: FakeEventReporter,
     )

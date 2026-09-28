@@ -5,45 +5,25 @@ internal enum class FpxBank(
     override val code: String,
     override val displayName: String
 ) : Bank {
-    Maybank2U(
-        "MB2U0227",
-        "maybank2u",
-        "Maybank2U"
-    ),
-    Cimb(
-        "BCBB0235",
-        "cimb",
-        "CIMB Clicks"
-    ),
-    PublicBank(
-        "PBB0233",
-        "public_bank",
-        "Public Bank"
-    ),
-    Rhb(
-        "RHB0218",
-        "rhb",
-        "RHB Bank"
-    ),
-    HongLeongBank(
-        "HLB0224",
-        "hong_leong_bank",
-        "Hong Leong Bank"
-    ),
-    AmBank(
-        "AMBB0209",
-        "ambank",
-        "AmBank"
-    ),
     AffinBank(
         "ABB0233",
         "affin_bank",
         "Affin Bank"
     ),
-    AllianceBankBusiness(
+    Agrobank(
+        "AGRO01",
+        "agrobank",
+        "Agrobank"
+    ),
+    AllianceBank(
         "ABMB0212",
         "alliance_bank",
         "Alliance Bank"
+    ),
+    AmBank(
+        "AMBB0209",
+        "ambank",
+        "AmBank"
     ),
     BankIslam(
         "BIMB0340",
@@ -55,6 +35,11 @@ internal enum class FpxBank(
         "bank_muamalat",
         "Bank Muamalat"
     ),
+    BankOfChina(
+        "BOCM01",
+        "bank_of_china",
+        "Bank of China"
+    ),
     BankRakyat(
         "BKRM0602",
         "bank_rakyat",
@@ -64,6 +49,16 @@ internal enum class FpxBank(
         "BSN0601",
         "bsn",
         "BSN"
+    ),
+    Cimb(
+        "BCBB0235",
+        "cimb",
+        "CIMB Clicks"
+    ),
+    HongLeongBank(
+        "HLB0224",
+        "hong_leong_bank",
+        "Hong Leong Bank"
     ),
     Hsbc(
         "HSBC0223",
@@ -80,10 +75,30 @@ internal enum class FpxBank(
         "maybank2e",
         "Maybank2E"
     ),
+    Maybank2U(
+        "MB2U0227",
+        "maybank2u",
+        "Maybank2U"
+    ),
+    MbsbBank(
+        "MBSB001",
+        "mbsb_bank",
+        "MBSB Bank"
+    ),
     Ocbc(
         "OCBC0229",
         "ocbc",
         "OCBC Bank"
+    ),
+    PublicBank(
+        "PBB0233",
+        "public_bank",
+        "Public Bank"
+    ),
+    Rhb(
+        "RHB0218",
+        "rhb",
+        "RHB Bank"
     ),
     StandardChartered(
         "SCB0216",
@@ -93,7 +108,7 @@ internal enum class FpxBank(
     UobBank(
         "UOB0226",
         "uob",
-        "UOB"
+        "UOB Bank"
     );
 
     companion object {

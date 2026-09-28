@@ -38,12 +38,15 @@ import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.hamcrest.CoreMatchers.anything
 import org.junit.Rule
@@ -67,6 +70,12 @@ internal class CardInputWidgetTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -76,6 +85,8 @@ internal class CardInputWidgetTest {
 
     @BeforeTest
     fun setup() {
+        CardInputWidgetTestActivity.viewModelStoreTestRule = viewModelStoreRule
+
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
@@ -1812,6 +1823,86 @@ internal class CardInputWidgetTest {
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(2)
     }
 
+    @Test
+    fun `card element analytics reportShown when widget attaches`() = runCardInputWidgetAnalyticsTest {
+        assertThat(cardElementAnalytics.awaitShown()).isNotNull()
+        assertThat(cardElementAnalytics.awaitInteraction()).isNotNull()
+    }
+
+    @Test
+    fun `card element analytics records focus events as interactions`() =
+        runCardInputWidgetAnalyticsTest {
+            with(cardInputWidget) {
+                cardNumberEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cardNumberEditText, true)
+                expiryDateEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(expiryDateEditText, true)
+                cvcEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cvcEditText, true)
+                postalCodeEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(postalCodeEditText, true)
+            }
+
+            idleLooper()
+
+            assertThat(cardElementAnalytics.awaitShown()).isNotNull()
+            repeat(6) {
+                assertThat(cardElementAnalytics.awaitInteraction()).isNotNull()
+            }
+        }
+
+    @Test
+    fun `card element analytics reports form completed when all inputs valid`() =
+        runCardInputWidgetAnalyticsTest {
+            with(cardInputWidget) {
+                postalCodeEnabled = true
+                updateCardNumberAndIdle(VISA_WITH_SPACES)
+                expiryDateEditText.append("12")
+                expiryDateEditText.append("50")
+                cvcEditText.append("123")
+                postalCodeEditText.append("94103")
+            }
+
+            idleLooper()
+
+            assertThat(cardElementAnalytics.awaitShown()).isNotNull()
+            repeat(9) { assertThat(cardElementAnalytics.awaitInteraction()).isNotNull() }
+            repeat(2) { assertThat(cardElementAnalytics.awaitFormCompleted()).isNotNull() }
+        }
+
+    private fun runCardInputWidgetAnalyticsTest(
+        block: suspend AnalyticsScenario.() -> Unit,
+    ) {
+        ActivityScenario.launch<CardInputWidgetTestActivity>(
+            Intent(context, CardInputWidgetTestActivity::class.java).apply {
+                putExtra(
+                    "args",
+                    CardInputWidgetTestActivity.Args(
+                        isCbcEligible = false,
+                    ),
+                )
+            }
+        ).use { scenario ->
+            scenario.onActivity { activity ->
+                runTest {
+                    val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
+                    val cardElementAnalytics = activity.recordingCardElementAnalytics
+
+                    idleLooper()
+
+                    block(
+                        AnalyticsScenario(
+                            cardInputWidget = widget,
+                            cardElementAnalytics = cardElementAnalytics,
+                        )
+                    )
+
+                    cardElementAnalytics.ensureAllEventsConsumed()
+                }
+            }
+        }
+    }
+
     private fun runCardInputWidgetTest(
         isCbcEligible: Boolean = false,
         afterRecreation: (CardInputWidget.() -> Unit)? = null,
@@ -1845,6 +1936,11 @@ internal class CardInputWidgetTest {
 
         activityScenario.close()
     }
+
+    private class AnalyticsScenario(
+        val cardInputWidget: CardInputWidget,
+        val cardElementAnalytics: RecordingCardElementAnalytics,
+    )
 
     private fun CardInputWidget.updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
@@ -1914,14 +2010,24 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
         intent.getParcelableExtra("args")!!
     }
 
+    val recordingCardElementAnalytics = RecordingCardElementAnalytics()
+
     private val cardInputWidget: CardInputWidget by lazy {
-        CardInputWidget(this).apply {
+        CardInputWidget(
+            context = this,
+            attrs = null,
+            defStyleAttr = 0,
+            cardElementAnalytics = recordingCardElementAnalytics,
+        ).apply {
             id = VIEW_ID
 
             layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ -> text.length * 10 }
             frameWidthSupplier = { 500 }
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
 
@@ -1948,5 +2054,7 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
 
     companion object {
         const val VIEW_ID = 12345
+
+        lateinit var viewModelStoreTestRule: ViewModelStoreTestRule
     }
 }

@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodCo
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
-import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -30,12 +29,12 @@ class PaymentElementConfirmationOrderTest {
     @Test
     fun `on register, should register contracts in expected order`() = runTest {
         DummyActivityResultCaller.test {
-            val viewModel = DaggerPaymentElementConfirmationTestComponent.builder()
-                .application(application)
-                .allowsManualConfirmation(allowsManualConfirmation = false)
-                .statusBarColor(statusBarColor = null)
-                .savedStateHandle(SavedStateHandle())
-                .build().viewModel
+            val viewModel = DaggerPaymentElementConfirmationTestComponent.factory()
+                .create(
+                    application = application,
+                    savedStateHandle = SavedStateHandle(),
+                    allowsManualConfirmation = false,
+                ).viewModel
 
             viewModel.confirmationHandler.register(
                 activityResultCaller = activityResultCaller,
@@ -67,9 +66,6 @@ class PaymentElementConfirmationOrderTest {
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<LinkActivityContract>()
-            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
-
-            assertThat(awaitRegisterCall().contract).isInstanceOf<ShopPayActivityContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
         }
     }

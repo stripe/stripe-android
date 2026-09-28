@@ -4,136 +4,219 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.DefaultFieldValidationMessageComparator
+import com.stripe.android.uicore.elements.FieldValidationMessageComparator
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldComposable
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.util.UUID
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.coroutines.CoroutineContext
 
 internal class CardDetailsController(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    initialValues: Map<IdentifierSpec, String?>,
+    initialValues: Map<FormFieldId, String?>,
+    coroutineScope: CoroutineScope,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
-    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
-) : SectionFieldErrorController, SectionFieldComposable {
+    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
+        isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
+    ),
+    cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
+    dateConfig: TextFieldConfig = DateConfig(),
+    private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
+) : SectionFieldValidationController, SectionFieldComposable {
+    private val initialCardNumber = initialValues[FormFieldId.CardNumber]
 
-    val nameElement = if (collectName) {
-        SimpleTextElement(
-            controller = SimpleTextFieldController(
-                textFieldConfig = SimpleTextFieldConfig(
-                    label = resolvableString(R.string.stripe_name_on_card),
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboard = androidx.compose.ui.text.input.KeyboardType.Text
-                ),
-                initialValue = initialValues[IdentifierSpec.Name],
+    val cardPillElement = MutableStateFlow(
+        if (initialValues[FormFieldId.CardValidatedScan].toBoolean() && initialCardNumber != null) {
+            CardPillElement(
+                controller = CardPillController(
+                    cardNumber = initialCardNumber,
+                    expirationDate = formatExpirationDateForDisplay(
+                        expirationMonth = initialValues[FormFieldId.CardExpMonth]?.toIntOrNull(),
+                        expirationYear = initialValues[FormFieldId.CardExpYear]?.toIntOrNull(),
+                    ),
+                    onDismissPill = ::dismissCardPill,
+                )
+            )
+        } else {
+            null
+        }
+    )
+
+    private val nameController = if (collectName) {
+        SimpleTextFieldController(
+            textFieldConfig = SimpleTextFieldConfig(
+                label = resolvableString(R.string.stripe_name_on_card),
+                capitalization = KeyboardCapitalization.Words,
+                keyboard = androidx.compose.ui.text.input.KeyboardType.Text
             ),
-            identifier = IdentifierSpec.Name,
+            initialValue = initialValues[FormFieldId.Name],
         )
     } else {
         null
     }
 
+    val nameElement = nameController?.let { controller ->
+        SimpleTextElement(
+            controller = controller,
+            identifier = FormFieldId.Name,
+        )
+    }
+
     val label: Int? = null
     val numberElement = CardNumberElement(
-        IdentifierSpec.CardNumber,
+        FormFieldId.CardNumber,
         DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(
-                isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
-                cardBrandFilter = cardBrandFilter
-            ),
+            coroutineScope = coroutineScope,
+            cardTextFieldConfig = cardDetailsTextFieldConfig,
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
-            initialValue = initialValues[IdentifierSpec.CardNumber],
+            initialValue = initialCardNumber,
             cardBrandChoiceConfig = when (cbcEligibility) {
                 is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(
                     preferredBrands = cbcEligibility.preferredNetworks,
                     initialBrand = initialValues[
-                        IdentifierSpec.PreferredCardBrand
+                        FormFieldId.PreferredCardBrand
                     ]?.let { value ->
                         CardBrand.fromCode(value)
                     }
                 )
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         )
     )
 
     val cvcElement = CvcElement(
-        IdentifierSpec.CardCvc,
+        FormFieldId.CardCvc,
         CvcController(
-            CvcConfig(),
+            cvcTextFieldConfig,
             numberElement.controller.cardBrandFlow,
-            initialValue = initialValues[IdentifierSpec.CardCvc]
+            initialValue = initialValues[FormFieldId.CardCvc]
         )
     )
 
     val expirationDateElement = SimpleTextElement(
-        IdentifierSpec.Generic("date"),
+        FormFieldId.Generic("date"),
         SimpleTextFieldController(
-            textFieldConfig = DateConfig(),
-            initialValue = initialValues[IdentifierSpec.CardExpMonth] +
-                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2),
+            textFieldConfig = dateConfig,
+            initialValue = initialValues[FormFieldId.CardExpMonth] +
+                initialValues[FormFieldId.CardExpYear]?.takeLast(2),
             overrideContentDescriptionProvider = ::formatExpirationDateForAccessibility
         )
     )
 
-    val onCardScanResult: (CardScanResult) -> Unit = { result ->
-        (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
-            cvcElement.controller.onRawValueChange("")
-            numberElement.controller.onRawValueChange(
-                scannedCard.pan
+    fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
+        if (scannedCardDetails is ScannedCardDetails.Validated) {
+            cardPillElement.value = CardPillElement(
+                controller = CardPillController(
+                    cardNumber = scannedCardDetails.cardNumber,
+                    expirationDate = formatExpirationDateForDisplay(
+                        expirationMonth = scannedCardDetails.expirationMonth,
+                        expirationYear = scannedCardDetails.expirationYear,
+                    ),
+                    onDismissPill = ::dismissCardPill,
+                )
             )
+            numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
+            expirationDateElement.controller.onRawValueChange(
+                formatExpirationDate(
+                    scannedCardDetails.expirationMonth,
+                    scannedCardDetails.expirationYear,
+                )
+            )
+            cvcElement.controller.onRawValueChange("")
+
+            val emptyNameController = nameController?.takeIf { controller ->
+                controller.rawFieldValue.value.isBlank()
+            }
+
+            if (emptyNameController != null) {
+                emptyNameController.requestFocus()
+            } else {
+                cvcElement.controller.requestFocus()
+            }
+
+            return
+        } else {
+            numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
+
+            val expirationMonth = scannedCardDetails.expirationMonth
+            val expirationYear = scannedCardDetails.expirationYear
+
             val newDate = if (
-                scannedCard.expirationMonth != null &&
-                scannedCard.expirationYear != null &&
+                expirationMonth != null &&
+                expirationYear != null &&
                 DateUtils.isExpiryDataValid(
-                    expiryMonth = scannedCard.expirationMonth,
-                    expiryYear = scannedCard.expirationYear
+                    expiryMonth = expirationMonth,
+                    expiryYear = expirationYear
                 )
             ) {
                 @Suppress("MagicNumber")
-                "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+                formatExpirationDate(expirationMonth, expirationYear)
             } else {
                 ""
             }
             expirationDateElement.controller.onRawValueChange(newDate)
         }
+        cvcElement.controller.onRawValueChange("")
     }
 
-    private val rowFields = listOf(expirationDateElement, cvcElement)
-    val fields = listOfNotNull(
-        nameElement,
-        numberElement,
-        RowElement(
-            IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
-            rowFields,
-            RowController(rowFields)
-        )
-    )
+    val fields: StateFlow<List<SectionFieldElement>> = cardPillElement.mapAsStateFlow { cardPillElement ->
+        buildList {
+            nameElement?.let { add(it) }
 
-    override val error = combineAsStateFlow(
+            cardPillElement?.let {
+                add(it)
+                add(cvcElement)
+            } ?: run {
+                add(numberElement)
+
+                val fields = listOf(expirationDateElement, cvcElement)
+
+                add(
+                    RowElement(
+                        FormFieldId.Generic("card_details_row"),
+                        fields,
+                        RowController(fields)
+                    )
+                )
+            }
+        }
+    }
+
+    override val validationMessage = combineAsStateFlow(
         listOfNotNull(
             nameElement,
             numberElement,
@@ -141,13 +224,13 @@ internal class CardDetailsController(
             cvcElement
         )
             .map { it.controller }
-            .map { it.error }
+            .map { it.validationMessage }
     ) {
-        it.filterNotNull().firstOrNull()
+        it.sortedWith(validationMessageComparator).filterNotNull().firstOrNull()
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
-        fields.forEach {
+        fields.value.forEach {
             it.onValidationStateChanged(isValidating)
         }
     }
@@ -157,8 +240,8 @@ internal class CardDetailsController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         CardDetailsElementUI(
             enabled,
@@ -167,5 +250,41 @@ internal class CardDetailsController(
             lastTextFieldIdentifier,
             modifier = modifier,
         )
+    }
+
+    private fun dismissCardPill() {
+        numberElement.controller.onRawValueChange("")
+        expirationDateElement.controller.onRawValueChange("")
+        cvcElement.controller.onRawValueChange("")
+        cardPillElement.value = null
+    }
+
+    private fun formatExpirationDate(
+        expirationMonth: Int,
+        expirationYear: Int,
+    ): String {
+        return "%02d%02d".format(expirationMonth, expirationYear % YEAR_REMAINDER)
+    }
+
+    private fun formatExpirationDateForDisplay(
+        expirationMonth: Int?,
+        expirationYear: Int?,
+    ): String? {
+        if (expirationMonth == null || expirationYear == null) {
+            return null
+        }
+
+        return buildString {
+            append(expirationMonth.toString().padStart(EXPIRATION_DATE_PART_LENGTH, '0'))
+            append('/')
+            append(
+                (expirationYear % YEAR_REMAINDER).toString().padStart(EXPIRATION_DATE_PART_LENGTH, '0')
+            )
+        }
+    }
+
+    private companion object {
+        const val EXPIRATION_DATE_PART_LENGTH = 2
+        const val YEAR_REMAINDER = 100
     }
 }

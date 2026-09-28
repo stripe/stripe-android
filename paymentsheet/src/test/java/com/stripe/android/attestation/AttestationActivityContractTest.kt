@@ -7,6 +7,7 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -18,7 +19,7 @@ internal class AttestationActivityContractTest {
     fun `createIntent creates intent correctly with AttestationArgs`() {
         val contract = AttestationActivityContract()
         val args = AttestationActivityContract.Args(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = setOf("PaymentSheet", "CustomerSheet")
         )
 
@@ -28,7 +29,7 @@ internal class AttestationActivityContractTest {
         }
 
         assertThat(intent.component?.className).isEqualTo(AttestationActivity::class.java.name)
-        assertThat(intentArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(intentArgs?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(intentArgs?.productUsage).containsExactly("PaymentSheet", "CustomerSheet")
     }
 
@@ -49,8 +50,7 @@ internal class AttestationActivityContractTest {
     @Test
     fun `parseResult with failed result`() {
         val contract = AttestationActivityContract()
-        val throwable = RuntimeException("Attestation verification failed")
-        val failedResult = AttestationActivityResult.Failed(throwable)
+        val failedResult = AttestationActivityResult.Failed
 
         val result = contract.parseResult(
             Activity.RESULT_OK,
@@ -58,8 +58,6 @@ internal class AttestationActivityContractTest {
         )
 
         assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val parsedFailedResult = result as AttestationActivityResult.Failed
-        assertThat(parsedFailedResult.error.message).isEqualTo(throwable.message)
     }
 
     @Test
@@ -71,9 +69,7 @@ internal class AttestationActivityContractTest {
             Intent()
         )
 
-        assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("No result received from AttestationActivity")
+        assertThat(result).isInstanceOf<AttestationActivityResult.NoResult>()
     }
 
     @Test
@@ -85,9 +81,7 @@ internal class AttestationActivityContractTest {
             null
         )
 
-        assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("No result received from AttestationActivity")
+        assertThat(result).isInstanceOf<AttestationActivityResult.NoResult>()
     }
 
     private fun intent(result: AttestationActivityResult): Intent {

@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.StripeIntent
@@ -17,7 +18,12 @@ internal class FakeElementsSessionRepository(
     private val customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
     private val cardBrandChoice: ElementsSession.CardBrandChoice? = null,
     private val externalPaymentMethodData: String? = null,
-    private val passiveCaptchaParams: PassiveCaptchaParams? = null
+    private val passiveCaptchaParams: PassiveCaptchaParams? = null,
+    private val flags: Map<ElementsSession.Flag, Boolean> = mapOf(
+        ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+        ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
+    ),
+    private val experimentsData: ElementsSession.ExperimentsData? = null,
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,
@@ -27,6 +33,7 @@ internal class FakeElementsSessionRepository(
         val savedPaymentMethodSelectionId: String?,
         val userOverrideCountry: String?,
         val linkDisallowedFundingSourceCreation: Set<String>,
+        val apiConfiguration: ApiConfiguration.State,
     )
 
     var lastParams: Params? = null
@@ -37,7 +44,8 @@ internal class FakeElementsSessionRepository(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
-        userOverrideCountry: String?,
+        countryOverride: String?,
+        apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         lastParams = Params(
@@ -46,8 +54,9 @@ internal class FakeElementsSessionRepository(
             externalPaymentMethods = externalPaymentMethods,
             customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-            userOverrideCountry = userOverrideCountry,
+            userOverrideCountry = countryOverride,
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
+            apiConfiguration = apiConfiguration,
         )
         return if (error != null) {
             Result.failure(error)
@@ -55,7 +64,6 @@ internal class FakeElementsSessionRepository(
             Result.success(
                 ElementsSession(
                     linkSettings = linkSettings,
-                    paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
                     isGooglePayEnabled = isGooglePayEnabled,
@@ -65,11 +73,9 @@ internal class FakeElementsSessionRepository(
                     cardBrandChoice = cardBrandChoice,
                     customPaymentMethods = this.customPaymentMethods,
                     elementsSessionId = DEFAULT_ELEMENTS_SESSION_ID,
-                    flags = mapOf(
-                        ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
-                    ),
+                    flags = this.flags,
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
-                    experimentsData = null,
+                    experimentsData = experimentsData,
                     passiveCaptcha = passiveCaptchaParams,
                     merchantLogoUrl = null,
                     elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,

@@ -9,6 +9,7 @@ import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -28,32 +29,20 @@ import kotlin.coroutines.CoroutineContext
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface StripeCustomerAdapterComponent {
     val stripeCustomerAdapter: StripeCustomerAdapter
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun customerEphemeralKeyProvider(
-            customerEphemeralKeyProvider: CustomerEphemeralKeyProvider
-        ): Builder
-
-        @BindsInstance
-        fun setupIntentClientSecretProvider(
-            setupIntentClientSecretProvider: SetupIntentClientSecretProvider?
-        ): Builder
-
-        @BindsInstance
-        fun paymentMethodTypes(
-            paymentMethodTypes: List<String>?
-        ): Builder
-
-        fun build(): StripeCustomerAdapterComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance context: Context,
+            @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
+            @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
+            @BindsInstance paymentMethodTypes: List<String>?,
+        ): StripeCustomerAdapterComponent
     }
 }
 

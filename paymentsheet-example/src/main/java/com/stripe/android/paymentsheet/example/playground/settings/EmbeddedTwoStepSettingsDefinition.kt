@@ -5,7 +5,10 @@ internal object EmbeddedTwoStepSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Embedded 2 Step Integration",
     defaultValue = false,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.Embedded
     }
 }

@@ -46,15 +46,20 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLaunch
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,6 +80,9 @@ internal class LinkActivityViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `test that cancel result is called on back pressed`() = runTest(dispatcher) {
@@ -148,8 +156,7 @@ internal class LinkActivityViewModelTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             requestSurface = RequestSurface.PaymentElement,
-            publishableKey = "pk_123",
-            stripeAccountId = null,
+            apiConfiguration = TestFactory.LINK_CONFIGURATION.apiConfiguration,
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
@@ -157,6 +164,7 @@ internal class LinkActivityViewModelTest {
             ),
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
             launchMode = LinkLaunchMode.Full,
+            statusBarColor = null,
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -302,7 +310,7 @@ internal class LinkActivityViewModelTest {
     fun `onCreate should start with Wallet screen account status is Verified`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
 
@@ -429,7 +437,6 @@ internal class LinkActivityViewModelTest {
             )
             linkAccountManager.setAccountStatus(
                 AccountStatus.Verified(
-                    hasVerifiedSMSSession = false,
                     consentPresentation = null
                 )
             )
@@ -501,7 +508,7 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
+        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen(initialDestination = LinkScreen.Loading))
 
         assertThat(launchWebConfig).isNotNull()
     }
@@ -576,11 +583,11 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.linkScreenState.test {
-            assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
+            assertThat(awaitItem()).isEqualTo(ScreenState.FullScreen(initialDestination = LinkScreen.Loading))
             vm.onCreate(mock())
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
             vm.onVerificationSucceeded(null)
             assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
         }
@@ -722,21 +729,190 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `change email should navigate to email route and update savedStateHandle`() {
-        val navigationManager = TestNavigationManager()
-        val savedStateHandle = SavedStateHandle()
+    fun `logout action should dismiss when canContinueWithoutLink is true`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
         val viewModel = createViewModel(
-            navigationManager = navigationManager,
-            savedStateHandle = savedStateHandle
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+                canContinueWithoutLink = true,
+            ),
         )
 
-        viewModel.changeEmail()
+        viewModel.result.test {
+            viewModel.handleViewAction(LinkAction.LogoutClicked)
+
+            linkAccountManager.awaitLogoutCall()
+            assertThat(awaitItem()).isEqualTo(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `logout action should navigate to signup when canContinueWithoutLink is false`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navigationManager = TestNavigationManager()
+        val savedStateHandle = SavedStateHandle()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            navigationManager = navigationManager,
+            savedStateHandle = savedStateHandle,
+            linkAccountHolder = linkAccountHolder,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+                canContinueWithoutLink = false,
+            ),
+        )
+
+        viewModel.result.test {
+            viewModel.handleViewAction(LinkAction.LogoutClicked)
+
+            linkAccountManager.awaitLogoutCall()
+            expectNoEvents()
+        }
 
         assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
 
         navigationManager.assertNavigatedTo(
             route = LinkScreen.SignUp.route,
+            popUpTo = PopUpToBehavior.Start,
+        )
+
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null, LoggedOut)
+        )
+    }
+
+    @Test
+    fun `change email from verification dialog should log out and transition to full screen SignUp`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            savedStateHandle = savedStateHandle,
+            linkExpressMode = LinkExpressMode.ENABLED,
+        )
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
+        viewModel.onCreate(mock())
+        advanceUntilIdle()
+
+        assertThat(viewModel.linkScreenState.value).isEqualTo(
+            ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT)
+        )
+
+        viewModel.changeEmail()
+
+        linkAccountManager.awaitLogoutCall()
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null)
+        )
+        assertThat(viewModel.linkScreenState.value).isEqualTo(
+            ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
+        )
+    }
+
+    @Test
+    fun `change email from full screen should log out and navigate to SignUp`() = runTest {
+        val navigationManager = TestNavigationManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val linkAccountManager = FakeLinkAccountManager(linkAccountHolder = linkAccountHolder)
+        val savedStateHandle = SavedStateHandle()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        val viewModel = createViewModel(
+            navigationManager = navigationManager,
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            savedStateHandle = savedStateHandle,
+        )
+
+        viewModel.changeEmail()
+
+        linkAccountManager.awaitLogoutCall()
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null, LoggedOut)
+        )
+        navigationManager.assertNavigatedTo(
+            route = LinkScreen.SignUp.route,
             popUpTo = PopUpToBehavior.Start
+        )
+    }
+
+    @Test
+    fun `change email clears linkAccountHolder immediately for full-screen flow`() = runTest {
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val linkAccountManager = FakeLinkAccountManager(linkAccountHolder = linkAccountHolder)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+        val viewModel = createViewModel(
+            linkAccountHolder = linkAccountHolder,
+            linkAccountManager = linkAccountManager,
+        )
+
+        viewModel.changeEmail()
+        linkAccountManager.awaitLogoutCall()
+
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null, LoggedOut)
+        )
+    }
+
+    @Test
+    fun `change email logs out captured account after clearing linkAccountHolder`() = runTest {
+        val queuedDispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(queuedDispatcher)
+
+        try {
+            val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            val linkAccountManager = FakeLinkAccountManager(linkAccountHolder = linkAccountHolder)
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+            val viewModel = createViewModel(
+                linkAccountHolder = linkAccountHolder,
+                linkAccountManager = linkAccountManager,
+            )
+
+            viewModel.changeEmail()
+            assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+
+            runCurrent()
+            assertThat(linkAccountManager.awaitLogoutCallAccount()).isEqualTo(TestFactory.LINK_ACCOUNT)
+        } finally {
+            Dispatchers.setMain(dispatcher)
+        }
+    }
+
+    @Test
+    fun `change email clears linkAccountHolder without LoggedOut for verification dialog flow`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            linkExpressMode = LinkExpressMode.ENABLED,
+        )
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
+        viewModel.onCreate(mock())
+        advanceUntilIdle()
+
+        viewModel.changeEmail()
+        linkAccountManager.awaitLogoutCall()
+
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null)
         )
     }
 
@@ -797,7 +973,7 @@ internal class LinkActivityViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
             )
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, inlineConsentPresentation))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = inlineConsentPresentation))
 
             vm.result.test {
                 vm.onCreate(mock())
@@ -820,7 +996,6 @@ internal class LinkActivityViewModelTest {
         )
         linkAccountManager.setAccountStatus(
             AccountStatus.Verified(
-                hasVerifiedSMSSession = true,
                 consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE)
             )
         )
@@ -922,7 +1097,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
 
-        val accountStatus = AccountStatus.Verified(true, consentPresentation)
+        val accountStatus = AccountStatus.Verified(consentPresentation = consentPresentation)
         val consumerSessionRefresh = ConsumerSessionRefresh(
             consumerSession = TestFactory.CONSUMER_SESSION,
             linkAuthIntent = linkAuthIntentStatus?.let { LinkAuthIntent(it) }
@@ -1021,7 +1196,7 @@ internal class LinkActivityViewModelTest {
             addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory,
         ).apply {
             this.launchWebFlow = launchWeb
-        }
+        }.also { viewModelStoreRule.track(it) }
     }
 
     private fun creationExtras(): CreationExtras {

@@ -26,34 +26,46 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.testing.RetryRule
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
-import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -71,12 +83,18 @@ import kotlin.test.BeforeTest
 internal class PaymentOptionsActivityTest {
 
     private val composeTestRule = createEmptyComposeRule()
+    private val networkRule = NetworkRule()
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
+        .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
-        .around(RetryRule(3))
+        .around(networkRule)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -130,7 +148,10 @@ internal class PaymentOptionsActivityTest {
             it.onActivity {
                 // We use US Bank Account because they don't dismiss PaymentSheet upon selection
                 // due to their mandate requirement.
-                val usBankAccountLabel = usBankAccount.getLabel(canShowSublabel = false)?.resolve(context)
+                val usBankAccountLabel = usBankAccount.getLabel(
+                    linkBrand = LinkBrand.Link,
+                    canShowSublabel = false,
+                )?.resolve(context)
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
@@ -216,7 +237,7 @@ internal class PaymentOptionsActivityTest {
     fun `Verify Ready state updates the add button label`() {
         runActivityScenario {
             it.onActivity { activity ->
-                val addBinding = StripePrimaryButtonBinding.bind(activity.continueButton)
+                val addBinding = StripeAndroidPrimaryButtonBinding.bind(activity.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
@@ -268,7 +289,10 @@ internal class PaymentOptionsActivityTest {
     fun `notes visibility is set correctly`() {
         val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
 
-        val label = usBankAccount.getLabel(canShowSublabel = false)?.resolve(context)
+        val label = usBankAccount.getLabel(
+            linkBrand = LinkBrand.Link,
+            canShowSublabel = false,
+        )?.resolve(context)
         val mandateText = "By continuing, you agree to authorize payments pursuant to these terms."
 
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
@@ -374,7 +398,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
@@ -400,7 +424,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
                 mandateNode.assertIsDisplayed()
@@ -429,7 +453,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.performScrollTo()
@@ -445,8 +469,42 @@ internal class PaymentOptionsActivityTest {
         }
     }
 
+    @Test
+    fun `promotion message is displayed when selecting klarna from saved PMs screen`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+        )
+
+        runActivityScenario(
+            args = args,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                promotions = FakePaymentMethodMessagePromotionsHelper.promotions
+            ),
+        ) {
+            it.onActivity {
+                composeTestRule.onNodeWithTag(
+                    PaymentOptionsItem.AddCard.viewType.name
+                ).performClick()
+
+                composeTestRule.onNodeWithTag(
+                    "PaymentMethodsUITestTagklarna"
+                ).performClick()
+
+                composeTestRule.onNodeWithText(
+                    "This is a message",
+                    substring = true,
+                ).assertIsDisplayed()
+            }
+        }
+    }
+
     private fun runActivityScenario(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS,
+        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper(),
         block: (InjectableActivityScenario<PaymentOptionsActivity>) -> Unit,
     ) {
         val intent = Intent(
@@ -462,7 +520,7 @@ internal class PaymentOptionsActivityTest {
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                customerRepository = FakeCustomerRepository(),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
@@ -470,8 +528,18 @@ internal class PaymentOptionsActivityTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+                mode = EventReporter.Mode.Complete,
+                errorReporter = FakeErrorReporter(),
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                placesClient = null,
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
-        }
+        }.also { viewModelStoreRule.track(it) }
 
         val scenario = injectableActivityScenario<PaymentOptionsActivity> {
             injectActivity {

@@ -23,6 +23,8 @@ class PhoneNumberController private constructor(
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
+    override val enforceLeftToRightTextDirection: Boolean = true
+
     override val label = stateFlowOf(
         resolvableString(CoreR.string.stripe_address_label_phone_number)
     )
@@ -89,7 +91,7 @@ class PhoneNumberController private constructor(
         FormFieldEntry(rawFieldValue, isComplete)
     }
 
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         fieldValueAndComplete,
         _hasFocus,
         _validating,
@@ -98,7 +100,7 @@ class PhoneNumberController private constructor(
         val canShowWhenNotValidating = value.isNotBlank() && !complete && !hasFocus
 
         if (canShowWhenNotValidating || canShowWhenValidating) {
-            FieldError(R.string.stripe_incomplete_phone_number)
+            FieldValidationMessage.Error(R.string.stripe_incomplete_phone_number)
         } else {
             null
         }
@@ -195,8 +197,8 @@ class PhoneNumberController private constructor(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         PhoneNumberElementUI(
             enabled,

@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.model.ClientAttributionMetadata
@@ -38,6 +39,7 @@ internal interface LinkRepository {
         sessionId: String,
         customerId: String?,
         supportedVerificationTypes: List<String>?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -48,6 +50,7 @@ internal interface LinkRepository {
     suspend fun lookupConsumerWithoutBackendLoggingForExposure(
         email: String,
         sessionId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -66,6 +69,7 @@ internal interface LinkRepository {
         customerId: String?,
         supportedVerificationTypes: List<String>?,
         linkAuthTokenClientSecret: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -75,6 +79,7 @@ internal interface LinkRepository {
         appId: String,
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionRefresh>
 
     /**
@@ -86,7 +91,8 @@ internal interface LinkRepository {
         country: String?,
         countryInferringMethod: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
+        consentAction: ConsumerSignUpConsentAction,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionSignup>
 
     suspend fun mobileSignUp(
@@ -100,7 +106,8 @@ internal interface LinkRepository {
         currency: String?,
         incentiveEligibilitySession: IncentiveEligibilitySession?,
         verificationToken: String,
-        appId: String
+        appId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSessionSignup>
 
     /**
@@ -112,13 +119,25 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkPaymentDetails.New>
+
+    suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+        userEmail: String,
+        stripeIntent: StripeIntent,
+        consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
+        customerEphemeralKey: String,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<LinkPaymentDetails.Saved>
 
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
@@ -126,28 +145,32 @@ internal interface LinkRepository {
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
-    ): Result<LinkPaymentDetails.Saved>
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
         apiKey: String?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(
         consumerSessionClientSecret: String,
         paymentMethod: LinkPaymentMethod,
-        clientAttributionMetadata: ClientAttributionMetadata
+        clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     suspend fun logOut(
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
@@ -155,7 +178,8 @@ internal interface LinkRepository {
      */
     suspend fun startVerification(
         consumerSessionClientSecret: String,
-        isResendSmsCode: Boolean = false
+        isResendSmsCode: Boolean = false,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
@@ -165,6 +189,7 @@ internal interface LinkRepository {
         verificationCode: String,
         consumerSessionClientSecret: String,
         consentGranted: Boolean?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
@@ -173,6 +198,7 @@ internal interface LinkRepository {
     suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Unit>
 
     /**
@@ -181,6 +207,7 @@ internal interface LinkRepository {
     suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails>
 
     /**
@@ -188,6 +215,7 @@ internal interface LinkRepository {
      */
     suspend fun listShippingAddresses(
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerShippingAddresses>
 
     /**
@@ -196,6 +224,7 @@ internal interface LinkRepository {
     suspend fun deletePaymentDetails(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Unit>
 
     /**
@@ -204,12 +233,14 @@ internal interface LinkRepository {
     suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerPaymentDetails>
 
     suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
-        stripeIntent: StripeIntent,
+        intentToken: String?,
         linkMode: LinkMode?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<LinkAccountSession>
 
     /**
@@ -218,5 +249,6 @@ internal interface LinkRepository {
     suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 }

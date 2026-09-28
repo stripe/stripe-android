@@ -36,11 +36,13 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
     implementation libs.material
+    implementation libs.mediapipeTasksVision
 
     debugImplementation libs.compose.uiTestManifest
 
     ksp libs.daggerCompiler
 
+    testImplementation project(':payments-core-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.fragment
@@ -57,6 +59,10 @@ dependencies {
 }
 
 android {
+    defaultConfig {
+        minSdkVersion 24
+    }
+
     sourceSets {
         main {
             assets {

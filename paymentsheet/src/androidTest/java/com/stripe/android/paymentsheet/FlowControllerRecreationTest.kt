@@ -5,9 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.networktesting.RequestMatchers.host
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -22,7 +23,13 @@ import kotlin.time.Duration.Companion.seconds
 class FlowControllerRecreationTest {
     @get:Rule
     val testRules = TestRules.create {
-        around(PaymentConfigurationTestRule(ApplicationProvider.getApplicationContext()))
+        around(
+            PaymentConfigurationTestRule(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = TestApiKeys.PUBLISHABLE,
+                stripeAccountId = TestApiKeys.ACCOUNT,
+            )
+        )
     }
 
     private val networkRule = testRules.networkRule
@@ -31,11 +38,7 @@ class FlowControllerRecreationTest {
 
     @Test
     fun onRecreationShouldNotEmitPreviouslyEmittedResults() = test {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 

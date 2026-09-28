@@ -2,12 +2,14 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -18,6 +20,7 @@ internal data class WalletUiState(
     val email: String,
     val allowLogOut: Boolean,
     val cardBrandFilter: CardBrandFilter,
+    val cardFundingFilter: CardFundingFilter,
     val selectedItemId: String?,
     val isProcessing: Boolean,
     val isSettingUp: Boolean,
@@ -36,10 +39,9 @@ internal data class WalletUiState(
     val addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
     val alertMessage: ResolvableString? = null,
     val paymentSelectionHint: ResolvableString? = null,
-    val isAutoSelecting: Boolean = false,
-    val hasAttemptedAutoSelection: Boolean = false,
     val signupToggleEnabled: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val linkBrand: LinkBrand,
     val isValidating: Boolean = false,
 ) {
 
@@ -62,7 +64,7 @@ internal data class WalletUiState(
         )
 
     val shouldShowLoadingState: Boolean
-        get() = paymentDetailsList.isEmpty() || isAutoSelecting
+        get() = paymentDetailsList.isEmpty()
 
     val isExpanded: Boolean
         get() = userSetIsExpanded ?: (selectedItem?.let { isItemAvailable(it) } != true)
@@ -104,9 +106,24 @@ internal data class WalletUiState(
         get() = addPaymentMethodOptions.isNotEmpty()
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
-        return (
-            item !is ConsumerPaymentDetails.Card || cardBrandFilter.isAccepted(item.brand)
-            ) && item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration)
+        if (item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration).not()) {
+            return false
+        }
+        if (item !is ConsumerPaymentDetails.Card) {
+            return true
+        }
+        return cardBrandFilter.isAccepted(item.brand) && cardFundingAccepted(item)
+    }
+
+    private fun cardFundingAccepted(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
+        return when (item) {
+            is ConsumerPaymentDetails.BankAccount,
+            is ConsumerPaymentDetails.Passthrough,
+            is ConsumerPaymentDetails.Generic -> true
+            is ConsumerPaymentDetails.Card -> {
+                cardFundingFilter.isAccepted(item.funding.cardFunding)
+            }
+        }
     }
 
     fun updateWithResponse(
@@ -159,5 +176,6 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
             )
             else -> null
         }
+        is ConsumerPaymentDetails.Generic -> null
     }
 }

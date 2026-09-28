@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">은행 계좌 ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">은행 계좌 ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">구매를 완료하려면 %s 내에 모바일 뱅킹 앱에서 Bizum 결제를 확인하십시오.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -29,9 +31,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Link로 더 빠르게 체크아웃할 수 있도록 내 정보 저장</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">%s로 체크아웃을 빠르게 진행하기 위해 내 정보 저장</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Link 계정을 생성하여 웹 전반에서 더 빠르게 체크아웃하세요</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">%s 계정을 생성하여 웹 전반에서 더 빠르게 체크아웃하세요</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 신용</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +50,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">예, 업데이트합니다</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">로그인 또는 등록</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">수락</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">취소</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">신고</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">주소</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -58,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">귀하의 정보 확인</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN의 마지막 4자리</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">이용 약관</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">서비스 약관</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">로그인 또는 등록</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">동의하고 계속</string>
   <!-- Title for the Link signup screen -->
@@ -68,6 +84,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Link에서 결제 정보를 저장하고 Link 지원 사이트에서 원클릭으로 안전하게 체크아웃하십시오.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Link가 허용되는 모든 곳에서 더 빠르게 결제하십시오.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">%s가 허용되는 모든 곳에서 더 빠르게 결제하십시오.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[계속하면 <terms>약관</terms>과 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,10 +102,34 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">카드 업데이트</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link 로그아웃</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">%s에서 로그아웃</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">오류가 발생했습니다. 연결을 확인하고 다시 시도하십시오.</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">카드가 만료되었습니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">카드가 거절되었습니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">카드가 만료되었습니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">간편결제는 지원되지 않습니다. 실물 카드를 사용해 보십시오.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">휴대폰 뒷면에 카드를 대십시오</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">문제가 발생했습니다. 다른 카드를 사용해 보세요.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">지원되지 않는 카드입니다. 다른 카드를 사용해 주십시오.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">다시 시도해 주십시오.</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">또는 수동으로 입력</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Link로 결제</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">%s으로 지불</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">%s으로 지불</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[계속하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -98,6 +140,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">결제 정보를 추가하세요.</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">추가된 카드</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">주소 저장</string>
   <!-- Title for shipping address entry section -->
@@ -134,6 +178,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> (<terms>약관</terms> 및 <privacy>개인정보 보호</privacy> 참조)에 저장하는 데 동의하시는 것입니다.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> 에 Link <terms>약관</terms> 및 <privacy>개인정보 보호</privacy>에 따라 저장하시는 데 동의하시는 것입니다.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[계속 진행하시면, %2$s의 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 따라 향후 %1$s 및 <link>%2$s</link>에서 구매 시 귀하의 정보를 저장하는 데 동의하는 것으로 간주됩니다.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">카드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -153,6 +199,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">카드 관리</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">은행 계좌 관리</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">결제 방식 관리</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">결제 방식 관리</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -211,6 +259,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">저장함</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">저장된 카드</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">카드 선택</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -223,6 +273,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">기본 결제 방식이 변경되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">결제 방식 세부사항은 변경할 수 없습니다.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">카드 브랜드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -235,6 +287,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Shop Pay 버튼</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">메뉴 표시</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Link에서 로그아웃</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">%s에서 로그아웃</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Link 가입</string>
   <!-- Title for the Link signup screen -->
@@ -245,22 +301,54 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link에 참여하면 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Link의 <terms>약관</terms> 및 <privacy>개인정보처리방침</privacy>에 따라, 이메일을 제공하면 Link 계정을 생성하고 Link에 결제 정보를 저장하게 됩니다.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[이메일 주소를 제공하시면 귀하는 %1$s <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 따라 %1$s 계정을 생성하고 결제 정보를 %1$s에 저장하는 데 동의하는 것으로 간주됩니다.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Link의 <terms>약관</terms> 및 <privacy>개인정보처리방침</privacy>에 따라, 전화번호를 제공하면 Link 계정을 생성하고 Link에 결제 정보를 저장하게 됩니다.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[전화번호를 제공하시면 귀하는 %1$s <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 따라 %1$s 계정을 생성하고 결제 정보를 %1$s에 저장하는 데 동의하는 것으로 간주됩니다.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[%1$s에 가입하시면 귀하는 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하는 것으로 간주됩니다.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[전화번호와 이메일 주소를 제공하면 Link <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 따라 Link 계정을 생성하는 데 동의하는 것입니다.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[전화번호와 이메일을 제공하시면 귀하는 %1$s <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 따라 %1$s 계정을 생성하는 데 동의하는 것으로 간주됩니다.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">계정이 비활성화되었습니다</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">문제가 발생했습니다.</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">거래 완료</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">카드 추가됨</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">탭하여 카드 추가</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">카드 거부됨</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">카드를 다시 한 번 탭해 보십시오</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">지원되지 않는 카드</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">개발자 옵션을 끄고 다시 시도해 보십시오</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">다른 네트워크를 선택하고 다시 탭하십시오</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">%s 지불됨</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">뒤로 돌아가서 카드를 다시 탭하십시오</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">사용 중인 장치에서는 탭하여 추가 기능을 지원하지 않습니다</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">다른 장치를 사용해 보십시오</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">지원되지 않는 장치</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">다른 카드 사용해 보십시오</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">결제 승인</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">결제를 승인하려면 %s 안에 UPI 앱을 여십시오.</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">뒤로 돌아가서 다른 결제 방식을 선택해 주십시오.</string>
   <!-- Text on a screen that indicates a payment has failed -->

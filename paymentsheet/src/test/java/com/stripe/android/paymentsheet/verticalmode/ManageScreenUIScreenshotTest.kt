@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -31,6 +32,7 @@ internal class ManageScreenUIScreenshotTest {
                         currentSelection = null,
                         isEditing = false,
                         canEdit = true,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )
@@ -47,6 +49,7 @@ internal class ManageScreenUIScreenshotTest {
                         currentSelection = savedPaymentMethods[1],
                         isEditing = false,
                         canEdit = true,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )
@@ -63,6 +66,7 @@ internal class ManageScreenUIScreenshotTest {
                         currentSelection = null,
                         isEditing = true,
                         canEdit = true,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )
@@ -79,6 +83,7 @@ internal class ManageScreenUIScreenshotTest {
                         currentSelection = null,
                         isEditing = true,
                         canEdit = true,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )
@@ -97,6 +102,7 @@ internal class ManageScreenUIScreenshotTest {
                         currentSelection = null,
                         isEditing = true,
                         canEdit = true,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )
@@ -129,6 +135,7 @@ internal class ManageScreenUIScreenshotTest {
                         currentSelection = null,
                         isEditing = false,
                         canEdit = true,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )

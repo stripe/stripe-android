@@ -1,10 +1,10 @@
 package com.stripe.android.paymentelement.confirmation.bacs
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
@@ -35,7 +35,6 @@ internal class BacsConfirmationDefinition @Inject constructor(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = data,
                 receivesResultInProcess = true,
-                deferredIntentConfirmationType = null,
             )
         } ?: run {
             ConfirmationDefinition.Action.Fail(
@@ -50,6 +49,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (BacsMandateConfirmationResult) -> Unit
     ): BacsMandateConfirmationLauncher {
         return bacsMandateConfirmationLauncherFactory.create(
@@ -75,7 +75,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: BacsConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: BacsMandateData,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {
         return when (result) {

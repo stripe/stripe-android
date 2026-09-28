@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Číslo vášho účtu nebolo možné teraz sprístupniť</string>
   <string name="stripe_close_dialog_networking_desc">Ak ho zrušíte teraz, váš účet sa prepojí so spoločnosťou %1$s, ale nebude uložené do služby Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Ak ho zrušíte teraz, váš účet sa prepojí so spoločnosťou, ale nebude uložené do služby Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Ak zrušíte teraz, váš účet bude prepojený s touto spoločnosťou, ale nebude uložený na %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Ak zrušíte teraz, váš účet bude prepojený so spoločnosťou %1$s, ale nebude uložený na %2$s.</string>
   <string name="stripe_error_cta_close">Zatvoriť</string>
   <string name="stripe_error_cta_manual_entry">Zadať bankové údaje manuálne</string>
   <string name="stripe_error_cta_retry">Skúsiť znova</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Zadať bankové údaje</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Zrušiť</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Pokračovať so službou Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Pokračujte so službou %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Teraz nie</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Použite informácie, ktoré ste predtým uložili pomocou svojho účtu Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Použite informácie, ktoré ste si predtým uložili na svojom %1$s účte.</string>
   <string name="stripe_networking_link_login_warmup_title">Pokračovať so službou Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Pokračujte so službou %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Teraz nie</string>
   <string name="stripe_networking_save_to_link_verification_title">Potvrdenie vašej totožnosti</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Vybrať inú banku</string>
   <string name="stripe_search">Vyhľadať</string>
   <string name="stripe_success_pane_desc_link_error_plural">Vaše účty boli pripojené, ale nebolo možné uloženie so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Vaše účty boli prepojené, ale nedali sa uložiť na %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Váš účet bol pripojený, ale nebolo možné uloženie so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Váš účet bol prepojený, ale nedal sa uložiť na %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Vaše účty boli pripojené a uložené so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Vaše účty boli prepojené a uložené za %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Váš účet bol pripojený a uložený so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Váš účet bol prepojený a uložený za %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Mikro vklady na účet ••••%1$s môžete očakávať do 1 – 2 dní a e-mail s ďalšími pokynmi.</string>
   <string name="stripe_success_pane_desc_plural">Vaše účty boli pripojené</string>
   <string name="stripe_success_pane_desc_singular">Váš účet bol pripojený</string>

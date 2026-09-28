@@ -83,7 +83,6 @@ internal object CustomerSheetFixtures {
             linkSettings = null,
             externalPaymentMethodData = null,
             customPaymentMethods = emptyList(),
-            paymentMethodSpecs = null,
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = listOf("card"),
@@ -103,7 +102,7 @@ internal object CustomerSheetFixtures {
             permissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
             ),
             defaultPaymentMethodId = null,
             customerId = customer?.session?.customerId ?: "unused_for_customer_adapter_data_source",
@@ -119,6 +118,7 @@ internal object CustomerSheetFixtures {
     ) = if (hasCustomerSession) {
         ElementsSession.Customer(
             paymentMethods = listOf(),
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_123",
                 customerId = "cus_123",

@@ -1,10 +1,12 @@
 package com.stripe.android.googlepaylauncher
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
@@ -12,28 +14,33 @@ import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.BuildConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.plus
 import org.json.JSONObject
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
+    private val context: Context,
     private val paymentsClient: PaymentsClient,
-    private val requestOptions: ApiRequest.Options,
     private val args: GooglePayPaymentMethodLauncherContractV2.Args,
     private val stripeRepository: StripeRepository,
     private val googlePayJsonFactory: GooglePayJsonFactory,
     private val googlePayRepository: GooglePayRepository,
+    @IOContext private val workContext: CoroutineContext,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     /**
@@ -47,6 +54,19 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
     private val _googleResult = MutableStateFlow<GooglePayPaymentMethodLauncher.Result?>(null)
     internal val googlePayResult = _googleResult.asStateFlow()
+
+    init {
+        args.dynamicCallbackId?.let { dynamicCallbackId ->
+            GooglePayPaymentDataUpdateCallbackRegistry.select(
+                key = dynamicCallbackId,
+                workScope = viewModelScope.plus(workContext),
+            )
+        }
+    }
+
+    override fun onCleared() {
+        GooglePayPaymentDataUpdateCallbackRegistry.deselect()
+    }
 
     fun updateResult(result: GooglePayPaymentMethodLauncher.Result) {
         _googleResult.value = result
@@ -72,6 +92,8 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 )
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
+            shippingAddressParameters = args.shippingAddressParameters,
+            hasDynamicCallbacks = args.dynamicCallbackId != null,
             isEmailRequired = args.config.isEmailRequired,
             allowCreditCards = args.config.allowCreditCards
         )
@@ -81,14 +103,22 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     internal fun createTransactionInfo(
         args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
+        // Google Pay requires totalPriceLabel when displayItems are present.
+        val label = args.label ?: if (args.displayItems.isNotEmpty()) {
+            context.getString(R.string.stripe_google_pay_total)
+        } else {
+            null
+        }
         return if (shouldHidePrice(args)) {
             GooglePayJsonFactory.TransactionInfo(
                 currencyCode = args.currencyCode,
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
-                totalPriceLabel = args.label,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                totalPrice = null,
+                totalPriceLabel = label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                displayItems = args.displayItems,
             )
         } else {
             GooglePayJsonFactory.TransactionInfo(
@@ -97,8 +127,9 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
                 totalPrice = args.amount,
-                totalPriceLabel = args.label,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                totalPriceLabel = label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                displayItems = args.displayItems,
             )
         }
     }
@@ -129,12 +160,25 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         paymentData: PaymentData
     ): GooglePayPaymentMethodLauncher.Result {
         val paymentDataJson = JSONObject(paymentData.toJson())
+        val googlePayResult = GooglePayResult.fromJson(paymentDataJson)
 
-        val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson, args.clientAttributionMetadata)
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayResult = googlePayResult,
+            clientAttributionMetadata = args.clientAttributionMetadata,
+            billingEmailOverride = args.billingEmailOverride,
+        )
+
+        val requestOptions = ApiRequest.Options(
+            apiKey = args.apiConfiguration.publishableKey,
+            stripeAccount = args.apiConfiguration.stripeAccountId
+        )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {
-                GooglePayPaymentMethodLauncher.Result.Completed(it)
+                GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = it,
+                    shippingInformation = googlePayResult.shippingInformation,
+                )
             },
             onFailure = {
                 GooglePayPaymentMethodLauncher.Result.Failed(
@@ -158,24 +202,22 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            val subComponentBuilder = DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.builder()
-                .context(application)
-                .enableLogging(BuildConfig.DEBUG)
-                .publishableKeyProvider {
-                    PaymentConfiguration.getInstance(application).publishableKey
-                }
-                .stripeAccountIdProvider {
-                    PaymentConfiguration.getInstance(application).stripeAccountId
-                }
-                .productUsage(setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN))
-                .googlePayConfig(args.config)
-                .cardBrandFilter(args.cardBrandFilter)
-                .build().subcomponentBuilder
+            val subComponentFactory = DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.factory()
+                .create(
+                    context = application,
+                    enableLogging = BuildConfig.DEBUG,
+                    apiConfiguration = args.apiConfiguration,
+                    productUsage = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN),
+                    config = args.config,
+                    cardBrandFilter = args.cardBrandFilter,
+                    cardFundingFilter = args.cardFundingFilter
+                ).subcomponentFactory
 
-            return subComponentBuilder
-                .args(args)
-                .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+            return subComponentFactory
+                .create(
+                    args = args,
+                    savedStateHandle = savedStateHandle,
+                ).viewModel as T
         }
     }
 

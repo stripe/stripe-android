@@ -1,0 +1,65 @@
+package com.stripe.android.common.nfcscan.analytics
+
+import app.cash.turbine.Turbine
+import com.stripe.android.common.nfcscan.scanner.NfcScanningError
+
+internal class FakeNfcScanningEventReporter : NfcScanningEventReporter {
+    val onNfcScanStartedCalls = Turbine<Unit>()
+    val onNfcScanBlockedCalls = Turbine<Unit>()
+    val onNfcScanAttemptStartedCalls = Turbine<Unit>()
+    val onNfcScanAttemptSucceededCalls = Turbine<Unit>()
+    val onNfcScanAttemptFailedCalls = Turbine<NfcScanningError>()
+    val onNfcScanSucceededCalls = Turbine<Int>()
+    val onNfcScanCancelledCalls = Turbine<NfcScanCancelledCall>()
+
+    data class NfcScanCancelledCall(
+        val reason: NfcScanCancellationReason,
+        val numberOfAttempts: Int,
+    )
+
+    override fun onNfcScanStarted() {
+        onNfcScanStartedCalls.add(Unit)
+    }
+
+    override fun onNfcScanBlocked() {
+        onNfcScanBlockedCalls.add(Unit)
+    }
+
+    override fun onNfcScanAttemptStarted() {
+        onNfcScanAttemptStartedCalls.add(Unit)
+    }
+
+    override fun onNfcScanAttemptSucceeded() {
+        onNfcScanAttemptSucceededCalls.add(Unit)
+    }
+
+    override fun onNfcScanAttemptFailed(error: NfcScanningError) {
+        onNfcScanAttemptFailedCalls.add(error)
+    }
+
+    override fun onNfcScanSucceeded(numberOfAttempts: Int) {
+        onNfcScanSucceededCalls.add(numberOfAttempts)
+    }
+
+    override fun onNfcScanCancelled(
+        reason: NfcScanCancellationReason,
+        numberOfAttempts: Int,
+    ) {
+        onNfcScanCancelledCalls.add(
+            NfcScanCancelledCall(
+                reason = reason,
+                numberOfAttempts = numberOfAttempts,
+            ),
+        )
+    }
+
+    fun ensureAllEventsConsumed() {
+        onNfcScanStartedCalls.ensureAllEventsConsumed()
+        onNfcScanBlockedCalls.ensureAllEventsConsumed()
+        onNfcScanAttemptStartedCalls.ensureAllEventsConsumed()
+        onNfcScanAttemptSucceededCalls.ensureAllEventsConsumed()
+        onNfcScanAttemptFailedCalls.ensureAllEventsConsumed()
+        onNfcScanSucceededCalls.ensureAllEventsConsumed()
+        onNfcScanCancelledCalls.ensureAllEventsConsumed()
+    }
+}

@@ -10,39 +10,56 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
-import kotlinx.coroutines.test.runTest
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
     val embeddedPaymentElement: EmbeddedPaymentElement,
     val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
+    val paymentOptionTurbine: ReceiveTurbine<EmbeddedPaymentElement.PaymentOptionDisplayData?>,
     private val countDownLatch: CountDownLatch,
+    private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
+    @OptIn(ApiConfigurationPreview::class)
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
         ),
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
+        val configurationBuilder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .configurationMutator()
+        apiConfigurationTestType.apiConfiguration?.let(configurationBuilder::apiConfiguration)
         embeddedPaymentElement.configure(
             intentConfiguration = intentConfiguration,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .configurationMutator()
-                .build()
+            configuration = configurationBuilder.build()
         )
     }
 
     fun confirm() {
         embeddedPaymentElement.confirm()
+    }
+
+    suspend fun consumePaymentOptionEvent(paymentMethodType: String, label: String) {
+        val paymentOption = paymentOptionTurbine.awaitItem()
+        val expectedLabel = if (paymentMethodType == "card") {
+            "···· $label".withLtrIsolate()
+        } else {
+            label
+        }
+        assertThat(paymentOption?.label).isEqualTo(expectedLabel)
+        assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
     }
 
     /**
@@ -59,9 +76,9 @@ internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
+    apiConfigurationTestType: ApiConfigurationTestType = ApiConfigurationTestType.PaymentConfigurationOnly,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
-    showWalletButtons: Boolean = false,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -73,8 +90,8 @@ internal fun runEmbeddedPaymentElementTest(
         ),
         builder = builder,
         successTimeoutSeconds = successTimeoutSeconds,
-        showWalletButtons = showWalletButtons,
         rowSelectionCalls = rowSelectionCalls,
+        apiConfigurationTestType = apiConfigurationTestType,
         block = block,
     )
 }
@@ -83,9 +100,9 @@ internal fun runEmbeddedPaymentElementTest(
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     builderInstance: EmbeddedPaymentElement.Builder,
+    apiConfigurationTestType: ApiConfigurationTestType = ApiConfigurationTestType.PaymentConfigurationOnly,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
-    showWalletButtons: Boolean = false,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -130,10 +147,6 @@ internal fun runEmbeddedPaymentElementTest(
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
             val scrollState = rememberScrollState()
             Column(modifier = Modifier.verticalScroll(scrollState)) {
-                if (showWalletButtons) {
-                    embeddedPaymentElement.WalletButtons()
-                }
-
                 embeddedPaymentElement.Content()
             }
         }
@@ -146,6 +159,7 @@ internal fun runEmbeddedPaymentElementTest(
         countDownLatchTimeoutSeconds = successTimeoutSeconds,
         makeEmbeddedPaymentElement = factory,
         rowSelectionCalls = rowSelectionCalls,
+        apiConfigurationTestType = apiConfigurationTestType,
         block = block,
     )
 }
@@ -156,13 +170,14 @@ private fun runEmbeddedPaymentElementTestInternal(
     countDownLatchTimeoutSeconds: Long,
     makeEmbeddedPaymentElement: (ComponentActivity) -> EmbeddedPaymentElement,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
+    apiConfigurationTestType: ApiConfigurationTestType,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            apiConfigurationTestType.initializePaymentConfiguration(it)
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var embeddedPaymentElement: EmbeddedPaymentElement
@@ -172,16 +187,30 @@ private fun runEmbeddedPaymentElementTestInternal(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        val testContext = EmbeddedPaymentElementTestRunnerContext(
-            embeddedPaymentElement = embeddedPaymentElement,
-            rowSelectionCalls = rowSelectionCalls,
-            countDownLatch = countDownLatch,
-        )
-        runTest {
-            block(testContext)
+        runBlocking {
+            turbineScope {
+                val paymentOptionTurbine = embeddedPaymentElement.paymentOption.testIn(this)
+                // Consume the initial null.
+                assertThat(paymentOptionTurbine.awaitItem()).isNull()
+
+                val testContext = EmbeddedPaymentElementTestRunnerContext(
+                    embeddedPaymentElement = embeddedPaymentElement,
+                    rowSelectionCalls = rowSelectionCalls,
+                    paymentOptionTurbine = paymentOptionTurbine,
+                    countDownLatch = countDownLatch,
+                    apiConfigurationTestType = apiConfigurationTestType,
+                )
+                block(testContext)
+
+                testContext.rowSelectionCalls.ensureAllEventsConsumed()
+
+                paymentOptionTurbine.ensureAllEventsConsumed()
+                // Cancel the turbine to stop collecting the StateFlow, which never
+                // completes on its own and would cause turbineScope to hang indefinitely.
+                paymentOptionTurbine.cancel()
+            }
         }
 
-        testContext.rowSelectionCalls.ensureAllEventsConsumed()
         val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()

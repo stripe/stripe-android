@@ -18,9 +18,12 @@ dependencies {
     implementation libs.androidx.appCompat
     implementation libs.material
     implementation libs.kotlin.serialization
+    implementation libs.playServicesWallet
 
     api libs.compose.ui
     implementation libs.compose.activity
+    implementation libs.compose.foundation
+    implementation libs.compose.material
 
     implementation libs.dagger
 
@@ -34,14 +37,28 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.espresso.core
 }
 
 android {
+    defaultConfig {
+        minSdkVersion 24
+    }
+
     buildFeatures {
         compose = true
+    }
+
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp",
+                    "-opt-in=com.stripe.android.link.LinkControllerPreview",
+            ])
+        }
     }
 }
 

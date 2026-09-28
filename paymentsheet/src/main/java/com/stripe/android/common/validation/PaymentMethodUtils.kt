@@ -35,6 +35,9 @@ internal fun ConsumerPaymentDetails.PaymentDetails.isSupportedWithBillingConfig(
             allowedCountries.contains(it.value.uppercase())
         } ?: false
         is ConsumerPaymentDetails.BankAccount -> allowedCountries.contains(CountryCode.US.value)
+        is ConsumerPaymentDetails.Generic -> billingAddress?.countryCode?.let {
+            allowedCountries.contains(it.value.uppercase())
+        } ?: false
         is ConsumerPaymentDetails.Passthrough -> false
     }
 }

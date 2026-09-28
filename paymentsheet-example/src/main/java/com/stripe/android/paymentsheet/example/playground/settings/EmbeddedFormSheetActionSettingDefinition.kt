@@ -13,7 +13,10 @@ internal object EmbeddedFormSheetActionSettingDefinition :
         defaultValue = FormSheetAction.Continue
     ),
     PlaygroundSettingDefinition.Displayable<EmbeddedFormSheetActionSettingDefinition.FormSheetAction> {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.Embedded
     }
 

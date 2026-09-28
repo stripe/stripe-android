@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
+import android.content.Intent
 import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -9,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
@@ -18,10 +20,15 @@ import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
@@ -37,6 +44,9 @@ internal class PollingActivityTest {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `Displays loading screen when activity is opened`() {
@@ -152,9 +162,7 @@ internal class PollingActivityTest {
     @Test
     fun `Passes stripeAccountId through to result when polling succeeds`() {
         val fakePoller = FakeIntentStatusPoller()
-        val testStripeAccountId = "acct_test_123"
-        val argsWithStripeAccountId = defaultArgs.copy(stripeAccountId = testStripeAccountId)
-        val scenario = pollingScenario(args = argsWithStripeAccountId, poller = fakePoller)
+        val scenario = pollingScenario(poller = fakePoller)
 
         scenario.onActivity {
             fakePoller.emitNextPollResult(StripeIntent.Status.Succeeded)
@@ -162,15 +170,13 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-            assertThat(result.stripeAccountId).isEqualTo(testStripeAccountId)
+            assertThat(result.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
         }
     }
 
     @Test
     fun `Passes stripeAccountId through to result when polling is canceled`() {
-        val testStripeAccountId = "acct_test_456"
-        val argsWithStripeAccountId = defaultArgs.copy(stripeAccountId = testStripeAccountId)
-        val scenario = pollingScenario(args = argsWithStripeAccountId)
+        val scenario = pollingScenario()
 
         scenario.onActivity {
             composeTestRule
@@ -181,7 +187,7 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
-            assertThat(result.stripeAccountId).isEqualTo(testStripeAccountId)
+            assertThat(result.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
         }
     }
 
@@ -220,6 +226,19 @@ internal class PollingActivityTest {
         }
     }
 
+    @Test
+    fun `activity finishes gracefully when required args are missing`() {
+        ActivityScenario.launchActivityForResult<PollingActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PollingActivity::class.java
+            )
+        ).use { scenario ->
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
+    }
+
     private fun pollingScenario(
         args: PollingContract.Args = defaultArgs,
         poller: IntentStatusPoller = FakeIntentStatusPoller(),
@@ -234,12 +253,13 @@ internal class PollingActivityTest {
 
         val viewModel = createViewModel(
             args = PollingViewModel.Args(
-                args.clientSecret,
-                args.timeLimitInSeconds.seconds,
-                args.initialDelayInSeconds.seconds,
-                args.ctaText,
-                args.stripeAccountId,
-                args.qrCodeUrl,
+                clientSecret = args.clientSecret,
+                timeLimit = args.timeLimitInSeconds.seconds,
+                initialDelay = args.initialDelayInSeconds.seconds,
+                ctaText = args.ctaText,
+                requestOptions = args.requestOptions,
+                qrCodeUrl = args.qrCodeUrl,
+                paymentMethodType = args.paymentMethodType,
             ),
             poller = poller,
             timeProvider = timeProvider,
@@ -263,7 +283,8 @@ internal class PollingActivityTest {
         timeProvider: TimeProvider = TimeProvider { System.currentTimeMillis() },
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): PollingViewModel {
-        return PollingViewModel(args, poller, timeProvider, savedStateHandle)
+        return PollingViewModel(args, poller, timeProvider, savedStateHandle, FakePollingAnalyticsEventReporter())
+            .also { viewModelStoreRule.track(it) }
     }
 
     private fun waitForActivityFinish() {
@@ -272,19 +293,19 @@ internal class PollingActivityTest {
     }
 
     private fun assertQrCodeWebViewIsDisplayed() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
 
     private fun assertQrCodeWebViewIsNotDisplayed() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }
@@ -296,9 +317,13 @@ internal class PollingActivityTest {
             statusBarColor = null,
             timeLimitInSeconds = 60,
             initialDelayInSeconds = 0,
-            ctaText = R.string.stripe_upi_polling_message,
-            stripeAccountId = null,
+            ctaText = R.string.stripe_blik_confirm_payment,
+            requestOptions = ApiRequest.Options(
+                apiKey = DEFAULT_API_CONFIG.publishableKey,
+                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+            ),
             qrCodeUrl = null,
+            paymentMethodType = "blik",
         )
     }
 }

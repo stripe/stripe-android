@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
+import com.stripe.android.paymentsheet.example.playground.matchesQuery
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -58,23 +59,6 @@ internal fun SettingsUi(
                 Setting(settingDefinition, playgroundSettings)
             }
         }
-    }
-}
-
-private val WordBoundaryRegex by lazy(LazyThreadSafetyMode.NONE) { "\\s+".toRegex() }
-
-/**
- * Returns true if the string matches the query.
- */
-private fun String.matchesQuery(query: String): Boolean {
-    if (query.isBlank()) {
-        return true
-    }
-
-    val words = this.trim().split(WordBoundaryRegex)
-    val queryWords = query.trim().split(WordBoundaryRegex)
-    return queryWords.all { queryWord ->
-        words.any { word -> word.startsWith(queryWord, ignoreCase = true) }
     }
 }
 

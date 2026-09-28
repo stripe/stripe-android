@@ -119,7 +119,5 @@ private fun OTPError.toMessage(): TextResource = TextResource.StringId(
 )
 
 private fun OTPElement.populateTestCode() {
-    for (character in "000000") {
-        controller.onAutofillDigit(character.toString())
-    }
+    controller.onValueChanged(index = 0, "000000")
 }

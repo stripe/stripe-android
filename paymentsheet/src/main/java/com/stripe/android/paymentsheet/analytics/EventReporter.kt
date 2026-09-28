@@ -16,7 +16,7 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted(initializedViaCompose: Boolean)
+    fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be
@@ -30,26 +30,16 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have failed to load.
      */
-    fun onLoadFailed(error: Throwable)
+    fun onLoadFailed(error: Throwable, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
      */
     fun onElementsSessionLoadFailed(error: Throwable)
-
-    /**
-     * The client was unable to parse the response from LUXE.
-     */
-    fun onLpmSpecFailure(errorMessage: String?)
 }
 
 @Suppress("TooManyFunctions")
 internal interface EventReporter : CardScanEventsReporter {
-
-    /**
-     * PaymentSheet has been instantiated or FlowController has finished its configuration.
-     */
-    fun onInit()
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.
@@ -112,6 +102,11 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onDisallowedCardBrandEntered(brand: CardBrand)
 
     fun onAnalyticsEvent(event: AnalyticsEvent)
+
+    /**
+     * The customer has tapped a wallet button (e.g. Google Pay, Link).
+     */
+    fun onWalletButtonTapped(walletType: String)
 
     /**
      * The customer has pressed the confirm button.
@@ -229,20 +224,50 @@ internal interface EventReporter : CardScanEventsReporter {
         isVerticalLayout: Boolean,
     )
 
-    /**
-     * Shop Pay webView loading has been attempted.
-     */
-    fun onShopPayWebViewLoadAttempt()
+    fun onTapToAddButtonShown()
+
+    fun onNfcScanButtonShown()
+
+    fun onTapToAddStarted()
+
+    fun onCardAddedWithTapToAdd(
+        canCollectLinkInput: Boolean,
+    )
+
+    fun onTapToAddCanceled(source: TapToAddCancelSource)
+
+    fun onTapToAddContinueAfterCardAdded(
+        completedLinkInput: Boolean?,
+    )
+
+    fun onTapToAddConfirm(
+        recollectedCvc: Boolean,
+    )
+
+    fun onFailedToAddCardWithTapToAdd(
+        message: String
+    )
+
+    fun onTapToAddAttemptWithUnsupportedDevice()
 
     /**
-     * Shop Pay webView payment confirmation has succeeded.
+     * The user confirms payment with a billing address filled.
      */
-    fun onShopPayWebViewConfirmSuccess()
+    fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    )
 
     /**
-     * Shop Pay webView has been cancelled by the user.
+     * Promotions fetched from PMM API.
      */
-    fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
+    fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String)
+
+    /**
+     * Attempted to display promotions.
+     */
+    fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean)
 
     enum class Mode(val code: String) {
         Complete("complete"),
@@ -255,5 +280,9 @@ internal interface EventReporter : CardScanEventsReporter {
 
     enum class CardBrandChoiceEventSource {
         Edit, Add
+    }
+
+    enum class TapToAddCancelSource {
+        CardCollection, CardAdded, Confirmation
     }
 }

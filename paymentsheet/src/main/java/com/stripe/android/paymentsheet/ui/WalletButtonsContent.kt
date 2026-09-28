@@ -19,8 +19,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
-import com.stripe.android.shoppay.ShopPayButton
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(WalletButtonsPreview::class)
@@ -46,7 +44,7 @@ internal class WalletButtonsContent(
 
         // Render the wallet buttons and 2FA section if they exist
         if (state.hasContent) {
-            StripeTheme {
+            PaymentElementTheme(appearance = state.appearance) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -79,12 +77,15 @@ internal class WalletButtonsContent(
         state.walletButtons.forEach { button ->
             when (button) {
                 is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
+                    apiConfiguration = button.apiConfiguration,
                     state = PrimaryButton.State.Ready,
                     allowCreditCards = button.allowCreditCards,
                     buttonType = button.googlePayButtonType,
                     billingAddressParameters = button.billingAddressParameters,
                     isEnabled = state.buttonsEnabled,
                     cardBrandFilter = button.cardBrandFilter,
+                    cardFundingFilter = button.cardFundingFilter,
+                    additionalEnabledNetworks = button.additionalEnabledNetworks,
                     onPressed = {
                         interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                     },
@@ -94,13 +95,11 @@ internal class WalletButtonsContent(
                     state = button.state,
                     enabled = state.buttonsEnabled,
                     theme = button.theme,
+                    linkBrand = button.linkBrand,
                     onClick = {
                         interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                     },
                 )
-                is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
-                    interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
-                }
             }
         }
     }

@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import com.stripe.android.common.nfcscan.LocalNfcScanEventShownReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.LocalElementsSessionId
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -12,6 +14,7 @@ import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 @Composable
 internal fun EventReporterProvider(
     eventReporter: EventReporter,
+    elementsSessionId: String? = null,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
@@ -20,6 +23,8 @@ internal fun EventReporterProvider(
         LocalCardBrandDisallowedReporter provides eventReporter::onDisallowedCardBrandEntered,
         LocalAnalyticsEventReporter provides eventReporter::onAnalyticsEvent,
         LocalCardScanEventsReporter provides eventReporter,
+        LocalNfcScanEventShownReporter provides eventReporter::onNfcScanButtonShown,
+        LocalElementsSessionId provides elementsSessionId,
     ) {
         content()
     }

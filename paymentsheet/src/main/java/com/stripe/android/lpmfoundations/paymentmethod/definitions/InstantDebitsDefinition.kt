@@ -1,6 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -25,12 +25,16 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = InstantDebitsUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = InstantDebitsUiDefinitionFactory
 }
 
-private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Custom {
 
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             syntheticCode = "link_instant_debits",

@@ -61,7 +61,8 @@ class CountryConfig(
          * Convert 2-letter country code to the corresponding flag, using
          * [regional indicator symbols](https://en.wikipedia.org/wiki/Regional_indicator_symbol).
          */
-        internal fun countryCodeToEmoji(countryCode: String): String {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun countryCodeToEmoji(countryCode: String): String {
             if (countryCode.length != 2) {
                 return "🌐"
             }

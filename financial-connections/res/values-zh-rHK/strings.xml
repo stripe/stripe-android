@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">目前無法存取您的賬戶</string>
   <string name="stripe_close_dialog_networking_desc">如果現在取消，則您的賬戶會被關聯到 %1$s，但不會儲存在 Link。</string>
   <string name="stripe_close_dialog_networking_desc_no_business">如果現在取消，則您的賬戶會被關聯到該商家，但不會儲存在 Link。</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">如果閣下現在取消，貴賬戶將連結至此商家，但不會將其儲存至 %1$s。</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">如果閣下現在取消，貴賬戶將連結至 %1$s，但不會將其儲存至 %2$s。</string>
   <string name="stripe_error_cta_close">關閉</string>
   <string name="stripe_error_cta_manual_entry">手動輸入銀行資訊</string>
   <string name="stripe_error_cta_retry">重試</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">輸入銀行資訊</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">取消</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">繼續使用 Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">繼續使用 %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">現在不</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">使用您之前在 Link 賬戶中儲存的資訊。</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">使用先前儲存在閣下 %1$s 賬戶的資訊。</string>
   <string name="stripe_networking_link_login_warmup_title">繼續使用 Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">繼續使用 %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">現在不</string>
   <string name="stripe_networking_save_to_link_verification_title">確認是您本人</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">選擇其他銀行</string>
   <string name="stripe_search">搜尋</string>
   <string name="stripe_success_pane_desc_link_error_plural">您的賬戶已關聯，但無法儲存到 Link。</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">已關聯至貴賬戶，但無法使用 %1$s 進行儲存。</string>
   <string name="stripe_success_pane_desc_link_error_singular">您的賬戶已關聯，但無法儲存到 Link。</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">已關聯至貴賬戶，但無法使用 %1$s 進行儲存。</string>
   <string name="stripe_success_pane_desc_link_success_plural">您的賬戶已透過 Link 關聯並儲存。</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">已關聯至貴賬戶並使用 %1$s 進行儲存。</string>
   <string name="stripe_success_pane_desc_link_success_singular">您的賬戶已透過 Link 關聯並儲存。</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">已關聯至貴賬戶並使用 %1$s 進行儲存。</string>
   <string name="stripe_success_pane_desc_microdeposits">預計 1-2 天內會向您的賬戶 ••••%1$s 存入微額存款，同時會給您郵件發送進一步說明。</string>
   <string name="stripe_success_pane_desc_plural">您的賬戶已關聯</string>
   <string name="stripe_success_pane_desc_singular">您的賬戶已關聯</string>

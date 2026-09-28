@@ -1,6 +1,7 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.RestrictTo.Scope
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.HEADER_ORIGIN
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CLIENT_ID
@@ -191,8 +192,12 @@ data class AnalyticsRequestV2 private constructor(
         )
     }
 
-    internal companion object {
-        internal const val ANALYTICS_HOST = "https://r.stripe.com/0"
+    @RestrictTo(Scope.LIBRARY_GROUP)
+    companion object {
+
+        @VisibleForTesting
+        @RestrictTo(Scope.LIBRARY_GROUP)
+        const val ANALYTICS_HOST = "https://r.stripe.com/0"
         internal const val HEADER_ORIGIN = "origin"
 
         internal const val PARAM_CLIENT_ID = "client_id"

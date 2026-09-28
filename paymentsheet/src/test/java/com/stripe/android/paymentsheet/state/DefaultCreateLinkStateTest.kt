@@ -1,0 +1,313 @@
+package com.stripe.android.paymentsheet.state
+
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.isInstanceOf
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkDisabledReason
+import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodSelectionFlow
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
+import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FakeLinkStore
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+internal class DefaultCreateLinkStateTest {
+
+    @Test
+    fun `passes customer email from elements session into retrieveCustomerEmail`() = runTest {
+        val retrieveCustomerEmail = FakeRetrieveCustomerEmail()
+        val createLinkState = createLinkStateFactory(retrieveCustomerEmail = retrieveCustomerEmail)
+
+        createLinkState(
+            elementsSession = createElementsSession(customer = customerWithEmail),
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
+        assertThat(retrieveCustomerEmail.invokedWith?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `cardFundingFilterFactory invoked with custom types when enableCardFundFiltering is true`() = runTest {
+        testCardFundingFilterFactory(
+            cardFundingTypes = listOf(PaymentSheet.CardFundingType.Credit),
+            enableCardFundFiltering = true,
+            expectedFundingTypes = listOf(PaymentSheet.CardFundingType.Credit)
+        )
+    }
+
+    @Test
+    fun `cardFundingFilterFactory invoked with default types when enableCardFundFiltering is false`() = runTest {
+        testCardFundingFilterFactory(
+            cardFundingTypes = listOf(PaymentSheet.CardFundingType.Credit),
+            enableCardFundFiltering = false,
+            expectedFundingTypes = PaymentSheet.CardFundingType.entries
+        )
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled is false by default`() =
+        testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
+            flags = emptyMap(),
+            isLinkInlineSignupAvailableForSavedPaymentMethods = false,
+        )
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled matches elements session flag`() =
+        testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to true
+            ),
+            isLinkInlineSignupAvailableForSavedPaymentMethods = true,
+        )
+
+    @Test
+    fun `link is disabled when checkout session should disable wallets for automatic tax billing`() = runTest {
+        val createLinkState = createLinkStateFactory()
+        val elementsSession = createElementsSession()
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                elementsSession = elementsSession,
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        assertThat(result).isInstanceOf<LinkDisabledState>()
+        val disabledState = result as LinkDisabledState
+        assertThat(disabledState.linkDisabledReasons)
+            .contains(LinkDisabledReason.AutomaticTaxBillingAddress)
+    }
+
+    @Test
+    fun `uses checkout session save consent to determine Link signup mode`() = runTest {
+        val createLinkState = createLinkStateFactory()
+        val elementsSession = createElementsSession()
+        val customerMetadata = CustomerMetadata.CheckoutSession(
+            sessionId = "cs_test_123",
+            customerId = "cus_123",
+            removePaymentMethod = PaymentMethodRemovePermission.None,
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
+        )
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = customerMetadata,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        assertThat(result).isInstanceOf<LinkState>()
+        assertThat((result as LinkState).signupMode).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
+    }
+
+    private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
+        flags: Map<ElementsSession.Flag, Boolean>,
+        isLinkInlineSignupAvailableForSavedPaymentMethods: Boolean
+    ) = runTest {
+        val createLinkState = createLinkStateFactory()
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration()
+        val elementsSession = createElementsSession(flags)
+
+        val linkStateResult = createLinkState(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        assertThat(linkStateResult).isInstanceOf<LinkState>()
+
+        val linkState = linkStateResult as LinkState
+
+        assertThat(linkState.signupModeResult.availableForSavedPaymentMethods)
+            .isEqualTo(isLinkInlineSignupAvailableForSavedPaymentMethods)
+    }
+
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    private suspend fun testCardFundingFilterFactory(
+        cardFundingTypes: List<PaymentSheet.CardFundingType>,
+        enableCardFundFiltering: Boolean,
+        expectedFundingTypes: List<PaymentSheet.CardFundingType>
+    ) {
+        val cardFundingFilterFactory = FakeCardFundingFilterFactory()
+        val createLinkState = createLinkStateFactory(cardFundingFilterFactory = cardFundingFilterFactory)
+
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+            .newBuilder()
+            .allowedCardFundingTypes(cardFundingTypes)
+            .build()
+            .asCommonConfiguration()
+
+        val elementsSession = createElementsSession(
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to enableCardFundFiltering
+            )
+        )
+
+        createLinkState(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
+    }
+
+    private fun createLinkStateFactory(
+        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
+        retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
+            FakeCustomerRepository(),
+            FakeDurationProvider(),
+        ),
+    ): DefaultCreateLinkState {
+        return DefaultCreateLinkState(
+            accountStatusProvider = { AccountStatus.SignedOut },
+            retrieveCustomerEmail = retrieveCustomerEmail,
+            linkStore = FakeLinkStore(),
+            linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
+            cardFundingFilterFactory = cardFundingFilterFactory
+        )
+    }
+
+    private fun createElementsSession(
+        flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
+        customer: ElementsSession.Customer? = null,
+    ): ElementsSession {
+        return ElementsSession(
+            linkSettings = null,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            merchantCountry = "US",
+            isGooglePayEnabled = false,
+            sessionsError = null,
+            externalPaymentMethodData = null,
+            customer = customer,
+            cardBrandChoice = null,
+            customPaymentMethods = emptyList(),
+            elementsSessionId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_ID,
+            flags = flags,
+            orderedPaymentMethodTypesAndWallets = emptyList(),
+            experimentsData = null,
+            passiveCaptcha = null,
+            merchantLogoUrl = null,
+            elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
+        )
+    }
+
+    private val customerWithEmail = ElementsSession.Customer(
+        paymentMethods = emptyList(),
+        defaultPaymentMethod = null,
+        email = "customer@example.com",
+        session = ElementsSession.Customer.Session(
+            id = "cuss_123",
+            liveMode = false,
+            apiKey = "ek_test_123",
+            apiKeyExpiry = 999999999,
+            customerId = "cus_123",
+            components = ElementsSession.Customer.Components(
+                mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            )
+        ),
+    )
+
+    private class FakeCardFundingFilterFactory : CardFundingFilter.Factory<List<PaymentSheet.CardFundingType>> {
+        var invokedWith: List<PaymentSheet.CardFundingType>? = null
+
+        override fun invoke(params: List<PaymentSheet.CardFundingType>): CardFundingFilter {
+            invokedWith = params
+            return PaymentSheetCardFundingFilter(params)
+        }
+    }
+
+    private class FakeRetrieveCustomerEmail : RetrieveCustomerEmail {
+        var invokedWith: Invocation? = null
+
+        override suspend fun invoke(
+            configuration: CommonConfiguration,
+            customerMetadata: CustomerMetadata?,
+            customerEmail: String?,
+            apiConfiguration: ApiConfiguration.State,
+        ): String? {
+            invokedWith = Invocation(
+                configuration = configuration,
+                customerMetadata = customerMetadata,
+                customerEmail = customerEmail,
+                apiConfiguration = apiConfiguration,
+            )
+            return customerEmail
+        }
+
+        data class Invocation(
+            val configuration: CommonConfiguration,
+            val customerMetadata: CustomerMetadata?,
+            val customerEmail: String?,
+            val apiConfiguration: ApiConfiguration.State,
+        )
+    }
+
+    private companion object {
+        val PAYMENT_INTENT_INIT_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+        )
+
+        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+            elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+            checkoutSessionId = null,
+        )
+    }
+}

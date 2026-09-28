@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Bankovni račun ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Bankovni račun ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Potvrdite plaćanje Bizum u svojoj aplikaciji mobilnog bankarstva unutar %s da biste dovršili kupnju.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Potvrdite plaćanje u aplikaciji svoje banke unutar %s da biste dovršili kupnju.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -29,9 +31,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Spremi moje podatke za bržu naplatu putem poveznice</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Spremi moje podatke za brže izvršenje plaćanja s %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Stvaranje računa s pomoću Linka za brže izvršenje plaćanja na mreži</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Izradite račun s %s za brže izvršenje plaćanja na mreži</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kreditna kartica</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +50,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Da, ažuriraj</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Prijavite se ili registrirajte</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Prihvati</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Otkaži</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Deklaracije</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Adresa</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -58,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Potvrdite svoje podatke</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Zadnje četiri znamenke SSN-a</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Uvjeti i odredbe</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Uvjeti usluge</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Prijavite se ili se registrirajte</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Pristani i nastavi</string>
   <!-- Title for the Link signup screen -->
@@ -68,6 +84,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Spremite svoje podatke o plaćanju pomoću Linka i sigurno platite jednim klikom na stranicama koje podržavaju Link.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Plaćajte brže svugdje gdje je Link prihvaćen.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Plaćajte brže svugdje gdje se prihvaća %s.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Nastavkom pristajte na <terms>Uvjete</terms> i <privacy>Pravila o privatnosti</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,10 +102,34 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Ažurirajte karticu</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odjavite se s Linka</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Odjava s %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Došlo je do pogreške. Provjerite vezu i pokušajte ponovno.</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">Kartica je istekla. Pokušajte s drugom karticom.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Kartica je odbijena. Pokušajte s drugom karticom.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">Kartica je istekla. Pokušajte s drugom karticom.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Mobilni novčanici nisu podržani. Pokušajte s fizičkom karticom.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Držite karticu iza telefona</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Došlo je do pogreške. Pokušajte s drugom karticom.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">Kartica nije podržana. Pokušajte s drugom karticom.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Pokušajte ponovno.</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">ili upišite ručno</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Platite koristeći Link</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">Platite s %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Platite s %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ako nastavite, pristajete na autorizaciju plaćanja u skladu s <terms>ovim uvjetima</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -98,6 +140,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Dodavanje informacija o plaćanju</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Kartica je dodana</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Spremi adresu</string>
   <!-- Title for shipping address entry section -->
@@ -134,6 +178,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Nastavkom pristajete spremiti svoje podatke za buduće kupnje uz %s i <link>Link</link> (pogledajte <terms>Uvjeti</terms> i <privacy>Privatnost</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Nastavkom pristajete spremiti svoje podatke za buduće kupnje uz %s i <link>Link</link> prema <terms>uvjetima</terms> i <privacy>privatnosti</privacy> značajke Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Nastavkom se slažete da ćete spremiti svoje podatke za buduće kupnje s %1$s i <link>%2$s</link> prema %2$s <terms>uvjetima</terms> i <privacy>privatnosti</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartica nije ažurirana. Pokušajte ponovo.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -153,6 +199,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Upravljajte karticama</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Upravljajte bankovnim računom</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Upravljajte načinom plaćanja</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Upravljanje načinima plaćanja</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -211,6 +259,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spremi ovu karticu za buduća plaćanja %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Spremljeno</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Spremljena kartica</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Odaberite karticu</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -223,6 +273,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Zadani način plaćanja nije promijenjen. Pokušajte ponovno.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Ukupno: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Pojedinosti o načinu plaćanja ne mogu se mijenjati.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Marka kartice nije ažurirana. Molimo pokušajte ponovo.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -235,6 +287,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Gumb Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Prikaži izbornik</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Odjavite se s usluge Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Odjavite se s %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Pridružite se na Link</string>
   <!-- Title for the Link signup screen -->
@@ -245,22 +301,54 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Prisupanjem u Link, prihvaćate <terms>Uvjete</terms> i <privacy>Pravila privatnosti</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Navođenjem svoje adrese e-pošte pristajete na izradu Link računa i spremanje podataka o plaćanju na Link, u skladu s <terms>Uvjetima</terms> i <privacy>Pravilima o privatnosti</privacy> Linka.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Davanjem svoje adrese e-pošte, pristajete otvoriti račun %1$s i spremiti podatke o plaćanju na %1$s, prema %1$s <terms>uvjetima</terms> i <privacy>pravilima o privatnosti</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Navođenjem svog telefonskog broja pristajete na izradu Link računa i spremanje podataka o plaćanju na Link, u skladu s <terms>Uvjetima</terms> i <privacy>Pravilima o privatnosti</privacy> Linka.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Davanjem telefonskog broja pristajete otvoriti račun %1$s i spremiti podatke o plaćanju na %1$s, prema %1$s <terms>uvjetima</terms> i <privacy>pravilima o privatnosti</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Pridruživanjem %1$s, pristajete na <terms>uvjete</terms> i <privacy>pravila o privatnosti</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Davanjem telefonskog broja i e-pošte pristajete na stvaranje Link računa u skladu s Link <terms>Uvjetima</terms> i <privacy>Pravilima o privatnosti</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Davanjem telefonskog broja i e-pošte, pristajete otvoriti račun %1$s podložan %1$s <terms>uvjetima</terms> i <privacy>pravilima o privatnosti</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Vaš račun je deaktiviran</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Došlo je do pogreške</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Transakcija je dovršena</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Kartica je dodana</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">Dodirnite za dodavanje kartice</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Kartica odbijena</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Pokušajte ponovno prisloniti karticu</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Kartica nije podržana</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Isključite mogućnost za razvijatelje i pokušajte ponovno</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Pokušajte s drugom mrežom i ponovno prislonite</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Plaćeno %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Vratite se i ponovno prislonite karticu</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Vaš uređaj ne podržava dodavanje dodirom</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Isprobajte drugi uređaj</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Uređaj nije podržan</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Pokušaj s drugom karticom</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Otkaži i plati na drugi način</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Odobri plaćanje</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Otvorite svoju aplikaciju UPI da biste odobrili svoje plaćanje unutar %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Molimo vratite se i odaberite drugi način plaćanja</string>
   <!-- Text on a screen that indicates a payment has failed -->

@@ -6,8 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.PaymentConfiguration
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.flatMapCatching
@@ -21,6 +22,7 @@ import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
+import com.stripe.android.link.theme.isDarkTheme
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.link.ui.wallet.makeFallbackCardName
@@ -31,35 +33,46 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
-import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.ui.getLinkIconArrow
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LargeClass")
 @Singleton
 internal class LinkControllerInteractor @Inject constructor(
     private val application: Application,
     private val logger: Logger,
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
-    private val linkComponentBuilderProvider: Provider<LinkComponent.Builder>,
+    private val linkComponentFactoryProvider: Provider<LinkComponent.Factory>,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
+    private val savedStateHandle: SavedStateHandle,
 ) {
+
+    private var configuration: LinkController.Configuration.State? = null
 
     private val tag = "LinkControllerViewInteractor"
 
@@ -79,7 +92,8 @@ internal class LinkControllerInteractor @Inject constructor(
                     LinkState.LoginState.LoggedIn ->
                         LinkController.SessionState.LoggedIn
                 },
-                consumerSessionClientSecret = account.clientSecret
+                consumerSessionClientSecret = account.clientSecret,
+                linkSessionKey = account.linkSessionKey,
             )
         }
     }
@@ -98,45 +112,101 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.AuthorizeResult>(extraBufferCapacity = 1)
     val authorizeResultFlow = _authorizeResultFlow.asSharedFlow()
 
+    private val _presentResultFlow =
+        MutableSharedFlow<LinkController.PresentResult>(extraBufferCapacity = 1)
+    val presentResultFlow = _presentResultFlow.asSharedFlow()
+
+    private val createPaymentMethodMutex = Mutex()
+
+    private fun createPaymentMethodForPresentResult() {
+        coroutineScope.launch {
+            createPaymentMethodMutex.withLock {
+                val pmResult = performCreatePaymentMethod(apiKey = null)
+                updateState { it.copy(createdPaymentMethod = pmResult.getOrNull()) }
+                val presentResult = pmResult.fold(
+                    onSuccess = { pm -> LinkController.PresentResult.Completed(pm) },
+                    onFailure = { error -> LinkController.PresentResult.Failed(error) }
+                )
+                emitPresentResult(presentResult)
+            }
+        }
+    }
+
+    internal enum class PresentationType { PaymentMethods, Full }
+
+    private val cachedIconLoader by lazy {
+        PaymentSelection.IconLoader(application.resources, DefaultStripeImageLoader(application))
+    }
+
+    private val _confirmSetupIntentResultFlow =
+        MutableSharedFlow<LinkController.ConfirmSetupIntentResult>(extraBufferCapacity = 1)
+    val confirmSetupIntentResultFlow = _confirmSetupIntentResultFlow.asSharedFlow()
+
+    internal val lastCreatedPaymentMethod: PaymentMethod?
+        get() = _state.value.createdPaymentMethod
+
     val paymentMethodMetadata: PaymentMethodMetadata?
         get() = _state.value.paymentMethodMetadata
 
+    val selectedPaymentMethodPreview: StateFlow<LinkController.PaymentMethodPreview?> =
+        _state.mapAsStateFlow { state ->
+            val isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(
+                isSystemDarkTheme = application.isSystemDarkTheme()
+            )
+            state.selectedPaymentMethod?.details?.toPreview(
+                context = application,
+                iconLoader = cachedIconLoader,
+                reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+                isDarkTheme = isDarkTheme
+            )
+        }
+
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
+            val isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(context.isSystemDarkTheme())
             LinkController.State(
-                elementsSessionId = state.linkComponent?.configuration?.elementsSessionId,
+                elementsSessionId = state.linkConfiguration?.elementsSessionId,
                 internalLinkAccount = account,
-                merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context),
+                merchantLogoUrl = state.linkConfiguration?.merchantLogoUrl,
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details
+                    ?.toPreview(
+                        context = context,
+                        iconLoader = cachedIconLoader,
+                        reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+                        isDarkTheme = isDarkTheme
+                    ),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
     }
 
-    suspend fun configure(configuration: LinkController.Configuration): LinkController.ConfigureResult {
-        logger.debug("$tag: updating configuration")
+    suspend fun configure(configuration: LinkController.Configuration): Result<Unit> {
+        val config = configuration.build()
+        this.configuration = config
         updateState { State() }
-        PaymentConfiguration.init(
-            context = application,
-            publishableKey = configuration.publishableKey,
-            stripeAccountId = configuration.stripeAccountId,
-        )
-        return linkConfigurationLoader.load(configuration)
+        return linkConfigurationLoader.load(config)
             .flatMapCatching { linkMetadata ->
-                val component = linkComponentBuilderProvider.get()
-                    .configuration(linkMetadata.linkConfiguration)
-                    .build()
+                val component = linkComponentFactoryProvider.get()
+                    .create(
+                        configuration = linkMetadata.linkConfiguration,
+                    )
                 component.linkAttestationCheck.invoke()
                     .toResult()
                     .map { Pair(component, linkMetadata.paymentMethodMetadata) }
             }
             .fold(
                 onSuccess = { (component, paymentMethodMetadata) ->
-                    updateState { it.copy(linkComponent = component, paymentMethodMetadata = paymentMethodMetadata) }
-                    LinkController.ConfigureResult.Success
+                    updateState {
+                        it.copy(
+                            linkComponent = component,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                        )
+                    }
+                    savedStateHandle[LINK_CONFIGURED_KEY] = true
+                    Result.success(Unit)
                 },
                 onFailure = { error ->
-                    LinkController.ConfigureResult.Failed(error)
+                    Result.failure(error)
                 }
             )
     }
@@ -144,13 +214,18 @@ internal class LinkControllerInteractor @Inject constructor(
     fun presentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
-        paymentMethodType: LinkController.PaymentMethodType?,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        collectName: Boolean = false,
     ) {
+        if (_state.value.presentationType != null) return
+        updateState { it.copy(presentationType = PresentationType.PaymentMethods) }
         present(
             launcher = launcher,
             email = email,
-            paymentMethodType = paymentMethodType,
+            paymentMethodTypes = paymentMethodTypes,
+            collectName = collectName,
             onConfigurationError = { error ->
+                updateState { it.copy(presentationType = null) }
                 _presentPaymentMethodsResultFlow.tryEmit(
                     LinkController.PresentPaymentMethodsResult.Failed(error)
                 )
@@ -158,9 +233,41 @@ internal class LinkControllerInteractor @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
-                    paymentMethodFilter = paymentMethodType?.toFilter(),
+                    paymentMethodFilters = paymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
+                )
+            }
+        )
+    }
+
+    fun presentFull(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+    ) {
+        val config = configuration
+        if (config == null) {
+            _presentResultFlow.tryEmit(
+                LinkController.PresentResult.Failed(MissingConfigurationException())
+            )
+            return
+        }
+        if (_state.value.presentationType != null) return
+        updateState { it.copy(presentationType = PresentationType.Full) }
+        present(
+            launcher = launcher,
+            email = config.email.takeIf { !it.isNullOrEmpty() },
+            phoneNumber = config.phoneNumber,
+            paymentMethodTypes = config.supportedPaymentMethodTypes,
+            onConfigurationError = { error ->
+                updateState { it.copy(presentationType = null) }
+                _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
+            },
+            getLaunchMode = { _, state ->
+                LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = state.selectedPaymentMethod?.details,
+                    paymentMethodFilters = config.supportedPaymentMethodTypes?.toFilters(),
+                    sharePaymentDetailsImmediatelyAfterCreation = false,
+                    canContinueWithoutLink = false,
                 )
             }
         )
@@ -194,8 +301,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 )
             },
             getLaunchMode = { linkAccount, _ ->
-                // This condition will need to change for web fallback.
-                if (linkAccount?.hasVerifiedSMSSession == true) {
+                if (linkAccount?.isVerified == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
                     _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
@@ -208,27 +314,33 @@ internal class LinkControllerInteractor @Inject constructor(
 
     private fun withConfiguration(
         email: String?,
-        paymentMethodType: LinkController.PaymentMethodType?,
+        phoneNumber: String? = null,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        collectName: Boolean = false,
         onError: (Throwable) -> Unit,
         onSuccess: (LinkConfiguration) -> Unit
     ) {
         val configuration = requireLinkComponent()
             .map { it.configuration }
             .map { config ->
-                if (email == null && paymentMethodType == null) {
+                if (email == null && phoneNumber == null && paymentMethodTypes == null && !collectName) {
                     // No change needed.
                     config
                 } else {
                     val customerInfo = config.customerInfo
-                        .copy(email = email ?: config.customerInfo.email)
-                    val nameCollectionConfig =
-                        if (paymentMethodType == LinkController.PaymentMethodType.BankAccount) {
-                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                        } else {
-                            config.billingDetailsCollectionConfiguration.name
-                        }
-                    val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
-                        .copy(name = nameCollectionConfig)
+                        .copy(
+                            email = email ?: config.customerInfo.email,
+                            phone = phoneNumber ?: config.customerInfo.phone,
+                        )
+
+                    val billingDetailsCollectionConfiguration = if (collectName) {
+                        config.billingDetailsCollectionConfiguration.copy(
+                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        )
+                    } else {
+                        config.billingDetailsCollectionConfiguration
+                    }
+
                     config.copy(
                         customerInfo = customerInfo,
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -244,12 +356,13 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
-        updateState { it.copy(currentLaunchMode = null) }
+        val currentPresentationType = _state.value.presentationType
+        updateState { it.copy(currentLaunchMode = null, presentationType = null) }
         updateLinkAccountOnLinkResult(result)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
-                handlePaymentMethodSelectionResult(result)
+                handlePaymentMethodSelectionResult(result, currentPresentationType)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
             is LinkLaunchMode.Authorization ->
@@ -312,29 +425,53 @@ internal class LinkControllerInteractor @Inject constructor(
         }
     }
 
-    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
-        when (result) {
-            is LinkActivityResult.Canceled -> {
-                logger.debug("$tag: presentPaymentMethods canceled")
-                _presentPaymentMethodsResultFlow.tryEmit(
-                    LinkController.PresentPaymentMethodsResult.Canceled
-                )
-            }
-            is LinkActivityResult.Completed -> {
-                logger.debug("$tag: presentPaymentMethods completed: details=${result.selectedPayment?.details}")
-                updateState {
-                    it.copy(selectedPaymentMethod = result.selectedPayment)
+    fun emitPresentResult(result: LinkController.PresentResult) {
+        _presentResultFlow.tryEmit(result)
+    }
+
+    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult, presentationType: PresentationType?) {
+        when (presentationType) {
+            PresentationType.Full -> when (result) {
+                is LinkActivityResult.Canceled -> {
+                    logger.debug("$tag: present canceled")
+                    _presentResultFlow.tryEmit(LinkController.PresentResult.Canceled())
                 }
-                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success)
+                is LinkActivityResult.Completed -> {
+                    logger.debug("$tag: present PM selected, creating payment method")
+                    updateState { it.copy(selectedPaymentMethod = result.selectedPayment) }
+                    createPaymentMethodForPresentResult()
+                }
+                is LinkActivityResult.Failed -> {
+                    logger.debug("$tag: present failed")
+                    _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(result.error))
+                }
+                is LinkActivityResult.PaymentMethodObtained -> {
+                    logger.warning("$tag: present unexpected result: $result")
+                }
             }
-            is LinkActivityResult.Failed -> {
-                logger.debug("$tag: presentPaymentMethods failed")
-                _presentPaymentMethodsResultFlow.tryEmit(
-                    LinkController.PresentPaymentMethodsResult.Failed(result.error)
-                )
-            }
-            is LinkActivityResult.PaymentMethodObtained -> {
-                logger.warning("$tag: presentPaymentMethods unexpected result: $result")
+            PresentationType.PaymentMethods, null -> when (result) {
+                is LinkActivityResult.Canceled -> {
+                    logger.debug("$tag: presentPaymentMethods canceled")
+                    _presentPaymentMethodsResultFlow.tryEmit(
+                        LinkController.PresentPaymentMethodsResult.Canceled
+                    )
+                }
+                is LinkActivityResult.Completed -> {
+                    logger.debug("$tag: presentPaymentMethods completed: details=${result.selectedPayment?.details}")
+                    updateState {
+                        it.copy(selectedPaymentMethod = result.selectedPayment)
+                    }
+                    _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success)
+                }
+                is LinkActivityResult.Failed -> {
+                    logger.debug("$tag: presentPaymentMethods failed")
+                    _presentPaymentMethodsResultFlow.tryEmit(
+                        LinkController.PresentPaymentMethodsResult.Failed(result.error)
+                    )
+                }
+                is LinkActivityResult.PaymentMethodObtained -> {
+                    logger.warning("$tag: presentPaymentMethods unexpected result: $result")
+                }
             }
         }
     }
@@ -454,6 +591,30 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
+    internal fun onSetupIntentConfirmationResult(result: InternalPaymentResult) {
+        val confirmResult = when (result) {
+            is InternalPaymentResult.Completed -> {
+                val paymentMethod = _state.value.createdPaymentMethod
+                if (paymentMethod != null) {
+                    LinkController.ConfirmSetupIntentResult.Success(paymentMethod)
+                } else {
+                    LinkController.ConfirmSetupIntentResult.Failed(
+                        IllegalStateException("Payment method not found after SetupIntent confirmation")
+                    )
+                }
+            }
+            is InternalPaymentResult.Failed ->
+                LinkController.ConfirmSetupIntentResult.Failed(result.throwable)
+            is InternalPaymentResult.Canceled ->
+                LinkController.ConfirmSetupIntentResult.Canceled
+        }
+        _confirmSetupIntentResultFlow.tryEmit(confirmResult)
+    }
+
+    internal fun emitConfirmSetupIntentResult(result: LinkController.ConfirmSetupIntentResult) {
+        _confirmSetupIntentResultFlow.tryEmit(result)
+    }
+
     suspend fun registerConsumer(
         email: String,
         phone: String,
@@ -526,7 +687,9 @@ internal class LinkControllerInteractor @Inject constructor(
     private fun present(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String? = null,
-        paymentMethodType: LinkController.PaymentMethodType? = null,
+        phoneNumber: String? = null,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>? = null,
+        collectName: Boolean = false,
         onConfigurationError: (Throwable) -> Unit,
         getLaunchMode: (linkAccount: LinkAccount?, state: State) -> LinkLaunchMode?
     ) {
@@ -534,7 +697,9 @@ internal class LinkControllerInteractor @Inject constructor(
 
         withConfiguration(
             email = email,
-            paymentMethodType = paymentMethodType,
+            phoneNumber = phoneNumber,
+            paymentMethodTypes = paymentMethodTypes,
+            collectName = collectName,
             onError = onConfigurationError,
             onSuccess = { configuration ->
                 updateStateOnNewEmail(email)
@@ -556,6 +721,10 @@ internal class LinkControllerInteractor @Inject constructor(
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         launchMode = launchMode,
+                        // LinkController launches Link for selection/authentication only (never
+                        // in-Link confirmation), and this singleton has no host Activity to read a
+                        // status bar color from.
+                        statusBarColor = null,
                     )
                 )
             }
@@ -630,9 +799,14 @@ internal class LinkControllerInteractor @Inject constructor(
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
         val currentLaunchMode: LinkLaunchMode? = null,
+        val presentationType: PresentationType? = null,
     ) {
         val linkConfiguration: LinkConfiguration?
             get() = linkComponent?.configuration
+    }
+
+    companion object {
+        internal const val LINK_CONFIGURED_KEY = "LinkController_Configured"
     }
 }
 
@@ -655,12 +829,15 @@ sealed interface PaymentMethodPreviewDetails {
 
 internal fun PaymentMethodPreviewDetails.toPreview(
     context: Context,
+    iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
-    val drawableResourceId = getIconDrawableRes(this, context.isSystemDarkTheme())
+    val isDarkTheme = context.isSystemDarkTheme()
+    val drawableResourceId = getIconDrawableRes(this, isDarkTheme)
     val sublabel = buildString {
         val name: ResolvableString
         val last4: String
+
         when (this@toPreview) {
             is PaymentMethodPreviewDetails.Card -> {
                 name = makeFallbackCardName(funding, brand.displayName)
@@ -677,15 +854,36 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         append(last4)
     }
 
+    val type = when (this@toPreview) {
+        is PaymentMethodPreviewDetails.Card -> {
+            LinkController.PaymentMethodType.Card
+        }
+        is PaymentMethodPreviewDetails.BankAccount -> {
+            LinkController.PaymentMethodType.BankAccount
+        }
+    }
+
     return LinkController.PaymentMethodPreview(
-        iconRes = drawableResourceId,
+        imageLoader = {
+            iconLoader.load(
+                drawableResourceId = drawableResourceId,
+                drawableResourceIdNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                useDarkThemeIcon = isDarkTheme,
+            )
+        },
         label = label,
         sublabel = sublabel,
+        type = type
     )
 }
 
 internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
+    iconLoader: PaymentSelection.IconLoader,
+    reduceLinkBranding: Boolean,
+    isDarkTheme: Boolean,
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
@@ -696,12 +894,37 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         append(" •••• ")
         append(last4)
     }
-    val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
+    val drawableResourceId = if (reduceLinkBranding) {
+        getIconDrawableRes(isDarkTheme)
+    } else {
+        getLinkIconArrow()
+    }
+
+    val type = when (this@toPreview) {
+        is ConsumerPaymentDetails.Card, is ConsumerPaymentDetails.Passthrough -> {
+            LinkController.PaymentMethodType.Card
+        }
+        is ConsumerPaymentDetails.BankAccount -> {
+            LinkController.PaymentMethodType.BankAccount
+        }
+        is ConsumerPaymentDetails.Generic -> {
+            LinkController.PaymentMethodType.Generic
+        }
+    }
 
     return LinkController.PaymentMethodPreview(
-        iconRes = drawableResourceId,
+        imageLoader = {
+            iconLoader.load(
+                drawableResourceId = drawableResourceId,
+                drawableResourceIdNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                useDarkThemeIcon = isDarkTheme,
+            )
+        },
         label = label,
         sublabel = sublabel,
+        type = type
     )
 }
 
@@ -714,9 +937,11 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
                 isDarkTheme
             )
         is ConsumerPaymentDetails.Card ->
-            getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding, last4), isDarkTheme)
+            getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding.code, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
-            getLinkIcon(iconOnly = true)
+            getLinkIconArrow()
+        is ConsumerPaymentDetails.Generic ->
+            getLinkIconArrow()
     }
 }
 
@@ -748,8 +973,11 @@ internal fun getIconDrawableRes(type: PaymentMethodPreviewDetails, isDarkTheme: 
     }
 }
 
-private fun LinkController.PaymentMethodType.toFilter(): LinkPaymentMethodFilter =
-    when (this) {
-        LinkController.PaymentMethodType.Card -> LinkPaymentMethodFilter.Card
-        LinkController.PaymentMethodType.BankAccount -> LinkPaymentMethodFilter.BankAccount
+private fun List<LinkController.PaymentMethodType>.toFilters(): List<LinkPaymentMethodFilter> =
+    map { type ->
+        when (type) {
+            LinkController.PaymentMethodType.Card -> LinkPaymentMethodFilter.Card
+            LinkController.PaymentMethodType.BankAccount -> LinkPaymentMethodFilter.BankAccount
+            LinkController.PaymentMethodType.Generic -> LinkPaymentMethodFilter.Generic
+        }
     }

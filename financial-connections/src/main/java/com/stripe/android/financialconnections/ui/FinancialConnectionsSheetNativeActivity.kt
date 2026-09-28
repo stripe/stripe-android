@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -133,9 +134,15 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                 .filterNotNull()
                 .collect { viewEffect ->
                     when (viewEffect) {
-                        is OpenUrl -> startActivity(
-                            browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
-                        )
+                        is OpenUrl -> try {
+                            startActivity(
+                                browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
+                            )
+                        } catch (_: ActivityNotFoundException) {
+                            // No browser available on the device.
+                        } catch (_: SecurityException) {
+                            // A non-exported activity on the device matched the URL intent filter.
+                        }
 
                         is Finish -> {
                             setResult(
@@ -213,6 +220,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         composable(Destination.Success)
                         composable(Destination.Reset)
                         composable(Destination.Error)
+                        composable(Destination.GenericError)
                         composable(Destination.AttachLinkedPaymentAccount)
                         composable(Destination.NetworkingLinkSignup)
                         bottomSheet(Destination.NetworkingLinkLoginWarmup)
@@ -220,7 +228,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         composable(Destination.NetworkingSaveToLinkVerification)
                         composable(Destination.LinkAccountPicker)
                         composable(Destination.BankAuthRepair)
-                        composable(Destination.LinkStepUpVerification)
                         composable(Destination.ManualEntrySuccess)
                         bottomSheet(Destination.Notice)
                         bottomSheet(Destination.AccountUpdateRequired)

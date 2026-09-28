@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.networking
 
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -7,9 +8,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Date
 
 internal abstract class AbsFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
+
+    override val syncFlow: StateFlow<SynchronizeSessionResponse?> = MutableStateFlow(null)
 
     override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
@@ -90,10 +95,6 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         TODO("Not yet implemented")
     }
 
-    override suspend fun postMarkLinkStepUpVerified(clientSecret: String): FinancialConnectionsSessionManifest {
-        TODO("Not yet implemented")
-    }
-
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -104,7 +105,8 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse {
         TODO("Not yet implemented")
     }

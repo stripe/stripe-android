@@ -18,4 +18,26 @@ class PaymentMethodExtraParamsTest {
             )
         )
     }
+
+    @Test
+    fun createFromCardWithValidatedScan() {
+        assertThat(PaymentMethodExtraParams.Card(fromValidatedScan = true).toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "validated_scan" to "true"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun createFromCardWithoutValidatedScan() {
+        assertThat(PaymentMethodExtraParams.Card(fromValidatedScan = false).toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "validated_scan" to "false"
+                )
+            )
+        )
+    }
 }

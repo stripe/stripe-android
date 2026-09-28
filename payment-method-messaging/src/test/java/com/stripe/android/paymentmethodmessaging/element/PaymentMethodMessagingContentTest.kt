@@ -12,15 +12,17 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.ApiConfigurationFixtures.DEFAULT_REQUEST_OPTIONS
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement.Appearance.Theme
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
@@ -32,6 +34,9 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMessagingContentTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -95,9 +100,9 @@ internal class PaymentMethodMessagingContentTest {
     ) = runTest {
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
-            paymentConfiguration = { PaymentConfiguration("key") },
+            requestOptionsProvider = { DEFAULT_REQUEST_OPTIONS },
             eventReporter = FakeEventReporter(),
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = FakeErrorReporter()
         )
 

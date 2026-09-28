@@ -7,17 +7,26 @@ apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 android {
     defaultConfig {
         applicationId "com.stripe.android.crypto.onramp.example"
+        minSdkVersion 24
         versionCode 11
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
-        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
         compose true
+    }
+
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp",
+            ])
+        }
     }
 }
 
@@ -36,9 +45,18 @@ dependencies {
     implementation libs.fuelCoroutines
     implementation libs.kotlin.serialization
 
-    testImplementation testLibs.junit
+    debugImplementation libs.leakCanary
 
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
     androidTestImplementation testLibs.androidx.testRunner
     androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.androidx.archCore
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.core
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.espresso.core
 }

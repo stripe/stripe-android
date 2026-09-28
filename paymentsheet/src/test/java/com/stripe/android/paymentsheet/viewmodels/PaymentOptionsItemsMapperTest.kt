@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadataFlow
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -22,6 +23,7 @@ class PaymentOptionsItemsMapperTest {
     private val customerStateFlow = MutableStateFlow<CustomerState?>(null)
     private val isGooglePayReadyFlow = MutableStateFlow(false)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
+    private val linkBrandFlow = MutableStateFlow<LinkBrand?>(null)
 
     @Test
     fun `Only emits value if required flows have emitted values`() = runTest {
@@ -29,9 +31,9 @@ class PaymentOptionsItemsMapperTest {
             customerState = customerStateFlow,
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
+            linkBrand = linkBrandFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false },
             customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
@@ -43,6 +45,7 @@ class PaymentOptionsItemsMapperTest {
             )
             isGooglePayReadyFlow.value = true
             isLinkEnabledFlow.value = true
+            linkBrandFlow.value = LinkBrand.Link
 
             val state = awaitItem()
             assertThat(state).hasSize(5)
@@ -60,9 +63,9 @@ class PaymentOptionsItemsMapperTest {
             customerState = customerStateFlow,
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
+            linkBrand = linkBrandFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false },
             customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
@@ -77,7 +80,7 @@ class PaymentOptionsItemsMapperTest {
 
             assertThat(awaitItem()).containsNoneOf(
                 PaymentOptionsItem.GooglePay,
-                PaymentOptionsItem.Link,
+                PaymentOptionsItem.Link(LinkBrand.Link),
             )
         }
     }
@@ -110,9 +113,9 @@ class PaymentOptionsItemsMapperTest {
             customerState = customerStateFlow,
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
+            linkBrand = linkBrandFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false },
             customerMetadata = getDefaultCustomerMetadataFlow(
                 isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled
             ),

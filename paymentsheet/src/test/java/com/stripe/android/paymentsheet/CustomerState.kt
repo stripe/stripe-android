@@ -4,7 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.state.CustomerState
 
 internal fun createCustomerState(
-    paymentMethods: List<PaymentMethod>,
+    paymentMethods: List<PaymentMethod> = emptyList(),
     defaultPaymentMethodId: String? = null,
 ): CustomerState {
     return CustomerState(

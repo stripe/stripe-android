@@ -19,17 +19,21 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.FormHeaderInformation
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_HEADER_PROMO_BADGE = "TEST_TAG_HEADER_PROMO_BADGE"
 
 @Composable
 internal fun VerticalModeFormUI(
@@ -37,7 +41,7 @@ internal fun VerticalModeFormUI(
     showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
@@ -45,7 +49,7 @@ internal fun VerticalModeFormUI(
     Column(modifier) {
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
-        if (headerInformation != null && !showsWalletHeader) {
+        if (headerInformation != null && shouldShowHeader(state.selectedPaymentMethodCode, showsWalletHeader)) {
             VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
         }
 
@@ -71,6 +75,10 @@ internal fun VerticalModeFormUI(
     }
 }
 
+private fun shouldShowHeader(selectedCode: String, showsWalletHeader: Boolean): Boolean {
+    return if (selectedCode == PaymentMethod.Type.Card.code) !showsWalletHeader else true
+}
+
 @Composable
 internal fun VerticalModeFormHeaderUI(
     isEnabled: Boolean,
@@ -78,13 +86,13 @@ internal fun VerticalModeFormHeaderUI(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context)
+        DefaultStripeImageLoader(context)
     }
 
     Row(
         modifier = Modifier
             .padding(bottom = 12.dp)
-            .padding(StripeTheme.getOuterFormInsets()),
+            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {
@@ -113,7 +121,9 @@ internal fun VerticalModeFormHeaderUI(
         if (formHeaderInformation.promoBadge != null) {
             PromoBadge(
                 text = formHeaderInformation.promoBadge,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier
+                    .testTag(TEST_TAG_HEADER_PROMO_BADGE)
+                    .padding(start = 12.dp),
             )
         }
     }

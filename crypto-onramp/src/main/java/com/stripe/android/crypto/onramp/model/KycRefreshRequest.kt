@@ -1,6 +1,5 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.DateOfBirth
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,7 +9,6 @@ import kotlinx.serialization.Serializable
  * This represents the exact structure expected by the Stripe API.
  */
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class KycRefreshRequest(
     @SerialName("first_name")
     val firstName: String,
@@ -55,7 +53,7 @@ internal data class KycRefreshRequest(
                 firstName = kycInfo.firstName,
                 lastName = kycInfo.lastName,
                 idNumberLastFour = kycInfo.idNumberLastFour,
-                idType = SOCIAL_SECURITY_NUMBER,
+                idType = kycInfo.idType,
                 dateOfBirth = kycInfo.dateOfBirth,
                 city = kycInfo.address.city ?: "",
                 country = kycInfo.address.country ?: "",
@@ -66,10 +64,5 @@ internal data class KycRefreshRequest(
                 credentials = credentials
             )
         }
-
-        /**
-         * Currently, we only support SSN for identity verification in the US.
-         */
-        private const val SOCIAL_SECURITY_NUMBER = "social_security_number"
     }
 }

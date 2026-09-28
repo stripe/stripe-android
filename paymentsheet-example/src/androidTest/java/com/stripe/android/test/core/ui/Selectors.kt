@@ -1,6 +1,7 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
+import android.os.SystemClock.sleep
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription
@@ -18,12 +19,11 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
@@ -38,6 +38,7 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
+import com.stripe.android.uicore.elements.SELECTOR_CLICKABLE_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -52,12 +53,12 @@ import com.stripe.android.uicore.R as UiCoreR
 internal class Selectors(
     val device: UiDevice,
     val composeTestRule: ComposeTestRule,
-    testParameters: TestParameters
+    private val testParameters: TestParameters
 ) {
     val continueButton = BuyButton(composeTestRule)
     val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
     val reload = ComposeButton(composeTestRule, hasTestTag(RELOAD_TEST_TAG))
-    val embeddedFormBuyButton = ComposeButton(composeTestRule, hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
+    val embeddedFormBuyButton = ComposeButton(composeTestRule, hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
     val multiStepSelect = ComposeButton(
         composeTestRule,
         hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
@@ -83,7 +84,7 @@ internal class Selectors(
         } else if (testParameters.paymentMethodCode == Blik.code) {
             30.seconds
         } else {
-            5.seconds
+            DEFAULT_UI_TIMEOUT
         }
     )
 
@@ -139,6 +140,7 @@ internal class Selectors(
 
     val googlePayCheckoutButton = UiAutomatorText(
         "Pay",
+        labelMatchesExactly = true,
         className = "android.widget.Button",
         device = device
     )
@@ -156,15 +158,97 @@ internal class Selectors(
     val closeButton = UiAutomatorText("Close", device = device)
 
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
-        assertThat(
+        val authorizationText = requireNotNull(testParameters.authorizationAction).text(isSetup)
+        val readinessText = authorizationText.ifBlank {
+            "test ${if (isSetup) "setup" else "payment"} page"
+        }
+
+        checkNotNull(
             device.wait(
-                Until.findObject(
-                    By.textContains("test ${if (isSetup) "setup" else "payment"} page")
-                ),
-                HOOKS_PAGE_LOAD_TIMEOUT * 1000
+                Until.findObject(By.textContains(readinessText)),
+                HOOKS_PAGE_LOAD_TIMEOUT * 1000,
             )
-        ).isNotNull()
+        ) {
+            "Authorization page content '$readinessText' did not load"
+        }
         device.waitForIdle()
+    }
+
+    /** Waits for the browser chooser or browser, then handles Chrome's first-run onboarding. */
+    @OptIn(ExperimentalTestApi::class)
+    fun awaitBrowserAndDismissFirstRun(browser: BrowserUI) {
+        var launchedActivity: String? = null
+        composeTestRule.waitUntil(
+            conditionDescription = "browser chooser or ${browser.name} to launch",
+            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+        ) {
+            currentTopActivity()?.let { activity ->
+                val isRequestedBrowser = activity.contains(browser.packageName)
+                if (isRequestedBrowser) {
+                    launchedActivity = activity
+                }
+                isRequestedBrowser
+            } == true || selectBrowserPrompt.exists()
+        }
+
+        if (launchedActivity == null) {
+            browserIconAtPrompt(browser).click()
+            composeTestRule.waitUntil(
+                conditionDescription = "${browser.name} to launch",
+                timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+            ) {
+                currentTopActivity()?.let { activity ->
+                    if (activity.contains(browser.packageName)) {
+                        launchedActivity = activity
+                    }
+                }
+                launchedActivity != null
+            }
+        }
+
+        if (browser == BrowserUI.Chrome) {
+            sleep(CHROME_ACTIVITY_TRANSITION_MS)
+            if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == true) {
+                dismissChromeFirstRunWithInput()
+            }
+        }
+    }
+
+    private fun currentTopActivity(): String? {
+        return runCatching {
+            device.executeShellCommand("dumpsys activity activities")
+                .lineSequence()
+                .firstOrNull { "topResumedActivity=" in it }
+        }.getOrNull()
+    }
+
+    private fun dismissChromeFirstRunWithInput() {
+        val chrome = BrowserUI.Chrome.packageName
+        repeat(CHROME_FIRST_RUN_MAX_SCREENS) {
+            if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false) {
+                return
+            }
+
+            var buttonId: String? = null
+            composeTestRule.waitUntil(
+                conditionDescription = "Chrome first-run dismissal button to appear",
+                timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+            ) {
+                buttonId = CHROME_FIRST_RUN_BUTTON_IDS.firstOrNull { id ->
+                    device.hasObject(By.res("$chrome:id/$id"))
+                }
+                buttonId != null
+            }
+            device.findObject(By.res("$chrome:id/${checkNotNull(buttonId)}")).click()
+            sleep(CHROME_ACTIVITY_TRANSITION_MS)
+        }
+
+        composeTestRule.waitUntil(
+            conditionDescription = "Chrome first-run onboarding to close",
+            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+        ) {
+            currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false
+        }
     }
 
     fun getInstalledBrowsers() = getInstalledPackages()
@@ -282,9 +366,14 @@ internal class Selectors(
 
     fun getName(labelText: String) = composeTestRule.onNodeWithText(labelText)
 
-    fun getLine1() = composeTestRule.onNodeWithText(
-        getResourceString(CoreR.string.stripe_address_label_address_line1)
-    )
+    fun enterAddressManually() {
+        composeTestRule.onNodeWithTextAfterWaiting(
+            getResourceString(UiCoreR.string.stripe_address_enter_manually)
+        ).performClick()
+        composeTestRule.onNodeWithTextAfterWaiting(
+            getResourceString(CoreR.string.stripe_address_label_city)
+        )
+    }
 
     fun getCity() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_city)
@@ -310,6 +399,8 @@ internal class Selectors(
     )
 
     fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
+
+    fun getCountryCode() = composeTestRule.onNode(hasTestTag("DropDown:tiny"))
 
     fun getAuBsb() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
@@ -345,7 +436,7 @@ internal class Selectors(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodes(
                 hasContentDescription("Expiration date", true)
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
     }
@@ -360,21 +451,19 @@ internal class Selectors(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
 
-    fun assertCardBrandDropdownExists() {
-        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+    fun assertCardBrandSelectorExists() {
+        composeTestRule.onNode(hasTestTag(SELECTOR_CLICKABLE_TEST_TAG), true)
             .assertExists()
     }
 
-    fun selectCardBrand(displayName: String) {
-        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
-            .performClick()
-        composeTestRule.onNodeWithTextAfterWaiting(displayName)
+    fun selectCardBrand(cardBrand: String) {
+        composeTestRule.onNodeWithContentDescription(cardBrand)
             .performClick()
     }
 
     private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
-        this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            this.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty()
+        waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         return this.onNodeWithText(
             text
@@ -382,6 +471,19 @@ internal class Selectors(
     }
 
     companion object {
+        private const val BROWSER_LAUNCH_TIMEOUT_MS = 60_000L
+        private const val CHROME_ACTIVITY_TRANSITION_MS = 2_000L
+        private const val CHROME_FIRST_RUN_MAX_SCREENS = 8
+        private const val CHROME_FIRST_RUN_ACTIVITY =
+            "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+        private val CHROME_FIRST_RUN_BUTTON_IDS = listOf(
+            "signin_fre_dismiss_button",
+            "negative_button",
+            "button_secondary",
+            "terms_accept",
+            "next_button",
+        )
+
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =
             device.findObject(
                 UiSelector()

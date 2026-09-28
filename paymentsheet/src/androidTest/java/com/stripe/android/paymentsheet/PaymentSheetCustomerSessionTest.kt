@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.core.utils.urlEncode
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -13,8 +16,13 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class PaymentSheetCustomerSessionTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetCustomerSessionTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -25,6 +33,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsUnspecifiedWhenNotSavingWithPaymentIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -41,6 +50,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsAlwaysWhenSavingWithPaymentIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -58,6 +68,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsLimitedWhenNotSavingWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -74,6 +85,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsAlwaysWhenSavingWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -91,6 +103,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsUnspecifiedWhenSaveIsDisabledWithPaymentIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -109,6 +122,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsLimitedWhenSaveIsDisabledWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -127,6 +141,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsUnspecifiedWhenOverrideIsUnspecifiedWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -146,6 +161,7 @@ class PaymentSheetCustomerSessionTest {
 
     @Test
     fun allowRedisplayIsAlwaysWhenOverrideIsAlwaysWithSetupIntent() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -187,7 +203,7 @@ class PaymentSheetCustomerSessionTest {
         return networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_data[allow_redisplay]"), allowRedisplay)
+            bodyPart("payment_method_data[allow_redisplay]", allowRedisplay)
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -197,7 +213,7 @@ class PaymentSheetCustomerSessionTest {
         return networkRule.enqueue(
             method("POST"),
             path("/v1/setup_intents/seti_example/confirm"),
-            bodyPart(urlEncode("payment_method_data[allow_redisplay]"), allowRedisplay)
+            bodyPart("payment_method_data[allow_redisplay]", allowRedisplay)
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }
@@ -207,11 +223,7 @@ class PaymentSheetCustomerSessionTest {
         responseFilePath: String,
         replacements: List<ResponseReplacement> = listOf()
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile(responseFilePath, replacements)
         }
     }
@@ -224,12 +236,14 @@ class PaymentSheetCustomerSessionTest {
         presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "cuss_1",
-                    ),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_1",
+                        ),
+                    )
                 ),
             )
         }
@@ -239,12 +253,14 @@ class PaymentSheetCustomerSessionTest {
         presentPaymentSheet {
             presentWithSetupIntent(
                 setupIntentClientSecret = "seti_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "cuss_1",
-                    ),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_1",
+                        ),
+                    )
                 ),
             )
         }

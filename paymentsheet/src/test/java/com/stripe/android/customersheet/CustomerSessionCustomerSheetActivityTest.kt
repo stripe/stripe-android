@@ -10,7 +10,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
@@ -21,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_T
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage.Companion.assertHasModifyBadge
@@ -360,7 +361,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onEditButton().performClick()
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClick()
 
-            editPage.setCardBrand("Visa")
+            editPage.setCardBrandWithSelector("Visa")
             editPage.update(waitUntilComplete = false)
 
             enqueueUpdatePaymentMethod(id = "pm_1")
@@ -448,7 +449,7 @@ class CustomerSessionCustomerSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule
                         .onAllNodes(
                             hasTestTag(FORM_ELEMENT_TEST_TAG)
@@ -474,16 +475,13 @@ class CustomerSessionCustomerSheetActivityTest {
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
         onBehalfOf: String?,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query("type", "deferred_intent"),
-            query(urlEncode("deferred_intent[setup_future_usage]"), "off_session"),
-            query(urlEncode("deferred_intent[mode]"), "setup"),
-            query(urlEncode("deferred_intent[payment_method_types][0]"), "card"),
-            query(urlEncode("deferred_intent[payment_method_types][1]"), "us_bank_account"),
-            query(urlEncode("deferred_intent[on_behalf_of]"), onBehalfOf),
+            query("deferred_intent[setup_future_usage]", "off_session"),
+            query("deferred_intent[mode]", "setup"),
+            query("deferred_intent[payment_method_types][0]", "card"),
+            query("deferred_intent[payment_method_types][1]", "us_bank_account"),
+            query("deferred_intent[on_behalf_of]", onBehalfOf),
             query("customer_session_client_secret", "cuss_123"),
         ) { response ->
             response.createElementsSessionResponse(

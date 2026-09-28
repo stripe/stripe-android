@@ -5,6 +5,12 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -35,7 +41,13 @@ class FawryActivity : AppCompatActivity() {
 
         setContent {
             PaymentSheetExampleTheme {
-                Column {
+                Column(
+                    modifier = Modifier.padding(
+                        paddingValues = WindowInsets.systemBars.only(
+                            WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                        ).asPaddingValues()
+                    )
+                ) {
                     if (billingDetails != null) {
                         BillingDetails(billingDetails = billingDetails)
                     }

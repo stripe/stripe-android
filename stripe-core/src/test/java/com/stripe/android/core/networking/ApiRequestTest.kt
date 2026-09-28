@@ -6,6 +6,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -92,6 +93,14 @@ internal class ApiRequestTest {
             mapOf("param" to "123")
         ).url
         assertEquals(url, "sources?param=123")
+    }
+
+    @Test
+    fun optionsToStringDoesNotExposeApiKey() {
+        val options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        val str = options.toString()
+        assertFalse(str.contains(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+        assertFalse(str.contains("pk_test"))
     }
 
     private companion object {

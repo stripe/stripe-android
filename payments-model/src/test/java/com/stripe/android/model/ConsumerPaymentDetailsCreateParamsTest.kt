@@ -419,7 +419,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
             brand = CardBrand.Visa,
             networks = listOf("visa"),
             cvcCheck = CvcCheck.Pass,
-            funding = "credit",
+            funding = ConsumerPaymentDetails.Card.Funding.Credit,
             billingAddress = billingAddress,
             billingEmailAddress = "john@example.com"
         )

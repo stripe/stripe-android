@@ -5,9 +5,11 @@ import androidx.annotation.RestrictTo
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -50,36 +52,46 @@ internal class DefaultGooglePayRepository(
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
+    googlePayConfig: GooglePayConfig,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter,
     private val additionalEnabledNetworks: List<String> = emptyList()
 ) : GooglePayRepository {
 
     @Inject
     internal constructor(
         context: Context,
-        googlePayConfig: GooglePayPaymentMethodLauncher.Config,
+        launcherConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger,
         errorReporter: ErrorReporter,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter,
+        apiConfiguration: ApiConfiguration.State,
     ) : this(
         context.applicationContext,
-        googlePayConfig.environment,
-        googlePayConfig.billingAddressConfig.convert(),
-        googlePayConfig.existingPaymentMethodRequired,
-        googlePayConfig.allowCreditCards,
+        launcherConfig.environment,
+        launcherConfig.billingAddressConfig.convert(),
+        launcherConfig.existingPaymentMethodRequired,
+        launcherConfig.allowCreditCards,
+        GooglePayConfig(
+            publishableKey = apiConfiguration.publishableKey,
+            connectedAccountId = apiConfiguration.stripeAccountId,
+        ),
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,
         cardBrandFilter,
-        googlePayConfig.additionalEnabledNetworks
+        cardFundingFilter,
+        launcherConfig.additionalEnabledNetworks
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(
-        GooglePayConfig(context),
+        googlePayConfig = googlePayConfig,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = additionalEnabledNetworks
     )
 

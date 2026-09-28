@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.strings.resolve
@@ -16,7 +17,7 @@ import org.junit.Test
 
 internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(LayoutDirection.entries)
 
     @Test
     fun updatePaymentMethodScreen_forCard() {
@@ -29,20 +30,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCbcEligibleCard() {
-        paparazziRule.snapshot {
-            PaymentSheetScreenOnUpdatePaymentMethod(
-                paymentMethod = PaymentMethodFixtures
-                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                    .toDisplayableSavedPaymentMethod(),
-                canRemove = true,
-                isModifiablePaymentMethod = true,
-            )
-        }
-    }
-
-    @Test
-    fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton() {
+    fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -50,6 +38,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = false,
                 isModifiablePaymentMethod = true,
+                shouldShowCardBrandDropdown = true,
             )
         }
     }
@@ -119,7 +108,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection() {
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -127,14 +116,14 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Automatic
             )
         }
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection() {
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -143,14 +132,14 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Full,
             )
         }
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection() {
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -159,7 +148,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Never,
             )
         }
@@ -175,7 +164,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Automatic,
             )
         }
@@ -191,10 +180,20 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = false,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Full,
                 useDefaultBillingDetails = false,
                 validating = true,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forLinkGeneric() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures.displayableLinkGenericPaymentMethod(),
+                canRemove = true
             )
         }
     }
@@ -207,7 +206,8 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         isExpiredCard: Boolean = false,
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
+        shouldShowCardBrandDropdown: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never,
         useDefaultBillingDetails: Boolean = true,
         validating: Boolean = false,
@@ -217,6 +217,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             canRemove = canRemove,
             isExpiredCard = isExpiredCard,
             isModifiablePaymentMethod = isModifiablePaymentMethod,
+            shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             setAsDefaultCheckboxEnabled = true,
             viewActionRecorder = null,
@@ -229,7 +230,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             useDefaultBillingDetails = useDefaultBillingDetails,
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
         ).apply {
             if (validating) {
                 editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)

@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -37,6 +37,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -59,6 +60,8 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import dagger.Binds
@@ -72,7 +75,8 @@ import kotlin.coroutines.CoroutineContext
 @Module(
     includes = [
         StripeRepositoryModule::class,
-        PaymentsIntegrityModule::class
+        PaymentsIntegrityModule::class,
+        LinkAccountAnalyticsModule::class,
     ],
     subcomponents = [
         OAuthConsentViewModelComponent::class,
@@ -204,10 +208,9 @@ internal interface NativeLinkModule {
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
-        @NativeLinkScope
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
-        }
+        fun provideApiConfiguration(
+            paymentMethodMetadata: PaymentMethodMetadata
+        ): ApiConfiguration.State = paymentMethodMetadata.apiConfiguration
 
         @Provides
         @NativeLinkScope
@@ -248,5 +251,11 @@ internal interface NativeLinkModule {
         fun provideAutocompleteLauncher() = DefaultAutocompleteLauncher(
             appearanceContext = AutocompleteAppearanceContext.Link,
         )
+
+        @Provides
+        @NativeLinkScope
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return DefaultStripeImageLoader(context)
+        }
     }
 }

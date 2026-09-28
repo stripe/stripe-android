@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
@@ -9,12 +10,14 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
     private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetPaymentMethodDataSource {
     override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
@@ -38,13 +41,11 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
                 customerRepository.updatePaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-                    ),
+                    customerId = ephemeralKey.customerId,
+                    ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     paymentMethodId = paymentMethodId,
                     params = params,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }
@@ -64,14 +65,12 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
-                customerRepository.detachPaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-                    ),
-                    canRemoveDuplicates = true,
+                customerRepository.detachPaymentMethodAndDuplicates(
+                    customerId = ephemeralKey.customerId,
+                    ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                    customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }

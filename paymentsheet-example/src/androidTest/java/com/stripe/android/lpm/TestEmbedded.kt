@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition.FormSheetAction
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.FieldPopulator
@@ -106,7 +107,7 @@ internal class TestEmbedded : BasePlaygroundTest() {
                 saveForFutureUseCheckboxVisible = true,
                 authorizationAction = null,
             ).copyPlaygroundSettings { settings ->
-                settings[GooglePaySettingsDefinition] = false
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT

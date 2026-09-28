@@ -1,0 +1,1047 @@
+package com.stripe.android.paymentelement.embedded.manage
+
+import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
+import app.cash.turbine.test
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+import kotlin.test.Test
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
+
+@Suppress("LargeClass")
+internal class EmbeddedNavigatorTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @Test
+    fun `initial state is correct`() = testScenario {
+        assertThat(navigator.canGoBack).isFalse()
+        assertThat(navigator.screen.value).isEqualTo(initialScreen)
+        navigator.result.test {
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `navigating to a new screen state is correct`() = testScenario {
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            assertThat(navigator.canGoBack).isFalse()
+
+            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(
+                FakeUpdatePaymentMethodInteractor()
+            )
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
+            assertThat(awaitItem()).isEqualTo(newScreen)
+            assertThat(navigator.canGoBack).isTrue()
+        }
+        navigator.result.test {
+            ensureAllEventsConsumed()
+        }
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `navigating back with one screen emits result`() = testScenario {
+        navigator.performAction(EmbeddedNavigator.Action.Back)
+        navigator.result.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `navigating back with two screens navigates back`() = testScenario {
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+
+            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(
+                FakeUpdatePaymentMethodInteractor()
+            )
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
+            assertThat(awaitItem()).isEqualTo(newScreen)
+            assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+            navigator.performAction(EmbeddedNavigator.Action.Back)
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+        }
+
+        navigator.result.test {
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `cancelling the coroutine scope closes the root screen when nothing was navigated to`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val eventReporter = FakeEventReporter()
+        val manageInteractor = FakeManageScreenInteractor()
+        EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialScreen = EmbeddedNavigator.Screen.ManageAll(manageInteractor),
+        )
+        assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
+
+        scope.cancel()
+
+        assertThat(manageInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        manageInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `cancelling the coroutine scope closes every screen remaining on the back stack`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val eventReporter = FakeEventReporter()
+        val manageInteractor = FakeManageScreenInteractor()
+        val updateInteractor = FakeUpdatePaymentMethodInteractor()
+        val initialScreen = EmbeddedNavigator.Screen.ManageAll(manageInteractor)
+        val navigator = EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialScreen = initialScreen,
+        )
+        assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
+
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(updateInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
+            assertThat(awaitItem()).isEqualTo(manageUpdateScreen)
+        }
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+        scope.cancel()
+
+        assertThat(updateInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(manageInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        manageInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `performing close action emits result`() = testScenario {
+        navigator.performAction(EmbeddedNavigator.Action.Close())
+        navigator.result.test {
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `performing close action with shouldInvokeRowSelection true emits true`() = testScenario {
+        navigator.performAction(
+            EmbeddedNavigator.Action.Close(
+                shouldInvokeRowSelectionCallback = true
+            )
+        )
+        navigator.result.test {
+            val item = awaitItem()
+            assertThat(item).isNotNull()
+            assertThat(item).isTrue()
+        }
+    }
+
+    @Test
+    fun `performing close action with shouldInvokeRowSelection false emits false`() = testScenario {
+        navigator.performAction(
+            EmbeddedNavigator.Action.Close(
+                shouldInvokeRowSelectionCallback = false
+            )
+        )
+        navigator.result.test {
+            val item = awaitItem()
+            assertThat(item).isNotNull()
+            assertThat(item).isFalse()
+        }
+    }
+
+    @Test
+    fun `GoToScreen with Form does not emit show analytics`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Back from Form screen does not emit hide analytics`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            assertThat(awaitItem()).isEqualTo(formScreen)
+            navigator.performAction(EmbeddedNavigator.Action.Back)
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        }
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Close while on ManageUpdate calls onHideEditablePaymentOption`() = testScenario {
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(
+            FakeUpdatePaymentMethodInteractor()
+        )
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
+            assertThat(awaitItem()).isEqualTo(manageUpdateScreen)
+        }
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+        navigator.performAction(EmbeddedNavigator.Action.Close())
+        assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `ReplaceCurrentScreen reports replaced screen hidden and replacement shown`() = testScenario {
+        val updateInteractor = FakeUpdatePaymentMethodInteractor()
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(updateInteractor)
+        val paymentOptionsScreen = createPaymentOptionsScreen()
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
+            assertThat(awaitItem()).isEqualTo(manageUpdateScreen)
+            assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(paymentOptionsScreen))
+
+            assertThat(awaitItem()).isEqualTo(paymentOptionsScreen)
+        }
+
+        assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(updateInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `ReplaceCurrentScreen does not report dropped replacement shown`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createPaymentOptionsScreen(interactor = paymentOptionsInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(paymentOptionsScreen))
+
+            assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(awaitItem()).isEqualTo(formScreen)
+        }
+
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `initial screen ManageUpdate calls onShowEditablePaymentOption`() = runTest {
+        val eventReporter = FakeEventReporter()
+        EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = EmbeddedNavigator.Screen.ManageUpdate(
+                FakeUpdatePaymentMethodInteractor()
+            ),
+        )
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `ManageAll topBarState maps from interactor state`() {
+        val interactor = FakeManageScreenInteractor(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = emptyList(),
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+            )
+        )
+        val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isTrue()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `ManageAll title maps from interactor state`() {
+        val interactor = FakeManageScreenInteractor(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = emptyList(),
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+            )
+        )
+        val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
+
+        val title = screen.title().value
+        assertThat(title).isEqualTo(interactor.state.value.title)
+    }
+
+    @Test
+    fun `ManageAll isPerformingNetworkOperation returns false`() {
+        val screen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    }
+
+    @Test
+    fun `ManageAll close calls interactor close`() = runTest {
+        val interactor = FakeManageScreenInteractor()
+        val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
+
+        screen.close()
+        assertThat(interactor.closeCalls.awaitItem()).isEqualTo(Unit)
+        interactor.validate()
+    }
+
+    @Test
+    fun `GoToScreen with PaymentOptions emits show analytics`() = testScenario {
+        val paymentOptionsScreen = createPaymentOptionsScreen()
+        navigator.performAction(EmbeddedNavigator.Action.GoToScreen(paymentOptionsScreen))
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `Back from PaymentOptions screen does not emit hide analytics`() = testScenario {
+        val paymentOptionsScreen = createPaymentOptionsScreen()
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(paymentOptionsScreen))
+            assertThat(awaitItem()).isEqualTo(paymentOptionsScreen)
+            assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+
+            navigator.performAction(EmbeddedNavigator.Action.Back)
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+        }
+        navigator.result.test {
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `initial screen PaymentOptions calls onShowNewPaymentOptions`() = runTest {
+        val eventReporter = FakeEventReporter()
+        EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = createPaymentOptionsScreen(),
+        )
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `initial screen HorizontalPaymentOptions calls onShowNewPaymentOptions`() = runTest {
+        val eventReporter = FakeEventReporter()
+        EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = createHorizontalPaymentOptionsScreen(),
+        )
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `initial screen HorizontalSavedPaymentOptions calls onShowExistingPaymentOptions`() = runTest {
+        val eventReporter = FakeEventReporter()
+        EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = createHorizontalSavedPaymentOptionsScreen(),
+        )
+
+        assertThat(eventReporter.showExistingPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `HorizontalSavedPaymentOptions topBarState maps state and handles edit`() {
+        val viewActionRecorder = ViewActionRecorder<SelectSavedPaymentMethodsInteractor.ViewAction>()
+        val screen = createHorizontalSavedPaymentOptionsScreen(
+            interactor = FakeSelectSavedPaymentMethodsInteractor(
+                initialState = SelectSavedPaymentMethodsInteractor.State(
+                    paymentOptionsItems = emptyList(),
+                    selectedPaymentOptionsItem = null,
+                    linkBrand = LinkBrand.Link,
+                    isEditing = false,
+                    isProcessing = false,
+                    canEdit = true,
+                    canRemove = true,
+                ),
+                viewActionRecorder = viewActionRecorder,
+            ),
+        )
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isTrue()
+        assertThat(topBarState.isEditing).isFalse()
+
+        topBarState.onEditIconPressed()
+        viewActionRecorder.consume(SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit)
+    }
+
+    @Test
+    fun `HorizontalSavedPaymentOptions title selects payment method`() {
+        val screen = createHorizontalSavedPaymentOptionsScreen()
+
+        assertThat(screen.title().value).isEqualTo(
+            PaymentSheetR.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+        )
+    }
+
+    @Test
+    fun `HorizontalSavedPaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createHorizontalSavedPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions topBarState hides test mode label in live mode`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState(),
+                isLiveMode = true,
+            ),
+        )
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions topBarState shows test mode label in test mode`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState(),
+                isLiveMode = false,
+            ),
+        )
+
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions title is null when only one non-card payment method`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState().copy(
+                    supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.usBankAccount),
+                ),
+            ),
+        )
+
+        assertThat(screen.title().value).isNull()
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions title is add a card when only card is supported`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState().copy(
+                    supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.card),
+                ),
+            ),
+        )
+
+        assertThat(screen.title().value)
+            .isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions title is choose payment method when multiple methods supported`() {
+        val screen = createHorizontalPaymentOptionsScreen(
+            interactor = FakeAddPaymentMethodInteractor(
+                initialState = FakeAddPaymentMethodInteractor.createState().copy(
+                    supportedPaymentMethods = listOf(
+                        SupportedPaymentMethodFixtures.card,
+                        SupportedPaymentMethodFixtures.usBankAccount,
+                    ),
+                ),
+            ),
+        )
+
+        assertThat(screen.title().value)
+            .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+    }
+
+    @Test
+    fun `HorizontalPaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createHorizontalPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+    }
+
+    @Test
+    fun `initial back stack with a form on top starts on the form and can go back`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val eventReporter = FakeEventReporter()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
+            interactor = paymentOptionsInteractor,
+            isLiveMode = true,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = false,
+                    shouldDisplayLockIcon = true,
+                )
+            ),
+            onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
+        )
+        val (formScreen, formInteractor) = createFormScreen()
+
+        val navigator = EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(paymentOptionsScreen, formScreen),
+        )
+
+        // Only the visible top screen is considered shown during initialization.
+        assertThat(navigator.canGoBack).isTrue()
+        assertThat(navigator.screen.value).isEqualTo(formScreen)
+
+        scope.cancel()
+
+        // Both seeded screens are tracked and closed on scope cancellation.
+        assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `PaymentOptions topBarState returns correct state for live mode`() {
+        val screen = createPaymentOptionsScreen(isLiveMode = true)
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `PaymentOptions topBarState returns correct state for test mode`() {
+        val screen = createPaymentOptionsScreen(isLiveMode = false)
+        val topBarState = screen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+    }
+
+    @Test
+    fun `PaymentOptions title returns select your payment method`() {
+        val screen = createPaymentOptionsScreen()
+        val title = screen.title().value
+        assertThat(title).isNotNull()
+    }
+
+    @Test
+    fun `PaymentOptions isPerformingNetworkOperation returns false`() {
+        val screen = createPaymentOptionsScreen()
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    }
+
+    @Test
+    fun `PaymentOptions isPerformingNetworkOperation returns processing state`() {
+        val screen = createPaymentOptionsScreen(isProcessing = true)
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+    }
+
+    @Test
+    fun `ManageUpdate topBarState returns interactor topBarState`() {
+        val interactor = FakeUpdatePaymentMethodInteractor()
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
+
+        val topBarState = screen.topBarState().value
+        assertThat(topBarState).isEqualTo(interactor.topBarState)
+    }
+
+    @Test
+    fun `ManageUpdate title returns interactor screenTitle`() {
+        val interactor = FakeUpdatePaymentMethodInteractor()
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
+
+        val title = screen.title().value
+        assertThat(title).isEqualTo(interactor.screenTitle)
+    }
+
+    @Test
+    fun `ManageUpdate isPerformingNetworkOperation when idle returns false`() {
+        val interactor = FakeUpdatePaymentMethodInteractor(
+            initialState = UpdatePaymentMethodInteractor.State(
+                error = null,
+                status = UpdatePaymentMethodInteractor.Status.Idle,
+                setAsDefaultCheckboxChecked = false,
+                isSaveButtonEnabled = false,
+            )
+        )
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    }
+
+    @Test
+    fun `ManageUpdate isPerformingNetworkOperation when updating returns true`() {
+        val interactor = FakeUpdatePaymentMethodInteractor(
+            initialState = UpdatePaymentMethodInteractor.State(
+                error = null,
+                status = UpdatePaymentMethodInteractor.Status.Updating,
+                setAsDefaultCheckboxChecked = false,
+                isSaveButtonEnabled = false,
+            )
+        )
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+    }
+
+    @Test
+    fun `ManageUpdate close calls interactor close`() = runTest {
+        val interactor = FakeUpdatePaymentMethodInteractor()
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
+
+        screen.close()
+        assertThat(interactor.closeCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `Form close calls interactor close`() = runTest {
+        val (formScreen, formInteractor) = createFormScreen()
+
+        formScreen.close()
+        assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm close calls interactor close`() = runTest {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
+
+        screen.close()
+
+        assertThat(interactor.closeCalls.awaitItem()).isEqualTo(Unit)
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm topBarState hides test mode label in live mode`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(isLiveMode = true)
+
+        val topBarState = screen.topBarState().value!!
+
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm topBarState shows test mode label in test mode`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(isLiveMode = false)
+
+        val topBarState = screen.topBarState().value!!
+
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm title returns null`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
+
+        assertThat(screen.title().value).isNull()
+        interactor.validate()
+    }
+
+    @Test
+    fun `SavedPaymentMethodConfirm maps processing state from state holder`() {
+        val stateHolder = FakeSheetActivityStateHolder(
+            initialState = SheetActivityStateHolder.State(
+                primaryButtonLabel = "Confirm".resolvableString,
+                isEnabled = false,
+                processingState = PrimaryButtonProcessingState.Processing,
+                isProcessing = true,
+                shouldDisplayLockIcon = true,
+            )
+        )
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(
+            stateHolder = stateHolder,
+        )
+
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+        interactor.validate()
+    }
+
+    @Test
+    fun `Form topBarState hides test mode label in live mode`() {
+        val (formScreen, formInteractor) = createFormScreen(isLiveMode = true)
+
+        val topBarState = formScreen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isFalse()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Form topBarState shows test mode label in test mode`() {
+        val (formScreen, formInteractor) = createFormScreen(isLiveMode = false)
+
+        val topBarState = formScreen.topBarState().value!!
+        assertThat(topBarState.showTestModeLabel).isTrue()
+        assertThat(topBarState.showEditMenu).isFalse()
+        assertThat(topBarState.isEditing).isFalse()
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Form title returns null`() {
+        val (formScreen, formInteractor) = createFormScreen()
+
+        assertThat(formScreen.title().value).isNull()
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods true when a saved payment method matches the code`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        )
+
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+            )
+        )
+
+        // "Add new card" is only used when the customer has a saved card, so this proves the per-code
+        // derivation resolved to hasSavedPaymentMethods = true and flowed into the created interactor.
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_new_card.resolvableString)
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods false when no saved payment method matches the code`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.US_BANK_ACCOUNT),
+        )
+
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+            )
+        )
+
+        // The saved payment method is not a card, so the derivation resolves to false and the interactor
+        // uses the "Add card" header instead of "Add new card".
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods per code, ignoring saved methods of other types`() {
+        // A saved card is present, but the selected code is cashapp. A card-only check would resolve to
+        // true here; keying off the selected code correctly resolves to false.
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+            ),
+        )
+
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "cashapp",
+            )
+        )
+
+        // setAsDefaultMatchesSaveForFutureUse is !hasSavedPaymentMethods, so true confirms the per-code
+        // derivation resolved to false for cashapp despite the saved card.
+        assertThat(screen.formInteractor.state.value.usBankAccountFormArguments.setAsDefaultMatchesSaveForFutureUse)
+            .isTrue()
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods false when there are no saved payment methods`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = emptyList(),
+        )
+
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+            )
+        )
+
+        // With no saved payment methods the derivation resolves to false, so the interactor uses the
+        // "Add card" header rather than "Add new card".
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+    }
+
+    private fun createFormFactory(
+        savedPaymentMethods: List<PaymentMethod>,
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+    ): EmbeddedNavigator.Screen.Form.Factory {
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val interactorFactory = EmbeddedFormInteractorFactory(
+            paymentMethodMetadata = paymentMethodMetadata,
+            embeddedSelectionHolder = selectionHolder,
+            embeddedFormHelperFactory = EmbeddedFormHelperFactory(
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                embeddedSelectionHolder = selectionHolder,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            savedStateHandle = SavedStateHandle(),
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        ),
+            viewModelScope = TestScope(UnconfinedTestDispatcher()),
+            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+            eventReporter = FakeEventReporter(),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+        )
+        return EmbeddedNavigator.Screen.Form.Factory(
+            interactorFactory = interactorFactory,
+            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            embeddedSelectionHolder = selectionHolder,
+            customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        )
+    }
+
+    private fun createPaymentOptionsScreen(
+        isLiveMode: Boolean = true,
+        isProcessing: Boolean = false,
+        interactor: FakePaymentMethodVerticalLayoutInteractor =
+            FakePaymentMethodVerticalLayoutInteractor.create(),
+    ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
+        return EmbeddedNavigator.Screen.VerticalPaymentOptions(
+            interactor = interactor,
+            isLiveMode = isLiveMode,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = isProcessing,
+                    shouldDisplayLockIcon = true,
+                )
+            ),
+            onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
+        )
+    }
+
+    private fun createHorizontalPaymentOptionsScreen(
+        interactor: AddPaymentMethodInteractor =
+            FakeAddPaymentMethodInteractor(FakeAddPaymentMethodInteractor.createState()),
+        isProcessing: Boolean = false,
+    ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
+        return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
+            interactor = interactor,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = isProcessing,
+                    shouldDisplayLockIcon = true,
+                )
+            ),
+            onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
+        )
+    }
+
+    private fun createHorizontalSavedPaymentOptionsScreen(
+        interactor: SelectSavedPaymentMethodsInteractor = FakeSelectSavedPaymentMethodsInteractor(),
+        isProcessing: Boolean = false,
+    ): EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions {
+        return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
+            interactor = interactor,
+            sheetActivityState = stateFlowOf(
+                SheetActivityStateHolder.State(
+                    primaryButtonLabel = "".resolvableString,
+                    isEnabled = false,
+                    processingState = PrimaryButtonProcessingState.Idle(null),
+                    isProcessing = isProcessing,
+                    shouldDisplayLockIcon = true,
+                )
+            ),
+            onContinueClick = {},
+            onPrimaryButtonDisabledClick = {},
+        )
+    }
+
+    private fun createFormScreen(
+        isLiveMode: Boolean = true,
+    ): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
+        val formInteractor = TestFormInteractor(isLiveMode = isLiveMode)
+        val screen = EmbeddedNavigator.Screen.Form(
+            formInteractor = formInteractor,
+            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+            customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            launchMode = EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "card",
+            ),
+        )
+        return screen to formInteractor
+    }
+
+    private fun createSavedPaymentMethodConfirmScreen(
+        isLiveMode: Boolean = true,
+        stateHolder: FakeSheetActivityStateHolder = FakeSheetActivityStateHolder(),
+        confirmationHelper: FakeSheetActivityConfirmationHelper = FakeSheetActivityConfirmationHelper(),
+        selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+        customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(
+            selectedPaymentMethodCode = "card",
+        ),
+    ): Pair<
+        EmbeddedNavigator.Screen.SavedPaymentMethodConfirm,
+        FakeSavedPaymentMethodConfirmInteractor
+    > {
+        val interactor = FakeSavedPaymentMethodConfirmInteractor()
+        val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
+            interactor = interactor,
+            isLiveMode = isLiveMode,
+            sheetActivityStateHolder = stateHolder,
+            confirmationHelper = confirmationHelper,
+            embeddedSelectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            launchMode = launchMode,
+        )
+        return screen to interactor
+    }
+
+    private class TestFormInteractor(
+        override val isLiveMode: Boolean = true,
+    ) : VerticalModeFormInteractor {
+        override val state: StateFlow<VerticalModeFormInteractor.State>
+            get() = throw AssertionError("Not expected")
+
+        val handleViewActionCalls = Turbine<VerticalModeFormInteractor.ViewAction>()
+        val closeCalls = Turbine<Unit>()
+
+        override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
+            handleViewActionCalls.add(viewAction)
+        }
+
+        override fun close() {
+            closeCalls.add(Unit)
+        }
+
+        fun validate() {
+            handleViewActionCalls.ensureAllEventsConsumed()
+            closeCalls.ensureAllEventsConsumed()
+        }
+    }
+
+    private fun testScenario(
+        block: suspend Scenario.() -> Unit
+    ) = runTest {
+        lateinit var navigator: EmbeddedNavigator
+        val initialScreen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
+        val eventReporter = FakeEventReporter()
+        navigator = EmbeddedNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = initialScreen,
+        )
+
+        // Initial screen is emitted to event reporter.
+        assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
+
+        Scenario(
+            navigator = navigator,
+            initialScreen = initialScreen,
+            eventReporter = eventReporter,
+        ).block()
+        eventReporter.validate()
+    }
+
+    private class Scenario(
+        val navigator: EmbeddedNavigator,
+        val initialScreen: EmbeddedNavigator.Screen,
+        val eventReporter: FakeEventReporter,
+    )
+}

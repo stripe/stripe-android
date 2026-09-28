@@ -4,7 +4,6 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 android {
     defaultConfig {
         applicationId = "com.stripe.android.stripe3ds2playground"
-        minSdk = 21
 
         versionCode = 1
         versionName = "1.0"

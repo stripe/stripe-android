@@ -1,0 +1,239 @@
+package com.stripe.android.crypto.onramp.example.ui.screens
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.example.AUTHENTICATED_OPERATIONS_TAG
+import com.stripe.android.crypto.onramp.example.BACK_TO_SIGN_IN_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.LOG_OUT_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.model.KycResidence
+import com.stripe.android.crypto.onramp.example.model.OnrampUiState
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
+import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+import com.stripe.android.paymentsheet.PaymentSheet
+
+@Composable
+@Suppress("LongMethod")
+internal fun AuthenticatedOperationsScreen(
+    uiState: OnrampUiState,
+    onAuthenticate: (String) -> Unit,
+    onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit,
+    onGetWalletOwnershipChallenge: (String, CryptoNetwork) -> Unit,
+    onSubmitWalletOwnershipSignature: (String) -> Unit,
+    onWalletOwnershipSignatureChange: (String) -> Unit,
+    onCollectKyc: (KycInfo) -> Unit,
+    onVerifyKyc: () -> Unit,
+    onStartVerification: () -> Unit,
+    onShowUserAttestation: () -> Unit,
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
+    onCollectPayment: (PaymentMethodSelection) -> Unit,
+    onCreatePaymentToken: () -> Unit,
+    onCreateSession: () -> Unit,
+    onPerformCheckout: () -> Unit,
+    onLogOut: () -> Unit,
+    onBack: () -> Unit,
+    onSelectSettlementSpeed: (SettlementSpeed) -> Unit,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
+    onKycFirstNameChange: (String) -> Unit,
+    onKycLastNameChange: (String) -> Unit,
+    onKycBirthCountryChange: (String) -> Unit,
+    onKycBirthCityChange: (String) -> Unit,
+    onKycNationalitiesChange: (String) -> Unit,
+    onKycResidenceChange: (KycResidence) -> Unit,
+    onKycAddressChange: (PaymentSheet.Address) -> Unit,
+    onIdentifierTypeChange: (Int, String) -> Unit,
+    onIdentifierValueChange: (Int, String) -> Unit,
+    onAddIdentifier: () -> Unit,
+    onRemoveIdentifier: (Int) -> Unit,
+    onRetrieveMissingIdentifiers: () -> Unit,
+    onSubmitIdentifiers: () -> Unit,
+) {
+    var walletAddressInput by remember {
+        mutableStateOf(uiState.walletAddress ?: DEFAULT_WALLET_ADDRESS)
+    }
+    var selectedNetwork by remember {
+        mutableStateOf(uiState.network ?: CryptoNetwork.Ethereum)
+    }
+    var isNetworkDropdownExpanded by remember { mutableStateOf(false) }
+    var isWalletOwnershipExpanded by remember { mutableStateOf(false) }
+    var isKycExpanded by remember { mutableStateOf(false) }
+    var isIdentifierExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        onRefreshWallets()
+    }
+
+    LaunchedEffect(uiState.walletAddress) {
+        walletAddressInput = uiState.walletAddress ?: DEFAULT_WALLET_ADDRESS
+    }
+
+    LaunchedEffect(uiState.network) {
+        uiState.network?.let { selectedNetwork = it }
+    }
+
+    Column(
+        modifier = Modifier
+            .testTag(AUTHENTICATED_OPERATIONS_TAG)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        OperationsHeader(
+            email = uiState.email,
+            consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds
+        )
+
+        SessionSummary(onrampSessionResponse = uiState.onrampSession)
+        SelectedPaymentSummary(
+            selectedPaymentData = uiState.selectedPaymentData,
+            selectedSettlementSpeed = uiState.settlementSpeed,
+            onSelectSettlementSpeed = onSelectSettlementSpeed
+        )
+
+        Text(
+            text = "Request scopes",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        AuthenticateSection(onAuthenticate = onAuthenticate)
+
+        WalletAddressSection(
+            wallets = uiState.wallets,
+            isLoading = uiState.isWalletsLoading,
+            walletAddress = walletAddressInput,
+            onWalletAddressChange = { walletAddressInput = it },
+            selectedNetwork = selectedNetwork,
+            isDropdownExpanded = isNetworkDropdownExpanded,
+            onDropdownExpandedChange = { isNetworkDropdownExpanded = it },
+            onSelectNetwork = { selectedNetwork = it },
+            onRegisterWalletAddress = {
+                onRegisterWalletAddress(walletAddressInput, selectedNetwork)
+            },
+            onDeleteWallet = onDeleteWallet,
+            onRefreshWallets = onRefreshWallets
+        )
+
+        WalletOwnershipSection(
+            isExpanded = isWalletOwnershipExpanded,
+            onExpandedChange = { isWalletOwnershipExpanded = it },
+            challengeId = uiState.walletOwnershipChallengeId,
+            challengeMessage = uiState.walletOwnershipChallengeMessage,
+            challengeExpiresAt = uiState.walletOwnershipChallengeExpiresAt,
+            verifiedOwnership = uiState.walletOwnershipVerified,
+            signatureInput = uiState.walletOwnershipSignatureInput,
+            onSignatureInputChange = onWalletOwnershipSignatureChange,
+            onGetWalletOwnershipChallenge = {
+                onGetWalletOwnershipChallenge(walletAddressInput, selectedNetwork)
+            },
+            onSubmitWalletOwnershipSignature = {
+                onSubmitWalletOwnershipSignature(uiState.walletOwnershipSignatureInput)
+            }
+        )
+
+        KycSection(
+            isExpanded = isKycExpanded,
+            onExpandedChange = { isKycExpanded = it },
+            firstName = uiState.kycFirstName,
+            onFirstNameChange = onKycFirstNameChange,
+            lastName = uiState.kycLastName,
+            onLastNameChange = onKycLastNameChange,
+            birthCountry = uiState.kycBirthCountry,
+            onBirthCountryChange = onKycBirthCountryChange,
+            birthCity = uiState.kycBirthCity,
+            onBirthCityChange = onKycBirthCityChange,
+            nationalities = uiState.kycNationalities,
+            onNationalitiesChange = onKycNationalitiesChange,
+            residence = uiState.kycResidence,
+            onResidenceChange = onKycResidenceChange,
+            address = uiState.kycAddress,
+            onAddressChange = onKycAddressChange,
+            onCollectKyc = onCollectKyc,
+            onVerifyKyc = onVerifyKyc
+        )
+
+        PartnerTermsSection(
+            onShowTermsAndConditions = onShowTermsAndConditions,
+            onShowTermsOfService = onShowTermsOfService,
+        )
+
+        IdentifierSection(
+            isExpanded = isIdentifierExpanded,
+            onExpandedChange = { isIdentifierExpanded = it },
+            identifierInputs = uiState.identifierInputs,
+            onIdentifierTypeChange = onIdentifierTypeChange,
+            onIdentifierValueChange = onIdentifierValueChange,
+            onAddIdentifier = onAddIdentifier,
+            onRemoveIdentifier = onRemoveIdentifier,
+            missingIdentifiersSummary = uiState.missingIdentifiersSummary,
+            submitIdentifiersSummary = uiState.submitIdentifiersSummary,
+            onRetrieveMissingIdentifiers = onRetrieveMissingIdentifiers,
+            onSubmitIdentifiers = onSubmitIdentifiers
+        )
+
+        VerificationSection(
+            onStartVerification = onStartVerification,
+            onShowUserAttestation = onShowUserAttestation
+        )
+        PaymentSection(
+            googlePayIsReady = uiState.googlePayIsReady,
+            samsungPayIsReady = uiState.samsungPayIsReady,
+            sourceCurrency = uiState.sourceCurrency,
+            onSelectSourceCurrency = onSelectSourceCurrency,
+            onCollectPayment = onCollectPayment
+        )
+        CheckoutSection(
+            hasSession = uiState.onrampSession != null,
+            onCreatePaymentToken = onCreatePaymentToken,
+            onCreateSession = onCreateSession,
+            onPerformCheckout = onPerformCheckout
+        )
+
+        Button(
+            onClick = onLogOut,
+            modifier = Modifier
+                .testTag(LOG_OUT_BUTTON_TAG)
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Log Out")
+        }
+
+        TextButton(
+            onClick = onBack,
+            modifier = Modifier
+                .testTag(BACK_TO_SIGN_IN_BUTTON_TAG)
+                .fillMaxWidth()
+        ) {
+            Text("Back to Sign in")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+private const val DEFAULT_WALLET_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"

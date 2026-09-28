@@ -8,5 +8,8 @@ internal sealed interface AttestationActivityResult : Parcelable {
     data class Success(val token: String) : AttestationActivityResult
 
     @Parcelize
-    data class Failed(val error: Throwable) : AttestationActivityResult
+    data object Failed : AttestationActivityResult
+
+    @Parcelize
+    data object NoResult : AttestationActivityResult
 }

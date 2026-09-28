@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
-import com.stripe.android.common.di.ApplicationIdModule
-import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.DefaultLinkInlineInteractor
@@ -13,20 +13,24 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.sepa.SepaMandateConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
+import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
+import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
-import javax.inject.Named
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -35,21 +39,26 @@ import javax.inject.Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
+        ApiRequestOptionsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        SepaMandateConfirmationModule::class,
+        TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
+        GooglePayPaymentDataUpdateNoOpModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
-        ApplicationIdModule::class,
-        MobileSessionIdModule::class,
-        LinkHoldbackExposureModule::class
+        ElementsSessionClientParamsModule::class,
+        LinkHoldbackExposureModule::class,
+        PaymentMethodMessagePromotionsHelperModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface FlowControllerStateComponent {
-    val flowControllerComponentBuilder: FlowControllerComponent.Builder
+    val flowControllerComponentFactory: FlowControllerComponent.Factory
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler
     val errorReporter: ErrorReporter
@@ -59,26 +68,19 @@ internal interface FlowControllerStateComponent {
     val linkAccountHolder: LinkAccountHolder
     val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>
 
-    fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun statusBarColor(
-            @Named(STATUS_BAR_COLOR) statusBarColor: Int?
-        ): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        @BindsInstance
-        fun flowControllerViewModel(viewModel: FlowControllerViewModel): Builder
-
-        fun build(): FlowControllerStateComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
+            flowControllerViewModel: FlowControllerViewModel,
+            @BindsInstance
+            @ViewModelScope
+            viewModelScope: CoroutineScope,
+        ): FlowControllerStateComponent
     }
 }

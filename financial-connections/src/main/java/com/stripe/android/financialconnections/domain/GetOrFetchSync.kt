@@ -1,9 +1,11 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.debug.DebugConfiguration
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import com.stripe.android.model.LinkBrand
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -15,6 +17,7 @@ internal class GetOrFetchSync @Inject constructor(
     val repository: FinancialConnectionsManifestRepository,
     val configuration: FinancialConnectionsSheetConfiguration,
     @Named(APPLICATION_ID) private val applicationId: String,
+    private val debugConfiguration: DebugConfiguration,
 ) {
 
     suspend operator fun invoke(
@@ -25,8 +28,16 @@ internal class GetOrFetchSync @Inject constructor(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             applicationId = applicationId,
             reFetchCondition = refetchCondition::shouldReFetch,
-            supportsAppVerification = supportsAppVerification
-        )
+            supportsAppVerification = supportsAppVerification,
+            preCollectedConsent = configuration.preCollectedConsent
+        ).maybeOverrideLinkBrand()
+    }
+
+    private fun SynchronizeSessionResponse.maybeOverrideLinkBrand(): SynchronizeSessionResponse {
+        if (debugConfiguration.forceOnelink) {
+            return copy(manifest = manifest.copy(rawLinkBrand = LinkBrand.Onelink))
+        }
+        return this
     }
 
     sealed interface RefetchCondition {

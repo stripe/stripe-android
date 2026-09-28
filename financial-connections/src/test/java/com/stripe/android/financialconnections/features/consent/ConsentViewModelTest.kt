@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +33,9 @@ class ConsentViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Test
     fun `Navigates to Link warmup pane if recognizing a returning Link consumer from prefill details`() = runTest {
         val navigationManager = NavigationManagerImpl()
@@ -46,6 +50,7 @@ class ConsentViewModelTest {
 
         navigationManager.navigationFlow.test {
             val viewModel = ConsentViewModelFactory.create(
+                viewModelStoreTestRule = viewModelStoreRule,
                 isLinkWithStripe = { true },
                 navigationManager = navigationManager,
                 getOrFetchSync = getOrFetchSync,
@@ -84,6 +89,7 @@ class ConsentViewModelTest {
 
         navigationManager.navigationFlow.test {
             val viewModel = ConsentViewModelFactory.create(
+                viewModelStoreTestRule = viewModelStoreRule,
                 isLinkWithStripe = { true },
                 navigationManager = navigationManager,
                 getOrFetchSync = getOrFetchSync,
@@ -121,6 +127,7 @@ class ConsentViewModelTest {
 
         navigationManager.navigationFlow.test {
             val viewModel = ConsentViewModelFactory.create(
+                viewModelStoreTestRule = viewModelStoreRule,
                 isLinkWithStripe = { false },
                 navigationManager = navigationManager,
                 getOrFetchSync = getOrFetchSync,
@@ -158,6 +165,7 @@ class ConsentViewModelTest {
 
         navigationManager.navigationFlow.test {
             val viewModel = ConsentViewModelFactory.create(
+                viewModelStoreTestRule = viewModelStoreRule,
                 isLinkWithStripe = { true },
                 navigationManager = navigationManager,
                 getOrFetchSync = getOrFetchSync,

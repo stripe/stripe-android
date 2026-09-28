@@ -10,13 +10,11 @@ import com.stripe.android.stripe3ds2.exceptions.SDKRuntimeException
 internal enum class DirectoryServer(
     val ids: List<String>,
     val algorithm: Algorithm,
-
     /**
      * A file that represents a public key certificate. Should only be used for certifying
      * the 3DS2 SDK. In production, the Stripe API will provide the certificate.
      */
     val fileName: String,
-
     val keyUse: KeyUse? = KeyUse.SIGNATURE
 ) {
     // public key for each algorithm defined in

@@ -14,6 +14,8 @@
         "state": "VERIFIED",
         "type": "SMS"
       }
-    ]
+    ],
+    "current_authentication_level": "1fa",
+    "minimum_authentication_level": "1fa"
   }
 }

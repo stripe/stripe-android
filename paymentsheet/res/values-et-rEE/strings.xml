@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Pangakonto ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Pangakonto ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Kinnitage Bizumi makse oma mobiilipanga rakenduses %s jooksul, et ost lõpule viia.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Ostu sooritamiseks kinnitage makse oma pangarakenduses %s jooksul.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -29,9 +31,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Salvesta minu andmed kiiremaks makse lõpuleviimiseks Linkiga</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Salvesta minu info kiiremaks väljamakseks %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Looge Linki konto, et veebis kiiremini maksta</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Looge konto %s-iga, et veebis kiiremini makse lõpule viia</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s krediit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +50,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Jah, uuenda</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Logi sisse või registreeru</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Nõustun</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Tühista</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Deklaratsioonid</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Aadress</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -58,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Kinnitage oma teave</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN-i 4 viimast numbrit</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Tingimused</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Teenusetingimused</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Logi sisse või registreeru</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Nõustu ja jätka</string>
   <!-- Title for the Link signup screen -->
@@ -68,6 +84,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Salvestage oma makseteave Linki ja võimaldage Linki toetusega saitidel turvaline ühe klõpsuga makse lõpuleviimine.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Makske kiiremini kõikjal, kus Link on aktsepteeritud.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Makske kiiremini kõikjal, kus %s on aktsepteeritud.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Jätkates, nõustute <terms>tingimuste</terms> ja <privacy>privaatsuseeskirjadega</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,10 +102,34 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Uuenda kaarti</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Logi Link välja</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Logi %sst välja</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ilmnes viga. Kontrollige oma ühendust ja proovige uuesti.</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">Kaart on aegunud. Proovige teist kaarti.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Kaart lükati tagasi. Proovige teist kaarti.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">Kaart on aegunud. Proovige teist kaarti.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned credential is a mobile wallet (e.g. Apple Pay, Google Pay) rather than a physical card -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Mobiilseid rahakotte ei toetata. Proovige füüsilist kaarti.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Hoidke kaarti telefoni taga</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Midagi läks valesti. Proovige teist kaarti.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">Kaart pole toetatud. Proovige teist kaarti.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Proovige uuesti.</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">või sisestage käsitsi</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Maksa Linkiga</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">Maksa %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Makske %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Jätkates nõustute maksete autoriseerimisega vastavalt nendele <terms>tingimustele</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -98,6 +140,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ lisa</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Lisage makseteave</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Lisatud kaart</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Salvesta aadress</string>
   <!-- Title for shipping address entry section -->
@@ -134,6 +178,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Jätkates nõustute salvestama oma andmed tulevaste ostude jaoks %s ja <link>Link</link> (vt <terms>Tingimused</terms> ja <privacy>Privaatsus</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Jätkates nõustute salvestama oma andmed tulevaste ostude jaoks %s ja <link>Link</link> vastavalt Linki <terms>tingimustele</terms> ja <privacy>privaatsusele</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Jätkates nõustute, et teie andmed salvestatakse tulevasteks ostudeks teenusepakkujatega %1$s ja <link>%2$s</link> vastavalt %2$s <terms>tingimustele</terms> ja <privacy>privaatsuspoliitikale</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kaarti ei värskendatud. Palun proovige uuesti.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -153,6 +199,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Hallake kaarte</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Pangakonto haldamine</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Makseviisi haldamine</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Halda makseviise</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -211,6 +259,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvestage see kaart tulevasteks makseteks teenuses %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Salvestatud</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Salvestatud kaart</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Valige kaart</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -223,6 +273,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Vaikemakseviisi ei muudetud. Palun proovige uuesti.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kokku: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Makseviisi andmeid ei saa muuta.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kaardi kaubamärki ei värskendatud. Proovige uuesti.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -237,6 +289,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Shop Pay nupp</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Kuva menüü</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Logi Linkist välja</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Logi teenusest %s välja</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Liitu Linkiga</string>
   <!-- Title for the Link signup screen -->
@@ -247,22 +303,54 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link liitudes nõustute <terms>tingimuste</terms> ja <privacy>privaatsuseeskirjadega</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Oma e-posti aadressi esitamisega nõustute looma Linki konto ja salvestama oma makseteabe Linki, mille suhtes kehtivad <terms>Linki tingimused</terms> ja <privacy>privaatsuseeskirjad</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Esitades oma e-posti aadressi, nõustute looma %1$s konto ja salvestama oma makseandmed teenusesse %1$s vastavalt <terms>%1$s tingimustele</terms> ja <privacy>privaatsuseeskirjadele</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Oma telefoninumbri esitamisega nõustute looma Linki konto ja salvestama oma makseteabe Linki, mille suhtes kehtivad <terms>Linki tingimused</terms> ja <privacy>privaatsuseeskirjad</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Esitades oma telefoninumbri, nõustute looma %1$s konto ja salvestama oma makseandmed teenusesse %1$s vastavalt <terms>%1$s tingimustele</terms> ja <privacy>privaatsuseeskirjadele</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Liitudes teenusega %1$s nõustute <terms>tingimuste</terms> ja <privacy>privaatsuseeskirjadega</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Telefoninumbri ja e-posti aadressi esitamisega nõustute Linki konto loomisega vastavalt Linki <terms>tingimustele</terms> ja <privacy>privaatsuseeskirjadele</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Esitades oma telefoninumbri ja e-posti aadressi, nõustute looma %1$s konto vastavalt %1$s <terms>tingimustele</terms> ja <privacy>privaatsuseeskirjadele</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Teie konto on inaktiveeritud</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Midagi läks valesti</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Tehing on teostatud</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Kaart lisatud</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">Puudutage kaardi lisamiseks</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Kaart lükati tagasi</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Proovige kaarti uuesti puudutada</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Kaarti ei toetata</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Lülitage arendaja valikud välja ja proovige uuesti</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Proovige teist võrku ja puudutage uuesti</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Makstud %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Minge tagasi ja puudutage oma kaarti uuesti</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Tap to Add ei ole teie seadmes toetatud</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Proovige teist seadet</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Seadet ei toetata</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Proovige teist kaarti</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Tühista ja maksa muul viisil</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Kinnitage makse</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Makse kinnitamiseks avage oma UPI rakendus %s jooksul</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Minge tagasi ja valige mõni muu makseviis</string>
   <!-- Text on a screen that indicates a payment has failed -->

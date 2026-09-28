@@ -3,16 +3,20 @@ package com.stripe.android.attestation
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -63,8 +67,6 @@ internal class AttestationActivityTest {
 
         val result = extractActivityResult(scenario)
         assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error).isEqualTo(testError)
 
         scenario.close()
     }
@@ -79,7 +81,7 @@ internal class AttestationActivityTest {
             BundleCompat.getParcelable(it, AttestationActivity.EXTRA_ARGS, AttestationArgs::class.java)
         }
         assertThat(intentArgs).isEqualTo(args)
-        assertThat(intentArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(intentArgs?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(intentArgs?.productUsage).containsExactly("PaymentSheet")
     }
 
@@ -92,7 +94,7 @@ internal class AttestationActivityTest {
         val retrievedArgs = AttestationActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isEqualTo(args)
-        assertThat(retrievedArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(retrievedArgs?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -102,6 +104,21 @@ internal class AttestationActivityTest {
         val retrievedArgs = AttestationActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isNull()
+    }
+
+    @Test
+    fun `activity finishes gracefully when required args are missing`() = runTest {
+        ActivityScenario.launchActivityForResult<AttestationActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                AttestationActivity::class.java
+            )
+        ).use { scenario ->
+            advanceUntilIdle()
+
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     private fun launchActivityForResult(
@@ -143,7 +160,8 @@ internal class AttestationActivityTest {
                 return AttestationViewModel(
                     integrityRequestManager = integrityRequestManager,
                     workContext = testDispatcher,
-                    attestationAnalyticsEventsReporter = eventsReporter
+                    attestationAnalyticsEventsReporter = eventsReporter,
+                    errorReporter = FakeErrorReporter()
                 ) as T
             }
         }
@@ -151,7 +169,7 @@ internal class AttestationActivityTest {
 
     companion object {
         private val args = AttestationArgs(
-            publishableKey = "pk_test_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = listOf("PaymentSheet")
         )
     }

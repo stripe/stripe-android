@@ -16,12 +16,10 @@ class CustomFontSource(
      * The font family loaded from your assets folder.
      */
     internal val assetsFilePath: String,
-
     /**
      * The name of this font family.
      */
     internal val name: String,
-
     /**
      * The weight of this font by default (e.g., bold, normal) between 0-1000. If null the default will be used.
      */

@@ -8,10 +8,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALL
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.uicore.StripeTheme
@@ -40,7 +42,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class FlowControllerConfigurationHandlerTest {
 
     @get:Rule
@@ -58,6 +59,9 @@ class FlowControllerConfigurationHandlerTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Before
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -67,7 +71,7 @@ class FlowControllerConfigurationHandlerTest {
             handle = SavedStateHandle(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             statusBarColor = null,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test
@@ -105,7 +109,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.state).isNotNull()
         assertThat(StripeTheme.primaryButtonStyle.shape.height).isEqualTo(80f)
 
@@ -176,7 +180,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
     }
 
     @Test
@@ -209,7 +213,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
     }
 
     @Test
@@ -416,11 +420,41 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
     }
 
+    @Test
+    fun `confirmation handler is bootstrapped after successful configuration`() = runTest {
+        FakeFlowControllerConfirmationHandler.test(
+            initialState = ConfirmationHandler.State.Idle,
+        ) {
+            val configureErrors = Turbine<Throwable?>()
+            val configurationHandler = FlowControllerConfigurationHandler(
+                paymentElementLoader = defaultPaymentSheetLoader(),
+                uiContext = testDispatcher,
+                viewModel = viewModel,
+                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
+                confirmationHandler = handler,
+            )
+
+            configurationHandler.configure(
+                scope = this@runTest,
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                ),
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ) { _, exception ->
+                configureErrors.add(exception)
+            }
+
+            assertThat(configureErrors.awaitItem()).isNull()
+            assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isNotNull()
+        }
+    }
+
     private fun defaultPaymentSheetLoader(): PaymentElementLoader {
         return FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Link(),
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,

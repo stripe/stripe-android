@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -55,7 +56,12 @@ internal fun DocWarmupScreen(
             screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_WARMUP
         )
         DocWarmupView(documentSelectPage = it.documentSelect) {
-            identityViewModel.checkPermissionAndNavigate(navController, cameraPermissionEnsureable)
+            identityViewModel.checkPermissionAndNavigate(
+                navController = navController,
+                cameraPermissionEnsureable = cameraPermissionEnsureable,
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_WARMUP,
+                cameraSource = CameraSource.CAMERA_SESSION
+            )
         }
     }
 }

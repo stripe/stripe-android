@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Hindi ma-access ang numero ng iyong account sa ngayon</string>
   <string name="stripe_close_dialog_networking_desc">Kung magkansela ka ngayon, ang iyong account ay mali-link sa %1$s ngunit hindi ito mase-save sa Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Kung magkansela ka ngayon, ang iyong account ay mali-link sa negosyong ito ngunit hindi ito mase-save sa Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Kung kakanselahin mo ngayon, mai-link ang iyong account sa negosyong ito ngunit hindi ito mase-save sa %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Kung kakanselahin mo ngayon, mai-link ang iyong account sa %1$s ngunit hindi ito mase-save sa %2$s.</string>
   <string name="stripe_error_cta_close">Isara</string>
   <string name="stripe_error_cta_manual_entry">Manu-manong ilagay ang mga detalye ng bangko</string>
   <string name="stripe_error_cta_retry">Subukan muli</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Ilagay ang mga detalye ng bangko</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Kanselahin</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Magpatuloy sa Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Magpatuloy gamit ang %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Hindi ngayon</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Gamitin ang impormasyon na dati mong na-save sa iyong Link account.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Gamitin ang impormasyong dati mong nai-save sa iyong %1$s account.</string>
   <string name="stripe_networking_link_login_warmup_title">Magpatuloy sa Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Magpatuloy gamit ang %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Hindi ngayon</string>
   <string name="stripe_networking_save_to_link_verification_title">Kumpirmahin na ikaw ito</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Pumili ng ibang bangko</string>
   <string name="stripe_search">Maghanap</string>
   <string name="stripe_success_pane_desc_link_error_plural">Naikonekta ang iyong mga account, pero hindi mai-save sa Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Naikonekta ang iyong mga account ngunit hindi mai-save sa %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Naikonekta ang iyong account, pero hindi mai-save sa Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">NakaNaikonektakonekta ang iyong account ngunit hindi mai-save sa %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Naikonekta ang iyong mga account at nai-save sa Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Ang iyong mga account ay naikonekta at nai-save sa %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Naikonekta ang iyong account at nai-save sa Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Naikonekta ang iyong account at nai-save sa %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Asahan mo ang maliliit na deposito sa account na ••••%1$s sa loob ng 1–2 araw at isang email na may mga iba pang tagubilin.</string>
   <string name="stripe_success_pane_desc_plural">Naikonekta ang iyong mga account</string>
   <string name="stripe_success_pane_desc_singular">Naikonekta ang iyong account</string>

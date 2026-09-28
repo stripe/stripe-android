@@ -2,7 +2,9 @@ package com.stripe.android.link.ui.signup
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.elements.EmailConfig
@@ -19,8 +21,9 @@ internal class SignUpScreenshotTest(
 ) {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         listOf(SystemAppearance.DarkTheme),
-        listOf(FontSize.DefaultFont)
+        listOf(FontSize.DefaultFont),
     )
 
     @Test
@@ -91,6 +94,7 @@ internal class SignUpScreenshotTest(
                                             signUpEnabled = signUpEnabled,
                                             requiresNameCollection = requiresNameCollection,
                                             canEditEmail = true,
+                                            linkBrand = LinkBrand.Link,
                                             signUpState = signUpState,
                                             isSubmitting = isSubmitting,
                                             errorMessage = errorMessage,

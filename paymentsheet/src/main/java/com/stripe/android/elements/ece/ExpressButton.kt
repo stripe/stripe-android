@@ -1,0 +1,103 @@
+@file:OptIn(CheckoutSessionPreview::class)
+package com.stripe.android.elements.ece
+
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.CardFunding
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
+
+internal sealed interface ExpressButton {
+
+    val buttonTheme: ButtonTheme
+
+    fun toSelection(): PaymentSelection
+    fun toWalletType(): WalletType
+
+    data class Link(
+        val state: LinkButtonState,
+        val linkBrand: LinkBrand,
+        override val buttonTheme: ButtonTheme,
+    ) : ExpressButton {
+
+        override fun toSelection(): PaymentSelection {
+            return PaymentSelection.Link(
+                brand = linkBrand,
+                linkExpressMode = LinkExpressMode.DISABLED,
+            )
+        }
+
+        override fun toWalletType(): WalletType = WalletType.Link
+
+        companion object {
+            fun create(
+                paymentMethodMetadata: PaymentMethodMetadata,
+                linkAccountInfo: LinkAccountUpdate.Value,
+                buttonTheme: ButtonTheme,
+            ): Link {
+                val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+                val linkAccount = linkAccountInfo.account
+                return Link(
+                    state = LinkButtonState.create(
+                        enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
+                        linkEmail = linkAccount?.email,
+                        paymentDetails = linkAccount?.displayablePaymentDetails,
+                    ),
+                    linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
+                    buttonTheme = buttonTheme,
+                )
+            }
+        }
+    }
+
+    data class GooglePay(
+        val apiConfiguration: ApiConfiguration.State,
+        val googlePayButtonType: GooglePayButtonType,
+        val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
+        val allowCreditCards: Boolean,
+        val cardBrandFilter: CardBrandFilter,
+        val cardFundingFilter: CardFundingFilter,
+        val additionalEnabledNetworks: List<String>,
+        val shippingAddressRequired: Boolean,
+        override val buttonTheme: ButtonTheme,
+    ) : ExpressButton {
+
+        override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay
+
+        override fun toWalletType(): WalletType = WalletType.GooglePay
+
+        companion object {
+            fun create(
+                paymentMethodMetadata: PaymentMethodMetadata,
+                googlePayConfiguration: CheckoutGooglePayConfiguration,
+                shippingAddressRequired: Boolean,
+                buttonTheme: ButtonTheme,
+            ): GooglePay {
+                return GooglePay(
+                    apiConfiguration = paymentMethodMetadata.apiConfiguration,
+                    allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
+                    googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType,
+                    cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
+                    cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+                    billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration
+                        .toBillingAddressParameters(),
+                    additionalEnabledNetworks = googlePayConfiguration.additionalEnabledNetworks,
+                    shippingAddressRequired = shippingAddressRequired,
+                    buttonTheme = buttonTheme,
+                )
+            }
+        }
+    }
+}

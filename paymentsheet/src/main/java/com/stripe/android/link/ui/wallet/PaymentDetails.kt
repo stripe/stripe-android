@@ -50,6 +50,8 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.model.ConsumerPaymentDetails.Display
+import com.stripe.android.model.ConsumerPaymentDetails.Generic
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
@@ -190,7 +192,7 @@ private fun PaymentDetailsListItemPreview() {
         brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Pass,
         networks = emptyList(),
-        funding = "CREDIT",
+        funding = Card.Funding.Credit,
         nickname = null,
         billingAddress = null
     )
@@ -203,6 +205,21 @@ private fun PaymentDetailsListItemPreview() {
         bankAccountName = "Bank of America Checking Account",
         billingAddress = null,
         billingEmailAddress = null
+    )
+    val generic = Generic(
+        id = "unknown_id",
+        last4 = "4444",
+        isDefault = false,
+        nickname = null,
+        billingAddress = null,
+        billingEmailAddress = null,
+        rawType = "CRYPTO",
+        display = Display(
+            label = "Crypto",
+            sublabel = "0x••••22Dd",
+            icon = null
+        ),
+        nextActionTypes = emptyList()
     )
     DefaultLinkTheme {
         Column {
@@ -243,6 +260,16 @@ private fun PaymentDetailsListItemPreview() {
                 isSelected = false,
                 isAvailable = false,
                 isUpdating = true,
+                onClick = {},
+                onMenuButtonClick = {}
+            )
+            PaymentDetailsListItem(
+                paymentDetails = generic,
+                isClickable = true,
+                isMenuButtonClickable = true,
+                isSelected = true,
+                isAvailable = true,
+                isUpdating = false,
                 onClick = {},
                 onMenuButtonClick = {}
             )
@@ -319,7 +346,7 @@ internal fun RowScope.PaymentDetails(
             CardInfo(
                 modifier = modifier,
                 title = paymentDetails.displayName.resolve(),
-                subtitle = "•••• ${paymentDetails.last4}",
+                subtitle = stringResource(R.string.stripe_link_payment_method_last4, paymentDetails.last4),
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
         }
@@ -332,6 +359,14 @@ internal fun RowScope.PaymentDetails(
                 title = paymentDetails.displayName.resolve(),
                 subtitle = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
+            )
+        }
+        is Generic -> {
+            PaymentMethodInfo(
+                modifier = modifier,
+                title = paymentDetails.displayName.resolve(),
+                subtitle = paymentDetails.display.sublabel,
+                icon = { Icon(iconUrl = paymentDetails.display.icon?.defaultUrl, errorContent = { BankIcon(null) }) }
             )
         }
     }
@@ -367,7 +402,7 @@ private fun RowScope.BankAccountInfo(
     PaymentMethodInfo(
         modifier = modifier,
         title = bankAccount.displayName.resolve(),
-        subtitle = "•••• ${bankAccount.last4}",
+        subtitle = stringResource(R.string.stripe_link_payment_method_last4, bankAccount.last4),
         icon = {
             BankIcon(bankAccount.bankIconCode)
         }

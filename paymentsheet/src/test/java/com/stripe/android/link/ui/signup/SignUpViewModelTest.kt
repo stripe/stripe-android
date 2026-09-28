@@ -24,6 +24,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -43,6 +44,9 @@ internal class SignUpViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init sends analytics event`() = runTest(dispatcher) {
@@ -440,7 +444,7 @@ internal class SignUpViewModelTest {
                 dismissResults.add(result)
             },
             verifyDuringSignUp = {},
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         authViewModel.emailController.onRawValueChange("test@example.com")
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
@@ -714,7 +718,9 @@ internal class SignUpViewModelTest {
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+                    verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION),
+                    currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+                    minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
                 )
             )
             linkAccountManager.lookupResult = Result.success(linkAccount)
@@ -796,7 +802,9 @@ internal class SignUpViewModelTest {
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    verificationSessions = emptyList()
+                    verificationSessions = emptyList(),
+                    currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+                    minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
                 )
             )
             linkAccountManager.lookupResult = Result.success(null)
@@ -854,13 +862,27 @@ internal class SignUpViewModelTest {
             linkLaunchMode = linkLaunchMode,
             dismissWithResult = dismissWithResult,
             verifyDuringSignUp = verifyDuringSignUp,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun mockConsumerSessionWithVerificationSession(
         type: ConsumerSession.VerificationSession.SessionType,
         state: ConsumerSession.VerificationSession.SessionState
     ): ConsumerSession {
+        // Set auth levels based on verification state:
+        // - Verified sessions should meet minimum auth level
+        // - Started/unverified sessions should not meet minimum auth level
+        val (currentLevel, minimumLevel) = when (state) {
+            ConsumerSession.VerificationSession.SessionState.Verified -> {
+                ConsumerSession.AuthenticationLevel.OneFactorAuthentication to
+                    ConsumerSession.AuthenticationLevel.OneFactorAuthentication
+            }
+            else -> {
+                ConsumerSession.AuthenticationLevel.NotAuthenticated to
+                    ConsumerSession.AuthenticationLevel.OneFactorAuthentication
+            }
+        }
+
         return ConsumerSession(
             emailAddress = "",
             redactedPhoneNumber = "",
@@ -870,7 +892,9 @@ internal class SignUpViewModelTest {
                     state = state
                 )
             ),
-            redactedFormattedPhoneNumber = ""
+            redactedFormattedPhoneNumber = "",
+            currentAuthenticationLevel = currentLevel,
+            minimumAuthenticationLevel = minimumLevel,
         )
     }
 

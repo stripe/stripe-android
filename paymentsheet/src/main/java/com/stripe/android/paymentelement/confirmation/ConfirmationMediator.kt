@@ -2,30 +2,29 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 
 internal class ConfirmationMediator<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     >(
     private val savedStateHandle: SavedStateHandle,
-    private val definition:
-    ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
+    private val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
 ) {
     private var launcher: TLauncher? = null
 
     private val parametersKey = definition.key + PARAMETERS_POSTFIX_KEY
-    private var persistedParameters: Parameters<TConfirmationOption>?
+    private var persistedParameters: Parameters<TConfirmationOption, TLauncherArgs>?
         get() = savedStateHandle[parametersKey]
         set(value) {
             savedStateHandle[parametersKey] = value
@@ -44,17 +43,19 @@ internal class ConfirmationMediator<
 
     fun register(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (ConfirmationDefinition.Result) -> Unit,
     ) {
         launcher = definition.createLauncher(
-            activityResultCaller
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
                 persistedParameters = null
                 definition.toResult(
                     confirmationOption = params.confirmationOption,
                     confirmationArgs = params.confirmationArgs,
-                    deferredIntentConfirmationType = params.deferredIntentConfirmationType,
+                    launcherArgs = params.launcherArgs,
                     result = result
                 )
             } ?: run {
@@ -107,7 +108,7 @@ internal class ConfirmationMediator<
                             persistedParameters = Parameters(
                                 confirmationOption = confirmationOption,
                                 confirmationArgs = arguments,
-                                deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                                launcherArgs = action.launcherArguments,
                             )
 
                             definition.launch(
@@ -134,7 +135,7 @@ internal class ConfirmationMediator<
             is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
-                    deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                    metadata = action.metadata,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
                 )
             }
@@ -162,16 +163,16 @@ internal class ConfirmationMediator<
 
         data class Complete(
             val intent: StripeIntent,
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
+            val metadata: ConfirmationMetadata,
             val completedFullPaymentFlow: Boolean,
         ) : Action
     }
 
     @Parcelize
-    internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
+    internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option, TLauncherArgs : Parcelable>(
         val confirmationOption: TConfirmationOption,
         val confirmationArgs: ConfirmationHandler.Args,
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val launcherArgs: TLauncherArgs,
     ) : Parcelable
 
     companion object {

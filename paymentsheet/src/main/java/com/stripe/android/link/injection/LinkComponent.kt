@@ -22,6 +22,7 @@ internal annotation class LinkScope
 @Subcomponent(
     modules = [
         LinkModule::class,
+        LinkAccountAnalyticsModule::class,
         ApplicationIdModule::class,
     ]
 )
@@ -32,11 +33,11 @@ internal abstract class LinkComponent {
     internal abstract val linkAttestationCheck: LinkAttestationCheck
     internal abstract val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory
 
-    @Subcomponent.Builder
-    internal interface Builder {
-        @BindsInstance
-        fun configuration(configuration: LinkConfiguration): Builder
-
-        fun build(): LinkComponent
+    @Subcomponent.Factory
+    internal interface Factory {
+        fun create(
+            @BindsInstance
+            configuration: LinkConfiguration,
+        ): LinkComponent
     }
 }

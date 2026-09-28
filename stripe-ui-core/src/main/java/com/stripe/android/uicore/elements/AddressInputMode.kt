@@ -35,6 +35,16 @@ sealed class AddressInputMode : Parcelable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
+    data class AutocompleteInline(
+        val googleApiKey: String?,
+        val autocompleteCountries: Set<String>?,
+        override val phoneNumberConfig: AddressFieldConfiguration,
+        override val nameConfig: AddressFieldConfiguration,
+        override val emailConfig: AddressFieldConfiguration,
+    ) : AddressInputMode()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @Parcelize
     data class NoAutocomplete(
         override val phoneNumberConfig: AddressFieldConfiguration =
             AddressFieldConfiguration.HIDDEN,

@@ -12,12 +12,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -31,8 +30,8 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -85,15 +84,15 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val args = starterArgsSupplier()
-                val component = DaggerLpmNetworkTestViewModelComponent.builder()
-                    .application(extras.requireApplication())
-                    .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
-                    .publishableKeyProvider { args.publishableKey }
-                    .stripeAccountIdProvider { null }
-                    .allowsManualConfirmation(args.allowsManualConfirmation)
-                    .savedStateHandle(extras.createSavedStateHandle())
-                    .userFacingLogger(FakeUserFacingLogger())
-                    .build()
+                val component = DaggerLpmNetworkTestViewModelComponent.factory()
+                    .create(
+                        application = extras.requireApplication(),
+                        apiConfiguration = args.apiConfiguration,
+                        allowsManualConfirmation = args.allowsManualConfirmation,
+                        paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                        savedStateHandle = extras.createSavedStateHandle(),
+                        userFacingLogger = FakeUserFacingLogger(),
+                    )
 
                 @Suppress("UNCHECKED_CAST")
                 return component.viewModel as T
@@ -103,7 +102,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 
     @Parcelize
     data class Args(
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val paymentElementCallbackIdentifier: String,
         val allowsManualConfirmation: Boolean,
     ) : ActivityStarter.Args {
@@ -130,7 +129,9 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
+        ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
+        ApiRequestOptionsModule::class,
         PaymentElementRequestSurfaceModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
@@ -141,40 +142,24 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 internal interface LpmNetworkTestViewModelComponent {
     val viewModel: LpmNetworkTestActivity.TestViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        ): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
-        ): Builder
-
-        @BindsInstance
-        fun allowsManualConfirmation(
-            @Named(ALLOWS_MANUAL_CONFIRMATION) allowsManualConfirmation: Boolean
-        ): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier identifier: String,
-        ): Builder
-
-        @BindsInstance
-        fun savedStateHandle(
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            apiConfiguration: ApiConfiguration.State,
+            @BindsInstance
+            @Named(ALLOWS_MANUAL_CONFIRMATION)
+            allowsManualConfirmation: Boolean,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
             savedStateHandle: SavedStateHandle,
-        ): Builder
-
-        @BindsInstance
-        fun userFacingLogger(userFacingLogger: UserFacingLogger): Builder
-
-        fun build(): LpmNetworkTestViewModelComponent
+            @BindsInstance
+            userFacingLogger: UserFacingLogger,
+        ): LpmNetworkTestViewModelComponent
     }
 }
 
@@ -201,21 +186,6 @@ internal interface LpmNetworkTestModule {
         fun providesLogger(): Logger = FakeLogger()
 
         @Provides
-        fun providesPaymentConfiguration(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String,
-        ): PaymentConfiguration {
-            return PaymentConfiguration(
-                publishableKey = publishableKeyProvider(),
-                stripeAccountId = stripeAccountIdProvider(),
-            )
-        }
-
-        @Provides
-        @Named(STATUS_BAR_COLOR)
-        fun providesStatusBarColor(): Int? = STATUS_BAR_COLOR_VALUE
-
-        @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
 
@@ -231,7 +201,6 @@ internal interface LpmNetworkTestModule {
             }
         }
 
-        private val STATUS_BAR_COLOR_VALUE = null
         private const val ENABLE_LOGGING_VALUE = false
     }
 }

@@ -18,19 +18,16 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.identity.R
-import com.stripe.android.identity.navigation.CountryNotListedDestination
-import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.IdNumberParam
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.FieldError
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FieldValidationMessage
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -48,7 +45,7 @@ internal fun IDNumberSection(
     enabled: Boolean,
     idNumberCountries: List<Country>,
     countryNotListedText: String,
-    navController: NavController,
+    onCountryNotListedClick: () -> Unit,
     onIdNumberCollected: (Resource<IdNumberParam>) -> Unit
 ) {
     val controller = remember {
@@ -59,7 +56,7 @@ internal fun IDNumberSection(
             )
         )
     }
-    val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }
+    val countryElement = remember { CountryElement(FormFieldId.Country, controller) }
     val usElement = remember {
         SimpleTextElement(
             identifier = US_SPEC,
@@ -114,7 +111,6 @@ internal fun IDNumberSection(
     }
     IDNumberContent(
         enabled = enabled,
-        navController = navController,
         countryElement = countryElement,
         usElement = usElement,
         sgElement = sgElement,
@@ -122,6 +118,7 @@ internal fun IDNumberSection(
         idNumberParam = idNumberParam,
         selectedCountryCode = selectedCountryCode,
         countryNotListedText = countryNotListedText,
+        onCountryNotListedClick = onCountryNotListedClick,
         onIdNumberCollected = onIdNumberCollected
     )
 }
@@ -129,7 +126,6 @@ internal fun IDNumberSection(
 @Composable
 private fun IDNumberContent(
     enabled: Boolean,
-    navController: NavController,
     countryElement: CountryElement,
     usElement: SimpleTextElement,
     sgElement: SimpleTextElement,
@@ -137,6 +133,7 @@ private fun IDNumberContent(
     idNumberParam: IdNumberParam?,
     selectedCountryCode: String?,
     countryNotListedText: String,
+    onCountryNotListedClick: () -> Unit,
     onIdNumberCollected: (Resource<IdNumberParam>) -> Unit
 ) {
     val idNumberSectionElement = remember(selectedCountryCode) {
@@ -179,13 +176,7 @@ private fun IDNumberContent(
     TextButton(
         modifier = Modifier.testTag(ID_NUMBER_COUNTRY_NOT_LISTED_BUTTON_TAG),
         contentPadding = PaddingValues(0.dp),
-        onClick = {
-            navController.navigateTo(
-                CountryNotListedDestination(
-                    isMissingId = true
-                )
-            )
-        }
+        onClick = onCountryNotListedClick
     ) {
         Text(
             text = countryNotListedText,
@@ -201,11 +192,16 @@ private object USIDConfig : SimpleTextFieldConfig(
     override val keyboard = KeyboardType.Number
     override val visualTransformation = Last4SSNTransformation
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = !hasFocus && input.length < 4
+        override fun shouldShowValidationMessage(
+            hasFocus: Boolean,
+            isValidating: Boolean
+        ) = !hasFocus && input.length < 4
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.stripe_incomplete_id_number)
+        override fun getValidationMessage(): FieldValidationMessage = FieldValidationMessage.Error(
+            message = R.string.stripe_incomplete_id_number
+        )
 
         override fun isFull(): Boolean = input.length == 4
 
@@ -221,11 +217,16 @@ private object BRIDConfig : SimpleTextFieldConfig(
     override val visualTransformation = BRVisualTransformation
     override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = !hasFocus && input.length < 11
+        override fun shouldShowValidationMessage(
+            hasFocus: Boolean,
+            isValidating: Boolean
+        ) = !hasFocus && input.length < 11
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.stripe_incomplete_id_number)
+        override fun getValidationMessage(): FieldValidationMessage = FieldValidationMessage.Error(
+            message = R.string.stripe_incomplete_id_number
+        )
 
         override fun isFull(): Boolean = input.length == 11
 
@@ -239,11 +240,11 @@ private object SGIDConfig : SimpleTextFieldConfig(
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
     override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = false
+        override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean) = false
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError() = null
+        override fun getValidationMessage() = null
 
         override fun isFull(): Boolean = false
 
@@ -312,13 +313,13 @@ private object BRVisualTransformation : VisualTransformation {
 }
 
 internal const val US_CODE = "US"
-internal val US_SPEC = IdentifierSpec.Generic("USSpec")
+internal val US_SPEC = FormFieldId.Generic("USSpec")
 internal const val US_ID_PLACEHOLDER = "***-**-1234"
 internal const val US_ID_PLACEHOLDER_PREFIX = "***-**-"
 internal const val SINGAPORE_CODE = "SG"
 internal const val BRAZIL_ID_PLACEHOLDER = "000.000.000-00"
 internal const val BRAZIL_CODE = "BR"
-internal val BRAZIL_SPEC = IdentifierSpec.Generic("BRSpec")
+internal val BRAZIL_SPEC = FormFieldId.Generic("BRSpec")
 internal const val SINGAPORE_ID_PLACEHOLDER = "S1234567A"
-internal val SINGAPORE_SPEC = IdentifierSpec.Generic("SingaporeSpec")
+internal val SINGAPORE_SPEC = FormFieldId.Generic("SingaporeSpec")
 internal const val ID_NUMBER_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"

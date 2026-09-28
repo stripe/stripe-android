@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application>
         <activity
@@ -46,11 +48,15 @@
             android:name=".paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
-            android:name="com.stripe.android.paymentelement.embedded.form.FormActivity"
+            android:name="com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
-            android:name="com.stripe.android.paymentelement.embedded.manage.ManageActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
+            android:name="com.stripe.android.common.nfcscan.NfcScanningActivity"
+            android:theme="@style/StripePaymentSheetTapToAddTheme"
+            android:exported="false" />
+        <activity
+            android:name="com.stripe.android.common.taptoadd.TapToAddActivity"
+            android:theme="@style/StripePaymentSheetTapToAddTheme" />
 
         <activity
             android:name="com.stripe.android.attestation.AttestationActivity"
@@ -89,9 +95,5 @@
                     android:path="/${applicationId}" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="com.stripe.android.shoppay.ShopPayActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
     </application>
 </manifest>

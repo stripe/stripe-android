@@ -39,6 +39,7 @@ dependencies {
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
     testImplementation testLibs.turbine
     testImplementation testLibs.truth
 
@@ -46,11 +47,13 @@ dependencies {
 }
 
 android {
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xconsistent-data-class-copy-visibility",
-        ]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlin.RequiresOptIn",
+                    "-Xconsistent-data-class-copy-visibility",
+            ])
+        }
     }
 }
 

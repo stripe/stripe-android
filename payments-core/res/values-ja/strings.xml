@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">名前を入力してください。</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">キャンセル</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">クレジットカードブランドを選択</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">選択なし</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -110,6 +112,18 @@
   <string name="stripe_card_declined">クレジットカードが拒否されました</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">末尾が %2$s の %1$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">クレジットカードのみ利用できます</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">クレジットカードとプリペイドカードのみ利用できます</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">デビットカードのみ利用できます</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">デビットカードとクレジットカードのみ利用できます</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">デビットカードとプリペイドカードのみ利用できます</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">プリペイドカードのみ利用できます</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
@@ -142,6 +156,14 @@
   <string name="stripe_fpx_bank_offline">%s - オフライン</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">お客様の支払い方法が拒否されました。</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">税抜金額</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">概算合計（実際の税額は異なる場合があります）</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">合計</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">カードの残高が不足しています。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">内部エラーが発生しました。</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
@@ -155,6 +177,8 @@
   <string name="stripe_invalid_shipping_information">配送先住所が無効です</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">郵便番号の入力に不備があります。</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">決済手段の詳細</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">シンプルで安全なワンクリック決済</string>
   <string name="stripe_payment_method_add_new_card">新しいカードを追加...</string>
@@ -168,6 +192,8 @@
   <string name="stripe_remove">削除</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">%s が削除されました</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">問題が発生しました。リクエスト ID: %1$s</string>
   <string name="stripe_secure_checkout">安全なチェックアウト</string>
   <string name="stripe_title_add_a_card">カードを追加</string>
   <!-- Screen title telling users they should add an address -->

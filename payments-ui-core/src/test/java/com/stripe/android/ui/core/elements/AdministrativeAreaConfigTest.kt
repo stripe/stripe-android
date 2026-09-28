@@ -45,6 +45,24 @@ class AdministrativeAreaConfigTest {
     }
 
     @Test
+    fun `brazil displays state`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.Brazil()
+        )
+        Truth.assertThat(config.label)
+            .isEqualTo(resolvableString(CoreR.string.stripe_address_label_state))
+    }
+
+    @Test
+    fun `brazil converts raw state code to full name`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.Brazil()
+        )
+        Truth.assertThat(config.convertFromRaw("SP"))
+            .isEqualTo("São Paulo")
+    }
+
+    @Test
     fun `dropdown defaults to first element if raw value doesn't exist`() {
         val config = AdministrativeAreaConfig(
             AdministrativeAreaConfig.Country.US()

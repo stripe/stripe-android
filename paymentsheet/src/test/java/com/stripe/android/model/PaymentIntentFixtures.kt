@@ -32,6 +32,40 @@ internal object PaymentIntentFixtures {
     )
     val PI_SUCCEEDED = requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
 
+    private val PI_SUCCEEDED_WITH_US_BANK_JSON = org.json.JSONObject(
+        """
+        {
+            "id": "pi_1IRg6VCRMbs6F",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1IRg6VCRMbs6F_secret_7oH5g4v8GaCrHfsGYS6kiSnwF",
+            "confirmation_method": "automatic",
+            "created": 1614960135,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": null,
+            "payment_method": "pm_1IJs3ZCRMbs",
+            "payment_method_types": ["card","us_bank_account"],
+            "payment_method_options": {
+                "us_bank_account": {
+                    "verification_method": "automatic"
+                }
+            },
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "succeeded"
+        }
+        """.trimIndent()
+    )
+    val PI_SUCCEEDED_WITH_US_BANK = requireNotNull(PARSER.parse(PI_SUCCEEDED_WITH_US_BANK_JSON))
+
     val PI_REQUIRES_MASTERCARD_3DS2_JSON = org.json.JSONObject(
         """
         {

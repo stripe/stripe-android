@@ -2,8 +2,12 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -24,6 +28,7 @@ internal data class LinkConfiguration(
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,
     val cardBrandFilter: CardBrandFilter,
+    val cardFundingFilter: CardFundingFilter,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
@@ -38,8 +43,7 @@ internal data class LinkConfiguration(
     val allowUserEmailEdits: Boolean,
     val allowLogOut: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
-    val skipWalletInFlowController: Boolean,
-    val linkAppearance: LinkAppearance?,
+    val linkAppearance: LinkAppearance.State?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
     private val customerId: String?,
@@ -47,6 +51,9 @@ internal data class LinkConfiguration(
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val linkBrand: LinkBrand,
+    val apiConfiguration: ApiConfiguration.State,
+    val shouldDisplay: Boolean,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?
@@ -71,4 +78,11 @@ internal data class LinkConfiguration(
         val eligible: Boolean,
         val preferredNetworks: List<String>,
     ) : Parcelable
+}
+
+/**
+ * Returns the consumer's LinkBrand if logged in, otherwise falls back to the configuration's brand.
+ */
+internal fun LinkConfiguration.effectiveLinkBrand(account: LinkAccount?): LinkBrand {
+    return account?.linkBrand ?: linkBrand
 }

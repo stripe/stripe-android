@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
@@ -116,6 +117,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
     private val saveAccountToLink: SaveAccountToLink,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
+    private val currentLinkBrand: CurrentLinkBrand,
     @Named(APPLICATION_ID) private val applicationId: String,
     private val logger: Logger,
 ) : LinkSignupHandler {
@@ -148,6 +150,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 consumerSessionClientSecret = signup.consumerSession.clientSecret,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                linkBrand = signup.consumerSession.linkBrand ?: manifest.linkBrand,
             )
         } else {
             // ** Legacy signup endpoint on unverified flows: 1 request **
@@ -159,6 +162,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 phoneNumber = state.validPhone!!,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                linkBrand = currentLinkBrand(),
             )
         }
         return Pane.SUCCESS

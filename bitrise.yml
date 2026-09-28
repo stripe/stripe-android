@@ -1,5 +1,5 @@
 ---
-format_version: '11'
+format_version: '25'
 default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
@@ -10,11 +10,20 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
+    # Run PaymentSheet E2E tests in parallel on one machine so Bitrise bills a single job.
+    - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 6
 
 pipelines:
   main-trigger-pipeline:
-    stages:
-      - stage-trigger-run-all: { }
+    workflows:
+      check-and-test: { }
+      run-instrumentation-and-ime-tests: { }
+      run-paymentsheet-instrumentation-tests: { }
+      run-financial-connections-and-crypto-instrumentation-tests: { }
+      run-connections-e2e-tests-on-push: { }
+      run-cardscan-and-google-pay-tests: { }
+      run-paymentsheet-e2e: { }
+      check-dependencies-and-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
     stages:
       - stage-run-connect-e2e-tests: { }
@@ -30,19 +39,6 @@ pipelines:
       - stage-run-connections-e2e-tests: { }
       - stage-notify-connections-e2e-failure: { }
 stages:
-  stage-trigger-run-all:
-    workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-connections-e2e-payments-tests-on-push: { }
-      - run-connections-e2e-token-tests-on-push: { }
-      - run-connections-e2e-data-tests-on-push: { }
-      - run-paymentsheet-end-to-end-tests: { }
-      - check-dependencies: { }
   stage-run-connect-e2e-tests:
     workflows:
       - run-connect-e2e-tests: { }
@@ -63,17 +59,7 @@ stages:
     workflows:
       - notify-connections-e2e-failure: { }
 workflows:
-  check:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          timeout: 1200
-          inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
-  test:
+  check-and-test:
     envs:
       - opts:
           is_expand: false
@@ -81,7 +67,7 @@ workflows:
       - INCLUDE_PAPARAZZI_ON_FAILURE: true
     meta:
       bitrise.io:
-        stack: osx-xcode-16.2.x    # Specify Mac stack just for this workflow
+        stack: osx-xcode-26.5.x    # Specify Mac stack just for this workflow
         machine_type_id: g2.mac.4large # Appropriate Mac instance
     before_run:
       - prepare_all
@@ -89,9 +75,14 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          title: Run static analysis, unit, and screenshot tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources runUnitAndScreenshotTests :paymentsheet-example:testBaseDebugUnitTest --init-script build-configuration/unit-test-init.gradle --continue
+      - bundle::export_unit_test_results:
+          title: Export unit & screenshot test results
+          inputs:
+            - test_title: Unit & screenshot tests
   build-connect-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -142,16 +133,28 @@ workflows:
       - MAESTRO_TAGS: testmode-payments
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests:
     envs:
       - MAESTRO_TAGS: testmode-data
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests:
     envs:
       - MAESTRO_TAGS: testmode-token
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -161,7 +164,7 @@ workflows:
       - _run-connections-e2e-tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests-on-push:
     envs:
@@ -172,7 +175,7 @@ workflows:
       - _run-connections-e2e-tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests-on-push:
     envs:
@@ -183,13 +186,78 @@ workflows:
       - _run-connections-e2e-tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-connections-e2e-tests-on-push:
+    envs:
+      - MAESTRO_TAGS: testmode
+      - BUILD_VARIANT: release
+    before_run:
+      - start_connections_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      # Build once and run all testmode flows on the same emulator. This avoids
+      # paying for three jobs that each repeat checkout, build, and emulator boot.
+      - android-build@1:
+          inputs:
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+            - variant: $BUILD_VARIANT
+            - build_type: apk
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Start logcat capture
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                adb logcat > /tmp/logcat.txt 2>&1 &
+                echo $! > /tmp/logcat.pid
+      - script@1:
+          title: Execute all testmode Maestro tests
+          timeout: 1200
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
+      - script@1:
+          title: Stop logcat capture
+          is_always_run: true
+          is_skippable: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                kill "$(cat /tmp/logcat.pid)" 2>/dev/null || true
+      - deploy-to-bitrise-io@2:
+          title: Upload logcat on failure
+          run_if: '{{ getenv "BITRISE_BUILD_STATUS" | eq "1" }}'
+          inputs:
+            - deploy_path: /tmp/logcat.txt
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
+      - script@1:
+          title: Test results
+          is_always_run: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module financial-connections
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-connections-e2e-livemode-tests:
     envs:
       - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   _run-connect-e2e-tests:
     before_run:
       - build-connect-debug
@@ -210,6 +278,13 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 bash ./scripts/execute_maestro_tests.sh -m connect -t $MAESTRO_TAGS
+      - script@1:
+          title: Test results
+          is_always_run: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module connect
   _run-connections-e2e-tests:
     before_run:
       - start_connections_emulator
@@ -224,11 +299,40 @@ workflows:
           inputs:
             - artifact_sources: .*
       - script@1:
+          title: Start logcat capture
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                adb logcat > /tmp/logcat.txt 2>&1 &
+                echo $! > /tmp/logcat.pid
+      - script@1:
           title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
                 bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
+      - script@1:
+          title: Stop logcat capture
+          is_always_run: true
+          is_skippable: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                kill "$(cat /tmp/logcat.pid)" 2>/dev/null || true
+      - deploy-to-bitrise-io@2:
+          title: Upload logcat on failure
+          run_if: '{{ getenv "BITRISE_BUILD_STATUS" | eq "1" }}'
+          inputs:
+            - deploy_path: /tmp/logcat.txt
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
+      - script@1:
+          title: Test results
+          is_always_run: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module financial-connections
   notify-connections-e2e-failure:
     steps:
       # Notify all executions.
@@ -242,22 +346,28 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CUX_BOTS
             - webhook_url_on_error: $WEBHOOK_SLACK_CUX_BOTS
-      - pagerduty@0:
-          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
-          inputs:
-            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-  run-instrumentation-tests:
+  run-instrumentation-and-ime-tests:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Execute instrumentation tests
+          title: Execute general instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33DebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - script@1:
+          title: Execute PaymentSheet IME instrumentation tests
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export general and IME instrumentation test results
+          is_always_run: true
+          inputs:
+            - test_title: General and IME instrumentation tests
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -268,12 +378,31 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet instrumentation test results
+          inputs:
+            - test_title: PaymentSheet instrumentation tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-  run-example-instrumentation-tests:
+  run-paymentsheet-ime-instrumentation-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Execute PaymentSheet IME instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet IME instrumentation test results
+          inputs:
+            - test_title: PaymentSheet IME instrumentation tests
+  run-financial-connections-and-crypto-instrumentation-tests:
     before_run:
       - start_emulator
       - prepare_all
@@ -284,7 +413,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :example:assembleAndroidTest
+            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -292,10 +421,18 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew :example:connectedAndroidTest
-  run-financial-connections-instrumentation-tests:
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle --continue
+      - bundle::export_instrumentation_test_results:
+          title: Export FC and Crypto instrumentation test results
+          inputs:
+            - test_title: FC and Crypto instrumentation tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-cardscan-and-google-pay-tests:
     before_run:
-      - start_emulator
+      - start_cardscan_emulator
       - prepare_all
     after_run:
       - conclude_all
@@ -304,7 +441,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest
+            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -312,26 +449,125 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
-  run-paymentsheet-end-to-end-tests:
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export CardScan instrumentation test results
+          inputs:
+            - test_title: CardScan instrumentation tests
+      # Firebase Test Lab runs remotely, so it can share this job without
+      # competing with CardScan's local emulator.
+      - android-build-for-ui-testing@0:
+          title: Build PaymentSheet Google Pay E2E test APKs
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - module: paymentsheet-example
+            - variant: baseDebug
+            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+      - virtual-device-testing-for-android@1:
+          title: Run TestGooglePay on virtual devices
+          is_always_run: true
+          timeout: 3600
+          inputs:
+            - test_type: instrumentation
+            - auto_google_login: "true"
+            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
+            - download_test_results: "true"
+            - test_timeout: "2700"
+      - deploy-to-bitrise-io@2:
+          title: Deploy Google Pay E2E test results
+          is_always_run: true
+          inputs:
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-paymentsheet-e2e:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          timeout: 1200
-          inputs:
-            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug -PIS_BROWSERSTACK_BUILD=true -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
-      - script@1:
-          timeout: 120
-          inputs:
-            - content: pip3 install requests_toolbelt requests
-      - script@1:
+          title: Execute PaymentSheet E2E tests
           timeout: 2400
           inputs:
-            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk --num-retries 2
-  check-dependencies:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                # Keep the explicit class list so tests with dedicated workflows stay excluded.
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index 0 --num-shards 1)
+
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet E2E test results
+          inputs:
+            - test_title: PaymentSheet E2E tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-paymentsheet-google-pay-e2e:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - android-build-for-ui-testing@0:
+          title: Build PaymentSheet Google Pay E2E test APKs
+          timeout: 1200
+          inputs:
+            - module: paymentsheet-example
+            - variant: baseDebug
+            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+      - virtual-device-testing-for-android@1:
+          title: Run TestGooglePay on virtual devices
+          timeout: 3600
+          inputs:
+            - test_type: instrumentation
+            - auto_google_login: "true"
+            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
+            - download_test_results: "true"
+            - test_timeout: "2700"
+      - deploy-to-bitrise-io@2:
+          title: Deploy Google Pay E2E test results
+          inputs:
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-paymentsheet-latency-synthetics:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Install Ruby via asdf
+          inputs:
+            - content: asdf install ruby 3.2.4
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Report PaymentSheet latency synthetics
+          timeout: 2400
+          inputs:
+            - content: ruby scripts/report_latency_synthetics.rb
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet latency test results
+          inputs:
+            - test_title: PaymentSheet latency synthetics
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  check-dependencies-and-publish-pom:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
     before_run:
@@ -343,31 +579,64 @@ workflows:
           inputs:
             - content: asdf install ruby 3.2.4
       - script@1:
+          title: Check dependencies and published POMs
+          timeout: 1200
           inputs:
-            - content: ruby scripts/dependencies/update_transitive_dependencies.rb
-      - script@1:
-          inputs:
-            - content: ruby scripts/dependencies/check_transitive_dependencies.rb
+            - content: |-
+                #!/usr/bin/env bash
+                set +e
+
+                ruby scripts/dependencies/update_transitive_dependencies.rb
+                dependencies_status=$?
+                if [ "$dependencies_status" -eq 0 ]; then
+                  ruby scripts/dependencies/check_transitive_dependencies.rb
+                  dependencies_status=$?
+                fi
+
+                bash ./scripts/verify_publish_pom.sh
+                publish_pom_status=$?
+
+                if [ "$dependencies_status" -ne 0 ] || [ "$publish_pom_status" -ne 0 ]; then
+                  exit 1
+                fi
   start_connections_emulator:
     steps:
-      - avd-manager@1:
+      - avd-manager@2:
           inputs:
-            - profile: "pixel_3a"
+            - profile: "Nexus 5"
             - abi: "x86_64"
-            - api_level: 32
+            - api_level: 33
             - tag: "google_apis"
             - start_command_flags: >
                 -camera-back none
                 -camera-front none
                 -netdelay none
                 -netspeed full
-                -memory 4096
+                -memory 3072
                 -no-snapshot
                 -no-audio
                 -no-window
+                -gpu software
+  start_cardscan_emulator:
+    steps:
+      - avd-manager@2:
+          inputs:
+            - profile: "pixel_6"
+            - abi: "x86_64"
+            - api_level: 33
+            - tag: "google_apis_playstore"
+            - start_command_flags: >
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 4096
+               -no-snapshot
+               -no-audio
+               -no-window
   start_emulator:
     steps:
-      - avd-manager@1:
+      - avd-manager@2:
           inputs:
             - profile: "pixel_6"
             - abi: "x86_64"
@@ -384,7 +653,7 @@ workflows:
                -no-window
   start_screenshot_emulator:
     steps:
-      - avd-manager@1:
+      - avd-manager@2:
           inputs:
             - profile: "Nexus 6"
             - abi: "x86_64"
@@ -406,11 +675,12 @@ workflows:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
+      - script@1:
+          title: Install Java via Direct Download
+          inputs:
+            - content: ./scripts/retry.sh 3 ./scripts/install_java.sh
       - restore-gradle-configuration-cache@1: { }
       - restore-gradle-cache@2: { }
-      - set-java-version@1:
-          inputs:
-            - set_java_version: 21
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
@@ -436,8 +706,47 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - save-gradle-configuration-cache@1: { }
-      - save-gradle-cache@1: { }
+      - save-gradle-cache@1:
+          inputs:
+            - save_transforms: true
+step_bundles:
+  export_unit_test_results:
+    inputs:
+      - test_title: Unit tests
+    steps:
+      - bundle::export_test_results:
+          inputs:
+            - test_title: $test_title
+            - test_type: unit
+  export_instrumentation_test_results:
+    inputs:
+      - test_title: Instrumentation tests
+    steps:
+      - script@1:
+          title: Split instrumentation test results
+          is_skippable: true
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - content: ./gradlew splitInstrumentationTestReportsByClass
+      - bundle::export_test_results:
+          inputs:
+            - test_title: $test_title
+            - test_type: instrumentation
+  export_test_results:
+    inputs:
+      - test_title: tests
+      - test_type: unit
+    steps:
+      - script@1:
+          is_always_run: true
+          is_skippable: true
+          title: Test results
+          inputs:
+            - content: |
+                #!/usr/bin/env bash
+                bash "$BITRISE_SOURCE_DIR/scripts/store_in_bitrise_test_results_folder.sh" "$test_type" "$test_title"
 meta:
   bitrise.io:
-    stack: linux-docker-android-22.04
+    stack: ubuntu-resolute-26.04-bitrise-2026-android
     machine_type_id: g2.linux.medium

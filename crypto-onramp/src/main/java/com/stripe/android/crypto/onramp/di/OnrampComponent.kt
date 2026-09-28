@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -16,19 +15,19 @@ import javax.inject.Singleton
     modules = [
         OnrampModule::class,
         StripeRepositoryModule::class,
-        ResourceRepositoryModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
     ]
 )
 internal interface OnrampComponent {
     val onrampCoordinator: OnrampCoordinator
+    val onrampCallbackIdentifier: String
 
     @Component.Factory
     interface Factory {
         fun build(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle
+            @BindsInstance savedStateHandle: SavedStateHandle,
         ): OnrampComponent
     }
 }

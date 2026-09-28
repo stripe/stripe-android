@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Did-darba ma stajniex intellgħu n-numru tal-kont tiegħek</string>
   <string name="stripe_close_dialog_networking_desc">Jekk tikkanċella issa, il-kont tiegħek se jintrabat ma\' %1$s imma mhux se jintrefa\' f\'Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Jekk tikkanċella issa, il-kont tiegħek se jintrabat ma\' dan-negozju imma mhux se jintrefa\' f\'Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Jekk tikkanċella issa, il-kont tiegħek se jkun marbut ma\' dan in-negozju iżda mhux se jiġi ssejvjat għal fi %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Jekk tikkanċella issa, il-kont tiegħek se jkun marbut ma\' %1$s iżda mhux se jiġi salvat fi %2$s.</string>
   <string name="stripe_error_cta_close">Agħlaq</string>
   <string name="stripe_error_cta_manual_entry">Daħħal id-dettalji tal-bank int stess</string>
   <string name="stripe_error_cta_retry">Erġa\' pprova</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Daħħal id-dettalji tal-bank</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Ikkanċella</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Kompli b\'Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Kompli b\'%1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Mhux issa</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Uża d-dettalji li diġà kont erfajt fil-kont Link tiegħek.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Uża l-informazzjoni li ssejvjajt qabel bil-kont tiegħek ta\' %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Kompli b\'Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Kompli b\'%1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Mhux issa</string>
   <string name="stripe_networking_save_to_link_verification_title">Ikkonferma li int min qed tgħid li int</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Agħżel bank ieħor</string>
   <string name="stripe_search">Fittex</string>
   <string name="stripe_success_pane_desc_link_error_plural">Il-kontijiet tiegħek intrabtu imma ma setgħux jintrefgħu f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Il-kontijiet tiegħek kienu konnessi iżda ma setgħux jiġu ssejvjati bi %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Il-kont tiegħek intrabat imma ma setax jintrefa\' f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Il-kont tiegħek kien konness imma ma setax jiġi ssejvjat bi %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Il-kontijiet tiegħek intrabtu u ntrefgħu f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Il-kontijiet tiegħek kienu konnessi u maħżuna bi %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Il-kont tiegħek intrabat u ntrefa\' f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Il-kont tiegħek kien konness u ssejvjat bi %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Għandek tistenna li l-mikrodepożiti jaslulek fi żmien jum jew jumejn fil-kont li jispiċċa ••••%1$s flimkien ma\' email b\'iktar istruzzjonijiet.</string>
   <string name="stripe_success_pane_desc_plural">Il-kontijiet tiegħek intrabtu</string>
   <string name="stripe_success_pane_desc_singular">Il-kont tiegħek intrabat</string>

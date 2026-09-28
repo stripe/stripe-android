@@ -73,12 +73,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         BacsDebitJsonParser().parse(it)
                     }
                 )
-            PaymentMethod.Type.Upi ->
-                builder.setUpi(
-                    json.optJSONObject(type.code)?.let {
-                        UpiJsonParser().parse(it)
-                    }
-                )
             PaymentMethod.Type.Netbanking ->
                 builder.setNetbanking(
                     json.optJSONObject(type.code)?.let {
@@ -144,7 +138,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
                 },
-                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND)
+                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND),
+                cardArt = json.optJSONObject(FIELD_CARD_ART)?.let {
+                    CardArtJsonParser().parse(it)
+                }
             )
         }
 
@@ -216,6 +213,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_WALLET = "wallet"
             private const val FIELD_DISPLAY_BRAND = "display_brand"
             private const val FIELD_NETWORKS = "networks"
+            private const val FIELD_CARD_ART = "card_art"
         }
     }
 
@@ -349,18 +347,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_SORT_CODE = "sort_code"
-        }
-    }
-
-    internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
-        override fun parse(json: JSONObject): PaymentMethod.Upi {
-            return PaymentMethod.Upi(
-                vpa = StripeJsonUtils.optString(json, FIELD_VPA)
-            )
-        }
-
-        private companion object {
-            private const val FIELD_VPA = "vpa"
         }
     }
 

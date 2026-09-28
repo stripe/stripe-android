@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
@@ -14,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncher
@@ -111,6 +113,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = onResult,
             )
 
@@ -138,13 +141,12 @@ class CvcRecollectionConfirmationDefinitionTest {
             confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<EmptyConfirmationLauncherArgs>>()
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
         assertThat(launchAction.receivesResultInProcess).isTrue()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -153,7 +155,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcherScenario.launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
         )
@@ -173,7 +175,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "444",
             ),
@@ -207,7 +209,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "555",
             ),
@@ -238,7 +240,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = CvcRecollectionResult.Cancelled,
         )
 
@@ -290,6 +292,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         originatedFromWallet: Boolean = false,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = optionsParams,
             originatedFromWallet = originatedFromWallet,

@@ -14,13 +14,18 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-internal class DelegateDrawable(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DelegateDrawable(
+    /**
+     * Loads the drawable to display. Runs on [Dispatchers.Main.immediate], so any blocking I/O
+     * must be offloaded internally (e.g. via `withContext(Dispatchers.IO)`).
+     */
     imageLoader: suspend () -> Drawable,
 ) : Drawable() {
     @Volatile
@@ -33,12 +38,10 @@ internal class DelegateDrawable(
 
     init {
         @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main.immediate) {
             delegate = imageLoader()
-            withContext(Dispatchers.Main) {
-                super.setBounds(0, 0, delegate.intrinsicWidth, delegate.intrinsicHeight)
-                invalidateSelf()
-            }
+            super.setBounds(0, 0, delegate.intrinsicWidth, delegate.intrinsicHeight)
+            invalidateSelf()
         }
     }
 
@@ -66,7 +69,6 @@ internal class DelegateDrawable(
         delegate.isFilterBitmap = filter
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun isFilterBitmap(): Boolean {
         return delegate.isFilterBitmap
     }

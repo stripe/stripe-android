@@ -3,6 +3,7 @@ package com.stripe.android.cards
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object CbcTestCardDelegate {
@@ -16,6 +17,7 @@ object CbcTestCardDelegate {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                funding = CardFunding.Unknown
             ),
             AccountRange(
                 BinRange(
@@ -24,6 +26,7 @@ object CbcTestCardDelegate {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown
             ),
         ),
         "5555552500001001" to listOf(
@@ -34,6 +37,7 @@ object CbcTestCardDelegate {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                funding = CardFunding.Unknown
             ),
             AccountRange(
                 binRange = BinRange(
@@ -42,6 +46,7 @@ object CbcTestCardDelegate {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
+                funding = CardFunding.Unknown
             ),
         ),
     )

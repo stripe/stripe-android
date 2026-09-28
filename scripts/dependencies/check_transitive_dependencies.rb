@@ -2,7 +2,7 @@
 
 require 'open3'
 
-diff_command = 'git status --porcelain */dependencies/dependencies.txt'
+diff_command = 'git status --porcelain */dependencies/*dependencies.txt'
 stdout, _, _ = Open3.capture3(diff_command)
 
 if stdout.empty?

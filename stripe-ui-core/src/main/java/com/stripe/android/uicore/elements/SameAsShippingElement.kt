@@ -8,19 +8,19 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SameAsShippingElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     override val controller: SameAsShippingController
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         rawValuesMap[identifier]?.let {
             controller.onRawValueChange(it)
         }
     }
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
         return controller.formFieldValue.mapAsStateFlow { formFieldEntry ->
             listOf(identifier to formFieldEntry)
         }

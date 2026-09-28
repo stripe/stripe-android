@@ -9,6 +9,8 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PA
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PLUGIN_TYPE
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_PLATFORM
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_VERSION
+import com.stripe.android.core.reactnative.ReactNativeAnalytics
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -140,6 +142,41 @@ class AnalyticsRequestV2FactoryTest {
             )
             assertThat(paramsMap.containsKey("param4")).isFalse()
             assertThat(paramsMap["param5"]).isEqualTo("")
+        }
+    }
+
+    @Test
+    fun `react native fields are absent by default`() {
+        val request = factory.createRequest(
+            "EVENT_NAME",
+            includeSDKParams = true
+        )
+
+        request.postParameters.toMap().let { paramsMap ->
+            assertThat(paramsMap).doesNotContainKey(AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE)
+            assertThat(paramsMap).doesNotContainKey(AnalyticsFields.REACT_NATIVE_VERSION)
+        }
+    }
+
+    @OptIn(ReactNativeSdkInternal::class)
+    @Test
+    fun `react native fields are included when set`() {
+        ReactNativeAnalytics.isNewArchitecture = true
+        ReactNativeAnalytics.reactNativeVersion = "0.76.0"
+
+        try {
+            val request = factory.createRequest(
+                "EVENT_NAME",
+                includeSDKParams = true
+            )
+
+            request.postParameters.toMap().let { paramsMap ->
+                assertThat(paramsMap[AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE]).isEqualTo("true")
+                assertThat(paramsMap[AnalyticsFields.REACT_NATIVE_VERSION]).isEqualTo("0.76.0")
+            }
+        } finally {
+            ReactNativeAnalytics.isNewArchitecture = null
+            ReactNativeAnalytics.reactNativeVersion = null
         }
     }
 

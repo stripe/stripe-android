@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
@@ -48,13 +49,15 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         composeTestRule: ComposeTestRule,
     )
 
-    class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {
+    data object Horizontal : PaymentSheetLayoutType(
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
+    ) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,
             paymentMethod: PaymentMethod,
         ) {
-            val label = paymentMethod.getLabel()?.resolve(context)
+            val label = paymentMethod.getLabel(linkBrand = LinkBrand.Link)?.resolve(context)
             composeTestRule
                 .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$label")
                 .assertIsSelected()
@@ -129,7 +132,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         }
     }
 
-    class Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
+    data object Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,
@@ -243,6 +246,6 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
 internal object PaymentSheetLayoutTypeProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<PaymentSheetLayoutType> {
-       return listOf(PaymentSheetLayoutType.Vertical(), PaymentSheetLayoutType.Horizontal())
+       return listOf(PaymentSheetLayoutType.Vertical, PaymentSheetLayoutType.Horizontal)
     }
 }

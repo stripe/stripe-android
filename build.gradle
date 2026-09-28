@@ -29,16 +29,17 @@ buildscript {
 plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
     id 'io.codearte.nexus-staging' version '0.30.0'
-    id 'com.google.devtools.ksp' version '2.1.10-1.0.30' apply false
-    id 'dev.drewhamilton.poko' version '0.18.2' apply false
-    id 'org.jetbrains.kotlin.jvm' version '2.1.10' apply false
-    id 'com.emergetools.android' version '4.3.0' apply false
-    id 'com.google.dagger.hilt.android' version '2.55' apply false
+    id 'com.google.devtools.ksp' version '2.3.6' apply false
+    id 'dev.drewhamilton.poko' version '0.20.2' apply false
+    id 'org.jetbrains.kotlin.jvm' version '2.2.21' apply false
+    id 'com.emergetools.android' version '4.4.0' apply false
+    id 'com.google.dagger.hilt.android' version '2.58' apply false
+    id 'org.gradle.test-retry' version "1.6.4" apply false
 }
 
-apply plugin: "io.gitlab.arturbosch.detekt"
+apply plugin: "dev.detekt"
 
-allprojects {
+allprojects { project ->
     group = GROUP
 
     repositories {
@@ -49,7 +50,7 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 35
+    compileSdkVersion = 36
 
     group_name = GROUP
     version_name = VERSION_NAME
@@ -106,8 +107,10 @@ dependencies {
 }
 
 apiValidation {
-    ignoredPackages += ["com.stripe.android.databinding"]
+    ignoredPackages += ["com.stripe.android.databinding", "com.stripe.android.stripecardscan.databinding"]
     ignoredProjects += [
+            "checkout-testing",
+            "tap-to-add-testing",
             "example",
             "financial-connections-example",
             "identity-example",
@@ -115,6 +118,7 @@ apiValidation {
             "payment-element-test-pages",
             "payments-core-testing",
             "paymentsheet-example",
+            "stripecardscan-example",
             "connect-example",
             "screenshot-testing",
             "3ds2playground",
@@ -129,20 +133,9 @@ apiValidation {
 
 subprojects {
     plugins.withId("app.cash.paparazzi") {
-        // Defer until afterEvaluate so that testImplementation is created by Android plugin.
-        afterEvaluate {
-            dependencies.constraints {
-                add("testImplementation", "com.google.guava:guava") {
-                    attributes {
-                        attribute(
-                                TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
-                                objects.named(TargetJvmEnvironment, TargetJvmEnvironment.STANDARD_JVM)
-                        )
-                    }
-                    because("LayoutLib and sdk-common depend on Guava's -jre published variant." +
-                            "See https://github.com/cashapp/paparazzi/issues/906.")
-                }
-            }
+        tasks.withType(Test).configureEach { test ->
+            // https://github.com/cashapp/paparazzi/issues/2111
+            test.reports.html.required = false
         }
     }
     // Auto-add kotlin-parcelize-runtime when parcelize plugin is applied
@@ -150,6 +143,36 @@ subprojects {
         afterEvaluate {
             dependencies {
                 implementation libs.kotlin.parcelizeRuntimePlugin
+            }
+        }
+    }
+}
+
+tasks.register("runUnitAndScreenshotTests") {
+    group = "verification"
+    description =
+            "Runs verifyPaparazziDebug where Paparazzi is applied (else testDebugUnitTest or test); " +
+                    "other projects run testDebugUnitTest or plain test. Skips :stripe-test-e2e."
+}
+
+gradle.projectsEvaluated {
+    tasks.named("runUnitAndScreenshotTests").configure {
+        rootProject.subprojects.each { Project sub ->
+            if (sub.path == ":stripe-test-e2e") {
+                return
+            }
+
+            def selected = null
+
+            if (sub.plugins.hasPlugin("app.cash.paparazzi")) {
+                selected = sub.tasks.findByName("verifyPaparazziDebug")
+                    ?: sub.tasks.findByName("testDebugUnitTest")
+            } else {
+                selected = sub.tasks.findByName("testDebugUnitTest")
+            }
+
+            if (selected != null) {
+                dependsOn(selected)
             }
         }
     }

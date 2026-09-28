@@ -1,8 +1,14 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
@@ -18,10 +24,9 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.LpmSerializer
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodMetadataFactory {
+    @Suppress("LongMethod")
     fun create(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
@@ -34,21 +39,26 @@ internal object PaymentMethodMetadataFactory {
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
-        sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
-        paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        linkBrand: LinkBrand = LinkBrand.Link,
         linkState: LinkStateResult? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
-        customerMetadataPermissions: CustomerMetadata.Permissions =
-            PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        removePaymentMethod: PaymentMethodRemovePermission =
+            PaymentMethodRemovePermission.Full,
+        saveConsent: PaymentMethodSaveConsentBehavior =
+            PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod: Boolean = true,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
+        customerEphemeralKeySecret: String = "ek_123",
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -61,6 +71,18 @@ internal object PaymentMethodMetadataFactory {
         integrationMetadata: IntegrationMetadata = stripeIntent.integrationMetadata(),
         sellerBusinessName: String? = null,
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
+        isTapToAddSupported: Boolean = false,
+        isNfcScanningEnabled: Boolean = false,
+        preferNfcOverCameraScan: Boolean = false,
+        experimentsData: ElementsSession.ExperimentsData? = null,
+        isStripeCardScanAllowed: Boolean = false,
+        enableMlKitCardScan: Boolean = false,
+        elementsSessionId: String? = null,
+        disableSsdOcrCardScan: Boolean = false,
+        cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
+        shouldUseAutocompleteProxyEndpoints: Boolean = false,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -76,23 +98,40 @@ internal object PaymentMethodMetadataFactory {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    permissions = customerMetadataPermissions,
-                    customerSessionClientSecret = customerSessionClientSecret,
-                )
+                if (customerSessionClientSecret != null) {
+                    CustomerMetadata.CustomerSession(
+                        id = "cus_123",
+                        ephemeralKeySecret = customerEphemeralKeySecret,
+                        customerSessionClientSecret = customerSessionClientSecret,
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                    )
+                } else {
+                    CustomerMetadata.LegacyEphemeralKey(
+                        id = "cus_123",
+                        ephemeralKeySecret = customerEphemeralKeySecret,
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                    )
+                }
             } else {
                 null
             },
-            sharedDataSpecs = sharedDataSpecs,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
             linkConfiguration = linkConfiguration,
             linkMode = linkMode,
+            linkBrand = linkBrand,
             linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             financialConnectionsAvailability = financialConnectionsAvailability,
             termsDisplay = termsDisplay,
@@ -106,20 +145,30 @@ internal object PaymentMethodMetadataFactory {
             onBehalfOf = onBehalfOf,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            isTapToAddSupported = isTapToAddSupported,
+            isNfcScanningEnabled = isNfcScanningEnabled,
+            preferNfcOverCameraScan = preferNfcOverCameraScan,
+            experimentsData = experimentsData,
+            isStripeCardScanAllowed = isStripeCardScanAllowed,
+            enableMlKitCardScan = enableMlKitCardScan,
+            elementsSessionId = elementsSessionId,
+            disableSsdOcrCardScan = disableSsdOcrCardScan,
+            cardArts = cardArts,
+            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
+            paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
     }
 
-    private fun createSharedDataSpecs(): List<SharedDataSpec> {
-        val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
-        val specsString = inputStream.bufferedReader().use { it.readText() }
-        return LpmSerializer.deserializeList(specsString).getOrThrow()
+    fun defaultIntegrationMetadata(stripeIntent: StripeIntent): IntegrationMetadata {
+        return stripeIntent.integrationMetadata()
     }
 
     private fun StripeIntent.integrationMetadata(): IntegrationMetadata {
         clientSecret?.let { return IntegrationMetadata.IntentFirst(it) }
         return when (this) {
             is PaymentIntent -> {
-                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount ?: 5000,
@@ -129,7 +178,7 @@ internal object PaymentMethodMetadataFactory {
                 )
             }
             is SetupIntent -> {
-                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                             currency = "usd"

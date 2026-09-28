@@ -18,10 +18,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.connect.ComponentEvent
+import com.stripe.android.connect.EmbeddedComponentError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -37,6 +39,7 @@ import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage.UnknownValue
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -115,7 +118,8 @@ internal class StripeConnectWebViewContainerViewModel(
         createWebView(
             application = application,
             delegate = delegate,
-            logger = logger
+            logger = logger,
+            coroutineScope = viewModelScope,
         )
 
     /**
@@ -203,8 +207,14 @@ internal class StripeConnectWebViewContainerViewModel(
 
             // don't send errors for requests that aren't for the main page load
             if (isMainPageLoad) {
-                // TODO - wrap error better
-                _eventFlow.tryEmit(ComponentEvent.LoadError(RuntimeException(errorString)))
+                _eventFlow.tryEmit(
+                    ComponentEvent.LoadError(
+                        EmbeddedComponentError(
+                            type = EmbeddedComponentError.ErrorType.API_CONNECTION_ERROR,
+                            message = errorString
+                        )
+                    )
+                )
                 analyticsService.track(
                     ConnectAnalyticsEvent.WebErrorPageLoad(
                         status = httpStatusCode,
@@ -450,7 +460,12 @@ internal class StripeConnectWebViewContainerViewModel(
 }
 
 internal fun interface CreateWebView {
-    operator fun invoke(application: Application, delegate: Delegate, logger: Logger): StripeConnectWebView
+    operator fun invoke(
+        application: Application,
+        delegate: Delegate,
+        logger: Logger,
+        coroutineScope: CoroutineScope,
+    ): StripeConnectWebView
 }
 
 @Suppress("MagicNumber")

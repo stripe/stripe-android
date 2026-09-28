@@ -12,6 +12,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.updatedWithProductUsage
@@ -94,7 +95,9 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
 
             ConfirmationDefinition.Action.Complete(
                 intent = intent,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                },
                 completedFullPaymentFlow = false,
             )
         } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {

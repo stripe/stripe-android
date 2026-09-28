@@ -2,6 +2,8 @@ package com.stripe.android
 
 internal object ApiKeyFixtures {
     const val FAKE_PUBLISHABLE_KEY = "pk_test_123"
+    const val FAKE_ACCOUNT_ID = "acct_123"
+    const val FAKE_LIVE_KEY = "pk_live_123"
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val CONNECTED_ACCOUNT_PUBLISHABLE_KEY = "pk_test_fdjfCYpGSwAX24KUEiuaAAWX"
     const val FAKE_EPHEMERAL_KEY = "ek_test_123"
@@ -20,8 +22,6 @@ internal object ApiKeyFixtures {
     const val GRABPAY_PUBLISHABLE_KEY = "pk_test_TP0eh0buhedbg787icFUy83H00i9fh4Auj"
     const val PAYPAL_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val AFTERPAY_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
-    const val UPI_PUBLISHABLE_KEY =
-        "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"
     const val NETBANKING_PUBLISHABLE_KEY =
         "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"
     const val BLIK_PUBLISHABLE_KEY = "pk_test_ErsyMEOTudSjQR8hh0VrQr5X008sBXGOu6"

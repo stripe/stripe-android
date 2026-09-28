@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionProvide
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -32,6 +33,9 @@ class NetworkingLinkLoginWarmupViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
@@ -55,7 +59,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         lookupAccount = lookupAccount,
         prefillDetails = null,
         consumerSessionProvider = consumerSessionProvider,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - payload error navigates to error screen`() = runTest {

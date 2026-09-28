@@ -3,12 +3,17 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
@@ -18,12 +23,16 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runMultiplePaymentSheetInstancesTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetDeferredTest {
+internal class PaymentSheetDeferredTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -41,6 +50,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -51,10 +61,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -66,7 +73,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -77,7 +84,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
@@ -96,14 +103,14 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "payment_method_options[card][setup_future_usage]",
                     "off_session"
                 )
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -115,6 +122,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPayment_forSetup() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -125,10 +133,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -137,7 +142,7 @@ internal class PaymentSheetDeferredTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -170,6 +175,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentSavedCardPayment_forSetup() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -180,10 +186,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -196,16 +199,20 @@ internal class PaymentSheetDeferredTest {
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
-
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build()
+                ),
             )
         }
 
@@ -231,6 +238,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPaymentWithCustomer() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -241,10 +249,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -257,6 +262,9 @@ internal class PaymentSheetDeferredTest {
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -265,10 +273,12 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build()
+                ),
             )
         }
 
@@ -279,7 +289,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -297,14 +307,14 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "payment_method_options[card][setup_future_usage]",
                     "off_session"
                 )
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -316,6 +326,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentWithSavedCard_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -326,10 +337,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -342,6 +350,9 @@ internal class PaymentSheetDeferredTest {
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -350,10 +361,12 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build()
+                ),
             )
         }
 
@@ -379,6 +392,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentCardPaymentWithSaveFor() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -389,10 +403,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -405,6 +416,9 @@ internal class PaymentSheetDeferredTest {
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -413,10 +427,12 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build()
+                ),
             )
         }
 
@@ -428,7 +444,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -445,13 +461,13 @@ internal class PaymentSheetDeferredTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                urlEncode("payment_method_options[card][setup_future_usage]"),
+                "payment_method_options[card][setup_future_usage]",
                 "off_session"
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -463,6 +479,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -475,10 +492,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -490,7 +504,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -501,7 +515,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -516,6 +530,7 @@ internal class PaymentSheetDeferredTest {
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -525,10 +540,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -540,7 +552,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -551,7 +563,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -562,6 +574,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentKonbiniPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -572,10 +585,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -587,10 +597,12 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc")
-                    .allowsDelayedPaymentMethods(true)
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc")
+                        .allowsDelayedPaymentMethods(true)
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build()
+                ),
             )
         }
 
@@ -607,7 +619,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
@@ -625,13 +637,13 @@ internal class PaymentSheetDeferredTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                urlEncode("payment_method_options[konbini][confirmation_number]"),
+                "payment_method_options[konbini][confirmation_number]",
                 phone
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -643,6 +655,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredPaymentIntent_withElementsSessionFailure() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -653,10 +666,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -668,7 +678,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -679,7 +689,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -697,14 +707,14 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "payment_method_options[card][setup_future_usage]",
                     "off_session"
                 )
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -716,6 +726,7 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredSetupIntent_withElementsSessionFailure() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -726,10 +737,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -738,7 +746,7 @@ internal class PaymentSheetDeferredTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -773,6 +781,7 @@ internal class PaymentSheetDeferredTest {
         @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
         testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         testType = testType,
         createIntentCallback = { _, _ ->
@@ -780,10 +789,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -795,7 +801,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 

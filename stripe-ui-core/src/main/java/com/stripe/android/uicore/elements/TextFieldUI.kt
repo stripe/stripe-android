@@ -21,6 +21,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -36,7 +37,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
@@ -50,20 +50,21 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.editableText
+import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
@@ -75,8 +76,8 @@ import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.withLtrDirectionEnforcedIfNeeded
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -104,21 +105,12 @@ fun TextFieldSection(
     @StringRes sectionTitle: Int? = null,
     content: @Composable () -> Unit,
 ) {
-    val error by textFieldController.error.collectAsState()
-
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
+    val validationMessage by textFieldController.validationMessage.collectAsState()
 
     Section(
         modifier = modifier,
         title = sectionTitle?.let { resolvableString(it) },
-        error = sectionErrorString,
+        validationMessage = validationMessage,
         isSelected = isSelected,
         content = content,
     )
@@ -150,30 +142,23 @@ fun TextField(
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState()
     val trailingIcon by textFieldController.trailingIcon.collectAsState()
-    val shouldShowError by textFieldController.visibleError.collectAsState()
+    val shouldShowValidationMessage by textFieldController.visibleValidationMessage.collectAsState()
     val loading by textFieldController.loading.collectAsState()
     val contentDescription by textFieldController.contentDescription.collectAsState()
     val visualTransformation by textFieldController.visualTransformation.collectAsState()
     val placeHolder by textFieldController.placeHolder.collectAsState()
+    val textStyle = LocalTextStyle.current.withLtrDirectionEnforcedIfNeeded(textFieldController)
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
 
     val fieldState by textFieldController.fieldState.collectAsState()
     val label by textFieldController.label.collectAsState()
 
-    val error by textFieldController.error.collectAsState()
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
+    val error by textFieldController.validationMessage.collectAsState()
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
-        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
+        if (fieldState is TextFieldStateConstants.Valid.Full && hasFocus.value) {
             focusManager.moveFocusSafely(nextFocusDirection)
         }
     }
@@ -215,6 +200,7 @@ fun TextField(
             }
         },
         onDropdownItemClicked = textFieldController::onDropdownItemClicked,
+        onSelectorItemClicked = textFieldController::onSelectorItemClicked,
         modifier = modifier
             .onPreviewKeyEvent(
                 value = value,
@@ -240,10 +226,10 @@ fun TextField(
         shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
-        shouldShowError = shouldShowError,
-        errorMessage = sectionErrorString,
+        shouldShowValidationMessage = shouldShowValidationMessage,
+        validationMessage = error,
         visualTransformation = visualTransformation,
-        layoutDirection = textFieldController.layoutDirection,
+        textStyle = textStyle,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
@@ -257,6 +243,7 @@ fun TextField(
                 focusManager.clearFocus(true)
             }
         ),
+        hasFocus = hasFocus.value
     )
 }
 
@@ -269,67 +256,77 @@ internal fun TextFieldUi(
     placeholder: String?,
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
-    shouldShowError: Boolean,
-    errorMessage: String?,
+    shouldShowValidationMessage: Boolean,
+    validationMessage: FieldValidationMessage?,
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    layoutDirection: LayoutDirection? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {},
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit = {},
+    hasFocus: Boolean
 ) {
-    val colors = TextFieldColors(shouldShowError)
+    val displayState = when (shouldShowValidationMessage) {
+        true -> {
+            when (validationMessage) {
+                is FieldValidationMessage.Error, null -> FieldDisplayState.ERROR
+                is FieldValidationMessage.Warning -> FieldDisplayState.WARNING
+            }
+        }
+        false -> FieldDisplayState.NORMAL
+    }
+    val colors = TextFieldColors(displayState)
     val textFieldInsets = LocalTextFieldInsets.current
 
-    val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
-
-    CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
-        CompatTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = modifier.fillMaxWidth(),
-            enabled = enabled,
-            label = {
-                FormLabel(
-                    text = if (showOptionalLabel) {
-                        stringResource(
-                            R.string.stripe_form_label_optional,
-                            label,
-                        )
-                    } else {
-                        label
-                    },
-                    modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
-                )
-            },
-            placeholder = placeholder?.let {
-                {
-                    Placeholder(text = it)
-                }
-            },
-            trailingIcon = trailingIcon?.let { icon ->
-                {
-                    icon.Composable(loading, onDropdownItemClicked)
-                }
-            },
-            isError = shouldShowError,
-            errorMessage = errorMessage,
-            visualTransformation = visualTransformation,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = true,
-            colors = colors,
-            contentPadding = textFieldInsets.asPaddingValues(),
-        )
-    }
+    CompatTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        label = {
+            FormLabel(
+                text = if (showOptionalLabel) {
+                    stringResource(
+                        R.string.stripe_form_label_optional,
+                        label,
+                    )
+                } else {
+                    label
+                },
+                modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
+            )
+        },
+        placeholder = placeholder?.let {
+            {
+                Placeholder(text = it)
+            }
+        },
+        trailingIcon = trailingIcon?.let { icon ->
+            {
+                icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
+            }
+        },
+        isError = shouldShowValidationMessage,
+        errorMessage = validationMessage?.resolvable?.resolve(),
+        visualTransformation = visualTransformation,
+        textStyle = textStyle,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = true,
+        colors = colors,
+        contentPadding = textFieldInsets.asPaddingValues(),
+    )
 }
 
 @Composable
 private fun TextFieldIcon.Composable(
     loading: Boolean,
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit,
+    hasFocus: Boolean
 ) {
     Row {
         when (this@Composable) {
@@ -338,7 +335,20 @@ private fun TextFieldIcon.Composable(
             }
 
             is TextFieldIcon.MultiTrailing -> {
-                Row(modifier = Modifier.padding(10.dp)) {
+                val resolvedContentDescription = contentDescription?.resolve()
+                Row(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .then(
+                            if (resolvedContentDescription != null) {
+                                Modifier.clearAndSetSemantics {
+                                    this.contentDescription = resolvedContentDescription
+                                }
+                            } else {
+                                Modifier
+                            }
+                        )
+                ) {
                     staticIcons.forEach {
                         TrailingIcon(it, loading)
                     }
@@ -351,6 +361,15 @@ private fun TextFieldIcon.Composable(
                     icon = this@Composable,
                     loading = loading,
                     onDropdownItemClicked = onDropdownItemClicked
+                )
+            }
+
+            is TextFieldIcon.Selector -> {
+                TrailingSelector(
+                    icon = this@Composable,
+                    loading = loading,
+                    onSelectorItemClicked = onSelectorItemClicked,
+                    hasFocus = hasFocus
                 )
             }
         }
@@ -390,16 +409,15 @@ fun AnimatedIcons(
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun TextFieldColors(
-    shouldShowError: Boolean = false,
+    fieldDisplayState: FieldDisplayState = FieldDisplayState.NORMAL,
     textColor: Color = MaterialTheme.stripeColors.onComponent,
     disabledTextColor: Color = textColor.copy(ContentAlpha.disabled),
     backgroundColor: Color = MaterialTheme.stripeColors.component,
     disabledIndicatorColor: Color = Color.Transparent,
 ) = TextFieldDefaults.textFieldColors(
-    textColor = if (shouldShowError) {
-        MaterialTheme.colors.error
-    } else {
-        textColor
+    textColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> textColor
     },
     disabledTextColor = disabledTextColor,
     unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
@@ -409,7 +427,15 @@ fun TextFieldColors(
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = disabledIndicatorColor,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.stripeColors.textCursor
+    cursorColor = MaterialTheme.stripeColors.textCursor,
+    errorCursorColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> MaterialTheme.stripeColors.textCursor
+    },
+    errorIndicatorColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> Color.Transparent
+    },
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -526,25 +552,60 @@ private fun Modifier.onPreviewKeyEvent(
     }
 }
 
-/*
- * Using 'composed' is no longer recommended
- * https://developer.android.com/jetpack/compose/custom-modifiers#create_a_custom_modifier_using_a_composable_modifier_factory
- */
-@SuppressLint("ComposableModifierFactory")
-@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun TrailingSelector(
+    icon: TextFieldIcon.Selector,
+    loading: Boolean,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit,
+    hasFocus: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .focusProperties { canFocus = false }
+            .padding(10.dp)
+            .testTag(SELECTOR_CLICKABLE_TEST_TAG),
+        contentAlignment = Alignment.Center
+    ) {
+        if (icon.showSelector) {
+            Selector(
+                currentItem = icon.currentItem,
+                items = icon.items,
+                onItemSelected = onSelectorItemClicked,
+                hasFocus = hasFocus,
+                popupMessage = icon.message,
+                hasMadeSelection = icon.hasMadeSelection
+            )
+        } else {
+            TrailingIcon(
+                TextFieldIcon.Trailing(
+                    icon.currentItem.icon,
+                    isTintable = false
+                ),
+                loading
+            )
+        }
+    }
+}
+
 @Composable
 private fun Modifier.onAutofill(
     textFieldController: TextFieldController,
     autofillReporter: (String) -> Unit
-): Modifier = autofill(
-    types = listOfNotNull(textFieldController.autofillType),
-    onFill = {
-        textFieldController.autofillType?.let { type ->
-            autofillReporter(type.name)
-        }
-        textFieldController.onValueChange(it)
+): Modifier = semantics {
+    textFieldController.autofillType?.let {
+        contentType = it
     }
-)
+
+    onAutofillText {
+        textFieldController.autofillType?.let { type ->
+            autofillReporter(type.toReadableString())
+        }
+
+        textFieldController.onValueChange(it.text)
+
+        true
+    }
+}
 
 private fun Modifier.onFocusChanged(
     textFieldController: TextFieldController,
@@ -567,5 +628,13 @@ private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val DROPDOWN_MENU_CLICKABLE_TEST_TAG = "dropdown_menu_clickable"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SELECTOR_CLICKABLE_TEST_TAG = "selector_clickable"
+
 // Default size of Material Theme icons
 private const val LOADING_INDICATOR_SIZE = 24
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class FieldDisplayState {
+    NORMAL, ERROR, WARNING
+}

@@ -14,27 +14,39 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 internal class DefaultEmbeddedConfigurationHandlerTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `configuration fails when sheetIsOpen`() = runScenario {
         sheetStateHolder.sheetIsOpen = true
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
             configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
         )
         assertThat(result.exceptionOrNull()?.message).isEqualTo("Configuring while a sheet is open is not supported.")
     }
@@ -45,18 +57,22 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
             arguments = DefaultEmbeddedConfigurationHandler.Arguments(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                    )
                 ),
                 configuration = configuration.asCommonConfiguration(),
             ),
             resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
         )
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
             configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
         )
         assertThat(result.getOrThrow())
             .isInstanceOf<PaymentElementLoader.State>()
@@ -67,10 +83,12 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
             configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
         )
         assertThat(result.getOrThrow())
             .isInstanceOf<PaymentElementLoader.State>()
@@ -81,17 +99,19 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
 
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
         )
 
         val state1 = handler.configure(
-            intentConfiguration = intentConfiguration,
             configuration = configuration,
+            initializationMode = initializationMode,
         ).getOrThrow()
         val state2 = handler.configure(
-            intentConfiguration = intentConfiguration,
             configuration = configuration,
+            initializationMode = initializationMode,
         ).getOrThrow()
         assertThat(state1).isEqualTo(state2)
     }
@@ -105,17 +125,19 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             .build()
         loader.emit(loader.createSuccess(configuration2.asCommonConfiguration()))
 
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
         )
 
         val state1 = handler.configure(
-            intentConfiguration = intentConfiguration,
             configuration = configuration1,
+            initializationMode = initializationMode,
         ).getOrThrow()
         val state2 = handler.configure(
-            intentConfiguration = intentConfiguration,
             configuration = configuration2,
+            initializationMode = initializationMode,
         ).getOrThrow()
         assertThat(state1).isNotEqualTo(state2)
     }
@@ -137,16 +159,20 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         )
 
         val state1 = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
             configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
         ).getOrThrow()
         val state2 = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "EUR"),
-            ),
             configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "EUR"),
+                )
+            ),
         ).getOrThrow()
         assertThat(state1).isNotEqualTo(state2)
     }
@@ -156,18 +182,22 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
             arguments = DefaultEmbeddedConfigurationHandler.Arguments(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                    )
                 ),
                 configuration = configuration.asCommonConfiguration(),
             ),
             resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
         )
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
             configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
         )
         assertThat(result.getOrThrow())
             .isInstanceOf<PaymentElementLoader.State>()
@@ -175,23 +205,25 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
     @Test
     fun `results are saved in saved state handle`() = runScenario {
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
         )
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         val loaderResult = loader.createSuccess(configuration.asCommonConfiguration())
         loader.emit(loaderResult)
 
         val result = handler.configure(
-            intentConfiguration = intentConfiguration,
             configuration = configuration,
+            initializationMode = initializationMode,
         )
         val configurationCache = savedStateHandle.get<ConfigurationCache>(ConfigurationCache.KEY)
         assertThat(result.getOrThrow()).isEqualTo(configurationCache!!.resultState)
         assertThat(configurationCache).isEqualTo(
             ConfigurationCache(
                 DefaultEmbeddedConfigurationHandler.Arguments(
-                    intentConfiguration = intentConfiguration,
+                    initializationMode = initializationMode,
                     configuration = configuration.asCommonConfiguration(),
                 ),
                 resultState = loaderResult.getOrThrow(),
@@ -201,15 +233,17 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
     @Test
     fun `results are not saved in saved state handle on failure`() = runScenario {
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
         )
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(Result.failure(IllegalStateException("Bad data")))
 
         val result = handler.configure(
-            intentConfiguration = intentConfiguration,
             configuration = configuration,
+            initializationMode = initializationMode,
         )
         assertThat(result.isFailure).isTrue()
         val configurationCache = savedStateHandle.get<ConfigurationCache>(ConfigurationCache.KEY)
@@ -219,8 +253,10 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
     fun `parallel calls to configure with the same arguments results in a single call to the loader`() = runScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
         )
         val countDownLatch = CountDownLatch(2)
         val testDispatcher = UnconfinedTestDispatcher()
@@ -228,16 +264,16 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val first = testScope.async(testDispatcher) {
             countDownLatch.countDown()
             handler.configure(
-                intentConfiguration = intentConfiguration,
                 configuration = configuration,
+                initializationMode = initializationMode,
             ).getOrThrow()
         }
 
         val second = testScope.async(testDispatcher) {
             countDownLatch.countDown()
             handler.configure(
-                intentConfiguration = intentConfiguration,
                 configuration = configuration,
+                initializationMode = initializationMode,
             ).getOrThrow()
         }
 
@@ -253,28 +289,35 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
     fun `parallel calls to configure with different arguments results in different results`() = runScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val firstInitializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
+            )
+        )
+        val secondInitializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
+        )
 
         val first = testScope.backgroundScope.async(Dispatchers.IO) {
             handler.configure(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
-                ),
                 configuration = configuration,
+                initializationMode = firstInitializationMode,
             ).getOrThrow()
         }
 
-        loader.loadCalledTurbine.awaitItem()
+        assertThat(loader.loadCalledTurbine.awaitItem()).isEqualTo(firstInitializationMode)
 
         val second = testScope.backgroundScope.async(Dispatchers.IO) {
             handler.configure(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-                ),
                 configuration = configuration,
+                initializationMode = secondInitializationMode,
             ).getOrThrow()
         }
 
-        loader.loadCalledTurbine.awaitItem()
+        assertThat(loader.loadCancelledTurbine.awaitItem()).isEqualTo(firstInitializationMode)
+        assertThat(loader.loadCalledTurbine.awaitItem()).isEqualTo(secondInitializationMode)
         val expectedResult = loader.createSuccess(
             configuration.asCommonConfiguration(),
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
@@ -283,6 +326,30 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
         assertThat(first.isCompleted).isFalse()
         assertThat(second.await()).isEqualTo(expectedResult.getOrThrow())
+        assertThat(viewModelScope.coroutineContext[Job]?.isActive).isTrue()
+    }
+
+    @Test
+    fun `cancelling view model scope cancels in-flight request`() = runScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
+        )
+        val request = viewModelScope.async {
+            handler.configure(
+                configuration = configuration,
+                initializationMode = initializationMode,
+            ).getOrThrow()
+        }
+
+        assertThat(loader.loadCalledTurbine.awaitItem()).isEqualTo(initializationMode)
+
+        viewModelScope.cancel()
+
+        assertThat(loader.loadCancelledTurbine.awaitItem()).isEqualTo(initializationMode)
+        assertThat(request.isCancelled).isTrue()
     }
 
     private fun runScenario(
@@ -292,11 +359,15 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
             val sheetStateHolder = SheetStateHolder(savedStateHandle)
+            val viewModelScope = coroutineScopeCleanupRule.track(
+                CoroutineScope(SupervisorJob() + UnconfinedTestDispatcher(testScheduler))
+            )
             val handler = DefaultEmbeddedConfigurationHandler(
                 loader,
                 savedStateHandle,
                 sheetStateHolder,
                 internalRowSelectionCallback = { null },
+                viewModelScope = viewModelScope,
             )
             Scenario(
                 loader = loader,
@@ -304,6 +375,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 handler = handler,
                 testScope = this,
                 sheetStateHolder = sheetStateHolder,
+                viewModelScope = viewModelScope,
             ).apply {
                 block()
             }
@@ -317,11 +389,13 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val handler: DefaultEmbeddedConfigurationHandler,
         val testScope: TestScope,
         val sheetStateHolder: SheetStateHolder,
+        val viewModelScope: CoroutineScope,
     )
 
     private class FakePaymentElementLoader : PaymentElementLoader {
         private val resultTurbine: Turbine<Result<PaymentElementLoader.State>> = Turbine()
         val loadCalledTurbine: Turbine<PaymentElementLoader.InitializationMode> = Turbine()
+        val loadCancelledTurbine: Turbine<PaymentElementLoader.InitializationMode> = Turbine()
 
         fun emit(result: Result<PaymentElementLoader.State>) {
             resultTurbine.add(result)
@@ -329,6 +403,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
         fun assertConsumed() {
             resultTurbine.ensureAllEventsConsumed()
+            loadCancelledTurbine.ensureAllEventsConsumed()
         }
 
         fun createSuccess(
@@ -361,7 +436,12 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             metadata: PaymentElementLoader.Metadata,
         ): Result<PaymentElementLoader.State> {
             loadCalledTurbine.add(initializationMode)
-            return resultTurbine.awaitItem()
+            return try {
+                resultTurbine.awaitItem()
+            } catch (e: CancellationException) {
+                loadCancelledTurbine.add(initializationMode)
+                throw e
+            }
         }
     }
 }

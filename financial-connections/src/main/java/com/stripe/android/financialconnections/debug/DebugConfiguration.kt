@@ -26,6 +26,24 @@ internal class DebugConfiguration @Inject constructor(
                 }
             }
         }.getOrNull()
+
+    internal val forceOnelink: Boolean
+        get() = runCatching {
+            sharedPreferences.getString("json", null)?.let {
+                val jsonObject = Json.decodeFromString(JsonObject.serializer(), it)
+                jsonObject[KEY_FORCE_ONELINK]?.jsonPrimitive?.contentOrNull == "true"
+            } ?: false
+        }.getOrDefault(false)
+
+    internal val forceOnelinkConsumer: Boolean
+        get() = runCatching {
+            sharedPreferences.getString("json", null)?.let {
+                val jsonObject = Json.decodeFromString(JsonObject.serializer(), it)
+                jsonObject[KEY_FORCE_ONELINK_CONSUMER]?.jsonPrimitive?.contentOrNull == "true"
+            } ?: false
+        }.getOrDefault(false)
 }
 
 private const val KEY_OVERRIDE_NATIVE = "financial_connections_override_native"
+private const val KEY_FORCE_ONELINK = "force_onelink"
+private const val KEY_FORCE_ONELINK_CONSUMER = "force_onelink_consumer"

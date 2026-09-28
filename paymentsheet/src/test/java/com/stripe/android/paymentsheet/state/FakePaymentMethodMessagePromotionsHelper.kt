@@ -1,0 +1,94 @@
+package com.stripe.android.utils
+
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+
+internal class FakePaymentMethodMessagePromotionsHelper(
+    private val promotions: List<PaymentMethodMessagePromotion>? = null
+) : PaymentMethodMessagePromotionsHelper {
+    private val _calls = Turbine<Unit>()
+    val calls: ReceiveTurbine<Unit> = _calls
+
+    private val _reportPromotionDisplayedCalls = Turbine<Pair<PaymentMethodCode, Boolean>>()
+    val reportPromotionDisplayedCalls: ReceiveTurbine<Pair<PaymentMethodCode, Boolean>> =
+        _reportPromotionDisplayedCalls
+
+    override fun fetchPromotionsAsync(intent: StripeIntent, apiConfiguration: ApiConfiguration.State) {
+        _calls.add(Unit)
+    }
+
+    override fun getPromotionIfAvailableForCode(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): PaymentMethodMessagePromotion? {
+        return promotions?.find {
+            it.paymentMethodType.lowercase() == code
+        }
+    }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return promotions
+    }
+
+    override fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)? {
+        return { getPromotionIfAvailableForCode(code, metadata) }
+    }
+
+    override fun reportPromotionDisplayed(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ) {
+        val displayedSuccessfully = getPromotionIfAvailableForCode(code, metadata) != null
+        _reportPromotionDisplayedCalls.add(code to displayedSuccessfully)
+    }
+
+    fun validate() {
+        calls.ensureAllEventsConsumed()
+    }
+
+    internal object Factory {
+        fun create(
+            promotions: List<PaymentMethodMessagePromotion>? = Companion.promotions
+        ): PaymentMethodMessagePromotionsHelper {
+            return FakePaymentMethodMessagePromotionsHelper(promotions)
+        }
+    }
+
+    internal companion object {
+        val klarnaPromotion = PaymentMethodMessagePromotion(
+            paymentMethodType = "KLARNA",
+            message = "This is a message",
+            learnMore = PaymentMethodMessageLearnMore(
+                message = "Click me",
+                url = "https://www.test.com"
+            )
+        )
+        val affirmPromotion = PaymentMethodMessagePromotion(
+            paymentMethodType = "AFFIRM",
+            message = "This is a message",
+            learnMore = PaymentMethodMessageLearnMore(
+                message = "Click me",
+                url = "https://www.test.com"
+            )
+        )
+        val afterpayPromotion = PaymentMethodMessagePromotion(
+            paymentMethodType = "AFTERPAY_CLEARPAY",
+            message = "This is a message",
+            learnMore = PaymentMethodMessageLearnMore(
+                message = "Click me",
+                url = "https://www.test.com"
+            )
+        )
+        val promotions = listOf(klarnaPromotion, affirmPromotion, afterpayPromotion)
+    }
+}

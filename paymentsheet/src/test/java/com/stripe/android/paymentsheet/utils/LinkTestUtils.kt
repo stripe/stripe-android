@@ -7,9 +7,11 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.wallets.Wallet
@@ -19,7 +21,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
 internal object LinkTestUtils {
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
         paymentDetails = ConsumerPaymentDetails.Passthrough(
             id = "csmrpd_123",
             last4 = "4242",
@@ -34,7 +36,6 @@ internal object LinkTestUtils {
                 postalCode = "42424"
             )
         ),
-        paymentMethodCreateParams = mock(),
         paymentMethod = PaymentMethod.Builder()
             .setId("pm_123")
             .setType(PaymentMethod.Type.Card)
@@ -57,7 +58,7 @@ internal object LinkTestUtils {
             cvcCheck = CvcCheck.Fail,
             isDefault = false,
             networks = emptyList(),
-            funding = "CREDIT",
+            funding = ConsumerPaymentDetails.Card.Funding.Credit,
             nickname = null,
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
@@ -69,13 +70,14 @@ internal object LinkTestUtils {
                 postalCode = "42424"
             )
         ),
-        paymentMethodCreateParams = mock(),
+        confirmParams = mock(),
         originalParams = mock()
     )
 
     fun createLinkConfiguration(
         cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        linkBrand: LinkBrand = LinkBrand.Link,
     ): LinkConfiguration {
         return LinkConfiguration(
             stripeIntent = mock {
@@ -109,12 +111,15 @@ internal object LinkTestUtils {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+            linkBrand = linkBrand,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 }

@@ -1,34 +1,35 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.validation.isSupportedWithBillingConfig
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.link.LinkController
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetCustomerSession
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetLegacyEphemeralKey
-import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -38,25 +39,29 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -89,20 +94,47 @@ internal interface PaymentElementLoader {
         data class Embedded(
             val isRowSelectionImmediateAction: Boolean,
             val configuration: EmbeddedPaymentElement.Configuration,
+            val paymentMethodLayout: PaymentMethodLayout,
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
 
         data class CryptoOnramp(
-            val configuration: LinkController.Configuration
+            val configuration: LinkController.Configuration.State
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class StandaloneLink(
+            val configuration: LinkController.Configuration.State
+        ) : Configuration {
+            override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
+        }
+
+        data class ExpressCheckoutElement(
+            override val commonConfiguration: CommonConfiguration
+        ) : Configuration
     }
 
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
         abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
+
+        fun walletsDisabledReason(): WalletsDisabledReason? {
+            val shouldDisable = (this as? CheckoutSession)
+                ?.checkoutSessionResponse
+                ?.collectsTaxFromBillingAddress == true
+
+            return if (shouldDisable) {
+                WalletsDisabledReason.AutomaticTaxBillingAddress
+            } else {
+                null
+            }
+        }
+
+        enum class WalletsDisabledReason {
+            AutomaticTaxBillingAddress;
+        }
 
         @Parcelize
         data class PaymentIntent(
@@ -151,13 +183,13 @@ internal interface PaymentElementLoader {
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return when {
                     paymentElementCallbacks?.preparePaymentMethodHandler != null -> {
-                        IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration)
+                        IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration)
                     }
                     paymentElementCallbacks?.createIntentWithConfirmationTokenCallback != null -> {
-                        IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration)
+                        IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration)
                     }
                     paymentElementCallbacks?.createIntentCallback != null -> {
-                        IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration)
+                        IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration)
                     }
                     else -> throw IllegalStateException("No callback for deferred intent.")
                 }
@@ -165,13 +197,46 @@ internal interface PaymentElementLoader {
         }
 
         @Parcelize
-        object CryptoOnramp : InitializationMode() {
+        data class CryptoOnramp(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate.
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CryptoOnramp
+            }
+        }
+
+        @Parcelize
+        data class StandaloneLink(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.StandaloneLink
+            }
+        }
+
+        @Parcelize
+        data class CheckoutSession(
+            val instancesKey: String,
+            val checkoutSessionResponse: CheckoutSessionResponse,
+        ) : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate — the response was already loaded successfully.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.CheckoutSession(
+                    id = checkoutSessionResponse.id,
+                    instancesKey = instancesKey,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                )
             }
         }
     }
@@ -200,22 +265,30 @@ internal interface PaymentElementLoader {
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-    private val elementsSessionRepository: ElementsSessionRepository,
-    private val customerRepository: CustomerRepository,
-    private val lpmRepository: LpmRepository,
+    private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val logger: Logger,
     private val eventReporter: LoadingEventReporter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
+    private val logFcLiteExperiment: LogFcLiteExperiment,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    private val tapToAddConnectionStarter: TapToAddConnectionStarter,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
+    private val customerRepository: CustomerRepository,
+    private val createCustomerState: CreateCustomerState,
+    private val checkoutSessionLoader: CheckoutSessionLoader,
+    private val elementsSessionLoader: ElementsSessionLoader,
+    private val createCustomerMetadata: CreateCustomerMetadata,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
+    private val durationProvider: DurationProvider,
+    private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -227,6 +300,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration: PaymentElementLoader.Configuration,
             customerMetadata: CustomerMetadata?,
             linkStateResult: LinkStateResult?,
+            isTapToAddAvailable: Boolean,
         ): AnalyticsMetadata
     }
 
@@ -235,31 +309,49 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
-    ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
-        val configuration = integrationConfiguration.commonConfiguration
+    ): Result<PaymentElementLoader.State> = runWithApiConfiguration(
+        integrationConfiguration.commonConfiguration
+    ) { configuration, apiConfiguration ->
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(isLiveModeProvider(), paymentElementCallbackIdentifier)
+        configuration.validate(
+            initializationMode = initializationMode,
+            isLiveMode = apiConfiguration.isLiveMode(),
+            callbackIdentifier = paymentElementCallbackIdentifier,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported(apiConfiguration),
+        )
 
-        eventReporter.onLoadStarted(metadata.initializedViaCompose)
+        eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
+        tapToAddConnectionStarter.start(
+            configuration,
+            apiConfiguration,
+        )
 
-        val isGooglePaySupportedOnDevice = async {
-            isGooglePaySupportedOnDevice()
+        // Give immediately available results a chance to complete before later load work checks isCompleted.
+        val isGooglePaySupportedOnDevice = async(start = CoroutineStart.UNDISPATCHED) {
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
+            ) {
+                isGooglePaySupportedOnDevice(apiConfiguration)
+            }
         }
         val isGooglePaySupportedByConfiguration = async {
-            configuration.isGooglePayReady()
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
+            ) {
+                configuration.isGooglePayReady(apiConfiguration)
+            }
         }
 
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration, apiConfiguration)
+
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = retrieveElementsSession(
+        val elementsSession = loadSession(
             initializationMode = initializationMode,
-            customer = configuration.customer,
-            customPaymentMethods = configuration.customPaymentMethods,
-            externalPaymentMethods = configuration.externalPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
-            link = configuration.link,
-            countryOverride = configuration.userOverrideCountry,
-        ).getOrThrow()
+            configuration = configuration,
+            savedPaymentMethodSelection = savedPaymentMethodSelection,
+            apiConfiguration = apiConfiguration,
+        )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -267,12 +359,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        val customerInfo = createCustomerInfo(
+        fetchPaymentMethodMessaging(elementsSession, apiConfiguration)
+
+        val isGooglePayReady = isGooglePayReady(
             configuration = configuration,
             elementsSession = elementsSession,
+            initializationMode = initializationMode,
+            isGooglePaySupportedByConfiguration = isGooglePaySupportedByConfiguration,
         )
-
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -288,14 +382,23 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
 
+        val customerMetadata = createCustomerMetadata(
+            initializationMode = initializationMode,
+            configuration = configuration,
+            elementsSession = elementsSession,
+        )
+
         val linkState = async {
-            createLinkState(
-                elementsSession = elementsSession,
-                configuration = configuration,
-                customer = customerInfo?.toCustomerInfo(),
-                initializationMode = initializationMode,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState) {
+                createLinkState(
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = apiConfiguration,
+                )
+            }
         }
 
         val paymentMethodMetadata = async {
@@ -304,36 +407,51 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            createPaymentMethodMetadata(
-                integrationConfiguration = integrationConfiguration,
-                elementsSession = elementsSession,
-                customerInfo = customerInfo,
-                linkStateResult = linkStateResult,
-                isGooglePayReady = isGooglePayReady,
-                isGooglePaySupported = isGooglePaySupported,
-                initializationMode = initializationMode,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
+                createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = apiConfiguration,
+                )
+            }
         }
 
         val customer = async {
-            createCustomerState(
-                configuration = configuration,
-                customerInfo = customerInfo,
-                metadata = paymentMethodMetadata.await(),
-                savedSelection = savedSelection,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
-            )
+            val paymentMethodMetadata = paymentMethodMetadata.await()
+
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateCustomerState) {
+                createCustomerState(
+                    initializationMode = initializationMode,
+                    elementsSession = elementsSession,
+                    metadata = paymentMethodMetadata,
+                    savedSelection = savedSelection,
+                    prefetchedPaymentMethods = prefetchedPaymentMethods,
+                )
+            }
         }
 
         val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(
-                savedSelection = savedSelection,
-                metadata = paymentMethodMetadata.await(),
-                customer = customer.await(),
-                isGooglePayReady = isGooglePayReady,
-                isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
-            )
+            val paymentMethodMetadata = paymentMethodMetadata.await()
+            val customer = customer.await()
+
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection
+            ) {
+                retrieveInitialPaymentSelection(
+                    savedSelection = savedSelection,
+                    metadata = paymentMethodMetadata,
+                    customer = customer,
+                    isGooglePayReady = isGooglePayReady,
+                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                )
+            }
         }
 
         val stripeIntent = elementsSession.stripeIntent
@@ -354,19 +472,80 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
-        logLinkExperimentExposures(
+        logExperimentExposures(
             elementsSession = elementsSession,
             state = state
         )
+
+        logPaymentMethodMessagingExposure(pmMetadata)
 
         reportSuccessfulLoad(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            paymentMethodMetadata = pmMetadata,
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            publishableKey = apiConfiguration.publishableKey,
         )
 
-        return@runCatching state
+        state
+    }
+
+    private suspend fun runWithApiConfiguration(
+        configuration: CommonConfiguration,
+        block: suspend CoroutineScope.(CommonConfiguration, ApiConfiguration.State) -> PaymentElementLoader.State,
+    ): Result<PaymentElementLoader.State> {
+        val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
+        return workContext.runCatching(
+            onFailure = { error -> reportFailedLoad(error, apiConfiguration.publishableKey) },
+            task = { block(configuration, apiConfiguration) },
+        )
+    }
+
+    private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
+        configuration: CommonConfiguration,
+        apiConfiguration: ApiConfiguration.State,
+    ): PrefetchedPaymentMethods? {
+        val customer = configuration.customer ?: return null
+        val accessType = customer.accessType
+        if (accessType !is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey) return null
+
+        return async {
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs) {
+                customerRepository.getPaymentMethods(
+                    customerId = customer.id,
+                    ephemeralKeySecret = accessType.ephemeralKeySecret,
+                    types = listOf(
+                        PaymentMethod.Type.Card,
+                        PaymentMethod.Type.SepaDebit,
+                        PaymentMethod.Type.USBankAccount,
+                    ), // These are the only payment method types we support as saved payment methods.
+                    silentlyFail = apiConfiguration.isLiveMode(),
+                    apiConfiguration = apiConfiguration,
+                )
+            }
+        }
+    }
+
+    private suspend fun loadSession(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        configuration: CommonConfiguration,
+        savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+        apiConfiguration: ApiConfiguration.State,
+    ): ElementsSession {
+        return durationProvider.measureDuration(
+            DurationProvider.Key.PaymentSheetLoadSessionLoad
+        ) {
+            if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+                checkoutSessionLoader(initializationMode)
+            } else {
+                elementsSessionLoader(
+                    initializationMode = initializationMode,
+                    configuration = configuration,
+                    savedPaymentMethodSelection = savedPaymentMethodSelection,
+                    apiConfiguration = apiConfiguration,
+                )
+            }
+        }
     }
 
     private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
@@ -378,7 +557,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private fun logLinkExperimentExposures(
+    private fun logExperimentExposures(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
@@ -391,48 +570,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state
         )
-    }
-
-    private suspend fun retrieveElementsSession(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-        externalPaymentMethods: List<String>,
-        savedPaymentMethodSelectionId: String?,
-        link: PaymentSheet.LinkConfiguration,
-        countryOverride: String?,
-    ): Result<ElementsSession> {
-        return elementsSessionRepository.get(
-            initializationMode = initializationMode,
-            customer = customer,
-            externalPaymentMethods = externalPaymentMethods,
-            customPaymentMethods = customPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-            countryOverride = countryOverride,
-            linkDisallowedFundingSourceCreation = link.disallowFundingSourceCreation,
-        )
+        logFcLiteExperiment(elementsSession, state.paymentMethodMetadata)
     }
 
     private fun createPaymentMethodMetadata(
         integrationConfiguration: PaymentElementLoader.Configuration,
         elementsSession: ElementsSession,
-        customerInfo: CustomerInfo?,
+        configuration: CommonConfiguration,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): PaymentMethodMetadata {
-        val configuration = integrationConfiguration.commonConfiguration
-        val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
-
-        if (sharedDataSpecsResult.failedToParseServerResponse) {
-            eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
-        }
-
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
         )
@@ -444,13 +596,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         logCustomPaymentMethodErrors(elementsSession.customPaymentMethods)
 
-        val customerMetadata = getCustomerMetadata(
-            configuration = configuration,
-            elementsSession = elementsSession,
-            customerInfo = customerInfo,
-        )
         val integrationMetadata = initializationMode.integrationMetadata(
             paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+        )
+
+        val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(
+            elementsSession,
+            customerMetadata,
+            apiConfiguration,
         )
 
         val analyticsMetadata = analyticsMetadataFactory.create(
@@ -461,12 +614,17 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration = integrationConfiguration,
             customerMetadata = customerMetadata,
             linkStateResult = linkStateResult,
+            isTapToAddAvailable = isTapToAddAvailable,
         )
 
-        return PaymentMethodMetadata.createForPaymentElement(
+        val paymentMethodLayout = getPaymentMethodLayout(
+            integrationConfiguration = integrationConfiguration,
+            elementsSession = elementsSession,
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
             linkStateResult = linkStateResult,
@@ -475,172 +633,59 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            isTapToAddAvailable = isTapToAddAvailable,
+            paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
+
+        return paymentMethodMetadata
     }
 
-    private fun getCustomerMetadata(
-        configuration: CommonConfiguration,
+    private fun getPaymentMethodLayout(
+        integrationConfiguration: PaymentElementLoader.Configuration,
         elementsSession: ElementsSession,
-        customerInfo: CustomerInfo?,
-    ): CustomerMetadata? {
-        val customerId: String
-        val ephemeralKeySecret: String
-        val customerSessionClientSecret: String?
-
-        when (customerInfo) {
-            is CustomerInfo.CustomerSession -> {
-                val customer = elementsSession.customer
-                if (customer != null) {
-                    customerId = customer.session.customerId
-                    ephemeralKeySecret = customer.session.apiKey
-                    customerSessionClientSecret = customerInfo.customerSessionClientSecret
+    ): PaymentMethodLayout {
+        return when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement,
+            is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
+            is PaymentElementLoader.Configuration.Embedded ->
+                if (
+                    elementsSession.forceVerticalPaymentMethodLayout &&
+                    integrationConfiguration.paymentMethodLayout == PaymentMethodLayout.Automatic
+                ) {
+                    PaymentMethodLayout.Vertical
                 } else {
-                    return null
+                    integrationConfiguration.paymentMethodLayout
                 }
-            }
-            is CustomerInfo.Legacy -> {
-                customerId = customerInfo.id
-                ephemeralKeySecret = customerInfo.ephemeralKeySecret
-                customerSessionClientSecret = null
-            }
-            null -> return null
+            is PaymentElementLoader.Configuration.PaymentSheet ->
+                if (
+                    elementsSession.forceVerticalPaymentMethodLayout &&
+                    integrationConfiguration.configuration.paymentMethodLayout == PaymentMethodLayout.Automatic
+                ) {
+                    PaymentMethodLayout.Vertical
+                } else {
+                    integrationConfiguration.configuration.paymentMethodLayout
+                }
         }
-
-        return CustomerMetadata(
-            id = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = customerSessionClientSecret,
-            isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
-            permissions = if (customerInfo is CustomerInfo.CustomerSession) {
-                createForPaymentSheetCustomerSession(
-                    configuration = configuration,
-                    customer = customerInfo.elementsSessionCustomer
-                )
-            } else {
-                createForPaymentSheetLegacyEphemeralKey(
-                    configuration = configuration
-                )
-            }
-        )
     }
 
-    private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
-        val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
-            as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
-        return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
-            ?: false
-    }
-
-    private fun createCustomerInfo(
+    @VisibleForTesting
+    internal suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
-    ): CustomerInfo? {
-        val customer = configuration.customer
-
-        return when (val accessType = customer?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                elementsSession.customer?.let { elementsSessionCustomer ->
-                    CustomerInfo.CustomerSession(elementsSessionCustomer, accessType.customerSessionClientSecret)
-                } ?: run {
-                    val exception = IllegalStateException(
-                        "Excepted 'customer' attribute as part of 'elements_session' response!"
-                    )
-
-                    errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                        StripeException.create(exception)
-                    )
-
-                    if (!elementsSession.stripeIntent.isLiveMode) {
-                        throw exception
-                    }
-
-                    null
-                }
-            }
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                CustomerInfo.Legacy(
-                    customerConfig = customer,
-                    accessType = accessType,
-                )
-            }
-            else -> null
-        }
-    }
-
-    private suspend fun createCustomerState(
-        configuration: CommonConfiguration,
-        customerInfo: CustomerInfo?,
-        metadata: PaymentMethodMetadata,
-        savedSelection: Deferred<SavedSelection>,
-        cardBrandFilter: PaymentSheetCardBrandFilter
-    ): CustomerState? {
-        val customerState = when (customerInfo) {
-            is CustomerInfo.CustomerSession -> {
-                CustomerState.createForCustomerSession(
-                    customer = customerInfo.elementsSessionCustomer,
-                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                )
-            }
-            is CustomerInfo.Legacy -> {
-                CustomerState.createForLegacyEphemeralKey(
-                    paymentMethods = retrieveCustomerPaymentMethods(
-                        metadata = metadata,
-                        customerConfig = customerInfo.customerConfig,
-                    )
-                )
-            }
-            else -> null
-        }
-
-        return customerState?.let { state ->
-            state.copy(
-                paymentMethods = state.paymentMethods
-                    .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
-                        savedSelection = savedSelection,
-                        defaultPaymentMethodId = state.defaultPaymentMethodId,
-                        isPaymentMethodSetAsDefaultEnabled = metadata.customerMetadata
-                            ?.isPaymentMethodSetAsDefaultEnabled
-                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
-                    ).filter { paymentMethod ->
-                        cardBrandFilter.isAccepted(paymentMethod) &&
-                            paymentMethod.isSupportedWithBillingConfig(
-                                configuration.billingDetailsCollectionConfiguration
-                            )
-                    },
-            )
-        }
-    }
-
-    private suspend fun retrieveCustomerPaymentMethods(
-        metadata: PaymentMethodMetadata,
-        customerConfig: PaymentSheet.CustomerConfiguration,
-    ): List<PaymentMethod> {
-        val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
-
-        val customerSession = (customerConfig.accessType as? PaymentSheet.CustomerAccessType.CustomerSession)
-        val customerSessionClientSecret = customerSession?.customerSessionClientSecret
-
-        val paymentMethods = customerRepository.getPaymentMethods(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-            ),
-            types = paymentMethodTypes,
-            silentlyFail = metadata.stripeIntent.isLiveMode,
-        ).getOrThrow()
-
-        return paymentMethods.filter { paymentMethod ->
-            paymentMethod.hasExpectedDetails()
-        }
-    }
-
-    private suspend fun isGooglePayReady(
-        configuration: CommonConfiguration,
-        elementsSession: ElementsSession,
+        initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
+        val shouldDisableForAutomaticTaxBilling =
+            (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
+            ?.checkoutSessionResponse
+            ?.let { checkoutSessionResponse ->
+                checkoutSessionResponse.automaticTaxEnabled &&
+                    checkoutSessionResponse.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING &&
+                    configuration.defaultBillingDetails == null
+            } == true
+
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay is not enabled for this session."
@@ -649,6 +694,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
+        } else if (shouldDisableForAutomaticTaxBilling) {
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay is disabled because automatic tax is configured to use the billing address and no " +
+                    "default billing address was provided."
+            )
+            return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")
             userFacingLogger.logWarningWithoutPii(
@@ -664,23 +715,43 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return elementsSession.isGooglePayEnabled && isGooglePaySupportedByConfiguration.await()
     }
 
-    private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
+    // Default filters are used here because this only determines the ready state,
+    // not what's presented to Google Pay. This check runs async before we fetch the
+    // elements session, so using merchant-defined filters would add latency.
+    private suspend fun isGooglePayReadyForEnvironment(
+        environment: GooglePayEnvironment,
+        apiConfiguration: ApiConfiguration.State,
+    ): Boolean {
+        return googlePayRepositoryFactory(
+            environment = environment,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
+            googlePayConfig = GooglePayConfig(
+                publishableKey = apiConfiguration.publishableKey,
+                connectedAccountId = apiConfiguration.stripeAccountId,
+            ),
+        ).isReady().first()
+    }
+
+    private suspend fun CommonConfiguration.isGooglePayReady(apiConfiguration: ApiConfiguration.State): Boolean {
         return googlePay?.environment?.let { environment ->
-            googlePayRepositoryFactory(
+            isGooglePayReadyForEnvironment(
                 when (environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production ->
                         GooglePayEnvironment.Production
                     PaymentSheet.GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
-                }
+                },
+                apiConfiguration = apiConfiguration,
             )
-        }?.isReady()?.first() ?: false
+        } ?: false
     }
 
-    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
-        return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
+    private suspend fun isGooglePaySupportedOnDevice(apiConfiguration: ApiConfiguration.State): Boolean {
+        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production, apiConfiguration)
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
         metadata: PaymentMethodMetadata,
@@ -698,9 +769,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
                     !isUsingWalletButtons && isGooglePayReady
                 }
-                is SavedSelection.Link -> PaymentSelection.Link().takeIf {
-                    !isUsingWalletButtons
-                }
+                is SavedSelection.Link ->
+                    metadata.linkState?.configuration?.linkBrand
+                        ?.let { PaymentSelection.Link(brand = it) }
+                        ?.takeIf { !isUsingWalletButtons }
                 is SavedSelection.PaymentMethod -> {
                     val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
                     if (customerPaymentMethod != null) {
@@ -708,9 +780,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     } else if (selection.isLinkOrigin) {
                         // The payment method wasn't attached to the customer, but is of Link origin. Offer
                         // Link as the initial payment selection.
-                        PaymentSelection.Link().takeIf {
-                            !isUsingWalletButtons
-                        }
+                        metadata.linkState?.configuration?.linkBrand
+                            ?.let { PaymentSelection.Link(brand = it) }
+                            ?.takeIf { !isUsingWalletButtons }
                     } else {
                         null
                     }
@@ -766,13 +838,17 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePayReady: Boolean,
         isLinkAvailable: Boolean,
     ): SavedSelection {
-        val customerConfiguration = configuration.customer
-        val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
+        return durationProvider.measureDuration(
+            DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection
+        ) {
+            val customerConfiguration = configuration.customer
+            val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
 
-        return prefsRepository.getSavedSelection(
-            isGooglePayAvailable = isGooglePayReady,
-            isLinkAvailable = isLinkAvailable,
-        )
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = isGooglePayReady,
+                isLinkAvailable = isLinkAvailable,
+            )
+        }
     }
 
     private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {
@@ -801,6 +877,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
+        publishableKey: String,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
@@ -809,7 +886,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
 
         if (state.validationError != null && treatValidationErrorAsFailure) {
-            eventReporter.onLoadFailed(state.validationError)
+            eventReporter.onLoadFailed(state.validationError, publishableKey)
         } else {
             eventReporter.onLoadSucceeded(
                 paymentSelection = state.paymentSelection,
@@ -820,9 +897,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun reportFailedLoad(
         error: Throwable,
+        publishableKey: String,
     ) {
         logger.error("Failure loading PaymentSheetState", error)
-        eventReporter.onLoadFailed(error)
+        eventReporter.onLoadFailed(error, publishableKey)
     }
 
     private fun logIfMissingExternalPaymentMethods(
@@ -866,50 +944,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    internal sealed interface CustomerInfo {
-        val id: String
-        val ephemeralKeySecret: String
+    private fun fetchPaymentMethodMessaging(
+        elementsSession: ElementsSession,
+        apiConfiguration: ApiConfiguration.State,
+    ) {
+        val variant = elementsSession.experimentsData?.experimentAssignments[
+            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+        ] ?: return
 
-        data class CustomerSession(
-            val elementsSessionCustomer: ElementsSession.Customer,
-            val customerSessionClientSecret: String,
-        ) : CustomerInfo {
-            override val id: String = elementsSessionCustomer.session.customerId
-            override val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey
-        }
-
-        data class Legacy(
-            val customerConfig: PaymentSheet.CustomerConfiguration,
-            val accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
-        ) : CustomerInfo {
-            override val id: String = customerConfig.id
-            override val ephemeralKeySecret: String = accessType.ephemeralKeySecret
+        if (variant == "treatment") {
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent, apiConfiguration)
         }
     }
 
-    private fun CustomerInfo.toCustomerInfo() = CustomerRepository.CustomerInfo(
-        id = id,
-        ephemeralKeySecret = ephemeralKeySecret,
-        customerSessionClientSecret = (this as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
-    )
-}
-
-private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
-    savedSelection: Deferred<SavedSelection>,
-    isPaymentMethodSetAsDefaultEnabled: Boolean,
-    defaultPaymentMethodId: String?,
-): List<PaymentMethod> {
-    val primaryPaymentMethodId = if (isPaymentMethodSetAsDefaultEnabled) {
-        defaultPaymentMethodId
-    } else {
-        (savedSelection.await() as? SavedSelection.PaymentMethod)?.id
+    private fun logPaymentMethodMessagingExposure(metadata: PaymentMethodMetadata) {
+        paymentMethodMessagePromotionsExperimentHandler.logExposure(metadata)
     }
-
-    val primaryPaymentMethod = this.firstOrNull { it.id == primaryPaymentMethodId }
-
-    return primaryPaymentMethod?.let {
-        listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
-    } ?: this
 }
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {

@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
@@ -21,6 +22,8 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -37,6 +40,9 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
@@ -66,7 +72,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         initialState = state,
         attachedPaymentAccountRepository = attachedPaymentAccountRepository,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-    )
+        currentLinkBrand = FakeCurrentLinkBrand(),
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - starts verification with consumer session secret from cached session`() = runTest {
@@ -103,6 +110,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount)),
                 eq(true),
+                eq(LinkBrand.Link),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = cachedConsumerSession.clientSecret,
@@ -148,6 +156,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(emptyList()),
                 eq(true),
+                eq(LinkBrand.Link),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = cachedConsumerSession.clientSecret,
@@ -171,7 +180,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
-            whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException("error"))
+            whenever(saveAccountToLink.existing(any(), any(), any(), any())).thenThrow(RuntimeException("error"))
 
             val viewModel = buildViewModel()
 
@@ -187,6 +196,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount)),
                 eq(true),
+                eq(LinkBrand.Link),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = cachedConsumerSession.clientSecret,

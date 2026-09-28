@@ -9,11 +9,16 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -22,7 +27,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -245,7 +249,7 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is reset when payment method requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal_day,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -276,7 +280,7 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is preserved when payment method no longer requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal_day,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -309,7 +313,7 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is preserved when payment method still requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal_day,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -429,7 +433,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            selection = PaymentSelection.Link(brand = LinkBrand.Link, linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -449,7 +453,12 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
+        assertThat(result).isEqualTo(
+            PaymentSelection.Link(
+                brand = LinkBrand.Link,
+                linkExpressMode = LinkExpressMode.DISABLED,
+            )
+        )
     }
 
     @OptIn(WalletButtonsPreview::class)
@@ -487,7 +496,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            selection = PaymentSelection.Link(brand = LinkBrand.Link, linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -507,7 +516,12 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
+        assertThat(result).isEqualTo(
+            PaymentSelection.Link(
+                brand = LinkBrand.Link,
+                linkExpressMode = LinkExpressMode.DISABLED,
+            )
+        )
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(
@@ -531,10 +545,6 @@ class PaymentSelectionUpdaterTest {
                 stripeIntent = intent.copy(
                     paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
                 ),
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("card"),
-                    SharedDataSpec("paypal"),
-                ),
                 linkState = LinkState(
                     configuration = mock(),
                     loginState = LinkState.LoginState.LoggedOut,
@@ -543,6 +553,108 @@ class PaymentSelectionUpdaterTest {
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 displayableCustomPaymentMethods = displayableCustomPaymentMethods,
                 isGooglePayReady = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `New card selection is invalidated when setupFutureUsage is added and mandate not yet seen`() {
+        val cardSelectionWithoutSFU = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = null),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            brand = CardBrand.Visa,
+        )
+
+        val newState = mockPaymentSheetStateWithSetupFutureUsage(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = cardSelectionWithoutSFU,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `New card selection is preserved when setupFutureUsage was already set when card was entered`() {
+        val cardSelectionWithSFU = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            brand = CardBrand.Visa,
+        )
+
+        val newState = mockPaymentSheetStateWithSetupFutureUsage(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = cardSelectionWithSFU,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(cardSelectionWithSFU)
+    }
+
+    @Test
+    fun `New card selection is preserved when termsDisplay is NEVER`() {
+        val cardSelection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = null),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            brand = CardBrand.Visa,
+        )
+
+        val newState = mockPaymentSheetStateWithSetupFutureUsage(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+            termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER),
+        )
+
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = cardSelection,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(cardSelection)
+    }
+
+    private fun mockPaymentSheetStateWithSetupFutureUsage(
+        setupFutureUsage: StripeIntent.Usage,
+        termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+    ): PaymentSheetState.Full {
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        return PaymentSheetState.Full(
+            config = defaultPaymentSheetConfiguration.asCommonConfiguration(),
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            paymentSelection = null,
+            validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = intent.copy(
+                    setupFutureUsage = setupFutureUsage,
+                ),
+                isGooglePayReady = true,
+                termsDisplay = termsDisplay,
             ),
         )
     }

@@ -28,10 +28,14 @@
   <string name="stripe_blik_code">BLIK kodu</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
+  <string name="stripe_card_brand_icons_content_description">Desteklenen kartlar: %1$s</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(kabul edilmedi)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (kabul edilmedi)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Dokunun veya manuel olarak girin</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Devam ederek %1$s şirketinin bu ödeme ve gelecekteki ödemeler için Cash Uygulaması hesabınızı %2$s şirketinin şartlarına uygun olarak borçlandırmasına izin vermiş olursunuz. Bu durum, izin iptal edilene kadar geçerli olur. İstediğiniz zaman Cash Uygulamasının Ayarlarından bu izni değiştirebilirsiniz.</string>
   <!-- Title for the contact information section -->
@@ -48,8 +52,6 @@
   <string name="stripe_iban_invalid_country">Girdiğiniz IBAN geçersiz. \"%s\" desteklenen bir ülke kodu değil.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN numaranız iki harfli bir ülke koduyla başlamalıdır.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL Bank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK kodunuz eksik.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -65,8 +67,12 @@
   <string name="stripe_klarna_pay_later">Daha sonra Klarna ile ödeyin.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Ödemenizi NICEPAY ile onayladığınızda, %s’in kendi koşullarına uygun olarak gelecekteki ödemeler için bu ödeme yönteminden ücret almasına izin vermiş olursunuz.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Karttaki isim</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Nasıl ödeme yapmak istediğinizi seçin:</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -83,8 +89,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">ABD banka hesabı ekleyin</string>
-  <!-- Header text shown above a UPI ID text field -->
-  <string name="stripe_paymentsheet_buy_using_upi_id">UPI Numarası kullanarak satın alın</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Otomatik Ödeme</string>
   <!-- Payment Method type brand name -->
@@ -107,12 +111,16 @@
   <string name="stripe_save_payment_details_to_merchant_name">Ödeme bilgilerini gelecekteki satın almalar için %s işletmesine kaydet</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Kartı tara</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Taranan kartı temizleyin</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Ödeme bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, (A) %s ve ödeme hizmeti sağlayıcımız Stripe\'a hesabınızdan ödeme tahsilatı yapması için bankanıza talimatlar göndermesi ve (B) bankanıza bu talimatlara uygun olarak hesabınızdan ödeme tahsilatı yapması için yetki verirsiniz. Haklarınızın bir parçası olarak, bankanızla yaptığınız sözleşmenin hüküm ve koşulları uyarınca bankanızdan geri ödeme alma hakkına sahipsiniz. Geri ödeme, hesabınızdan ödeme tahsilatı yapıldığı tarihten itibaren 8 hafta içinde talep edilmelidir. Haklarınız, bankanızdan alabileceğiniz bir hesap özetinde açıklanmaktadır. Tahakkuk etmeden 2 gün öncesine kadar gelecekteki ödeme tahsilatları için bildirim almayı da kabul edersiniz.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Varsayılan ödeme yöntemi olarak ayarla</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Ayarla</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Devam ettiğinizde, %1$s şirketine satın alma veya abonelik planınıza uygun olarak Twint Bakiyenizi otomatik olarak yinelenen bir şekilde borçlandırma yetkisi vermiş olursunuz.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI Numarası</string>
 </resources>

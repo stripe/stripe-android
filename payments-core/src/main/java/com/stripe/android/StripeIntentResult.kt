@@ -84,6 +84,8 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.WeChatPayRedirect,
             StripeIntent.NextActionType.CashAppRedirect,
             StripeIntent.NextActionType.SwishRedirect,
+            StripeIntent.NextActionType.AwaitAuthorization,
+            StripeIntent.NextActionType.MbWayAwaitAuthorization,
             StripeIntent.NextActionType.DisplayPayNowDetails,
             StripeIntent.NextActionType.DisplayPromptPayDetails,
             null -> {
@@ -94,7 +96,6 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.DisplayBoletoDetails,
             StripeIntent.NextActionType.DisplayKonbiniDetails,
             StripeIntent.NextActionType.DisplayMultibancoDetails,
-            StripeIntent.NextActionType.UpiAwaitNotification,
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> {
                 true
             }

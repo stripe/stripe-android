@@ -1,8 +1,8 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 fun interface OnrampVerifyIdentityCallback {
     fun onResult(result: OnrampVerifyIdentityResult)
 }
@@ -10,24 +10,24 @@ fun interface OnrampVerifyIdentityCallback {
 /**
  * Result of Stripe Identity verification process in Onramp.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed class OnrampVerifyIdentityResult {
     /**
      * The user has completed uploading their documents.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Completed internal constructor() : OnrampVerifyIdentityResult()
 
     /**
      * The user did not complete uploading their document, and should be allowed to try again.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Cancelled internal constructor() : OnrampVerifyIdentityResult()
 
     /**
      * Identity verification failed due to an error.
      * @param error The error that caused the failure.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(val error: Throwable) : OnrampVerifyIdentityResult()
 }

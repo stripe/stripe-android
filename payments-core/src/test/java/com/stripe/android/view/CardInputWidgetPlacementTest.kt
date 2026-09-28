@@ -185,7 +185,6 @@ class CardInputWidgetPlacementTest {
                 frameStart = BRAND_ICON_WIDTH,
                 isShowingFullCard = false,
                 postalCodeEnabled = false
-
             )
         ).isEqualTo(CardInputWidget.Field.Number)
     }

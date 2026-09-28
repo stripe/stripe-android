@@ -25,12 +25,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeVerticalModeRowPadding
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -53,7 +55,7 @@ internal fun PaymentMethodVerticalLayoutUI(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
+        DefaultStripeImageLoader(context.applicationContext)
     }
 
     val state by interactor.state.collectAsState()
@@ -63,6 +65,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
+        linkBrand = state.linkBrand,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
@@ -106,6 +109,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -129,7 +133,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
             PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
                 .spacingDp(spacingDp)
-                .additionalInsetsDp(StripeTheme.verticalModeRowPadding)
+                .additionalInsetsDp(MaterialTheme.stripeVerticalModeRowPadding)
                 .build()
         }
 
@@ -146,6 +150,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                     updatePaymentMethodVisibility.invoke("saved", coordinates)
                 },
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+                linkBrand = linkBrand,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },

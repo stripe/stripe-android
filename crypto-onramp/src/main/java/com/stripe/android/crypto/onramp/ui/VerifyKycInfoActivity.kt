@@ -111,7 +111,7 @@ internal class VerifyKycInfoActivityContract : ActivityResultContract<
             context = context,
             args = VerifyKycArgs(
                 kycRetrieveResponse = input.kycRetrieveResponse,
-                appearance = input.linkAppearance
+                appearance = input.linkAppearance?.build()
             )
         )
     }
@@ -128,7 +128,7 @@ internal class VerifyKycInfoActivityContract : ActivityResultContract<
 @Parcelize
 internal data class VerifyKycArgs(
     val kycRetrieveResponse: KycRetrieveResponse,
-    val appearance: LinkAppearance?,
+    val appearance: LinkAppearance.State?,
 ) : Parcelable
 
 private fun KycRetrieveResponse.toVerifyKYCInfo(): VerifyKYCInfo {

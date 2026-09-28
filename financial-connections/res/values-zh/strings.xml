@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">目前无法访问您的账户</string>
   <string name="stripe_close_dialog_networking_desc">如果现在取消，则您的账户会被关联到 %1$s，但不会保存在 Link。</string>
   <string name="stripe_close_dialog_networking_desc_no_business">如果现在取消，则您的账户会被关联到该商家，但不会保存在 Link。</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">如果现在取消，则您的账户会被关联到该商户，但不会保存在 %1$s。</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">如果现在取消，则您的账户会被关联到 %1$s，但不会保存在 %2$s。</string>
   <string name="stripe_error_cta_close">关闭</string>
   <string name="stripe_error_cta_manual_entry">手动输入银行信息</string>
   <string name="stripe_error_cta_retry">重试</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">输入银行信息</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">取消</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">继续使用 Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">继续使用 %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">现在不</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">使用您之前在 Link 账户中保存的信息。</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">使用您之前在 %1$s 账户中保存的信息。</string>
   <string name="stripe_networking_link_login_warmup_title">继续使用 Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">继续使用 %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">现在不</string>
   <string name="stripe_networking_save_to_link_verification_title">确认是您本人</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">选择其他银行</string>
   <string name="stripe_search">搜索</string>
   <string name="stripe_success_pane_desc_link_error_plural">您的账户已关联，但无法保存到 Link。</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">您的账户已被关联，但无法保存至 %1$s。</string>
   <string name="stripe_success_pane_desc_link_error_singular">您的账户已关联，但无法保存到 Link。</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">您的账户已被关联，但无法保存至 %1$s。</string>
   <string name="stripe_success_pane_desc_link_success_plural">您的账户已通过 Link 关联并保存。</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">您的账户已被关联并保存至 %1$s。</string>
   <string name="stripe_success_pane_desc_link_success_singular">您的账户已通过 Link 关联并保存。</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">您的账户已被关联并保存至 %1$s。</string>
   <string name="stripe_success_pane_desc_microdeposits">预计 1-2 天内会向您的账户 ••••%1$s 存入微额存款，同时会给您邮件发送进一步说明。</string>
   <string name="stripe_success_pane_desc_plural">您的账户已关联</string>
   <string name="stripe_success_pane_desc_singular">您的账户已关联</string>

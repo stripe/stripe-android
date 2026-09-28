@@ -10,17 +10,12 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class BankAccount(
-
     @SerialName(value = "id") @Required
     override val id: String,
-
     @SerialName(value = "last4") @Required
     val last4: String,
-
     @SerialName(value = "bank_name") val bankName: String? = null,
-
     @SerialName(value = "routing_number") val routingNumber: String? = null,
-
     // Whether the account is to be verified with microdeposits.
     // This field isn't part of the API response and is being set later on.
     val usesMicrodeposits: Boolean = true

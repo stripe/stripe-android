@@ -8,6 +8,9 @@ apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         testApplicationId "com.stripe.android.financialconnections.test"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -54,6 +57,7 @@ dependencies {
     kspDebug libs.showkaseProcessor
 
     testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
@@ -87,12 +91,14 @@ android {
         compose true
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
-                "-Xconsistent-data-class-copy-visibility",
-        ]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlin.RequiresOptIn",
+                    "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+                    "-Xconsistent-data-class-copy-visibility",
+            ])
+        }
     }
 }
 

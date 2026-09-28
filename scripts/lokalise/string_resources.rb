@@ -14,6 +14,7 @@ class StringResources
             'payments-ui-core',
             'stripe-core',
             'stripe-ui-core',
+            'stripecardscan',
             'financial-connections',
 
     #         These following modules don't use Lokalise

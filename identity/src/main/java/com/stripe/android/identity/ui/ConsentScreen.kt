@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,7 +43,6 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConse
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
@@ -89,6 +89,7 @@ internal fun ConsentScreen(
             verificationPage.biometricConsent,
             verificationPage.bottomSheet,
             visitedIndividualWelcomePage,
+            hideBrandingHeader = identityViewModel.verificationArgs.biometricConsent?.hideBrandingHeader == true,
             showStripeLogo = !verificationPage.isStripe,
             onConsentAgreed = {
                 coroutineScope.launch {
@@ -117,12 +118,14 @@ internal fun ConsentScreen(
 }
 
 @Suppress("LongMethod")
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun SuccessUI(
     merchantLogoUri: Uri,
     consentPage: VerificationPageStaticContentConsentPage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     visitedIndividualWelcomePage: Boolean,
+    hideBrandingHeader: Boolean,
     showStripeLogo: Boolean = true,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
@@ -151,23 +154,28 @@ private fun SuccessUI(
                 modifier = Modifier.testTag(CONSENT_HEADER_TAG),
                 merchantLogoUri = merchantLogoUri,
                 title = consentPage.title,
-                showLogos = visitedIndividualWelcomePage.not(),
+                showLogos = !hideBrandingHeader && !visitedIndividualWelcomePage,
                 showStripeLogo = showStripeLogo
             )
-            ConsentLines(lines = consentPage.lines, bottomSheets = bottomSheets)
+            ConsentLines(
+                lines = consentPage.lines,
+                bottomSheets = bottomSheets
+            )
 
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Html(
+                BottomSheetHTML(
                     html = consentPage.privacyPolicy,
+                    bottomSheets = bottomSheets,
                     modifier = Modifier
                         .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                         .semantics {
                             testTag = PRIVACY_POLICY_TAG
                         },
                     color = colorResource(id = R.color.stripe_html_line),
+                    style = MaterialTheme.typography.body1,
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = colorResource(id = R.color.stripe_html_line)
@@ -257,6 +265,7 @@ internal fun ConsentPreview() {
                 )
             ),
             visitedIndividualWelcomePage = false,
+            hideBrandingHeader = false,
             bottomSheets = mapOf(),
             onConsentAgreed = {},
             onConsentDeclined = {}

@@ -33,7 +33,6 @@
 <script type="text/javascript">
     if (window.JSDI) {
         JSON.parse(window.JSDI.getDebugInfo()).forEach(function (v) { window[v] = true; });
-        window.sysDebug = JSON.parse(window.JSDI.getSysDebug());
     }
 </script>
 <script type="text/javascript">

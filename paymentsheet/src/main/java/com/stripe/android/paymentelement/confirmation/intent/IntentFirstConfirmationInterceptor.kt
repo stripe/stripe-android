@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.RadarOptions
@@ -58,10 +57,8 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
                 extraParams = null,
                 intentConfigSetupFutureUsage = null,
                 radarOptions = RadarOptions(
-                    hCaptchaToken = confirmationOption.hCaptchaToken,
-                    androidVerificationObject = AndroidVerificationObject(
-                        androidVerificationToken = confirmationOption.attestationToken
-                    )
+                    hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
+                    androidVerificationObject = confirmationOption.confirmationChallengeState.attestationResult
                 ),
                 clientAttributionMetadata = clientAttributionMetadata,
             )

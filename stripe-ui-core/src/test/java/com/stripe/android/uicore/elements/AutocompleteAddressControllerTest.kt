@@ -41,7 +41,7 @@ class AutocompleteAddressControllerTest {
         nameConfig = AddressFieldConfiguration.HIDDEN
     ) { elements ->
         assertThat(
-            elements.any { it.identifier == IdentifierSpec.Name }
+            elements.any { it.identifier == FormFieldId.Name }
         ).isFalse()
     }
 
@@ -50,7 +50,7 @@ class AutocompleteAddressControllerTest {
         nameConfig = AddressFieldConfiguration.OPTIONAL
     ) { elements ->
         assertThat(
-            elements.any { it.identifier == IdentifierSpec.Name }
+            elements.any { it.identifier == FormFieldId.Name }
         ).isTrue()
     }
 
@@ -59,7 +59,7 @@ class AutocompleteAddressControllerTest {
         nameConfig = AddressFieldConfiguration.REQUIRED
     ) { elements ->
         assertThat(
-            elements.any { it.identifier == IdentifierSpec.Name }
+            elements.any { it.identifier == FormFieldId.Name }
         ).isTrue()
     }
 
@@ -101,12 +101,12 @@ class AutocompleteAddressControllerTest {
     @Test
     fun `Same as shipping element & shipping values are respected when provided`() {
         val shippingValuesMap = mapOf(
-            IdentifierSpec.Line1 to "123 Main Street",
-            IdentifierSpec.Line2 to "456",
-            IdentifierSpec.City to "San Francisco",
-            IdentifierSpec.State to "CA",
-            IdentifierSpec.Country to "US",
-            IdentifierSpec.PostalCode to "94111",
+            FormFieldId.Line1 to "123 Main Street",
+            FormFieldId.Line2 to "456",
+            FormFieldId.City to "San Francisco",
+            FormFieldId.State to "CA",
+            FormFieldId.Country to "US",
+            FormFieldId.PostalCode to "94111",
         )
         val element = createSameAsShippingElement()
 
@@ -116,12 +116,12 @@ class AutocompleteAddressControllerTest {
         ) {
             assertThat(awaitItem()).containsExactlyElementsIn(
                 listOf(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -129,23 +129,23 @@ class AutocompleteAddressControllerTest {
 
             assertThat(awaitItem()).containsAtLeastElementsIn(
                 listOf(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
             assertThat(awaitItem()).containsAtLeastElementsIn(
                 listOf(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
                 )
             )
 
@@ -170,6 +170,141 @@ class AutocompleteAddressControllerTest {
             isPlacesAvailable = false,
         ),
     )
+
+    @Test
+    fun `Element does not use inline autocomplete if Places is not available`() = noAutocompleteTest(
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "123",
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = false,
+            isInlineAutocompleteEnabled = true,
+        ),
+    )
+
+    @Test
+    fun `Element uses inline autocomplete when stripe-hosted is enabled without Google key or Places`() =
+        elementsTest(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = null,
+                autocompleteCountries = setOf("US"),
+                isPlacesAvailable = false,
+                isInlineAutocompleteEnabled = true,
+                shouldUseStripeHostedAutocomplete = true,
+            ),
+        ) { elements ->
+            assertThat(elements.filterIsInstance<AddressTextFieldElement>()).hasSize(1)
+            assertThat(elements.any { it.identifier == FormFieldId.Line1 }).isFalse()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `Inline autocomplete switches to expanded when country changes to unsupported`() =
+        runTest(UnconfinedTestDispatcher()) {
+            TestAutocompleteAddressInteractor.test(
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = setOf("US"),
+                    isPlacesAvailable = false,
+                    isInlineAutocompleteEnabled = true,
+                    shouldUseStripeHostedAutocomplete = true,
+                ),
+            ) {
+                val controller = createAutocompleteAddressController(
+                    interactor = interactor,
+                )
+
+                val registerCall = registerCalls.awaitItem()
+
+                controller.addressElementFlow.test {
+                    val firstElement = awaitItem()
+                    val firstFields = firstElement.fields.value
+
+                    assertThat(
+                        firstFields.any { it is AddressTextFieldElement }
+                    ).isTrue()
+                    assertThat(
+                        firstFields.any { it.identifier == FormFieldId.Line1 }
+                    ).isFalse()
+
+                    registerCall.onEvent(
+                        AutocompleteAddressInteractor.Event.OnValues(
+                            values = mapOf(FormFieldId.Country to "JP")
+                        )
+                    )
+
+                    val secondElement = awaitItem()
+                    val secondFields = secondElement.fields.value
+
+                    assertThat(
+                        secondFields.any { it is AddressTextFieldElement }
+                    ).isFalse()
+                    assertThat(
+                        secondFields.any { it.identifier == FormFieldId.Line1 }
+                    ).isTrue()
+                }
+            }
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `Inline autocomplete resumes when country changes back to supported`() =
+        runTest(UnconfinedTestDispatcher()) {
+            TestAutocompleteAddressInteractor.test(
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = setOf("US"),
+                    isPlacesAvailable = false,
+                    isInlineAutocompleteEnabled = true,
+                    shouldUseStripeHostedAutocomplete = true,
+                ),
+            ) {
+                val controller = createAutocompleteAddressController(
+                    interactor = interactor,
+                )
+
+                val registerCall = registerCalls.awaitItem()
+
+                controller.addressElementFlow.test {
+                    awaitItem()
+
+                    registerCall.onEvent(
+                        AutocompleteAddressInteractor.Event.OnValues(
+                            values = mapOf(FormFieldId.Country to "JP")
+                        )
+                    )
+
+                    val expandedElement = awaitItem()
+                    assertThat(
+                        expandedElement.fields.value.any { it.identifier == FormFieldId.Line1 }
+                    ).isTrue()
+
+                    registerCall.onEvent(
+                        AutocompleteAddressInteractor.Event.OnValues(
+                            values = mapOf(FormFieldId.Country to "US")
+                        )
+                    )
+
+                    val inlineElement = awaitItem()
+                    assertThat(
+                        inlineElement.fields.value.any { it is AddressTextFieldElement }
+                    ).isTrue()
+                    assertThat(
+                        inlineElement.fields.value.any { it.identifier == FormFieldId.Line1 }
+                    ).isFalse()
+                }
+            }
+        }
+
+    @Test
+    fun `Element does not use full-screen autocomplete when stripe-hosted is enabled without inline autocomplete`() =
+        noAutocompleteTest(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = null,
+                autocompleteCountries = setOf("US"),
+                isPlacesAvailable = false,
+                shouldUseStripeHostedAutocomplete = true,
+            ),
+        )
 
     @Test
     fun `Element does not use autocomplete if autocomplete country not supported`() = noAutocompleteTest(
@@ -201,13 +336,13 @@ class AutocompleteAddressControllerTest {
 
                 assertThat(
                     firstElements.any { field ->
-                        field.identifier == IdentifierSpec.Line1
+                        field.identifier == FormFieldId.Line1
                     }
                 ).isFalse()
 
                 assertThat(
                     firstElements.any { field ->
-                        field.identifier == IdentifierSpec.Line2
+                        field.identifier == FormFieldId.Line2
                     }
                 ).isFalse()
 
@@ -227,13 +362,13 @@ class AutocompleteAddressControllerTest {
 
                 assertThat(
                     secondElements.any { field ->
-                        field.identifier == IdentifierSpec.Line1
+                        field.identifier == FormFieldId.Line1
                     }
                 ).isTrue()
 
                 assertThat(
                     secondElements.any { field ->
-                        field.identifier == IdentifierSpec.Line2
+                        field.identifier == FormFieldId.Line2
                     }
                 ).isTrue()
 
@@ -258,7 +393,7 @@ class AutocompleteAddressControllerTest {
             val controller = createAutocompleteAddressController(
                 interactor = interactor,
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123",
+                    FormFieldId.Line1 to "123",
                 )
             )
 
@@ -266,34 +401,34 @@ class AutocompleteAddressControllerTest {
 
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
 
                 registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
-                            IdentifierSpec.Line1 to "123 Main Street",
-                            IdentifierSpec.Line2 to "456",
-                            IdentifierSpec.City to "San Francisco",
-                            IdentifierSpec.State to "CA",
-                            IdentifierSpec.Country to "US",
-                            IdentifierSpec.PostalCode to "94111",
+                            FormFieldId.Line1 to "123 Main Street",
+                            FormFieldId.Line2 to "456",
+                            FormFieldId.City to "San Francisco",
+                            FormFieldId.State to "CA",
+                            FormFieldId.Country to "US",
+                            FormFieldId.PostalCode to "94111",
                         )
                     )
                 )
 
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
                 )
             }
         }
@@ -311,7 +446,7 @@ class AutocompleteAddressControllerTest {
             val controller = createAutocompleteAddressController(
                 interactor = interactor,
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123",
+                    FormFieldId.Line1 to "123",
                 )
             )
 
@@ -319,29 +454,29 @@ class AutocompleteAddressControllerTest {
 
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
 
                 registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
-                            IdentifierSpec.Line1 to "123 Main Street",
+                            FormFieldId.Line1 to "123 Main Street",
                         )
                     )
                 )
 
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
             }
         }
@@ -357,10 +492,10 @@ class AutocompleteAddressControllerTest {
                 phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
                 emailConfig = AddressFieldConfiguration.REQUIRED,
                 values = mapOf(
-                    IdentifierSpec.Name to "John Doe",
-                    IdentifierSpec.Email to "email@email.com",
-                    IdentifierSpec.Phone to "+11234567890",
-                    IdentifierSpec.Line1 to "123",
+                    FormFieldId.Name to "John Doe",
+                    FormFieldId.Email to "email@email.com",
+                    FormFieldId.Phone to "+11234567890",
+                    FormFieldId.Line1 to "123",
                 )
             )
 
@@ -368,42 +503,42 @@ class AutocompleteAddressControllerTest {
 
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Email to FormFieldEntry(value = "email@email.com", isComplete = true),
-                    IdentifierSpec.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.Phone to FormFieldEntry(value = "+11234567890", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Email to FormFieldEntry(value = "email@email.com", isComplete = true),
+                    FormFieldId.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.Phone to FormFieldEntry(value = "+11234567890", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
 
                 registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
-                            IdentifierSpec.Line1 to "123 Main Street",
-                            IdentifierSpec.Line2 to "456",
-                            IdentifierSpec.City to "San Francisco",
-                            IdentifierSpec.State to "CA",
-                            IdentifierSpec.Country to "US",
-                            IdentifierSpec.PostalCode to "94111",
+                            FormFieldId.Line1 to "123 Main Street",
+                            FormFieldId.Line2 to "456",
+                            FormFieldId.City to "San Francisco",
+                            FormFieldId.State to "CA",
+                            FormFieldId.Country to "US",
+                            FormFieldId.PostalCode to "94111",
                         )
                     )
                 )
 
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Email to FormFieldEntry(value = "email@email.com", isComplete = true),
-                    IdentifierSpec.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.Phone to FormFieldEntry(value = "+11234567890", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Email to FormFieldEntry(value = "email@email.com", isComplete = true),
+                    FormFieldId.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.Phone to FormFieldEntry(value = "+11234567890", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
                 )
             }
         }
@@ -416,12 +551,12 @@ class AutocompleteAddressControllerTest {
             val controller = createAutocompleteAddressController(
                 interactor = interactor,
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main Street",
-                    IdentifierSpec.Line2 to "456",
-                    IdentifierSpec.City to "San Francisco",
-                    IdentifierSpec.State to "CA",
-                    IdentifierSpec.Country to "US",
-                    IdentifierSpec.PostalCode to "94111",
+                    FormFieldId.Line1 to "123 Main Street",
+                    FormFieldId.Line2 to "456",
+                    FormFieldId.City to "San Francisco",
+                    FormFieldId.State to "CA",
+                    FormFieldId.Country to "US",
+                    FormFieldId.PostalCode to "94111",
                 )
             )
 
@@ -429,34 +564,34 @@ class AutocompleteAddressControllerTest {
 
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
                 )
 
                 registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
-                            IdentifierSpec.Line1 to "123 Main Street",
-                            IdentifierSpec.Line2 to null,
-                            IdentifierSpec.City to null,
-                            IdentifierSpec.State to "CA",
-                            IdentifierSpec.Country to "US",
-                            IdentifierSpec.PostalCode to "94111",
+                            FormFieldId.Line1 to "123 Main Street",
+                            FormFieldId.Line2 to null,
+                            FormFieldId.City to null,
+                            FormFieldId.State to "CA",
+                            FormFieldId.Country to "US",
+                            FormFieldId.PostalCode to "94111",
                         )
                     )
                 )
 
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
                 )
             }
         }
@@ -474,7 +609,7 @@ class AutocompleteAddressControllerTest {
             val controller = createAutocompleteAddressController(
                 interactor = interactor,
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123",
+                    FormFieldId.Line1 to "123",
                 )
             )
 
@@ -482,30 +617,30 @@ class AutocompleteAddressControllerTest {
 
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
 
                 registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
-                            IdentifierSpec.Line1 to "123 Main Street",
-                            IdentifierSpec.Country to "CA"
+                            FormFieldId.Line1 to "123 Main Street",
+                            FormFieldId.Country to "CA"
                         )
                     )
                 )
 
                 assertThat(expectMostRecentItem()).containsExactly(
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
             }
         }
@@ -514,7 +649,7 @@ class AutocompleteAddressControllerTest {
     @Test
     fun `On values has line 1, should be expanded form`() = elementsTest(
         values = mapOf(
-            IdentifierSpec.Line1 to "123 Apple Street"
+            FormFieldId.Line1 to "123 Apple Street"
         ),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
@@ -523,11 +658,11 @@ class AutocompleteAddressControllerTest {
         ),
     ) { elements ->
         val containsLineOne = elements.any { element ->
-            element.identifier == IdentifierSpec.Line1
+            element.identifier == FormFieldId.Line1
         }
 
         val containsLineTwo = elements.any { element ->
-            element.identifier == IdentifierSpec.Line2
+            element.identifier == FormFieldId.Line2
         }
 
         assertThat(containsLineOne).isTrue()
@@ -557,7 +692,7 @@ class AutocompleteAddressControllerTest {
     @Test
     fun `Element contains expanded elements & navigates on autocomplete click`() = elementsTest(
         values = mapOf(
-            IdentifierSpec.Line1 to "123 Apple Street"
+            FormFieldId.Line1 to "123 Apple Street"
         ),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
@@ -566,7 +701,7 @@ class AutocompleteAddressControllerTest {
         ),
     ) { elements ->
         val element = elements.firstOrNull { element ->
-            element.identifier == IdentifierSpec.Line1
+            element.identifier == FormFieldId.Line1
         }
 
         assertThat(element).isNotNull()
@@ -622,16 +757,16 @@ class AutocompleteAddressControllerTest {
                 )
             ),
             values = mapOf(
-                IdentifierSpec.Country to "US",
-                IdentifierSpec.PostalCode to "999",
-                IdentifierSpec.Phone to "+1222"
+                FormFieldId.Country to "US",
+                FormFieldId.PostalCode to "999",
+                FormFieldId.Phone to "+1222"
             )
         )
 
-        controller.error.test {
+        controller.validationMessage.test {
             val error = awaitItem()
 
-            assertThat(error?.errorMessage).isEqualTo(R.string.stripe_address_zip_incomplete)
+            assertThat(error?.message).isEqualTo(R.string.stripe_address_zip_incomplete)
 
             controller.addressElementFlow.test {
                 val addressElement = awaitItem()
@@ -644,18 +779,18 @@ class AutocompleteAddressControllerTest {
                     assertThat(rowElements).hasSize(1)
 
                     val zipCodeElement = rowElements[0].fields.find { element ->
-                        element.identifier == IdentifierSpec.PostalCode
+                        element.identifier == FormFieldId.PostalCode
                     }
 
                     assertThat(zipCodeElement).isNotNull()
 
-                    requireNotNull(zipCodeElement).setRawValue(mapOf(IdentifierSpec.PostalCode to "99999"))
+                    requireNotNull(zipCodeElement).setRawValue(mapOf(FormFieldId.PostalCode to "99999"))
                 }
             }
 
             val nextError = expectMostRecentItem()
 
-            assertThat(nextError?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(nextError?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
         }
     }
 
@@ -678,12 +813,12 @@ class AutocompleteAddressControllerTest {
                 registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
-                            IdentifierSpec.Line1 to "123 Main Street",
-                            IdentifierSpec.Line2 to "456",
-                            IdentifierSpec.City to "San Francisco",
-                            IdentifierSpec.State to "CA",
-                            IdentifierSpec.Country to "US",
-                            IdentifierSpec.PostalCode to "94111",
+                            FormFieldId.Line1 to "123 Main Street",
+                            FormFieldId.Line2 to "456",
+                            FormFieldId.City to "San Francisco",
+                            FormFieldId.State to "CA",
+                            FormFieldId.Country to "US",
+                            FormFieldId.PostalCode to "94111",
                         )
                     )
                 )
@@ -700,25 +835,25 @@ class AutocompleteAddressControllerTest {
         fieldsTest { controller ->
             val fields = awaitItem()
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line1).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.State).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.PostalCode).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.City).errorTest(fieldError = null)
+            fields.element(FormFieldId.Country).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Line1).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Line2).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.State).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.PostalCode).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.City).errorTest(fieldValidationMessage = null)
 
             controller.onValidationStateChanged(true)
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line1)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.State)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.PostalCode)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.City)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(FormFieldId.Country).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Line1)
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
+            fields.element(FormFieldId.Line2).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.State)
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
+            fields.element(FormFieldId.PostalCode)
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
+            fields.element(FormFieldId.City)
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
         }
 
     private fun noAutocompleteTest(
@@ -729,7 +864,7 @@ class AutocompleteAddressControllerTest {
         assertThat(fields.filterIsInstance<AutocompleteAddressElement>()).isEmpty()
 
         val field = fields.firstOrNull { field ->
-            field.identifier == IdentifierSpec.Line1
+            field.identifier == FormFieldId.Line1
         }
 
         assertThat(field).isNotNull()
@@ -745,12 +880,12 @@ class AutocompleteAddressControllerTest {
     }
 
     private fun elementsTest(
-        values: Map<IdentifierSpec, String?> = emptyMap(),
+        values: Map<FormFieldId, String?> = emptyMap(),
         nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
-        shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
+        shippingValuesMap: Map<FormFieldId, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("AT", "BE", "DE", "ES", "IT", "NL"),
             googlePlacesApiKey = null,
@@ -792,8 +927,8 @@ class AutocompleteAddressControllerTest {
     private fun formFieldsTest(
         phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
-        shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-        test: suspend TurbineTestContext<List<Pair<IdentifierSpec, FormFieldEntry>>>.() -> Unit
+        shippingValuesMap: Map<FormFieldId, String?> = emptyMap(),
+        test: suspend TurbineTestContext<List<Pair<FormFieldId, FormFieldEntry>>>.() -> Unit
     ) = runTest {
         val controller = createAutocompleteAddressController(
             phoneNumberConfig = phoneNumberConfig,
@@ -811,12 +946,12 @@ class AutocompleteAddressControllerTest {
     }
 
     private fun createAutocompleteAddressController(
-        values: Map<IdentifierSpec, String?> = emptyMap(),
+        values: Map<FormFieldId, String?> = emptyMap(),
         phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
-        shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
+        shippingValuesMap: Map<FormFieldId, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("AT", "BE", "DE", "ES", "IT", "NL"),
             googlePlacesApiKey = null,
@@ -828,7 +963,7 @@ class AutocompleteAddressControllerTest {
             ),
     ): AutocompleteAddressController {
         return AutocompleteAddressController(
-            identifier = IdentifierSpec.Generic("address"),
+            identifier = FormFieldId.Generic("address"),
             initialValues = values,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
@@ -842,26 +977,26 @@ class AutocompleteAddressControllerTest {
 
     private fun createSameAsShippingElement(): SameAsShippingElement {
         return SameAsShippingElement(
-            identifier = IdentifierSpec.SameAsShipping,
+            identifier = FormFieldId.SameAsShipping,
             controller = SameAsShippingController(initialValue = false)
         )
     }
 
-    private fun List<SectionFieldElement>.element(identifierSpec: IdentifierSpec): SectionFieldElement {
-        val element = nullableElement(identifierSpec)
+    private fun List<SectionFieldElement>.element(formFieldId: FormFieldId): SectionFieldElement {
+        val element = nullableElement(formFieldId)
 
         assertThat(element).isNotNull()
 
         return requireNotNull(element)
     }
 
-    private fun List<SectionFieldElement>.nullableElement(identifierSpec: IdentifierSpec): SectionFieldElement? {
+    private fun List<SectionFieldElement>.nullableElement(formFieldId: FormFieldId): SectionFieldElement? {
         for (element in this) {
             if (element is RowElement) {
-                element.fields.nullableElement(identifierSpec)?.let {
+                element.fields.nullableElement(formFieldId)?.let {
                     return it
                 }
-            } else if (element.identifier == identifierSpec) {
+            } else if (element.identifier == formFieldId) {
                 return element
             }
         }
@@ -869,12 +1004,12 @@ class AutocompleteAddressControllerTest {
         return null
     }
 
-    private suspend fun SectionFieldElement.errorTest(fieldError: FieldError?) {
-        sectionFieldErrorController().error.test {
-            fieldError?.let {
+    private suspend fun SectionFieldElement.errorTest(fieldValidationMessage: FieldValidationMessage?) {
+        sectionFieldErrorController().validationMessage.test {
+            fieldValidationMessage?.let {
                 val error = awaitItem()
 
-                assertThat(error?.errorMessage).isEqualTo(it.errorMessage)
+                assertThat(error?.message).isEqualTo(it.message)
                 assertThat(error?.formatArgs).isEqualTo(it.formatArgs)
             } ?: run {
                 assertThat(awaitItem()).isNull()

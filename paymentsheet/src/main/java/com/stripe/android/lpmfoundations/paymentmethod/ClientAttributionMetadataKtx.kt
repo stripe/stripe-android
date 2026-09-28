@@ -12,9 +12,11 @@ internal fun ClientAttributionMetadata.Companion.create(
 ): ClientAttributionMetadata {
     val paymentIntentCreationFlow = when (initializationMode) {
         is PaymentElementLoader.InitializationMode.CryptoOnramp,
+        is PaymentElementLoader.InitializationMode.StandaloneLink,
         is PaymentElementLoader.InitializationMode.DeferredIntent -> PaymentIntentCreationFlow.Deferred
         is PaymentElementLoader.InitializationMode.PaymentIntent,
         is PaymentElementLoader.InitializationMode.SetupIntent -> PaymentIntentCreationFlow.Standard
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> null
     }
 
     val paymentMethodSelectionFlow = if (automaticPaymentMethodsEnabled) {
@@ -23,9 +25,14 @@ internal fun ClientAttributionMetadata.Companion.create(
         PaymentMethodSelectionFlow.MerchantSpecified
     }
 
+    val checkoutSessionId =
+        (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
+            ?.checkoutSessionResponse?.id
+
     return ClientAttributionMetadata(
         elementsSessionConfigId = elementsSessionConfigId,
         paymentIntentCreationFlow = paymentIntentCreationFlow,
         paymentMethodSelectionFlow = paymentMethodSelectionFlow,
+        checkoutSessionId = checkoutSessionId,
     )
 }

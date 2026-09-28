@@ -6,22 +6,28 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
+import com.stripe.android.testing.ViewModelStoreTestRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewActivityViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor { analyticsRequests.add(it) }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        ApplicationProvider.getApplicationContext(),
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = ApplicationProvider.getApplicationContext(),
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     @Test
@@ -143,7 +149,7 @@ class PaymentAuthWebViewActivityViewModelTest {
             args,
             analyticsRequestExecutor,
             analyticsRequestFactory
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private companion object {
@@ -153,7 +159,7 @@ class PaymentAuthWebViewActivityViewModelTest {
             clientSecret = "client_secret",
             url = "https://example.com",
             statusBarColor = Color.RED,
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             isInstantApp = false
         )
     }

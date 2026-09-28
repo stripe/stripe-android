@@ -1,17 +1,28 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -28,26 +39,57 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
+    private val resultStateHolder = AddressElementResultStateHolder()
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
+            AddressElementActivityContract.Result.StandaloneSucceeded(it)
+        },
+        eventReporter: AddressLauncherEventReporter = this.eventReporter,
+        argsFactory:
+            (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
+                AddressElementActivityContract.Args.Standalone(
+                    apiConfiguration = DEFAULT_API_CONFIG,
+                    config = currentConfig,
+                )
+            },
     ): InputAddressViewModel {
         return InputAddressViewModel(
-            AddressElementActivityContract.Args(
-                publishableKey = "pk_123",
-                config = config,
-            ),
+            argsFactory(config),
             navigator,
+            resultStateHolder,
             eventReporter,
-        )
+            placesClient = null,
+            primaryButtonAction = primaryButtonAction,
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @Test
+    fun `onScreenShown fires onShow with initial country`() {
+        val viewModel = createViewModel(
+            address = AddressDetails(address = PaymentSheet.Address(country = "US"))
+        )
+        viewModel.onScreenShown()
+        verify(eventReporter).onShow(eq("US"))
+    }
+
+    @Test
+    fun `onScreenShown fires onShow with empty string when no initial country`() {
+        val viewModel = createViewModel()
+        viewModel.onScreenShown()
+        verify(eventReporter).onShow(eq(""))
+    }
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest(UnconfinedTestDispatcher()) {
@@ -115,7 +157,44 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
+    fun `default configuration enables stripe-hosted autocomplete with hosted countries`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(config = AddressLauncher.Configuration())
+
+            assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+            assertThat(viewModel.autocompleteConfig.autocompleteCountries)
+                .isEqualTo(AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES)
+        }
+
+    @Test
+    fun `builder preserves custom autocomplete countries with stripe-hosted autocomplete`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val customCountries = setOf("US", "GB")
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .autocompleteCountries(customCountries)
+                    .build()
+            )
+
+            assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+            assertThat(viewModel.autocompleteConfig.autocompleteCountries).isEqualTo(customCountries)
+        }
+
+    @Test
+    fun `clickPrimaryButton publishes a succeeded result when form is valid`() = runTest(UnconfinedTestDispatcher()) {
+        val completedFormValues = mapOf(
+            FormFieldId.Line1 to FormFieldEntry(value = "99 Broadway St", isComplete = true),
+            FormFieldId.City to FormFieldEntry(value = "Seattle", isComplete = true),
+            FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+        )
+        val expectedAddress = AddressDetails(
+            address = PaymentSheet.Address(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US",
+            ),
+            isCheckboxSelected = true,
+        )
         val viewModel = createViewModel(
             AddressDetails(
                 address = PaymentSheet.Address(
@@ -125,20 +204,167 @@ class InputAddressViewModelTest {
                 )
             )
         )
-        viewModel.dismissWithAddress(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = "99 Broadway St",
-                    city = "Seattle",
-                    country = "US"
-                )
-            )
+        viewModel.clickPrimaryButton(
+            completedFormValues = completedFormValues,
+            checkboxChecked = true,
         )
+
+        assertThat(resultStateHolder.result.value)
+            .isEqualTo(AddressElementActivityContract.Result.StandaloneSucceeded(expectedAddress))
+        assertThat(viewModel.formEnabled.value).isFalse()
         verify(eventReporter).onCompleted(
             country = eq("US"),
             autocompleteResultSelected = eq(true),
             editDistance = eq(0)
         )
+    }
+
+    @Test
+    fun `clickPrimaryButton accepts a second click when first submission fails`() = runTest {
+        val results = ArrayDeque<Result<AddressElementActivityContract.Result>>(
+            listOf(
+                Result.failure(IllegalStateException("first submission failed")),
+                Result.success(
+                    AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+                ),
+            )
+        )
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            results.removeFirst()
+        }
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = createViewModel(
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+        )
+
+        assertThat(viewModel.saveError.value).isNull()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(viewModel.saveError.value)
+            .isEqualTo(IllegalStateException("first submission failed").stripeErrorMessage())
+        eventReporter.completedCalls.expectNoEvents()
+        assertThat(resultStateHolder.result.value).isNull()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isFalse()
+        assertThat(viewModel.saveError.value).isNull()
+        assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+
+        primaryButtonAction.calls.expectNoEvents()
+        primaryButtonAction.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `clickPrimaryButton replaces save error when retry fails`() = runTest {
+        val firstError = LocalStripeException("first submission failed", null)
+        val secondError = LocalStripeException("second submission failed", null)
+        val results = ArrayDeque<Result<AddressElementActivityContract.Result>>(
+            listOf(
+                Result.failure(firstError),
+                Result.failure(secondError),
+            )
+        )
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            results.removeFirst()
+        }
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = createViewModel(
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
+        assertThat(viewModel.formEnabled.value).isTrue()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(secondError.stripeErrorMessage())
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(resultStateHolder.result.value).isNull()
+        eventReporter.completedCalls.expectNoEvents()
+
+        primaryButtonAction.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `editing the form clears the save error`() = runTest {
+        val error = LocalStripeException("submission failed", null)
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            Result.failure(error)
+        }
+        val viewModel = createViewModel(
+            address = EXPECTED_ADDRESS,
+            primaryButtonAction = primaryButtonAction,
+        )
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.saveError.value).isEqualTo(error.stripeErrorMessage())
+
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to ""))
+
+        assertThat(viewModel.saveError.value).isNull()
+
+        primaryButtonAction.validate()
+    }
+
+    @Test
+    fun `clickPrimaryButton ignores a second click while first submission is in flight`() = runTest {
+        val primaryButtonResult = CompletableDeferred<Result<AddressElementActivityContract.Result>>()
+        val primaryButtonAction = RecordingPrimaryButtonAction {
+            primaryButtonResult.await()
+        }
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = createViewModel(
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+        )
+        val controller = (
+            (viewModel.addressFormController.elements.single() as SectionElement).fields.single()
+                as AutocompleteAddressElement
+            ).sectionFieldErrorController()
+
+        controller.validationMessage.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(viewModel.formEnabled.value).isFalse()
+
+            viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = true)
+
+            primaryButtonAction.calls.expectNoEvents()
+            eventReporter.completedCalls.expectNoEvents()
+            expectNoEvents()
+            assertThat(resultStateHolder.result.value).isNull()
+
+            primaryButtonResult.complete(
+                Result.success(
+                    AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+                )
+            )
+            eventReporter.completedCalls.awaitItem()
+        }
+
+        primaryButtonAction.validate()
+        eventReporter.validate()
     }
 
     @Test
@@ -328,13 +554,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
                 )
             )
 
@@ -344,21 +570,20 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    FormFieldId.Name to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
+            viewModel.onEnterManuallyFromInline()
+            assertThat(formValuesTurbine.awaitItem().keys).contains(FormFieldId.Line1)
+
             viewModel.setRawValues(
                 mapOf(
-                    IdentifierSpec.Name to "Jane Doe",
-                    IdentifierSpec.Line1 to "123 Pear Street",
-                    IdentifierSpec.PostalCode to "88888",
+                    FormFieldId.Name to "Jane Doe",
+                    FormFieldId.Line1 to "123 Pear Street",
+                    FormFieldId.PostalCode to "88888",
                 )
             )
 
@@ -366,13 +591,13 @@ class InputAddressViewModelTest {
             shippingSameAsBillingStateTurbine.expectNoEvents()
             assertThat(formValuesTurbine.expectMostRecentItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
                 )
             )
 
@@ -382,13 +607,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
                 )
             )
 
@@ -398,13 +623,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = null, isComplete = false),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
                 )
             )
 
@@ -414,21 +639,21 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
                 )
             )
 
             viewModel.setRawValues(
                 mapOf(
-                    IdentifierSpec.Name to "Jane Doe",
-                    IdentifierSpec.Line1 to "123 Coffee Street",
-                    IdentifierSpec.PostalCode to "77777",
+                    FormFieldId.Name to "Jane Doe",
+                    FormFieldId.Line1 to "123 Coffee Street",
+                    FormFieldId.PostalCode to "77777",
                 )
             )
 
@@ -436,13 +661,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.expectMostRecentItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
                 )
             )
 
@@ -497,13 +722,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Jose", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Jose", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
                 )
             )
 
@@ -513,13 +738,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
                 )
             )
 
@@ -529,13 +754,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.expectMostRecentItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Jose", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Jose", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
                 )
             )
 
@@ -590,13 +815,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
                 )
             )
 
@@ -606,13 +831,9 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    FormFieldId.Name to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -669,13 +890,13 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
                 )
             )
 
@@ -685,13 +906,9 @@ class InputAddressViewModelTest {
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    FormFieldId.Name to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                    FormFieldId.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -853,13 +1070,9 @@ class InputAddressViewModelTest {
                 .isEqualTo(InputAddressViewModel.ShippingSameAsBillingState.Hide)
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                    FormFieldId.Name to FormFieldEntry(value = "", isComplete = false),
+                    FormFieldId.Country to FormFieldEntry(value = "CA", isComplete = true),
+                    FormFieldId.Generic("address") to FormFieldEntry(value = "", isComplete = false),
                 )
             )
 
@@ -889,7 +1102,7 @@ class InputAddressViewModelTest {
     }
 
     private fun InputAddressViewModel.setRawValues(
-        values: Map<IdentifierSpec, String?>
+        values: Map<FormFieldId, String?>
     ) {
         val elements = addressFormController.elements
 
@@ -917,6 +1130,166 @@ class InputAddressViewModelTest {
         }
     }
 
+    @Test
+    fun `clickPrimaryButton with null triggers validation errors without a result`() = runTest {
+        val viewModel = createViewModel()
+
+        val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
+        val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
+        val controller = autocompleteElement.sectionFieldErrorController()
+
+        assertThat(controller.validationMessage.value).isNull()
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = null,
+            checkboxChecked = false
+        )
+
+        assertThat(controller.validationMessage.value).isNotNull()
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(resultStateHolder.result.value).isNull()
+    }
+
+    @Test
+    fun `standalone save emits standalone success`() {
+        val viewModel = createViewModel()
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        )
+    }
+
+    @Test
+    fun `isInlineAutocompleteEnabled is always true`() {
+        val viewModel = createViewModel()
+        assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
+    }
+
+    // --- Inline Autocomplete Tests ---
+    // Core controller logic (predictions, debouncing, selection, suppression, dismissal)
+    // is tested in InlineAutocompleteControllerTest.
+
+    @Suppress("DEPRECATION")
+    private fun createInlineViewModel(
+        googlePlacesApiKey: String = "test_key",
+        autocompleteCountries: Set<String> = emptySet(),
+    ): InputAddressViewModel {
+        return InputAddressViewModel(
+            AddressElementActivityContract.Args.Standalone(
+                apiConfiguration = DEFAULT_API_CONFIG,
+                config = AddressLauncher.Configuration.Builder()
+                    .googlePlacesApiKey(googlePlacesApiKey)
+                    .autocompleteCountries(autocompleteCountries)
+                    .build(),
+            ),
+            navigator,
+            resultStateHolder,
+            eventReporter,
+            placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+                fetchPlaceResult = Result.success(Address()),
+            ),
+            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
+                AddressElementActivityContract.Result.StandaloneSucceeded(it)
+            },
+        ).also { viewModelStoreRule.track(it) }
+    }
+
+    @Test
+    fun `onEnterManuallyFromInline emits OnExpandForm with current country when query is empty`() = runTest {
+        val viewModel = createInlineViewModel()
+        var emittedEvent: AutocompleteAddressInteractor.Event? = null
+        viewModel.register { emittedEvent = it }
+
+        viewModel.onEnterManuallyFromInline()
+
+        assertThat(emittedEvent)
+            .isEqualTo(
+                AutocompleteAddressInteractor.Event.OnExpandForm(
+                    values = mapOf(FormFieldId.Country to "US")
+                )
+            )
+    }
+
+    @Test
+    fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createInlineViewModel()
+        var emittedEvent: AutocompleteAddressInteractor.Event? = null
+        viewModel.register { emittedEvent = it }
+
+        val queryFlow = MutableStateFlow("")
+        val countryFlow = MutableStateFlow<String?>("US")
+        viewModel.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main St"
+        viewModel.onEnterManuallyFromInline()
+
+        assertThat(emittedEvent).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    FormFieldId.Line1 to "123 Main St",
+                    FormFieldId.Country to "US",
+                )
+            )
+        )
+    }
+
     private fun createShowState(isChecked: Boolean) =
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
+
+    private companion object {
+        val EXPECTED_ADDRESS = AddressDetails(
+            name = "Jenny Rosen",
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = "+14155551212",
+            isCheckboxSelected = true,
+        )
+        val COMPLETED_FORM_VALUES = mapOf(
+            FormFieldId.Name to FormFieldEntry("Jenny Rosen", true),
+            FormFieldId.City to FormFieldEntry("San Francisco", true),
+            FormFieldId.Country to FormFieldEntry("US", true),
+            FormFieldId.Line1 to FormFieldEntry("510 Townsend St", true),
+            FormFieldId.Line2 to FormFieldEntry("Floor 2", true),
+            FormFieldId.Phone to FormFieldEntry("+14155551212", true),
+            FormFieldId.PostalCode to FormFieldEntry("94103", true),
+            FormFieldId.State to FormFieldEntry("CA", true),
+        )
+    }
+}
+
+private class FakeAddressElementPrimaryButtonAction(
+    private val action: (AddressDetails) -> AddressElementActivityContract.Result,
+) : AddressElementPrimaryButtonAction {
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        return Result.success(action(addressDetails))
+    }
+}
+
+private class RecordingPrimaryButtonAction(
+    private val action: suspend (AddressDetails) -> Result<AddressElementActivityContract.Result>,
+) : AddressElementPrimaryButtonAction {
+    private val _calls = Turbine<AddressDetails>()
+    val calls: ReceiveTurbine<AddressDetails> = _calls
+
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        _calls.add(addressDetails)
+        return action(addressDetails)
+    }
+
+    fun validate() {
+        _calls.ensureAllEventsConsumed()
+    }
 }

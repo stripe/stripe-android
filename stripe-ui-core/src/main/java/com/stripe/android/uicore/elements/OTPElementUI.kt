@@ -23,14 +23,13 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -40,15 +39,14 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,9 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
-import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -69,7 +65,7 @@ internal fun OTPElementUIPreview() {
         OTPElementUI(
             enabled = true,
             element = OTPElement(
-                identifier = IdentifierSpec.Generic("otp"),
+                identifier = FormFieldId.Generic("otp"),
                 controller = OTPController()
             )
         )
@@ -83,7 +79,7 @@ internal fun OTPElementUIDisabledPreview() {
         OTPElementUI(
             enabled = false,
             element = OTPElement(
-                identifier = IdentifierSpec.Generic("otp"),
+                identifier = FormFieldId.Generic("otp"),
                 controller = OTPController()
             )
         )
@@ -112,7 +108,13 @@ fun OTPElementUI(
     selectedStrokeWidth: Dp = 2.dp,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    val focusManager = LocalFocusManager.current
+    val focusRequesters = remember(focusRequester, element.controller.otpLength) {
+        if (element.controller.otpLength <= 0) {
+            emptyList()
+        } else {
+            listOf(focusRequester) + List(element.controller.otpLength - 1) { FocusRequester() }
+        }
+    }
     Row(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -149,6 +151,7 @@ fun OTPElementUI(
 
                 var textFieldModifier = Modifier
                     .height(56.dp)
+                    .focusRequester(focusRequesters[index])
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
                             focusedElementIndex = index
@@ -163,22 +166,26 @@ fun OTPElementUI(
                             value.isEmpty()
                         ) {
                             // If the current field is empty, move to the previous one and delete
-                            focusManager.moveFocusSafely(FocusDirection.Previous)
+                            focusRequesters.requestFocusSafely(index - 1)
                             element.controller.onValueChanged(index - 1, "")
                             return@onPreviewKeyEvent true
                         }
                         false
                     }
                     .testTag("OTP-$index")
-                    .semantics { testTagsAsResourceId = true }
+                    .semantics {
+                        contentType = ContentType.SmsOtpCode
+                        testTagsAsResourceId = true
+                    }
 
                 if (index == 0) {
                     textFieldModifier = textFieldModifier
-                        .focusRequester(focusRequester)
-                        .autofill(
-                            types = listOf(AutofillType.SmsOtpCode),
-                            onFill = element.controller::onAutofillDigit,
-                        )
+                        .semantics {
+                            onAutofillText {
+                                element.controller.onAutofillDigit(it.text)
+                                true
+                            }
+                        }
                 }
 
                 OTPInputBox(
@@ -186,7 +193,7 @@ fun OTPElementUI(
                     isSelected = isSelected,
                     element = element,
                     index = index,
-                    focusManager = focusManager,
+                    focusRequesters = focusRequesters,
                     modifier = textFieldModifier,
                     placeholder = otpInputPlaceholder,
                     textStyle = boxTextStyle,
@@ -205,34 +212,42 @@ private fun OTPInputBox(
     textStyle: TextStyle,
     element: OTPElement,
     index: Int,
-    focusManager: FocusManager,
+    focusRequesters: List<FocusRequester>,
     modifier: Modifier,
     enabled: Boolean,
     colors: OTPElementColors,
     placeholder: String
 ) {
+    var lastTextValue by remember(value) { mutableStateOf(value) }
+
     // Need to use BasicTextField instead of TextField to be able to customize the
     // internal contentPadding
     BasicTextField(
-        value = TextFieldValue(
-            text = value,
-            selection = if (isSelected) {
-                TextRange(value.length)
-            } else {
-                TextRange.Zero
-            }
-        ),
-        onValueChange = {
-            // If the OTPInputBox already has a value, it would be the first character of it.text
-            // remove it before passing it to the controller.
-            val newValue =
-                if (value.isNotBlank() && it.text.isNotBlank()) {
-                    it.text.substring(1)
-                } else {
-                    it.text
+        value = value,
+        onValueChange = { newValue ->
+            val prevLastTextValue = lastTextValue
+            val stringChangedSinceLastInvocation = prevLastTextValue != newValue
+            lastTextValue = newValue
+
+            if (stringChangedSinceLastInvocation || (newValue.length == 1 && newValue != value)) {
+                // If the OTPInputBox already has a value, it would be the first character of it.text
+                // remove it before passing it to the controller.
+                val newValue =
+                    if (value.isNotBlank() && newValue.isNotBlank()) {
+                        newValue.substring(1)
+                    } else {
+                        newValue
+                    }
+                val isSpuriousImeFlush = newValue.isEmpty() && prevLastTextValue.length > 1
+                if (!isSpuriousImeFlush) {
+                    val inputLength = element.controller.onValueChanged(index, newValue)
+                    if (inputLength > 0) {
+                        focusRequesters.requestFocusSafely(
+                            minOf(index + inputLength, focusRequesters.lastIndex)
+                        )
+                    }
                 }
-            val inputLength = element.controller.onValueChanged(index, newValue)
-            (0 until inputLength).forEach { _ -> focusManager.moveFocusSafely(FocusDirection.Next) }
+            }
         },
         modifier = modifier,
         enabled = enabled,
@@ -242,12 +257,21 @@ private fun OTPInputBox(
             keyboardType = element.controller.keyboardType
         ),
         keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocusSafely(FocusDirection.Next) },
-            onDone = { focusManager.clearFocus(true) }
+            onNext = { focusRequesters.requestFocusSafely(index + 1) }
         ),
         singleLine = true,
         decorationBox = OTPInputDecorationBox(value, isSelected, placeholder, enabled, colors)
     )
+}
+
+private fun List<FocusRequester>.requestFocusSafely(index: Int) {
+    val focusRequester = getOrNull(index) ?: return
+
+    try {
+        focusRequester.requestFocus()
+    } catch (_: IllegalStateException) {
+        // Ignore requests made before the next field has attached to the focus tree.
+    }
 }
 
 @Composable

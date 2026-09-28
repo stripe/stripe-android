@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
@@ -19,15 +18,15 @@ internal class CvcControllerTest {
     @Test
     fun `When invalid card number verify visible error`() = runTest {
         val cvcController = createController()
-        cvcController.error.test {
+        cvcController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cvcController.onValueChange("12")
 
-            assertThat(awaitItem()?.errorMessage)
+            assertThat(awaitItem()?.message)
                 .isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
 
-            assertThat(awaitItem()?.errorMessage)
+            assertThat(awaitItem()?.message)
                 .isEqualTo(StripeR.string.stripe_invalid_cvc)
         }
     }
@@ -57,7 +56,7 @@ internal class CvcControllerTest {
     @Test
     fun `Verify error is visible based on the focus`() = runTest {
         val cvcController = createController()
-        cvcController.visibleError.test {
+        cvcController.visibleValidationMessage.test {
             cvcController.onFocusChange(true)
             cvcController.onValueChange("12")
 
@@ -69,24 +68,24 @@ internal class CvcControllerTest {
     }
 
     @Test
-    fun `Controller should always have an Ltr layout`() = runTest {
+    fun `Controller should enforce Ltr text direction`() = runTest {
         val cvcController = createController()
 
-        assertThat(cvcController.layoutDirection).isEqualTo(LayoutDirection.Ltr)
+        assertThat(cvcController.enforceLeftToRightTextDirection).isTrue()
     }
 
     @Test
     fun `Verify 'onValidationStateChanged' with 'true' results in an error when incomplete CVC`() = runTest {
         val cvcController = createController()
 
-        cvcController.error.test {
+        cvcController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cvcController.onFocusChange(true)
             cvcController.onValueChange("12")
 
             cvcController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeR.string.stripe_invalid_cvc)
+            assertThat(awaitItem()?.message).isEqualTo(StripeR.string.stripe_invalid_cvc)
         }
     }
 
@@ -94,7 +93,7 @@ internal class CvcControllerTest {
     fun `Verify 'onValidationStateChanged' with 'true' & complete CVC shows no error`() = runTest {
         val cvcController = createController()
 
-        cvcController.error.test {
+        cvcController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cvcController.onValueChange("123")
@@ -109,11 +108,11 @@ internal class CvcControllerTest {
     fun `Verify 'onValidationStateChanged' with 'true' results in an error when empty CVC`() = runTest {
         val cvcController = createController()
 
-        cvcController.error.test {
+        cvcController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cvcController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
+            assertThat(awaitItem()?.message).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
 
             cvcController.onFocusChange(true)
             cvcController.onValidationStateChanged(false)

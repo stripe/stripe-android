@@ -5,11 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.parcelize.Parcelize
@@ -18,8 +20,8 @@ import javax.inject.Provider
 
 internal interface EmbeddedConfigurationHandler {
     suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): Result<PaymentElementLoader.State>
 }
 
@@ -28,6 +30,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -42,15 +45,13 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private var inFlightRequest: InFlightRequest? = null
 
     override suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): Result<PaymentElementLoader.State> {
         val targetConfiguration = configuration.asCommonConfiguration()
 
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
-
         val arguments = Arguments(
-            intentConfiguration = intentConfiguration,
+            initializationMode = initializationMode,
             configuration = targetConfiguration,
         )
 
@@ -75,7 +76,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             return Result.failure(IllegalStateException("Configuring while a sheet is open is not supported."))
         }
 
-        val supervisorJob = SupervisorJob()
+        val supervisorJob = SupervisorJob(viewModelScope.coroutineContext[Job])
         val coroutineScope = CoroutineScope(supervisorJob)
 
         val coalescingOrchestrator = CoalescingOrchestrator<Result<PaymentElementLoader.State>>(
@@ -86,6 +87,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
                         integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                             isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
                             configuration = configuration,
+                            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                         ),
                         metadata = PaymentElementLoader.Metadata(
                             isReloadingAfterProcessDeath = false,
@@ -94,7 +96,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
                     ).onSuccess { state ->
                         cache = ConfigurationCache(
                             arguments = Arguments(
-                                intentConfiguration = intentConfiguration,
+                                initializationMode = initializationMode,
                                 configuration = targetConfiguration,
                             ),
                             resultState = state,
@@ -117,7 +119,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
 
     @Parcelize
     data class Arguments(
-        val intentConfiguration: PaymentSheet.IntentConfiguration,
+        val initializationMode: PaymentElementLoader.InitializationMode,
         val configuration: CommonConfiguration,
     ) : Parcelable
 

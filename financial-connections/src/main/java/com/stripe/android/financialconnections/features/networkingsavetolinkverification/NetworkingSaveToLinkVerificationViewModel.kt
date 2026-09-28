@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
@@ -31,7 +32,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -55,6 +56,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     private val getCachedAccounts: GetCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
+    private val currentLinkBrand: CurrentLinkBrand,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -76,7 +78,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
                 phoneNumber = consumerSession.phoneNumber,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 otpElement = OTPElement(
-                    IdentifierSpec.Generic("otp"),
+                    FormFieldId.Generic("otp"),
                     OTPController()
                 )
             )
@@ -150,6 +152,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 selectedAccounts = accounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                linkBrand = currentLinkBrand(),
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }

@@ -3,6 +3,9 @@ package com.stripe.android.uicore.elements
 import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -47,11 +50,11 @@ internal class SimpleTextFieldControllerTest {
     fun `verify the error message is set when should be visible`() = runTest {
         val controller = createControllerWithState()
 
-        controller.error.test {
+        controller.validationMessage.test {
             assertThat(awaitItem()).isNull()
             controller.onValueChange("showWhenNoFocus")
             shadowOf(getMainLooper()).idle()
-            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getError())
+            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getValidationMessage())
         }
     }
 
@@ -119,7 +122,7 @@ internal class SimpleTextFieldControllerTest {
     @Test
     fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() = runTest {
         val controller = createControllerWithState()
-        controller.visibleError.test {
+        controller.visibleValidationMessage.test {
             assertThat(awaitItem()).isEqualTo(false)
 
             controller.onValueChange("full")
@@ -138,9 +141,9 @@ internal class SimpleTextFieldControllerTest {
         val controller = createControllerWithState()
 
         turbineScope {
-            val visibleErrors = controller.visibleError.testIn(backgroundScope)
+            val visibleErrors = controller.visibleValidationMessage.testIn(backgroundScope)
 
-            val errors = controller.error.testIn(backgroundScope)
+            val errors = controller.validationMessage.testIn(backgroundScope)
 
             assertThat(visibleErrors.awaitItem()).isEqualTo(false)
             assertThat(errors.awaitItem()).isNull()
@@ -166,7 +169,7 @@ internal class SimpleTextFieldControllerTest {
         // Initialize the fieldState
         controller.onValueChange("showWhenNoFocus")
 
-        controller.visibleError.test {
+        controller.visibleValidationMessage.test {
             controller.onFocusChange(false)
             assertThat(awaitItem()).isEqualTo(true)
 
@@ -245,8 +248,8 @@ internal class SimpleTextFieldControllerTest {
         )
 
         turbineScope {
-            val visibleErrorTurbine = controller.visibleError.testIn(this)
-            val errorTurbine = controller.error.testIn(this)
+            val visibleErrorTurbine = controller.visibleValidationMessage.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(visibleErrorTurbine.awaitItem()).isFalse()
             assertThat(errorTurbine.awaitItem()).isNull()
@@ -254,7 +257,7 @@ internal class SimpleTextFieldControllerTest {
             controller.onValidationStateChanged(true)
 
             assertThat(visibleErrorTurbine.awaitItem()).isTrue()
-            assertThat(errorTurbine.awaitItem()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+            assertThat(errorTurbine.awaitItem()?.message).isEqualTo(R.string.stripe_blank_and_required)
 
             visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
             errorTurbine.cancelAndIgnoreRemainingEvents()
@@ -268,8 +271,8 @@ internal class SimpleTextFieldControllerTest {
         )
 
         turbineScope {
-            val visibleErrorTurbine = controller.visibleError.testIn(this)
-            val errorTurbine = controller.error.testIn(this)
+            val visibleErrorTurbine = controller.visibleValidationMessage.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(visibleErrorTurbine.awaitItem()).isFalse()
             assertThat(errorTurbine.awaitItem()).isNull()
@@ -291,8 +294,8 @@ internal class SimpleTextFieldControllerTest {
         )
 
         turbineScope {
-            val visibleErrorTurbine = controller.visibleError.testIn(this)
-            val errorTurbine = controller.error.testIn(this)
+            val visibleErrorTurbine = controller.visibleValidationMessage.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(visibleErrorTurbine.awaitItem()).isFalse()
             assertThat(errorTurbine.awaitItem()).isNull()
@@ -308,12 +311,26 @@ internal class SimpleTextFieldControllerTest {
         }
     }
 
+    @Test
+    fun `Verify autofillType for AddressTextFieldConfig`() {
+        val controller = SimpleTextFieldController(
+            AddressTextFieldConfig(
+                label = resolvableString(CoreR.string.stripe_address_label_full_name),
+                capitalization = KeyboardCapitalization.Words,
+                keyboard = KeyboardType.Text,
+                optional = false,
+                autofillContentType = ContentType.AddressStreet,
+            )
+        )
+        assertThat(controller.autofillType).isEqualTo(ContentType.AddressStreet)
+    }
+
     private fun createControllerWithState(
         isOptional: Boolean = false,
         nullPlaceHolder: Boolean = true,
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
-            on { determineState("full") } doReturn Full
+            on { determineState("full") } doReturn Full()
             on { filter("full") } doReturn "full"
 
             on { optional } doReturn isOptional
@@ -345,15 +362,18 @@ internal class SimpleTextFieldControllerTest {
     }
 
     companion object {
-        val fieldError = FieldError(-1)
+        val fieldValidationMessage = FieldValidationMessage.Error(-1)
 
         object ShowWhenNoFocus : TextFieldState {
             override fun isValid(): Boolean = false
             override fun isFull(): Boolean = false
             override fun isBlank(): Boolean = false
 
-            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = !hasFocus || isValidating
-            override fun getError() = fieldError
+            override fun shouldShowValidationMessage(
+                hasFocus: Boolean,
+                isValidating: Boolean
+            ): Boolean = !hasFocus || isValidating
+            override fun getValidationMessage() = fieldValidationMessage
         }
     }
 }

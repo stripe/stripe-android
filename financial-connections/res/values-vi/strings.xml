@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Không thể truy cập số tài khoản của bạn tại thời điểm này</string>
   <string name="stripe_close_dialog_networking_desc">Nếu giờ bạn hủy, tài khoản của bạn sẽ được liên kết với %1$s nhưng sẽ không được lưu vào Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Nếu giờ bạn hủy, tài khoản của bạn sẽ được liên kết với doanh nghiệp này nhưng sẽ không được lưu vào Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Nếu hiện tại bạn hủy, tài khoản của bạn sẽ được liên kết với doanh nghiệp này nhưng sẽ không được lưu vào %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Nếu hiện tại bạn hủy, tài khoản của bạn sẽ được liên kết với %1$s nhưng sẽ không được lưu vào %2$s.</string>
   <string name="stripe_error_cta_close">Đóng</string>
   <string name="stripe_error_cta_manual_entry">Nhập thông tin ngân hàng theo cách thủ công</string>
   <string name="stripe_error_cta_retry">Thử lại</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Nhập thông tin ngân hàng</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Hủy</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Tiếp tục với Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Tiếp tục với %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Không phải lúc này</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Sử dụng thông tin bạn đã lưu vào tài khoản Link trước đây.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Sử dụng thông tin bạn đã lưu vào tài khoản %1$s trước đây.</string>
   <string name="stripe_networking_link_login_warmup_title">Tiếp tục với Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Tiếp tục với %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Không phải lúc này</string>
   <string name="stripe_networking_save_to_link_verification_title">Xác nhận đó là bạn</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Chọn một ngân hàng khác</string>
   <string name="stripe_search">Tìm kiếm</string>
   <string name="stripe_success_pane_desc_link_error_plural">Tài khoản của bạn đã được kết nối nhưng không thể lưu vào Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Các tài khoản của bạn đã được kết nối nhưng không thể lưu với %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Tài khoản của bạn đã được kết nối nhưng không thể lưu vào Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Tài khoản của bạn đã được kết nối nhưng không thể lưu với %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Tài khoản của bạn đã được kết nối và lưu vào Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Tài khoản của bạn đã được kết nối và lưu với %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Tài khoản của bạn đã được kết nối và lưu vào Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Tài khoản của bạn đã kết nối và lưu với %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Trong 1-2 ngày tới, tài khoản ••••%1$s có thể nhận các khoản tiền gửi siêu nhỏ và bạn sẽ nhận được email kèm theo hướng dẫn chi tiết.</string>
   <string name="stripe_success_pane_desc_plural">Tài khoản của bạn đã kết nối</string>
   <string name="stripe_success_pane_desc_singular">Tài khoản của bạn đã kết nối</string>

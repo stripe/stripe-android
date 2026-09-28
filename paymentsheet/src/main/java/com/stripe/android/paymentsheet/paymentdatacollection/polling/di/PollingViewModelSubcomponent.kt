@@ -10,14 +10,13 @@ internal interface PollingViewModelSubcomponent {
 
     val viewModel: PollingViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun args(args: PollingViewModel.Args): Builder
-
-        fun build(): PollingViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            args: PollingViewModel.Args,
+        ): PollingViewModelSubcomponent
     }
 }

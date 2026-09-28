@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>MagicNumber:NetworkDispatcher.kt$NetworkDispatcher$200</ID>
-    <ID>TooManyFunctions:RequestMatchers.kt$RequestMatchers</ID>
+    <ID>MagicNumber:NetworkDispatcher.kt:NetworkDispatcher$200</ID>
+    <ID>TooManyFunctions:RequestMatchers.kt:RequestMatchers</ID>
   </CurrentIssues>
 </SmellBaseline>

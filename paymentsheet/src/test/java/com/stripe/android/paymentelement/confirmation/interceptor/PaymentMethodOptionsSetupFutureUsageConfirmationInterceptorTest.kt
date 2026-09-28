@@ -32,7 +32,7 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
         var observedValue = false
 
         val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -73,7 +73,7 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
         var observedValue = false
 
         val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -111,7 +111,7 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
     @Test
     fun `Returns confirm params with pmo 'setup_future_usage' set to 'off_session' when set on configuration`() =
         runInterceptorScenario(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         currency = "usd",
@@ -176,7 +176,7 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
     @Test
     fun `Returns confirm params with top level 'setup_future_usage' set to 'off_session' when set on configuration`() =
         runInterceptorScenario(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         currency = "usd",

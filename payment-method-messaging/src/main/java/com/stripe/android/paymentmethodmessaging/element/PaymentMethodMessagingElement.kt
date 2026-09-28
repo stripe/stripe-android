@@ -6,10 +6,8 @@ import androidx.annotation.FontRes
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
-import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.Locale
 import javax.inject.Inject
@@ -47,9 +45,10 @@ class PaymentMethodMessagingElement @Inject internal constructor(
 
     companion object {
         fun create(application: Application): PaymentMethodMessagingElement {
-            return DaggerPaymentMethodMessagingComponent.builder()
-                .application(application)
-                .build().element
+            return DaggerPaymentMethodMessagingComponent.factory()
+                .create(
+                    application = application,
+                ).element
         }
     }
 
@@ -250,8 +249,8 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         }
 
         class Colors {
-            private var textColor: Int = StripeThemeDefaults.colorsLight.onComponent.toArgb()
-            private var infoIconColor: Int = StripeThemeDefaults.colorsLight.subtitle.toArgb()
+            private var textColor: Int? = null
+            private var linkTextColor: Int? = null
 
             /**
              * The color used for the message text.
@@ -261,22 +260,22 @@ class PaymentMethodMessagingElement @Inject internal constructor(
             }
 
             /**
-             * The color used for the "i" information icon.
+             * The color used for the text that links to available BNPL plans.
              */
-            fun infoIconColor(@ColorInt infoIconColor: Int) = apply {
-                this.infoIconColor = infoIconColor
+            fun linkTextColor(@ColorInt linkTextColor: Int) = apply {
+                this.linkTextColor = linkTextColor
             }
 
             internal data class State(
                 @ColorInt
-                val textColor: Int,
+                val textColor: Int?,
                 @ColorInt
-                val infoIconColor: Int
+                val linkTextColor: Int?
             )
 
             internal fun build() = State(
                 textColor = textColor,
-                infoIconColor = infoIconColor
+                linkTextColor = linkTextColor
             )
         }
     }

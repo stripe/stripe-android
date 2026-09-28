@@ -33,8 +33,9 @@ internal class PollingActivity : AppCompatActivity() {
             timeLimit = args.timeLimitInSeconds.seconds,
             initialDelay = args.initialDelayInSeconds.seconds,
             ctaText = args.ctaText,
-            stripeAccountId = args.stripeAccountId,
+            requestOptions = args.requestOptions,
             qrCodeUrl = args.qrCodeUrl,
+            paymentMethodType = args.paymentMethodType,
         )
     }
 
@@ -43,6 +44,12 @@ internal class PollingActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -101,6 +108,10 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result.toBundle())
         )
         finish()
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return PollingContract.Args.fromIntent(intent) != null
     }
 
     override fun finish() {

@@ -35,33 +35,40 @@ internal sealed interface AnalyzerOutput
 /**
  * Output of IDDetector
  */
-internal sealed class IDDetectorOutput(
-    open val boundingBox: BoundingBox,
-    open val category: Category,
-    open val resultScore: Float,
-    open val allScores: List<Float>,
-    open val blurScore: Float
-) : AnalyzerOutput {
-    data class Legacy(
-        override val boundingBox: BoundingBox,
-        override val category: Category,
-        override val resultScore: Float,
-        override val allScores: List<Float>,
-        override val blurScore: Float
-    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
-
-    fun blurScore(): Float =
-        when (this) {
-            is Legacy -> {
-                this.blurScore
-            }
-        }
-}
+internal data class IDDetectorOutput(
+    val boundingBox: BoundingBox,
+    val category: Category,
+    val resultScore: Float,
+    val allScores: List<Float>,
+    val blurScore: Float,
+    val croppedImage: Bitmap
+) : AnalyzerOutput
 
 /**
- * Output of FaceDetector
+ * Output of a face detector.
+ *
+ * [boundingBox] is normalized to the detector's center-cropped model input and is used when
+ * cropping an image for upload. [fullFrameBoundingBox], when available, is normalized to the
+ * uncropped camera frame and is used for framing validation and metadata.
  */
 internal data class FaceDetectorOutput(
     val boundingBox: BoundingBox,
-    val resultScore: Float
-) : AnalyzerOutput
+    val resultScore: Float,
+    val pose: FacePose? = null,
+    val faceLandmarkResult: String? = null,
+    val fullFrameBoundingBox: BoundingBox? = null,
+    val isFromMediaPipe: Boolean = false
+) : AnalyzerOutput {
+    /** Uses full-frame coordinates when supplied while preserving legacy detector behavior. */
+    val validationBoundingBox: BoundingBox
+        get() = fullFrameBoundingBox ?: boundingBox
+}
+
+/**
+ * Optional face pose metadata in degrees. The legacy detector does not populate this.
+ */
+internal data class FacePose(
+    val yaw: Float,
+    val pitch: Float,
+    val roll: Float
+)

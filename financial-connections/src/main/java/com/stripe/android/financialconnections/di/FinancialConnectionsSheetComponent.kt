@@ -19,22 +19,14 @@ import dagger.Component
 internal interface FinancialConnectionsSheetComponent {
     val viewModel: FinancialConnectionsSheetViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun initialState(initialState: FinancialConnectionsSheetState): Builder
-
-        @BindsInstance
-        fun configuration(configuration: FinancialConnectionsSheetConfiguration): Builder
-
-        fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
-
-        fun build(): FinancialConnectionsSheetComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance application: Application,
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance initialState: FinancialConnectionsSheetState,
+            @BindsInstance configuration: FinancialConnectionsSheetConfiguration,
+            sharedComponent: FinancialConnectionsSingletonSharedComponent,
+        ): FinancialConnectionsSheetComponent
     }
 }

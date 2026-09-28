@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -28,6 +29,7 @@ import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_WARMUP
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -46,15 +48,18 @@ import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
+import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureModels
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
@@ -63,6 +68,7 @@ import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -91,22 +97,26 @@ internal class IdentityViewModelTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
         on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
         on { requirements }.thenReturn(REQUIREMENTS_NO_MISSING)
+        on { experiments }.thenReturn(emptyList())
     }
 
     private val mockIdentityRepository = mock<IdentityRepository> {
-        onBlocking {
+        on {
             retrieveVerificationPage(any(), any())
         }.thenReturn(mockVerificationPage)
     }
     private val mockIdentityModelFetcher = mock<IdentityModelFetcher> {
-        onBlocking {
+        on {
             fetchIdentityModel(eq(ID_DETECTOR_URL))
         }.thenReturn(ID_DETECTOR_FILE)
-        onBlocking {
+        on {
             fetchIdentityModel(eq(FACE_DETECTOR_URL))
         }.thenReturn(FACE_DETECTOR_FILE)
     }
@@ -144,6 +154,8 @@ internal class IdentityViewModelTest {
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
+            brandColor = null,
+            biometricConsent = null,
             injectorKey = DUMMY_INJECTOR_KEY,
             presentTime = 0
         ),
@@ -158,7 +170,7 @@ internal class IdentityViewModelTest {
         mock(),
         UnconfinedTestDispatcher(),
         mock()
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private fun mockUploadSuccess() = runBlocking {
         whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any())).thenReturn(
@@ -193,6 +205,16 @@ internal class IdentityViewModelTest {
     }
 
     @Test
+    fun `uploadManualResult bitmap front resizes file and notifies _documentUploadedState`() {
+        testUploadManualBitmapSuccessResult(true)
+    }
+
+    @Test
+    fun `uploadManualResult bitmap back resizes file and notifies _documentUploadedState`() {
+        testUploadManualBitmapSuccessResult(false)
+    }
+
+    @Test
     fun `uploadManualResult front failure notifies _documentUploadedState`() {
         testUploadManualFailureResult(true)
     }
@@ -203,17 +225,17 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `legacy uploadScanResult front success uploads both files and notifies _documentUploadedState`() {
+    fun `uploadScanResult front success uploads both files and notifies _documentUploadedState`() {
         testUploadDocumentScanSuccessResult(isFront = true)
     }
 
     @Test
-    fun `legacy uploadScanResult back success uploads both files and notifies _documentUploadedState`() {
+    fun `uploadScanResult back success uploads both files and notifies _documentUploadedState`() {
         testUploadDocumentScanSuccessResult(isFront = false)
     }
 
     @Test
-    fun `uploadScanResult uploads all files and notifies _selfieUploadedState`() = runBlocking {
+    fun `uploadScanResult does not upload side frames when 3D is disabled`() = runBlocking {
         mockUploadSuccess()
         viewModel.uploadScanResult(
             FINAL_FACE_DETECTOR_RESULT,
@@ -225,18 +247,70 @@ internal class IdentityViewModelTest {
             (FaceDetectorTransitioner.Selfie.BEST),
             (FaceDetectorTransitioner.Selfie.LAST)
         ).forEach { selfie ->
-            verify(mockIdentityAnalyticsRequestFactory, times(6)).imageUpload(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
             listOf(true, false).forEach { isHighRes ->
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
         }
+        verify(mockIdentityAnalyticsRequestFactory, times(6)).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+        )
+        assertThat(viewModel.selfieUploadState.value.leftFullFrameResult.status)
+            .isEqualTo(Status.IDLE)
+        assertThat(viewModel.selfieUploadState.value.rightFullFrameResult.status)
+            .isEqualTo(Status.IDLE)
+    }
+
+    @Test
+    fun `uploadScanResult uploads side full frames when 3D experiment is enabled`() = runBlocking {
+        mockUploadSuccess()
+        val verificationPage3D = mock<VerificationPage> {
+            on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
+            on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
+            on { requirements }.thenReturn(REQUIREMENTS_NO_MISSING)
+            on { experiments }.thenReturn(
+                listOf(
+                    VerificationPageStaticContentExperiment(
+                        experimentName = IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT,
+                        eventName = "screen_presented",
+                        eventMetadata = mapOf("screen_name" to "selfie")
+                    )
+                )
+            )
+        }
+
+        viewModel.uploadScanResult(
+            FINAL_FACE_DETECTOR_RESULT,
+            verificationPage3D
+        )
+
+        listOf(
+            FaceDetectorTransitioner.Selfie.FIRST,
+            FaceDetectorTransitioner.Selfie.BEST,
+            FaceDetectorTransitioner.Selfie.LAST
+        ).forEach { selfie ->
+            listOf(true, false).forEach { isHighRes ->
+                testUploadSelfieScanSuccessResult(selfie, isHighRes)
+            }
+        }
+        listOf(
+            FaceDetectorTransitioner.Selfie.RIGHT,
+            FaceDetectorTransitioner.Selfie.LEFT
+        ).forEach { selfie ->
+            testUploadSelfieScanSuccessResult(selfie, isHighRes = false)
+        }
+        verify(mockIdentityAnalyticsRequestFactory, times(8)).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+        )
     }
 
     @Test
@@ -270,6 +344,10 @@ internal class IdentityViewModelTest {
                 )
             )
         }
+        assertThat(viewModel.selfieUploadState.value.leftFullFrameResult.status)
+            .isEqualTo(Status.IDLE)
+        assertThat(viewModel.selfieUploadState.value.rightFullFrameResult.status)
+            .isEqualTo(Status.IDLE)
     }
 
     @Test
@@ -355,6 +433,41 @@ internal class IdentityViewModelTest {
         assertThat(viewModel.analyticsState.value.docFrontUploadType).isEqualTo(
             DocumentUploadParam.UploadMethod.MANUALCAPTURE
         )
+    }
+
+    @Test
+    fun `trackScreenPresented includes previous screen name`() {
+        val scanTypeCaptor = argumentCaptor<IdentityScanState.ScanType?>()
+        val screenNameCaptor = argumentCaptor<String>()
+        val previousScreenNameCaptor = argumentCaptor<String?>()
+
+        viewModel.trackScreenPresented(
+            scanType = IdentityScanState.ScanType.DOC_FRONT,
+            screenName = SCREEN_NAME_CONSENT
+        )
+        viewModel.trackScreenPresented(
+            scanType = IdentityScanState.ScanType.DOC_BACK,
+            screenName = SCREEN_NAME_DOC_WARMUP
+        )
+
+        verify(mockIdentityAnalyticsRequestFactory, times(2)).screenPresented(
+            scanTypeCaptor.capture(),
+            screenNameCaptor.capture(),
+            previousScreenNameCaptor.capture()
+        )
+        assertThat(scanTypeCaptor.allValues).containsExactly(
+            IdentityScanState.ScanType.DOC_FRONT,
+            IdentityScanState.ScanType.DOC_BACK
+        ).inOrder()
+        assertThat(screenNameCaptor.allValues).containsExactly(
+            SCREEN_NAME_CONSENT,
+            SCREEN_NAME_DOC_WARMUP
+        ).inOrder()
+        assertThat(previousScreenNameCaptor.allValues).containsExactly(
+            null,
+            SCREEN_NAME_CONSENT
+        ).inOrder()
+        assertThat(viewModel.analyticsLastScreenName).isEqualTo(SCREEN_NAME_DOC_WARMUP)
     }
 
     @Test
@@ -567,6 +680,7 @@ internal class IdentityViewModelTest {
             mockController,
             ConsentDestination.ROUTE.route
         )
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
         verify(mockController).navigate(
             eq(SelfieWarmupDestination.routeWithArgs),
             any<NavOptionsBuilder.() -> Unit>()
@@ -600,6 +714,7 @@ internal class IdentityViewModelTest {
             )
 
             assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
 
             verify(mockController).navigate(
                 argWhere {
@@ -637,12 +752,63 @@ internal class IdentityViewModelTest {
             )
 
             assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
 
             verify(mockController).navigate(
                 eq(ConfirmationDestination.routeWithArgs),
                 any<NavOptionsBuilder.() -> Unit>()
             )
         }
+    }
+
+    @Test
+    fun `checkPermissionAndNavigate - camera ready starts transition and navigates to document scan`() {
+        val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
+        val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
+
+        viewModel.checkPermissionAndNavigate(
+            navController = mockController,
+            cameraPermissionEnsureable = mockCameraPermissionEnsureable,
+            screenName = SCREEN_NAME_DOC_WARMUP
+        )
+
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_WARMUP), any())
+        verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+            onCameraReadyCaptor.capture(),
+            any()
+        )
+
+        onCameraReadyCaptor.firstValue.invoke()
+
+        verify(mockController).navigate(
+            eq(DocumentScanDestination.routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @Test
+    fun `checkPermissionAndNavigate - user denied starts transition and navigates to permission denied`() {
+        val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
+        val onUserDeniedCaptor = argumentCaptor<() -> Unit>()
+
+        viewModel.checkPermissionAndNavigate(
+            navController = mockController,
+            cameraPermissionEnsureable = mockCameraPermissionEnsureable,
+            screenName = SCREEN_NAME_DOC_WARMUP
+        )
+
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_WARMUP), any())
+        verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+            any(),
+            onUserDeniedCaptor.capture()
+        )
+
+        onUserDeniedCaptor.firstValue.invoke()
+
+        verify(mockController).navigate(
+            eq(com.stripe.android.identity.navigation.CameraPermissionDeniedDestination.routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
     }
 
     @Test
@@ -921,9 +1087,9 @@ internal class IdentityViewModelTest {
 
         viewModel.uploadScanResult(
             if (isFront) {
-                FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT
+                FINAL_ID_DETECTOR_RESULT_FRONT
             } else {
-                FINAL_ID_DETECTOR_LEGACY_RESULT_BACK
+                FINAL_ID_DETECTOR_RESULT_BACK
             },
             mockVerificationPage
         )
@@ -996,14 +1162,66 @@ internal class IdentityViewModelTest {
         }
     }
 
+    private fun testUploadManualBitmapSuccessResult(isFront: Boolean) = runBlocking {
+        mockUploadSuccess()
+
+        val bitmap = mock<Bitmap>()
+        viewModel.uploadManualResult(
+            bitmap,
+            isFront,
+            DOCUMENT_CAPTURE,
+            DocumentUploadParam.UploadMethod.MANUALCAPTURE,
+            if (isFront) {
+                IdentityScanState.ScanType.DOC_FRONT
+            } else {
+                IdentityScanState.ScanType.DOC_BACK
+            }
+        )
+
+        verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
+            same(bitmap),
+            eq(VERIFICATION_SESSION_ID),
+            eq("${VERIFICATION_SESSION_ID}_${if (isFront) FRONT else BACK}.jpeg"),
+            eq(HIGH_RES_IMAGE_MAX_DIMENSION),
+            eq(HIGH_RES_COMPRESSION_QUALITY)
+        )
+
+        verify(mockIdentityAnalyticsRequestFactory).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+        )
+
+        if (isFront) {
+            viewModel.documentFrontUploadedState.value.highResResult
+        } else {
+            viewModel.documentBackUploadedState.value.highResResult
+        }.let { uploadedResult ->
+            assertThat(uploadedResult).isEqualTo(
+                Resource.success(
+                    UploadedResult(
+                        UPLOADED_STRIPE_FILE,
+                        null,
+                        DocumentUploadParam.UploadMethod.MANUALCAPTURE
+                    )
+                )
+            )
+        }
+    }
+
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     private fun testUploadSelfieScanSuccessResult(
         selfie: FaceDetectorTransitioner.Selfie,
         isHighRes: Boolean
     ) {
+        val selfieFrame = SELFIE_FRAME_BY_VARIANT.getValue(selfie)
         if (isHighRes) { // high res
             verify(mockIdentityIO).cropAndPadBitmap(
-                same(FILTERED_FRAMES[selfie.index].first.cameraPreviewImage.image),
-                same(FILTERED_FRAMES[selfie.index].second.boundingBox),
+                same(selfieFrame.first.cameraPreviewImage.image),
+                same(selfieFrame.second.boundingBox),
                 any()
             )
 
@@ -1015,6 +1233,8 @@ internal class IdentityViewModelTest {
                         FaceDetectorTransitioner.Selfie.FIRST -> "${VERIFICATION_SESSION_ID}_face_first_crop_frame.jpeg"
                         FaceDetectorTransitioner.Selfie.BEST -> "${VERIFICATION_SESSION_ID}_face.jpeg"
                         FaceDetectorTransitioner.Selfie.LAST -> "${VERIFICATION_SESSION_ID}_face_last_crop_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.LEFT,
+                        FaceDetectorTransitioner.Selfie.RIGHT -> error("Side selfies are full-frame only")
                     }
                 ),
                 eq(HIGH_RES_IMAGE_MAX_DIMENSION),
@@ -1025,6 +1245,8 @@ internal class IdentityViewModelTest {
                     FaceDetectorTransitioner.Selfie.FIRST -> viewModel.selfieUploadState.value.firstHighResResult
                     FaceDetectorTransitioner.Selfie.BEST -> viewModel.selfieUploadState.value.bestHighResResult
                     FaceDetectorTransitioner.Selfie.LAST -> viewModel.selfieUploadState.value.lastHighResResult
+                    FaceDetectorTransitioner.Selfie.LEFT,
+                    FaceDetectorTransitioner.Selfie.RIGHT -> error("Side selfies are full-frame only")
                 }
             ).isEqualTo(
                 Resource.success(
@@ -1035,13 +1257,15 @@ internal class IdentityViewModelTest {
             )
         } else { // low res
             verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
-                same(FILTERED_FRAMES[selfie.index].first.cameraPreviewImage.image),
+                same(selfieFrame.first.cameraPreviewImage.image),
                 eq(VERIFICATION_SESSION_ID),
                 eq(
                     when (selfie) {
                         FaceDetectorTransitioner.Selfie.FIRST -> "${VERIFICATION_SESSION_ID}_face_first_full_frame.jpeg"
                         FaceDetectorTransitioner.Selfie.BEST -> "${VERIFICATION_SESSION_ID}_face_full_frame.jpeg"
                         FaceDetectorTransitioner.Selfie.LAST -> "${VERIFICATION_SESSION_ID}_face_last_full_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.LEFT -> "${VERIFICATION_SESSION_ID}_face_left_full_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.RIGHT -> "${VERIFICATION_SESSION_ID}_face_right_full_frame.jpeg"
                     }
                 ),
                 eq(LOW_RES_IMAGE_MAX_DIMENSION),
@@ -1052,6 +1276,8 @@ internal class IdentityViewModelTest {
                     FaceDetectorTransitioner.Selfie.FIRST -> viewModel.selfieUploadState.value.firstLowResResult
                     FaceDetectorTransitioner.Selfie.BEST -> viewModel.selfieUploadState.value.bestLowResResult
                     FaceDetectorTransitioner.Selfie.LAST -> viewModel.selfieUploadState.value.lastLowResResult
+                    FaceDetectorTransitioner.Selfie.LEFT -> viewModel.selfieUploadState.value.leftFullFrameResult
+                    FaceDetectorTransitioner.Selfie.RIGHT -> viewModel.selfieUploadState.value.rightFullFrameResult
                 }
             ).isEqualTo(
                 Resource.success(
@@ -1067,7 +1293,7 @@ internal class IdentityViewModelTest {
         mockUploadFailure()
 
         viewModel.uploadManualResult(
-            mock(),
+            mock<Uri>(),
             isFront,
             DOCUMENT_CAPTURE,
             DocumentUploadParam.UploadMethod.FILEUPLOAD,
@@ -1193,7 +1419,7 @@ internal class IdentityViewModelTest {
         val EXTRACTED_BITMAP = mock<Bitmap>()
         val BOUNDING_BOX = mock<BoundingBox>()
         val ALL_SCORES = listOf(1f, 2f, 3f)
-        val FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT = IdentityAggregator.FinalResult(
+        val FINAL_ID_DETECTOR_RESULT_FRONT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(
                     INPUT_BITMAP,
@@ -1201,16 +1427,17 @@ internal class IdentityViewModelTest {
                 ),
                 mock()
             ),
-            result = IDDetectorOutput.Legacy(
+            result = IDDetectorOutput(
                 boundingBox = BOUNDING_BOX,
                 category = Category.ID_FRONT,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )
-        val FINAL_ID_DETECTOR_LEGACY_RESULT_BACK = IdentityAggregator.FinalResult(
+        val FINAL_ID_DETECTOR_RESULT_BACK = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(
                     INPUT_BITMAP,
@@ -1218,12 +1445,13 @@ internal class IdentityViewModelTest {
                 ),
                 mock()
             ),
-            result = IDDetectorOutput.Legacy(
+            result = IDDetectorOutput(
                 boundingBox = BOUNDING_BOX,
                 category = Category.ID_BACK,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )
@@ -1260,6 +1488,35 @@ internal class IdentityViewModelTest {
                 resultScore = 0.82f
             ) // last
         )
+        val LEFT_SELFIE_FRAME =
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = mock(),
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.83f
+            )
+        val RIGHT_SELFIE_FRAME =
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = mock(),
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.84f
+            )
+        val SELFIE_FRAME_BY_VARIANT = mapOf(
+            FaceDetectorTransitioner.Selfie.FIRST to FILTERED_FRAMES[FaceDetectorTransitioner.INDEX_FIRST],
+            FaceDetectorTransitioner.Selfie.BEST to FILTERED_FRAMES[FaceDetectorTransitioner.INDEX_BEST],
+            FaceDetectorTransitioner.Selfie.LAST to FILTERED_FRAMES[FaceDetectorTransitioner.INDEX_LAST],
+            FaceDetectorTransitioner.Selfie.LEFT to LEFT_SELFIE_FRAME,
+            FaceDetectorTransitioner.Selfie.RIGHT to RIGHT_SELFIE_FRAME
+        )
         val FINAL_FACE_DETECTOR_RESULT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(
@@ -1276,6 +1533,15 @@ internal class IdentityViewModelTest {
                 type = IdentityScanState.ScanType.SELFIE,
                 transitioner = mock<FaceDetectorTransitioner> {
                     on { filteredFrames }.thenReturn(FILTERED_FRAMES)
+                    on { sideSelfies }.thenReturn(
+                        listOf(
+                            FaceDetectorTransitioner.Selfie.RIGHT,
+                            FaceDetectorTransitioner.Selfie.LEFT
+                        )
+                    )
+                    SELFIE_FRAME_BY_VARIANT.forEach { (selfie, frame) ->
+                        on { frameForSelfie(selfie) }.thenReturn(frame)
+                    }
                 }
             )
         )

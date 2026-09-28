@@ -11,17 +11,17 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.model.Address
+import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.uicore.DefaultStripeTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.Locale
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
@@ -30,7 +30,7 @@ class AutocompleteScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val eventReporter = FakeEventReporter()
+    private val eventReporter = NoOpAddressLauncherEventReporter
 
     @Test
     fun ensure_elements_exist() {
@@ -54,10 +54,10 @@ class AutocompleteScreenTest {
             )
         )
         onQueryField().performTextInput("Some text")
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodesWithText("primaryText")
-                .fetchSemanticsNodes().size == 1
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).size == 1
         }
     }
 
@@ -87,8 +87,10 @@ class AutocompleteScreenTest {
 
     private class FakeGooglePlacesClient(
         private val predictions: List<AutocompletePrediction> = listOf(),
-        private val addressComponents: List<AddressComponent> = listOf()
+        private val fetchResult: Address = Address(),
     ) : PlacesClientProxy {
+        override fun resetSession() = Unit
+
         override suspend fun findAutocompletePredictions(
             query: String?,
             country: String,
@@ -99,26 +101,9 @@ class AutocompleteScreenTest {
             )
         }
 
-        override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-            return Result.success(
-                FetchPlaceResponse(
-                    Place(addressComponents)
-                )
-            )
+        override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
+            return Result.success(fetchResult)
         }
     }
 
-    private class FakeEventReporter : AddressLauncherEventReporter {
-        override fun onShow(country: String) {
-            // no-op
-        }
-
-        override fun onCompleted(
-            country: String,
-            autocompleteResultSelected: Boolean,
-            editDistance: Int?
-        ) {
-            // no-op
-        }
-    }
 }

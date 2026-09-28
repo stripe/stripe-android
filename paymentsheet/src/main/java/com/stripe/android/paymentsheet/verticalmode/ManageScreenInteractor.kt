@@ -2,9 +2,10 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -37,6 +38,7 @@ internal interface ManageScreenInteractor {
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
         val canEdit: Boolean,
+        val linkBrand: LinkBrand,
     ) {
         private val containsOnlyCards: Boolean by lazy {
             paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
@@ -101,11 +103,11 @@ internal class DefaultManageScreenInteractor(
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
+    private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
@@ -117,7 +119,6 @@ internal class DefaultManageScreenInteractor(
         combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
             paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
-                    providePaymentMethodName,
                     paymentMethodMetadata,
                     defaultPaymentMethodId
                 )
@@ -131,7 +132,8 @@ internal class DefaultManageScreenInteractor(
         selection,
         editing,
         canEdit,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
+        linkAccount,
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAccount, ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -143,6 +145,7 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
     }
 
@@ -202,7 +205,6 @@ internal class DefaultManageScreenInteractor(
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
                     val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                     viewModel.updateSelection(savedPmSelection)
@@ -216,7 +218,8 @@ internal class DefaultManageScreenInteractor(
                         viewModel.navigationHandler.pop()
                     }
                 },
-                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId
+                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
+                linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
             )
         }
 
@@ -230,7 +233,6 @@ internal class DefaultManageScreenInteractor(
                 is PaymentSelection.CustomPaymentMethod,
                 PaymentSelection.GooglePay,
                 is PaymentSelection.Link,
-                is PaymentSelection.ShopPay,
                 is PaymentSelection.New -> return null
                 is PaymentSelection.Saved -> selection.paymentMethod.id
             }

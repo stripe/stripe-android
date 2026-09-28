@@ -2,21 +2,25 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.countryElements
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
@@ -30,6 +34,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -38,12 +44,10 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -62,15 +66,9 @@ import com.stripe.android.uicore.R as UiCoreR
 internal class PaymentMethodMetadataTest {
 
     @get:Rule
-    val enablePassiveCaptchaRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePassiveCaptcha,
-        isEnabled = true
-    )
-
-    @get:Rule
-    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
+    val disableNfcScanningFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disableNfcScanning,
+        isEnabled = false,
     )
 
     @Test
@@ -142,25 +140,11 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
-            ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-        )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
-        assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
-    }
-
-    @Test
     fun `filterSupportedPaymentMethods returns expected items`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
@@ -176,7 +160,6 @@ internal class PaymentMethodMetadataTest {
                 unactivatedPaymentMethods = listOf("klarna"),
                 isLiveMode = true,
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(1)
@@ -191,7 +174,6 @@ internal class PaymentMethodMetadataTest {
                 unactivatedPaymentMethods = listOf("klarna"),
                 isLiveMode = false,
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
@@ -205,20 +187,8 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("klarna")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
-    }
-
-    @Test
-    fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("klarna")
-            ),
-            sharedDataSpecs = emptyList(),
-        )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
     }
 
     @Test
@@ -227,9 +197,39 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+    }
+
+    @Test
+    fun `displayNameForCode returns display name for supported payment method`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna")
+            ),
+        )
+        assertThat(metadata.displayNameForCode("klarna"))
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_klarna.resolvableString)
+    }
+
+    @Test
+    fun `displayNameForCode returns empty ResolvableString for unsupported payment method`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+        )
+        assertThat(metadata.displayNameForCode("klarna")).isEqualTo("".resolvableString)
+    }
+
+    @Test
+    fun `displayNameForCode returns empty ResolvableString for null code`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+        )
+        assertThat(metadata.displayNameForCode(null)).isEqualTo("".resolvableString)
     }
 
     @Test
@@ -239,11 +239,6 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card", "affirm", "klarna"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-                SharedDataSpec("klarna"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -259,35 +254,12 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("affirm", "klarna", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-                SharedDataSpec("klarna"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
-    }
-
-    @Test
-    fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "klarna", "card"),
-            ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("card"),
-            ),
-        )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-        assertThat(sortedSupportedPaymentMethods).hasSize(2)
-        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
-        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
     }
 
     @Test
@@ -299,11 +271,6 @@ internal class PaymentMethodMetadataTest {
                 isLiveMode = true,
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("klarna"),
-                SharedDataSpec("card"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
@@ -312,14 +279,11 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `sortedSupportedPaymentMethods keeps us_bank_account without a sharedDataSpec`() {
+    fun `sortedSupportedPaymentMethods keeps registered us_bank_account`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "us_bank_account"),
                 paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}""",
-            ),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("card"),
             ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -336,11 +300,6 @@ internal class PaymentMethodMetadataTest {
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             paymentMethodOrder = listOf("klarna", "affirm", "card", "ignored"),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("klarna"),
-                SharedDataSpec("card"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -357,11 +316,6 @@ internal class PaymentMethodMetadataTest {
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             paymentMethodOrder = listOf("card"),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("affirm"),
-                SharedDataSpec("klarna"),
-                SharedDataSpec("card"),
-            ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -376,10 +330,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card"),
             ),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("card"),
-                SharedDataSpec("sepa_debit"),
-            ),
         )
         assertThat(metadata.supportedSavedPaymentMethodTypes())
             .containsExactly(PaymentMethod.Type.Card)
@@ -391,11 +341,6 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm", "sepa_debit"),
-            ),
-            sharedDataSpecs = listOf(
-                SharedDataSpec("card"),
-                SharedDataSpec("affirm"),
-                SharedDataSpec("sepa_debit"),
             ),
         )
         assertThat(metadata.supportedSavedPaymentMethodTypes())
@@ -492,7 +437,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test
@@ -582,7 +527,7 @@ internal class PaymentMethodMetadataTest {
 
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
+        assertThat(identifiers).contains(FormFieldId.Country)
     }
 
     @Test
@@ -603,7 +548,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode creates one country field in the Klarna address`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -621,19 +566,33 @@ internal class PaymentMethodMetadataTest {
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
-        val countrySection = formElement[4] as SectionElement
-        val countryElement = countrySection.fields[0] as CountryElement
-        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
-
-        val addressSection = formElement[5] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+        assertThat(formElement.countryElements()).hasSize(1)
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple`() = runTest {
+    fun `formElementsForCode creates one country field in the Wero address`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "wero")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "wero",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        assertThat(formElement.countryElements()).hasSize(1)
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryCustom`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val headerInformation = metadata.formHeaderInformationForCode(
             code = "card",
@@ -644,7 +603,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `formHeaderInformationForCode is correct for UiDefinitionFactoryRequiresSharedDataSpec`() = runTest {
+    fun `formHeaderInformationForCode is correct for UiDefinitionFactorySimple with icon`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
@@ -688,11 +647,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
             )
             val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -711,11 +665,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
             )
@@ -735,11 +684,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm")
             )
@@ -873,11 +817,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
             )
@@ -898,11 +837,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
                 paymentMethodOrder = listOf("affirm", "cpmt_paypal", "external_paypal")
@@ -924,11 +858,6 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
                 allowsPaymentMethodsRequiringShippingAddress = true,
-                sharedDataSpecs = listOf(
-                    SharedDataSpec("affirm"),
-                    SharedDataSpec("card"),
-                    SharedDataSpec("klarna"),
-                ),
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
@@ -1049,6 +978,7 @@ internal class PaymentMethodMetadataTest {
         val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
             listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
         )
+        val allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit, PaymentSheet.CardFundingType.Prepaid)
         val customPaymentMethods = listOf(
             PaymentSheet.CustomPaymentMethod(
                 id = "cpmt_123",
@@ -1072,6 +1002,7 @@ internal class PaymentMethodMetadataTest {
             shippingDetails,
             customPaymentMethods,
             cardBrandAcceptance,
+            allowedCardFundingTypes
         )
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -1094,16 +1025,18 @@ internal class PaymentMethodMetadataTest {
                     type = "cpmt_789",
                     error = "not_found",
                 ),
+            ),
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to true
             )
         )
 
-        val sharedDataSpecs = listOf(SharedDataSpec("card"))
         val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
-            sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
             linkStateResult = LinkState(
@@ -1116,6 +1049,9 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1136,7 +1072,6 @@ internal class PaymentMethodMetadataTest {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            sharedDataSpecs = sharedDataSpecs,
             displayableCustomPaymentMethods = listOf(
                 DisplayableCustomPaymentMethod(
                     id = "cpmt_123",
@@ -1157,16 +1092,17 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = getDefaultCustomerMetadata(
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             linkMode = null,
+            linkBrand = LinkBrand.Link,
             linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            cardFundingFilter = PaymentSheetCardFundingFilter(allowedCardFundingTypes),
             paymentMethodIncentive = null,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             termsDisplay = emptyMap(),
@@ -1179,9 +1115,84 @@ internal class PaymentMethodMetadataTest {
             onBehalfOf = null,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
+            isNfcScanningEnabled = false,
+            preferNfcOverCameraScan = false,
+            experimentsData = null,
+            isStripeCardScanAllowed = false,
+            enableMlKitCardScan = false,
+            elementsSessionId = "session_1234",
+            disableSsdOcrCardScan = false,
+            cardArts = emptyList(),
+            shouldUseAutocompleteProxyEndpoints = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
+    }
+
+    @Suppress("LongMethod")
+    @Test
+    fun `should use default funding types when ELEMENTS_MOBILE_CARD_FUND_FILTERING flag is false`() {
+        val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
+        val defaultBillingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        )
+        val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
+        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
+            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        )
+        // Configure restrictive funding types
+        val allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit, PaymentSheet.CardFundingType.Prepaid)
+
+        val configuration = createPaymentSheetConfiguration(
+            billingDetailsCollectionConfiguration,
+            defaultBillingDetails,
+            shippingDetails,
+            emptyList(),
+            cardBrandAcceptance,
+            allowedCardFundingTypes
+        )
+
+        // Create ElementsSession with flag set to false
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to false // Flag is false
+            )
+        )
+
+        val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = configuration.asCommonConfiguration(),
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+            isGooglePayReady = false,
+            linkStateResult = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        )
+
+        // When flag is false, should use default funding types, not the configured ones
+        assertThat(metadata.cardFundingFilter)
+            .isEqualTo(PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes))
     }
 
     @Suppress("LongMethod")
@@ -1209,17 +1220,13 @@ internal class PaymentMethodMetadataTest {
             ),
         )
 
-        val paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-            overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-        )
-
         val metadata = PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1237,19 +1244,19 @@ internal class PaymentMethodMetadataTest {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = null,
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
             displayableCustomPaymentMethods = emptyList(),
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = getDefaultCustomerMetadata(
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
+            linkBrand = LinkBrand.Link,
             linkStateResult = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
             paymentMethodIncentive = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
@@ -1259,89 +1266,29 @@ internal class PaymentMethodMetadataTest {
                 elementsSessionConfigId = elementsSession.elementsSessionConfigId,
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
+                checkoutSessionId = null,
             ),
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
             onBehalfOf = null,
-            integrationMetadata = IntegrationMetadata.CustomerSheet,
+            integrationMetadata = IntegrationMetadata.CustomerSheet(
+                attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
+            ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
+            isNfcScanningEnabled = false,
+            preferNfcOverCameraScan = false,
+            experimentsData = null,
+            isStripeCardScanAllowed = false,
+            enableMlKitCardScan = false,
+            elementsSessionId = "session_1234",
+            disableSsdOcrCardScan = false,
+            cardArts = emptyList(),
+            shouldUseAutocompleteProxyEndpoints = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
-    }
-
-    @Test
-    fun `consent behavior should be Always for Payment Sheet is customer session save is enabled`() {
-        val metadata = createPaymentMethodMetadataForPaymentSheet(
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
-                isPaymentMethodSaveEnabled = true,
-                paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-                paymentMethodRemoveLast =
-                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
-                allowRedisplayOverride = null,
-                isPaymentMethodSetAsDefaultEnabled = false,
-            )
-        )
-
-        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Enabled)
-    }
-
-    @Test
-    fun `consent behavior should be Disabled for Payment Sheet is customer session save is disabled`() {
-        val metadata = createPaymentMethodMetadataForPaymentSheet(
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
-                isPaymentMethodSaveEnabled = false,
-                paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-                paymentMethodRemoveLast =
-                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
-                allowRedisplayOverride = null,
-                isPaymentMethodSetAsDefaultEnabled = false,
-            ),
-        )
-
-        assertThat(metadata.paymentMethodSaveConsentBehavior)
-            .isEqualTo(
-                PaymentMethodSaveConsentBehavior.Disabled(
-                    overrideAllowRedisplay = null,
-                ),
-            )
-    }
-
-    @Test
-    fun `consent behavior should be Legacy for Payment Sheet if payment sheet component is disabled`() {
-        val metadata = createPaymentMethodMetadataForPaymentSheet(
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-        )
-
-        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
-    }
-
-    @Test
-    fun `consent behavior should be Legacy for Payment Sheet if no customer session provided`() {
-        val metadata = createPaymentMethodMetadataForPaymentSheet(
-            mobilePaymentElementComponent = null,
-        )
-
-        assertThat(metadata.paymentMethodSaveConsentBehavior).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
-    }
-
-    private fun createPaymentMethodMetadataForPaymentSheet(
-        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement?,
-    ): PaymentMethodMetadata {
-        return PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = createElementsSession(
-                mobilePaymentElementComponent = mobilePaymentElementComponent
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = listOf(),
-            externalPaymentMethodSpecs = listOf(),
-            isGooglePayReady = false,
-            linkStateResult = null,
-            customerMetadata = DEFAULT_CUSTOMER_METADATA,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
-            analyticsMetadata = AnalyticsMetadata(emptyMap()),
-        )
     }
 
     private fun createElementsSession(
@@ -1353,7 +1300,12 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets: List<String> = intent.paymentMethodTypes,
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null,
-        passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+        experimentsData: ElementsSession.ExperimentsData? = null,
+        flags: Map<ElementsSession.Flag, Boolean> = mapOf(
+            ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+            ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
+        ),
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
@@ -1363,6 +1315,7 @@ internal class PaymentMethodMetadataTest {
             customer = mobilePaymentElementComponent?.let { component ->
                 ElementsSession.Customer(
                     paymentMethods = listOf(),
+                    email = null,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_123",
                         customerId = "cus_123",
@@ -1380,13 +1333,10 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = null,
-            paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
-            flags = mapOf(
-                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
-            ),
+            flags = flags,
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
-            experimentsData = null,
+            experimentsData = experimentsData,
             merchantLogoUrl = null,
             passiveCaptcha = passiveCaptchaParams,
             elementsSessionConfigId = null,
@@ -1399,7 +1349,6 @@ internal class PaymentMethodMetadataTest {
     fun `allowRedisplay returns Unspecified when consent behavior is Legacy`() = runTest {
         val metadataForPaymentIntent = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1409,7 +1358,6 @@ internal class PaymentMethodMetadataTest {
 
         val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1421,7 +1369,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OnSession,
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1433,7 +1380,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1447,7 +1393,8 @@ internal class PaymentMethodMetadataTest {
         runTest {
             val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1461,7 +1408,8 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1475,7 +1423,8 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1487,11 +1436,13 @@ internal class PaymentMethodMetadataTest {
         }
 
     @Test
+    @Suppress("LongMethod")
     fun `allowRedisplay returns Limited when consent behavior is Enabled, setting up, and is not saving`() =
         runTest {
             val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1512,7 +1463,8 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1533,7 +1485,8 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1556,7 +1509,8 @@ internal class PaymentMethodMetadataTest {
         runTest {
             val metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1572,7 +1526,8 @@ internal class PaymentMethodMetadataTest {
         runTest {
             val metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1594,8 +1549,8 @@ internal class PaymentMethodMetadataTest {
     fun `allowRedisplay returns Unspecified when consent behavior is Disabled and not setting up`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                overrideAllowRedisplay = null,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
             ),
         )
 
@@ -1609,8 +1564,9 @@ internal class PaymentMethodMetadataTest {
     fun `allowRedisplay returns Limited when consent behavior is Disabled and setting up`() = runTest {
         val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                overrideAllowRedisplay = null,
+            hasCustomerConfiguration = true,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
             ),
         )
 
@@ -1623,8 +1579,9 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OnSession,
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                overrideAllowRedisplay = null,
+            hasCustomerConfiguration = true,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
             ),
         )
 
@@ -1637,9 +1594,10 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                overrideAllowRedisplay = null,
-            )
+            hasCustomerConfiguration = true,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
+            ),
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1653,8 +1611,9 @@ internal class PaymentMethodMetadataTest {
         runTest {
             val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
                 ),
             )
 
@@ -1667,8 +1626,9 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
                 ),
             )
 
@@ -1681,7 +1641,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
             )
 
             testAllowRedisplayValueForCustomerRequestedSave(
@@ -1759,6 +1718,98 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `shouldShowLinkButton returns false when linkState is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = null,
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true when linkState is present and display is Automatic`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns false when linkState is present and display is Never`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns false for logged-out user when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isFalse()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for user needing verification when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
+    fun `shouldShowLinkButton returns true for logged-in user when display is WalletButtonHidden`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+
+        assertThat(metadata.shouldShowLinkButton).isTrue()
+    }
+
+    @Test
     fun `requiresMandate returns true for PMO SFU`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -1784,20 +1835,10 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `availableWallets contains all wallet types`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "shop_pay", "card"),
+        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "card"),
         isGooglePayReady = true,
         hasLinkState = true,
-        hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
-    )
-
-    @Test
-    fun `availableWallets contains all wallet types in order with Link first`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("shop_pay", "link", "card", "google_pay"),
-        isGooglePayReady = true,
-        hasLinkState = true,
-        hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
@@ -1805,7 +1846,6 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = false,
-        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.GooglePay),
     )
 
@@ -1814,7 +1854,6 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = false,
         hasLinkState = false,
-        hasShopPayConfiguration = false,
         expectedWalletTypes = emptyList(),
     )
 
@@ -1823,35 +1862,7 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "link"),
         isGooglePayReady = false,
         hasLinkState = true,
-        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.Link),
-    )
-
-    @Test
-    fun `availableWallets contains only ShopPay`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay"),
-        isGooglePayReady = false,
-        hasLinkState = false,
-        hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.ShopPay),
-    )
-
-    @Test
-    fun `availableWallets does not contain ShopPay if no configuration`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay"),
-        isGooglePayReady = false,
-        hasLinkState = false,
-        hasShopPayConfiguration = false,
-        expectedWalletTypes = emptyList(),
-    )
-
-    @Test
-    fun `availableWallets does not contain ShopPay if not in types and no configuration`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
-        isGooglePayReady = false,
-        hasLinkState = false,
-        hasShopPayConfiguration = false,
-        expectedWalletTypes = emptyList(),
     )
 
     @Test
@@ -1859,7 +1870,6 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = false,
         hasLinkState = true,
-        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.Link),
     )
 
@@ -1868,35 +1878,7 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
-        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
-    )
-
-    @Test
-    fun `availableWallets does not include Shop Pay if not in types`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
-        isGooglePayReady = true,
-        hasLinkState = true,
-        hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
-    )
-
-    @Test
-    fun `availableWallets contains ShopPay and Link but not GooglePay`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("shop_pay", "link", "card"),
-        isGooglePayReady = false,
-        hasLinkState = true,
-        hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay),
-    )
-
-    @Test
-    fun `availableWallets contains ShopPay and GooglePay but not Link`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "shop_pay", "card"),
-        isGooglePayReady = true,
-        hasLinkState = false,
-        hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.ShopPay),
     )
 
     @Test
@@ -2014,7 +1996,6 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets: List<String>,
         isGooglePayReady: Boolean,
         hasLinkState: Boolean,
-        hasShopPayConfiguration: Boolean,
         expectedWalletTypes: List<WalletType>,
     ) {
         val elementsSession = createElementsSession(
@@ -2026,25 +2007,18 @@ internal class PaymentMethodMetadataTest {
             ),
         )
 
-        val shopPayConfiguration = if (hasShopPayConfiguration) {
-            SHOP_PAY_CONFIGURATION
-        } else {
-            null
-        }
-
         val configuration = createPaymentSheetConfiguration(
             defaultBillingDetails = PaymentSheet.BillingDetails(),
             shippingDetails = AddressDetails(),
             billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
             customPaymentMethods = listOf(),
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
-            shopPayConfiguration = shopPayConfiguration,
+            allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = isGooglePayReady,
             linkStateResult = if (hasLinkState) {
@@ -2061,6 +2035,9 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
 
         assertThat(metadata.availableWallets)
@@ -2087,6 +2064,53 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement enables NFC scanning when server flag is enabled`() {
+        val metadata = createPaymentElementMetadata(
+            nfcScanningFlag = true,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement disables NFC scanning when server flag is disabled`() {
+        val metadata = createPaymentElementMetadata(
+            nfcScanningFlag = false,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement prefers NFC over camera scan when server flag is enabled`() {
+        val metadata = createPaymentElementMetadata(
+            preferNfcOverCameraScanFlag = true,
+        )
+
+        assertThat(metadata.preferNfcOverCameraScan).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement disables NFC scanning when kill switch is enabled`() {
+        disableNfcScanningFeatureFlagRule.setEnabled(true)
+        val metadata = createPaymentElementMetadata(
+            nfcScanningFlag = true,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `createForCustomerSheet disables NFC scanning when server flag is enabled`() {
+        val metadata = createCustomerSheetMetadata(
+            attestOnIntentConfirmationFlag = false,
+            nfcScanningFlag = true,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
     fun `createForCustomerSheet reads attestOnIntentConfirmation from elements session when true`() {
         val metadata = createCustomerSheetMetadata(attestOnIntentConfirmationFlag = true)
         assertThat(metadata.attestOnIntentConfirmation).isTrue()
@@ -2098,23 +2122,53 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.attestOnIntentConfirmation).isFalse()
     }
 
-    private fun createPaymentElementMetadata(attestOnIntentConfirmationFlag: Boolean?): PaymentMethodMetadata {
+    @Test
+    fun `Experiments data is initialized from elements session experiments data`() {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
+                experimentAssignments = emptyMap(),
+            )
+        )
+        val metadata = createPaymentElementMetadata(elementsSession = elementsSession)
+
+        assertThat(metadata.experimentsData).isEqualTo(elementsSession.experimentsData)
+    }
+
+    @Test
+    fun `createForPaymentElement maps isTapToAddAvailable to isTapToAddSupported when customer present`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        ).copy(
-            flags = if (attestOnIntentConfirmationFlag != null) {
-                mapOf(
-                    ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
-                )
-            } else {
-                emptyMap()
-            }
         )
 
-        return PaymentMethodMetadata.createForPaymentElement(
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement maps isTapToAddAvailable to isTapToAddSupported when customerMetadata is null`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
             linkStateResult = null,
@@ -2123,16 +2177,202 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement maps isTapToAddAvailable false to isTapToAddSupported false`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false,
+            ),
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement requires automatic tax billing address when tax status requires it`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+        val metadata = createPaymentElementMetadata(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+        )
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement requires automatic tax billing address when tax status is ready`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+        val metadata = createPaymentElementMetadata(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+        )
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement does not require automatic tax billing address when automatic tax is disabled`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = false,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+        val metadata = createPaymentElementMetadata(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+        )
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement does not require automatic tax billing address when tax uses shipping`() {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        )
+        val metadata = createPaymentElementMetadata(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_123",
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+        )
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false for non-checkout modes`() {
+        val metadata = createPaymentElementMetadata()
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
+    }
+
+    @Test
+    fun `createForCustomerSheet sets requiresBillingAddressForAutomaticTax to false`() {
+        val metadata = createCustomerSheetMetadata(attestOnIntentConfirmationFlag = false)
+
+        assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
+    }
+
+    private fun createPaymentElementMetadata(
+        attestOnIntentConfirmationFlag: Boolean? = null,
+        nfcScanningFlag: Boolean? = null,
+        preferNfcOverCameraScanFlag: Boolean? = null,
+        elementsSession: ElementsSession? = null,
+        initializationMode: PaymentElementLoader.InitializationMode =
+            PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+        integrationMetadata: IntegrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+    ): PaymentMethodMetadata {
+        val elementsSession = (
+            elementsSession
+                ?: createElementsSession(
+                    intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                )
+            ).copy(
+                flags = buildMap {
+                    attestOnIntentConfirmationFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION, it)
+                    }
+                    nfcScanningFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED, it)
+                    }
+                    preferNfcOverCameraScanFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN, it)
+                    }
+                }
+            )
+
+        return PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = null,
+            initializationMode = initializationMode,
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = integrationMetadata,
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 
-    private fun createCustomerSheetMetadata(attestOnIntentConfirmationFlag: Boolean): PaymentMethodMetadata {
+    private fun createCustomerSheetMetadata(
+        attestOnIntentConfirmationFlag: Boolean,
+        nfcScanningFlag: Boolean? = null,
+    ): PaymentMethodMetadata {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         ).copy(
-            flags = mapOf(
-                ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
-            )
+            flags = buildMap {
+                put(
+                    ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION,
+                    attestOnIntentConfirmationFlag,
+                )
+                nfcScanningFlag?.let {
+                    put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED, it)
+                }
+            }
         )
 
         val configuration = createCustomerSheetConfiguration(
@@ -2144,10 +2384,10 @@ internal class PaymentMethodMetadataTest {
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-            sharedDataSpecs = emptyList(),
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
         )
     }
 
@@ -2185,7 +2425,6 @@ internal class PaymentMethodMetadataTest {
             allowUserEmailEdits = true,
             allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
-            skipWalletInFlowController = false,
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
@@ -2194,6 +2433,10 @@ internal class PaymentMethodMetadataTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+            linkBrand = LinkBrand.Link,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 
@@ -2205,6 +2448,78 @@ internal class PaymentMethodMetadataTest {
             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
+
+    @Test
+    fun `paymentMethodOrientation returns Horizontal when layout is Horizontal`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Vertical when layout is Vertical`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Vertical when layout is Automatic and has three payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna", "affirm"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Horizontal when layout is Automatic and has two payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns account linkBrand when account linkBrand is present`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link)
+
+        assertThat(metadata.effectiveLinkBrand(createLinkAccount(linkBrand = LinkBrand.Onelink)))
+            .isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns metadata linkBrand when account is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Onelink)
+
+        assertThat(metadata.effectiveLinkBrand(account = null)).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns metadata linkBrand when account linkBrand is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Onelink)
+
+        assertThat(metadata.effectiveLinkBrand(createLinkAccount(linkBrand = null)))
+            .isEqualTo(LinkBrand.Onelink)
+    }
+
+    private fun createLinkAccount(linkBrand: LinkBrand?): LinkAccount {
+        return LinkAccount(
+            TestFactory.CONSUMER_SESSION.copy(linkBrand = linkBrand),
+        )
+    }
 
     private fun createCustomerSheetConfiguration(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -2224,7 +2539,7 @@ internal class PaymentMethodMetadataTest {
         shippingDetails: AddressDetails,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+        allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
         allowsDelayedPaymentMethods = true,
@@ -2237,6 +2552,6 @@ internal class PaymentMethodMetadataTest {
         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
-        shopPayConfiguration = shopPayConfiguration
+        allowedCardFundingTypes = allowedCardFundingTypes
     )
 }

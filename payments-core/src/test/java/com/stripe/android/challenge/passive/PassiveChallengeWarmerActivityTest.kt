@@ -2,10 +2,13 @@ package com.stripe.android.challenge.passive
 
 import android.content.Context
 import android.content.Intent
+import android.view.WindowManager
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerActivity
@@ -13,6 +16,7 @@ import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarm
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
@@ -20,6 +24,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -55,6 +60,30 @@ internal class PassiveChallengeWarmerActivityTest {
             scenario.close()
             hCaptchaService.ensureAllEventsConsumed()
         }
+    }
+
+    @Test
+    fun `activity window should not accept focus or touch input while warming up`() = runTest {
+        val hCaptchaService = FakeHCaptchaService().apply {
+            warmUpResult = {
+                awaitCancellation()
+            }
+        }
+
+        val scenario = launchActivityForResult(hCaptchaService)
+        hCaptchaService.awaitWarmUpCall()
+
+        scenario.onActivity { activity ->
+            val flags = activity.window.attributes.flags
+
+            assertThat(flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                .isEqualTo(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+            assertThat(flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                .isEqualTo(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        }
+
+        scenario.close()
+        hCaptchaService.ensureAllEventsConsumed()
     }
 
     @Test
@@ -122,6 +151,21 @@ internal class PassiveChallengeWarmerActivityTest {
         assertThat(retrievedArgs).isNull()
     }
 
+    @Test
+    fun `activity finishes gracefully when required args are missing`() = runTest {
+        ActivityScenario.launchActivityForResult<PassiveChallengeWarmerActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PassiveChallengeWarmerActivity::class.java
+            )
+        ).use { scenario ->
+            advanceUntilIdle()
+
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
+    }
+
     private fun launchActivityForResult(
         hCaptchaService: HCaptchaService = FakeHCaptchaService(),
     ) = injectableActivityScenario<PassiveChallengeWarmerActivity> {
@@ -168,12 +212,13 @@ internal class PassiveChallengeWarmerActivityTest {
     companion object {
         private val passiveCaptchaParams = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = null
         )
 
         private val args = PassiveChallengeWarmerArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = listOf("PaymentSheet")
         )
     }

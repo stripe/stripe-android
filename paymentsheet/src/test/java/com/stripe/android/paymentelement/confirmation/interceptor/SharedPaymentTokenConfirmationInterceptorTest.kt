@@ -10,9 +10,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -57,9 +59,9 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 intent = intent,
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = providedPaymentMethod,
                     optionsParams = null,
-                    hCaptchaToken = null,
                 ),
                 shippingValues = providedShippingAddress,
             )
@@ -67,7 +69,9 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                    },
                     completedFullPaymentFlow = false,
                 )
             )
@@ -114,7 +118,9 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                    },
                     completedFullPaymentFlow = false,
                 )
             )
@@ -163,7 +169,9 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                    },
                     completedFullPaymentFlow = false,
                 )
             )
@@ -218,7 +226,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
     }
 
     private companion object {
-        val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
+        val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,

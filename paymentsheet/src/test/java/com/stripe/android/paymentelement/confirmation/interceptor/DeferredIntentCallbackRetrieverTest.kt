@@ -2,12 +2,11 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackNotFoundException
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -32,7 +31,7 @@ class DeferredIntentCallbackRetrieverTest {
         failureMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE,
         userMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE.resolvableString,
     ) { errorReporter ->
-        createDefaultRetriever(errorReporter = errorReporter).waitForSharedPaymentTokenCallback()
+        createDefaultRetriever(errorReporter = errorReporter).waitForSharedPaymentTokenCallback(isLiveMode = false)
     }
 
     @Test
@@ -49,7 +48,7 @@ class DeferredIntentCallbackRetrieverTest {
                         CreateIntentResult.Success(clientSecret = "pi_123")
                     }
                 },
-            ).waitForSharedPaymentTokenCallback()
+            ).waitForSharedPaymentTokenCallback(isLiveMode = false)
         }
 
     @Test
@@ -58,7 +57,7 @@ class DeferredIntentCallbackRetrieverTest {
         failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
         userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
     ) { errorReporter ->
-        createDefaultRetriever(errorReporter = errorReporter).waitForPaymentMethodCallback()
+        createDefaultRetriever(errorReporter = errorReporter).waitForPaymentMethodCallback(isLiveMode = false)
     }
 
     @Test
@@ -75,7 +74,7 @@ class DeferredIntentCallbackRetrieverTest {
                         CreateIntentResult.Success(clientSecret = "pi_123")
                     }
                 }
-            ).waitForPaymentMethodCallback()
+            ).waitForPaymentMethodCallback(isLiveMode = false)
         }
 
     @Test
@@ -86,8 +85,7 @@ class DeferredIntentCallbackRetrieverTest {
     ) { errorReporter ->
         createDefaultRetriever(
             errorReporter = errorReporter,
-            publishableKeyProvider = { "pk_live_12345" },
-        ).waitForPaymentMethodCallback()
+        ).waitForPaymentMethodCallback(isLiveMode = true)
     }
 
     @Test
@@ -101,7 +99,7 @@ class DeferredIntentCallbackRetrieverTest {
                 createDefaultRetriever(
                     errorReporter = errorReporter,
                     intentCreationCallbackProvider = Provider { callback },
-                ).waitForPaymentMethodCallback()
+                ).waitForPaymentMethodCallback(isLiveMode = false)
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -130,7 +128,7 @@ class DeferredIntentCallbackRetrieverTest {
                 createDefaultRetriever(
                     errorReporter = errorReporter,
                     intentCreationWithConfirmationTokenCallback = Provider { callback },
-                ).waitForConfirmationTokenCallback()
+                ).waitForConfirmationTokenCallback(isLiveMode = false)
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -160,7 +158,7 @@ class DeferredIntentCallbackRetrieverTest {
                 createDefaultRetriever(
                     errorReporter = errorReporter,
                     preparePaymentMethodHandlerProvider = Provider { callback },
-                ).waitForSharedPaymentTokenCallback()
+                ).waitForSharedPaymentTokenCallback(isLiveMode = false)
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -188,9 +186,9 @@ class DeferredIntentCallbackRetrieverTest {
         val dispatcher = StandardTestDispatcher()
 
         runTest(dispatcher) {
-            lateinit var exception: DeferredIntentCallbackNotFoundException
+            lateinit var exception: CallbackNotFoundException
             val retrieveJob = async {
-                exception = assertFailsWith<DeferredIntentCallbackNotFoundException> {
+                exception = assertFailsWith<CallbackNotFoundException> {
                     retrieveCall(errorReporter)
                 }
             }
@@ -217,11 +215,10 @@ class DeferredIntentCallbackRetrieverTest {
     }
 
     private fun createDefaultRetriever(
-        publishableKeyProvider: Provider<String> = Provider { "pk_test_1234" },
         errorReporter: FakeErrorReporter = FakeErrorReporter(),
         intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
-        intentCreationWithConfirmationTokenCallback:
-        Provider<CreateIntentWithConfirmationTokenCallback?> = Provider { null },
+        intentCreationWithConfirmationTokenCallback: Provider<CreateIntentWithConfirmationTokenCallback?> =
+            Provider { null },
         preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null },
     ): DeferredIntentCallbackRetriever {
         return DeferredIntentCallbackRetriever(
@@ -229,12 +226,6 @@ class DeferredIntentCallbackRetrieverTest {
             intentCreateIntentWithConfirmationTokenCallback = intentCreationWithConfirmationTokenCallback,
             preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
             errorReporter = errorReporter,
-            requestOptionsProvider = {
-                ApiRequest.Options(
-                    apiKey = publishableKeyProvider.get(),
-                    stripeAccount = null,
-                )
-            },
         )
     }
 

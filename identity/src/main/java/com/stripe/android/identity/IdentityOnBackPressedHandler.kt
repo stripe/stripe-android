@@ -66,7 +66,8 @@ internal class IdentityOnBackPressedHandler(
                             isFromFallbackUrl = false,
                             requireSelfie =
                             identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                            throwable = failedReason
+                            throwable = failedReason,
+                            lastScreenName = identityViewModel.analyticsLastScreenName
                         )
                         verificationFlowFinishable.finishWithResult(
                             IdentityVerificationSheet.VerificationFlowResult.Failed(failedReason)
@@ -89,7 +90,7 @@ internal class IdentityOnBackPressedHandler(
     ) {
         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
             isFromFallbackUrl = false,
-            lastScreenName = lastScreeName,
+            lastScreenName = identityViewModel.analyticsLastScreenName ?: lastScreeName,
             requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
         )
         verificationFlowFinishable.finishWithResult(

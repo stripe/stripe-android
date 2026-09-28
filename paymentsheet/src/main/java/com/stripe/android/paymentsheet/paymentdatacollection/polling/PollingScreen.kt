@@ -23,7 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -111,7 +112,7 @@ private fun ActivePolling(
         modifier = modifier
             .fillMaxSize()
             .padding(vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top))
-            .padding(StripeTheme.getOuterFormInsets())
+            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
     ) {
         LoadingIndicator(
             modifier = Modifier.padding(bottom = Spacing.extended),
@@ -173,7 +174,7 @@ private fun FailedPolling(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top))
-                    .padding(StripeTheme.getOuterFormInsets())
+                    .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
             ) {
                 Image(
                     painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
@@ -205,14 +206,14 @@ private fun rememberActivePollingMessage(
     remainingDuration: Duration,
     @StringRes ctaText: Int
 ): String {
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     return remember(remainingDuration) {
         val remainingTime = remainingDuration.toComponents { minutes, seconds, _ ->
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-        context.getString(ctaText, remainingTime)
+        resources.getString(ctaText, remainingTime)
     }
 }
 
@@ -238,7 +239,7 @@ private fun ActivePollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
-                    ctaText = R.string.stripe_upi_polling_message,
+                    ctaText = R.string.stripe_blik_confirm_payment,
                     pollingState = PollingState.Active,
                     shouldShowQrCode = false,
                 ),
@@ -256,7 +257,7 @@ private fun FailedPollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
-                    ctaText = R.string.stripe_upi_polling_message,
+                    ctaText = R.string.stripe_blik_confirm_payment,
                     pollingState = PollingState.Failed,
                     shouldShowQrCode = false,
                 ),

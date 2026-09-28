@@ -1,10 +1,14 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.RestrictTo
+import android.graphics.drawable.Drawable
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 fun interface OnrampCollectPaymentMethodCallback {
     fun onResult(result: OnrampCollectPaymentMethodResult)
 }
@@ -12,42 +16,58 @@ fun interface OnrampCollectPaymentMethodCallback {
 /**
  * Result of selecting a payment type in Onramp.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed class OnrampCollectPaymentMethodResult {
     /**
      * The user has selected a payment option.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Completed internal constructor(val displayData: PaymentMethodDisplayData) : OnrampCollectPaymentMethodResult()
+    @ExperimentalCryptoOnramp
+    class Completed internal constructor(
+        val displayData: PaymentMethodDisplayData,
+        val kycInfo: KycInfo?
+    ) : OnrampCollectPaymentMethodResult()
 
     /**
      * The user declined to select a payment option.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Cancelled internal constructor() : OnrampCollectPaymentMethodResult()
 
     /**
      * Selecting a payment option failed due to an error.
      * @param error The error that caused the failure.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(val error: Throwable) : OnrampCollectPaymentMethodResult()
 }
 
 @Poko
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class PaymentMethodDisplayData internal constructor(
-
-    /**
-     * User facing icon represented payment method.
-     */
-    @DrawableRes
-    val iconRes: Int,
-
+    val imageLoader: suspend () -> Drawable,
     /**
      * User facing strings representing payment method information
      */
     val label: String,
+    val sublabel: String?,
+    /**
+     * The type of payment being displayed.
+     */
+    val type: Type
+) {
+    @ExperimentalCryptoOnramp
+    enum class Type {
+        Card,
+        BankAccount,
+        GooglePay,
+        SamsungPay,
+    }
 
-    val sublabel: String?
-)
+    val icon: Drawable by lazy {
+        DelegateDrawable(imageLoader = imageLoader)
+    }
+
+    val iconPainter: Painter
+        @Composable
+        get() = rememberDrawablePainter(icon)
+}

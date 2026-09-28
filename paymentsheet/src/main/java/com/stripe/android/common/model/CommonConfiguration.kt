@@ -3,16 +3,19 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -31,21 +34,36 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
-    val linkAppearance: LinkAppearance? = null,
+    val linkAppearance: LinkAppearance.State? = null,
     val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
     val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
+    val apiConfiguration: ApiConfiguration.State? = null,
 ) : Parcelable {
 
-    fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
+    fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
+        if (enabled) return allowedCardFundingTypes
+        return ConfigurationDefaults.allowedCardFundingTypes
+    }
+
+    fun validate(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        isLiveMode: Boolean,
+        @PaymentElementCallbackIdentifier callbackIdentifier: String,
+        isTapToAddSupported: Boolean = true,
+    ) {
         customerAndMerchantValidate()
+        checkoutSessionValidate(initializationMode)
         externalPaymentMethodsValidate(isLiveMode)
         confirmationTokenValidate(isLiveMode, callbackIdentifier)
+        if (isTapToAddSupported) {
+            tapToAddValidate(callbackIdentifier)
+        }
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -68,6 +86,27 @@ internal data class CommonConfiguration(
                         " the Customer ID cannot be an empty string."
                 )
             }
+        }
+    }
+
+    @Suppress("ThrowsCount")
+    private fun checkoutSessionValidate(initializationMode: PaymentElementLoader.InitializationMode) {
+        if (initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession) return
+        if (customer != null) {
+            throw IllegalArgumentException(
+                "configuration.customer must not be set when using CheckoutSession initialization mode. " +
+                    "Customer information is provided by the checkout session."
+            )
+        }
+        if (externalPaymentMethods.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "configuration.externalPaymentMethods must not be set when using CheckoutSession initialization mode."
+            )
+        }
+        if (customPaymentMethods.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "configuration.customPaymentMethods must not be set when using CheckoutSession initialization mode."
+            )
         }
     }
 
@@ -99,6 +138,23 @@ internal data class CommonConfiguration(
         ) {
             throw IllegalArgumentException(
                 "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
+            )
+        }
+    }
+
+    // These exception messages are not localized as they are not intended to be displayed to a user.
+    @OptIn(TapToAddPreview::class)
+    private fun tapToAddValidate(
+        @PaymentElementCallbackIdentifier callbackIdentifier: String
+    ) {
+        if (
+            PaymentElementCallbackReferences[callbackIdentifier]?.createCardPresentSetupIntentCallback != null &&
+            billingDetailsCollectionConfiguration.collectsAnything
+        ) {
+            throw IllegalArgumentException(
+                "Tap to Add does not supporting collecting billing fields with " +
+                    "BillingDetailsCollectionConfiguration. To use Tap to Add, set all " +
+                    "BillingDetailsCollectionConfiguration config options to 'Automatic'."
             )
         }
     }
@@ -185,13 +241,14 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    shopPayConfiguration = shopPayConfiguration,
     googlePlacesApiKey = googlePlacesApiKey,
     termsDisplay = termsDisplay,
     walletButtons = walletButtons,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -210,16 +267,17 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    shopPayConfiguration = null,
     googlePlacesApiKey = null,
     termsDisplay = termsDisplay,
     walletButtons = null,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
-internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = null,
     googlePay = null,
@@ -238,10 +296,9 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
         display = PaymentSheet.LinkConfiguration.Display.Automatic,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
-        allowLogOut = allowLogOut,
+        allowLogOut = allowLogout,
         disallowFundingSourceCreation = emptySet(),
     ),
-    shopPayConfiguration = null,
     googlePlacesApiKey = null,
     linkAppearance = linkAppearance,
     termsDisplay = emptyMap(),
@@ -249,13 +306,18 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     opensCardScannerAutomatically = false,
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
+    allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+    apiConfiguration = ApiConfiguration.State(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+    ),
 )
 
 private fun String.isEKClientSecretValid(): Boolean {
     return Regex(EK_CLIENT_SECRET_VALID_REGEX_PATTERN).matches(this)
 }
 
-private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^ek_[^_](.)+$"
+private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^(ek|uk)_[^_](.)+$"
 
 internal fun CommonConfiguration.containsVolatileDifferences(
     other: CommonConfiguration

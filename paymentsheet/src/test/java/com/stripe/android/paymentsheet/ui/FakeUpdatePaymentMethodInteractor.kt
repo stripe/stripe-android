@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.Turbine
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
@@ -9,6 +10,8 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.hasMultipleNetworks
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +24,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val isExpiredCard: Boolean = false,
     override val isModifiablePaymentMethod: Boolean = false,
     override val hasValidBrandChoices: Boolean = true,
+    override val shouldShowCardBrandDropdown: Boolean = false,
     override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     override val shouldShowSetAsDefaultCheckbox: Boolean = false,
     override val shouldShowSaveButton: Boolean = false,
@@ -36,23 +40,30 @@ internal class FakeUpdatePaymentMethodInteractor(
         isSaveButtonEnabled = false,
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
-    override val canUpdateFullPaymentMethodDetails: Boolean = false,
+    override val canUpdateCardExpiryAndBillingDetails: Boolean = false,
+    override val canChangeCbc: Boolean = true,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
+    val closeCalls = Turbine<Unit>()
+
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
-        val isModifiable =
-            displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
+        val isModifiable = displayableSavedPaymentMethod.paymentMethod.isModifiable(
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+            canChangeCbc = canChangeCbc,
+        )
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
             cardEditConfiguration = CardEditConfiguration(
                 cardBrandFilter = cardBrandFilter,
-                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
-                areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails
+                isCbcModifiable = isModifiable &&
+                    canChangeCbc &&
+                    displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks(),
+                areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardExpiryAndBillingDetails
             ),
             requiresModification = true,
             payload = EditCardPayload.create(
@@ -64,6 +75,7 @@ internal class FakeUpdatePaymentMethodInteractor(
             ),
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
+            autocompleteAddressInteractorFactory = null,
         )
     }
 
@@ -74,5 +86,9 @@ internal class FakeUpdatePaymentMethodInteractor(
 
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         viewActionRecorder?.record(viewAction)
+    }
+
+    override fun close() {
+        closeCalls.add(Unit)
     }
 }

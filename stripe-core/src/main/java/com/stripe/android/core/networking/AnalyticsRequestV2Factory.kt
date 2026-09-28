@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.reactnative.ReactNativeAnalytics
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
@@ -61,6 +62,8 @@ class AnalyticsRequestV2Factory(
         AnalyticsFields.APP_VERSION to appContext.packageInfo?.versionCode,
         AnalyticsFields.DEVICE_ID to Settings.Secure.getString(appContext.contentResolver, Settings.Secure.ANDROID_ID),
         PARAM_PLUGIN_TYPE to pluginType,
+        AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE to ReactNativeAnalytics.isNewArchitecture,
+        AnalyticsFields.REACT_NATIVE_VERSION to ReactNativeAnalytics.reactNativeVersion,
         PARAM_PLATFORM_INFO to mapOf(
             PARAM_PACKAGE_NAME to appContext.packageName
         )

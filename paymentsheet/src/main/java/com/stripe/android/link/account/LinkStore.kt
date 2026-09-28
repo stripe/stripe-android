@@ -6,24 +6,30 @@ import androidx.core.content.edit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+internal interface LinkStore {
+    fun hasUsedLink(): Boolean
+    fun markLinkAsUsed()
+    fun clear()
+}
+
 @Singleton
-internal class LinkStore @Inject constructor(
+internal class DefaultLinkStore @Inject constructor(
     context: Context,
-) {
+) : LinkStore {
 
     private val sharedPrefs: SharedPreferences by lazy {
         context.getSharedPreferences(FileName, Context.MODE_PRIVATE)
     }
 
-    fun hasUsedLink(): Boolean {
+    override fun hasUsedLink(): Boolean {
         return sharedPrefs.getBoolean(HasUsedLink, false)
     }
 
-    fun markLinkAsUsed() {
+    override fun markLinkAsUsed() {
         sharedPrefs.edit { putBoolean(HasUsedLink, true) }
     }
 
-    fun clear() {
+    override fun clear() {
         sharedPrefs.edit { clear() }
     }
 

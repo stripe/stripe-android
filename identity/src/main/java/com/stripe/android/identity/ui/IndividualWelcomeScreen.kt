@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,13 +23,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL_WELCOME
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun IndividualWelcomeScreen(
@@ -55,16 +56,20 @@ internal fun IndividualWelcomeScreen(
             merchantLogoUri = merchantLogoUri,
             welcomePage = individualWelcomePage,
             bottomSheets = verificationPage.bottomSheet,
+            identityViewModel = identityViewModel,
             navController = navController
         )
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod")
 @Composable
 private fun SuccessUI(
     merchantLogoUri: Uri,
     welcomePage: VerificationPageStaticContentIndividualWelcomePage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
+    identityViewModel: IdentityViewModel,
     navController: NavController,
 ) {
     Column(
@@ -91,7 +96,10 @@ private fun SuccessUI(
                 merchantLogoUri = merchantLogoUri,
                 title = welcomePage.title
             )
-            ConsentLines(lines = welcomePage.lines, bottomSheets = bottomSheets)
+            ConsentLines(
+                lines = welcomePage.lines,
+                bottomSheets = bottomSheets
+            )
         }
 
         var scrolledToBottom by remember { mutableStateOf(false) }
@@ -101,14 +109,16 @@ private fun SuccessUI(
             }
         }
 
-        Html(
+        BottomSheetHTML(
             html = welcomePage.privacyPolicy,
+            bottomSheets = bottomSheets,
             modifier = Modifier
                 .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                 .semantics {
                     testTag = PRIVACY_POLICY_TAG
                 },
             color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.body1,
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary
@@ -123,6 +133,9 @@ private fun SuccessUI(
             state = acceptState
         ) {
             acceptState = LoadingButtonState.Disabled
+            identityViewModel.screenTracker.screenTransitionStart(
+                IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL_WELCOME
+            )
             navController.navigateTo(IndividualDestination)
         }
     }

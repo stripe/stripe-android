@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,22 +23,26 @@ internal class FlowControllerViewModel(
     application: Application,
     val handle: SavedStateHandle,
     paymentElementCallbackIdentifier: String,
-    @ColorInt statusBarColor: Int?,
+    @ColorInt val statusBarColor: Int?,
 ) : AndroidViewModel(application) {
 
     val flowControllerStateComponent: FlowControllerStateComponent =
         DaggerFlowControllerStateComponent
-            .builder()
-            .application(application)
-            .statusBarColor(statusBarColor)
-            .paymentElementCallbackIdentifier(paymentElementCallbackIdentifier)
-            .flowControllerViewModel(this)
-            .build()
+            .factory()
+            .create(
+                application = application,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                flowControllerViewModel = this,
+                viewModelScope = viewModelScope,
+            )
 
     var walletButtonsRendered: Boolean = false
 
     @Volatile
     var paymentSelection: PaymentSelection? = null
+
+    @Volatile
+    var autocompleteFilledAddress: Address? = null
 
     // Used to determine if we need to reload the flow controller configuration.
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest?
@@ -64,8 +69,6 @@ internal class FlowControllerViewModel(
     private val restartSession = SessionSavedStateHandler.attachTo(this, handle)
 
     init {
-        flowControllerStateComponent.eventReporter.onInit()
-
         viewModelScope.launch {
             stateFlow.collectLatest { state ->
                 flowControllerStateComponent.linkHandler.setupLink(
@@ -76,6 +79,7 @@ internal class FlowControllerViewModel(
     }
 
     fun resetSession() {
+        autocompleteFilledAddress = null
         restartSession()
     }
 

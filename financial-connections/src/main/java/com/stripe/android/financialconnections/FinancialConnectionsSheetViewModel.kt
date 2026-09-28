@@ -602,13 +602,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val args: FinancialConnectionsSheetActivityArgs = requireNotNull(getArgs(savedStateHandle))
                 val state = FinancialConnectionsSheetState(args, savedState)
                 DaggerFinancialConnectionsSheetComponent
-                    .builder()
-                    .application(app)
-                    .savedStateHandle(savedStateHandle)
-                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
-                    .initialState(state)
-                    .configuration(state.initialArgs.configuration)
-                    .build().viewModel
+                    .factory()
+                    .build(
+                        application = app,
+                        savedStateHandle = savedStateHandle,
+                        initialState = state,
+                        configuration = state.initialArgs.configuration,
+                        sharedComponent = FinancialConnectionsSingletonSharedComponentHolder.getComponent(app),
+                    ).viewModel
             }
         }
 

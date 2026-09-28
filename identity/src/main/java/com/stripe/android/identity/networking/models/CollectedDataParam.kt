@@ -9,6 +9,7 @@ import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.ui.DRIVING_LICENSE_KEY
 import com.stripe.android.identity.ui.ID_CARD_KEY
 import com.stripe.android.identity.ui.PASSPORT_KEY
+import com.stripe.android.identity.utils.roundToMaxDecimals
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -73,7 +74,7 @@ internal data class CollectedDataParam(
         fun CollectedDataParam.createCollectedDataParamEntry(json: Json) =
             COLLECTED_DATA_PARAM to json.encodeToJsonElement(
                 serializer(),
-                this
+                this.roundFloatUploadParams()
             ).toMap()
 
         fun createFromFrontUploadedResultsForAutoCapture(
@@ -160,6 +161,13 @@ internal data class CollectedDataParam(
             bestFocalLength: Float? = null,
             bestExposureDuration: Long? = null,
             bestIsVirtualCamera: Boolean? = null,
+            leftFullFrameResult: UploadedResult? = null,
+            rightFullFrameResult: UploadedResult? = null,
+            bestFrameData: FaceFrameDataParam? = null,
+            firstFrameData: FaceFrameDataParam? = null,
+            lastFrameData: FaceFrameDataParam? = null,
+            leftFrameData: FaceFrameDataParam? = null,
+            rightFrameData: FaceFrameDataParam? = null,
         ) = CollectedDataParam(
             face = FaceUploadParam(
                 bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
@@ -177,6 +185,13 @@ internal data class CollectedDataParam(
                 bestIsVirtualCamera = bestIsVirtualCamera,
                 bestExposureIso = bestExposureIso,
                 trainingConsent = trainingConsent,
+                leftHighResImage = leftFullFrameResult?.uploadedStripeFile?.id,
+                rightHighResImage = rightFullFrameResult?.uploadedStripeFile?.id,
+                bestFrameData = bestFrameData,
+                firstFrameData = firstFrameData,
+                lastFrameData = lastFrameData,
+                leftFrameData = leftFrameData,
+                rightFrameData = rightFrameData,
             )
         )
 
@@ -265,3 +280,47 @@ internal data class CollectedDataParam(
             }
     }
 }
+
+private const val MAX_UPLOAD_FLOAT_DECIMALS = 2
+
+private fun CollectedDataParam.roundFloatUploadParams(): CollectedDataParam =
+    copy(
+        idDocumentFront = idDocumentFront?.roundFloatUploadParams(),
+        idDocumentBack = idDocumentBack?.roundFloatUploadParams(),
+        face = face?.roundFloatUploadParams(),
+    )
+
+private fun DocumentUploadParam.roundFloatUploadParams(): DocumentUploadParam =
+    copy(
+        backScore = backScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        frontCardScore = frontCardScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        invalidScore = invalidScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        passportScore = passportScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        exposureIso = exposureIso?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        focalLength = focalLength?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+    )
+
+private fun FaceUploadParam.roundFloatUploadParams(): FaceUploadParam =
+    copy(
+        bestFaceScore = bestFaceScore.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        faceScoreVariance = faceScoreVariance.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestBrightnessValue = bestBrightnessValue?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestFocalLength = bestFocalLength?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestExposureIso = bestExposureIso?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestFrameData = bestFrameData?.roundFloatUploadParams(),
+        firstFrameData = firstFrameData?.roundFloatUploadParams(),
+        lastFrameData = lastFrameData?.roundFloatUploadParams(),
+        leftFrameData = leftFrameData?.roundFloatUploadParams(),
+        rightFrameData = rightFrameData?.roundFloatUploadParams(),
+    )
+
+private fun FaceFrameDataParam.roundFloatUploadParams(): FaceFrameDataParam =
+    copy(
+        faceScore = faceScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        faceScoreVariance = faceScoreVariance?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        blurScore = blurScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        blurScoreVariance = blurScoreVariance?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        yaw = yaw?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        pitch = pitch?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        roll = roll?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+    )

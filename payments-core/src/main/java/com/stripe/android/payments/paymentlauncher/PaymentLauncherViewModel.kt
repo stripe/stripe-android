@@ -11,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
@@ -22,6 +23,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.paymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -310,6 +312,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         LocalStripeException(
                             displayMessage = stripeIntentResult.failureMessage,
                             analyticsValue = "failedIntentOutcomeError",
+                            errorCode = stripeIntentResult.errorCode(),
+                            declineCode = stripeIntentResult.declineCode(),
+                            type = stripeIntentResult.type(),
                         )
                     )
                 StripeIntentResult.Outcome.CANCELED ->
@@ -338,6 +343,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
         intent: StripeIntent? = null,
         analyticsParams: Map<String, String> = emptyMap(),
     ) {
+        // Guard against multiple calls - only send analytics event once per flow
+        if (internalPaymentResult.value != null) {
+            return
+        }
+
         internalPaymentResult.value = stripeInternalResult.also {
             val event = if (confirmActionRequested) {
                 PaymentAnalyticsEvent.PaymentLauncherConfirmFinished
@@ -406,14 +416,17 @@ internal class PaymentLauncherViewModel @Inject constructor(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            val subcomponentBuilder = DaggerPaymentLauncherViewModelFactoryComponent.builder()
-                .context(application)
-                .enableLogging(arg.enableLogging)
-                .publishableKeyProvider { arg.publishableKey }
-                .stripeAccountIdProvider { arg.stripeAccountId }
-                .productUsage(arg.productUsage)
-                .includePaymentSheetNextHandlers(arg.includePaymentSheetNextHandlers)
-                .build().viewModelSubcomponentBuilder
+            val subcomponentFactory = DaggerPaymentLauncherViewModelFactoryComponent.factory()
+                .create(
+                    context = application,
+                    enableLogging = arg.enableLogging,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = arg.publishableKey,
+                        stripeAccountId = arg.stripeAccountId,
+                    ),
+                    productUsage = arg.productUsage,
+                    includePaymentSheetNextHandlers = arg.includePaymentSheetNextHandlers,
+                ).viewModelSubcomponentFactory
 
             val isPaymentIntent = when (arg) {
                 is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
@@ -430,10 +443,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 }
             }
 
-            return subcomponentBuilder
-                .isPaymentIntent(isPaymentIntent)
-                .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+            return subcomponentFactory
+                .create(
+                    isPaymentIntent = isPaymentIntent,
+                    handle = savedStateHandle,
+                ).viewModel as T
         }
     }
 
@@ -446,6 +460,27 @@ internal class PaymentLauncherViewModel @Inject constructor(
         internal const val KEY_HAS_STARTED = "key_has_started"
 
         private const val KEY_CONFIRM_ACTION_REQUESTED = "confirm_action_requested"
+    }
+}
+
+private fun StripeIntentResult<StripeIntent>.errorCode(): String? {
+    return when (val intent = this.intent) {
+        is PaymentIntent -> intent.lastPaymentError?.code
+        is SetupIntent -> intent.lastSetupError?.code
+    }
+}
+
+private fun StripeIntentResult<StripeIntent>.declineCode(): String? {
+    return when (val intent = this.intent) {
+        is PaymentIntent -> intent.lastPaymentError?.declineCode
+        is SetupIntent -> intent.lastSetupError?.declineCode
+    }
+}
+
+private fun StripeIntentResult<StripeIntent>.type(): String? {
+    return when (val intent = this.intent) {
+        is PaymentIntent -> intent.lastPaymentError?.type?.code
+        is SetupIntent -> intent.lastSetupError?.type?.code
     }
 }
 

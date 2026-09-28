@@ -4,10 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
@@ -29,6 +27,7 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -46,10 +45,11 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
-        ApplicationIdModule::class,
+        ElementsSessionClientParamsModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
+        ApiRequestOptionsModule::class,
     ]
 )
 internal interface NativeLinkComponent {
@@ -74,53 +74,34 @@ internal interface NativeLinkComponent {
     val webLinkAuthChannel: WebLinkAuthChannel
     val paymentMethodMetadata: PaymentMethodMetadata
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun configuration(configuration: LinkConfiguration): Builder
-
-        @BindsInstance
-        fun paymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun linkExpressMode(
-            @Named(LINK_EXPRESS_MODE) linkExpressMode: LinkExpressMode
-        ): Builder
-
-        @BindsInstance
-        fun linkLaunchMode(linkLaunchMode: LinkLaunchMode): Builder
-
-        @BindsInstance
-        fun linkAccountUpdate(linkAccountUpdate: LinkAccountUpdate.Value): Builder
-
-        @BindsInstance
-        fun requestSurface(
-            requestSurface: RequestSurface
-        ): Builder
-
-        fun build(): NativeLinkComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            configuration: LinkConfiguration,
+            @BindsInstance
+            paymentMethodMetadata: PaymentMethodMetadata,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            @Named(LINK_EXPRESS_MODE)
+            linkExpressMode: LinkExpressMode,
+            @BindsInstance
+            linkLaunchMode: LinkLaunchMode,
+            @BindsInstance
+            linkAccountUpdate: LinkAccountUpdate.Value,
+            @BindsInstance
+            requestSurface: RequestSurface,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+        ): NativeLinkComponent
     }
 }

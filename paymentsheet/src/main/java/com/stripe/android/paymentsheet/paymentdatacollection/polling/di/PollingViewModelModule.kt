@@ -2,21 +2,25 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.DefaultTimeProvider
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.TimeProvider
 import com.stripe.android.polling.DefaultIntentStatusPoller
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
-@Module(subcomponents = [PollingViewModelSubcomponent::class])
+@Module(
+    subcomponents = [PollingViewModelSubcomponent::class],
+    includes = [PollingAnalyticsModule::class],
+)
 internal interface PollingViewModelModule {
 
     @Binds
@@ -28,18 +32,15 @@ internal interface PollingViewModelModule {
     companion object {
 
         @Provides
-        fun providesAppContext(application: Application): Context = application
-
-        @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
+        fun provideApiConfiguration(requestOptions: ApiRequest.Options): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = requestOptions.apiKey,
+                stripeAccountId = requestOptions.stripeAccount,
+            )
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(
-            appContext: Context
-        ): () -> String = { PaymentConfiguration.getInstance(appContext).publishableKey }
+        fun providesAppContext(application: Application): Context = application
 
         @Provides
         @Named(PRODUCT_USAGE)

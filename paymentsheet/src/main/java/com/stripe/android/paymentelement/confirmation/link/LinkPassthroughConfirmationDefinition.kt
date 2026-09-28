@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.link
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.model.PaymentMethod
@@ -9,7 +10,6 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -38,7 +38,6 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = LauncherArguments(nextConfirmationOption),
                     receivesResultInProcess = true,
-                    deferredIntentConfirmationType = null,
                 )
             },
             onFailure = { error ->
@@ -53,6 +52,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (Result) -> Unit
     ): Launcher {
         return Launcher(onResult)
@@ -70,7 +70,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: LinkPassthroughConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: LauncherArguments,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
@@ -92,9 +92,11 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
             requireNotNull(it.encodedPaymentMethod.parsePaymentMethod())
         }.map { paymentMethod ->
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 originatedFromWallet = true,
+                newPMTransformedForConfirmation = true
             )
         }
     }
@@ -104,9 +106,10 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
     ) : Parcelable
 
+    @Parcelize
     data class LauncherArguments(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
-    )
+    ) : Parcelable
 
     class Launcher(
         val onResult: (Result) -> Unit,

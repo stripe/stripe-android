@@ -11,17 +11,15 @@ import dagger.Subcomponent
 internal interface AddressElementViewModelSubcomponent {
     val viewModel: AddressElementViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun args(args: AddressElementActivityContract.Args): Builder
-
-        fun build(): AddressElementViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            args: AddressElementActivityContract.Args,
+        ): AddressElementViewModelSubcomponent
     }
 }

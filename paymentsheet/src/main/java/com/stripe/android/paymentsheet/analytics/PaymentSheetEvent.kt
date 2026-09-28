@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
@@ -29,12 +30,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         paymentSelection: PaymentSelection?,
         orderedLpms: List<String>,
         duration: Duration?,
+        hasCardArt: Boolean,
+        loadTimings: Map<String, Int>,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val params: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
+            put(FIELD_HAS_CARD_ART, hasCardArt)
+            if (loadTimings.isNotEmpty()) {
+                put(FIELD_LOAD_TIMINGS, loadTimings)
+            }
         }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
@@ -49,12 +56,17 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class LoadFailed(
         duration: Duration?,
         error: Throwable,
+        loadTimings: Map<String, Int>,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
-        override val params: Map<String, Any?> = mapOf(
-            FIELD_DURATION to duration?.asSeconds,
-            FIELD_ERROR_MESSAGE to error.asPaymentSheetLoadingException.type,
-        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+        override val params: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_ERROR_MESSAGE, error.asPaymentSheetLoadingException.type)
+            putAll(ErrorReporter.getAdditionalParamsFromError(error))
+            if (loadTimings.isNotEmpty()) {
+                put(FIELD_LOAD_TIMINGS, loadTimings)
+            }
+        }
     }
 
     class ElementsSessionLoadFailed(
@@ -64,14 +76,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val params: Map<String, Any?> = mapOf(
             FIELD_ERROR_MESSAGE to error.asPaymentSheetLoadingException.type,
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
-    }
-
-    class Init(
-        private val mode: EventReporter.Mode,
-    ) : PaymentSheetEvent() {
-
-        override val eventName: String
-            get() = formatEventName(mode, "init")
     }
 
     class Dismiss : PaymentSheetEvent() {
@@ -124,6 +128,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_HAS_CARD_ART to paymentSelection.hasCardArt(),
+        )
     }
 
     class ShowPaymentOptionForm(
@@ -171,12 +178,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         selectedLpm: String?,
         linkContext: String?,
+        hasCardArt: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_confirm_button_tapped"
         override val params: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
             FIELD_SELECTED_LPM to selectedLpm,
             FIELD_LINK_CONTEXT to linkContext,
+            FIELD_HAS_CARD_ART to hasCardArt,
         ).filterNotNullValues()
     }
 
@@ -211,6 +220,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 }
             }
             put(FIELD_SELECTED_LPM, paymentSelection.code())
+            put(FIELD_IS_SAVED_PAYMENT_METHOD, paymentSelection.isSaved)
+            put(FIELD_HAS_CARD_ART, paymentSelection.hasCardArt())
             paymentSelection.linkContext()?.let { linkContext ->
                 put(FIELD_LINK_CONTEXT, linkContext)
             }
@@ -229,13 +240,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     is Failure -> "failure"
                 }
         }
-    }
-
-    class LpmSerializeFailureEvent(
-        val errorMessage: String?
-    ) : PaymentSheetEvent() {
-        override val eventName: String = "luxe_serialize_failure"
-        override val params: Map<String, Any?> = mapOf(FIELD_ERROR_MESSAGE to errorMessage)
     }
 
     class AutofillEvent(
@@ -355,20 +359,40 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
     }
 
-    class ShopPayWebviewLoadAttempt : PaymentSheetEvent() {
-        override val eventName: String = "mc_shoppay_webview_load_attempt"
+    class AdaptivePricingCurrencySelectorInit : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.currency_selector_init"
     }
 
-    class ShopPayWebviewConfirmSuccess : PaymentSheetEvent() {
-        override val eventName: String = "mc_shoppay_webview_confirm_success"
+    class AdaptivePricingCurrencyToggled : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.currency_toggled"
     }
 
-    class ShopPayWebviewCancelled(
-        didReceiveECEClick: Boolean,
+    class AdaptivePricingCurrencyToggledFailed(
+        error: String,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_shoppay_webview_cancelled"
+        override val eventName: String = "elements.adaptive_pricing.currency_toggled.failed"
         override val params: Map<String, Any?> = mapOf(
-            "did_receive_ece_click" to didReceiveECEClick
+            FIELD_ERROR_MESSAGE to error,
+        )
+    }
+
+    class AdaptivePricingFlagImageLoadFailed(
+        countryCode: String,
+        url: String,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.flag_image_load.failed"
+        override val params: Map<String, Any?> = mapOf(
+            "country_code" to countryCode,
+            "url" to url,
+        )
+    }
+
+    class WalletButtonTapped(
+        walletType: String,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_wallet_button_tapped"
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to walletType
         )
     }
 
@@ -407,6 +431,96 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 )
     }
 
+    sealed class TapToAdd : PaymentSheetEvent() {
+        abstract val mode: EventReporter.Mode
+
+        class ButtonShown(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_button_shown")
+        }
+
+        class Started(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_started")
+        }
+
+        class CardAdded(
+            override val mode: EventReporter.Mode,
+            val duration: Duration?,
+            canCollectLinkInput: Boolean,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_card_added")
+
+            override val params: Map<String, Any?> =
+                mapOf(FIELD_CAN_COLLECT_LINK_SIGNUP_INPUT to canCollectLinkInput) + duration.mapOfDurationInSeconds()
+        }
+
+        class FailedToAddCard(
+            override val mode: EventReporter.Mode,
+            val message: String,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_failed_to_add_card")
+
+            override val params: Map<String, Any?> =
+                mapOf(FIELD_ERROR_MESSAGE to message) + duration.mapOfDurationInSeconds()
+        }
+
+        class ContinueAfterCardAdded(
+            override val mode: EventReporter.Mode,
+            completedLinkInput: Boolean?,
+        ) : TapToAdd() {
+            override val eventName: String =
+                formatEventName(mode, "tap_to_add_continue_after_card_added")
+
+            override val params: Map<String, Any?> =
+                mapOf(FIELD_COMPLETED_LINK_SIGNUP_INPUT to completedLinkInput)
+        }
+
+        class Confirm(
+            override val mode: EventReporter.Mode,
+            recollectedCvc: Boolean,
+        ) : TapToAdd() {
+            override val eventName: String =
+                formatEventName(mode, "tap_to_add_confirm")
+
+            override val params: Map<String, Any?> =
+                mapOf(FIELD_RECOLLECTED_CVC to recollectedCvc)
+        }
+
+        class Canceled(
+            override val mode: EventReporter.Mode,
+            val source: EventReporter.TapToAddCancelSource,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            private val sourceAsAnalyticsValue = when (source) {
+                EventReporter.TapToAddCancelSource.CardCollection -> "card_collection"
+                EventReporter.TapToAddCancelSource.CardAdded -> "card_added"
+                EventReporter.TapToAddCancelSource.Confirmation -> "confirmation"
+            }
+
+            override val eventName: String = formatEventName(mode, "tap_to_add_canceled")
+
+            override val params: Map<String, Any?> =
+                duration.mapOfDurationInSeconds() +
+                    mapOf(
+                        FIELD_TTA_CANCEL_SOURCE to sourceAsAnalyticsValue
+                    )
+        }
+
+        class AttemptWithUnsupportedDevice(
+            override val mode: EventReporter.Mode,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            override val eventName: String =
+                formatEventName(mode, "tap_to_add_attempt_with_unsupported_device")
+
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+        }
+    }
+
     class CardScanCancelled(
         implementation: String,
         duration: Duration?,
@@ -426,6 +540,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val params: Map<String, Any?> = mapOf(
             "implementation" to implementation
         )
+    }
+
+    class CardScanButtonShown : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_button_shown"
+    }
+
+    class NfcScanButtonShown : PaymentSheetEvent() {
+        override val eventName: String = "mc_nfc_scan_button_shown"
     }
 
     class CardScanApiCheckFailed(
@@ -452,12 +574,47 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    sealed class PaymentMethodMessaging : PaymentSheetEvent() {
+
+        class Fetched : PaymentMethodMessaging() {
+            override val eventName: String = "payment_method_messaging_fetch_begin"
+        }
+
+        class Displayed(val duration: Duration?, displayedSuccessfully: Boolean) : PaymentMethodMessaging() {
+            override val eventName: String = "payment_method_messaging_displayed"
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds() + mapOf(
+                "displayed_successfully" to displayedSuccessfully
+            )
+        }
+    }
+
+    class BillingAddressCompleted(
+        private val addressCountryCode: String,
+        private val autocompleteResultSelected: Boolean,
+        private val editDistance: Int?,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_billing_address_completed"
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_ADDRESS_DATA_BLOB to buildMap<String, Any> {
+                put(FIELD_ADDRESS_COUNTRY_CODE, addressCountryCode)
+                put(FIELD_AUTO_COMPLETE_RESULT_SELECTED, autocompleteResultSelected)
+                editDistance?.let { put(FIELD_EDIT_DISTANCE, it) }
+            }
+        )
+    }
+
     internal companion object {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?
         ) = when (paymentSelection) {
             is PaymentSelection.GooglePay -> "googlepay"
-            is PaymentSelection.Saved -> "savedpm"
+            is PaymentSelection.Saved -> {
+                if (paymentSelection.isLink) {
+                    "link"
+                } else {
+                    "savedpm"
+                }
+            }
             is PaymentSelection.Link,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
@@ -469,7 +626,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 }
             }
             null -> "unknown"
-            is PaymentSelection.ShopPay -> "shop_pay"
         }
 
         private fun formatEventName(mode: EventReporter.Mode, eventName: String): String {
@@ -479,20 +635,31 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"
         const val FIELD_DURATION = "duration"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_IS_SAVED_PAYMENT_METHOD = "is_saved_payment_method"
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_TTA_CANCEL_SOURCE = "tta_cancel_source"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_SET_AS_DEFAULT = "set_as_default"
         const val FIELD_LINK_CONTEXT = "link_context"
+        const val FIELD_RECOLLECTED_CVC = "recollected_cvc"
+        const val FIELD_CAN_COLLECT_LINK_SIGNUP_INPUT = "can_collect_link_signup_input"
+        const val FIELD_COMPLETED_LINK_SIGNUP_INPUT = "completed_link_signup_input"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
+        const val FIELD_HAS_CARD_ART = "has_card_art"
         const val INTENT_ID = "intent_id"
         const val LINK_ACCOUNT_SESSION_ID = "link_account_session_id"
         const val FC_SDK_RESULT = "fc_sdk_result"
         const val FIELD_VISIBLE_PAYMENT_METHODS = "visible_payment_methods"
         const val FIELD_HIDDEN_PAYMENT_METHODS = "hidden_payment_methods"
+        const val FIELD_LOAD_TIMINGS = "load_timings"
+        const val FIELD_ADDRESS_DATA_BLOB = "address_data_blob"
+        const val FIELD_ADDRESS_COUNTRY_CODE = "address_country_code"
+        const val FIELD_AUTO_COMPLETE_RESULT_SELECTED = "auto_complete_result_selected"
+        const val FIELD_EDIT_DISTANCE = "edit_distance"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
@@ -509,11 +676,17 @@ internal fun PaymentSelection.code(): String {
     return when (this) {
         is PaymentSelection.GooglePay -> "google_pay"
         is PaymentSelection.Link -> "link"
-        is PaymentSelection.ShopPay -> "shop_pay"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
         is PaymentSelection.ExternalPaymentMethod -> type
         is PaymentSelection.CustomPaymentMethod -> id
+    }
+}
+
+internal fun PaymentSelection?.hasCardArt(): Boolean {
+    return when (this) {
+        is PaymentSelection.Saved -> paymentMethod.card?.cardArt?.artImage?.url != null
+        else -> false
     }
 }
 
@@ -533,7 +706,6 @@ internal fun PaymentSelection.linkContext(): String? {
         is PaymentSelection.New,
         is PaymentSelection.Saved,
         is PaymentSelection.CustomPaymentMethod,
-        is PaymentSelection.ExternalPaymentMethod,
-        is PaymentSelection.ShopPay -> null
+        is PaymentSelection.ExternalPaymentMethod -> null
     }
 }

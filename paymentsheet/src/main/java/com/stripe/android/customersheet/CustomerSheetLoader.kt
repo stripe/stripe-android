@@ -1,13 +1,15 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
@@ -15,21 +17,21 @@ import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSel
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
@@ -38,33 +40,33 @@ internal interface CustomerSheetLoader {
 }
 
 internal class DefaultCustomerSheetLoader(
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
-    private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
+    private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
-    private val workContext: CoroutineContext
+    private val workContext: CoroutineContext,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
 ) : CustomerSheetLoader {
 
-    @Inject constructor(
-        @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
-        googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    @Inject
+    constructor(
+        googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
-        lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
-        @IOContext workContext: CoroutineContext
+        @IOContext workContext: CoroutineContext,
+        apiConfigurationResolver: ApiConfigurationResolver,
     ) : this(
-        isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-        lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
+        intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
+        apiConfigurationResolver = apiConfigurationResolver,
     )
 
     override suspend fun load(
@@ -137,34 +139,47 @@ internal class DefaultCustomerSheetLoader(
         isPaymentMethodSyncDefaultEnabled: Boolean,
     ): PaymentMethodMetadata {
         val elementsSession = customerSheetSession.elementsSession
-        val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        ).sharedDataSpecs
+        val cardFundingFilter = DefaultCardFundingFilter
+        val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
+        val apiConfiguration = apiConfigurationResolver.resolve(apiConfiguration = null)
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
-            if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
+            environment = if (elementsSession.stripeIntent.isLiveMode) {
+                GooglePayEnvironment.Production
+            } else {
+                GooglePayEnvironment.Test
+            },
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter,
+            googlePayConfig = GooglePayConfig(
+                publishableKey = apiConfiguration.publishableKey,
+                connectedAccountId = apiConfiguration.stripeAccountId,
+            ),
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 
-        val customerMetadata = CustomerMetadata(
+        val customerMetadata = CustomerMetadata.createForCustomerSheet(
+            configuration = configuration,
+            customerSheetSession = customerSheetSession,
             id = customerSheetSession.customerId,
             ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
             customerSessionClientSecret = customerSheetSession.customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-            permissions = CustomerMetadata.Permissions.createForCustomerSheet(
-                configuration = configuration,
-                customerSheetSession = customerSheetSession
-            )
         )
 
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
-            sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             customerMetadata = customerMetadata,
+            integrationMetadata = IntegrationMetadata.CustomerSheet(
+                attachmentStyle = if (intentDataSourceProvider.await().canCreateSetupIntents) {
+                    IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent
+                } else {
+                    IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
+                }
+            ),
+            apiConfiguration = apiConfiguration,
         )
     }
 
@@ -182,19 +197,30 @@ internal class DefaultCustomerSheetLoader(
             selection = paymentSelection as? PaymentSelection.Saved
         )
 
-        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-
-        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+        val supportedPaymentMethods = getSupportedPaymentMethods(metadata)
 
         return CustomerSheetState.Full(
             config = configuration,
             paymentMethodMetadata = metadata,
-            supportedPaymentMethods = validSupportedPaymentMethods,
+            supportedPaymentMethods = supportedPaymentMethods,
             customerPaymentMethods = sortedPaymentMethods,
             paymentSelection = paymentSelection,
             validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
             customerPermissions = customerSheetSession.permissions,
         )
+    }
+
+    private fun getSupportedPaymentMethods(metadata: PaymentMethodMetadata): List<SupportedPaymentMethod> {
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+
+        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+
+        require(validSupportedPaymentMethods.isNotEmpty()) {
+            "No supported payment methods were found. " +
+                "Ensure your integration is configured to accept card or US bank account payments."
+        }
+
+        return validSupportedPaymentMethods
     }
 
     private fun getPaymentSelection(
@@ -205,7 +231,10 @@ internal class DefaultCustomerSheetLoader(
         return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
             getDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
         } else {
-            useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
+            useLocalSelectionAsPaymentSelection(
+                customerSheetSession = customerSheetSession,
+                paymentMethods = paymentMethods,
+            )
         }
     }
 
@@ -216,7 +245,7 @@ internal class DefaultCustomerSheetLoader(
         return customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.Link -> null
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id

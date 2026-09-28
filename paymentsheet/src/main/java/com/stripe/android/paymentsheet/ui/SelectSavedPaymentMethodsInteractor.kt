@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -10,6 +11,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -35,6 +37,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
     data class State(
         val paymentOptionsItems: List<PaymentOptionsItem>,
         val selectedPaymentOptionsItem: PaymentOptionsItem?,
+        val linkBrand: LinkBrand,
         val isEditing: Boolean,
         val isProcessing: Boolean,
         val canEdit: Boolean,
@@ -63,6 +66,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val updateSelection: (selection: PaymentSelection?, isUserInput: Boolean) -> Unit,
     override val isLiveMode: Boolean,
+    private val linkBrand: LinkBrand,
 ) : SelectSavedPaymentMethodsInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
@@ -89,6 +93,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 mostRecentlySelectedSavedPaymentMethod.value,
                 paymentOptionsItems,
             ),
+            linkBrand = linkBrand,
             isEditing = editing.value,
             isProcessing = isProcessing.value,
             canEdit = canEdit.value,
@@ -192,8 +197,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         val paymentSelection = when (selection) {
             is PaymentSelection.Saved,
             is PaymentSelection.Link,
-            is PaymentSelection.GooglePay,
-            is PaymentSelection.ShopPay -> selection
+            is PaymentSelection.GooglePay -> selection
             is PaymentSelection.New,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
@@ -240,6 +244,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
         ): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
@@ -254,6 +259,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     )
                     viewModel.navigationHandler.transitionTo(
                         AddAnotherPaymentMethod(interactor = interactor)
@@ -271,6 +277,9 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                linkBrand = paymentMethodMetadata.effectiveLinkBrand(
+                    viewModel.linkHandler.linkConfigurationCoordinator.accountFlow.value
+                ),
             )
         }
     }

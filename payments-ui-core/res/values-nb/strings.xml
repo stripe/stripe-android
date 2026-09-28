@@ -28,10 +28,14 @@
   <string name="stripe_blik_code">BLIK-kode</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
+  <string name="stripe_card_brand_icons_content_description">Støttede kort: %1$s</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(ikke godtatt)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ikke godtatt)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Trykk eller skriv inn manuelt</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Ved å fortsette, godkjenner du at %1$s belaster Cash App-kontoen din for denne og fremtidige betalinger, i henhold til vilkårene fra %2$s, frem til autorisasjonen er tilbakekalt. Du kan når som helst endre dette i Cash App-innstillingene.</string>
   <!-- Title for the contact information section -->
@@ -42,14 +46,14 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Når du bekrefter betalingen med GCash, godtar du at %s belaster GCash-kontoen din for fremtidige betalinger i henhold til vilkårene deres.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN-nummeret du la inn er ufullstendig.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">IBAN-nummeret du la inn er ugyldig, «%s» er ikke en gyldig landskode.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN-nummeret skal starte med en tosifret landskode.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL Bank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK-koden er ufullstendig.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -65,8 +69,16 @@
   <string name="stripe_klarna_pay_later">Betal senere med Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Når du bekrefter betalingen din med NICEPAY, tillater du at %s belaster denne betalingsmetoden for fremtidige betalinger i henhold til deres vilkår.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Navn på kort</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Velg hvordan du vil betale:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Når du bekrefter betalingen din, godtar du at transaksjonen din vil bli håndtert av Global Stack Services Limited som registrert selger og i samsvar med deres <a href=\"%s\">bruksvilkår</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Når du bekrefter betalingen din, godtar du at transaksjonen din vil bli håndtert av Global Stack Services Limited som registrert selger og i samsvar med deres <a href=\"%s\">vilkår</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -83,8 +95,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformasjon</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">Legg til bankkonto i USA</string>
-  <!-- Header text shown above a UPI ID text field -->
-  <string name="stripe_paymentsheet_buy_using_upi_id">Kjøp med UPI-ID</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS-direktedebitering</string>
   <!-- Payment Method type brand name -->
@@ -95,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Etter innsending vil du bli videresendt for å sikkert fullføre de neste trinnene.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Ved å bekrefte betalingen med PayPal, tillater du %s å belaste PayPal for fremtidige betalinger i samsvar med vilkårene deres.</string>
   <!-- Revolut mandate text -->
@@ -107,12 +119,20 @@
   <string name="stripe_save_payment_details_to_merchant_name">Lagre betalingsinformasjonen hos %s for fremtidige kjøp</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skann kort</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Fjern skannet kort</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Ved å oppgi betalingsinformasjonen din og bekrefte denne betalingen gir du tillatelse til at (A) %s og Stripe, vår leverandør for betalingstjenesten, sende anmodning til banken din om å belaste kontoen din og (B) banken din belaster kontoen din i samsvar med anmodningen. Som del av dine rettigheter kan du kreve å få beløpet tilbakeført i henhold til avtalen du har med banken. Tilbakeføringskrav må fremsettes innen 8 uker etter at kontoen ble belastet. Rettighetene dine blir forklart i en erklæring som du kan få fra banken. Du godtar å motta varsler om fremtidige belastninger opptil to dager før de skjer.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Angi som standard betalingsmetode</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Konfigurer</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Når du bekrefter betalingen med Touch ’n Go, godtar du at %s belaster Touch ’n Go-kontoen din for fremtidige betalinger i henhold til vilkårene deres.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Når du bekrefter betalingen med TrueMoney, godtar du at %s belaster TrueMoney-kontoen din for fremtidige betalinger i henhold til vilkårene deres.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Når du fortsetter, gir du %1$s tillatelse til å automatisk belaste Twint-saldoen din på gjentakende basis i samsvar med kjøps- eller abonnementsplanen din.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI-ID</string>
 </resources>

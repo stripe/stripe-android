@@ -2,6 +2,9 @@ package com.stripe.android.customersheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -15,12 +18,17 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.data.FakeCustomerSheetInitializationDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -28,10 +36,12 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -61,8 +71,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @Suppress("LargeClass")
 internal class DefaultCustomerSheetLoaderTest {
     private val dispatcher = StandardTestDispatcher()
-    private val lpmRepository = LpmRepository()
-
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
 
@@ -419,14 +427,9 @@ internal class DefaultCustomerSheetLoaderTest {
         val initDataSource = CompletableSingle<CustomerSheetInitializationDataSource>()
 
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
-        val loader = DefaultCustomerSheetLoader(
-            isLiveModeProvider = { false },
-            googlePayRepositoryFactory = { readyGooglePayRepository },
+        val loader = createCustomerSheetLoader(
             initializationDataSourceProvider = initDataSource,
-            lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
-            eventReporter = FakeCustomerSheetEventReporter(),
-            errorReporter = FakeErrorReporter(),
+            intentDataSourceProvider = CompletableSingle(FakeCustomerSheetIntentDataSource()),
             workContext = coroutineContext,
         )
 
@@ -449,6 +452,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
+                apiConfigurationProvider = { DEFAULT_API_CONFIG },
             )
         )
 
@@ -460,14 +464,10 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `Fails if awaiting InitializationDataSource times out`() = runTest {
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
-        val loader = DefaultCustomerSheetLoader(
-            isLiveModeProvider = { false },
-            googlePayRepositoryFactory = { readyGooglePayRepository },
-            lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
-            eventReporter = FakeCustomerSheetEventReporter(),
-            errorReporter = FakeErrorReporter(),
-            workContext = coroutineContext,
+        val loader = createCustomerSheetLoader(
+            initializationDataSourceProvider = CompletableSingle(),
+            intentDataSourceProvider = CompletableSingle(),
+            workContext = coroutineContext
         )
 
         val result = loader.load(configuration)
@@ -481,6 +481,7 @@ internal class DefaultCustomerSheetLoaderTest {
 
         val loader = createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(),
+            intentDataSourceProvider = CompletableSingle(),
             errorReporter = errorReporter,
         )
 
@@ -629,9 +630,113 @@ internal class DefaultCustomerSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `load creates integrationMetadata with SetupIntent attachment style when canCreateSetupIntents is true`() = runTest {
+        val intentDataSource = FakeCustomerSheetIntentDataSource(canCreateSetupIntents = true)
+
+        val loader = createCustomerSheetLoader(
+            intentDataSource = intentDataSource,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+        val state = loader.load(config).getOrThrow()
+
+        val integrationMetadata = state.paymentMethodMetadata.integrationMetadata
+
+        assertThat(integrationMetadata).isInstanceOf<IntegrationMetadata.CustomerSheet>()
+
+        val customerSheetMetadata = integrationMetadata as IntegrationMetadata.CustomerSheet
+
+        assertThat(customerSheetMetadata.attachmentStyle)
+            .isEqualTo(IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent)
+    }
+
+    @Test
+    fun `load creates integrationMetadata with CreateAttach attachment style when canCreateSetupIntents is false`() = runTest {
+        val intentDataSource = FakeCustomerSheetIntentDataSource(canCreateSetupIntents = false)
+
+        val loader = createCustomerSheetLoader(
+            intentDataSource = intentDataSource,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+        val state = loader.load(config).getOrThrow()
+
+        val integrationMetadata = state.paymentMethodMetadata.integrationMetadata
+
+        assertThat(integrationMetadata).isInstanceOf<IntegrationMetadata.CustomerSheet>()
+
+        val customerSheetMetadata = integrationMetadata as IntegrationMetadata.CustomerSheet
+
+        assertThat(customerSheetMetadata.attachmentStyle)
+            .isEqualTo(IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach)
+    }
+
+    @Test
+    fun `load fails gracefully when no supported payment methods are available`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(
+            intent = STRIPE_INTENT.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            ),
+            eventReporter = eventReporter,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val result = loader.load(config)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf<IllegalArgumentException>()
+        assertThat(result.exceptionOrNull()?.message).contains("No supported payment methods were found")
+        assertThat(eventReporter.onLoadFailedCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `supportedPaymentMethods uses paymentMethodOrder from configuration`() = runTest {
+        val loader = createCustomerSheetLoader(
+            isFinancialConnectionsAvailable = { true },
+            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
+        )
+
+        val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+            paymentMethodOrder = listOf("us_bank_account", "card"),
+        )
+
+        val supportedPaymentMethods = loader.load(config).getOrThrow().supportedPaymentMethods
+        assertThat(supportedPaymentMethods.map { it.code })
+            .containsExactly("us_bank_account", "card")
+            .inOrder()
+    }
+
+    @Test
+    fun `supportedPaymentMethods filters out unsupported types`() = runTest {
+        val loader = createCustomerSheetLoader(
+            isFinancialConnectionsAvailable = { true },
+            intent = STRIPE_INTENT.copy(
+                clientSecret = null,
+                paymentMethodTypes = listOf("card", "us_bank_account", "sepa_debit", "klarna"),
+                paymentMethodOptionsJsonString = """
+                        {
+                            "us_bank_account": {
+                                "verification_method": "automatic"
+                            }
+                        }
+                """.trimIndent(),
+            ),
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val supportedPaymentMethods = loader.load(config).getOrThrow().supportedPaymentMethods
+        assertThat(supportedPaymentMethods.map { it.code })
+            .containsExactly("card", "us_bank_account")
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isCbcEligible: Boolean? = null,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
@@ -655,7 +760,7 @@ internal class DefaultCustomerSheetLoaderTest {
                         permissions = CustomerPermissions(
                             removePaymentMethod = PaymentMethodRemovePermission.Full,
                             canRemoveLastPaymentMethod = true,
-                            canUpdateFullPaymentMethodDetails = true,
+                            canUpdateCardExpiryAndBillingDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
                         customerId = "unused_for_customer_adapter_data_source",
@@ -665,16 +770,15 @@ internal class DefaultCustomerSheetLoaderTest {
                 )
             }
         ),
-        lpmRepository: LpmRepository = this.lpmRepository,
+        intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
     ): CustomerSheetLoader {
         return createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
+            intentDataSourceProvider = CompletableSingle(intentDataSource),
             isGooglePayReady = isGooglePayReady,
-            isLiveModeProvider = isLiveModeProvider,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-            lpmRepository = lpmRepository,
             errorReporter = errorReporter,
             eventReporter = eventReporter,
         )
@@ -692,6 +796,7 @@ internal class DefaultCustomerSheetLoaderTest {
             isGooglePayEnabled = false,
             customer = ElementsSession.Customer(
                 paymentMethods = listOf(),
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     customerId = "cus_123",
@@ -714,7 +819,6 @@ internal class DefaultCustomerSheetLoaderTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             customPaymentMethods = emptyList(),
-            paymentMethodSpecs = null,
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
@@ -729,26 +833,36 @@ internal class DefaultCustomerSheetLoaderTest {
 
     private fun createCustomerSheetLoader(
         initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
+        intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
-        lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
-            isLiveModeProvider = isLiveModeProvider,
-            googlePayRepositoryFactory = {
-                if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
+            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+                override fun invoke(
+                    environment: GooglePayEnvironment,
+                    cardFundingFilter: CardFundingFilter,
+                    cardBrandFilter: CardBrandFilter,
+                    googlePayConfig: GooglePayConfig,
+                ): GooglePayRepository {
+                    return if (isGooglePayReady) {
+                        readyGooglePayRepository
+                    } else {
+                        unreadyGooglePayRepository
+                    }
+                }
             },
             initializationDataSourceProvider = initializationDataSourceProvider,
-            lpmRepository = lpmRepository,
+            intentDataSourceProvider = intentDataSourceProvider,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
+            apiConfigurationResolver = FakeApiConfigurationResolver(),
         )
     }
 
@@ -833,11 +947,13 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onConfirmPaymentMethodSucceeded(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) = Unit
 
     override fun onConfirmPaymentMethodFailed(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) = Unit
 
     override fun onEditTapped() = Unit
@@ -880,4 +996,6 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
 
     override fun onCardScanEvent(event: CardScanEvent) = Unit
+
+    override fun onNfcScanButtonShown() = Unit
 }

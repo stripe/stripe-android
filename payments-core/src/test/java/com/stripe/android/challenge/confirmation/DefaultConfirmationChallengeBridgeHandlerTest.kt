@@ -2,10 +2,10 @@ package com.stripe.android.challenge.confirmation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Test
@@ -16,9 +16,10 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultConfirmationChallengeBridgeHandlerTest {
 
     private val testArgs = IntentConfirmationChallengeArgs(
-        publishableKey = "pk_test_123",
+        apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
-        productUsage = listOf("PaymentSheet")
+        productUsage = listOf("PaymentSheet"),
+        captchaVendorName = "hcaptcha",
     )
 
     @Test
@@ -115,8 +116,8 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(IllegalArgumentException::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo("Missing client secret")
+            assertThat(errorEvent.error.cause).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(errorEvent.error.message).isEqualTo("Missing client secret")
         }
     }
 
@@ -146,8 +147,8 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(BridgeError::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo("Payment declined")
+            assertThat(errorEvent.error).isInstanceOf(BridgeException::class.java)
+            assertThat(errorEvent.error.message).isEqualTo("Payment declined")
         }
     }
 
@@ -165,7 +166,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isEqualTo(parsingException)
+            assertThat(errorEvent.error.cause).isEqualTo(parsingException)
         }
     }
 
@@ -183,7 +184,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isEqualTo(parsingException)
+            assertThat(errorEvent.error.cause).isEqualTo(parsingException)
         }
     }
 
@@ -197,7 +198,6 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             successParamsParser = successParamsParser,
             errorParamsParser = errorParamsParser,
             args = args,
-            logger = FakeLogger(),
             errorReporter = errorReporter,
         )
     }

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 
 internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition<LinkType>,
@@ -12,15 +12,25 @@ internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<LinkType> {
     override val displayName: String = "Link Type"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isSptFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isSptFlow()) {
+            return false
+        }
+
+        return (
+            LinkSettingsDefinition.applicable(configurationData, settings) &&
+                settings[LinkSettingsDefinition] != LinkDisplaySetting.Never
+            )
     }
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<LinkType>> {
         return listOf(
+            option("Server Controlled", LinkType.ServerControlled),
             option("Native", LinkType.Native),
             option("Native + Attest", LinkType.NativeAttest),
             option("Web", LinkType.Web),
@@ -28,24 +38,12 @@ internal object LinkTypeSettingsDefinition :
     }
 
     override fun setValue(value: LinkType) {
-        when (value) {
-            LinkType.Native -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(true)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-            }
-            LinkType.NativeAttest -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(true)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(true)
-            }
-            LinkType.Web -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(false)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-            }
-        }
+        value.applyFeatureFlags()
     }
 }
 
 enum class LinkType(override val value: String) : ValueEnum {
+    ServerControlled("Server Controlled"),
     Native("Native"),
     NativeAttest("Native + Attest"),
     Web("Web"),

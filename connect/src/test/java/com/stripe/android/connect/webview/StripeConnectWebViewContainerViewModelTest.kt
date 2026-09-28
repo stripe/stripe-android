@@ -8,9 +8,11 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.webkit.PermissionRequest
+import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.ComponentEvent
+import com.stripe.android.connect.EmbeddedComponentError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -27,9 +29,12 @@ import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.testing.ViewModelStoreTestRule
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -39,6 +44,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonNull
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -52,7 +58,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import kotlin.test.assertFalse
@@ -61,6 +66,9 @@ import kotlin.test.assertTrue
 @Suppress("TooManyFunctions")
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewContainerViewModelTest {
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -101,13 +109,41 @@ class StripeConnectWebViewContainerViewModelTest {
             embeddedComponent = embeddedComponent,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
-            createWebView = { _, _, _ -> webView }
-        )
+            createWebView = { _, _, _, _ -> webView }
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @After
     fun cleanup() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `WebView coroutine scope is cancelled when ViewModel is cleared`() {
+        lateinit var coroutineScope: CoroutineScope
+        val viewModel = StripeConnectWebViewContainerViewModel(
+            application = RuntimeEnvironment.getApplication(),
+            clock = androidClock,
+            embeddedComponentManager = embeddedComponentManager,
+            embeddedComponent = embeddedComponent,
+            analyticsService = analyticsService,
+            logger = mockLogger,
+            createWebView = { _, _, _, scope ->
+                coroutineScope = scope
+                webView
+            },
+        )
+        val viewModelStore = ViewModelStore()
+
+        try {
+            @Suppress("RestrictedApi")
+            viewModelStore.put("viewModel", viewModel)
+            assertThat(coroutineScope.isActive).isTrue()
+        } finally {
+            viewModelStore.clear()
+        }
+
+        assertThat(coroutineScope.isActive).isFalse()
     }
 
     @Test
@@ -120,7 +156,7 @@ class StripeConnectWebViewContainerViewModelTest {
             analyticsService = analyticsService,
             logger = Logger.noop(),
             // Default `createWebView` value
-        )
+        ).also { viewModelStoreRule.track(it) }
         assertThat(viewModel.webView.delegate).isEqualTo(viewModel.delegate)
     }
 
@@ -202,9 +238,49 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `should handle SetOnLoadError`() = runTest(testDispatcher) {
         collectComponentEvents()
-        val message = SetterFunctionCalledMessage(SetOnLoadError(LoadError("", null)))
+        val message = SetterFunctionCalledMessage(
+            SetOnLoadError(
+                LoadError(EmbeddedComponentError.ErrorType.API_ERROR, null)
+            )
+        )
         viewModel.delegate.onReceivedSetterFunctionCalled(message)
 
+        assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
+    }
+
+    @Test
+    fun `should handle all ErrorType values`() = runTest(testDispatcher) {
+        collectComponentEvents()
+
+        EmbeddedComponentError.ErrorType.entries.forEach { errorType ->
+            val message = SetterFunctionCalledMessage(
+                SetOnLoadError(LoadError(errorType, "Test message"))
+            )
+            viewModel.delegate.onReceivedSetterFunctionCalled(message)
+            assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
+        }
+    }
+
+    @Test
+    fun `should fallback to API_ERROR for unknown error types`() {
+        val unknownType = "unknown_error_type"
+        val result = EmbeddedComponentError.ErrorType.fromValue(unknownType)
+        assertThat(result).isEqualTo(EmbeddedComponentError.ErrorType.API_ERROR)
+    }
+
+    @Test
+    fun `should fallback to API_ERROR for null error type`() {
+        val result = EmbeddedComponentError.ErrorType.fromValue(null)
+        assertThat(result).isEqualTo(EmbeddedComponentError.ErrorType.API_ERROR)
+    }
+
+    @Test
+    fun `should handle render_error type`() = runTest(testDispatcher) {
+        collectComponentEvents()
+        val message = SetterFunctionCalledMessage(
+            SetOnLoadError(LoadError(EmbeddedComponentError.ErrorType.RENDER_ERROR, "Failed to render"))
+        )
+        viewModel.delegate.onReceivedSetterFunctionCalled(message)
         assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
     }
 
@@ -286,7 +362,7 @@ class StripeConnectWebViewContainerViewModelTest {
         val intent = Intent()
         val expected = arrayOf(Uri.parse("content://path/to/file"))
         var actual: Array<Uri>? = null
-        wheneverBlocking { componentCoordinator.chooseFile(mockActivity, intent) } doReturn expected
+        whenever { componentCoordinator.chooseFile(mockActivity, intent) } doReturn expected
 
         viewModel.delegate.onChooseFile(
             activity = mockActivity,
@@ -355,7 +431,7 @@ class StripeConnectWebViewContainerViewModelTest {
             connectedAccountId = "connected_account_id"
         )
         val expected = FinancialConnectionsSheetResult.Canceled
-        wheneverBlocking {
+        whenever {
             componentCoordinator.presentFinancialConnections(
                 activity = mockActivity,
                 clientSecret = message.clientSecret,
@@ -392,7 +468,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn true
+        whenever { componentCoordinator.requestCameraPermission(any()) } doReturn true
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
@@ -405,7 +481,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn false
+        whenever { componentCoordinator.requestCameraPermission(any()) } doReturn false
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 

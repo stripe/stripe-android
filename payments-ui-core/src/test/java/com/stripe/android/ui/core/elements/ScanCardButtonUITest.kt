@@ -17,11 +17,15 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
+import com.stripe.android.ui.core.cardscan.CardScanLauncher
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalPaymentCardRecognitionClient
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -35,19 +39,24 @@ internal class ScanCardButtonUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
     @Test
-    fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario(
-        isFetchClientSucceed = true,
-    ) {
+    fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario {
+        scanButtonShownCall.awaitItem()
         composeTestRule.onNodeWithText("Scan card").performClick()
         assertThat(cardScanCall.awaitItem()).isEqualTo("google_pay")
     }
 
     @Test
-    fun `ScanCardButtonUI hidden when GPCR is not available`() = runScenario(
-        isFetchClientSucceed = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
+    fun `ScanCardButtonUI fires button shown event when visible`() = runScenario {
+        composeTestRule.onNodeWithText("Scan card").assertExists()
+        assertThat(scanButtonShownCall.awaitItem())
+            .isEqualTo(FakeCardScanEventsReporter.ScanButtonShownCall)
     }
 
     private fun createMockPaymentCardRecognitionResultIntent(): Intent {
@@ -68,13 +77,12 @@ internal class ScanCardButtonUITest {
     }
     private class Scenario(
         val cardScanCall: ReceiveTurbine<String>,
+        val scanButtonShownCall: ReceiveTurbine<FakeCardScanEventsReporter.ScanButtonShownCall>,
     )
 
-    private fun runScenario(
-        isFetchClientSucceed: Boolean = true,
-        block: suspend Scenario.() -> Unit
-    ) = runTest {
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val cardScanCall = Turbine<String>()
+        val fakeEventsReporter = FakeCardScanEventsReporter()
         val registryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry: ActivityResultRegistry =
                 object : ActivityResultRegistry() {
@@ -95,24 +103,25 @@ internal class ScanCardButtonUITest {
 
         val scenario = Scenario(
             cardScanCall = cardScanCall,
+            scanButtonShownCall = fakeEventsReporter.scanButtonShownCalls,
         )
 
         composeTestRule.setContent {
             CompositionLocalProvider(
                 LocalActivityResultRegistryOwner provides registryOwner,
-                LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
-                LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(isFetchClientSucceed)
+                LocalCardScanEventsReporter provides fakeEventsReporter,
+                LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(shouldSucceed = true)
             ) {
                 val context = LocalContext.current
                 val eventsReporter = LocalCardScanEventsReporter.current
-                val cardScanLauncher = rememberCardScanGoogleLauncher(
+                val cardScanLauncher: CardScanLauncher = rememberCardScanGoogleLauncher(
                     context = context,
                     eventsReporter = eventsReporter,
                 ) { cardScanCall.add("google_pay") }
 
                 ScanCardButtonUI(
                     enabled = true,
-                    cardScanGoogleLauncher = cardScanLauncher
+                    cardScanLauncher = cardScanLauncher,
                 )
             }
         }

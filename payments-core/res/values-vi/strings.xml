@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">Tên của bạn là bắt buộc.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Hủy</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Chọn thương hiệu thẻ</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">Không có lựa chọn</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -110,6 +112,18 @@
   <string name="stripe_card_declined">Thẻ bị từ chối</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s kết thúc bằng %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Chỉ chấp nhận thẻ tín dụng</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Chỉ chấp nhận thẻ tín dụng và thẻ trả trước</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Chỉ chấp nhận thẻ ghi nợ</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Chỉ chấp nhận thẻ ghi nợ và thẻ tín dụng</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Chỉ chấp nhận thẻ ghi nợ và thẻ trả trước</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Chỉ chấp nhận thẻ trả trước</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
@@ -142,6 +156,14 @@
   <string name="stripe_fpx_bank_offline">%s - Ngoại tuyến</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Phương thức thanh toán của quý vị đã bị từ chối.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">Chi phí không bao gồm thuế</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">Tổng số tiền ước tính (chi phí thuế cuối cùng có thể thay đổi)</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Tổng</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">Thẻ của bạn không đủ tiền.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Đã xảy ra lỗi nội bộ.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
@@ -155,6 +177,8 @@
   <string name="stripe_invalid_shipping_information">Địa chỉ vận chuyển không hợp lệ</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Mã bưu điện chưa đầy đủ.</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">Chi tiết phương thức thanh toán</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">Thanh toán đơn giản, an toàn chỉ bằng một cú nhấp chuột</string>
   <string name="stripe_payment_method_add_new_card">Thêm thẻ mới...</string>
@@ -168,6 +192,8 @@
   <string name="stripe_remove">Xóa</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Đã xóa %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Đã xảy ra sự cố. Yêu cầu ID: %1$s</string>
   <string name="stripe_secure_checkout">Bảo mật Thanh toán</string>
   <string name="stripe_title_add_a_card">Thêm Thẻ</string>
   <!-- Screen title telling users they should add an address -->

@@ -33,9 +33,11 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
 
         val confirmParams = factory.confirmParamsCreation()
         return ConfirmationDefinition.Action.Launch(
-            launcherArguments = Args.Confirm(confirmParams),
+            launcherArguments = Args.Confirm(
+                confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred }
+            ),
             receivesResultInProcess = false,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
         )
     }
 

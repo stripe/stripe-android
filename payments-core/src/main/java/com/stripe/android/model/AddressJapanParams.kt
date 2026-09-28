@@ -11,32 +11,26 @@ class AddressJapanParams(
      * City or ward.
      */
     val city: String? = null,
-
     /**
      * Two-letter country code (ISO 3166-1 alpha-2).
      */
     val country: String? = null,
-
     /**
      * Block or building number.
      */
     val line1: String? = null,
-
     /**
      * Building details.
      */
     val line2: String? = null,
-
     /**
      * Postal code.
      */
     val postalCode: String? = null,
-
     /**
      * Prefecture.
      */
     val state: String? = null,
-
     /**
      * Town or cho-me.
      */

@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntentFixtures
@@ -361,6 +364,7 @@ internal class VerticalModeFormUIScreenshotTest {
         }
     }
 
+    @Suppress("ThrowsCount")
     @Test
     fun fullCardFormWithLink() {
         val metadata = PaymentMethodMetadataFactory.create()
@@ -375,13 +379,16 @@ internal class VerticalModeFormUIScreenshotTest {
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 state = LinkButtonState.Default,
+                linkBrand = LinkBrand.Link,
             ),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_with_card,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
-            walletsAllowedInHeader = WalletType.entries
+            walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
 
         paparazziRule.snapshot {

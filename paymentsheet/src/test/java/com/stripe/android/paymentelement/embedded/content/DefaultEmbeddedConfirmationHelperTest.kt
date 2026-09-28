@@ -7,22 +7,21 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.mockito.Mockito.mock
@@ -55,7 +54,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -103,7 +101,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     @Test
     fun confirmCallsConfirmationHandlerStartWithLink() = testScenario(
         loadedState = defaultLoadedState().copy(
-            selection = PaymentSelection.Link(),
+            selection = PaymentSelection.Link(brand = LinkBrand.Link),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),
@@ -123,6 +121,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         return EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             selection = PaymentSelection.GooglePay,
+            statusBarColor = null,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
@@ -140,12 +139,12 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
-        selectionHolder.set(loadedState?.selection)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        selectionHolder.setSelection(loadedState?.selection)
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = backgroundScope,
         )
         confirmationStateHolder.state = loadedState
         val stateHelper = FakeEmbeddedStateHelper()

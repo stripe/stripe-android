@@ -28,7 +28,6 @@ internal class PollAttachPaymentAccount @Inject constructor(
         sync: SynchronizeSessionResponse,
         // null, when attaching via manual entry.
         activeInstitution: FinancialConnectionsInstitution?,
-
         params: PaymentAccountParams
     ): LinkAccountSessionPaymentAccount {
         return retryOnException(

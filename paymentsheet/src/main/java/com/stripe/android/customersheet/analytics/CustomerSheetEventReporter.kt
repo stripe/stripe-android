@@ -48,6 +48,7 @@ internal interface CustomerSheetEventReporter {
     fun onConfirmPaymentMethodSucceeded(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     )
 
     /**
@@ -56,6 +57,7 @@ internal interface CustomerSheetEventReporter {
     fun onConfirmPaymentMethodFailed(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     )
 
     /**
@@ -145,6 +147,8 @@ internal interface CustomerSheetEventReporter {
     fun onAnalyticsEvent(event: AnalyticsEvent)
 
     fun onCardScanEvent(event: CardScanEvent)
+
+    fun onNfcScanButtonShown()
 
     enum class Screen(val value: String) {
         AddPaymentMethod("add_payment_method"),

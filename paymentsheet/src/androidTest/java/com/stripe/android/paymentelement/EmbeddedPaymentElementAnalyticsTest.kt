@@ -3,21 +3,28 @@ package com.stripe.android.paymentelement
 import android.net.Uri
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.createConfirmationToken
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.clientAttributionMetadataParamsForDeferredIntent
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.EmbeddedPaymentElementApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
@@ -26,12 +33,13 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@RunWith(TestParameterInjector::class)
 internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
@@ -51,17 +59,16 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
 
+    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
+    lateinit var apiConfigurationTestType: ApiConfigurationTestType
+
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
-
-    @Before
-    fun before() {
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
-    }
 
     @Test
     fun testSuccessfulCardPayment() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -71,24 +78,20 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
-            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
-            query(Uri.encode("mpe_config[form_sheet_action]"), "confirm"),
-            query(Uri.encode("mpe_config[row_selection_behavior]"), "default"),
-            query(Uri.encode("mpe_config[embedded_view_displays_mandate_text]"), "true"),
-            query(Uri.encode("mpe_config[open_card_scan_automatically]"), "false"),
-            query(Uri.encode("mpe_config[appearance][embedded_payment_element][row_style]"), "flat_with_radio"),
-            query(Uri.encode("mpe_config[appearance][colorsDark]"), "false"),
+            analyticsPayloadField(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+            analyticsPayloadField(Uri.encode("mpe_config[form_sheet_action]"), "confirm"),
+            analyticsPayloadField(Uri.encode("mpe_config[row_selection_behavior]"), "default"),
+            analyticsPayloadField(Uri.encode("mpe_config[embedded_view_displays_mandate_text]"), "true"),
+            analyticsPayloadField(Uri.encode("mpe_config[open_card_scan_automatically]"), "false"),
+            analyticsPayloadField(Uri.encode("mpe_config[appearance][embedded_payment_element][row_style]"), "flat_with_radio"),
+            analyticsPayloadField(Uri.encode("mpe_config[appearance][colorsDark]"), "false"),
         )
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
@@ -97,12 +100,12 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", ""),
-            query(
+            analyticsPayloadField("hidden_payment_methods", ""),
+            analyticsPayloadField(
                 "visible_payment_methods",
-                Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")
+                Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay,wechat_pay")
             ),
-            query("payment_method_layout", "vertical")
+            analyticsPayloadField("payment_method_layout", "vertical")
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -153,20 +156,20 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(
             eventName = "mc_embedded_payment_success",
-            query("intent_id", "pi_example"),
+            analyticsPayloadField("intent_id", "pi_example"),
         )
         validateAnalyticsRequest(eventName = "mc_dismiss")
 
@@ -179,6 +182,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentWithConfirmationToken() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         builderInstance = EmbeddedPaymentElement.Builder(
             createIntentCallback = { _ ->
                 CreateIntentResult.Success("pi_example_secret_example")
@@ -189,18 +193,14 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
-            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+            analyticsPayloadField(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
@@ -228,9 +228,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/confirmation_tokens"),
+        networkRule.createConfirmationToken(
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("confirmation-token-create-with-new-card.json")
@@ -247,7 +245,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("confirmation_token", "ctoken_example"),
-            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            bodyPart("return_url", "stripesdk://payment_return_url/com.stripe.android.paymentsheet.test"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -259,19 +257,19 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "pi_example"),
+            analyticsPayloadField("intent_id", "pi_example"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(
             eventName = "mc_embedded_payment_success",
-            query("is_confirmation_tokens", "true")
+            analyticsPayloadField("is_confirmation_tokens", "true")
         )
         validateAnalyticsRequest(eventName = "mc_dismiss")
 
@@ -284,6 +282,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testCheckoutWithSavedCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -293,30 +292,33 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
 
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
-            query("payment_method_layout", "vertical")
+            analyticsPayloadField("hidden_payment_methods", ""),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            analyticsPayloadField("payment_method_layout", "vertical")
         )
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
@@ -340,24 +342,26 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "pi_example"),
-            query("payment_method_type", "card"),
+            analyticsPayloadField("intent_id", "pi_example"),
+            analyticsPayloadField("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         testContext.confirm()
+        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
     }
 
     @Test
     fun testEditCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -367,32 +371,36 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
 
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
-            query("payment_method_layout", "vertical"),
+            analyticsPayloadField("hidden_payment_methods", ""),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            analyticsPayloadField("payment_method_layout", "vertical"),
         )
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+        embeddedContentPage.waitUntilVisible()
 
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
@@ -415,6 +423,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testRemoveCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -424,31 +433,35 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
 
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
-            query("payment_method_layout", "vertical"),
+            analyticsPayloadField("hidden_payment_methods", ""),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            analyticsPayloadField("payment_method_layout", "vertical"),
         )
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+        embeddedContentPage.waitUntilVisible()
 
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
@@ -469,7 +482,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         managePage.waitUntilVisible()
         managePage.waitUntilGone(card1.id)
+        validateAnalyticsRequest(eventName = "mc_dismiss")
         managePage.clickDone()
+        Espresso.pressBack()
+        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
 
         testContext.markTestSucceeded()
     }

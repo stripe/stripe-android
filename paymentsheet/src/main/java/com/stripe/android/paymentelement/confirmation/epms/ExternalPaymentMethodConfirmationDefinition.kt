@@ -2,11 +2,12 @@ package com.stripe.android.paymentelement.confirmation.epms
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -22,7 +23,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<
     ExternalPaymentMethodConfirmationOption,
     ActivityResultLauncher<ExternalPaymentMethodInput>,
-    Unit,
+    EmptyConfirmationLauncherArgs,
     PaymentResult
     > {
     override val key: String = "ExternalPaymentMethod"
@@ -36,7 +37,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
     override suspend fun action(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         val externalPaymentMethodType = confirmationOption.type
         val externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandlerProvider.get()
 
@@ -58,15 +59,15 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
             )
         } else {
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = Unit,
+                launcherArguments = EmptyConfirmationLauncherArgs,
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             )
         }
     }
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (PaymentResult) -> Unit
     ): ActivityResultLauncher<ExternalPaymentMethodInput> {
         return activityResultCaller.registerForActivityResult(
@@ -77,7 +78,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun launch(
         launcher: ActivityResultLauncher<ExternalPaymentMethodInput>,
-        arguments: Unit,
+        arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: ExternalPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
@@ -98,13 +99,12 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: EmptyConfirmationLauncherArgs,
         result: PaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is PaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = confirmationArgs.intent,
-                deferredIntentConfirmationType = null,
             )
             is PaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,

@@ -2,7 +2,6 @@ package com.stripe.android.challenge.confirmation
 
 import android.net.Uri
 import android.net.http.SslError
-import android.os.Build
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -11,20 +10,19 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 internal class IntentConfirmationWebViewClientTest {
 
     // onReceivedError (API 23+) tests
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedError for host url calls errorHandler with correct details`() =
         testWithSetup { client, errors, webView ->
             val request = createRequest(HOST_URL)
@@ -43,7 +41,6 @@ internal class IntentConfirmationWebViewClientTest {
         }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedError for wrong url does not call errorHandler`() = testWithSetup { client, errors, webView ->
         val request = createRequest(url = "https://example.com/iframe")
         val error = createWebResourceError()
@@ -54,7 +51,6 @@ internal class IntentConfirmationWebViewClientTest {
     }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedError handles trailing slash in failingUrl`() = testWithSetup { client, errors, webView ->
         val request = createRequest(url = "$HOST_URL/")
         val error = createWebResourceError()
@@ -71,7 +67,6 @@ internal class IntentConfirmationWebViewClientTest {
     }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedError handles trailing slash in hostUrl`() =
         testWithSetup("$HOST_URL/") { client, errors, webView ->
             val request = createRequest(HOST_URL)
@@ -88,56 +83,8 @@ internal class IntentConfirmationWebViewClientTest {
             )
         }
 
-    // onReceivedError (Pre-API 23) tests
-    @Test
-    @Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
-    fun `onReceivedError legacy API calls errorHandler`() = testWithSetup { client, errors, webView ->
-        @Suppress("DEPRECATION")
-        client.onReceivedError(webView, -2, "Connection failed", HOST_URL)
-
-        assertThat(errors).hasSize(1)
-        errors[0].assertHasDetails(
-            message = "Connection failed",
-            errorCode = -2,
-            url = HOST_URL,
-            type = "generic_resource_error"
-        )
-    }
-
-    @Test
-    @Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
-    fun `onReceivedError legacy API handles trailing slash in failingUrl`() = testWithSetup { client, errors, webView ->
-        @Suppress("DEPRECATION")
-        client.onReceivedError(webView, -2, "Connection failed", "$HOST_URL/")
-
-        assertThat(errors).hasSize(1)
-        errors[0].assertHasDetails(
-            message = "Connection failed",
-            errorCode = -2,
-            url = "$HOST_URL/",
-            type = "generic_resource_error"
-        )
-    }
-
-    @Test
-    @Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
-    fun `onReceivedError legacy API handles trailing slash in hostUrl`() =
-        testWithSetup(hostUrl = "$HOST_URL/") { client, errors, webView ->
-            @Suppress("DEPRECATION")
-            client.onReceivedError(webView, -2, "Connection failed", HOST_URL)
-
-            assertThat(errors).hasSize(1)
-            errors[0].assertHasDetails(
-                message = "Connection failed",
-                errorCode = -2,
-                url = HOST_URL,
-                type = "generic_resource_error"
-            )
-        }
-
     // onReceivedHttpError tests
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedHttpError for host url calls errorHandler`() = testWithSetup { client, errors, webView ->
         val request = createRequest(HOST_URL)
         val response = createWebResourceResponse()
@@ -154,7 +101,6 @@ internal class IntentConfirmationWebViewClientTest {
     }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedHttpError for non-host url does not call errorHandler`() = testWithSetup { client, errors, webView ->
         val request = createRequest(url = "https://example.com/iframe")
         val response = createWebResourceResponse()
@@ -165,7 +111,6 @@ internal class IntentConfirmationWebViewClientTest {
     }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedHttpError handles trailing slash in request url`() = testWithSetup { client, errors, webView ->
         val request = createRequest(url = "$HOST_URL/")
         val response = createWebResourceResponse()
@@ -182,7 +127,6 @@ internal class IntentConfirmationWebViewClientTest {
     }
 
     @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
     fun `onReceivedHttpError handles trailing slash in hostUrl`() =
         testWithSetup(hostUrl = "$HOST_URL/") { client, errors, webView ->
             val request = createRequest(HOST_URL)
@@ -219,17 +163,45 @@ internal class IntentConfirmationWebViewClientTest {
 
     // onRenderProcessGone tests
     @Test
-    @Config(sdk = [Build.VERSION_CODES.O])
-    fun `onRenderProcessGone calls errorHandler with view URL`() = testWithSetup { client, errors, webView ->
-        webView.loadUrl(HOST_URL)
+    fun `onRenderProcessGone reports error`() = testWithSetup { client, errors, webView ->
         val detail = createRenderProcessGoneDetail()
 
         client.onRenderProcessGone(webView, detail)
 
         assertThat(errors).hasSize(1)
-        assertThat(errors[0].message).isEqualTo("render process crashed")
+        assertThat(errors[0].message).isEqualTo("render process gone")
         assertThat(errors[0].errorCode).isNull()
         assertThat(errors[0].webViewErrorType).isEqualTo("render_process_gone")
+    }
+
+    @Test
+    fun `onRenderProcessGone returns true to prevent app crash`() = testWithSetup { client, _, webView ->
+        val detail = createRenderProcessGoneDetail()
+
+        val result = client.onRenderProcessGone(webView, detail)
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `shouldOverrideUrlLoading calls openUri with correct URI`() {
+        val capturedUris = mutableListOf<Uri>()
+        val openUri: (Uri) -> Unit = { uri -> capturedUris.add(uri) }
+        val client = IntentConfirmationWebViewClient(
+            hostUrl = HOST_URL,
+            logger = Logger.noop(),
+            errorHandler = { },
+            openUri = openUri,
+        )
+        val testUrl = "https://example.com/terms"
+        val request = createRequest(testUrl)
+        val webView = WebView(ApplicationProvider.getApplicationContext())
+
+        val result = client.shouldOverrideUrlLoading(webView, request)
+
+        assertThat(result).isTrue()
+        assertThat(capturedUris).hasSize(1)
+        assertThat(capturedUris[0].toString()).isEqualTo(testUrl)
     }
 
     // Helper methods
@@ -239,7 +211,14 @@ internal class IntentConfirmationWebViewClientTest {
     ) {
         val capturedErrors = mutableListOf<WebViewError>()
         val errorHandler = WebViewErrorHandler { error -> capturedErrors.add(error) }
-        val client = IntentConfirmationWebViewClient(hostUrl, errorHandler = errorHandler)
+        val capturedUris = mutableListOf<Uri>()
+        val openUri: (Uri) -> Unit = { uri -> capturedUris.add(uri) }
+        val client = IntentConfirmationWebViewClient(
+            hostUrl = hostUrl,
+            logger = Logger.noop(),
+            errorHandler = errorHandler,
+            openUri = openUri,
+        )
         val webView = WebView(ApplicationProvider.getApplicationContext())
 
         block(client, capturedErrors, webView)
@@ -263,8 +242,8 @@ internal class IntentConfirmationWebViewClientTest {
 
     private fun createWebResourceError(): WebResourceError {
         return mock<WebResourceError>().apply {
-            whenever(getErrorCode()).thenReturn(-2)
-            whenever(getDescription()).thenReturn("net::ERR_FAILED")
+            whenever(errorCode).thenReturn(-2)
+            whenever(description).thenReturn("net::ERR_FAILED")
         }
     }
 
@@ -275,7 +254,7 @@ internal class IntentConfirmationWebViewClientTest {
     private fun createSslError(): SslError {
         return mock<SslError>().apply {
             whenever(getPrimaryError()).thenReturn(SslError.SSL_UNTRUSTED)
-            whenever(getUrl()).thenReturn(HOST_URL)
+            whenever(url).thenReturn(HOST_URL)
         }
     }
 

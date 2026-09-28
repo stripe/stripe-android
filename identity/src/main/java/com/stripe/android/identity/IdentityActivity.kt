@@ -13,10 +13,14 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.luminance
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -80,7 +84,7 @@ internal class IdentityActivity :
     lateinit var subcomponent: IdentityActivitySubcomponent
 
     @Inject
-    lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Builder>
+    lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Factory>
 
     @Inject
     @UIContext
@@ -91,9 +95,8 @@ internal class IdentityActivity :
     lateinit var workContext: CoroutineContext
 
     override fun fallbackInitialize(arg: Context): Injector? {
-        DaggerIdentityActivityFallbackComponent.builder()
-            .context(arg)
-            .build().inject(this)
+        DaggerIdentityActivityFallbackComponent.factory()
+            .create(arg).inject(this)
         return null
     }
 
@@ -110,14 +113,15 @@ internal class IdentityActivity :
             this.applicationContext
         )
         subcomponent = subComponentBuilderProvider.get()
-            .args(starterArgs)
-            .cameraPermissionEnsureable(this)
-            .appSettingsOpenable(this)
-            .verificationFlowFinishable(this)
-            .identityViewModelFactory(viewModelFactory)
-            .fallbackUrlLauncher(this)
-            .viewModelStoreOwner(this)
-            .build()
+            .create(
+                args = starterArgs,
+                cameraPermissionEnsureable = this,
+                appSettingsOpenable = this,
+                verificationFlowFinishable = this,
+                identityViewModelFactory = viewModelFactory,
+                viewModelStoreOwner = this,
+                fallbackUrlLauncher = this,
+            )
         identityViewModel.retrieveAndBufferVerificationPage()
         identityViewModel.initializeTfLite()
         identityViewModel.registerActivityResultCaller(this)
@@ -131,13 +135,15 @@ internal class IdentityActivity :
                         if (it.submitted) {
                             identityViewModel.identityAnalyticsRequestFactory
                                 .verificationSucceeded(
-                                    isFromFallbackUrl = true
+                                    isFromFallbackUrl = true,
+                                    lastScreenName = identityViewModel.analyticsLastScreenName
                                 )
                             VerificationFlowResult.Completed
                         } else {
                             identityViewModel.identityAnalyticsRequestFactory
                                 .verificationCanceled(
-                                    isFromFallbackUrl = true
+                                    isFromFallbackUrl = true,
+                                    lastScreenName = identityViewModel.analyticsLastScreenName
                                 )
                             VerificationFlowResult.Canceled
                         }
@@ -146,7 +152,8 @@ internal class IdentityActivity :
                 onFailure = {
                     identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                         isFromFallbackUrl = true,
-                        throwable = IllegalStateException(it)
+                        throwable = IllegalStateException(it),
+                        lastScreenName = identityViewModel.analyticsLastScreenName
                     )
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
@@ -175,7 +182,14 @@ internal class IdentityActivity :
             var topBarState by remember {
                 mutableStateOf(IdentityTopBarState.GO_BACK)
             }
-            IdentityTheme {
+            IdentityTheme(brandColor = starterArgs.brandColor) {
+                val statusBarBackground = MaterialTheme.colors.background
+                val useDarkStatusBarIcons =
+                    statusBarBackground.luminance() > LIGHT_STATUS_BAR_LUMINANCE_THRESHOLD
+                SideEffect {
+                    WindowCompat.getInsetsController(window, window.decorView)
+                        .isAppearanceLightStatusBars = useDarkStatusBarIcons
+                }
                 IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     fallbackUrlLauncher = this,
@@ -210,7 +224,8 @@ internal class IdentityActivity :
 
     override fun finishWithResult(result: VerificationFlowResult) {
         identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
-            result.toString()
+            sessionResult = result.toAnalyticsSessionResult(),
+            lastScreenName = identityViewModel.analyticsLastScreenName
         )
         setResult(
             Activity.RESULT_OK,
@@ -225,6 +240,7 @@ internal class IdentityActivity :
      * [CameraPermissionCheckingActivity.requestCameraPermission].
      */
     override fun showPermissionRationaleDialog() {
+        identityViewModel.identityAnalyticsRequestFactory.cameraPermissionRationaleShown()
         val builder = AlertDialog.Builder(this)
         builder.setMessage(R.string.stripe_camera_permission_rationale)
             .setPositiveButton(R.string.stripe_ok) { _, _ ->
@@ -279,5 +295,13 @@ internal class IdentityActivity :
             "IdentityActivity was started without arguments"
 
         const val KEY_PRESENTED = "presented"
+
+        const val LIGHT_STATUS_BAR_LUMINANCE_THRESHOLD = 0.5f
     }
+}
+
+private fun VerificationFlowResult.toAnalyticsSessionResult(): String = when (this) {
+    VerificationFlowResult.Completed -> "completed"
+    VerificationFlowResult.Canceled -> "canceled"
+    is VerificationFlowResult.Failed -> "failed"
 }

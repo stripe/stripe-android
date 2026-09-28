@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
 import android.hardware.camera2.CameraCaptureSession
@@ -166,7 +167,19 @@ private fun ImageProxy.toBitmap(renderScript: RenderScript) = when (format) {
 }
 
 /**
- * CameraAdaptor implementation with CameraX, should be used in favor or [Camera1Adapter].
+ * Rotate a [Bitmap] by the given [rotationDegrees].
+ */
+@CheckResult
+private fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
+    val matrix = Matrix()
+    matrix.postRotate(rotationDegrees)
+    Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+} else {
+    this
+}
+
+/**
+ * CameraAdaptor implementation with CameraX.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CameraXAdapter(
@@ -186,6 +199,7 @@ class CameraXAdapter(
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
+    private var previewImplementationMode = PreviewView.ImplementationMode.PERFORMANCE
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
     private lateinit var lifecycleOwner: LifecycleOwner
 
@@ -217,7 +231,15 @@ class CameraXAdapter(
         )
     }
 
-    private val previewTextureView by lazy { PreviewView(activity) }
+    private val previewTextureView by lazy {
+        PreviewView(activity).apply {
+            implementationMode = previewImplementationMode
+        }
+    }
+
+    fun useCompatiblePreview() {
+        previewImplementationMode = PreviewView.ImplementationMode.COMPATIBLE
+    }
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         withCamera { task(it.cameraInfo.hasFlashUnit()) }
@@ -346,6 +368,7 @@ class CameraXAdapter(
     }
 
     override fun onDestroyed() {
+        super.onDestroyed()
         withCameraProvider {
             it.unbindAll()
             cameraExecutor.shutdown()

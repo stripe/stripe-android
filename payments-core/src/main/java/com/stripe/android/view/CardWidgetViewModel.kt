@@ -116,13 +116,13 @@ internal fun View.doWithCardWidgetViewModel(
     lifecycleOwner.action(viewModel)
 }
 
-context(LifecycleOwner)
+context(lifecycleOwner: LifecycleOwner)
 internal inline fun <T> Flow<T>.launchAndCollect(
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     crossinline action: (T) -> Unit
 ) {
-    lifecycleScope.launch {
-        repeatOnLifecycle(minActiveState) {
+    lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.repeatOnLifecycle(minActiveState) {
             collect {
                 action(it)
             }

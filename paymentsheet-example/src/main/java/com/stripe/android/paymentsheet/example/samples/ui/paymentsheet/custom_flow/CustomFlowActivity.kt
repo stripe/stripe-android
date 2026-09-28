@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
-import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 internal class CustomFlowActivity : AppCompatActivity() {
 
@@ -45,10 +44,10 @@ internal class CustomFlowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val flowController = rememberPaymentSheetFlowController(
+            val flowController = PaymentSheet.FlowController.Builder(
                 paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-                paymentResultCallback = viewModel::handlePaymentSheetResult,
-            )
+                resultCallback = viewModel::handlePaymentSheetResult,
+            ).build()
 
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()

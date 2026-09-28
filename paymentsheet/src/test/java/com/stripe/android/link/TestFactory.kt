@@ -6,7 +6,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
@@ -24,6 +26,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -84,6 +87,8 @@ internal object TestFactory {
         verificationSessions = listOf(VERIFIED_SESSION),
         redactedPhoneNumber = "+1********42",
         redactedFormattedPhoneNumber = "+1 (***) ***-**42",
+        currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+        minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
     )
 
     val CONSUMER_SESSION_LOOKUP = ConsumerSessionLookup(
@@ -126,7 +131,7 @@ internal object TestFactory {
         cvcCheck = CvcCheck.Pass,
         isDefault = true,
         networks = emptyList(),
-        funding = "CREDIT",
+        funding = ConsumerPaymentDetails.Card.Funding.Credit,
         nickname = null,
         billingAddress = ConsumerPaymentDetails.BillingAddress(
             name = null,
@@ -156,6 +161,22 @@ internal object TestFactory {
         paymentMethodId = "pm_123"
     )
 
+    val CONSUMER_PAYMENT_DETAILS_GENERIC = ConsumerPaymentDetails.Generic(
+        id = "csmrpd_126",
+        last4 = "0x••••22Dd",
+        isDefault = false,
+        nickname = null,
+        billingAddress = null,
+        billingEmailAddress = null,
+        rawType = "CRYPTO",
+        display = ConsumerPaymentDetails.Display(
+            label = "Crypto",
+            sublabel = "0x••••22Dd",
+            icon = null
+        ),
+        nextActionTypes = emptyList()
+    )
+
     val LINK_ACCOUNT_SESSION = LinkAccountSession(
         id = "fcsess_123",
         clientSecret = CLIENT_SECRET,
@@ -163,7 +184,7 @@ internal object TestFactory {
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+        confirmParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
     )
 
@@ -172,9 +193,8 @@ internal object TestFactory {
         encodedPaymentMethod = "{\"id\": \"pm_123\"}",
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
             .setType(PaymentMethod.Type.Card)
@@ -187,9 +207,8 @@ internal object TestFactory {
             .build(),
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Passthrough(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
             .setType(PaymentMethod.Type.Card)
@@ -212,6 +231,7 @@ internal object TestFactory {
             CONSUMER_PAYMENT_DETAILS_CARD,
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
             CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+            CONSUMER_PAYMENT_DETAILS_GENERIC
         )
     )
 
@@ -272,7 +292,6 @@ internal object TestFactory {
         allowUserEmailEdits = true,
         allowLogOut = true,
         enableDisplayableDefaultValuesInEce = false,
-        skipWalletInFlowController = false,
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
@@ -284,7 +303,12 @@ internal object TestFactory {
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            checkoutSessionId = null,
         ),
+        cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+        linkBrand = LinkBrand.Link,
+        apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        shouldDisplay = true,
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
@@ -310,7 +334,7 @@ internal object TestFactory {
         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
     )
 
-    val CARD_FORM_ELEMENTS = CardDefinition.formElements()
+    val CARD_FORM_ELEMENTS by lazy { CardDefinition.formElements() }
 
     const val VERIFICATION_TOKEN = "12356edtyf6esrte6r6dtd67"
     val INCENTIVE_ELIGIBILITY_SESSION = IncentiveEligibilitySession.PaymentIntent("pi_12345")
@@ -323,12 +347,12 @@ internal object TestFactory {
         configuration = LINK_CONFIGURATION,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         requestSurface = RequestSurface.PaymentElement,
-        publishableKey = "",
-        stripeAccountId = "",
+        apiConfiguration = LINK_CONFIGURATION.apiConfiguration,
         linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+        statusBarColor = null,
     )
 
     val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(

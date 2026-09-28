@@ -27,4 +27,6 @@ data class ConsumerSessionLookup(
     val consentUi: ConsentUi? = null,
     @SerialName("suggested_email")
     val suggestedEmail: String? = null,
+    @SerialName("link_brand")
+    val linkBrand: LinkBrand? = null,
 ) : StripeModel

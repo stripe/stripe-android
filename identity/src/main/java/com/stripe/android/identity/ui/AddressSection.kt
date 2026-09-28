@@ -13,11 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.identity.navigation.CountryNotListedDestination
-import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.RequiredInternationalAddress
 import com.stripe.android.uicore.address.AddressSchemaRegistry
@@ -25,7 +22,7 @@ import com.stripe.android.uicore.address.transformToElementList
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PostalCodeConfig
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
@@ -42,7 +39,7 @@ internal fun AddressSection(
     enabled: Boolean,
     addressCountries: List<Country>,
     addressNotListedText: String,
-    navController: NavController,
+    onAddressNotListedClick: () -> Unit,
     onAddressCollected: (Resource<RequiredInternationalAddress>) -> Unit
 ) {
     val controller = remember {
@@ -61,7 +58,7 @@ internal fun AddressSection(
             requireNotNull(selectedCountryCode)
         )
     }
-    val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }
+    val countryElement = remember { CountryElement(FormFieldId.Country, controller) }
     val sectionList = remember(selectedCountryCode) {
         mutableListOf<SectionFieldElement>(countryElement).also {
             it.addAll(addressDetailSectionElements)
@@ -82,14 +79,14 @@ internal fun AddressSection(
             val addressMap = formFieldValues.toMap()
             if (isValidAddress(addressMap)) {
                 RequiredInternationalAddress(
-                    line1 = addressMap[IdentifierSpec.Line1]?.value!!,
-                    line2 = addressMap[IdentifierSpec.Line2]?.value.takeIf {
+                    line1 = addressMap[FormFieldId.Line1]?.value!!,
+                    line2 = addressMap[FormFieldId.Line2]?.value.takeIf {
                         it?.isNotEmpty() == true
                     },
-                    city = addressMap[IdentifierSpec.City]?.value!!,
-                    postalCode = addressMap[IdentifierSpec.PostalCode]?.value!!,
-                    state = addressMap[IdentifierSpec.State]?.value,
-                    country = addressMap[IdentifierSpec.Country]?.value!!,
+                    city = addressMap[FormFieldId.City]?.value!!,
+                    postalCode = addressMap[FormFieldId.PostalCode]?.value!!,
+                    state = addressMap[FormFieldId.State]?.value,
+                    country = addressMap[FormFieldId.Country]?.value!!,
                 )
             } else {
                 null
@@ -111,7 +108,7 @@ internal fun AddressSection(
         addressNotListedText,
         sectionElement,
         textIdentifiers,
-        navController
+        onAddressNotListedClick
     )
 }
 
@@ -120,8 +117,8 @@ private fun AddressSectionContent(
     enabled: Boolean,
     addressNotListedText: String,
     sectionElement: SectionElement,
-    textIdentifiers: List<IdentifierSpec>,
-    navController: NavController
+    textIdentifiers: List<FormFieldId>,
+    onAddressNotListedClick: () -> Unit
 ) {
     SectionElementUI(
         modifier = Modifier.padding(vertical = 8.dp),
@@ -134,13 +131,7 @@ private fun AddressSectionContent(
     TextButton(
         modifier = Modifier.testTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG),
         contentPadding = PaddingValues(horizontal = 0.dp),
-        onClick = {
-            navController.navigateTo(
-                CountryNotListedDestination(
-                    isMissingId = false
-                )
-            )
-        }
+        onClick = onAddressNotListedClick
     ) {
         Text(
             text = addressNotListedText,
@@ -149,14 +140,14 @@ private fun AddressSectionContent(
     }
 }
 
-private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boolean {
+private fun isValidAddress(addressMap: Map<FormFieldId, FormFieldEntry>): Boolean {
     addressMap.forEach { (spec, entry) ->
         if (REQUIRED_FIELDS.contains(spec) && entry.value.isNullOrBlank()) {
             return false
         }
     }
-    val country = addressMap[IdentifierSpec.Country]?.value
-    val postal = addressMap[IdentifierSpec.PostalCode]?.value
+    val country = addressMap[FormFieldId.Country]?.value
+    val postal = addressMap[FormFieldId.PostalCode]?.value
     if (country == null || postal == null) {
         return false
     }
@@ -170,11 +161,11 @@ private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boo
 }
 
 private val REQUIRED_FIELDS = listOf(
-    IdentifierSpec.Line1,
-    IdentifierSpec.City,
-    IdentifierSpec.PostalCode,
-    IdentifierSpec.State,
-    IdentifierSpec.Country
+    FormFieldId.Line1,
+    FormFieldId.City,
+    FormFieldId.PostalCode,
+    FormFieldId.State,
+    FormFieldId.Country
 )
 
 internal const val ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"

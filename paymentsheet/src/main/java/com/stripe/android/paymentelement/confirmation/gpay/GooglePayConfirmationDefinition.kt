@@ -1,34 +1,40 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    @PaymentElementCallbackIdentifier val instanceId: String,
+    private val context: Context,
+    private val googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
+    private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback? = null,
 ) : ConfirmationDefinition<
     GooglePayConfirmationOption,
-    ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-    Unit,
+    InternalGooglePayPaymentMethodLauncher,
+    EmptyConfirmationLauncherArgs,
     GooglePayPaymentMethodLauncher.Result,
     > {
     override val key: String = "GooglePay"
@@ -40,7 +46,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     override suspend fun action(
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         if (
             confirmationOption.config.merchantCurrencyCode == null &&
             confirmationArgs.intent !is PaymentIntent
@@ -58,55 +64,63 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         }
 
         return ConfirmationDefinition.Action.Launch(
-            launcherArguments = Unit,
+            launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         )
     }
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit
-    ): ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args> {
-        return activityResultCaller.registerForActivityResult(
+    ): InternalGooglePayPaymentMethodLauncher {
+        val activityResultLauncher = activityResultCaller.registerForActivityResult(
             GooglePayPaymentMethodLauncherContractV2(),
             onResult,
+        )
+
+        return googlePayPaymentMethodLauncherFactory.create(
+            instanceId = instanceId,
+            lifecycleOwner = lifecycleOwner,
+            activityResultLauncher = activityResultLauncher,
+            onPaymentDataChangedCallback = onPaymentDataChangedCallback,
         )
     }
 
     override fun launch(
-        launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-        arguments: Unit,
+        launcher: InternalGooglePayPaymentMethodLauncher,
+        arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
         val config = confirmationOption.config
         val intent = confirmationArgs.intent
-        val googlePayLauncher = createGooglePayLauncher(
-            factory = googlePayPaymentMethodLauncherFactory,
-            activityLauncher = launcher,
-            config = confirmationOption.config,
-            confirmationArgs = confirmationArgs,
-        )
 
-        googlePayLauncher.present(
+        launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
                 ?: config.merchantCurrencyCode.orEmpty(),
             amount = when (intent) {
                 is PaymentIntent -> intent.amount ?: 0L
                 is SetupIntent -> config.customAmount ?: 0L
             },
+            config = config.toGooglePayLauncherConfig(confirmationArgs),
+            cardBrandFilter = config.cardBrandFilter,
+            cardFundingFilter = config.cardFundingFilter,
+            clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
             transactionId = intent.id,
             label = config.customLabel,
-            clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
             isElements = true,
+            apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
+            displayItems = GooglePayDisplayItemsFactory.create(confirmationArgs.paymentMethodMetadata, context),
+            billingEmailOverride = config.billingEmailOverride,
+            shippingAddressParameters = config.shippingAddressParameters,
         )
     }
 
     override fun toResult(
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: EmptyConfirmationLauncherArgs,
         result: GooglePayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -114,6 +128,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 val nextConfirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
+                    shippingInformation = result.shippingInformation,
                     originatedFromWallet = true,
                 )
 
@@ -141,32 +156,21 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         }
     }
 
-    private fun createGooglePayLauncher(
-        factory: GooglePayPaymentMethodLauncherFactory,
-        activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-        config: GooglePayConfirmationOption.Config,
+    private fun GooglePayConfirmationOption.Config.toGooglePayLauncherConfig(
         confirmationArgs: ConfirmationHandler.Args,
-    ): GooglePayPaymentMethodLauncher {
-        return factory.create(
-            lifecycleScope = CoroutineScope(Dispatchers.Default),
-            config = GooglePayPaymentMethodLauncher.Config(
-                environment = when (config.environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
-                    else -> GooglePayEnvironment.Test
-                },
-                merchantCountryCode = config.merchantCountryCode,
-                merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
-                    ?: config.merchantName,
-                isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
-                billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
-                additionalEnabledNetworks = config.additionalEnabledNetworks
-            ),
-            readyCallback = {
-                // Do nothing since we are skipping the ready check below
+    ): GooglePayPaymentMethodLauncher.Config {
+        return GooglePayPaymentMethodLauncher.Config(
+            environment = when (environment) {
+                PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
+                else -> GooglePayEnvironment.Test
             },
-            activityResultLauncher = activityLauncher,
-            skipReadyCheck = true,
-            cardBrandFilter = config.cardBrandFilter
+            merchantCountryCode = merchantCountryCode,
+            merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
+                ?: merchantName,
+            isEmailRequired = isEmailRequired,
+            billingAddressConfig = billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+            existingPaymentMethodRequired = !FeatureFlags.allowNoExistingPaymentMethodForGooglePay.isEnabled,
+            additionalEnabledNetworks = additionalEnabledNetworks
         )
     }
 

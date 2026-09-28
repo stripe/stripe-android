@@ -334,6 +334,7 @@ class ConfirmationTokenParamsTest {
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            checkoutSessionId = null,
         )
         val params = ConfirmationTokenParams(
             clientAttributionMetadata = clientAttributionMetadata

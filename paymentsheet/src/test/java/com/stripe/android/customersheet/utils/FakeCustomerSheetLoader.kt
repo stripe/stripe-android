@@ -5,8 +5,9 @@ import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -20,25 +21,28 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
 internal class FakeCustomerSheetLoader(
-    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED_WITH_US_BANK,
     private val shouldFail: Boolean = false,
     private val customerPaymentMethods: List<PaymentMethod> = emptyList(),
     private val supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-        LpmRepositoryTestHelpers.card,
-        LpmRepositoryTestHelpers.usBankAccount,
+        SupportedPaymentMethodFixtures.card,
+        SupportedPaymentMethodFixtures.usBankAccount,
     ),
     private val paymentSelection: PaymentSelection? = null,
     private val isGooglePayAvailable: Boolean = false,
+    private val attachmentStyle: IntegrationMetadata.CustomerSheet.AttachmentStyle =
+        IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
     private val delay: Duration = Duration.ZERO,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val financialConnectionsAvailability: FinancialConnectionsAvailability = Full,
     private val permissions: CustomerPermissions = CustomerPermissions(
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod = true,
-        canUpdateFullPaymentMethodDetails = true,
+        canUpdateCardExpiryAndBillingDetails = true,
     ),
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
+    private val integrationMetadata: IntegrationMetadata = IntegrationMetadata.CustomerSheet(attachmentStyle)
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -58,6 +62,7 @@ internal class FakeCustomerSheetLoader(
                         isGooglePayReady = isGooglePayAvailable,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         passiveCaptchaParams = passiveCaptchaParams,
+                        integrationMetadata = integrationMetadata,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,

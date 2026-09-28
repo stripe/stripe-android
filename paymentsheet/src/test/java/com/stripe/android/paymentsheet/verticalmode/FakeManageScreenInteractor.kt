@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import app.cash.turbine.Turbine
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +12,8 @@ internal class FakeManageScreenInteractor(
 ) : ManageScreenInteractor {
     override val isLiveMode: Boolean = true
 
+    val closeCalls = Turbine<Unit>()
+
     override val state: StateFlow<ManageScreenInteractor.State> =
         stateFlowOf(
             initialState ?: ManageScreenInteractor.State(
@@ -17,6 +21,7 @@ internal class FakeManageScreenInteractor(
                 currentSelection = null,
                 isEditing = false,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -25,6 +30,10 @@ internal class FakeManageScreenInteractor(
     }
 
     override fun close() {
-        /* Do nothing. */
+        closeCalls.add(Unit)
+    }
+
+    fun validate() {
+        closeCalls.ensureAllEventsConsumed()
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -33,20 +34,24 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
@@ -56,6 +61,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
@@ -65,10 +71,12 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -82,23 +90,28 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -106,6 +119,7 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -137,17 +151,25 @@ internal class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
+    @get:Rule
+    val networkRule = NetworkRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val googlePayPaymentMethodLauncherFactory =
-        createGooglePayPaymentMethodLauncherFactory()
+    private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
 
     private val paymentLauncherFactory = PaymentLauncherFactory(
         hostActivityLauncher = mock(),
@@ -161,7 +183,7 @@ internal class PaymentSheetActivityTest {
     }
 
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), any(), any(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), any(), any()) } doReturn paymentLauncher
     }
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
@@ -449,7 +471,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_\u2066···· 4242\u2069",
                 useUnmergedTree = true,
             ).assertIsSelected()
 
@@ -462,7 +484,7 @@ internal class PaymentSheetActivityTest {
             ).performClick()
 
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_\u2066···· 4242\u2069",
                 useUnmergedTree = true,
             ).assertIsSelected()
         }
@@ -640,7 +662,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
-            val buyBinding = StripePrimaryButtonBinding.bind(activity.buyButton)
+            val buyBinding = StripeAndroidPrimaryButtonBinding.bind(activity.buyButton)
 
             assertThat(buyBinding.confirmedIcon.isVisible)
                 .isFalse()
@@ -786,7 +808,6 @@ internal class PaymentSheetActivityTest {
             confirmationHandler.state.value = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = null,
                 )
             )
         }
@@ -853,7 +874,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_\u2066···· 4242\u2069",
                 useUnmergedTree = true,
             ).assertIsSelected()
 
@@ -938,7 +959,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
@@ -961,7 +982,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
             mandateNode.assertIsDisplayed()
@@ -989,7 +1010,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.performScrollTo()
@@ -1142,7 +1163,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule
-                .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule.waitForIdle()
@@ -1173,22 +1194,22 @@ internal class PaymentSheetActivityTest {
             scenario.onActivity {
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(initialSelection)
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<SelectSavedPaymentMethods>()
 
-                composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_···· 5454")
+                composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 5454\u2069")
                     .performClick()
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(newSelection)
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
 
                 viewModel.transitionToAddPaymentScreen()
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isNull()
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<AddAnotherPaymentMethod>()
 
@@ -1196,10 +1217,39 @@ internal class PaymentSheetActivityTest {
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(newSelection)
-                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<SelectSavedPaymentMethods>()
             }
+        }
+    }
+
+    @Test
+    fun `promotion message is displayed when selecting klarna from saved PMs screen`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "klarna"),
+        )
+        val viewModel = createViewModel(
+            paymentIntent = paymentIntent,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                promotions = FakePaymentMethodMessagePromotionsHelper.promotions
+            ),
+        )
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            composeTestRule.onNodeWithTag(
+                PaymentOptionsItem.AddCard.viewType.name
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                "PaymentMethodsUITestTagklarna"
+            ).performClick()
+
+            composeTestRule.onNodeWithText(
+                "This is a message",
+                substring = true,
+            ).assertIsDisplayed()
         }
     }
 
@@ -1213,6 +1263,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
@@ -1224,17 +1275,20 @@ internal class PaymentSheetActivityTest {
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
+        integrationMetadata: IntegrationMetadata? = null,
+        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper(),
     ): PaymentSheetViewModel = runBlocking {
         val coordinator = FakeLinkConfigurationCoordinator(
             accountStatus = AccountStatus.SignedOut,
             email = "email@email.com"
         )
-
         TestViewModelFactory.create(
             linkConfigurationCoordinator = coordinator,
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 args = args,
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 eventReporter = eventReporter,
                 paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,
@@ -1248,21 +1302,21 @@ internal class PaymentSheetActivityTest {
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,
                     cbcEligibility = cbcEligibility,
+                    integrationMetadata = integrationMetadata,
                 ),
-                customerRepository = FakeCustomerRepository(paymentMethods),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(paymentMethods),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-                    intentConfirmationInterceptorFactory =
-                    object : IntentConfirmationInterceptor.Factory {
+                    intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
                         override suspend fun create(
                             integrationMetadata: IntegrationMetadata,
-                            customerId: String?,
-                            ephemeralKeySecret: String?,
+                            customerMetadata: CustomerMetadata?,
                             clientAttributionMetadata: ClientAttributionMetadata,
+                            isLiveMode: Boolean,
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor
                         }
@@ -1271,7 +1325,6 @@ internal class PaymentSheetActivityTest {
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-                    paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                     statusBarColor = args.statusBarColor,
                     linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),
@@ -1286,13 +1339,19 @@ internal class PaymentSheetActivityTest {
                         args: Args,
                         processing: StateFlow<Boolean>,
                         coroutineScope: CoroutineScope,
-                    ): CvcRecollectionInteractor {
-                        return FakeCvcRecollectionInteractor()
-                    }
+                    ): CvcRecollectionInteractor = FakeCvcRecollectionInteractor()
                 },
-                isLiveModeProvider = { false }
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+                mode = EventReporter.Mode.Complete,
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                placesClient = null,
+                linkAccountHolder = LinkAccountHolder(savedStateHandle),
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
-        }
+        }.also { viewModelStoreRule.track(it) }
     }
 
     private fun PaymentSheetViewModel.captureGooglePayListener():
@@ -1320,24 +1379,22 @@ internal class PaymentSheetActivityTest {
     }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
-        object : GooglePayPaymentMethodLauncherFactory {
+        object : InternalGooglePayPaymentMethodLauncherFactory {
             override fun create(
-                lifecycleScope: CoroutineScope,
-                config: GooglePayPaymentMethodLauncher.Config,
-                readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                instanceId: String,
+                lifecycleOwner: LifecycleOwner,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                skipReadyCheck: Boolean,
-                cardBrandFilter: CardBrandFilter
-            ): GooglePayPaymentMethodLauncher {
-                val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-                readyCallback.onReady(true)
-                return googlePayPaymentMethodLauncher
+                onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
+            ): InternalGooglePayPaymentMethodLauncher {
+                return mock<InternalGooglePayPaymentMethodLauncher>()
             }
         }
 
     private fun startEditing() {
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodesWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).fetchSemanticsNodes().isNotEmpty()
+        composeTestRule.waitUntilWithIdle {
+            composeTestRule.onAllNodesWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
         composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).performClick()
     }

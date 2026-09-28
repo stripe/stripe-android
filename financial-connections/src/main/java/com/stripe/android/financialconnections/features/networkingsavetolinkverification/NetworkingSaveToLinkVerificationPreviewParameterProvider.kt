@@ -6,7 +6,7 @@ import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 
@@ -59,7 +59,7 @@ internal class NetworkingSaveToLinkVerificationPreviewParameterProvider :
         email = "theLargestEmailYoulleverseeThatCouldBreakALayout@email.com",
         phoneNumber = "12345678",
         otpElement = OTPElement(
-            IdentifierSpec.Generic("otp"),
+            FormFieldId.Generic("otp"),
             OTPController()
         ),
         showNotNowButton = false,

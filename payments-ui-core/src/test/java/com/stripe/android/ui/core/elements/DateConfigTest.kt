@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.unit.LayoutDirection
 import com.google.common.truth.Truth
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.TextFieldStateConstants
@@ -30,7 +29,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -40,7 +39,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -50,7 +49,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -60,7 +59,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -70,7 +69,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -138,7 +137,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(expectedErrorMessage)
     }
 
@@ -154,7 +153,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -170,7 +169,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -202,7 +201,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getValidationMessage()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -228,8 +227,8 @@ class DateConfigTest {
     }
 
     @Test
-    fun `Layout direction should be Ltr`() {
-        Truth.assertThat(dateConfig.layoutDirection).isEqualTo(LayoutDirection.Ltr)
+    fun `Date config should enforce Ltr text direction`() {
+        Truth.assertThat(dateConfig.enforceLeftToRightTextDirection).isTrue()
     }
 
     private fun produceInput(month: Int, year: Int): String {

@@ -35,6 +35,7 @@ object PaymentMethodFactory {
         brand: CardBrand = CardBrand.Visa,
         fingerprint: String? = card?.fingerprint,
         billingDetails: PaymentMethod.BillingDetails? = null,
+        funding: String? = card?.funding
     ): PaymentMethod {
         return copy(
             card = card?.copy(
@@ -48,6 +49,7 @@ object PaymentMethodFactory {
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
                 brand = brand,
                 fingerprint = fingerprint,
+                funding = funding
             ),
             billingDetails = billingDetails,
         )
@@ -146,6 +148,16 @@ object PaymentMethodFactory {
         )
     }
 
+    fun linkLPM(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Link,
+            code = PaymentMethod.Type.Link.code,
+        )
+    }
+
     fun bacs(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
@@ -210,6 +222,16 @@ object PaymentMethodFactory {
             liveMode = false,
             type = PaymentMethod.Type.RevolutPay,
             code = PaymentMethod.Type.RevolutPay.code,
+        )
+    }
+
+    fun satispay(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Satispay,
+            code = PaymentMethod.Type.Satispay.code,
         )
     }
 

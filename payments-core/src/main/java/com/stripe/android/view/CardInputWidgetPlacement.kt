@@ -8,7 +8,6 @@ import com.stripe.android.view.CardInputWidget.Field
  */
 internal data class CardInputWidgetPlacement(
     internal var totalLengthInPixels: Int = 0,
-
     internal var cardWidth: Int = 0,
     internal var hiddenCardWidth: Int = 0,
     internal var peekCardWidth: Int = 0,
@@ -18,7 +17,6 @@ internal data class CardInputWidgetPlacement(
     internal var cvcWidth: Int = 0,
     internal var cvcPostalCodeSeparation: Int = 0,
     internal var postalCodeWidth: Int = 0,
-
     internal var cardTouchBufferLimit: Int = 0,
     internal var dateStartPosition: Int = 0,
     internal var dateEndTouchBufferLimit: Int = 0,

@@ -7,8 +7,33 @@ internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Use Confirmation Token",
     defaultValue = false,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return initializationTypeIsDeferred(settings) && usingCustomerSessionsForSavedPms(settings)
+    }
+
+    private fun initializationTypeIsDeferred(settings: Map<PlaygroundSettingDefinition<*>, Any?>): Boolean {
+        return when (settings[InitializationTypeSettingsDefinition] as InitializationType) {
+            InitializationType.Normal -> false
+            InitializationType.DeferredClientSideConfirmation,
+            InitializationType.DeferredServerSideConfirmation,
+            InitializationType.DeferredManualConfirmation,
+            InitializationType.DeferredMultiprocessor -> true
+        }
+    }
+
+    private fun usingCustomerSessionsForSavedPms(settings: Map<PlaygroundSettingDefinition<*>, Any?>): Boolean {
+        return if (settings[CustomerSettingsDefinition] in listOf(CustomerType.RETURNING, CustomerType.NEW)) {
+            settings[CustomerSessionSettingsDefinition] == true
+        } else {
+            true
+        }
     }
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {

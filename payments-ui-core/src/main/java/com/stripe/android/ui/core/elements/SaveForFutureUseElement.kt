@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,9 +25,9 @@ data class SaveForFutureUseElement(
         initialValue
     )
 
-    override val identifier: IdentifierSpec = IdentifierSpec.SaveForFutureUse
+    override val identifier: FormFieldId = FormFieldId.SaveForFutureUse
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         controller.formFieldValue.mapAsStateFlow {
             listOf(
                 identifier to it

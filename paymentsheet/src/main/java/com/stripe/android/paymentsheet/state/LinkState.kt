@@ -28,7 +28,7 @@ internal data class LinkState(
         loginState = loginState,
         signupModeResult = when {
             signupMode != null ->
-                LinkSignupModeResult.Enabled(signupMode)
+                LinkSignupModeResult.Enabled(signupMode, false)
             loginState != LoginState.LoggedOut ->
                 LinkSignupModeResult.AlreadyRegistered
             else ->

@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -114,12 +115,31 @@ internal class SignUpBodyTest {
         onEmailField().assertIsNotEnabled()
     }
 
+    @Test
+    fun `signup subtitle uses Link brand name`() {
+        setContent(SignUpState.InputtingPrimaryField, linkBrand = LinkBrand.Link)
+
+        composeTestRule
+            .onNodeWithText("Pay faster everywhere Link is accepted.")
+            .assertExists()
+    }
+
+    @Test
+    fun `signup subtitle uses Onelink brand name`() {
+        setContent(SignUpState.InputtingPrimaryField, linkBrand = LinkBrand.Onelink)
+
+        composeTestRule
+            .onNodeWithText("Pay faster everywhere Onelink is accepted.")
+            .assertExists()
+    }
+
     private fun setContent(
         signUpState: SignUpState,
         isReadyToSignUp: Boolean = true,
         requiresNameCollection: Boolean = false,
         errorMessage: ResolvableString? = null,
-        canEditEmail: Boolean = true
+        canEditEmail: Boolean = true,
+        linkBrand: LinkBrand = LinkBrand.Link,
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             SignUpBody(
@@ -133,6 +153,7 @@ internal class SignUpBodyTest {
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
                     canEditEmail = canEditEmail,
+                    linkBrand = linkBrand,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),

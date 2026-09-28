@@ -1,65 +1,79 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.paymentsheet.utils.childScope
+import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val paymentMethodCode: PaymentMethodCode,
-    private val hasSavedPaymentMethods: Boolean,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
-    private val formActivityStateHelper: FormActivityStateHelper,
+    private val sheetActivityStateHolder: SheetActivityStateHolder,
+    private val tapToAddHelper: TapToAddHelper,
     private val eventReporter: EventReporter,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
 ) {
-    fun create(): DefaultVerticalModeFormInteractor {
+    fun create(
+        paymentMethodCode: PaymentMethodCode,
+        hasSavedPaymentMethods: Boolean
+    ): DefaultVerticalModeFormInteractor {
+        val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
+        val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
         val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = viewModelScope,
+            coroutineScope = formHelperScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = {
-                embeddedSelectionHolder.set(it)
-            },
+            automaticallyLaunchedCardScanFormDataHelper =
+                embeddedFormHelperFactory.createAutomaticallyLaunchedCardScanFormDataHelper(
+                    selectedPaymentMethodCode = paymentMethodCode,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                ),
+            selectionUpdater = { embeddedSelectionHolder.setSelection(it) },
+            tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        )
+        val bankFormInteractor = BankFormInteractor(
+            updateSelection = embeddedSelectionHolder::setSelection,
+            paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
+                paymentMethodMetadata.paymentMethodIncentive
+            ),
         )
 
-        val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectedPaymentMethodCode = paymentMethodCode,
-            hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set,
+        val usBankAccountFormArguments = createUsBankAccountFormArguments(
+            paymentMethodCode = paymentMethodCode,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
-            onMandateTextChanged = { mandateText, _ ->
-                formActivityStateHelper.updateMandate(mandateText)
-            },
-            onUpdatePrimaryButtonUIState = formActivityStateHelper::updatePrimaryButton,
-            onError = formActivityStateHelper::updateError,
-            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
+            bankFormInteractor = bankFormInteractor,
         )
 
         val formType = formHelper.formTypeForCode(paymentMethodCode)
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
-            embeddedSelectionHolder.set(
+            embeddedSelectionHolder.setSelection(
                 formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
                     paymentMethod = requireNotNull(
                         paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
@@ -80,14 +94,35 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods
             ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            processing = formActivityStateHelper.state.mapAsStateFlow { it.isProcessing },
-            paymentMethodIncentive = PaymentMethodIncentiveInteractor(
-                paymentMethodMetadata.paymentMethodIncentive
-            ).displayedIncentive,
-            // Embedded does not support validation at the moment. Should update here once it does.
-            validationRequested = MutableSharedFlow(),
-            coroutineScope = viewModelScope,
+            processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+            paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
+            validationRequested = sheetActivityStateHolder.validationRequested,
+            coroutineScope = coroutineScope,
             uiContext = Dispatchers.Main,
+        )
+    }
+
+    private fun createUsBankAccountFormArguments(
+        paymentMethodCode: PaymentMethodCode,
+        hasSavedPaymentMethods: Boolean,
+        bankFormInteractor: BankFormInteractor,
+    ): USBankAccountFormArguments {
+        return USBankAccountFormArguments.createForEmbedded(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectedPaymentMethodCode = paymentMethodCode,
+            hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+            isCompleteFlow = false,
+            draftPaymentSelection = null,
+            bankFormInteractor = bankFormInteractor,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
+            onMandateTextChanged = { mandateText, _ ->
+                sheetActivityStateHolder.updateMandate(mandateText)
+            },
+            onUpdatePrimaryButtonUIState = sheetActivityStateHolder::updatePrimaryButton,
+            onError = sheetActivityStateHolder::updateError,
+            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
     }
 }

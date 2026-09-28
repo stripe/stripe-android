@@ -6,11 +6,12 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class AccountRange internal constructor(
+data class AccountRange(
     val binRange: BinRange,
     val panLength: Int,
     val brandInfo: BrandInfo,
-    val country: String? = null
+    val funding: CardFunding,
+    val country: String? = null,
 ) : StripeModel {
     val brand: CardBrand
         get() = brandInfo.brand

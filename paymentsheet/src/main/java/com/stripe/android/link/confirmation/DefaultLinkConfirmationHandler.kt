@@ -21,12 +21,15 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val configuration: LinkConfiguration,
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val statusBarColor: Int?,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
 ) : LinkConfirmationHandler {
@@ -39,7 +42,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
     ): Result {
         return confirm {
             newConfirmationArgs(
@@ -121,11 +124,20 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                 )
             }
-            is LinkPaymentDetails.Saved -> {
+            is LinkPaymentDetails.Passthrough -> {
                 savedConfirmationArgs(
-                    paymentDetails = paymentDetails,
+                    paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    newPMTransformedForConfirmation = paymentDetails.createdFromNewPaymentMethod,
+                )
+            }
+            is LinkPaymentDetails.Saved -> {
+                savedConfirmationArgs(
+                    paymentMethod = paymentDetails.paymentMethod,
+                    cvc = cvc,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    newPMTransformedForConfirmation = false,
                 )
             }
         }
@@ -173,12 +185,13 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = statusBarColor,
         )
     }
 
-    private fun allowRedisplay(paymentMethodType: String): PaymentMethod.AllowRedisplay? {
+    private fun allowRedisplay(paymentMethodType: String?): PaymentMethod.AllowRedisplay? {
         val isSettingUp = when (val intent = configuration.stripeIntent) {
-            is PaymentIntent -> intent.isSetupFutureUsageSet(paymentMethodType)
+            is PaymentIntent -> paymentMethodType != null && intent.isSetupFutureUsageSet(paymentMethodType)
             is SetupIntent -> true
         }
 
@@ -190,27 +203,32 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails.Saved,
+        paymentMethod: PaymentMethod,
         cvc: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        newPMTransformedForConfirmation: Boolean
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentDetails.paymentMethod,
+                shippingInformation = null,
+                paymentMethod = paymentMethod,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
                     cvc = cvc?.takeIf {
                         configuration.passthroughModeEnabled.not()
                     }
                 ),
+                newPMTransformedForConfirmation = newPMTransformedForConfirmation
             ),
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = statusBarColor,
         )
     }
 
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
         private val paymentMethodMetadata: PaymentMethodMetadata,
+        @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val logger: Logger,
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
@@ -218,7 +236,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 confirmationHandler = confirmationHandler,
                 logger = logger,
                 configuration = configuration,
-                paymentMethodMetadata = paymentMethodMetadata
+                paymentMethodMetadata = paymentMethodMetadata,
+                statusBarColor = statusBarColor,
             )
         }
     }
@@ -255,17 +274,19 @@ internal fun createPaymentMethodCreateParams(
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         allowRedisplay = allowRedisplay,
         clientAttributionMetadata = clientAttributionMetadata,
+        originalPaymentMethodCode = selectedPaymentDetails.type
     )
 }
 
 internal fun computeExpectedPaymentMethodType(
     configuration: LinkConfiguration,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails
-): String {
+): String? {
     return when (paymentDetails) {
         is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
-        is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Card,
         is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Generic -> null
     }
 }
 

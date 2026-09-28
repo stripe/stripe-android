@@ -12,10 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.injection.DefaultApiConfigurationResolver
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
@@ -45,8 +46,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             try {
                 starterArgs.initializationMode.validate()
                 starterArgs.config.asCommonConfiguration().validate(
-                    viewModel.isLiveModeProvider(),
-                    starterArgs.paymentElementCallbackIdentifier
+                    initializationMode = starterArgs.initializationMode,
+                    isLiveMode = DefaultApiConfigurationResolver(this)
+                        .resolve(starterArgs.config.apiConfiguration)
+                        .isLiveMode(),
+                    callbackIdentifier = starterArgs.paymentElementCallbackIdentifier,
                 )
             } catch (e: IllegalArgumentException) {
                 finishWithError(e)
@@ -66,7 +70,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = starterArgs.config.appearance) {
                 val isProcessing by viewModel.processing.collectAsState()
 
                 val bottomSheetState = rememberStripeBottomSheetState(
@@ -77,7 +81,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     viewModel.paymentSheetResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
-                        viewModel.navigationHandler.closeScreens()
                         finish()
                     }
                 }

@@ -30,6 +30,19 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
+    suspend fun fetchCustomerWallets(
+        authToken: String
+    ): ApiResult<CustomerWalletsResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            manager.get("$baseUrl/customer_wallets?limit=$CUSTOMER_WALLETS_LIMIT")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $authToken")
+                .suspendable()
+                .awaitModel(CustomerWalletsResponse.serializer(), json)
+        }
+    }
+
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
@@ -38,7 +51,8 @@ class TestBackendRepository {
         sourceAmount: Double = 10.0,
         sourceCurrency: String = "usd",
         destinationCurrency: String = "eth",
-        customerIpAddress: String = "127.0.0.1"
+        customerIpAddress: String = "127.0.0.1",
+        settlementSpeed: SettlementSpeed,
     ): ApiResult<OnrampSessionResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = CreateOnrampSessionRequest(
@@ -49,7 +63,8 @@ class TestBackendRepository {
                 destinationCurrency = destinationCurrency,
                 destinationNetwork = destinationNetwork,
                 walletAddress = walletAddress,
-                customerIpAddress = customerIpAddress
+                customerIpAddress = customerIpAddress,
+                settlementSpeed = settlementSpeed
             )
 
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)
@@ -202,3 +217,4 @@ suspend fun <T : Any> Request.awaitModel(
 }
 
 private const val SESSION_CREATION_TIMEOUT = 60000 // 60 seconds
+private const val CUSTOMER_WALLETS_LIMIT = 50

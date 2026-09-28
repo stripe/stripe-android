@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -25,11 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
@@ -40,7 +36,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -48,9 +44,7 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
 
@@ -87,6 +81,7 @@ internal fun LinkOptionalInlineSignup(
         isShowingPhoneFirst = viewState.isShowingPhoneFirst,
         enabled = enabled,
         requiresNameCollection = viewModel.requiresNameCollection,
+        linkBrand = viewState.linkBrand,
         errorMessage = errorMessage?.resolve(),
         modifier = modifier
     )
@@ -103,6 +98,7 @@ internal fun LinkOptionalInlineSignup(
     signUpState: SignUpState,
     enabled: Boolean,
     requiresNameCollection: Boolean,
+    linkBrand: LinkBrand,
     errorMessage: String?,
     modifier: Modifier = Modifier
 ) {
@@ -113,7 +109,7 @@ internal fun LinkOptionalInlineSignup(
         val nameFocusRequester = remember { FocusRequester() }
 
         var didShowAllFields by rememberSaveable { mutableStateOf(false) }
-        val sectionError by sectionController.error.collectAsState()
+        val validationMessage by sectionController.validationMessage.collectAsState()
 
         if (signUpState == SignUpState.InputtingRemainingFields) {
             LaunchedEffect(signUpState) {
@@ -135,7 +131,7 @@ internal fun LinkOptionalInlineSignup(
         }
 
         LinkInlineSignupFields(
-            sectionError = sectionError?.errorMessage,
+            validationMessage = validationMessage,
             emailController = emailController,
             phoneNumberController = phoneNumberController,
             nameController = nameController,
@@ -158,6 +154,7 @@ internal fun LinkOptionalInlineSignup(
             } else {
                 LinkTermsType.InlineOptional
             },
+            linkBrand = linkBrand,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -214,26 +211,6 @@ internal fun EmailCollection(
     }
 }
 
-@Composable
-internal fun LinkLogo(
-    modifier: Modifier = Modifier,
-) {
-    Icon(
-        painter = painterResource(
-            id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                R.drawable.stripe_link_logo_knockout_black
-            } else {
-                R.drawable.stripe_link_logo_knockout_white
-            }
-        ),
-        contentDescription = stringResource(id = com.stripe.android.R.string.stripe_link),
-        modifier = modifier.semantics {
-            testTag = "LinkLogoIcon"
-        },
-        tint = Color.Unspecified,
-    )
-}
-
 @Preview
 @Composable
 private fun PreviewInitial() {
@@ -248,6 +225,7 @@ private fun PreviewInitial() {
                 enabled = true,
                 isShowingPhoneFirst = false,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )
@@ -269,6 +247,7 @@ private fun PreviewInitialWithPhoneFirst() {
                 enabled = true,
                 isShowingPhoneFirst = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )
@@ -290,6 +269,7 @@ private fun PreviewFilledOut() {
                 enabled = true,
                 isShowingPhoneFirst = false,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )

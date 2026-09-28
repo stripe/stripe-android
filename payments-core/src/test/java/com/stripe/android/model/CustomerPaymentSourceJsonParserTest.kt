@@ -38,13 +38,6 @@ class CustomerPaymentSourceJsonParserTest {
             .isEqualTo("src_19t3xKBZqEXluyI4uz2dxAfQ")
     }
 
-    @Test
-    fun getSourceType_whenCustomerSource_returnsSourceType() {
-        val customerSource = assertIs<CustomerSource>(parse(SourceFixtures.ALIPAY_JSON))
-        assertThat(customerSource.source.type)
-            .isEqualTo(Source.SourceType.ALIPAY)
-    }
-
     private companion object {
         private fun parse(jsonObject: JSONObject): CustomerPaymentSource {
             return requireNotNull(

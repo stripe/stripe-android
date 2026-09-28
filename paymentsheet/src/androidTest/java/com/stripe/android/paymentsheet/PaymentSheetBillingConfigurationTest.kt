@@ -5,12 +5,14 @@ import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -29,7 +31,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetBillingConfigurationTest {
+internal class PaymentSheetBillingConfigurationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -40,10 +45,7 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -53,7 +55,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -63,25 +65,27 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "foo@bar.com",
-                        phone = "+13105551234",
-                        address = PaymentSheet.Address(
-                            postalCode = "94111",
-                            country = "US",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        defaultBillingDetails = PaymentSheet.BillingDetails(
+                            name = "Jenny Rosen",
+                            email = "foo@bar.com",
+                            phone = "+13105551234",
+                            address = PaymentSheet.Address(
+                                postalCode = "94111",
+                                country = "US",
+                            ),
                         ),
-                    ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                        attachDefaultsToPaymentMethod = true,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                            attachDefaultsToPaymentMethod = true,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -94,11 +98,11 @@ internal class PaymentSheetBillingConfigurationTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_data[billing_details][name]"), urlEncode("Jane Doe")),
-            bodyPart(urlEncode("payment_method_data[billing_details][email]"), urlEncode("mail@mail.com")),
-            bodyPart(urlEncode("payment_method_data[billing_details][phone]"), urlEncode("+13105551234")),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US"),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111"),
+            bodyPart("payment_method_data[billing_details][name]", "Jane Doe"),
+            bodyPart("payment_method_data[billing_details][email]", "mail@mail.com"),
+            bodyPart("payment_method_data[billing_details][phone]", "+13105551234"),
+            bodyPart("payment_method_data[billing_details][address][country]", "US"),
+            bodyPart("payment_method_data[billing_details][address][postal_code]", "94111"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -117,10 +121,7 @@ internal class PaymentSheetBillingConfigurationTest {
             response.setResponseCode(500)
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -130,7 +131,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -140,22 +141,24 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "foo@bar.com",
-                        phone = "+13105551234",
-                        address = PaymentSheet.Address(
-                            postalCode = "94111",
-                            country = "US",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        defaultBillingDetails = PaymentSheet.BillingDetails(
+                            name = "Jenny Rosen",
+                            email = "foo@bar.com",
+                            phone = "+13105551234",
+                            address = PaymentSheet.Address(
+                                postalCode = "94111",
+                                country = "US",
+                            ),
                         ),
-                    ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                        attachDefaultsToPaymentMethod = false,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                            attachDefaultsToPaymentMethod = false,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -165,11 +168,11 @@ internal class PaymentSheetBillingConfigurationTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(bodyPart(urlEncode("payment_method_data[billing_details][name]"), urlEncode("Jenny Rosen"))),
-            not(bodyPart(urlEncode("payment_method_data[billing_details][email]"), urlEncode("foo@bar.com"))),
-            not(bodyPart(urlEncode("payment_method_data[billing_details][phone]"), urlEncode("+13105551234"))),
-            not(bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US")),
-            not(bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111")),
+            not(bodyPart("payment_method_data[billing_details][name]", "Jenny Rosen")),
+            not(bodyPart("payment_method_data[billing_details][email]", "foo@bar.com")),
+            not(bodyPart("payment_method_data[billing_details][phone]", "+13105551234")),
+            not(bodyPart("payment_method_data[billing_details][address][country]", "US")),
+            not(bodyPart("payment_method_data[billing_details][address][postal_code]", "94111")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -181,40 +184,40 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testAddressInputNotReset() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = IntegrationType.Compose,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "foo@bar.com",
-                        phone = "+13105551234",
-                        address = PaymentSheet.Address(
-                            postalCode = "94111",
-                            country = "US",
-                            state = "CA",
-                            city = "South San Francisco",
-                            line1 = "123 Main Street",
-                            line2 = null,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        defaultBillingDetails = PaymentSheet.BillingDetails(
+                            name = "Jenny Rosen",
+                            email = "foo@bar.com",
+                            phone = "+13105551234",
+                            address = PaymentSheet.Address(
+                                postalCode = "94111",
+                                country = "US",
+                                state = "CA",
+                                city = "South San Francisco",
+                                line1 = "123 Main Street",
+                                line2 = null,
+                            ),
                         ),
-                    ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                        attachDefaultsToPaymentMethod = false,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                            attachDefaultsToPaymentMethod = false,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -236,14 +239,12 @@ internal class PaymentSheetBillingConfigurationTest {
         @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
         layoutType: PaymentSheetLayoutType,
     ) = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -277,29 +278,30 @@ internal class PaymentSheetBillingConfigurationTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_data[billing_details][name]"), urlEncode("Jenny Rosen")),
-            bodyPart(urlEncode("payment_method_data[billing_details][email]"), urlEncode("foo@bar.com")),
-            bodyPart(urlEncode("payment_method_data[billing_details][phone]"), urlEncode("+13105551234")),
+            bodyPart("payment_method_data[billing_details][name]", "Jenny Rosen"),
+            bodyPart("payment_method_data[billing_details][email]", "foo@bar.com"),
+            bodyPart("payment_method_data[billing_details][phone]", "+13105551234"),
             bodyPart(
-                urlEncode("payment_method_data[billing_details][address][line1]"),
-                urlEncode("123 Main Street")
+                "payment_method_data[billing_details][address][line1]",
+                "123 Main Street"
             ),
             bodyPart(
-                urlEncode("payment_method_data[billing_details][address][line2]"),
-                urlEncode("Unit #123")
+                "payment_method_data[billing_details][address][line2]",
+                "Unit #123"
             ),
             bodyPart(
-                urlEncode("payment_method_data[billing_details][address][city]"),
-                urlEncode("South San Francisco")
+                "payment_method_data[billing_details][address][city]",
+                "South San Francisco"
             ),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][state]"), "CA"),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US"),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111"),
+            bodyPart("payment_method_data[billing_details][address][state]", "CA"),
+            bodyPart("payment_method_data[billing_details][address][country]", "US"),
+            bodyPart("payment_method_data[billing_details][address][postal_code]", "94111"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 }

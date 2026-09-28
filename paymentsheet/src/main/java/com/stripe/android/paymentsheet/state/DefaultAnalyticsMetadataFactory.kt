@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.Nested
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleBoolean
@@ -31,6 +32,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val mode: EventReporter.Mode,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
+    private val linkGateFactory: LinkGate.Factory,
 ) : DefaultPaymentElementLoader.AnalyticsMetadataFactory {
     override fun create(
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -40,6 +42,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         configuration: PaymentElementLoader.Configuration,
         customerMetadata: CustomerMetadata?,
         linkStateResult: LinkStateResult?,
+        isTapToAddAvailable: Boolean,
     ): AnalyticsMetadata = buildMap<String, AnalyticsMetadata.Value> {
         putAll(
             initialization(
@@ -67,6 +70,8 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         )
 
         put("google_pay_enabled", SimpleBoolean(isGooglePaySupported))
+
+        put("tap_to_add_available", SimpleBoolean(isTapToAddAvailable))
 
         put("mpe_config", Nested(configuration.analyticsMap()))
     }.let { AnalyticsMetadata(it) }
@@ -108,6 +113,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         putNonEmpty("link_disabled_reasons", disabledReasons)
         val signupDisabledReasons = linkState?.signupModeResult?.disabledReasons?.map { it.value }
         putNonEmpty("link_signup_disabled_reasons", signupDisabledReasons)
+        put("link_native_available", SimpleBoolean(deviceCanUseNativeLink(elementsSession, linkGateFactory)))
     }
 
     private fun defaultPaymentMethods(
@@ -124,7 +130,9 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         when (this@analyticsMap) {
             is PaymentElementLoader.Configuration.PaymentSheet -> putAll(analyticsMap())
             is PaymentElementLoader.Configuration.Embedded -> putAll(analyticsMap())
-            is PaymentElementLoader.Configuration.CryptoOnramp -> Unit
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement,
+            is PaymentElementLoader.Configuration.StandaloneLink -> Unit
         }
     }
 
@@ -174,6 +182,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("billing_details_collection_configuration", Nested(billingDetailsCollectionConfiguration.analyticsMap()))
 
         put("appearance", Nested(appearance.analyticsMap()))
+        put("card_funding_acceptance", SimpleBoolean(allowedCardFundingTypes.toAnalyticsValue()))
     }
 
     private fun PaymentSheet.BillingDetailsCollectionConfiguration.analyticsMap() =
@@ -183,6 +192,9 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
             put("email", SimpleString(email.name))
             put("phone", SimpleString(phone.name))
             put("address", SimpleString(address.name))
+            if (allowedBillingCountries.isNotEmpty()) {
+                put("allowed_countries", SimpleString(allowedBillingCountries.joinToString(",")))
+            }
         }
 
     private fun PaymentSheet.Appearance.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {
@@ -235,6 +247,8 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
 private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String
     get() = when (this) {
         is PaymentElementLoader.InitializationMode.CryptoOnramp -> "crypto_onramp"
+        is PaymentElementLoader.InitializationMode.StandaloneLink -> "standalone_link"
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             when (this.intentConfiguration.mode) {
                 is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
@@ -247,19 +261,21 @@ private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: Strin
 
 private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
     is IntegrationMetadata.IntentFirst -> false
-    IntegrationMetadata.CryptoOnramp -> true
-    IntegrationMetadata.CustomerSheet -> true
-    is IntegrationMetadata.DeferredIntentWithConfirmationToken -> true
-    is IntegrationMetadata.DeferredIntentWithPaymentMethod -> true
-    is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> true
+    IntegrationMetadata.CryptoOnramp,
+    IntegrationMetadata.StandaloneLink -> true
+    is IntegrationMetadata.CustomerSheet -> true
+    is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> true
+    is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> true
+    is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken -> true
+    is IntegrationMetadata.CheckoutSession -> false
 }
 
 private fun IntegrationMetadata.isSpt(): Boolean {
-    return this is IntegrationMetadata.DeferredIntentWithSharedPaymentToken
+    return this is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken
 }
 
 private fun IntegrationMetadata.isConfirmationTokens(): Boolean {
-    return this is IntegrationMetadata.DeferredIntentWithConfirmationToken
+    return this is IntegrationMetadata.DeferredIntent.WithConfirmationToken
 }
 
 private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Boolean {
@@ -310,6 +326,10 @@ private fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
 }
 
+private fun List<PaymentSheet.CardFundingType>.toAnalyticsValue(): Boolean {
+    return this.toSet() != PaymentSheet.CardFundingType.entries.toSet()
+}
+
 private fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
     return when (this) {
         PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
@@ -322,4 +342,16 @@ private fun MutableMap<String, AnalyticsMetadata.Value>.putNonEmpty(key: String,
     if (!list.isNullOrEmpty()) {
         put(key, SimpleString(list.joinToString(",")))
     }
+}
+
+/**
+ * Check if native Link is available on this device.
+ * Uses LinkGate.Factory to determine native Link availability.
+ */
+private fun deviceCanUseNativeLink(
+    elementsSession: ElementsSession,
+    linkGateFactory: LinkGate.Factory
+): Boolean {
+    val linkGate = linkGateFactory.create(elementsSession)
+    return linkGate.useNativeLink
 }

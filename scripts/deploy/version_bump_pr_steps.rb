@@ -38,9 +38,9 @@ def create_version_bump_pr()
     
         pr_description = create_pr_description()
         if (@is_dry_run)
-          user_message = "Verify that a draft PR containing version number bumps was opened. If this was a real release, you would need to wait for this PR to merge before continuing."
+          user_message = "Verify that a draft PR containing version number bumps was opened."
         else
-          user_message = "Verify that a PR containing version number bumps was opened. Merge this PR before continuing to the next steps."
+          user_message = "Verify that a PR containing version number bumps was opened. Press enter once you've confirmed the PR was created."
         end
 
         create_pr(

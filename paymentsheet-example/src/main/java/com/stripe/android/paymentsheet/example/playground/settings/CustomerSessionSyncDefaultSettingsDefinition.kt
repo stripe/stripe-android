@@ -8,22 +8,14 @@ internal object CustomerSessionSyncDefaultSettingsDefinition : BooleanSettingsDe
     displayName = "Customer Session Sync Default Feature",
     key = "customer_session_sync_default"
 ) {
-    override fun createOptions(
-        configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
-        PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
-    )
-
     override fun configure(value: Boolean, customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder) {
-        if (value) {
-            customerEphemeralKeyRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Enabled)
-        } else {
-            customerEphemeralKeyRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Disabled)
-        }
+        customerEphemeralKeyRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.fromBoolean(value))
     }
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType.isCustomerFlow()
     }
 }

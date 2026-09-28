@@ -1,7 +1,6 @@
 package com.stripe.android.connect.webview.serialization
 
 import com.stripe.android.connect.PaymentsProps
-import com.stripe.android.connect.PreviewConnectSDK
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -44,8 +43,7 @@ internal data class PaymentsPropsJs(
     )
 }
 
-@OptIn(PreviewConnectSDK::class)
-internal fun PaymentsProps.toJs(): PaymentsPropsJs {
+internal fun PaymentsProps.State.toJs(): PaymentsPropsJs {
     return PaymentsPropsJs(
         setDefaultFilters = defaultFilters?.let { filters ->
             PaymentsPropsJs.PaymentsListDefaultFiltersJs(

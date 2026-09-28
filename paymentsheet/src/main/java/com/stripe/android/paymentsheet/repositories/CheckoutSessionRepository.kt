@@ -1,0 +1,182 @@
+package com.stripe.android.paymentsheet.repositories
+
+import com.stripe.android.Stripe
+import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import java.util.TimeZone
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Provider
+
+@OptIn(CheckoutSessionPreview::class)
+internal class CheckoutSessionRepository @Inject constructor(
+    private val stripeNetworkClient: StripeNetworkClient,
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
+) {
+
+    private val apiRequestFactory = ApiRequest.Factory(
+        appInfo = Stripe.appInfo,
+        apiVersion = Stripe.API_VERSION,
+        sdkVersion = StripeSdkVersion.VERSION,
+    )
+    private val stripeErrorJsonParser = StripeErrorJsonParser()
+
+    private suspend fun executePost(
+        url: String,
+        params: Map<String, *>,
+    ): Result<CheckoutSessionResponse> {
+        val options = apiRequestOptionsProvider.get()
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = url,
+                options = options,
+                params = params,
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser,
+        )
+    }
+
+    suspend fun init(
+        clientParams: ElementsSessionClientParams,
+        sessionId: String,
+        adaptivePricingAllowed: Boolean,
+    ): Result<CheckoutSessionResponse> {
+        return executePost(
+            url = initUrl(sessionId),
+            params = mapOf(
+                "browser_locale" to clientParams.locale,
+                "browser_timezone" to TimeZone.getDefault().id,
+                "eid" to UUID.randomUUID().toString(),
+                "redirect_type" to "embedded",
+                "elements_session_client" to clientParams.toCheckoutSessionMap(),
+                "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
+            ),
+        )
+    }
+
+    suspend fun confirm(
+        id: String,
+        params: ConfirmCheckoutSessionParams,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = confirmUrl(id),
+        params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
+    )
+
+    suspend fun detachPaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "payment_method_to_detach" to paymentMethodId,
+        ),
+    )
+
+    suspend fun updatePaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams,
+    ): Result<CheckoutSessionResponse> {
+        val card = params as? PaymentMethodUpdateParams.Card
+        val updateParams = CheckoutSessionUpdatePaymentMethodParams(
+            paymentMethodId = paymentMethodId,
+            expiryMonth = card?.expiryMonth,
+            expiryYear = card?.expiryYear,
+            billingDetails = params.billingDetails,
+        )
+
+        return if (updateParams.hasSupportedUpdates) {
+            executePost(
+                url = updateUrl(sessionId),
+                params = updateParams.toParamMap(),
+            )
+        } else {
+            Result.failure(IllegalArgumentException(UNSUPPORTED_UPDATE_ERROR))
+        }
+    }
+
+    suspend fun applyPromotionCode(
+        sessionId: String,
+        promotionCode: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "promotion_code" to promotionCode,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
+
+    suspend fun updateTaxRegion(
+        sessionId: String,
+        address: Address.State,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = buildMap {
+            putIfNotEmpty("tax_region[country]", address.country)
+            putIfNotEmpty("tax_region[line1]", address.line1)
+            putIfNotEmpty("tax_region[line2]", address.line2)
+            putIfNotEmpty("tax_region[city]", address.city)
+            putIfNotEmpty("tax_region[state]", address.state)
+            putIfNotEmpty("tax_region[postal_code]", address.postalCode)
+            put("elements_session_client[is_aggregation_expected]", "true")
+        },
+    )
+
+    suspend fun updateCurrency(
+        sessionId: String,
+        currencyCode: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "updated_currency" to currencyCode,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    ).onSuccess {
+        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
+    }.onFailure {
+        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+    }
+
+    private fun fireEvent(event: PaymentSheetEvent) {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = event.params,
+            )
+        )
+    }
+
+    private companion object {
+        private const val UNSUPPORTED_UPDATE_ERROR =
+            "Checkout session update requires at least card expiry or billing details."
+
+        private fun initUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
+
+        private fun confirmUrl(checkoutSessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
+
+        private fun updateUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
+    }
+}
+
+private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
+    if (!value.isNullOrEmpty()) {
+        put(key, value)
+    }
+}

@@ -61,6 +61,22 @@ internal class LinkForegroundActivityTest {
     }
 
     @Test
+    fun `finishes with a failure result when security exception is thrown`() {
+        val intent = LinkForegroundActivity.createIntent(
+            context = ApplicationProvider.getApplicationContext(),
+            popupUrl = popupUrl,
+        )
+
+        intending(anyIntent()).respondWithFunction {
+            throw SecurityException("Permission Denial: activity not exported")
+        }
+
+        val scenario = ActivityScenario.launchActivityForResult<LinkForegroundActivity>(intent)
+        assertThat(scenario.result.resultCode)
+            .isEqualTo(LinkForegroundActivity.RESULT_FAILURE)
+    }
+
+    @Test
     fun `launches chrome custom tabs with url onResume`() {
         val intent = LinkForegroundActivity.createIntent(
             context = ApplicationProvider.getApplicationContext(),

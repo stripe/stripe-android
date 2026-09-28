@@ -36,6 +36,7 @@ internal object AppearanceStore {
         val sectionSpacing: SectionSpacing = SectionSpacing.Default,
         val textFieldInsets: Insets = Insets.Default,
         val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
+        val themeMode: PaymentSheet.ThemeMode = PaymentSheet.ThemeMode.default,
         val iconStyle: IconStyle = IconStyle.Filled,
     ) {
         @OptIn(AppearanceAPIAdditionsPreview::class)
@@ -43,6 +44,7 @@ internal object AppearanceStore {
             return PaymentSheet.Appearance.Builder()
                 .colorsLight(colorsLight.build())
                 .colorsDark(colorsDark.build())
+                .themeMode(themeMode)
                 .shapes(shapes.build())
                 .typography(typography.build())
                 .primaryButton(primaryButton.build())

@@ -2,12 +2,37 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Test
 
 class PaymentOptionsStateFactoryTest {
+
+    @Test
+    fun `non-Link payment options convert without LinkBrand`() {
+        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection()).isNull()
+        assertThat(
+            PaymentOptionsItem.GooglePay.toPaymentSelection()
+        ).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = savedPaymentMethod,
+                )
+            ).toPaymentSelection()
+        ).isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
+    }
+
+    @Test
+    fun `Link payment option conversion requires LinkBrand`() {
+        assertThat(PaymentOptionsItem.Link(linkBrand = LinkBrand.Onelink).toPaymentSelection())
+            .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
+    }
 
     @Test
     fun `Returns current selection if available`() {
@@ -18,9 +43,9 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
             defaultPaymentMethodId = null,
         )
 
@@ -36,9 +61,9 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            linkBrand = LinkBrand.Link,
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
             defaultPaymentMethodId = null,
         )
 
@@ -49,7 +74,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is true when canUpdatePaymentMethod is false and cbc can change`() {
         helperIsModifiable(
             canUpdatePaymentMethod = false,
-            isCbcEligible = true,
+            canChangeCbc = true,
             availableNetworks = setOf("visa", "cartes_bancaires"),
             expectedResult = true
         )
@@ -59,7 +84,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is true when canUpdatePaymentMethod is true and cbc cannot change`() {
         helperIsModifiable(
             canUpdatePaymentMethod = true,
-            isCbcEligible = false,
+            canChangeCbc = false,
             availableNetworks = setOf("visa"),
             expectedResult = true
         )
@@ -69,7 +94,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is false when canUpdatePaymentMethod is false and cbc cannot change`() {
         helperIsModifiable(
             canUpdatePaymentMethod = false,
-            isCbcEligible = false,
+            canChangeCbc = false,
             availableNetworks = setOf("visa"),
             expectedResult = false
         )
@@ -77,7 +102,7 @@ class PaymentOptionsStateFactoryTest {
 
     private fun helperIsModifiable(
         canUpdatePaymentMethod: Boolean = false,
-        isCbcEligible: Boolean = false,
+        canChangeCbc: Boolean = false,
         availableNetworks: Set<String> = emptySet(),
         expectedResult: Boolean
     ) {
@@ -99,14 +124,19 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            linkBrand = LinkBrand.Link,
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = null,
         )
 
+        val displayableSavedPaymentMethod = (state.items.last() as PaymentOptionsItem.SavedPaymentMethod)
+            .displayableSavedPaymentMethod
         assertThat(
-            (state.items.last() as PaymentOptionsItem.SavedPaymentMethod).isModifiable(canUpdatePaymentMethod)
+            displayableSavedPaymentMethod.paymentMethod.isModifiable(
+                canUpdateCardExpiryAndBillingDetails = canUpdatePaymentMethod,
+                canChangeCbc = canChangeCbc,
+            )
         ).isEqualTo(expectedResult)
     }
 
@@ -149,9 +179,9 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
@@ -170,9 +200,9 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            linkBrand = LinkBrand.Link,
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = true,
             defaultPaymentMethodId = null,
         )
     }

@@ -1,23 +1,23 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.content.Context
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -28,9 +28,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
-@RunWith(AndroidJUnit4::class)
-class CustomPaymentMethodsAnalyticsTest {
+@RunWith(TestParameterInjector::class)
+internal class CustomPaymentMethodsAnalyticsTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
@@ -47,6 +49,7 @@ class CustomPaymentMethodsAnalyticsTest {
 
     @Test
     fun testSuccessful() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = IntegrationType.Compose,
         builder = {
@@ -59,56 +62,53 @@ class CustomPaymentMethodsAnalyticsTest {
         },
         resultCallback = ::assertCompleted,
     ) { context ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-cpms.json")
         }
 
-        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
-            query(urlEncode("mpe_config[custom_payment_methods]"), "cpmt_123")
+            analyticsPayloadField("mpe_config[custom_payment_methods]", "cpmt_123")
         )
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("cpmt_123,card")),
-            query("payment_method_layout", "horizontal"),
+            analyticsPayloadField("hidden_payment_methods", ""),
+            analyticsPayloadField("visible_payment_methods", Uri.encode("cpmt_123,card")),
+            analyticsPayloadField("payment_method_layout", "horizontal"),
         )
 
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
-                    .customPaymentMethods(
-                        listOf(
-                            PaymentSheet.CustomPaymentMethod(
-                                id = "cpmt_123",
-                                subtitle = "Pay now",
-                                disableBillingDetailCollection = true,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                        .customPaymentMethods(
+                            listOf(
+                                PaymentSheet.CustomPaymentMethod(
+                                    id = "cpmt_123",
+                                    subtitle = "Pay now",
+                                    disableBillingDetailCollection = true,
+                                )
                             )
                         )
-                    )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .paymentMethodOrder(listOf("cpmt_123", "card"))
-                    .build()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .paymentMethodOrder(listOf("cpmt_123", "card"))
+                        .build()
+                )
             )
         }
 
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(
             eventName = "paymentsheet.custom_payment_method.launch_success",
-            query("custom_payment_method_type", "cpmt_123")
+            analyticsPayloadField("custom_payment_method_type", "cpmt_123")
         )
         validateAnalyticsRequest(
             eventName = "mc_complete_payment_newpm_success",
-            query("selected_lpm", "cpmt_123")
+            analyticsPayloadField("selected_lpm", "cpmt_123")
         )
 
         page.clickPrimaryButton()

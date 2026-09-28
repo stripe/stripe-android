@@ -9,7 +9,6 @@ import kotlinx.parcelize.Parcelize
 /**
  * Handler used to respond to custom payment method confirm results.
  */
-@ExperimentalCustomPaymentMethodsApi
 object CustomPaymentMethodResultHandler {
 
     /**
@@ -61,7 +60,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
          * The customer successfully completed the payment or setup.
          */
         @JvmStatic
-        @ExperimentalCustomPaymentMethodsApi
         fun completed(): CustomPaymentMethodResult {
             return Completed
         }
@@ -70,7 +68,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
          * The customer canceled the payment or setup attempt.
          */
         @JvmStatic
-        @ExperimentalCustomPaymentMethodsApi
         fun canceled(): CustomPaymentMethodResult {
             return Canceled
         }
@@ -83,7 +80,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
          */
         @JvmStatic
         @JvmOverloads
-        @ExperimentalCustomPaymentMethodsApi
         fun failed(displayMessage: String? = null): CustomPaymentMethodResult {
             return Failed(displayMessage)
         }

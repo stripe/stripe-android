@@ -1,7 +1,10 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
@@ -40,7 +43,7 @@ internal interface PlaygroundSettingDefinition<T> {
 
     fun configure(
         value: T,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: LinkControllerConfigurationData,
     ) {
@@ -90,7 +93,18 @@ internal interface PlaygroundSettingDefinition<T> {
      * */
     fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
 
-    fun applicable(configurationData: PlaygroundConfigurationData): Boolean = true
+    /**
+     * Determines whether this setting is applicable for the given configuration and settings.
+     *
+     * @param configurationData The current playground configuration
+     * @param settings Optional map of current settings used to determine if this specific setting is applicable or
+     * should be displayed
+     * @return true if this setting should be displayed/used, false otherwise
+     */
+    fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean = true
 
     fun saveable(): Saveable<T>? {
         @Suppress("UNCHECKED_CAST")
@@ -159,7 +173,7 @@ internal interface PlaygroundSettingDefinition<T> {
     }
 
     data class LinkControllerConfigurationData(
-        private val configurationBuilder: LinkController.Configuration.Builder,
+        private val configurationBuilder: LinkController.Configuration,
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {

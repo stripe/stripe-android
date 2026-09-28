@@ -1,12 +1,16 @@
 package com.stripe.android.paymentsheet.state
 
 import androidx.annotation.StringRes
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
@@ -24,9 +28,18 @@ internal data class WalletsState(
     private val walletsAllowedInHeader: List<WalletType>,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
+    val cardFundingFilter: CardFundingFilter,
+    val cardBrandFilter: CardBrandFilter,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
 ) {
+
+    fun wallets(location: WalletLocation): List<Wallet> {
+        return buildList {
+            googlePay(location)?.let { add(it) }
+            link(location)?.let { add(it) }
+        }
+    }
 
     /**
      * Returns Link data if it should be displayed in the specified location, null otherwise.
@@ -49,18 +62,23 @@ internal data class WalletsState(
     }
 
     val walletsInHeader
-        get() = link(WalletLocation.HEADER) != null || googlePay(WalletLocation.HEADER) != null
+        get() = wallets(WalletLocation.HEADER).isNotEmpty()
+
+    sealed interface Wallet
 
     data class Link(
         val state: LinkButtonState,
+        val linkBrand: LinkBrand,
         val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-    )
+    ) : Wallet
 
     data class GooglePay(
+        val apiConfiguration: ApiConfiguration.State,
         val buttonType: GooglePayButtonType,
         val allowCreditCards: Boolean,
         val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
-    )
+        val additionalEnabledNetworks: List<String>
+    ) : Wallet
 
     companion object {
 
@@ -69,6 +87,7 @@ internal data class WalletsState(
             linkEmail: String?,
             isGooglePayReady: Boolean,
             googlePayButtonType: GooglePayButtonType,
+            apiConfiguration: ApiConfiguration.State?,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
@@ -80,24 +99,80 @@ internal data class WalletsState(
             enableDefaultValues: Boolean = false,
             buttonThemes: PaymentSheet.ButtonThemes = PaymentSheet.ButtonThemes(
                 link = LinkButtonTheme.DEFAULT
-            )
+            ),
+            cardFundingFilter: CardFundingFilter,
+            cardBrandFilter: CardBrandFilter,
+            linkBrand: LinkBrand,
         ): WalletsState? {
-            val link = if (isLinkAvailable == true) {
+            val link = createLink(
+                isLinkAvailable = isLinkAvailable,
+                linkEmail = linkEmail,
+                paymentDetails = paymentDetails,
+                enableDefaultValues = enableDefaultValues,
+                buttonThemes = buttonThemes,
+                linkBrand = linkBrand,
+            )
+
+            val googlePay = createGooglePay(
+                isGooglePayReady = isGooglePayReady,
+                apiConfiguration = apiConfiguration,
+                googlePayButtonType = googlePayButtonType,
+                googlePayLauncherConfig = googlePayLauncherConfig
+            )
+
+            return if (link != null || googlePay != null) {
+                WalletsState(
+                    link = link,
+                    googlePay = googlePay,
+                    buttonsEnabled = buttonsEnabled,
+                    dividerTextResource = getDividerTextResource(paymentMethodTypes, isSetupIntent),
+                    onGooglePayPressed = onGooglePayPressed,
+                    onLinkPressed = onLinkPressed,
+                    walletsAllowedInHeader = walletsAllowedInHeader,
+                    cardFundingFilter = cardFundingFilter,
+                    cardBrandFilter = cardBrandFilter
+                )
+            } else {
+                null
+            }
+        }
+
+        private fun createLink(
+            isLinkAvailable: Boolean?,
+            linkEmail: String?,
+            paymentDetails: DisplayablePaymentDetails?,
+            enableDefaultValues: Boolean,
+            buttonThemes: PaymentSheet.ButtonThemes,
+            linkBrand: LinkBrand,
+        ): Link? {
+            return if (isLinkAvailable == true) {
                 Link(
                     state = LinkButtonState.create(
                         linkEmail = linkEmail,
                         paymentDetails = paymentDetails,
                         enableDefaultValues = enableDefaultValues
                     ),
-                    theme = buttonThemes.link
+                    theme = buttonThemes.link,
+                    linkBrand = linkBrand,
                 )
             } else {
                 null
             }
+        }
 
-            val googlePay = GooglePay(
+        private fun createGooglePay(
+            isGooglePayReady: Boolean,
+            apiConfiguration: ApiConfiguration.State?,
+            googlePayButtonType: GooglePayButtonType,
+            googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?
+        ): GooglePay? {
+            if (!isGooglePayReady || apiConfiguration == null) return null
+
+            return GooglePay(
+                apiConfiguration = apiConfiguration,
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
                 buttonType = googlePayButtonType,
+                additionalEnabledNetworks = googlePayLauncherConfig?.additionalEnabledNetworks.orEmpty(),
                 billingAddressParameters = googlePayLauncherConfig?.let {
                     GooglePayJsonFactory.BillingAddressParameters(
                         isRequired = it.billingAddressConfig.isRequired,
@@ -112,28 +187,22 @@ internal data class WalletsState(
                         isPhoneNumberRequired = it.billingAddressConfig.isPhoneNumberRequired,
                     )
                 },
-            ).takeIf { isGooglePayReady }
+            )
+        }
 
-            return if (link != null || googlePay != null) {
-                WalletsState(
-                    link = link,
-                    googlePay = googlePay,
-                    buttonsEnabled = buttonsEnabled,
-                    dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code && !isSetupIntent) {
-                        R.string.stripe_paymentsheet_or_pay_with_card
-                    } else if (paymentMethodTypes.singleOrNull() == null && !isSetupIntent) {
-                        R.string.stripe_paymentsheet_or_pay_using
-                    } else if (paymentMethodTypes.singleOrNull() == Card.code && isSetupIntent) {
-                        R.string.stripe_paymentsheet_or_use_a_card
-                    } else {
-                        R.string.stripe_paymentsheet_or_use
-                    },
-                    onGooglePayPressed = onGooglePayPressed,
-                    onLinkPressed = onLinkPressed,
-                    walletsAllowedInHeader = walletsAllowedInHeader,
-                )
+        @StringRes
+        private fun getDividerTextResource(
+            paymentMethodTypes: List<String>,
+            isSetupIntent: Boolean
+        ): Int {
+            return if (paymentMethodTypes.singleOrNull() == Card.code && !isSetupIntent) {
+                R.string.stripe_paymentsheet_or_pay_with_card
+            } else if (paymentMethodTypes.singleOrNull() == null && !isSetupIntent) {
+                R.string.stripe_paymentsheet_or_pay_using
+            } else if (paymentMethodTypes.singleOrNull() == Card.code && isSetupIntent) {
+                R.string.stripe_paymentsheet_or_use_a_card
             } else {
-                null
+                R.string.stripe_paymentsheet_or_use
             }
         }
     }

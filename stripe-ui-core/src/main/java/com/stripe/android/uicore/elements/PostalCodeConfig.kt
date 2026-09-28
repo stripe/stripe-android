@@ -31,6 +31,13 @@ class PostalCodeConfig(
         CountryPostalFormat.Other -> KeyboardType.Text
     }
 
+    override val enforceLeftToRightTextDirection: Boolean = when (format) {
+        CountryPostalFormat.US,
+        CountryPostalFormat.CA,
+        CountryPostalFormat.GB -> true
+        CountryPostalFormat.Other -> false
+    }
+
     override val debugLabel: String = "postal_code_text"
     override val visualTransformation: VisualTransformation =
         PostalCodeVisualTransformation(format)
@@ -38,8 +45,8 @@ class PostalCodeConfig(
     override val shouldAnnounceFieldValue = false
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) =
-            getError() != null && (!hasFocus || isValidating)
+        override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean) =
+            getValidationMessage() != null && (!hasFocus || isValidating)
 
         override fun isValid(): Boolean {
             val canBeEmpty = optional && input.isEmpty()
@@ -57,29 +64,29 @@ class PostalCodeConfig(
             }
         }
 
-        override fun getError(): FieldError? {
+        override fun getValidationMessage(): FieldValidationMessage? {
             return when {
                 input.isNotBlank() && !isValid() && country == "US" -> {
                     // Check if it's too short (incomplete) vs invalid format
                     if (input.length < format.minimumLength) {
-                        FieldError(R.string.stripe_address_zip_incomplete)
+                        FieldValidationMessage.Error(R.string.stripe_address_zip_incomplete)
                     } else {
-                        FieldError(R.string.stripe_address_zip_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_zip_invalid)
                     }
                 }
                 input.isNotBlank() && !isValid() -> {
                     // Check if it's too short (incomplete) vs invalid format
                     if (input.length < format.minimumLength) {
-                        FieldError(R.string.stripe_address_postal_code_incomplete)
+                        FieldValidationMessage.Error(R.string.stripe_address_postal_code_incomplete)
                     } else {
-                        FieldError(R.string.stripe_address_postal_code_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_postal_code_invalid)
                     }
                 }
                 input.isNotEmpty() && !isValid() -> {
                     if (country == "US") {
-                        FieldError(R.string.stripe_address_zip_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_zip_invalid)
                     } else {
-                        FieldError(R.string.stripe_address_postal_code_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_postal_code_invalid)
                     }
                 }
                 else -> null

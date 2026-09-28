@@ -2,9 +2,9 @@ package com.stripe.android.challenge.passive.warmer.activity
 
 import android.content.Context
 import com.stripe.android.challenge.passive.PassiveChallengeModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.hcaptcha.HCaptchaModule
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -21,28 +21,24 @@ import javax.inject.Singleton
         PassiveChallengeModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
     ]
 )
 internal interface PassiveChallengeWarmerActivityComponent {
     val passiveChallengeWarmerViewModel: PassiveChallengeWarmerViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams): Builder
-
-        fun build(): PassiveChallengeWarmerActivityComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            apiConfiguration: ApiConfiguration.State,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            passiveCaptchaParams: PassiveCaptchaParams,
+        ): PassiveChallengeWarmerActivityComponent
     }
 }

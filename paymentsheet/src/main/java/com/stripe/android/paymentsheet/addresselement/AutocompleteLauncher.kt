@@ -8,11 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
@@ -26,6 +28,7 @@ internal interface AutocompleteLauncher {
     fun launch(
         country: String,
         googlePlacesApiKey: String,
+        apiConfiguration: ApiConfiguration.State,
         resultHandler: AutocompleteLauncherResultHandler
     )
 
@@ -96,7 +99,8 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
                     showHeader = false,
                     canNavigateBack = !isRootScreen,
                     title = null,
-                    isElevated = false
+                    isElevated = false,
+                    linkBrand = LinkBrand.Link,
                 )
             ) {
                 onBack()
@@ -173,6 +177,7 @@ internal class DefaultAutocompleteLauncher(
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
+        apiConfiguration: ApiConfiguration.State,
         resultHandler: AutocompleteLauncherResultHandler
     ) {
         val id = UUID.randomUUID().toString()
@@ -184,6 +189,7 @@ internal class DefaultAutocompleteLauncher(
                 id = id,
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                apiConfiguration = apiConfiguration,
                 appearanceContext = appearanceContext,
             )
         )

@@ -3,11 +3,14 @@ package com.stripe.android.challenge.passive
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
@@ -101,6 +104,21 @@ internal class PassiveChallengeActivityTest {
         assertThat(retrievedArgs).isNull()
     }
 
+    @Test
+    fun `activity finishes gracefully when required args are missing`() = runTest {
+        ActivityScenario.launchActivityForResult<PassiveChallengeActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PassiveChallengeActivity::class.java
+            )
+        ).use { scenario ->
+            advanceUntilIdle()
+
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
+    }
+
     private fun launchActivityForResult(
         hCaptchaService: HCaptchaService = FakeHCaptchaService(),
     ) = injectableActivityScenario<PassiveChallengeActivity> {
@@ -147,12 +165,13 @@ internal class PassiveChallengeActivityTest {
     companion object {
         private val passiveCaptchaParams = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = null
         )
 
         private val args = PassiveChallengeArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = listOf("PaymentSheet")
         )
     }

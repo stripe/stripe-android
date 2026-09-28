@@ -19,6 +19,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessi
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
@@ -26,6 +28,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
@@ -89,7 +92,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(cardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -103,7 +106,8 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
             settings[DelayedPaymentMethodsSettingsDefinition] = true
             settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
-        }
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+        }.copy(resetCustomer = true)
 
         testDriver.confirmCustomUSBankAccountAndBuy(
             testParameters = testParameters,

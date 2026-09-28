@@ -2,18 +2,19 @@ package com.stripe.android.paymentelement.confirmation.challenge
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import javax.inject.Inject
@@ -22,42 +23,43 @@ import javax.inject.Named
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val passiveChallengeWarmer: PassiveChallengeWarmer,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+    private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption.New,
+    PaymentMethodConfirmationOption,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
     PassiveChallengeActivityContract.Args,
     PassiveChallengeActivityResult
     > {
     override val key = "ChallengePassive"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption.New? {
-        return confirmationOption as? PaymentMethodConfirmationOption.New
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
+        return confirmationOption as? PaymentMethodConfirmationOption
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        if (FeatureFlags.disablePassiveCaptchaWarmup.isEnabled) return
         val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
         passiveChallengeWarmer.start(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = publishableKeyProvider(),
+            apiConfiguration = paymentMethodMetadata.apiConfiguration,
             productUsage = productUsage
         )
     }
 
     override fun canConfirm(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
         return confirmationArgs.paymentMethodMetadata.passiveCaptchaParams != null &&
-            confirmationOption.createParams.typeCode == "card" &&
-            !confirmationOption.passiveChallengeComplete
+            isEligibleForConfirmationChallenge(confirmationOption) &&
+            !confirmationOption.confirmationChallengeState.passiveChallengeComplete
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: PassiveChallengeActivityContract.Args,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -78,6 +80,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (PassiveChallengeActivityResult) -> Unit
     ): ActivityResultLauncher<PassiveChallengeActivityContract.Args> {
         passiveChallengeWarmer.register(activityResultCaller)
@@ -87,14 +90,14 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
         arguments: PassiveChallengeActivityContract.Args,
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<PassiveChallengeActivityContract.Args> {
         val passiveCaptchaParams = confirmationArgs.paymentMethodMetadata.passiveCaptchaParams
@@ -102,11 +105,10 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = PassiveChallengeActivityContract.Args(
                     passiveCaptchaParams,
-                    publishableKey = publishableKeyProvider(),
+                    apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             )
         }
 
@@ -123,18 +125,37 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         )
     }
 
-    private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
-        return copy(
-            createParams = createParams.copy(
-                radarOptions = token?.let {
-                    RadarOptions(
-                        hCaptchaToken = it,
+    private fun PaymentMethodConfirmationOption.attachToken(token: String?): PaymentMethodConfirmationOption {
+        return when (this) {
+            is PaymentMethodConfirmationOption.New -> {
+                val radarOptions = if (token != null) {
+                    createParams.radarOptions?.copy(
+                        hCaptchaToken = token
+                    ) ?: RadarOptions(
+                        hCaptchaToken = token,
                         androidVerificationObject = null
                     )
+                } else {
+                    createParams.radarOptions
                 }
-            ),
-            passiveChallengeComplete = true,
-        )
+                copy(
+                    createParams = createParams.copy(
+                        radarOptions = radarOptions
+                    ),
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        passiveChallengeComplete = true
+                    )
+                )
+            }
+            is PaymentMethodConfirmationOption.Saved -> {
+                copy(
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        hCaptchaToken = token,
+                        passiveChallengeComplete = true
+                    )
+                )
+            }
+        }
     }
 
     override fun unregister(launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>) {

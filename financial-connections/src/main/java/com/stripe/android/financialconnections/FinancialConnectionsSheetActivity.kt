@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -18,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
@@ -32,6 +34,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
@@ -102,7 +105,11 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            LoadingSpinner(Modifier.size(52.dp))
+            // Use a neutral spinner and avoid flashing a branded color on the first frame.
+            LoadingSpinner(
+                modifier = Modifier.size(52.dp),
+                gradient = Brush.sweepGradient(listOf(colors.background, colors.spinnerNeutral)),
+            )
         }
     }
 
@@ -125,11 +132,17 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
     ) {
         when (viewEffect) {
             is OpenAuthFlowWithUrl -> {
-                startBrowserForResult.launch(
-                    browserManager.createBrowserIntentForUrl(
-                        uri = Uri.parse(viewEffect.url)
+                try {
+                    startBrowserForResult.launch(
+                        browserManager.createBrowserIntentForUrl(
+                            uri = Uri.parse(viewEffect.url)
+                        )
                     )
-                )
+                } catch (_: ActivityNotFoundException) {
+                    // No browser available on the device.
+                } catch (_: SecurityException) {
+                    // A non-exported activity on the device matched the URL intent filter.
+                }
             }
 
             is FinishWithResult -> {

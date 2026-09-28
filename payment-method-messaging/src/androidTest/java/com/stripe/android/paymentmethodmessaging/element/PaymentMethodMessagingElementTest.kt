@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.composite
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.RetryRule
 import org.junit.Rule
@@ -38,7 +39,7 @@ class PaymentMethodMessagingElementTest {
     )
 
     @Test
-    fun testNoContent() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testNoContent() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("no-content.json")
         }
@@ -49,7 +50,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testSinglePartner() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testSinglePartner() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("single-partner.json")
         }
@@ -62,7 +63,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testMultiPartner() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testMultiPartner() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("multi-partner.json")
         }
@@ -76,7 +77,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testError() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testError() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.setResponseCode(400)
             response.testBodyFromFile("error-invalid-currency.json")
@@ -92,7 +93,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("single-partner.json")
         }
@@ -116,7 +117,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testMalformedResponse() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testMalformedResponse() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.setBody("{}")
         }
@@ -125,5 +126,50 @@ class PaymentMethodMessagingElementTest {
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
 
         page.verifyNoContentDisplayed()
+    }
+
+    @Test
+    fun testMultiPartnerLegalDisclosure() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
+        val replacement = ResponseReplacement(
+            original = """
+                "legal_disclosure": null
+            """.trimIndent(),
+            new = """
+                "legal_disclosure" : {
+                  "message" : "18+, T&C apply. Credit subject to status.",
+                  "url" : null
+                }
+            """.trimIndent()
+        )
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("multi-partner.json", listOf(replacement))
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+
+        page.verifyLegalDisclosure()
+    }
+
+    @Test
+    fun testSinglePartnerLegalDisclosure() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
+        val replacement = ResponseReplacement(
+            original = """
+                "legal_disclosure": null
+            """.trimIndent(),
+            new = """
+                "legal_disclosure" : {
+                  "message" : "18+, T&C apply. Credit subject to status.",
+                  "url" : null
+                }
+            """.trimIndent()
+        )
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("single-partner.json", listOf(replacement))
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+        page.verifyLegalDisclosure()
     }
 }

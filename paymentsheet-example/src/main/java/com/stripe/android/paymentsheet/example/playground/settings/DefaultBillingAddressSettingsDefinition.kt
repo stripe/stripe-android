@@ -1,7 +1,10 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -9,12 +12,24 @@ import java.util.UUID
 
 internal object DefaultBillingAddressSettingsDefinition :
     PlaygroundSettingDefinition<DefaultBillingAddress>,
-    PlaygroundSettingDefinition.Saveable<DefaultBillingAddress> by EnumSaveable(
-        key = "defaultBillingAddress",
-        values = DefaultBillingAddress.entries.toTypedArray(),
-        defaultValue = DefaultBillingAddress.On,
-    ),
+    PlaygroundSettingDefinition.Saveable<DefaultBillingAddress>,
     PlaygroundSettingDefinition.Displayable<DefaultBillingAddress> {
+
+    override val key: String = "defaultBillingAddress"
+    override val defaultValue: DefaultBillingAddress = DefaultBillingAddress.On
+
+    override fun convertToValue(value: String): DefaultBillingAddress {
+        return when (value) {
+            "on" -> DefaultBillingAddress.On
+            "on_with_random_email" -> DefaultBillingAddress.OnWithRandomEmail
+            "off" -> DefaultBillingAddress.Off
+            else -> defaultValue
+        }
+    }
+
+    override fun convertToString(value: DefaultBillingAddress): String {
+        return value.value
+    }
 
     override val displayName: String
         get() = "Default Billing Address"
@@ -73,7 +88,7 @@ internal object DefaultBillingAddressSettingsDefinition :
 
     override fun configure(
         value: DefaultBillingAddress,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {
@@ -87,6 +102,7 @@ internal object DefaultBillingAddressSettingsDefinition :
             DefaultBillingAddress.On -> "email@email.com"
             DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
             DefaultBillingAddress.Off -> null
+            is DefaultBillingAddress.WithEmail -> value.email
         }
 
         return email?.let {
@@ -107,8 +123,9 @@ internal object DefaultBillingAddressSettingsDefinition :
     }
 }
 
-internal enum class DefaultBillingAddress(override val value: String) : ValueEnum {
-    On("on"),
-    OnWithRandomEmail("on_with_random_email"),
-    Off("off"),
+internal sealed class DefaultBillingAddress(val value: String) {
+    data object On : DefaultBillingAddress("on")
+    data object OnWithRandomEmail : DefaultBillingAddress("on_with_random_email")
+    data object Off : DefaultBillingAddress("off")
+    data class WithEmail(val email: String) : DefaultBillingAddress("with_email")
 }

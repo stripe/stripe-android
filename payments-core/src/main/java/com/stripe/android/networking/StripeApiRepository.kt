@@ -11,6 +11,7 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
@@ -26,7 +27,6 @@ import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
@@ -47,6 +47,7 @@ import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -61,8 +62,6 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.MobileCardElementConfig
@@ -70,6 +69,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -88,7 +88,6 @@ import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerShippingAddressesParser
 import com.stripe.android.model.parsers.CustomerJsonParser
-import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
@@ -96,6 +95,7 @@ import com.stripe.android.model.parsers.MobileCardElementConfigParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
+import com.stripe.android.model.parsers.PaymentMethodMessagePromotionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
 import com.stripe.android.model.parsers.RadarSessionWithHCaptchaJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
@@ -115,6 +115,7 @@ import java.security.Security
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -136,9 +137,29 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(context, workContext),
+        DefaultFraudDetectionDataRepository(
+            context = context,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
+            workContext = workContext,
+        ),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
-        DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, requestSurface, analyticsRequestExecutor),
+        DefaultCardAccountRangeRepositoryFactory(
+            context = context,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
+        ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
@@ -150,7 +171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -159,11 +180,23 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
+        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
+            context = appContext,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = workContext,
+        ),
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = appContext,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = apiConfigurationProvider,
+        ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )
@@ -268,7 +301,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createPaymentIntentConfirmation(
                     paymentMethodType = paymentMethodType,
-                    errorMessage = result.errorMessage,
+                    errorMessage = result.errorMessage(options),
                 )
             )
         }
@@ -458,7 +491,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
                     paymentMethodType = confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
-                    errorMessage = result.errorMessage,
+                    errorMessage = result.errorMessage(options),
                 )
             )
         }
@@ -647,6 +680,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = mapOf("payment_method" to (paymentMethodId ?: ""))
             ),
             jsonParser = CustomerJsonParser()
+        )
+    }
+
+    override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getSavedPaymentMethodFromCardPresentPaymentMethod(
+                    customerId = customerId,
+                    paymentMethodId = cardPresentPaymentMethodId,
+                ),
+                options = options,
+                params = emptyMap<String, String>()
+            ),
+            jsonParser = PaymentMethodJsonParser()
         )
     }
 
@@ -857,7 +908,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -870,12 +922,40 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(
                         PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                        productUsageTokens = productUsageTokens
+                        productUsageTokens = productUsageTokens,
+                        publishableKeyOverride = apiConfiguration.publishableKey
                     )
                 )
             },
         ).map {
             it.paymentMethods
+        }
+    }
+
+    /**
+     * Retrieve a single [PaymentMethod] for a customer.
+     *
+     * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethod]
+     */
+    override suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveCustomerPaymentMethodUrl(customerId, paymentMethodId),
+                options = requestOptions,
+            ),
+            jsonParser = PaymentMethodJsonParser(),
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.CustomerRetrievePaymentMethod,
+                    productUsageTokens = productUsageTokens
+                )
+            )
         }
     }
 
@@ -1032,7 +1112,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options = options.copy(stripeAccount = null),
                 params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
             ),
-            jsonParser = CardMetadataJsonParser(bin),
+            jsonParser = CardMetadataJsonParser(bin, isNetwork = true),
         ).onFailure {
             fireAnalyticsRequest(PaymentAnalyticsEvent.CardMetadataLoadFailure)
         }
@@ -1083,6 +1163,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): Result<StripeFile> {
         val response = runCatching {
             makeFileUploadRequest(
+                apiRequestOptions = requestOptions,
                 fileUploadRequest = FileUploadRequest(fileParams, requestOptions, appInfo),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate) },
             )
@@ -1516,6 +1597,32 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun retrievePaymentMethodMessagePromotionsForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createGet(
+                url = "https://ppm.stripe.com/config",
+                options = requestOptions,
+                params = mapOf<String, Any?>(
+                    "amount" to amount,
+                    "country" to country,
+                    "currency" to currency,
+                    "locale" to locale,
+                    "key" to requestOptions.apiKey,
+                    "_stripe_account" to requestOptions.stripeAccount
+                )
+            ),
+            PaymentMethodMessagePromotionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -1530,17 +1637,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     internal fun getElementsDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("elements/payment_methods/%s/detach", paymentMethodId)
-    }
-
-    override suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options,
-    ): Result<ElementsSession> {
-        return retrieveElementsSession(
-            params = params,
-            options = options,
-            analyticsEvent = null,
-        )
     }
 
     override suspend fun retrieveCardMetadata(
@@ -1671,54 +1767,34 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    private suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options,
-        analyticsEvent: PaymentAnalyticsEvent?,
-    ): Result<ElementsSession> {
-        // Unsupported for user key sessions.
-        if (options.apiKeyIsUserKey) {
-            return Result.failure(IllegalArgumentException("Invalid API key"))
-        }
-
-        fireFraudDetectionDataRequest()
-
-        val parser = ElementsSessionJsonParser(
-            params = params,
-            isLiveMode = options.apiKeyIsLiveMode
-        )
-
-        val requestParams = buildMap {
-            this["type"] = params.type
-            this["mobile_app_id"] = params.appId
-            params.clientSecret?.let { this["client_secret"] = it }
-            params.locale.let { this["locale"] = it }
-            params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
-            params.legacyCustomerEphemeralKey?.let { this["legacy_customer_ephemeral_key"] = it }
-            params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
-            params.customPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["custom_payment_methods"] = it }
-            params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
-            params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
-            params.sellerDetails?.let { this.putAll(it.toQueryParams()) }
-            putAll(params.link.toQueryParams())
-            params.countryOverride?.let { this["country_override"] = it }
-            (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
-                this.putAll(type.deferredIntentParams.toQueryParams())
-            }
-        }
-
+    override suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentIntent> {
         return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createGet(
-                url = getApiUrl("elements/sessions"),
-                options = options,
-                params = requestParams + createExpandParam(params.expandFields),
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelPaymentIntentCaptchaChallengeUrl(paymentIntentId),
+                options = requestOptions,
+                params = params.toParamMap(),
             ),
-            jsonParser = parser,
-        ) {
-            analyticsEvent?.let {
-                fireAnalyticsRequest(paymentAnalyticsRequestFactory.createRequest(analyticsEvent))
-            }
-        }
+            jsonParser = PaymentIntentJsonParser(),
+        )
+    }
+
+    override suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelSetupIntentCaptchaChallengeUrl(setupIntentId),
+                options = requestOptions,
+                params = params.toParamMap(),
+            ),
+            jsonParser = SetupIntentJsonParser(),
+        )
     }
 
     @Throws(
@@ -1727,13 +1803,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    private fun handleApiError(response: StripeResponse<String>) {
+    private fun handleApiError(
+        requestOptions: ApiRequest.Options,
+        response: StripeResponse<String>
+    ) {
         val requestId = response.requestId?.value
         val responseCode = response.code
 
         val stripeError = StripeErrorJsonParser()
             .parse(response.responseJson())
-            .withLocalizedMessage(context)
+            .withLocalizedMessage(context, requestId, requestOptions.apiKeyIsLiveMode)
 
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
@@ -1800,7 +1879,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.isError) {
-            handleApiError(response)
+            handleApiError(apiRequest.options, response)
         }
 
         resetDnsCache(dnsCacheData)
@@ -1817,6 +1896,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         APIException::class
     )
     internal suspend fun makeFileUploadRequest(
+        apiRequestOptions: ApiRequest.Options,
         fileUploadRequest: FileUploadRequest,
         onResponse: (RequestId?) -> Unit
     ): StripeResponse<String> {
@@ -1834,7 +1914,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.isError) {
-            handleApiError(response)
+            handleApiError(apiRequestOptions, response)
         }
 
         resetDnsCache(dnsCacheData)
@@ -1927,20 +2007,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmPaymentIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
+        }
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmPaymentIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
@@ -1949,43 +2035,50 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmSetupIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
+        }
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmSetupIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
     }
 
-    private val Result<StripeResponse<String>>.errorMessage: String?
-        get() {
-            val response = getOrNull()
-            val resultError = exceptionOrNull()
+    private fun Result<StripeResponse<String>>.errorMessage(
+        requestOptions: ApiRequest.Options,
+    ): String? {
+        val response = getOrNull()
+        val resultError = exceptionOrNull()
 
-            return when {
-                resultError != null -> resultError.safeAnalyticsMessage
-                response != null && response.isError -> {
-                    runCatching {
-                        handleApiError(response)
-                    }.let { errorResult ->
-                        errorResult.exceptionOrNull()?.safeAnalyticsMessage
-                    }
+        return when {
+            resultError != null -> resultError.safeAnalyticsMessage
+            response != null && response.isError -> {
+                runCatching {
+                    handleApiError(requestOptions, response)
+                }.let { errorResult ->
+                    errorResult.exceptionOrNull()?.safeAnalyticsMessage
                 }
-
-                else -> null
             }
+
+            else -> null
         }
+    }
 
     private sealed class DnsCacheData {
         data class Success(
@@ -2163,6 +2256,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         /**
+         * @return `https://api.stripe.com/v1/payment_intents/:id/cancel_challenge`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getCancelPaymentIntentCaptchaChallengeUrl(paymentIntentId: String): String {
+            return getApiUrl("payment_intents/%s/cancel_challenge", paymentIntentId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:id/cancel_challenge`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getCancelSetupIntentCaptchaChallengeUrl(setupIntentId: String): String {
+            return getApiUrl("setup_intents/%s/cancel_challenge", setupIntentId)
+        }
+
+        /**
          * @return `https://api.stripe.com/v1/customers/:customer_id/sources`
          */
         @VisibleForTesting
@@ -2196,6 +2307,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getRetrieveCustomerUrl(customerId: String): String {
             return getApiUrl("customers/%s", customerId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/customers/:id/payment_methods/:id`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getRetrieveCustomerPaymentMethodUrl(
+            customerId: String,
+            paymentMethodId: String
+        ): String {
+            return getApiUrl("customers/%s/payment_methods/%s", customerId, paymentMethodId)
         }
 
         /**
@@ -2305,6 +2428,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
             customerId: String,
         ): String {
             return getApiUrl("elements/customers/$customerId/set_default_payment_method")
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/elements/customers/:customerId/
+         * saved_payment_method_from_card_present_payment_method/$paymentMethodId`
+         */
+        @VisibleForTesting
+        internal fun getSavedPaymentMethodFromCardPresentPaymentMethod(
+            customerId: String,
+            paymentMethodId: String,
+        ): String {
+            return getApiUrl(
+                "elements/customers/$customerId/" +
+                    "saved_payment_method_from_card_present_payment_method/$paymentMethodId"
+            )
         }
 
         private fun getApiUrl(path: String, vararg args: Any): String {

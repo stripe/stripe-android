@@ -4,13 +4,15 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -22,15 +24,16 @@ import kotlin.coroutines.CoroutineContext
 
 internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private val eventReporter: EventReporter,
-    private val customerRepository: CustomerRepository,
+    private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>,
+    private val launchMode: EmbeddedLaunchMode,
 ) {
     fun createSavedPaymentMethodMutator(): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
@@ -39,13 +42,18 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             coroutineScope = viewModelScope,
             workContext = workContext,
             uiContext = uiContext,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::set,
+            setSelection = selectionHolder::setSelection,
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
-                if (customerStateHolder.paymentMethods.value.size > 1) {
-                    manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+                val shouldNavigateBack = when (launchMode) {
+                    is EmbeddedLaunchMode.PaymentOptions -> true
+                    is EmbeddedLaunchMode.Manage,
+                    is EmbeddedLaunchMode.Form -> customerStateHolder.paymentMethods.value.size > 1
+                }
+                if (shouldNavigateBack) {
+                    embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
                     withContext(workContext) {
                         delay(PaymentMethodRemovalDelayMillis)
                     }
@@ -57,13 +65,19 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             },
             isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
             isNotPaymentFlow = false,
+            linkAccount = stateFlowOf(null), // Link is never enabled in the manage screen.
         )
     }
 
     private fun onPaymentMethodRemoved() {
-        val shouldCloseSheet = customerStateHolder.paymentMethods.value.isEmpty()
-        if (shouldCloseSheet) {
-            manageNavigatorProvider.get().performAction(ManageNavigator.Action.Close())
+        if (customerStateHolder.paymentMethods.value.isEmpty()) {
+            when (launchMode) {
+                is EmbeddedLaunchMode.PaymentOptions -> Unit
+                is EmbeddedLaunchMode.Manage,
+                is EmbeddedLaunchMode.Form -> {
+                    embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())
+                }
+            }
         }
     }
 
@@ -71,9 +85,9 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     ) {
         if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-            manageNavigatorProvider.get().performAction(
-                ManageNavigator.Action.GoToScreen(
-                    screen = ManageNavigator.Screen.Update(
+            embeddedNavigatorProvider.get().performAction(
+                EmbeddedNavigator.Action.GoToScreen(
+                    screen = EmbeddedNavigator.Screen.ManageUpdate(
                         interactor = updateScreenInteractorFactoryProvider.get().createUpdateScreenInteractor(
                             displayableSavedPaymentMethod
                         )

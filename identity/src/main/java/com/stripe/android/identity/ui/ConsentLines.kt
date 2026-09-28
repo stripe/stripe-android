@@ -9,6 +9,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -45,12 +47,17 @@ internal fun ConsentLines(
             Image(
                 painter = painterResource(id = line.icon.getResourceId()),
                 modifier = Modifier
+                    .alignBy { it.measuredHeight / 2 }
                     .size(28.dp)
                     .padding(end = 8.dp),
                 contentDescription = stringResource(id = line.icon.getContentDescriptionId())
             )
             BottomSheetHTML(
                 html = line.content,
+                modifier = Modifier.alignBy {
+                    // Remove the distance between lines to find the first line's center.
+                    (it.measuredHeight - (it[LastBaseline] - it[FirstBaseline])) / 2
+                },
                 color = colorResource(id = R.color.stripe_html_line),
                 style = LocalTextStyle.current.merge(fontSize = 16.sp),
                 bottomSheets = bottomSheets,

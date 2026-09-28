@@ -2,6 +2,7 @@ package com.stripe.android.connect.example.ui.componentpicker
 
 import android.content.Intent
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,9 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.stripe.android.connect.AccountOnboardingListener
-import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Success
@@ -58,7 +57,6 @@ import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 @Suppress("LongMethod")
-@OptIn(PreviewConnectSDK::class)
 @Composable
 fun ComponentPickerContent(
     viewModel: EmbeddedComponentLoaderViewModel,
@@ -68,7 +66,7 @@ fun ComponentPickerContent(
     val state by viewModel.state.collectAsState()
     val settingsState by settingsViewModel.state.collectAsState()
     val embeddedComponentAsync = state.embeddedComponentManagerAsync
-    val context = LocalContext.current as FragmentActivity
+    val context = LocalActivity.current as FragmentActivity
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -231,12 +229,12 @@ private enum class MenuItem(
     Payouts(
         title = R.string.payouts,
         subtitle = R.string.payouts_menu_subtitle,
-        isBeta = true,
+        isBeta = false,
     ),
     Payments(
         title = R.string.payments,
         subtitle = R.string.payments_menu_subtitle,
-        isBeta = true,
+        isBeta = false,
     ),
 }
 

@@ -80,34 +80,8 @@ internal class DeviceParamNotAvailableFactoryImpl internal constructor(
                     Reason.PLATFORM_VERSION.toString()
             }
 
-            if (apiVersion < Build.VERSION_CODES.M) {
-                params[DeviceParam.PARAM_TELE_PHONE_COUNT.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_TELE_IS_HEARING_AID_COMPATIBILITY_SUPPORTED.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_TELE_IS_TTY_MODE_SUPPORTED.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_TELE_IS_WORLD_PHONE.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_BUILD_VERSION_PREVIEW_SDK_INT.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_BUILD_VERSION_SDK_INT.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_BUILD_VERSION_SECURITY_PATCH.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_SYSTEM_DTMF_TONE_TYPE_WHEN_DIALING.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-                params[DeviceParam.PARAM_SYSTEM_VIBRATE_WHEN_RINGING.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-            }
-
             if (apiVersion > Build.VERSION_CODES.M) {
                 params[DeviceParam.PARAM_SECURE_SYS_PROP_SETTING_VERSION.toString()] =
-                    Reason.PLATFORM_VERSION.toString()
-            }
-
-            if (apiVersion < Build.VERSION_CODES.LOLLIPOP_MR1) {
-                params[DeviceParam.PARAM_TELE_IS_VOICE_CAPABLE.toString()] =
                     Reason.PLATFORM_VERSION.toString()
             }
 

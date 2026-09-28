@@ -229,7 +229,7 @@ class ChallengeFragmentTest {
             assertFalse(challengeZoneView.infoTextView.isShown)
             assertFalse(challengeZoneView.submitButton.isShown)
 
-            assertNotNull(fragment.challengeZoneWebView?.onClickListener)
+            assertNotNull(fragment.challengeZoneWebView.onClickListener)
         }
     }
 
@@ -237,7 +237,7 @@ class ChallengeFragmentTest {
     fun refreshUi_htmlOOB_acsRefreshHtmlDisplayed() {
         createFragment(cres = CRES_HTML_DATA) { fragment ->
             fragment.refreshUi()
-            assertThat(fragment.challengeZoneWebView?.webView)
+            assertThat(fragment.challengeZoneWebView.webView)
                 .isNotNull()
         }
     }

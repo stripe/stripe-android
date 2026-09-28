@@ -11,7 +11,11 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
+import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
@@ -49,11 +53,22 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            viewBinding.appBar.updatePaddingRelative(top = systemBars.top)
+            view.updatePaddingRelative(bottom = systemBars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+
         val args = _args
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                context = applicationContext,
+                apiConfigurationProvider = { error("PaymentAuthWebViewActivity was started without arguments.") },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
                 )
@@ -65,6 +80,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
+
         customizeToolbar()
 
         onBackPressedDispatcher.addCallback {
@@ -81,7 +97,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { args.apiConfiguration },
+            )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
                 )
@@ -125,7 +144,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { requireNotNull(_args).apiConfiguration },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),

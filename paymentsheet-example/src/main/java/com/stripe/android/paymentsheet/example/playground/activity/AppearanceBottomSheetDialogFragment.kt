@@ -67,6 +67,7 @@ import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import kotlin.math.roundToInt
 
@@ -127,6 +128,14 @@ private fun AppearancePicker(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+            CustomizationCard("Theme") {
+                ThemeModeDropDown(
+                    themeMode = currentAppearance.themeMode,
+                    onThemeModeSelected = {
+                        updateAppearance(currentAppearance.copy(themeMode = it))
+                    },
+                )
+            }
             CustomizationCard("Icons") {
                 Icons(
                     currentAppearance = currentAppearance,
@@ -1303,6 +1312,46 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
             onValueChange(it)
         }
     )
+}
+
+@Composable
+private fun ThemeModeDropDown(
+    themeMode: PaymentSheet.ThemeMode,
+    onThemeModeSelected: (PaymentSheet.ThemeMode) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "ThemeMode: $themeMode",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PaymentSheet.ThemeMode.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onThemeModeSelected(it)
+                    }
+                ) {
+                    Text(it.name)
+                }
+            }
+        }
+    }
 }
 
 @Composable

@@ -19,7 +19,8 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitUntilWithIdle
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
@@ -331,11 +333,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
         defaultPaymentMethod: String? = null,
         test: (PaymentSheetActivity) -> Unit,
     ) {
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setBody(
                 createElementsSessionResponse(
                     cards = cards,
@@ -371,10 +369,10 @@ internal class CustomerSessionPaymentSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 2_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule
                         .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                        .fetchSemanticsNodes()
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isNotEmpty()
                 }
 
@@ -462,7 +460,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     "customer_session": {
                       "id": "cuss_654321",
                       "livemode": false,
-                      "api_key": "ek_12345",
+                      "api_key": "${TestApiKeys.EPHEMERAL}",
                       "api_key_expiry": 1899787184,
                       "customer": "cus_12345",
                       "components": {
@@ -528,13 +526,6 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     },
                     "type": "payment_intent"
                   },
-                  "payment_method_specs": [
-                    {
-                      "async": false,
-                      "fields": [],
-                      "type": "card"
-                    }
-                  ],
                   "paypal_express_config": {
                     "client_id": null,
                     "paypal_merchant_id": null

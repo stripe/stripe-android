@@ -1,0 +1,277 @@
+package com.stripe.android.ui.core.elements
+
+import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.FormInsets
+import com.stripe.android.uicore.LocalTextFieldInsets
+import com.stripe.android.uicore.elements.FieldValidationMessage
+import com.stripe.android.uicore.elements.FormFieldId
+import com.stripe.android.uicore.elements.SectionFieldComposable
+import com.stripe.android.uicore.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.SectionFieldValidationController
+import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
+import com.stripe.android.R as PaymentsCoreR
+
+internal class CardPillElement(
+    val controller: CardPillController,
+) : SectionFieldElement {
+    override val identifier: FormFieldId = FormFieldId.Generic("card_scanned_pill")
+    override val allowsUserInteraction: Boolean = true
+    override val mandateText: ResolvableString? = null
+
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
+        stateFlowOf(emptyList())
+
+    override fun sectionFieldErrorController(): SectionFieldValidationController = controller
+
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
+        // No-op
+    }
+
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
+        stateFlowOf(emptyList())
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
+}
+
+internal class CardPillController(
+    val cardNumber: String,
+    val expirationDate: String?,
+    private val onDismissPill: () -> Unit,
+) : SectionFieldValidationController, SectionFieldComposable {
+    override val validationMessage: StateFlow<FieldValidationMessage?> = stateFlowOf(null)
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        // No-op
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
+    ) {
+        CardPillElementUI(
+            enabled = enabled,
+            cardBrand = CardBrand.fromCardNumber(cardNumber),
+            lastFourDigits = cardNumber.takeLast(TAKE_LAST_4),
+            expirationDate = expirationDate,
+            onDismiss = onDismissPill,
+            modifier = modifier,
+        )
+    }
+
+    private companion object {
+        const val TAKE_LAST_4 = 4
+    }
+}
+
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun CardPillElementUI(
+    enabled: Boolean,
+    cardBrand: CardBrand,
+    lastFourDigits: String,
+    expirationDate: String?,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val textFieldInsets = LocalTextFieldInsets.current
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(textFieldInsets.cardPillMinHeight())
+            .padding(
+                start = textFieldInsets.start.dp,
+                end = textFieldInsets.end.dp,
+            ),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CardBrandIcon(cardBrand)
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            CardDetailsText(
+                lastFourDigits = lastFourDigits,
+                cardBrand = cardBrand,
+                expirationDate = expirationDate,
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            DismissButton(enabled, onDismiss)
+        }
+    }
+}
+
+@Composable
+private fun CardBrandIcon(
+    cardBrand: CardBrand
+) {
+    Image(
+        painter = painterResource(cardBrand.icon),
+        contentDescription = null,
+        modifier = Modifier
+            .height(22.dp)
+            .width(34.dp),
+    )
+}
+
+@Composable
+private fun RowScope.CardDetailsText(
+    cardBrand: CardBrand,
+    lastFourDigits: String,
+    expirationDate: String?,
+) {
+    val summaryDescription = stringResource(
+        PaymentsCoreR.string.stripe_card_ending_in,
+        cardBrand.displayName,
+        lastFourDigits,
+    )
+    val maskedPan = stringResource(R.string.stripe_scanned_card_masked_last4, lastFourDigits)
+
+    Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = maskedPan,
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.stripeColors.onComponent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.semantics {
+                contentDescription = summaryDescription
+            },
+        )
+
+        if (expirationDate != null) {
+            Text(
+                text = stringResource(
+                    R.string.stripe_scanned_card_pill_expiration_date,
+                    expirationDate,
+                ),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.stripeColors.subtitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+@Composable
+private fun DismissButton(
+    enabled: Boolean,
+    onDismiss: () -> Unit,
+) {
+    val dismissLabel = stringResource(R.string.stripe_scanned_card_pill_clear_content_description)
+    val dismissInteractionSource = remember { MutableInteractionSource() }
+    val dismissColor = MaterialTheme.stripeColors.onComponent.copy(
+        alpha = if (enabled) LocalContentColor.current.alpha else ContentAlpha.disabled,
+    )
+
+    Icon(
+        painter = painterResource(R.drawable.stripe_ic_rounded_close),
+        contentDescription = null,
+        tint = dismissColor,
+        modifier = Modifier
+            .size(8.dp)
+            .clickable(
+                enabled = enabled,
+                interactionSource = dismissInteractionSource,
+                indication = null,
+                onClick = onDismiss,
+            )
+            .clearAndSetSemantics {
+                contentDescription = dismissLabel
+                role = Role.Button
+            },
+    )
+}
+
+/**
+ * Minimum height for card pill. This builds the height to be exactly
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun FormInsets.cardPillMinHeight(): Dp {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+
+    val topPaddingValue = top.dp
+    val bottomPaddingValue = bottom.dp
+
+    val labelStyle = MaterialTheme.typography.subtitle1
+    val inputStyle = MaterialTheme.typography.body1
+
+    val labelHeight = remember(textMeasurer, labelStyle, density, topPaddingValue) {
+        with(density) {
+            val lastBaseline = textMeasurer.measure(
+                text = AnnotatedString(LABEL_MEASUREMENT_TEXT),
+                style = labelStyle,
+            ).lastBaseline.toDp()
+            maxOf(lastBaseline, topPaddingValue)
+        }
+    }
+
+    val inputHeight = remember(textMeasurer, inputStyle, density) {
+        with(density) {
+            textMeasurer.measure(
+                text = AnnotatedString(LABEL_MEASUREMENT_TEXT),
+                style = inputStyle,
+            ).size.height.toDp()
+        }
+    }
+
+    return labelHeight + inputHeight + TextFieldLabelToInputPadding + bottomPaddingValue
+}
+
+private val TextFieldLabelToInputPadding = 4.dp
+private const val LABEL_MEASUREMENT_TEXT = " "

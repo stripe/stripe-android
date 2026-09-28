@@ -26,9 +26,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
@@ -38,11 +39,15 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 class PaymentMethodViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Before
     fun setUp() {
@@ -115,7 +120,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.formValuesChanged(
             formValues = FormFieldValues(
-                fieldValuePairs = mapOf(IdentifierSpec.CardCvc to FormFieldEntry("111")),
+                fieldValuePairs = mapOf(FormFieldId.CardCvc to FormFieldEntry("111")),
                 userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
             )
         )
@@ -247,7 +252,7 @@ class PaymentMethodViewModelTest {
 
             val cardDetailsSectionElement = formElements[0] as CardDetailsSectionElement
 
-            cardDetailsSectionElement.controller.error.test {
+            cardDetailsSectionElement.controller.validationMessage.test {
                 assertThat(expectMostRecentItem()).isNotNull()
             }
 
@@ -255,7 +260,7 @@ class PaymentMethodViewModelTest {
 
             val sectionElement = formElements[1] as SectionElement
 
-            sectionElement.controller.error.test {
+            sectionElement.controller.validationMessage.test {
                 assertThat(expectMostRecentItem()).isNotNull()
             }
         }
@@ -284,6 +289,6 @@ class PaymentMethodViewModelTest {
                 dismissalCoordinator = dismissalCoordinator,
                 linkLaunchMode = LinkLaunchMode.Full
             ),
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

@@ -1,8 +1,10 @@
 package com.stripe.android.link.model
 
 import android.os.Parcelable
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
@@ -19,6 +21,18 @@ internal data class LinkAccount(
     val linkAuthIntentInfo: LinkAuthIntentInfo? = null,
     val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
+
+    val supportedPaymentDetailsTypes: List<String>
+        get() = consumerSession.supportedPaymentDetailsTypes
+
+    val linkBrand: LinkBrand?
+        get() = consumerSession.linkBrand?.let { consumerLinkBrand ->
+            if (FeatureFlags.forceOnelinkConsumer.isEnabled) LinkBrand.Onelink else consumerLinkBrand
+        }
+
+    // Raw value from the backend, used to carry forward across session updates.
+    internal val consumerLinkBrand: LinkBrand?
+        get() = consumerSession.linkBrand
 
     @IgnoredOnParcel
     val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")
@@ -39,13 +53,13 @@ internal data class LinkAccount(
     val clientSecret = consumerSession.clientSecret
 
     @IgnoredOnParcel
+    val linkSessionKey = consumerSession.linkSessionKey
+
+    @IgnoredOnParcel
     val email = consumerSession.emailAddress
 
     @IgnoredOnParcel
-    val hasVerifiedSMSSession: Boolean = consumerSession.containsVerifiedSMSSession()
-
-    @IgnoredOnParcel
-    val isVerified: Boolean = consumerSession.containsVerifiedSMSSession() ||
+    val isVerified: Boolean = consumerSession.meetsMinimumAuthenticationLevel ||
         consumerSession.isVerifiedForSignup() ||
         consumerSession.isVerifiedWithLinkAuthToken()
 
@@ -59,8 +73,8 @@ internal data class LinkAccount(
     val accountStatus = when {
         isVerified -> {
             AccountStatus.Verified(
-                hasVerifiedSMSSession = hasVerifiedSMSSession,
-                consentPresentation = consentPresentation
+                consentPresentation = consentPresentation,
+                meetsMinimumAuthenticationLevel = consumerSession.meetsMinimumAuthenticationLevel,
             )
         }
         consumerSession.containsSMSSessionStarted() -> {
@@ -84,11 +98,6 @@ internal data class LinkAccount(
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
             it.state == ConsumerSession.VerificationSession.SessionState.Started
-    } != null
-
-    private fun ConsumerSession.containsVerifiedSMSSession() = verificationSessions.find {
-        it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
-            it.state == ConsumerSession.VerificationSession.SessionState.Verified
     } != null
 
     private fun ConsumerSession.isVerifiedForSignup() = verificationSessions.find {

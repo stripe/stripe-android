@@ -1,90 +1,850 @@
-public final class com/stripe/android/crypto/onramp/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+public abstract interface annotation class com/stripe/android/crypto/onramp/ExperimentalCryptoOnramp : java/lang/annotation/Annotation {
+}
+
+public final class com/stripe/android/crypto/onramp/OnrampCoordinator {
+	public static final field $stable I
+	public final fun attachKycInfo (Lcom/stripe/android/crypto/onramp/model/KycInfo;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun authenticateUserWithToken (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun configure (Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun createCryptoPaymentToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun createPresenter (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator$Presenter;
+	public final fun deleteWalletAddress (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getWalletOwnershipChallenge (Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun hasLinkAccount (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun logOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun registerLinkUser (Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun registerWalletAddress (Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun retrieveMissingIdentifiers (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun submitIdentifiers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun submitWalletOwnershipSignature (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updatePhoneNumber (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Builder {
+	public static final field $stable I
 	public fun <init> ()V
+	public final fun build (Landroid/app/Application;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
+}
+
+public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter {
+	public static final field $stable I
+	public final fun authorize (Ljava/lang/String;)V
+	public final fun collectPaymentMethod (Lcom/stripe/android/crypto/onramp/model/PaymentMethodSelection;)V
+	public final fun performCheckout (Ljava/lang/String;)V
+	public final fun presentTermsAndConditionsIfNeeded ()V
+	public final fun presentTermsOfServiceIfNeeded ()V
+	public final fun presentUserAttestation ()V
+	public final fun verifyIdentity ()V
+	public final fun verifyKycInfo (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
+	public static synthetic fun verifyKycInfo$default (Lcom/stripe/android/crypto/onramp/OnrampCoordinator$Presenter;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;ILjava/lang/Object;)V
+}
+
+public final class com/stripe/android/crypto/onramp/exception/APIErrorContext {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Lcom/stripe/android/core/exception/StripeException;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApiErrorCode ()Ljava/lang/String;
+	public final fun getApiErrorMessage ()Ljava/lang/String;
+	public final fun getApiErrorType ()Ljava/lang/String;
+	public final fun getApiUserMessage ()Ljava/lang/String;
+	public final fun getDocUrl ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
+	public final fun getRequestId ()Ljava/lang/String;
+	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/AppAttestationException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/AppAttestationUnavailableException : java/lang/Exception, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+	public fun getDeveloperMessage ()Ljava/lang/String;
+	public fun getDocUrl ()Ljava/lang/String;
+	public fun getUnderlyingError ()Ljava/lang/Throwable;
+	public fun getUserMessage ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException : com/stripe/android/core/exception/StripeException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public static final field $stable I
+	public final fun getApiErrorContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public final fun getDeveloperMessage ()Ljava/lang/String;
+	public final fun getDocUrl ()Ljava/lang/String;
+	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
+	public synthetic fun getUnderlyingError ()Ljava/lang/Throwable;
+	public final fun getUserMessage ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/InvalidWalletOwnershipChallengeException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/InvalidWalletOwnershipSignatureException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/MissingConsumerSecretException : java/lang/IllegalStateException {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/exception/MissingCryptoCustomerException : java/lang/IllegalStateException {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/exception/MissingPaymentMethodException : java/lang/IllegalStateException {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/exception/MissingPlatformSettingsException : java/lang/IllegalStateException {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/crypto/onramp/exception/PaymentFailedException : java/lang/IllegalStateException {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/exception/SDKVersion {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/exception/SDKVersion;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/SDKVersion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/SDKVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDebugDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/SamsungPayException : java/lang/IllegalStateException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+	public fun getDeveloperMessage ()Ljava/lang/String;
+	public fun getDocUrl ()Ljava/lang/String;
+	public final fun getReason ()Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public final fun getSamsungPayErrorCode ()Ljava/lang/Integer;
+	public fun getUnderlyingError ()Ljava/lang/Throwable;
+	public fun getUserMessage ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/SamsungPayException$Reason : java/lang/Enum {
+	public static final field AppUpdateRequired Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field CredentialsFailed Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field InvalidConfiguration Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field NotConfigured Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field NotReady Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field NotSupported Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field OperationFailed Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field PlatformKeyUnavailable Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field PresentationFailed Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field SdkIncompatible Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field SdkUnavailable Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field SetupRequired Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static final field TemporarilyUnavailable Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public final fun getCode ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/exception/SamsungPayException$Reason;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public abstract fun getCode ()Ljava/lang/String;
+	public abstract fun getDeveloperMessage ()Ljava/lang/String;
+	public abstract fun getDocUrl ()Ljava/lang/String;
+	public abstract fun getUnderlyingError ()Ljava/lang/Throwable;
+	public abstract fun getUserMessage ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/UncategorizedException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/UnsupportedNetworkException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/WalletNotFoundException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipChallengeExpiredException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/CryptoConsumerWallet {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getNetwork ()Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public final fun getVerifiedOwnership ()Z
+	public final fun getWalletAddress ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {
+	public static final field Aptos Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Arbitrum Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Avalanche Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Base Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Bitcoin Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/CryptoNetwork$Companion;
+	public static final field Ethereum Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Optimism Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Polygon Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Solana Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Stellar Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Sui Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Tempo Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Worldchain Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Xrpl Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 }
 
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class com/stripe/android/crypto/onramp/model/IdType : java/lang/Enum {
+	public static final field CanadianSocialInsuranceNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field ColombianTaxIdentificationNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field PhilippinesTaxpayerIdentificationNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field SocialSecurityNumber Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/IdType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getBirthCity ()Ljava/lang/String;
+	public final fun getBirthCountry ()Lcom/stripe/android/core/model/CountryCode;
+	public final fun getDateOfBirth ()Lcom/stripe/android/model/DateOfBirth;
+	public final fun getFirstName ()Ljava/lang/String;
+	public final fun getIdNumber ()Ljava/lang/String;
+	public final fun getIdType ()Lcom/stripe/android/crypto/onramp/model/IdType;
+	public final fun getLastName ()Ljava/lang/String;
+	public final fun getNationalities ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+public final class com/stripe/android/crypto/onramp/model/LinkUserInfo : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCountry ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getFullName ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Creator : android/os/Parcelable$Creator {
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult$Completed : com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult$Failed : com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAuthorizeCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampAuthorizeResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$Canceled : com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$Consented : com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult {
+	public static final field $stable I
+	public final fun getCustomerId ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$Denied : com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$Failed : com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
+	public static final field $stable I
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+	public final fun authorizeCallback (Lcom/stripe/android/crypto/onramp/model/OnrampAuthorizeCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun checkoutCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun collectPaymentCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun googlePayIsReadyCallback (Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun onrampSessionClientSecretProvider (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun samsungPayIsReadyCallback (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun termsAndConditionsCallback (Lcom/stripe/android/crypto/onramp/model/OnrampPartnerTermsCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun termsOfServiceCallback (Lcom/stripe/android/crypto/onramp/model/OnrampPartnerTermsCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun userAttestationCallback (Lcom/stripe/android/crypto/onramp/model/OnrampUserAttestationCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun verifyIdentityCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyIdentityCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun verifyKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 }
 
-public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCheckoutCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult;)V
 }
 
-public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
 }
 
-public final class com/stripe/android/crypto/onramp/model/RefreshKycInfo$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/RefreshKycInfo;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/RefreshKycInfo;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public final class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Canceled : com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+	public static final field $stable I
 }
 
-public final class com/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Cancelled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Cancelled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Cancelled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public final class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+	public static final field $stable I
 }
 
-public final class com/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Confirm$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Confirm;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Confirm;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public final class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Failed : com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
 }
 
-public final class com/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Edit$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Edit;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Edit;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult;)V
 }
 
-public final class com/stripe/android/crypto/onramp/ui/VerifyKycArgs$Creator : android/os/Parcelable$Creator {
+public abstract class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
+	public static final field $stable I
+	public final fun getDisplayData ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData;
+	public final fun getKycInfo ()Lcom/stripe/android/crypto/onramp/model/KycInfo;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult$Failed : com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration {
+	public static final field $stable I
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/VerifyKycArgs;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/VerifyKycArgs;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+	public final fun appearance (Lcom/stripe/android/link/LinkAppearance;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun cryptoCustomerId (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun googlePayConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun publishableKey (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun samsungPayConfig (Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration$SamsungPayConfig;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$SamsungPayConfig {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult$Completed : com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {
+	public static final field $stable I
+	public final fun getSuccess ()Z
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult$Failed : com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult {
+	public static final field $stable I
+	public final fun getCryptoPaymentToken ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult$Failed : com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult$Completed : com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult$Failed : com/stripe/android/crypto/onramp/model/OnrampDeleteWalletAddressResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampGetWalletOwnershipChallengeResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampGetWalletOwnershipChallengeResult$Completed : com/stripe/android/crypto/onramp/model/OnrampGetWalletOwnershipChallengeResult {
+	public static final field $stable I
+	public final fun getChallenge ()Lcom/stripe/android/crypto/onramp/model/WalletOwnershipChallenge;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampGetWalletOwnershipChallengeResult$Failed : com/stripe/android/crypto/onramp/model/OnrampGetWalletOwnershipChallengeResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult$Completed : com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult {
+	public static final field $stable I
+	public final fun getHasLinkAccount ()Z
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult$Failed : com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampLogOutResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampLogOutResult$Completed : com/stripe/android/crypto/onramp/model/OnrampLogOutResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampLogOutResult$Failed : com/stripe/android/crypto/onramp/model/OnrampLogOutResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampPartnerTermsCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult$Accepted : com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult$Failed : com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampPartnerTermsResult {
+	public static final field $stable I
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampRegisterLinkUserResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampRegisterLinkUserResult$Completed : com/stripe/android/crypto/onramp/model/OnrampRegisterLinkUserResult {
+	public static final field $stable I
+	public final fun getCustomerId ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampRegisterLinkUserResult$Failed : com/stripe/android/crypto/onramp/model/OnrampRegisterLinkUserResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampRegisterWalletAddressResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampRegisterWalletAddressResult$Completed : com/stripe/android/crypto/onramp/model/OnrampRegisterWalletAddressResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampRegisterWalletAddressResult$Failed : com/stripe/android/crypto/onramp/model/OnrampRegisterWalletAddressResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampRetrieveMissingIdentifiersResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampRetrieveMissingIdentifiersResult$Completed : com/stripe/android/crypto/onramp/model/OnrampRetrieveMissingIdentifiersResult {
+	public static final field $stable I
+	public final fun getRequirements ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierRequirements;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampRetrieveMissingIdentifiersResult$Failed : com/stripe/android/crypto/onramp/model/OnrampRetrieveMissingIdentifiersResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampSubmitIdentifiersResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampSubmitIdentifiersResult$Completed : com/stripe/android/crypto/onramp/model/OnrampSubmitIdentifiersResult {
+	public static final field $stable I
+	public final fun getResult ()Lcom/stripe/android/crypto/onramp/model/compliance/SubmitIdentifiersResult;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampSubmitIdentifiersResult$Failed : com/stripe/android/crypto/onramp/model/OnrampSubmitIdentifiersResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampSubmitWalletOwnershipSignatureResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampSubmitWalletOwnershipSignatureResult$Completed : com/stripe/android/crypto/onramp/model/OnrampSubmitWalletOwnershipSignatureResult {
+	public static final field $stable I
+	public final fun getConsumerWallet ()Lcom/stripe/android/crypto/onramp/model/CryptoConsumerWallet;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampSubmitWalletOwnershipSignatureResult$Failed : com/stripe/android/crypto/onramp/model/OnrampSubmitWalletOwnershipSignatureResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampTokenAuthenticationResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTokenAuthenticationResult$Completed : com/stripe/android/crypto/onramp/model/OnrampTokenAuthenticationResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampTokenAuthenticationResult$Failed : com/stripe/android/crypto/onramp/model/OnrampTokenAuthenticationResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampUpdatePhoneNumberResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampUpdatePhoneNumberResult$Completed : com/stripe/android/crypto/onramp/model/OnrampUpdatePhoneNumberResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampUpdatePhoneNumberResult$Failed : com/stripe/android/crypto/onramp/model/OnrampUpdatePhoneNumberResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampUserAttestationCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampUserAttestationResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult$Confirmed : com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult$Failed : com/stripe/android/crypto/onramp/model/OnrampUserAttestationResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult;)V
+}
+
+public abstract class com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult$Completed : com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult$Failed : com/stripe/android/crypto/onramp/model/OnrampVerifyIdentityResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampVerifyKycCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Confirmed : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Failed : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$UpdateAddress : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodDisplayData {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIcon ()Landroid/graphics/drawable/Drawable;
+	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
+	public final fun getImageLoader ()Lkotlin/jvm/functions/Function1;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getSublabel ()Ljava/lang/String;
+	public final fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type : java/lang/Enum {
+	public static final field BankAccount Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public static final field Card Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public static final field GooglePay Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public static final field SamsungPay Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public abstract fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection$BankAccount : com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection$Card : com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection$CardAndBankAccount : com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection$GooglePay : com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection$SamsungPay : com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;JLjava/lang/String;)V
+	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodType : java/lang/Enum {
+	public static final field BankAccount Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static final field Card Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static final field CardAndBankAccount Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static final field GooglePay Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static final field SamsungPay Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
+public abstract class com/stripe/android/crypto/onramp/model/SamsungPayAvailabilityResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/SamsungPayAvailabilityResult$Available : com/stripe/android/crypto/onramp/model/SamsungPayAvailabilityResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/SamsungPayAvailabilityResult$Unavailable : com/stripe/android/crypto/onramp/model/SamsungPayAvailabilityResult {
+	public static final field $stable I
+	public final fun getError ()Lcom/stripe/android/crypto/onramp/exception/SamsungPayException;
+}
+
+public final class com/stripe/android/crypto/onramp/model/WalletOwnershipChallenge {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChallengeId ()Ljava/lang/String;
+	public final fun getExpiresAt ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getNetwork ()Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public final fun getWalletAddress ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifier {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun type (Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;)Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifier;
+	public final fun value (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifier;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierAlternativeGroup {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternativeMissingIdentifiers ()Ljava/util/List;
+	public final fun getOriginalMissingIdentifiers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierRequirement {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRegulation ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation;
+	public final fun getType ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierRequirements {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getCarfTinRequired ()Z
+	public final fun getIdentifiers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getAT_STN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getBE_NRN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getBG_UCN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getCY_TIC ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getCZ_RC ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getDE_STN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getDK_CPR ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getEE_IK ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getES_NIF ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getFI_HETU ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getFR_NIR ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getFR_SPI ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getGR_AFM ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getHR_OIB ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getHU_AD ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getIE_PPSN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getIS_KT ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getIT_CF ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getLT_AK ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getLU_NIF ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getLV_PK ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getMT_NIC ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getMT_PP ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getNL_BSN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getPL_NIP ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getPL_PESEL ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getPT_NIF ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getRO_CNP ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getSE_PIN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getSI_PIN ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+	public final fun getSK_RC ()Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceIdentifierType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation$Companion;
+	public static final field EuCarf Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation;
+	public static final field EuMica Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/compliance/ComplianceRegulation;
+}
+
+public final class com/stripe/android/crypto/onramp/model/compliance/SubmitIdentifiersResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getCarfTinRequired ()Z
+	public final fun getCompleted ()Z
+	public final fun getIdentifiers ()Ljava/util/List;
+	public final fun getInvalidIdentifiers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

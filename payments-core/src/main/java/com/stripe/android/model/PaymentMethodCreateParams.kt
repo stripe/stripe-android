@@ -26,26 +26,25 @@ class PaymentMethodCreateParams
 constructor(
     internal val code: PaymentMethodCode,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val requiresMandate: Boolean,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val requiresMandateForPaymentIntent: Boolean =
+        requiresMandate,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
     private val sepaDebit: SepaDebit? = null,
     private val auBecsDebit: AuBecsDebit? = null,
     private val bacsDebit: BacsDebit? = null,
-    private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
-    private val link: Link? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
-    private val shopPay: ShopPay? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val clientAttributionMetadata: ClientAttributionMetadata? = null,
-
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
      * instead of generating the map from its content.
@@ -63,19 +62,18 @@ constructor(
     fun copy(
         code: PaymentMethodCode = this.code,
         requiresMandate: Boolean = this.requiresMandate,
+        requiresMandateForPaymentIntent: Boolean = this.requiresMandateForPaymentIntent,
         card: Card? = this.card,
         ideal: Ideal? = this.ideal,
         fpx: Fpx? = this.fpx,
         sepaDebit: SepaDebit? = this.sepaDebit,
         auBecsDebit: AuBecsDebit? = this.auBecsDebit,
         bacsDebit: BacsDebit? = this.bacsDebit,
-        upi: Upi? = this.upi,
         netbanking: Netbanking? = this.netbanking,
         usBankAccount: USBankAccount? = this.usBankAccount,
         link: Link? = this.link,
         cashAppPay: CashAppPay? = this.cashAppPay,
         swish: Swish? = this.swish,
-        shopPay: ShopPay? = this.shopPay,
         billingDetails: PaymentMethod.BillingDetails? = this.billingDetails,
         allowRedisplay: PaymentMethod.AllowRedisplay? = this.allowRedisplay,
         radarOptions: RadarOptions? = this.radarOptions,
@@ -87,19 +85,18 @@ constructor(
         return PaymentMethodCreateParams(
             code = code,
             requiresMandate = requiresMandate,
+            requiresMandateForPaymentIntent = requiresMandateForPaymentIntent,
             card = card,
             ideal = ideal,
             fpx = fpx,
             sepaDebit = sepaDebit,
             auBecsDebit = auBecsDebit,
             bacsDebit = bacsDebit,
-            upi = upi,
             netbanking = netbanking,
             usBankAccount = usBankAccount,
             link = link,
             cashAppPay = cashAppPay,
             swish = swish,
-            shopPay = shopPay,
             billingDetails = billingDetails,
             allowRedisplay = allowRedisplay,
             radarOptions = radarOptions,
@@ -118,13 +115,11 @@ constructor(
         sepaDebit: SepaDebit? = null,
         auBecsDebit: AuBecsDebit? = null,
         bacsDebit: BacsDebit? = null,
-        upi: Upi? = null,
         netbanking: Netbanking? = null,
         usBankAccount: USBankAccount? = null,
         link: Link? = null,
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
-        shopPay: ShopPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         radarOptions: RadarOptions? = null,
@@ -135,19 +130,18 @@ constructor(
     ) : this(
         type.code,
         type.requiresMandate,
+        type.requiresMandateForPaymentIntent,
         card,
         ideal,
         fpx,
         sepaDebit,
         auBecsDebit,
         bacsDebit,
-        upi,
         netbanking,
         usBankAccount,
         link,
         cashAppPay,
         swish,
-        shopPay,
         billingDetails,
         allowRedisplay,
         radarOptions,
@@ -251,19 +245,6 @@ constructor(
     )
 
     private constructor(
-        upi: Upi,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-        billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
-    ) : this(
-        type = PaymentMethod.Type.Upi,
-        upi = upi,
-        allowRedisplay = allowRedisplay,
-        billingDetails = billingDetails,
-        metadata = metadata
-    )
-
-    private constructor(
         netbanking: Netbanking,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
@@ -317,17 +298,6 @@ constructor(
         metadata = metadata,
     )
 
-    private constructor(
-        shopPay: ShopPay,
-        billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?,
-    ) : this(
-        type = PaymentMethod.Type.ShopPay,
-        shopPay = shopPay,
-        billingDetails = billingDetails,
-        metadata = metadata,
-    )
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun requiresMandate(): Boolean {
         return requiresMandate
@@ -371,11 +341,9 @@ constructor(
                 PaymentMethod.Type.SepaDebit.code -> sepaDebit?.toParamMap()
                 PaymentMethod.Type.AuBecsDebit.code -> auBecsDebit?.toParamMap()
                 PaymentMethod.Type.BacsDebit.code -> bacsDebit?.toParamMap()
-                PaymentMethod.Type.Upi.code -> upi?.toParamMap()
                 PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
                 PaymentMethod.Type.Link.code -> link?.toParamMap()
-                PaymentMethod.Type.ShopPay.code -> shopPay?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(code to it)
@@ -538,22 +506,6 @@ constructor(
 
     @Parcelize
     @Poko
-    class Upi(
-        private val vpa: String?
-    ) : StripeParamsModel, Parcelable {
-        override fun toParamMap(): Map<String, Any> {
-            return vpa?.let {
-                mapOf(PARAM_VPA to it)
-            }.orEmpty()
-        }
-
-        private companion object {
-            private const val PARAM_VPA: String = "vpa"
-        }
-    }
-
-    @Parcelize
-    @Poko
     class SepaDebit(
         var iban: String?
     ) : StripeParamsModel, Parcelable {
@@ -600,7 +552,6 @@ constructor(
          * The bank account number (e.g. 00012345)
          */
         var accountNumber: String,
-
         /**
          * The sort code of the bank account (e.g. 10-88-00)
          */
@@ -732,11 +683,25 @@ constructor(
 
     @Parcelize
     @Poko
-    class Link(
+    class Link internal constructor(
         internal var paymentDetailsId: String,
         internal var consumerSessionClientSecret: String,
-        internal var extraParams: Map<String, @RawValue Any>? = null
+        internal var extraParams: Map<String, @RawValue Any>? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val originalPaymentMethodCode: PaymentMethodCode? = null,
     ) : StripeParamsModel, Parcelable {
+
+        constructor(
+            paymentDetailsId: String,
+            consumerSessionClientSecret: String,
+            extraParams: Map<String, @RawValue Any>? = null
+        ) : this(
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            extraParams = extraParams,
+            originalPaymentMethodCode = null
+        )
+
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
                 PARAM_PAYMENT_DETAILS_ID to paymentDetailsId,
@@ -753,22 +718,6 @@ constructor(
             private const val PARAM_CREDENTIALS = "credentials"
             private const val PARAM_CONSUMER_SESSION_CLIENT_SECRET =
                 "consumer_session_client_secret"
-        }
-    }
-
-    @Parcelize
-    @Poko
-    class ShopPay(
-        internal var externalSourceId: String
-    ) : StripeParamsModel, Parcelable {
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_EXTERNAL_SOURCE_ID to externalSourceId
-            )
-        }
-
-        private companion object {
-            private const val PARAM_EXTERNAL_SOURCE_ID = "external_source_id"
         }
     }
 
@@ -903,17 +852,6 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun create(
-            upi: Upi,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null,
-            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(upi, allowRedisplay, billingDetails, metadata)
-        }
-
-        @JvmStatic
-        @JvmOverloads
-        fun create(
             usBankAccount: USBankAccount,
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
@@ -965,7 +903,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createP24(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -983,7 +921,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createBancontact(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -1019,7 +957,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createEps(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -1074,6 +1012,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createPayPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.PayPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createAfterpayClearpay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
@@ -1097,17 +1050,18 @@ constructor(
             googlePayPaymentData: JSONObject
         ): PaymentMethodCreateParams {
             return createFromGooglePay(
-                googlePayPaymentData = googlePayPaymentData,
+                googlePayResult = GooglePayResult.fromJson(googlePayPaymentData),
                 clientAttributionMetadata = null,
+                billingEmailOverride = null,
             )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createFromGooglePay(
-            googlePayPaymentData: JSONObject,
+            googlePayResult: GooglePayResult,
             clientAttributionMetadata: ClientAttributionMetadata?,
+            billingEmailOverride: String?,
         ): PaymentMethodCreateParams {
-            val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
             val tokenId = token?.id.orEmpty()
 
@@ -1119,7 +1073,7 @@ constructor(
                 billingDetails = PaymentMethod.BillingDetails(
                     address = googlePayResult.address,
                     name = googlePayResult.name,
-                    email = googlePayResult.email,
+                    email = billingEmailOverride ?: googlePayResult.email,
                     phone = googlePayResult.phoneNumber
                 ),
                 allowRedisplay = null,
@@ -1399,6 +1353,141 @@ constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createTwint(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Twint,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createWero(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Wero,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createSequra(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Sequra,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createScalapay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Scalapay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createPayByBank(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createKakaoPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.KakaoPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createKrCard(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.KrCard,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createNaverPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NaverPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createPayco(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Payco,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,
@@ -1407,13 +1496,15 @@ constructor(
             billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            originalPaymentMethodCode: PaymentMethodCode? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
                 link = Link(
                     paymentDetailsId = paymentDetailsId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraParams
+                    extraParams = extraParams,
+                    originalPaymentMethodCode = originalPaymentMethodCode
                 ),
                 allowRedisplay = allowRedisplay,
                 billingDetails = billingDetails,
@@ -1435,18 +1526,6 @@ constructor(
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
                 clientAttributionMetadata = clientAttributionMetadata,
-            )
-        }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-        fun createShopPay(
-            externalSourceId: String,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(
-                type = PaymentMethod.Type.ShopPay,
-                shopPay = ShopPay(externalSourceId),
-                billingDetails = billingDetails,
             )
         }
 

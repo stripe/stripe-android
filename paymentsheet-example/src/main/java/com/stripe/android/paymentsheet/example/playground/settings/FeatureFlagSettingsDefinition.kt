@@ -11,7 +11,10 @@ internal open class FeatureFlagSettingsDefinition(
     displayName = featureFlag.name,
     defaultValue = false,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return allowedIntegrationTypes.contains(configurationData.integrationType)
     }
 

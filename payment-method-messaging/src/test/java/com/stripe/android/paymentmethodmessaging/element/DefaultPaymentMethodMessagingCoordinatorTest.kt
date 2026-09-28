@@ -4,20 +4,26 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentmethodmessaging.ApiConfigurationFixtures.DEFAULT_REQUEST_OPTIONS
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class DefaultPaymentMethodMessagingCoordinatorTest {
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `configure returns no content if single and multi partner null`() = runScenario {
@@ -127,13 +133,12 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
         testBlock: suspend Scenario.() -> Unit
     ) = runTest {
         val repository: StripeRepository = FakeStripeRepository()
-        val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
         val errorReporter = FakeErrorReporter()
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = repository,
-            paymentConfiguration = paymentConfig,
+            requestOptionsProvider = { DEFAULT_REQUEST_OPTIONS },
             eventReporter = FakeEventReporter(),
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = errorReporter
         )
 

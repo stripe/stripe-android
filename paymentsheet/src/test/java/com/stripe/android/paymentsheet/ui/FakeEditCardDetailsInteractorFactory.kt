@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
 
 internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.Factory {
@@ -10,6 +11,9 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
     var onCardUpdateParamsChanged: CardUpdateParamsCallback? = null
         private set
 
+    var autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null
+        private set
+
     override fun create(
         coroutineScope: CoroutineScope,
         cardEditConfiguration: CardEditConfiguration?,
@@ -17,10 +21,12 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         payload: EditCardPayload,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         onBrandChoiceChanged: CardBrandCallback,
-        onCardUpdateParamsChanged: CardUpdateParamsCallback
+        onCardUpdateParamsChanged: CardUpdateParamsCallback,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     ): EditCardDetailsInteractor {
         this.onCardUpdateParamsChanged = onCardUpdateParamsChanged
         this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+        this.autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory
         return FakeEditCardDetailsInteractor(
             payload = payload,
             shouldShowCardBrandDropdown = cardEditConfiguration?.isCbcModifiable ?: false,

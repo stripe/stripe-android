@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -18,6 +20,9 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -26,18 +31,26 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -47,6 +60,12 @@ import kotlin.time.Duration
 @RunWith(RobolectricTestRunner::class)
 internal class FormHelperOpenCardScanAutomaticallyTest {
     private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `should not AutomaticallyLaunchCardScan if card form will be filled PaymentSheet`() {
@@ -62,7 +81,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isFalse()
         }
     }
@@ -78,7 +99,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isTrue()
         }
     }
@@ -97,7 +120,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isFalse()
         }
     }
@@ -113,7 +138,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isTrue()
         }
     }
@@ -125,10 +152,12 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         ),
         block: (List<FormElement>) -> Unit,
     ) {
-        val defaultFormHelper = DefaultFormHelper.create(
-            viewModel = viewModel,
+        val defaultFormHelper = BaseSheetFormHelperFactory(viewModel).create(
+            coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true
+            linkInlineHandler = LinkInlineHandler.create(),
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
+            paymentMethodMessagePromotionsHelper = null,
         )
 
         val formElements = defaultFormHelper.formElementsForCode(PaymentMethod.Type.Card.code)
@@ -140,22 +169,35 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = listOf(CARD_PAYMENT_METHOD)),
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
     ): PaymentOptionsViewModel {
-        return TestViewModelFactory.create(
+        val viewModel = TestViewModelFactory.create(
             savedStateHandle = SavedStateHandle(),
         ) { linkHandler, thisSavedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = FakeEventReporter(),
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+                    customer?.paymentMethods ?: emptyList()
+                ),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkGateFactory = FakeLinkGate.Factory(),
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+                mode = EventReporter.Mode.Complete,
+                errorReporter = FakeErrorReporter(),
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }
+        return viewModelStoreRule.track(viewModel)
     }
 
     private fun createPaymentSheetViewModel(
@@ -173,7 +215,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             validationError = null,
         ),
     ): PaymentSheetViewModel {
-        return TestViewModelFactory.create(
+        val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             savedStateHandle = SavedStateHandle(),
         ) { linkHandler, thisSavedStateHandle ->
@@ -181,7 +223,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter = FakeEventReporter(),
                 paymentElementLoader = paymentElementLoader,
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+                    customer?.paymentMethods ?: emptyList()
+                ),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
@@ -199,9 +243,19 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false }
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+                mode = EventReporter.Mode.Complete,
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
+                linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )
         }
+        return viewModelStoreRule.track(viewModel)
     }
 
     private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
@@ -224,5 +278,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             lastUpdateReason = null
         ),
         walletButtonsRendered = false,
+        promotions = null,
     )
 }

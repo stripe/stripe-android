@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.networking
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -8,9 +9,15 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.Date
 
 internal class FakeFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
+
+    private val _syncFlow = MutableStateFlow<SynchronizeSessionResponse?>(null)
+    override val syncFlow: StateFlow<SynchronizeSessionResponse?> = _syncFlow.asStateFlow()
 
     var getSynchronizeSessionResponseProvider: () -> SynchronizeSessionResponse =
         { ApiKeyFixtures.syncResponse() }
@@ -29,7 +36,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 
     override suspend fun markConsentAcquired(
@@ -103,13 +111,16 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         TODO("Not yet implemented")
     }
 
-    override suspend fun postMarkLinkStepUpVerified(clientSecret: String): FinancialConnectionsSessionManifest {
-        TODO("Not yet implemented")
-    }
-
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
-    ) = Unit
+    ) {
+        val currentSync = syncFlow.value ?: return
+        _syncFlow.value = currentSync.copy(manifest = block(currentSync.manifest))
+    }
+
+    fun setSyncResponse(syncResponse: SynchronizeSessionResponse?) {
+        _syncFlow.value = syncResponse
+    }
 
     override suspend fun selectInstitution(
         clientSecret: String,

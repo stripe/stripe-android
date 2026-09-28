@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
@@ -19,7 +20,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.GooglePayFixtures
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -27,20 +30,28 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayPaymentMethodLauncherViewModelTest {
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val stripeRepository = FakeStripeRepository()
     private val googlePayJsonFactory = GooglePayJsonFactory(
@@ -62,15 +73,46 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         TestFragment()
     }
 
-    private val viewModel = GooglePayPaymentMethodLauncherViewModel(
-        paymentsClient,
-        REQUEST_OPTIONS,
-        ARGS,
-        stripeRepository,
-        googlePayJsonFactory,
-        googlePayRepository,
-        SavedStateHandle()
-    )
+    private val viewModel = createViewModel(ARGS)
+
+    @After
+    fun tearDown() {
+        GooglePayPaymentDataUpdateCallbackRegistry.deselect()
+        GooglePayPaymentDataUpdateCallbackRegistry.deregister(CALLBACK_ID)
+    }
+
+    @Test
+    fun `init selects dynamic callback`() {
+        val callback = GooglePayPaymentDataUpdateCallback {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+        GooglePayPaymentDataUpdateCallbackRegistry.register(CALLBACK_ID, callback)
+
+        createViewModel(ARGS.copy(dynamicCallbackId = CALLBACK_ID)).also {
+            viewModelStoreRule.track(it)
+        }
+
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()?.callback)
+            .isSameInstanceAs(callback)
+    }
+
+    @Test
+    fun `onCleared deselects dynamic callback`() {
+        val callback = GooglePayPaymentDataUpdateCallback {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+        GooglePayPaymentDataUpdateCallbackRegistry.register(CALLBACK_ID, callback)
+
+        val viewModelStore = ViewModelStore()
+        viewModelStore.put("view_model", createViewModel(ARGS.copy(dynamicCallbackId = CALLBACK_ID)))
+
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()?.callback)
+            .isSameInstanceAs(callback)
+
+        viewModelStore.clear()
+
+        assertThat(GooglePayPaymentDataUpdateCallbackRegistry.get()).isNull()
+    }
 
     @Test
     fun `createPaymentMethod() should return expected result`() = runTest {
@@ -88,6 +130,42 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentMethod() creates request options from api config`() = runTest {
+        viewModel.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+        assertThat(stripeRepository.getRequestOptions()).isEqualTo(
+            ApiRequest.Options(
+                apiKey = ARGS.apiConfiguration.publishableKey,
+                stripeAccount = ARGS.apiConfiguration.stripeAccountId
+            )
+        )
+    }
+
+    @Test
+    fun `createPaymentMethod() should return shipping information`() = runTest {
+        val result = viewModel.createPaymentMethod(
+            PaymentData.fromJson(GooglePayFixtures.RESULT_WITH_SHIPPING_ADDRESS.toString())
+        ) as GooglePayPaymentMethodLauncher.Result.Completed
+
+        assertThat(result.shippingInformation).isEqualTo(
+            ShippingInformation(
+                name = "Jenny Rosen",
+                phone = "1-800-555-1234",
+                address = Address(
+                    line1 = "510 Townsend St",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94103",
+                    country = "US",
+                ),
+            )
+        )
+    }
+
+    @Test
     fun `createPaymentMethod() sets clientAttributionMetadata`() = runTest {
         viewModel.createPaymentMethod(
             PaymentData.fromJson(
@@ -96,6 +174,34 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         )
 
         assertThat(stripeRepository.getCreateParams()?.toParamMap()).containsKey("client_attribution_metadata")
+    }
+
+    @Test
+    fun `createPaymentMethod() uses billingEmailOverride when Google Pay has no email`() = runTest {
+        val viewModelWithEmail = createViewModel(ARGS.copy(billingEmailOverride = "checkout@example.com"))
+
+        viewModelWithEmail.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `createPaymentMethod() prefers billingEmailOverride over Google Pay email`() = runTest {
+        val viewModelWithEmail = createViewModel(ARGS.copy(billingEmailOverride = "checkout@example.com"))
+
+        viewModelWithEmail.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -125,7 +231,9 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    apiConfiguration = ARGS.apiConfiguration,
+                    shippingAddressParameters = null,
                 )
             )
             assertThat(transactionInfo)
@@ -153,7 +261,9 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         merchantName = "Widget, Inc."
                     ),
                     currencyCode = "usd",
-                    amount = 0
+                    amount = 0,
+                    apiConfiguration = ARGS.apiConfiguration,
+                    shippingAddressParameters = null,
                 )
             )
             assertThat(transactionInfo)
@@ -190,15 +300,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
     @Test
     fun `createPaymentDataRequest() with isElements=true should set 'stripe-elements' software id`() {
-        val viewModel = GooglePayPaymentMethodLauncherViewModel(
-            paymentsClient,
-            REQUEST_OPTIONS,
-            ARGS.copy(isElements = true),
-            stripeRepository,
-            googlePayJsonFactory,
-            googlePayRepository,
-            SavedStateHandle()
-        )
+        val viewModel = createViewModel(ARGS.copy(isElements = true))
 
         val paymentDataRequest = viewModel.createPaymentDataRequest()
 
@@ -211,15 +313,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
     @Test
     fun `createPaymentDataRequest() with isElements=false should set 'stripe-launcher' software id`() {
-        val viewModel = GooglePayPaymentMethodLauncherViewModel(
-            paymentsClient,
-            REQUEST_OPTIONS,
-            ARGS.copy(isElements = false),
-            stripeRepository,
-            googlePayJsonFactory,
-            googlePayRepository,
-            SavedStateHandle()
-        )
+        val viewModel = createViewModel(ARGS.copy(isElements = false))
 
         val paymentDataRequest = viewModel.createPaymentDataRequest()
 
@@ -228,6 +322,28 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             .getJSONObject("softwareInfo")
 
         assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-launcher")
+    }
+
+    @Test
+    fun `createPaymentDataRequest() should include shipping address parameters`() {
+        val viewModel = createViewModel(
+            args = ARGS.copy(
+                shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                    isRequired = true,
+                    allowedCountryCodes = setOf("US", "CA"),
+                    phoneNumberRequired = true,
+                ),
+            ),
+        )
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        assertThat(paymentDataRequest.getBoolean("shippingAddressRequired")).isTrue()
+        val shippingAddressParameters = paymentDataRequest.getJSONObject("shippingAddressParameters")
+        val allowedCountryCodes = shippingAddressParameters.getJSONArray("allowedCountryCodes")
+        assertThat(listOf(allowedCountryCodes.getString(0), allowedCountryCodes.getString(1)))
+            .containsExactly("US", "CA")
+        assertThat(shippingAddressParameters.getBoolean("phoneNumberRequired")).isTrue()
     }
 
     @Test
@@ -248,6 +364,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
+                    apiConfiguration = ARGS.apiConfiguration,
+                    shippingAddressParameters = null,
                 )
             )
 
@@ -264,16 +382,19 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         private var createParams: PaymentMethodCreateParams? = null
+        private var requestOptions: ApiRequest.Options? = null
 
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options,
         ): Result<PaymentMethod> {
             createParams = paymentMethodCreateParams
+            requestOptions = options
             return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
         fun getCreateParams(): PaymentMethodCreateParams? = createParams
+        fun getRequestOptions(): ApiRequest.Options? = requestOptions
     }
 
     internal class TestFragment : Fragment() {
@@ -284,7 +405,25 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         ): View = FrameLayout(inflater.context)
     }
 
+    private fun createViewModel(
+        args: GooglePayPaymentMethodLauncherContractV2.Args,
+    ): GooglePayPaymentMethodLauncherViewModel {
+        return viewModelStoreRule.track(
+            GooglePayPaymentMethodLauncherViewModel(
+                ApplicationProvider.getApplicationContext(),
+                paymentsClient,
+                args,
+                stripeRepository,
+                googlePayJsonFactory,
+                googlePayRepository,
+                EmptyCoroutineContext,
+                SavedStateHandle(),
+            )
+        )
+    }
+
     private companion object {
+        const val CALLBACK_ID = "callback_id"
         val ARGS = GooglePayPaymentMethodLauncherContractV2.Args(
             GooglePayPaymentMethodLauncher.Config(
                 GooglePayEnvironment.Test,
@@ -297,11 +436,13 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-            )
-        )
-        val REQUEST_OPTIONS = ApiRequest.Options(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            "account"
+                checkoutSessionId = null,
+            ),
+            apiConfiguration = ApiConfiguration.State(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+            ),
+            shippingAddressParameters = null,
         )
     }
 }

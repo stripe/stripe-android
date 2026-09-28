@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.reactnative.ReactNativeAnalytics
 import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
@@ -18,7 +19,7 @@ open class AnalyticsRequestFactory(
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>,
     private val networkTypeProvider: Provider<String?>,
-    private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER
+    private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER,
 ) {
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
@@ -30,28 +31,30 @@ open class AnalyticsRequestFactory(
      */
     open fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
+        additionalParams: Map<String, Any?>,
+        publishableKeyOverride: String? = null,
     ): AnalyticsRequest {
         return AnalyticsRequest(
-            params = createParams(event) + additionalParams,
+            params = createParams(event, publishableKeyOverride) + additionalParams,
             headers = RequestHeadersFactory.Analytics.create()
         )
     }
 
     private fun createParams(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
+        publishableKeyOverride: String?
     ): Map<String, Any> {
-        return standardParams() + appDataParams() + event.params()
+        return standardParams(publishableKeyOverride) + appDataParams() + event.params()
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
         return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
-    private fun standardParams(): Map<String, Any> = mapOf(
+    private fun standardParams(publishableKeyOverride: String?): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            val publishableKey = publishableKeyProvider.get()
+            val publishableKey = publishableKeyOverride ?: publishableKeyProvider.get()
             if (publishableKey.startsWith("uk_")) {
                 "[REDACTED_LIVE_KEY]"
             } else {
@@ -67,7 +70,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.SESSION_ID to sessionId,
         AnalyticsFields.TIMESTAMP to System.currentTimeMillis() / MILLIS_TO_SECONDS,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
-    ) + networkType() + pluginType()
+    ) + networkType() + pluginType() + reactNativeParams()
 
     private fun networkType(): Map<String, String> {
         val networkType = networkTypeProvider.get() ?: return emptyMap()
@@ -78,6 +81,17 @@ open class AnalyticsRequestFactory(
         return pluginTypeProvider.get()?.let { pluginType ->
             mapOf(AnalyticsFields.PLUGIN_TYPE to pluginType)
         } ?: emptyMap()
+    }
+
+    private fun reactNativeParams(): Map<String, Any> {
+        val params = mutableMapOf<String, Any>()
+        ReactNativeAnalytics.isNewArchitecture?.let {
+            params[AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE] = it
+        }
+        ReactNativeAnalytics.reactNativeVersion?.let {
+            params[AnalyticsFields.REACT_NATIVE_VERSION] = it
+        }
+        return params
     }
 
     internal fun appDataParams(): Map<String, Any> {

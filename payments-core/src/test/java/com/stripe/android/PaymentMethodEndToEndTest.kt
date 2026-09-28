@@ -62,22 +62,6 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withBancontact_missingName_shouldFail() {
-        val params = PaymentMethodCreateParams.createBancontact(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
-        )
-
-        val exception = assertFailsWith<InvalidRequestException>(
-            "A name is required to create a Bancontact payment method"
-        ) {
-            Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-        assertThat(exception.message)
-            .isEqualTo("Missing required param: billing_details[name].")
-    }
-
-    @Test
     fun createPaymentMethod_withUSBankAccount_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT
         val paymentMethod =
@@ -142,31 +126,6 @@ internal class PaymentMethodEndToEndTest {
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Eps)
-    }
-
-    @Test
-    fun createPaymentMethod_withEps_missingName_shouldFail() {
-        val params = PaymentMethodCreateParams.createEps(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
-        )
-        val exception = assertFailsWith<InvalidRequestException>(
-            "A name is required to create a EPS payment method"
-        ) {
-            Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-        assertThat(exception.message)
-            .isEqualTo("Missing required param: billing_details[name].")
-    }
-
-    @Test
-    fun createPaymentMethod_withUpi_shouldCreateObject() {
-        val params = PaymentMethodCreateParamsFixtures.UPI
-        val paymentMethod =
-            Stripe(context, ApiKeyFixtures.UPI_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod.type)
-            .isEqualTo(PaymentMethod.Type.Upi)
     }
 
     @Test
@@ -237,6 +196,22 @@ internal class PaymentMethodEndToEndTest {
         ).getOrThrow()
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
+    }
+
+    @Test
+    fun `createPaymentMethod() with PayPay PaymentMethod should create expected object`() = runTest {
+        val paymentMethod = StripeApiRepository(
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY },
+            requestSurface = RequestSurface.PaymentElement,
+            workContext = testDispatcher
+        ).createPaymentMethod(
+            PaymentMethodCreateParams.createPayPay(),
+            ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY)
+        ).getOrThrow()
+
+        assertThat(paymentMethod.type)
+            .isEqualTo(PaymentMethod.Type.PayPay)
     }
 
     @Test
@@ -398,6 +373,15 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withTwint_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.TWINT
+        val stripe = Stripe(context, ApiKeyFixtures.TWINT_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Twint)
+    }
+
+    @Test
     fun createPaymentMethod_withAmazonPay_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.AMAZON_PAY
         val stripe = Stripe(context, ApiKeyFixtures.AMAZON_PAY_PUBLISHABLE_KEY)
@@ -458,5 +442,14 @@ internal class PaymentMethodEndToEndTest {
 
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Multibanco)
+    }
+
+    @Test
+    fun createPaymentMethod_withPayByBank_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.PAY_BY_BANK
+        val stripe = Stripe(context, ApiKeyFixtures.PAY_BY_BANK_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.PayByBank)
     }
 }

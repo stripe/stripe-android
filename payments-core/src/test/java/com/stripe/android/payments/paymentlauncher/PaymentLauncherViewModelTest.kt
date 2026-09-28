@@ -34,6 +34,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,10 +47,12 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -57,9 +60,13 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class PaymentLauncherViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     internal class TestFragment : Fragment()
 
@@ -130,7 +137,7 @@ class PaymentLauncherViewModelTest {
             durationProvider,
         ).apply {
             register(activityResultCaller, lifecycleOwner)
-        }
+        }.also { viewModelStoreRule.track(it) }
 
     @Before
     fun setUpMocks() = runTest {
@@ -604,13 +611,15 @@ class PaymentLauncherViewModelTest {
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
             additionalParams = any(),
+            publishableKeyOverride = isNull(),
         )
 
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
             additionalParams = argThat { params ->
                 params.containsKey("duration") && params["duration"] == 1L
-            }
+            },
+            publishableKeyOverride = isNull(),
         )
     }
 
@@ -668,7 +677,8 @@ class PaymentLauncherViewModelTest {
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
             additionalParams = argThat { params ->
                 params["status"] == expectedStatus
-            }
+            },
+            publishableKeyOverride = isNull(),
         )
     }
 
@@ -681,6 +691,7 @@ class PaymentLauncherViewModelTest {
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
             additionalParams = any(),
+            publishableKeyOverride = isNull(),
         )
 
         val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
@@ -692,7 +703,87 @@ class PaymentLauncherViewModelTest {
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished),
             additionalParams = argThat { params ->
                 params.containsKey("duration") && params["duration"] == 1L
-            }
+            },
+            publishableKeyOverride = isNull(),
+        )
+    }
+
+    @Test
+    fun `verify only one finished event is sent when result is already set`() = runTest {
+        whenever(paymentIntent.requiresAction()).thenReturn(false)
+        val viewModel = createViewModel()
+
+        viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+
+        verifyGuardPreventsDuplicateFinishedEvents(
+            viewModel = viewModel,
+            expectedEvent = PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+            expectedStatus = "succeeded",
+            secondResult = succeededPaymentResult
+        )
+    }
+
+    @Test
+    fun `verify guard blocks different result types`() = runTest {
+        whenever(paymentIntent.requiresAction()).thenReturn(false)
+        val viewModel = createViewModel()
+
+        viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+
+        verifyGuardPreventsDuplicateFinishedEvents(
+            viewModel = viewModel,
+            expectedEvent = PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+            expectedStatus = "succeeded",
+            secondResult = failedPaymentResult
+        )
+    }
+
+    @Test
+    fun `verify guard works for next action flows`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle = savedStateHandle)
+
+        viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
+
+        val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+        whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+            .thenReturn(Result.success(succeededPaymentResult))
+        viewModel.onPaymentFlowResult(paymentFlowResult)
+
+        verifyGuardPreventsDuplicateFinishedEvents(
+            viewModel = viewModel,
+            expectedEvent = PaymentAnalyticsEvent.PaymentLauncherNextActionFinished,
+            expectedStatus = "succeeded",
+            secondResult = succeededPaymentResult
+        )
+    }
+
+    private suspend fun verifyGuardPreventsDuplicateFinishedEvents(
+        viewModel: PaymentLauncherViewModel,
+        expectedEvent: PaymentAnalyticsEvent,
+        expectedStatus: String,
+        secondResult: PaymentIntentResult
+    ) {
+        // Verify initial finished event was sent once
+        verify(analyticsRequestFactory, times(1)).createRequest(
+            eq(expectedEvent),
+            additionalParams = argThat { params ->
+                params["status"] == expectedStatus
+            },
+            publishableKeyOverride = isNull(),
+        )
+
+        // Try to send another result - should be blocked by guard
+        val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+        whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+            .thenReturn(Result.success(secondResult))
+        viewModel.onPaymentFlowResult(paymentFlowResult)
+
+        // Verify still only one finished event was sent
+        verify(analyticsRequestFactory, times(1)).createRequest(
+            eq(expectedEvent),
+            additionalParams = any(),
+            publishableKeyOverride = isNull(),
         )
     }
 

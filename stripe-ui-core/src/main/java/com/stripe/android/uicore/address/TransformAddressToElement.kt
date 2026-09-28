@@ -2,15 +2,17 @@ package com.stripe.android.uicore.address
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.AddressTextFieldConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.PostalCodeConfig
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
@@ -33,41 +35,41 @@ import com.stripe.android.core.R as CoreR
 @Serializable
 enum class FieldType(
     val serializedValue: String,
-    val identifierSpec: IdentifierSpec,
+    val formFieldId: FormFieldId,
     @StringRes val defaultLabel: Int
 ) {
     @SerialName("addressLine1")
     AddressLine1(
         "addressLine1",
-        IdentifierSpec.Line1,
+        FormFieldId.Line1,
         CoreR.string.stripe_address_label_address_line1
     ),
 
     @SerialName("addressLine2")
     AddressLine2(
         "addressLine2",
-        IdentifierSpec.Line2,
+        FormFieldId.Line2,
         R.string.stripe_address_label_address_line2
     ),
 
     @SerialName("locality")
     Locality(
         "locality",
-        IdentifierSpec.City,
+        FormFieldId.City,
         CoreR.string.stripe_address_label_city
     ),
 
     @SerialName("dependentLocality")
     DependentLocality(
         "dependentLocality",
-        IdentifierSpec.DependentLocality,
+        FormFieldId.DependentLocality,
         CoreR.string.stripe_address_label_city
     ),
 
     @SerialName("postalCode")
     PostalCode(
         "postalCode",
-        IdentifierSpec.PostalCode,
+        FormFieldId.PostalCode,
         CoreR.string.stripe_address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
@@ -76,7 +78,7 @@ enum class FieldType(
     @SerialName("sortingCode")
     SortingCode(
         "sortingCode",
-        IdentifierSpec.SortingCode,
+        FormFieldId.SortingCode,
         CoreR.string.stripe_address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
@@ -85,14 +87,14 @@ enum class FieldType(
     @SerialName("administrativeArea")
     AdministrativeArea(
         "administrativeArea",
-        IdentifierSpec.State,
+        FormFieldId.State,
         NameType.State.stringResId
     ),
 
     @SerialName("name")
     Name(
         "name",
-        IdentifierSpec.Name,
+        FormFieldId.Name,
         CoreR.string.stripe_address_label_full_name
     );
 
@@ -236,7 +238,7 @@ fun List<CountryAddressSchema>.transformToElementList(
         }
         .mapNotNull { addressField ->
             addressField.type?.toElement(
-                identifierSpec = addressField.type.identifierSpec,
+                formFieldId = addressField.type.formFieldId,
                 label = addressField.schema?.nameType?.stringResId
                     ?: addressField.type.defaultLabel,
                 capitalization = addressField.type.capitalization(),
@@ -256,7 +258,7 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
 private fun FieldType.toElement(
-    identifierSpec: IdentifierSpec,
+    formFieldId: FormFieldId,
     label: Int,
     capitalization: KeyboardCapitalization,
     keyboardType: KeyboardType,
@@ -264,7 +266,7 @@ private fun FieldType.toElement(
     showOptionalLabel: Boolean
 ): SectionSingleFieldElement {
     val simpleTextElement = SimpleTextElement(
-        identifierSpec,
+        formFieldId,
         SimpleTextFieldController(
             textFieldConfig = toConfig(
                 label = label,
@@ -279,19 +281,21 @@ private fun FieldType.toElement(
     return when (this) {
         FieldType.AdministrativeArea -> {
             val supportsAdministrativeAreaDropdown = listOf(
+                "BR",
                 "CA",
                 "US"
             ).contains(countryCode)
             if (supportsAdministrativeAreaDropdown) {
                 val country = when (countryCode) {
+                    "BR" -> AdministrativeAreaConfig.Country.Brazil()
                     "CA" -> AdministrativeAreaConfig.Country.Canada()
                     "US" -> AdministrativeAreaConfig.Country.US()
                     else -> throw IllegalArgumentException()
                 }
                 AdministrativeAreaElement(
-                    identifierSpec,
+                    formFieldId,
                     DropdownFieldController(
-                        AdministrativeAreaConfig(country)
+                        AdministrativeAreaConfig(country),
                     )
                 )
             } else {
@@ -315,13 +319,32 @@ private fun FieldType.toConfig(
             country = countryCode,
             optional = optional,
         )
-        else -> SimpleTextFieldConfig(
-            label = resolvableString(label),
-            capitalization = capitalization,
-            keyboard = keyboardType,
-            optional = optional,
-            allowsEmojis = false,
-        )
+        else -> {
+            val autofillContentType = when (this) {
+                FieldType.AddressLine1 -> ContentType.AddressStreet
+                FieldType.AddressLine2 -> ContentType.AddressAuxiliaryDetails
+                FieldType.Locality -> ContentType.AddressLocality
+                FieldType.AdministrativeArea -> ContentType.AddressRegion
+                else -> null
+            }
+            if (autofillContentType != null) {
+                AddressTextFieldConfig(
+                    label = resolvableString(label),
+                    capitalization = capitalization,
+                    keyboard = keyboardType,
+                    optional = optional,
+                    autofillContentType = autofillContentType,
+                )
+            } else {
+                SimpleTextFieldConfig(
+                    label = resolvableString(label),
+                    capitalization = capitalization,
+                    keyboard = keyboardType,
+                    optional = optional,
+                    allowsEmojis = false,
+                )
+            }
+        }
     }
 }
 
@@ -346,7 +369,7 @@ private fun combineCityAndPostal(countryAddressElements: List<SectionSingleField
             val rowFields = listOf(countryAddressElements[index], countryAddressElements[index + 1])
             acc.plus(
                 RowElement(
-                    IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+                    FormFieldId.Generic("row_" + UUID.randomUUID().leastSignificantBits),
                     rowFields,
                     RowController(rowFields)
                 )
@@ -364,9 +387,9 @@ private fun isPostalNextToCity(
     element2: SectionSingleFieldElement
 ) = isCityOrPostal(element1.identifier) && isCityOrPostal(element2.identifier)
 
-private fun isCityOrPostal(identifierSpec: IdentifierSpec) =
-    identifierSpec == IdentifierSpec.PostalCode ||
-        identifierSpec == IdentifierSpec.City
+private fun isCityOrPostal(formFieldId: FormFieldId) =
+    formFieldId == FormFieldId.PostalCode ||
+        formFieldId == FormFieldId.City
 
 private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
     KeyboardType.NumberPassword

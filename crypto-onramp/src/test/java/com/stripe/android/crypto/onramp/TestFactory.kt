@@ -11,6 +11,7 @@ fun paymentIntent(
     setupFutureUsage: StripeIntent.Usage? = null,
     confirmationMethod: PaymentIntent.ConfirmationMethod = PaymentIntent.ConfirmationMethod.Automatic,
     status: StripeIntent.Status = StripeIntent.Status.RequiresConfirmation,
+    nextActionData: StripeIntent.NextActionData? = null,
     paymentMethodOptionsJsonString: String? = null,
     linkFundingSources: List<String> = emptyList(),
     countryCode: String? = null,
@@ -28,6 +29,7 @@ fun paymentIntent(
     unactivatedPaymentMethods = emptyList(),
     setupFutureUsage = setupFutureUsage,
     confirmationMethod = confirmationMethod,
+    nextActionData = nextActionData,
     paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
     linkFundingSources = linkFundingSources,
 )

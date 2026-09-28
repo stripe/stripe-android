@@ -131,10 +131,16 @@ private fun apiException(
     stripeErrorJsonParser: StripeErrorJsonParser,
     response: StripeResponse<String>
 ): APIException {
+    val stripeError = try {
+        stripeErrorJsonParser.parse(response.responseJson())
+    } catch (_: APIException) {
+        null
+    }
     return APIException(
-        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+        stripeError = stripeError,
         requestId = response.requestId?.value,
-        statusCode = response.code
+        statusCode = response.code,
+        message = stripeError?.message ?: "Request failed with status code ${response.code} and non-JSON error body."
     )
 }
 

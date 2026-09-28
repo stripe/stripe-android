@@ -21,6 +21,8 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.delay
@@ -38,6 +40,9 @@ internal class VerificationViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init starts verification with link account manager`() = runTest(dispatcher) {
@@ -120,7 +125,7 @@ internal class VerificationViewModelTest {
     }
 
     @Test
-    fun `onChangeEmailClicked triggers logout`() = runTest(dispatcher) {
+    fun `onChangeEmailClicked delegates to onChangeEmailRequested without logging out`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var callCount = 0
             override suspend fun logOut(): Result<ConsumerSession> {
@@ -139,7 +144,7 @@ internal class VerificationViewModelTest {
             onChangeEmailRequested = ::onChangeEmailRequested,
         ).onChangeEmailButtonClicked()
 
-        assertThat(linkAccountManager.callCount).isEqualTo(1)
+        assertThat(linkAccountManager.callCount).isEqualTo(0)
         assertThat(onChangeEmailRequestedCalls).containsExactly(Unit)
     }
 
@@ -468,10 +473,11 @@ internal class VerificationViewModelTest {
             linkLaunchMode = linkLaunchMode,
             webLinkAuthChannel = webLinkAuthChannel,
             isDialog = false,
+            linkBrand = LinkBrand.Link,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

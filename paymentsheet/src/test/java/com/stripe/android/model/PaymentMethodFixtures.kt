@@ -468,7 +468,7 @@ internal object PaymentMethodFixtures {
     )
 
     val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,
         iconResourceNight = null,
         label = "PayPal".resolvableString,
         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
@@ -680,10 +680,21 @@ internal object PaymentMethodFixtures {
         ).toDisplayableSavedPaymentMethod()
     }
 
+    fun displayableLinkGenericPaymentMethod(): DisplayableSavedPaymentMethod {
+        return LINK_PAYMENT_METHOD.copy(
+            linkPaymentDetails = LinkPaymentDetails.Generic(
+                nickname = null,
+                label = "Pix",
+                sublabel = null,
+                icon = null,
+                last4 = "1234",
+            ),
+        ).toDisplayableSavedPaymentMethod()
+    }
+
     fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
         return CARD_PAYMENT_METHOD.copy(
             id = "pm_234567890",
-
         ).toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
     }
 
@@ -699,8 +710,7 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
-            isCbcEligible = true,
-            shouldShowDefaultBadge = shouldShowDefaultBadge
+            shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }
 

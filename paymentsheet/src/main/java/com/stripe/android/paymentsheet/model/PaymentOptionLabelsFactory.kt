@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.createCardLabel
@@ -16,8 +16,9 @@ internal object PaymentOptionLabelsFactory {
     fun create(
         context: Context,
         selection: PaymentSelection,
+        linkBrand: LinkBrand?,
     ): PaymentOption.Labels {
-        val label = selection.label.resolve(context)
+        val label = selection.label(linkBrand).resolve(context)
         val fallback = PaymentOption.Labels(
             label = label,
             sublabel = null,
@@ -27,7 +28,6 @@ internal object PaymentOptionLabelsFactory {
             is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.GooglePay,
-            is PaymentSelection.ShopPay,
             is PaymentSelection.New.GenericPaymentMethod -> {
                 fallback
             }
@@ -39,14 +39,14 @@ internal object PaymentOptionLabelsFactory {
             }
             is PaymentSelection.Saved -> {
                 selection.paymentMethod.run {
-                    linkPaymentDetails?.let { savedLink(context, it) }
+                    linkPaymentDetails?.let { savedLink(context, it, linkBrand) }
                         ?: card?.let { savedCard(context, it) }
                         ?: usBankAccount?.let { savedUSBankAccount(it, label) }
                         ?: fallback
                 }
             }
             is PaymentSelection.Link -> {
-                link(context, selection.selectedPayment)
+                link(context, selection)
             }
         }
     }
@@ -57,7 +57,8 @@ internal object PaymentOptionLabelsFactory {
     ): PaymentOption.Labels {
         return PaymentOption.Labels(
             label = selection.brand.displayName,
-            sublabel = selection.label.resolve(context),
+            // linkBrand is irrelevant for New.Card — label() returns card last4, not brand name.
+            sublabel = selection.label(null).resolve(context),
         )
     }
 
@@ -76,9 +77,10 @@ internal object PaymentOptionLabelsFactory {
     private fun savedLink(
         context: Context,
         linkDetails: LinkPaymentDetails,
+        linkBrand: LinkBrand?,
     ): PaymentOption.Labels {
         return PaymentOption.Labels(
-            label = R.string.stripe_link.resolvableString.resolve(context),
+            label = linkBrand?.brandName() ?: R.string.stripe_link.resolvableString.resolve(context),
             sublabel = linkDetails.paymentOptionLabel.resolve(context),
         )
     }
@@ -126,11 +128,11 @@ internal object PaymentOptionLabelsFactory {
 
     private fun link(
         context: Context,
-        paymentMethod: LinkPaymentMethod?,
+        selection: PaymentSelection.Link,
     ): PaymentOption.Labels {
-        val sublabel = paymentMethod?.details?.paymentOptionLabel?.resolve(context)
+        val sublabel = selection.selectedPayment?.details?.paymentOptionLabel?.resolve(context)
         return PaymentOption.Labels(
-            label = R.string.stripe_link.resolvableString.resolve(context),
+            label = selection.brand.brandName(),
             sublabel = sublabel,
         )
     }

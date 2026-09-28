@@ -1,0 +1,349 @@
+package com.stripe.android.elements.ece
+
+import android.app.Application
+import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.elements.CheckoutGooglePayConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@OptIn(CheckoutSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
+internal class DefaultExpressCheckoutElementInteractorTest {
+    private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
+
+    @get:Rule
+    val paymentConfigurationRule = PaymentConfigurationTestRule(applicationContext)
+
+    @Test
+    fun `state contains provided express buttons`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(
+                WalletType.Link,
+                WalletType.GooglePay,
+            )
+        ),
+    ) {
+        assertThat(interactor.state.value.expressButtons).containsExactly(
+            ExpressButton.Link.create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
+            ),
+            ExpressButton.GooglePay.create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                googlePayConfiguration = googlePayConfiguration,
+                shippingAddressRequired = false,
+                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
+            ),
+        )
+    }
+
+    @Test
+    fun `state propagates shipping address requirement to Google Pay button`() = runScenario(
+        requiresShippingAddress = true,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+    ) {
+        val googlePayButton = interactor.state.value.expressButtons.single() as ExpressButton.GooglePay
+
+        assertThat(googlePayButton.shippingAddressRequired).isTrue()
+    }
+
+    @Test
+    fun `state contains configured button layout`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonLayout(
+                        ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                            .maxColumns(2)
+                            .maxRows(1)
+                    )
+            ),
+    ) {
+        assertThat(interactor.state.value.buttonLayout.maxColumns).isEqualTo(2)
+        assertThat(interactor.state.value.buttonLayout.maxRows).isEqualTo(1)
+    }
+
+    @Test
+    fun `state has no buttons when ECE configuration is absent`() = runScenario(
+        configuration = null,
+    ) {
+        assertThat(interactor.state.value.expressButtons).isEmpty()
+    }
+
+    @Test
+    fun `state contains configured button theme`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+        ),
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+            ),
+    ) {
+        assertThat(interactor.state.value.expressButtons.map { it.buttonTheme }).containsExactly(
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
+        )
+    }
+
+    @Test
+    fun `state is disabled when updating`() = runScenario(
+        isUpdating = MutableStateFlow(true),
+    ) {
+        assertThat(interactor.state.value.enabled).isFalse()
+    }
+
+    @Test
+    fun `state is enabled when not updating`() = runScenario(
+        isUpdating = MutableStateFlow(false),
+    ) {
+        assertThat(interactor.state.value.enabled).isTrue()
+    }
+
+    @Test
+    fun `state updates when link account info changes`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.Link),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    enableDisplayableDefaultValuesInEce = true,
+                ),
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+        )
+    ) {
+        val linkAccount = TestFactory.LINK_ACCOUNT.copy(
+            displayablePaymentDetails = DisplayablePaymentDetails(
+                defaultCardBrand = "VISA",
+                defaultPaymentType = "CARD",
+                last4 = "4242",
+                numberOfSavedPaymentDetails = 3L,
+            ),
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
+                ),
+            )
+
+            linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
+
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
+                ),
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `state reflects available express button types from session`() {
+        val googlePayConfiguration = createGooglePayConfiguration(
+            buttonType = GooglePayConfiguration.ButtonType.Checkout,
+            additionalEnabledNetworks = listOf("INTERAC"),
+        )
+        runScenario(
+            googlePayConfiguration = googlePayConfiguration,
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.GooglePay(
+                    googlePayConfiguration = googlePayConfiguration,
+                )
+            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWallets = listOf(
+                    WalletType.Link,
+                    WalletType.GooglePay,
+                )
+            ),
+        ) {
+            assertThat(interactor.state.value.expressButtons).containsExactly(
+                ExpressButton.GooglePay.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    googlePayConfiguration = googlePayConfiguration,
+                    shippingAddressRequired = false,
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `handleViewAction OnDisplayed reports displayed event`() = runScenario {
+        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+    }
+
+    @Test
+    fun `handleViewAction OnDisplayed only reports displayed event once across restored interactors`() = runScenario {
+        val restoredInteractor = createInteractor()
+
+        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+        restoredInteractor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+    }
+
+    @Test
+    fun `handleViewAction OnWalletTapped starts confirmation`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+    ) {
+        val expressButton = interactor.state.value.expressButtons.single()
+
+        interactor.handleViewAction(
+            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                expressButton = expressButton
+            )
+        )
+
+        val confirmedButton = confirmationPerformer.calls.awaitItem()
+        assertThat(confirmedButton).isEqualTo(expressButton)
+    }
+
+    private fun runScenario(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
+        googlePayConfiguration: CheckoutGooglePayConfiguration = createGooglePayConfiguration(),
+        availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
+            when (it) {
+                WalletType.Link -> ExpressButtonType.Link
+                WalletType.GooglePay -> ExpressButtonType.GooglePay(googlePayConfiguration)
+            }
+        },
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        requiresShippingAddress: Boolean = false,
+        isUpdating: MutableStateFlow<Boolean> = MutableStateFlow(false),
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val eventReporter = FakeExpressCheckoutElementEventReporter()
+        val confirmationPerformer = FakeExpressCheckoutElementConfirmationPerformer()
+
+        val interactorFactory = {
+            val stateHolder = createStateHolder(
+                paymentMethodMetadata = paymentMethodMetadata,
+                availableExpressButtonTypes = availableExpressButtonTypes,
+                savedStateHandle = savedStateHandle,
+                configuration = configuration,
+                requiresShippingAddress = requiresShippingAddress,
+            )
+
+            DefaultExpressCheckoutElementInteractor(
+                linkAccountHolder = linkAccountHolder,
+                stateHolder = stateHolder,
+                savedStateHandle = savedStateHandle,
+                eventReporter = eventReporter,
+                expressCheckoutElementConfirmationPerformer = confirmationPerformer,
+                isUpdating = isUpdating,
+            )
+        }
+
+        Scenario(
+            interactor = interactorFactory(),
+            eventReporter = eventReporter,
+            confirmationPerformer = confirmationPerformer,
+            linkAccountHolder = linkAccountHolder,
+            paymentMethodMetadata = paymentMethodMetadata,
+            googlePayConfiguration = googlePayConfiguration,
+            interactorFactory = interactorFactory,
+        ).block()
+
+        eventReporter.ensureAllEventsConsumed()
+        confirmationPerformer.ensureAllEventsConsumed()
+    }
+
+    private fun createStateHolder(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        availableExpressButtonTypes: List<ExpressButtonType>,
+        savedStateHandle: SavedStateHandle,
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
+        requiresShippingAddress: Boolean = false,
+    ): CheckoutControllerStateHolder {
+        val stateHolder = CheckoutControllerStateHolder(
+            savedStateHandle = savedStateHandle,
+            errorReporter = FakeErrorReporter(),
+            paymentOptionFactory = { _, _ -> null },
+            availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
+                availableExpressButtonTypes = availableExpressButtonTypes,
+            ),
+        )
+        val configurationBuilder = CheckoutController.Configuration()
+        if (configuration != null) {
+            configurationBuilder.expressCheckoutElement(configuration)
+        }
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
+            configuration = configurationBuilder.build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                requiresShippingAddress = requiresShippingAddress,
+            ),
+        )
+
+        return stateHolder
+    }
+
+    private class Scenario(
+        val interactor: DefaultExpressCheckoutElementInteractor,
+        val eventReporter: FakeExpressCheckoutElementEventReporter,
+        val confirmationPerformer: FakeExpressCheckoutElementConfirmationPerformer,
+        val linkAccountHolder: LinkAccountHolder,
+        val paymentMethodMetadata: PaymentMethodMetadata,
+        val googlePayConfiguration: CheckoutGooglePayConfiguration,
+        private val interactorFactory: () -> DefaultExpressCheckoutElementInteractor,
+    ) {
+        fun createInteractor(): DefaultExpressCheckoutElementInteractor {
+            return interactorFactory()
+        }
+    }
+
+    private fun createGooglePayConfiguration(
+        buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
+        additionalEnabledNetworks: List<String> = emptyList(),
+    ): CheckoutGooglePayConfiguration {
+        return GooglePayConfiguration()
+            .buttonType(buttonType)
+            .additionalEnabledNetworks(additionalEnabledNetworks)
+            .build()
+    }
+}

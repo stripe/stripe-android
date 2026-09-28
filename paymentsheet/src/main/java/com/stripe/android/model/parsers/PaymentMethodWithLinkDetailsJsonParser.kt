@@ -1,0 +1,61 @@
+package com.stripe.android.model.parsers
+
+import com.stripe.android.core.model.StripeJsonUtils.optBoolean
+import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkPaymentDetails
+import com.stripe.android.model.PaymentMethod
+import org.json.JSONObject
+
+internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<PaymentMethod> {
+
+    override fun parse(json: JSONObject): PaymentMethod {
+        val paymentMethod = PaymentMethodJsonParser().parse(json.getJSONObject("payment_method"))
+        val linkPaymentDetailsJson = json.optJSONObject("link_payment_details")
+        val isLinkOrigin = optBoolean(json, "is_link_origin")
+
+        val consumerPaymentDetails = linkPaymentDetailsJson?.let {
+            ConsumerPaymentDetailsJsonParser.parsePaymentDetails(it)
+        }
+
+        val linkPaymentDetails = when (consumerPaymentDetails) {
+            is ConsumerPaymentDetails.Card -> {
+                LinkPaymentDetails.Card(
+                    nickname = consumerPaymentDetails.nickname,
+                    expMonth = consumerPaymentDetails.expiryMonth,
+                    expYear = consumerPaymentDetails.expiryYear,
+                    last4 = consumerPaymentDetails.last4,
+                    brand = consumerPaymentDetails.brand,
+                    funding = consumerPaymentDetails.funding.code,
+                )
+            }
+            is ConsumerPaymentDetails.BankAccount -> {
+                LinkPaymentDetails.BankAccount(
+                    bankName = consumerPaymentDetails.bankAccountName,
+                    last4 = consumerPaymentDetails.last4,
+                )
+            }
+            is ConsumerPaymentDetails.Generic -> {
+                LinkPaymentDetails.Generic(
+                    nickname = consumerPaymentDetails.nickname,
+                    label = consumerPaymentDetails.display.label,
+                    sublabel = consumerPaymentDetails.display.sublabel,
+                    icon = consumerPaymentDetails.display.icon,
+                    last4 = consumerPaymentDetails.last4
+                )
+            }
+            is ConsumerPaymentDetails.Passthrough,
+            null -> {
+                null
+            }
+        }
+
+        // TODO(tillh-stripe): This is a short-term solution. We plan to create a new type that
+        //  contains payment method and Link information, but we can't easily do that right now.
+        return paymentMethod.copy(
+            linkPaymentDetails = linkPaymentDetails,
+            // A payment method is in passthrough mode if it has Link origin but no link details
+            isLinkPassthroughMode = isLinkOrigin && linkPaymentDetails == null,
+        )
+    }
+}

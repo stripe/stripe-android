@@ -5,20 +5,56 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.CardBrand
-import org.json.JSONException
+import com.stripe.android.model.CardFunding
+import com.stripe.android.model.PaymentMethod
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayJsonFactoryTest {
 
     private val googlePayConfig = GooglePayConfig(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     private val factory = GooglePayJsonFactory(googlePayConfig)
+
+    @Test
+    fun `payment data request includes shipping callback intent for dynamic callbacks`() {
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+            ),
+            hasDynamicCallbacks = true,
+        )
+
+        assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
+            .containsExactly("SHIPPING_ADDRESS")
+    }
+
+    @Test
+    fun `payment data request omits callback intents without dynamic callbacks`() {
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+            ),
+            hasDynamicCallbacks = false,
+        )
+
+        assertThat(json.has("callbackIntents")).isFalse()
+    }
 
     @Test
     fun testCreateIsReadyToPayRequestJson_withoutArgs() {
@@ -32,7 +68,9 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
+                        "allowCreditCards": true,
+                        "allowPrepaidCards": true
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -73,7 +111,9 @@ class GooglePayJsonFactoryTest {
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
                             "format": "FULL"
-                        }
+                        },
+                        "allowCreditCards": true,
+                        "allowPrepaidCards": true
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -109,7 +149,9 @@ class GooglePayJsonFactoryTest {
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
                             "format": "FULL"
-                        }
+                        },
+                        "allowCreditCards": true,
+                        "allowPrepaidCards": true
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -331,15 +373,57 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
-    fun allowCreditCards_whenNull_shouldNotIncludeAllowCreditCardsInRequest() {
-        assertFailsWith<JSONException> {
-            GooglePayJsonFactory(googlePayConfig)
-                .createIsReadyToPayRequest()
-                .getJSONArray("allowedPaymentMethods")
-                .getJSONObject(0)
-                .getJSONObject("parameters")
-                .getBoolean("allowCreditCards")
-        }
+    fun allowCreditCards_whenNull_shouldBeTrueWhenAcceptedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowCreditCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptCredit = true),
+            expectedValue = true
+        )
+    }
+
+    @Test
+    fun allowCreditCards_whenNull_shouldBeFalseWhenRejectedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowCreditCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptCredit = false),
+            expectedValue = false
+        )
+    }
+
+    @Test
+    fun allowPrepaidCards_shouldBeTrueWhenAcceptedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowPrepaidCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = true),
+            expectedValue = true
+        )
+    }
+
+    @Test
+    fun allowPrepaidCards_shouldBeFalseWhenRejectedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowPrepaidCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = false),
+            expectedValue = false
+        )
+    }
+
+    private fun assertCardFundingParameter(
+        parameterName: String,
+        cardFundingFilter: CardFundingFilter,
+        expectedValue: Boolean
+    ) {
+        val actualValue = GooglePayJsonFactory(
+            googlePayConfig,
+            cardFundingFilter = cardFundingFilter
+        )
+            .createIsReadyToPayRequest()
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getBoolean(parameterName)
+
+        assertThat(actualValue).isEqualTo(expectedValue)
     }
 
     @Test
@@ -348,6 +432,10 @@ class GooglePayJsonFactoryTest {
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return cardBrand == CardBrand.Visa || cardBrand == CardBrand.MasterCard
+            }
+
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
             }
 
             override fun describeContents(): Int {
@@ -387,6 +475,10 @@ class GooglePayJsonFactoryTest {
                 return false
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -422,6 +514,10 @@ class GooglePayJsonFactoryTest {
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return true
+            }
+
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
             }
 
             override fun describeContents(): Int {
@@ -484,6 +580,10 @@ class GooglePayJsonFactoryTest {
                 return true
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -522,6 +622,10 @@ class GooglePayJsonFactoryTest {
                 return cardBrand != CardBrand.JCB
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -558,6 +662,10 @@ class GooglePayJsonFactoryTest {
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return cardBrand == CardBrand.Visa || cardBrand == CardBrand.MasterCard
+            }
+
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
             }
 
             override fun describeContents(): Int {
@@ -663,4 +771,147 @@ class GooglePayJsonFactoryTest {
 
         assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-elements")
     }
+
+    @Test
+    fun `'transactionInfo' should include displayItems when provided`() {
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+        )
+
+        val transactionInfo = GooglePayJsonFactory.TransactionInfo(
+            currencyCode = "USD",
+            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            countryCode = "US",
+            transactionId = null,
+            totalPrice = 2500L,
+            totalPriceLabel = null,
+            checkoutOption = null,
+            displayItems = listOf(
+                GooglePayJsonFactory.DisplayItem(
+                    label = "Widget",
+                    type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                    price = 2000L,
+                ),
+                GooglePayJsonFactory.DisplayItem(
+                    label = "Tax",
+                    type = GooglePayJsonFactory.DisplayItem.Type.TAX,
+                    price = 500L,
+                ),
+            ),
+        )
+
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = transactionInfo,
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+        )
+
+        val transactionInfoJson = json.getJSONObject("transactionInfo")
+        assertThat(transactionInfoJson.getString("currencyCode")).isEqualTo("USD")
+        assertThat(transactionInfoJson.getString("totalPrice")).isEqualTo("25.00")
+
+        val displayItemsArray = transactionInfoJson.getJSONArray("displayItems")
+        assertThat(displayItemsArray.length()).isEqualTo(2)
+
+        val item0 = displayItemsArray.getJSONObject(0)
+        assertThat(item0.getString("label")).isEqualTo("Widget")
+        assertThat(item0.getString("type")).isEqualTo("LINE_ITEM")
+        assertThat(item0.getString("price")).isEqualTo("20.00")
+
+        val item1 = displayItemsArray.getJSONObject(1)
+        assertThat(item1.getString("label")).isEqualTo("Tax")
+        assertThat(item1.getString("type")).isEqualTo("TAX")
+        assertThat(item1.getString("price")).isEqualTo("5.00")
+    }
+
+    @Test
+    fun `'transactionInfo' should not include displayItems when list is empty`() {
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+        )
+
+        val transactionInfo = GooglePayJsonFactory.TransactionInfo(
+            currencyCode = "USD",
+            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            countryCode = "US",
+            transactionId = null,
+            totalPrice = 1000L,
+            totalPriceLabel = null,
+            checkoutOption = null,
+            displayItems = emptyList(),
+        )
+
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = transactionInfo,
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+        )
+
+        val transactionInfoJson = json.getJSONObject("transactionInfo")
+        assertThat(transactionInfoJson.has("displayItems")).isFalse()
+    }
+
+    @Test
+    fun `'transactionInfo' displayItems should format zero-decimal currencies correctly`() {
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+        )
+
+        val transactionInfo = GooglePayJsonFactory.TransactionInfo(
+            currencyCode = "JPY",
+            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            countryCode = "JP",
+            transactionId = null,
+            totalPrice = 1000L,
+            totalPriceLabel = null,
+            checkoutOption = null,
+            displayItems = listOf(
+                GooglePayJsonFactory.DisplayItem(
+                    label = "Item",
+                    type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                    price = 800L,
+                ),
+                GooglePayJsonFactory.DisplayItem(
+                    label = "Discount",
+                    type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
+                    price = -200L,
+                ),
+            ),
+        )
+
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = transactionInfo,
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+        )
+
+        val transactionInfoJson = json.getJSONObject("transactionInfo")
+        assertThat(transactionInfoJson.getString("totalPrice")).isEqualTo("1000")
+
+        val displayItemsArray = transactionInfoJson.getJSONArray("displayItems")
+        assertThat(displayItemsArray.length()).isEqualTo(2)
+
+        val item0 = displayItemsArray.getJSONObject(0)
+        assertThat(item0.getString("label")).isEqualTo("Item")
+        assertThat(item0.getString("type")).isEqualTo("LINE_ITEM")
+        assertThat(item0.getString("price")).isEqualTo("800")
+
+        val item1 = displayItemsArray.getJSONObject(1)
+        assertThat(item1.getString("label")).isEqualTo("Discount")
+        assertThat(item1.getString("type")).isEqualTo("DISCOUNT")
+        assertThat(item1.getString("price")).isEqualTo("-200")
+    }
+}
+
+@Parcelize
+private class FakeCardFundingFilter(
+    private val acceptCredit: Boolean = true,
+    private val acceptPrepaid: Boolean = true
+) : CardFundingFilter {
+    override fun isAccepted(cardFunding: CardFunding): Boolean {
+        return when (cardFunding) {
+            CardFunding.Credit -> acceptCredit
+            CardFunding.Prepaid -> acceptPrepaid
+            else -> true
+        }
+    }
+
+    override fun allowedFundingTypesDisplayMessage(): Int? = null
 }

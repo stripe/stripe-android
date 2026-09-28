@@ -19,18 +19,14 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
     val elementsSessionLoadFailedTurbine: ReceiveTurbine<ElementsSessionLoadFailedCall> =
         _elementsSessionLoadFailedTurbine
 
-    private val _lpmSpecFailureTurbine = Turbine<LpmSpecFailureCall>()
-    val lpmSpecFailureTurbine: ReceiveTurbine<LpmSpecFailureCall> = _lpmSpecFailureTurbine
-
     fun validate() {
         _loadStartedTurbine.ensureAllEventsConsumed()
         _loadSucceededTurbine.ensureAllEventsConsumed()
         _loadFailedTurbine.ensureAllEventsConsumed()
         _elementsSessionLoadFailedTurbine.ensureAllEventsConsumed()
-        _lpmSpecFailureTurbine.ensureAllEventsConsumed()
     }
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         _loadStartedTurbine.add(
             LoadStartedCall(
                 initializedViaCompose = initializedViaCompose,
@@ -50,7 +46,7 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         )
     }
 
-    override fun onLoadFailed(error: Throwable) {
+    override fun onLoadFailed(error: Throwable, publishableKey: String) {
         _loadFailedTurbine.add(
             LoadFailedCall(
                 error = error,
@@ -62,14 +58,6 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         _elementsSessionLoadFailedTurbine.add(
             ElementsSessionLoadFailedCall(
                 error = error,
-            )
-        )
-    }
-
-    override fun onLpmSpecFailure(errorMessage: String?) {
-        _lpmSpecFailureTurbine.add(
-            LpmSpecFailureCall(
-                errorMessage = errorMessage,
             )
         )
     }
@@ -89,9 +77,5 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
 
     class ElementsSessionLoadFailedCall(
         val error: Throwable,
-    )
-
-    class LpmSpecFailureCall(
-        val errorMessage: String?,
     )
 }

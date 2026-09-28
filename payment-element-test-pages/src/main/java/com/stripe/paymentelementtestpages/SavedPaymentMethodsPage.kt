@@ -16,19 +16,20 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_T
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.testing.waitUntilWithIdle
 
 class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
 
     fun waitForSavedPaymentMethodToBeRemoved(last4: String) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(
                 savedPaymentMethodMatcher(last4 = last4).and(
                     SemanticsMatcher("is_placed_in_layout") { node ->
@@ -36,7 +37,7 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
                     }
                 )
             )
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }
@@ -60,20 +61,18 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     }
 
     fun clickNewCardButton() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
         val testTag = PaymentOptionsItem.ViewType.AddCard.name
 
-        composeTestRule.waitUntil(
-            timeoutMillis = 5000L
-        ) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(testTag))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 

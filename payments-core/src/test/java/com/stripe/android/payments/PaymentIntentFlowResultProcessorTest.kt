@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.ApiRequest
@@ -19,11 +20,13 @@ import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_
 import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_REFRESH_CALLS
 import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_RETRIEVE_CALLS
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.atMost
@@ -42,7 +45,12 @@ import org.robolectric.RobolectricTestRunner
 internal class PaymentIntentFlowResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val mockStripeRepository: StripeRepository = mock()
+    private lateinit var mockStripeRepository: StripeRepository
+
+    @Before
+    fun setUp() {
+        mockStripeRepository = mock()
+    }
 
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
@@ -82,6 +90,39 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `processResult with RequiresPaymentMethod and card_declined returns localized failure message`() =
+        runTest(testDispatcher) {
+            val paymentIntentWithCardDeclined = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR.copy(
+                status = StripeIntent.Status.RequiresPaymentMethod,
+                lastPaymentError = PaymentIntent.Error(
+                    code = "card_declined",
+                    declineCode = null,
+                    charge = null,
+                    docUrl = null,
+                    paymentMethod = null,
+                    param = null,
+                    message = "Your card was declined.",
+                    type = PaymentIntent.Error.Type.CardError,
+                ),
+            )
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(paymentIntentWithCardDeclined)
+            )
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(paymentIntentWithCardDeclined.clientSecret),
+                    flowOutcome = StripeIntentResult.Outcome.FAILED,
+                )
+            ).getOrThrow()
+
+            assertThat(result.failureMessage).isEqualTo("Your card was declined")
+        }
+
+    @Test
     fun `when 3DS2 data contains intentId and publishableKey then they are used on source cancel`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
@@ -103,6 +144,59 @@ internal class PaymentIntentFlowResultProcessorTest {
                 eq("source_id"),
                 eq(ApiRequest.Options("pk_test_nextActionData"))
             )
+        }
+
+    @Test
+    fun `3ds2 web view cancellation cancels source instead of polling`() =
+        runTest(testDispatcher) {
+            val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.RequiresAction
+            )
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(intent)
+            )
+            whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any())).thenReturn(
+                Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE)
+            )
+
+            createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(intent.clientSecret),
+                    sourceId = "source_id",
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    canCancelSource = true
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository).cancelPaymentIntentSource(any(), eq("source_id"), any())
+            verify(mockStripeRepository).retrievePaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `ambiguous redirect return polls instead of canceling source`() =
+        runTest(testDispatcher) {
+            val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay")
+            )
+            val succeededIntent = intent.copy(status = StripeIntent.Status.Succeeded)
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(intent),
+                Result.success(succeededIntent)
+            )
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(intent.clientSecret),
+                    sourceId = "source_id",
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                    canCancelSource = true
+                )
+            ).getOrThrow()
+
+            assertThat(result.intent.status).isEqualTo(StripeIntent.Status.Succeeded)
+            verify(mockStripeRepository, never()).cancelPaymentIntentSource(any(), any(), any())
         }
 
     @Test
@@ -772,6 +866,325 @@ internal class PaymentIntentFlowResultProcessorTest {
             assertThat(result).isEqualTo(expectedResult)
         }
 
+    @Test
+    fun `card processing with non-canceled outcome should succeed immediately`() =
+        runTest(testDispatcher) {
+            val processingIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.Processing
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(processingIntent)
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(processingIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
+                )
+            ).getOrThrow()
+
+            // Should only retrieve once (no polling)
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        processingIntent,
+                        StripeIntentResult.Outcome.SUCCEEDED,
+                        null
+                    )
+                )
+        }
+
+    @Test
+    fun `does not poll for unrecognized payment method type with unknown outcome`() =
+        runTest(testDispatcher) {
+            val paymentMethodWithUnknownType = PaymentMethodFactory.card().copy(type = null)
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethodWithUnknownType,
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected second retrieve call")),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result).isEqualTo(
+                PaymentIntentResult(
+                    intent = requiresActionIntent,
+                    outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                    failureMessage = "We are unable to authenticate your payment method." +
+                        " Please choose a different payment method and try again.",
+                )
+            )
+        }
+
+    @Test
+    fun `does not poll when payment method is null with unknown outcome`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = null,
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected second retrieve call")),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result).isEqualTo(
+                PaymentIntentResult(
+                    intent = requiresActionIntent,
+                    outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                    failureMessage = "We are unable to authenticate your payment method." +
+                        " Please choose a different payment method and try again.",
+                )
+            )
+        }
+
+    @Test
+    fun `Keeps retrying when encountering a Link payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.linkLPM(),
+                paymentMethodTypes = listOf("link"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            verify(mockStripeRepository, times(3)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
+    fun `Reports polling timeout analytics when Swish payment never reaches a terminal state`() =
+        runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.swish()
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethod,
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            createProcessor(pollingAnalyticsEventReporter = pollingAnalyticsEventReporter).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+                FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                    paymentMethodType = "swish",
+                    lastKnownStatus = "RequiresAction",
+                    timeLimitSeconds = REDUCED_POLLING_DURATION / 1000,
+                )
+            )
+        }
+
+    @Test
+    fun `Reports last known status from prior poll when final retrieve fails`() =
+        runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.swish()
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethod,
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            // The first retrieve (in processResult, before polling starts) and the second retrieve
+            // (the initial poll inside pollStripeIntentUntilTerminalState) both succeed with a known
+            // status; every retrieve after that (including the final one made after the polling
+            // window closes) fails.
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.failure(APIConnectionException()),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            // The final retrieve failing means processResult itself fails (this is existing,
+            // unrelated behavior); what this test pins is that the analytics event still reports
+            // the last successfully observed status rather than losing it to the failed call.
+            val result = createProcessor(pollingAnalyticsEventReporter = pollingAnalyticsEventReporter).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+                FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                    paymentMethodType = "swish",
+                    lastKnownStatus = "RequiresAction",
+                    timeLimitSeconds = REDUCED_POLLING_DURATION / 1000,
+                )
+            )
+        }
+
+    @Test
+    fun `Does not report polling timeout analytics when Swish payment succeeds`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            createProcessor(pollingAnalyticsEventReporter = pollingAnalyticsEventReporter).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `Does not report polling timeout analytics for PayNow`() =
+        assertNoPollingTimeoutAnalyticsFor(PaymentMethod.Type.PayNow)
+
+    @Test
+    fun `Does not report polling timeout analytics for PromptPay`() =
+        assertNoPollingTimeoutAnalyticsFor(PaymentMethod.Type.PromptPay)
+
+    // PayNow/PromptPay poll via the dedicated PollingActivity UI, not this generic processor;
+    // pins that a future afterRedirectAction change can't reintroduce a double-fire here.
+    private fun assertNoPollingTimeoutAnalyticsFor(type: PaymentMethod.Type) =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethod(
+                    id = "pm_1234",
+                    created = 123456789L,
+                    liveMode = false,
+                    type = type,
+                    code = type.code,
+                ),
+                paymentMethodTypes = listOf(type.code),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected second retrieve call")),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            createProcessor(pollingAnalyticsEventReporter = pollingAnalyticsEventReporter).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+        }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,
@@ -814,12 +1227,17 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     private fun createProcessor(
         stripeRepository: StripeRepository = mockStripeRepository,
+        pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        {
+            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+        },
         stripeRepository,
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        pollingAnalyticsEventReporter,
+        Clock { testDispatcher.scheduler.currentTime },
     )
 
     private class FakeStripeRepository(

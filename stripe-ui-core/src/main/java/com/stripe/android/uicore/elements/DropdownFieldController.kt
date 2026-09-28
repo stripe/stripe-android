@@ -19,8 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DropdownFieldController(
     private val config: DropdownConfig,
-    initialValue: String? = null
-) : InputController, SectionFieldErrorController, SectionFieldComposable {
+    initialValue: String? = null,
+) : InputController, SectionFieldValidationController, SectionFieldComposable {
+    val autofillType = config.autofillType
     val displayItems: List<String> = config.displayItems
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val dropdownMode = config.mode
@@ -33,12 +34,12 @@ class DropdownFieldController(
     override val label: StateFlow<ResolvableString> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.mapAsStateFlow { it?.let { displayItems[it] } ?: "" }
     override val rawFieldValue = selectedIndex.mapAsStateFlow { it?.let { config.rawItems.getOrNull(it) } }
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         _validating,
         _selectedIndex,
     ) { validating, index ->
         if (validating && index == null) {
-            FieldError(R.string.stripe_blank_and_required)
+            FieldValidationMessage.Error(R.string.stripe_blank_and_required)
         } else {
             null
         }
@@ -81,6 +82,16 @@ class DropdownFieldController(
         )
     }
 
+    fun onAutofillValue(value: String) {
+        val displayItemIndex = displayItems.indexOfFirst { it.equals(value, ignoreCase = true) }
+            .takeUnless { it == -1 }
+        if (displayItemIndex != null) {
+            onValueChange(displayItemIndex)
+        } else {
+            onRawValueChange(value)
+        }
+    }
+
     private fun safelyUpdateSelectedIndex(index: Int?) {
         index?.let {
             if (it < displayItems.size) {
@@ -96,8 +107,8 @@ class DropdownFieldController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         DropDown(
             this,

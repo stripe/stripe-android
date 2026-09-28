@@ -1,0 +1,284 @@
+package com.stripe.android.paymentsheet.state
+
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.model.PaymentMethodMessagePromotionList
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.repositories.DefaultPaymentMethodMessagePromotionsHelper
+import com.stripe.android.testing.AbsFakeStripeRepository
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import java.util.Locale
+
+class DefaultPaymentMethodMessagePromotionsHelperTest {
+
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Test
+    fun `fetchPromotionsAsync calls repository and reports publishable key`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        assertThat(eventReporter.pmmPromotionsFetched.awaitItem())
+            .isEqualTo(DEFAULT_API_CONFIG.publishableKey)
+        val request = fakeRepository.calls.awaitItem()
+        assertThat(request.amount).isEqualTo(1099)
+        assertThat(request.currency).isEqualTo("usd")
+        assertThat(request.country).isNull()
+        assertThat(request.locale).isEqualTo(Locale.getDefault().language)
+        assertThat(request.options).isEqualTo(
+            ApiRequest.Options(
+                apiKey = DEFAULT_API_CONFIG.publishableKey,
+                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
+            )
+        )
+    }
+
+    @Test
+    fun `getPromotionIfAvailableForCode returns promotion if available and in treatment`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("treatment")
+        val result = helper.getPromotionIfAvailableForCode(
+            "afterpay_clearpay",
+            metadata
+        )
+
+        assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
+    }
+
+    @Test
+    fun `getPromotionIfAvailableForCode returns null if not available`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        val metadata = getMetadata("treatment")
+        val result = helper.getPromotionIfAvailableForCode(
+            "afterpay_clearpay",
+            metadata
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed fires event with true when promotion available`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("treatment")
+        helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed fires event with false when promotion not available`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        val metadata = getMetadata("treatment")
+        helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed does not fire event when not in treatment`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
+        eventReporter.pmmPromotionsDisplayed.expectNoEvents()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed does not fire event for unsupported PM`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("treatment")
+        helper.reportPromotionDisplayed("card", metadata)
+        eventReporter.pmmPromotionsDisplayed.expectNoEvents()
+    }
+
+    @Test
+    fun `getPromotionIfAvailableForCode does not return promotion if variant is control`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        assertThat(helper.getPromotionIfAvailableForCode("afterpay_clearpay", metadata)).isNull()
+    }
+
+    @Test
+    fun `getPromotionProvider returns null for control`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        assertThat(helper.getPromotionProvider("afterpay_clearpay", metadata)).isNull()
+    }
+
+    @Test
+    fun `getPromotionProvider returns null for unsupported PMs`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        assertThat(helper.getPromotionProvider("card", metadata)).isNull()
+    }
+
+    @Test
+    fun `returns promotion provider for treatment group supported pm`() = runScenario {
+        helper.fetchPromotionsAsync(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            DEFAULT_API_CONFIG
+        )
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("treatment")
+        val result = helper.getPromotionProvider(
+            "afterpay_clearpay",
+            metadata
+        )?.invoke()
+
+        assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
+    }
+
+    private fun runScenario(
+        repositoryResult: Result<PaymentMethodMessagePromotionList> = Result.success(
+            PaymentMethodMessagePromotionList(
+                listOf(AFTERPAY_PROMOTION)
+            )
+        ),
+        block: suspend Scenario.() -> Unit,
+    ) = runTest(testDispatcher) {
+        val fakeRepository = FakePromotionsStripeRepository(repositoryResult)
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val eventReporter = FakeEventReporter()
+
+        val helper = DefaultPaymentMethodMessagePromotionsHelper(
+            stripeRepository = fakeRepository,
+            viewModelScope = this,
+            workContext = testDispatcher,
+            eventReporter = eventReporter
+        )
+
+        Scenario(
+            helper = helper,
+            fakeRepository = fakeRepository,
+            dispatcher = testDispatcher,
+            eventReporter = eventReporter
+        ).block()
+
+        eventReporter.validate()
+    }
+
+    private data class Scenario(
+        val helper: DefaultPaymentMethodMessagePromotionsHelper,
+        val fakeRepository: FakePromotionsStripeRepository,
+        val dispatcher: TestDispatcher,
+        val eventReporter: FakeEventReporter
+    )
+
+    private class FakePromotionsStripeRepository(
+        private val promotionsResult: Result<PaymentMethodMessagePromotionList>,
+    ) : AbsFakeStripeRepository() {
+        private val _calls = Turbine<Request>()
+        val calls: ReceiveTurbine<Request> = _calls
+
+        override suspend fun retrievePaymentMethodMessagePromotionsForPaymentSheet(
+            amount: Int,
+            currency: String,
+            country: String?,
+            locale: String,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentMethodMessagePromotionList> {
+            _calls.add(
+                Request(
+                    amount = amount,
+                    currency = currency,
+                    country = country,
+                    locale = locale,
+                    options = requestOptions
+                )
+            )
+            return promotionsResult
+        }
+
+        data class Request(
+            val amount: Int,
+            val currency: String,
+            val country: String?,
+            val locale: String,
+            val options: ApiRequest.Options
+        )
+    }
+
+    private fun getMetadata(assignment: String? = null): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            experimentsData = if (assignment != null) {
+                ElementsSession.ExperimentsData(
+                    arbId = "arb_123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment
+                            .OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to assignment
+                    )
+                )
+            } else {
+                null
+            }
+        )
+    }
+
+    private companion object {
+        val AFTERPAY_PROMOTION = PaymentMethodMessagePromotion(
+            paymentMethodType = "Afterpay_Clearpay",
+            message = "Pay in 4 interest-free payments",
+            learnMore = PaymentMethodMessageLearnMore(
+                url = "https://stripe.com/learn-more",
+                message = "Learn more",
+            ),
+        )
+    }
+}

@@ -120,7 +120,7 @@ class ConsumerStateTest {
             cvcCheck = CvcCheck.Pass,
             isDefault = false,
             networks = emptyList(),
-            funding = "DEBIT",
+            funding = ConsumerPaymentDetails.Card.Funding.Debit,
             nickname = "New Card",
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = "Jane Doe",
@@ -287,7 +287,7 @@ class ConsumerStateTest {
             cvcCheck = CvcCheck.Pass,
             isDefault = false,
             networks = emptyList(),
-            funding = "DEBIT",
+            funding = ConsumerPaymentDetails.Card.Funding.Debit,
             nickname = "Different Card",
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = "Jane Doe",

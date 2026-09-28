@@ -32,6 +32,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.rememberScaffoldState
@@ -79,6 +80,7 @@ internal data class IdentitySubmissionState(
     val requireLiveCapture: Boolean = true,
     val requireId: Boolean = false,
     val requireSelfie: Boolean = false,
+    val threeDFaceCaptureEnabled: Boolean = true,
     val requireAddress: Boolean = false,
     val useDocumentFallback: Boolean? = null,
     val phoneOtpCheck: PhoneOTPCheck? = null,
@@ -140,7 +142,13 @@ internal fun ExampleScreen(
             ) { newVerificationType ->
                 onSubmissionStateChanged(
                     submissionState.copy(
-                        verificationType = newVerificationType
+                        verificationType = newVerificationType,
+                        useDocumentFallback = false,
+                        phoneOtpCheck = if (newVerificationType == VerificationType.PHONE) {
+                            PhoneOTPCheck.None
+                        } else {
+                            null
+                        }
                     )
                 )
                 onLoadingStateChanged(LoadingState.Idle)
@@ -150,6 +158,14 @@ internal fun ExampleScreen(
                     .verticalScroll(scrollState)
                     .weight(weight = 1f, fill = true)
             ) {
+                ThreeDFaceCaptureUI(
+                    enabled = submissionState.threeDFaceCaptureEnabled,
+                    onEnabledChanged = {
+                        onSubmissionStateChanged(
+                            submissionState.copy(threeDFaceCaptureEnabled = it)
+                        )
+                    }
+                )
                 when (submissionState.verificationType) {
                     VerificationType.DOCUMENT -> DocumentUI(
                         submissionState = submissionState,
@@ -182,6 +198,26 @@ internal fun ExampleScreen(
                 onLoadingStateChanged
             )
         }
+    }
+}
+
+@Composable
+private fun ThreeDFaceCaptureUI(
+    enabled: Boolean,
+    onEnabledChanged: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.padding(start = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Switch(
+            checked = enabled,
+            onCheckedChange = onEnabledChanged
+        )
+        StyledClickableText(
+            text = AnnotatedString(stringResource(R.string.three_d_face_capture_enabled)),
+            onClick = { onEnabledChanged(!enabled) }
+        )
     }
 }
 

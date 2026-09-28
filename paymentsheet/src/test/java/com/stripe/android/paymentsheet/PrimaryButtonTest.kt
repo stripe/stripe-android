@@ -11,6 +11,7 @@ import android.view.View
 import android.view.View.GONE
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.text.TextStyle
 import androidx.core.view.isVisible
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -48,7 +49,11 @@ class PrimaryButtonTest {
 
     @Test
     fun `onFinishingState() should clear any tint and restore onReadyState()`() {
-        primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.setAppearanceConfiguration(
+            primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle,
+            labelTextStyle = TextStyle.Default,
+            tintList = ColorStateList.valueOf(Color.BLACK),
+        )
         primaryButton.updateState(
             PrimaryButton.State.FinishProcessing({})
         )
@@ -62,7 +67,11 @@ class PrimaryButtonTest {
 
     @Test
     fun `onStartProcessing() and onFinishingState() should make button not clickable`() {
-        primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.setAppearanceConfiguration(
+            primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle,
+            labelTextStyle = TextStyle.Default,
+            tintList = ColorStateList.valueOf(Color.BLACK),
+        )
         primaryButton.updateState(
             PrimaryButton.State.StartProcessing
         )

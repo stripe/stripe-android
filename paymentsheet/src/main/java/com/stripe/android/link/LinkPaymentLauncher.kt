@@ -16,12 +16,12 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
-    linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+    linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore
-) {
-    private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
+) : LinkPaymentPresenter {
+    private val analyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -74,12 +74,13 @@ internal class LinkPaymentLauncher @Inject internal constructor(
      *
      * @param configuration The payment and customer settings
      */
-    fun present(
+    override fun present(
         configuration: LinkConfiguration,
         paymentMethodMetadata: PaymentMethodMetadata,
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
         linkExpressMode: LinkExpressMode,
+        statusBarColor: Int?,
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
@@ -87,8 +88,20 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             linkExpressMode = linkExpressMode,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
+            statusBarColor = statusBarColor,
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
     }
+}
+
+internal interface LinkPaymentPresenter {
+    fun present(
+        configuration: LinkConfiguration,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        launchMode: LinkLaunchMode,
+        linkExpressMode: LinkExpressMode,
+        statusBarColor: Int?,
+    )
 }

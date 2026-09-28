@@ -2,9 +2,20 @@ package com.stripe.android.lint
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest.kotlin
 import com.android.tools.lint.checks.infrastructure.TestLintTask.lint
+import com.android.tools.lint.detector.api.Scope
+import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.util.EnumSet
 
 class ComposeCleanupRuleUsageDetectorTest {
+    @Test
+    fun `issue is registered for test source analysis`() {
+        assertEquals(
+            EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+            ComposeCleanupRuleUsageDetector.ISSUE.implementation.scope,
+        )
+    }
+
     @Test
     fun `should not lint in Robolectric test without compose context`() {
         lint().files(
@@ -69,6 +80,30 @@ class ComposeCleanupRuleUsageDetectorTest {
                     import org.robolectric.RobolectricTestRunner
                     import androidx.compose.ui.test.junit4.createComposeRule
                     import com.stripe.android.testing.createComposeCleanupRule
+
+                    @RunWith(RobolectricTestRunner::class)
+                    class TestingWithCompose {}
+                    """
+            ).indented(),
+        )
+            .issues(ComposeCleanupRuleUsageDetector.ISSUE)
+            .allowCompilationErrors()
+            .allowMissingSdk()
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun `should not lint when 'createComposeCleanupRule' from another package is used`() {
+        lint().files(
+            kotlin(
+                """
+                    package com.stripe.android.uicore.elements
+
+                    import org.junit.runner.RunWith
+                    import org.robolectric.RobolectricTestRunner
+                    import androidx.compose.ui.test.junit4.createComposeRule
+                    import com.stripe.android.identity.testing.createComposeCleanupRule
 
                     @RunWith(RobolectricTestRunner::class)
                     class TestingWithCompose {}

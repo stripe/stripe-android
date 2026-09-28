@@ -2,13 +2,22 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -34,4 +43,30 @@ internal class PaymentOptionsViewModelModule {
     fun providePaymentMethodMetadata(args: PaymentOptionContract.Args): PaymentMethodMetadata {
         return args.state.paymentMethodMetadata
     }
+
+    @Provides
+    @ViewModelScope
+    fun provideViewModelScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    }
+
+    @Provides
+    fun providesPaymentMethodMessageHelper(
+        args: PaymentOptionContract.Args,
+        eventReporter: EventReporter
+    ): PaymentMethodMessagePromotionsHelper {
+        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, eventReporter)
+    }
+
+    @Provides
+    fun providePlacesClient(
+        appContext: Context,
+        args: PaymentOptionContract.Args,
+        errorReporter: ErrorReporter,
+    ): PlacesClientProxy? = createInlineAutocompletePlacesClient(
+        context = appContext,
+        googlePlacesApiKey = args.configuration.googlePlacesApiKey,
+        errorReporter = errorReporter,
+        isPlacesAvailable = DefaultIsPlacesAvailable()(),
+    )
 }

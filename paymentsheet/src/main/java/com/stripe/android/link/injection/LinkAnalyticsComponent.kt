@@ -20,10 +20,9 @@ internal annotation class LinkAnalyticsScope
 internal interface LinkAnalyticsComponent {
     val linkAnalyticsHelper: LinkAnalyticsHelper
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        fun build(): LinkAnalyticsComponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(): LinkAnalyticsComponent
     }
 }
 

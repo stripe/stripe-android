@@ -108,6 +108,8 @@ internal interface LinkAccountManager {
 
     suspend fun logOut(): Result<ConsumerSession>
 
+    suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession>
+
     suspend fun createPaymentMethod(
         linkPaymentMethod: LinkPaymentMethod
     ): Result<PaymentMethod>
@@ -116,17 +118,22 @@ internal interface LinkAccountManager {
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New>
 
+    suspend fun createPaymentDetailsFromPaymentMethod(
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved>
+
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String? = null,

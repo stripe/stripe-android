@@ -52,7 +52,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
             return TextFieldStateConstants.Valid.Limitless
         }
 
-        return TextFieldStateConstants.Valid.Full
+        return TextFieldStateConstants.Valid.Full()
     }
 
     private companion object {

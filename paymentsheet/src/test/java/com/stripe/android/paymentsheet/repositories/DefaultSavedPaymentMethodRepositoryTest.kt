@@ -1,0 +1,441 @@
+package com.stripe.android.paymentsheet.repositories
+
+import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.utils.FakeCustomerRepository
+import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class DefaultSavedPaymentMethodRepositoryTest {
+
+    @get:Rule
+    val networkRule = NetworkRule()
+
+    @Test
+    fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_detach", "pm_123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.detachPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+    }
+
+    @Test
+    fun `detach routes to customer repository when customer is Session`() = runScenario(
+        customerMetadata = SESSION_METADATA,
+    ) {
+        val result = repository.detachPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val detachRequest = customerRepository.detachRequests.awaitItem()
+        assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(detachRequest.customerSessionClientSecret).isEqualTo("css_456")
+        assertThat(detachRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `detach routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+    ) {
+        val result = repository.detachPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val detachRequest = customerRepository.detachRequests.awaitItem()
+        assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(detachRequest.customerSessionClientSecret).isNull()
+        assertThat(detachRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `update routes to customer repository when customer is CustomerSession`() = runScenario(
+        customerMetadata = SESSION_METADATA,
+    ) {
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val updateRequest = customerRepository.updateRequests.awaitItem()
+        assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(updateRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `update routes to checkout session repository when customer is CheckoutSession`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
+            bodyPart("payment_method_to_update[expiry_details][exp_month]", "12"),
+            bodyPart("payment_method_to_update[expiry_details][exp_year]", "2030"),
+            bodyPart("payment_method_to_update[billing_details][name]", "Jane Doe"),
+            bodyPart("payment_method_to_update[billing_details][address][postal_code]", "94111"),
+        ) { response ->
+            response.setBody(checkoutSessionUpdateResponse())
+        }
+
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(
+                expiryMonth = 12,
+                expiryYear = 2030,
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "Jane Doe",
+                    address = Address(postalCode = "94111"),
+                ),
+            ),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+        assertThat(result.getOrThrow().billingDetails?.name).isEqualTo("Jane Doe")
+        assertThat(result.getOrThrow().card?.expiryYear).isEqualTo(2030)
+    }
+
+    @Test
+    fun `update fails for checkout session when response omits updated payment method`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(
+                expiryMonth = 12,
+                expiryYear = 2030,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("did not include updated payment method")
+    }
+
+    @Test
+    fun `update fails for checkout session when params have no expiry or billing details`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("requires at least card expiry or billing details")
+    }
+
+    @Test
+    fun `update routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+    ) {
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val updateRequest = customerRepository.updateRequests.awaitItem()
+        assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(updateRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `setDefault routes to customer repository when customer is CustomerSession`() = runScenario(
+        customerMetadata = SESSION_METADATA,
+    ) {
+        val result = repository.setDefaultPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
+        assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(setDefaultRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `setDefault fails for checkout session`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        val result = repository.setDefaultPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
+    }
+
+    @Test
+    fun `setDefault routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+    ) {
+        val result = repository.setDefaultPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
+        assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(setDefaultRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `retrievePaymentMethod routes to customer repository when customer is CustomerSession`() = runScenario(
+        customerMetadata = SESSION_METADATA,
+        retrievePaymentMethodResult = Result.success(
+            PaymentMethod.Builder().setId("pm_123").build()
+        ),
+    ) {
+        val result = repository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+
+        val retrieveRequest = customerRepository.retrievePaymentMethodRequests.awaitItem()
+        assertThat(retrieveRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `retrievePaymentMethod routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+        retrievePaymentMethodResult = Result.success(
+            PaymentMethod.Builder().setId("pm_456").build()
+        ),
+    ) {
+        val result = repository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_456",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_456")
+
+        val retrieveRequest = customerRepository.retrievePaymentMethodRequests.awaitItem()
+        assertThat(retrieveRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
+    @Test
+    fun `retrievePaymentMethod fails for checkout session`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        val result = repository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
+    }
+
+    @Test
+    fun `detach propagates failure from checkout session repository`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_detach", "pm_123"),
+        ) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Detach failed"}}""")
+        }
+
+        val result = repository.detachPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    private fun runScenario(
+        customerMetadata: CustomerMetadata = SESSION_METADATA,
+        retrievePaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val customerRepository = FakeCustomerRepository(
+            paymentMethods = listOf(PaymentMethod.Builder().setId("pm_123").build()),
+            onUpdatePaymentMethod = {
+                Result.success(PaymentMethod.Builder().setId("pm_123").build())
+            },
+            onSetDefaultPaymentMethod = {
+                // Customer has an internal constructor, so we use mock() here.
+                // The Customer value is never inspected in these tests.
+                Result.success(mock())
+            },
+            onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
+        )
+        val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = "pk_test_123",
+            ),
+            apiRequestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
+            },
+        )
+        val repository = DefaultSavedPaymentMethodRepository(
+            customerRepository = customerRepository,
+            checkoutSessionRepository = checkoutSessionRepository,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
+        )
+
+        Scenario(
+            repository = repository,
+            customerRepository = customerRepository,
+            customerMetadata = customerMetadata,
+        ).block()
+    }
+
+    private class Scenario(
+        val repository: DefaultSavedPaymentMethodRepository,
+        val customerRepository: FakeCustomerRepository,
+        val customerMetadata: CustomerMetadata,
+    )
+
+    companion object {
+        private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
+            sessionId = "cs_123",
+            customerId = "cus_123",
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+        )
+
+        private val SESSION_METADATA = CustomerMetadata.CustomerSession(
+            id = "cus_456",
+            ephemeralKeySecret = "ek_456",
+            customerSessionClientSecret = "css_456",
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateCardExpiryAndBillingDetails = false,
+        )
+
+        private val LEGACY_METADATA = CustomerMetadata.LegacyEphemeralKey(
+            id = "cus_789",
+            ephemeralKeySecret = "ek_789",
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateCardExpiryAndBillingDetails = false,
+        )
+
+        private fun checkoutSessionUpdateResponse(): String {
+            val resource = requireNotNull(
+                requireNotNull(DefaultSavedPaymentMethodRepositoryTest::class.java.classLoader)
+                    .getResource("checkout-session-init.json")
+            )
+            return JSONObject(resource.readText())
+                .put("session_id", "cs_123")
+                .put(
+                    "customer",
+                    JSONObject(
+                        """
+                        {
+                    "id": "cus_123",
+                    "can_detach_payment_method": true,
+                    "payment_methods": [
+                      {
+                        "id": "pm_123",
+                        "object": "payment_method",
+                        "billing_details": {
+                          "address": {
+                            "postal_code": "94111"
+                          },
+                          "email": null,
+                          "name": "Jane Doe",
+                          "phone": null
+                        },
+                        "card": {
+                          "brand": "visa",
+                          "exp_month": 12,
+                          "exp_year": 2030,
+                          "last4": "4242"
+                        },
+                        "created": 1712554485,
+                        "customer": "cus_123",
+                        "livemode": false,
+                        "type": "card"
+                      }
+                    ]
+                        }
+                        """.trimIndent()
+                    )
+                ).toString()
+        }
+    }
+}

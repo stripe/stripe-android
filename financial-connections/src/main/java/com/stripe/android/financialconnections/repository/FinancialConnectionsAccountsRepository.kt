@@ -65,7 +65,10 @@ internal interface FinancialConnectionsAccountsRepository {
         consentAcquired: Boolean?
     ): ShareNetworkedAccountsResponse
 
-    suspend fun pollAccountNumbers(linkedAccounts: Set<String>)
+    suspend fun pollAccountNumbers(
+        clientSecret: String,
+        linkedAccounts: Set<String>,
+    )
 
     companion object {
         operator fun invoke(
@@ -213,7 +216,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
+    override suspend fun pollAccountNumbers(
+        clientSecret: String,
+        linkedAccounts: Set<String>,
+    ) {
         val accounts = linkedAccounts.mapIndexed { index, account ->
             "${NetworkConstants.PARAM_LINKED_ACCOUNTS}[$index]" to account
         }.toMap()
@@ -221,7 +227,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         val request = apiRequestFactory.createGet(
             url = pollAccountsNumbersUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = accounts,
+            params = accounts + (PARAMS_CLIENT_SECRET to clientSecret),
         )
 
         requestExecutor.execute(request)
@@ -239,22 +245,22 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     companion object {
         private const val CachedPartnerAccountsKey = "CachedPartnerAccounts"
 
-        internal const val accountsSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
+        internal val accountsSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 
-        internal const val networkedAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
+        internal val networkedAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
 
-        internal const val shareNetworkedAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
+        internal val shareNetworkedAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
 
-        internal const val attachPaymentAccountUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
+        internal val attachPaymentAccountUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
 
-        internal const val authorizationSessionSelectedAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
+        internal val authorizationSessionSelectedAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
 
-        internal const val pollAccountsNumbersUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/poll_account_numbers"
+        internal val pollAccountsNumbersUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/poll_account_numbers"
     }
 }

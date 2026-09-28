@@ -9,24 +9,30 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.browser.BrowserCapabilities
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.testing.ViewModelStoreTestRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class StripeBrowserLauncherViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
         analyticsRequests.add(it)
     }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        application,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = application,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val savedStateHandle = SavedStateHandle()
@@ -36,11 +42,8 @@ class StripeBrowserLauncherViewModelTest {
         val viewModel = createViewModel()
         val launchIntent = viewModel.createLaunchIntent(ARGS)
 
-        val browserIntent = requireNotNull(launchIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
-
-        assertThat(browserIntent.action).isEqualTo(Intent.ACTION_VIEW)
-        assertThat(browserIntent.data).isEqualTo(Uri.parse("https://bank.com"))
-        assertThat(launchIntent.getStringExtra(Intent.EXTRA_TITLE)).isEqualTo("Verify your payment")
+        assertThat(launchIntent.action).isEqualTo(Intent.ACTION_VIEW)
+        assertThat(launchIntent.data).isEqualTo(Uri.parse("https://bank.com"))
     }
 
     @Test
@@ -77,7 +80,8 @@ class StripeBrowserLauncherViewModelTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
                     canCancelSource = true,
-                    sourceId = ""
+                    sourceId = "",
+                    stripeAccountId = "acct_123",
                 )
             )
     }
@@ -103,10 +107,10 @@ class StripeBrowserLauncherViewModelTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             browserCapabilities = browserCapabilities,
-            intentChooserTitle = "Verify your payment",
+            customTabsPackage = null,
             resolveErrorMessage = "Unable to resolve things",
             savedStateHandle = savedStateHandle,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private companion object {
@@ -116,7 +120,7 @@ class StripeBrowserLauncherViewModelTest {
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
             url = "https://bank.com",
             statusBarColor = Color.RED,
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             isInstantApp = false
         )
     }

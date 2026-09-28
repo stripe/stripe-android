@@ -1,16 +1,25 @@
 appId: ${APP_ID}
 ---
 ####### Bypass Chrome on-boarding screen #######
+- waitForAnimationToEnd
 # USE CHROME WITHOUT AN ACCOUNT
 - tapOn:
     id: com.android.chrome:id/signin_fre_dismiss_button
     optional: true
+- waitForAnimationToEnd
 # ACCEPT TERMS
 - tapOn:
     id: "com.android.chrome:id/terms_accept"
     optional: true
+- waitForAnimationToEnd
 # REJECT TURN ON SYNC
 - tapOn:
     id: "com.android.chrome:id/negative_button"
     optional: true
+- waitForAnimationToEnd
+# DISMISS "Chrome keeps stopping" crash dialog if present
+- tapOn:
+    text: "Close app"
+    optional: true
+- waitForAnimationToEnd
 ###############################################

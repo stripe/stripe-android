@@ -20,63 +20,54 @@ class PersonTokenParams(
      * [person.address](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-address)
      */
     val address: Address? = null,
-
     /**
      * The Kana variation of the person's address (Japan only).
      *
      * [person.address_kana](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-address_kana)
      */
     val addressKana: AddressJapanParams? = null,
-
     /**
      * The Kanji variation of the person's address (Japan only).
      *
      * [person.address_kanji](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-address_kanji)
      */
     val addressKanji: AddressJapanParams? = null,
-
     /**
      * The person's date of birth.
      *
      * [person.dob](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-dob)
      */
     val dateOfBirth: DateOfBirth? = null,
-
     /**
      * The person's email address.
      *
      * [person.email](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-email)
      */
     val email: String? = null,
-
     /**
      * The person's first name.
      *
      * [person.first_name](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-first_name)
      */
     val firstName: String? = null,
-
     /**
      * The Kana variation of the person's first name (Japan only).
      *
      * [person.first_name_kana](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-first_name_kana)
      */
     val firstNameKana: String? = null,
-
     /**
      * The Kanji variation of the person's first name (Japan only).
      *
      * [person.first_name_kanji](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-first_name_kanji)
      */
     val firstNameKanji: String? = null,
-
     /**
      * The person's gender (International regulations require either "male" or "female").
      *
      * [person.gender](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-gender)
      */
     val gender: String? = null,
-
     /**
      * The person's ID number, as appropriate for their country. For example, a social security
      * number in the U.S., social insurance number in Canada, etc. Instead of the number itself,
@@ -85,35 +76,30 @@ class PersonTokenParams(
      * [person.id_number](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-id_number)
      */
     val idNumber: String? = null,
-
     /**
      * The person's last name.
      *
      * [person.last_name](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-last_name)
      */
     val lastName: String? = null,
-
     /**
      * The Kana variation of the person's last name (Japan only).
      *
      * [person.last_name_kana](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-last_name_kana)
      */
     val lastNameKana: String? = null,
-
     /**
      * The Kanji variation of the person's last name (Japan only).
      *
      * [person.last_name_kanji](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-last_name_kanji)
      */
     val lastNameKanji: String? = null,
-
     /**
      * The person's maiden name.
      *
      * [person.maiden_name](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-maiden_name)
      */
     val maidenName: String? = null,
-
     /**
      * Set of key-value pairs that you can attach to an object. This can be useful for storing
      * additional information about the object in a structured format. Individual keys can be unset
@@ -123,28 +109,24 @@ class PersonTokenParams(
      * [person.metadata](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-metadata)
      */
     val metadata: Map<String, String>? = null,
-
     /**
      * The person's phone number.
      *
      * [person.phone](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-phone)
      */
     val phone: String? = null,
-
     /**
      * The relationship that this person has with the account's legal entity.
      *
      * [person.relationship](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship)
      */
     val relationship: Relationship? = null,
-
     /**
      * The last 4 digits of the person's social security number.
      *
      * [person.ssn_last_4](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-ssn_last_4)
      */
     val ssnLast4: String? = null,
-
     /**
      * The person's verification status.
      *
@@ -195,7 +177,6 @@ class PersonTokenParams(
          * [person.relationship.directory](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-directory)
          */
         val director: Boolean? = null,
-
         /**
          * Whether the person has significant responsibility to control, manage, or direct the
          * organization.
@@ -203,21 +184,18 @@ class PersonTokenParams(
          * [person.relationship.executive](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-executive)
          */
         val executive: Boolean? = null,
-
         /**
          * Whether the person is an owner of the account's legal entity.
          *
          * [person.relationship.owner](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-owner)
          */
         val owner: Boolean? = null,
-
         /**
          * The percent owned by the person of the account's legal entity.
          *
          * [person.relationship.representative](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-representative)
          */
         val percentOwnership: Int? = null,
-
         /**
          * Whether the person is authorized as the primary representative of the account. This is
          * the person nominated by the business to provide information about themselves, and general
@@ -228,7 +206,6 @@ class PersonTokenParams(
          * [person.relationship.percent_ownership](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-percent_ownership)
          */
         val representative: Boolean? = null,
-
         /**
          * The person's title (e.g., CEO, Support Engineer).
          *
@@ -319,7 +296,6 @@ class PersonTokenParams(
          * [person.verification.document](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-verification-document)
          */
         val document: Document? = null,
-
         /**
          * A document showing address, either a passport, local ID card, or utility bill from a well-known utility company.
          *
@@ -356,7 +332,6 @@ class PersonTokenParams(
          * [person.verification.document.front](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-verification-document-front)
          */
         val front: String? = null,
-
         /**
          * The back of an ID returned by a
          * [file upload](https://stripe.com/docs/api/tokens/create_person#create_file) with a

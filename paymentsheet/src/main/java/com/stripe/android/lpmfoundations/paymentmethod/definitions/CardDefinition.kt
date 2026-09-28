@@ -7,31 +7,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.nfcscan.NfcScanningAction
+import com.stripe.android.common.nfcscan.NfcScanningAvailability
+import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.replaceHyperlinks
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
-import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.addSavePaymentOptionElements
+import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardScanAction
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
+import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -53,20 +60,48 @@ internal object CardDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = CardUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory {
+        return CardUiDefinitionFactory
+    }
 }
 
-private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
-        paymentMethodDefinition = CardDefinition,
-        displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
-        iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
-        iconResourceNight = null,
-        outlinedIconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined,
-        iconRequiresTinting = true,
-    )
+private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+    ): SupportedPaymentMethod {
+        val iconResource = if (metadata.isTapToAddSupported) {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap
+        } else {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card
+        }
+
+        val outlinedIconResource = if (metadata.isTapToAddSupported) {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap
+        } else {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined
+        }
+
+        val subtitle = if (metadata.isTapToAddSupported) {
+            PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually
+        } else {
+            null
+        }
+
+        return SupportedPaymentMethod(
+            paymentMethodDefinition = CardDefinition,
+            displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
+            iconResource = iconResource,
+            iconResourceNight = null,
+            subtitle = subtitle?.resolvableString,
+            outlinedIconResource = outlinedIconResource,
+            iconRequiresTinting = true,
+        )
+    }
 
     override fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
         customerHasSavedPaymentMethods: Boolean,
         incentive: PaymentMethodIncentive?,
     ): FormHeaderInformation {
@@ -75,7 +110,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         } else {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_card
         }
-        return createSupportedPaymentMethod().asFormHeaderInformation(incentive).copy(
+        return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive).copy(
             displayName = displayName.resolvableString,
             shouldShowIcon = false,
         )
@@ -86,16 +121,19 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
+
         return buildList {
             add(
                 CardDetailsSectionElement(
+                    coroutineScope = arguments.coroutineScope,
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
                     initialValues = arguments.initialValues,
-                    identifier = IdentifierSpec.Generic("card_details"),
+                    identifier = FormFieldId.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
-                    automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
+                    cardFundingFilter = arguments.cardFundingFilter,
+                    cardDetailsAction = createCardDetailsAction(metadata, arguments)
                 )
             )
 
@@ -137,10 +175,12 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
             if (metadata.forceSetupFutureUseBehaviorAndNewMandate) {
+                val linkBrand = metadata.linkState?.configuration?.linkBrand ?: return@buildList
                 add(
                     CombinedLinkMandateElement(
-                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        identifier = FormFieldId.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
+                        linkBrand = linkBrand,
                         signupMode = signupMode,
                         isLinkUI = arguments.isLinkUI,
                         canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
@@ -150,7 +190,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             } else if (metadata.hasIntentToSetup(CardDefinition.type.code) && mandateAllowed) {
                 add(
                     MandateTextElement(
-                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        identifier = FormFieldId.Generic("card_mandate"),
                         stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
                         topPadding = when {
                             signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
@@ -163,6 +203,40 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             }
         }
+    }
+
+    private fun createCardDetailsAction(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): CardDetailsAction {
+        if (metadata.isTapToAddSupported && arguments.tapToAddHelper != null) {
+            return TapToAddCardDetailsAction(
+                tapToAddHelper = arguments.tapToAddHelper,
+                paymentMethodMetadata = metadata,
+            )
+        }
+
+        val nfcScanningAvailability = arguments.isNfcScanningAvailable?.get(metadata)
+        val nfcScanningAction = NfcScanningAction(paymentMethodMetadata = metadata)
+
+        if (
+            nfcScanningAvailability is NfcScanningAvailability.Available &&
+            nfcScanningAvailability.shouldBePrimaryScanningOption
+        ) {
+            return nfcScanningAction
+        }
+
+        return CardScanAction(
+            isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
+            enableMlKitCardScan = metadata.enableMlKitCardScan,
+            disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+            apiConfiguration = metadata.apiConfiguration,
+            automaticallyLaunchedCardScanFormDataHelper =
+                arguments.automaticallyLaunchedCardScanFormDataHelper,
+            backupAction = nfcScanningAction.takeIf {
+                nfcScanningAvailability is NfcScanningAvailability.Available
+            },
+        )
     }
 
     private fun MutableList<FormElement>.addCardBillingElements(
@@ -182,6 +256,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
+                    arguments.requiresBillingAddressForAutomaticTax,
                 )
             )
         }
@@ -212,24 +287,29 @@ private fun cardBillingElements(
     allowedCountries: Set<String>,
     collectionConfiguration: BillingDetailsCollectionConfiguration,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
-    initialValues: Map<IdentifierSpec, String?>,
-    shippingValues: Map<IdentifierSpec, String?>?,
+    initialValues: Map<FormFieldId, String?>,
+    shippingValues: Map<FormFieldId, String?>?,
+    requiresBillingAddressForAutomaticTax: Boolean,
 ): List<FormElement> {
     val sameAsShippingElement =
-        shippingValues?.get(IdentifierSpec.SameAsShipping)
+        shippingValues?.get(FormFieldId.SameAsShipping)
             ?.toBooleanStrictOrNull()
             ?.let {
                 SameAsShippingElement(
-                    identifier = IdentifierSpec.SameAsShipping,
+                    identifier = FormFieldId.SameAsShipping,
                     controller = SameAsShippingController(it)
                 )
             }
-    val addressElement = CardBillingAddressElement(
-        IdentifierSpec.Generic("credit_billing"),
+    val addressElement = BillingAddressElement(
+        FormFieldId.Generic("credit_billing"),
         countryCodes = allowedCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
+        addressCollectionMode = cardBillingAddressCollectionMode(
+            addressCollectionMode = collectionConfiguration.address,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+        ),
         collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
     )
@@ -252,17 +332,18 @@ private fun cardBillingElements(
 }
 
 internal class CombinedLinkMandateElement(
-    identifier: IdentifierSpec,
+    identifier: FormFieldId,
     signupMode: LinkSignupMode?,
     canChangeSaveForFutureUse: Boolean,
     private val merchantName: String,
+    private val linkBrand: LinkBrand,
     private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>,
     private val isLinkUI: Boolean,
 ) : RenderableFormElement(
     allowsUserInteraction = false,
     identifier = identifier
 ) {
-    override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<IdentifierSpec, FormFieldEntry>>())
+    override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<FormFieldId, FormFieldEntry>>())
 
     private val topPadding = when {
         signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
@@ -272,21 +353,25 @@ internal class CombinedLinkMandateElement(
     }
 
     @Composable
-    override fun ComposeUI(enabled: Boolean) {
+    override fun ComposeUI(
+        enabled: Boolean,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
+    ) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
             // when displaying the mandate from Link UI (add card to Link) we always want the
             // non-signup version of the mandate text.
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
                 stringResource(
-                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
-                    formatArgs = arrayOf(merchantName)
-                ).replaceHyperlinks()
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded,
+                    formatArgs = arrayOf(merchantName, linkBrand.brandName())
+                ).replaceHyperlinks(linkBrand)
             } else {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
                     formatArgs = arrayOf(merchantName)
-                ).replaceHyperlinks()
+                ).replaceHyperlinks(linkBrand)
             },
             textAlign = if (isLinkUI) TextAlign.Center else TextAlign.Start,
             modifier = Modifier.padding(top = topPadding)

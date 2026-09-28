@@ -225,19 +225,19 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     protected open fun onConfirmSuccess() {
         viewModel.status.value +=
-            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation succeeded\n\n"
+            "\n\n${if (isPaymentIntent) "Payment" else "Setup"}Intent confirmation succeeded\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmCanceled() {
         viewModel.status.value +=
-            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation canceled\n\n"
+            "\n\n${if (isPaymentIntent) "Payment" else "Setup"}Intent confirmation canceled\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
         viewModel.status.value +=
-            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation failed with " +
+            "\n\n${if (isPaymentIntent) "Payment" else "Setup"}Intent confirmation failed with " +
             "throwable ${failedResult.throwable} \n\n"
         viewModel.inProgress.value = false
     }

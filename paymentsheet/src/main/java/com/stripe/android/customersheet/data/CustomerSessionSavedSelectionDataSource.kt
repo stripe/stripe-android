@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
@@ -11,12 +12,14 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetSavedSelectionDataSource {
     override suspend fun retrieveSavedSelection(
@@ -98,12 +101,10 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     ) {
         val paymentMethodId = (selection as? SavedSelection.PaymentMethod)?.id
         customerRepository.setDefaultPaymentMethod(
+            customerId = ephemeralKey.customerId,
+            ephemeralKeySecret = ephemeralKey.ephemeralKey,
             paymentMethodId = paymentMethodId,
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = ephemeralKey.customerId,
-                ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-            )
+            apiConfiguration = apiConfigurationProvider.get(),
         ).getOrThrow()
     }
 

@@ -2,10 +2,13 @@ package com.stripe.android.challenge.passive
 
 import android.content.Context
 import android.content.Intent
+import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
+import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PassiveChallengeActivityContract :
@@ -14,7 +17,7 @@ class PassiveChallengeActivityContract :
     override fun createIntent(context: Context, input: Args): Intent {
         return PassiveChallengeActivity.createIntent(
             context,
-            PassiveChallengeArgs(input.passiveCaptchaParams, input.publishableKey, input.productUsage.toList())
+            PassiveChallengeArgs(input.passiveCaptchaParams, input.apiConfiguration, input.productUsage.toList())
         )
     }
 
@@ -26,11 +29,12 @@ class PassiveChallengeActivityContract :
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
     data class Args(
         val passiveCaptchaParams: PassiveCaptchaParams,
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val productUsage: Set<String>
-    )
+    ) : Parcelable
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

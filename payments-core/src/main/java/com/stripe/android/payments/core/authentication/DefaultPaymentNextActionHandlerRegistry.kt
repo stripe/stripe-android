@@ -8,9 +8,9 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
@@ -20,6 +20,7 @@ import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACT
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -33,21 +34,24 @@ private typealias NextActionHandler = @JvmSuppressWildcards PaymentNextActionHan
 @Singleton
 internal class DefaultPaymentNextActionHandlerRegistry @Inject internal constructor(
     private val noOpIntentNextActionHandler: NoOpIntentNextActionHandler,
-    private val sourceNextActionHandler: SourceNextActionHandler,
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : PaymentNextActionHandlerRegistry {
 
     private val paymentSheetNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler> by lazy {
-        paymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers, applicationContext)
+        paymentSheetNextActionHandlers(
+            includePaymentSheetNextActionHandlers,
+            applicationContext,
+            apiConfigurationProvider.get(),
+        )
     }
 
     @VisibleForTesting
     internal val allNextActionHandlers: Set<PaymentNextActionHandler<out StripeModel>>
         get() = buildSet {
             add(noOpIntentNextActionHandler)
-            add(sourceNextActionHandler)
             addAll(paymentNextActionHandlers.values)
             addAll(paymentSheetNextActionHandlers.values)
         }
@@ -80,9 +84,6 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                 } ?: noOpIntentNextActionHandler
 
                 return nextActionHandler as PaymentNextActionHandler<Actionable>
-            }
-            is Source -> {
-                sourceNextActionHandler as PaymentNextActionHandler<Actionable>
             }
             else -> {
                 error("No suitable PaymentNextActionHandler for $actionable")
@@ -124,22 +125,23 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            publishableKeyProvider: () -> String,
+            apiConfigurationState: ApiConfiguration.State,
             productUsage: Set<String>,
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
         ): PaymentNextActionHandlerRegistry {
-            val component = DaggerNextActionHandlerComponent.builder()
-                .context(context)
-                .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-                .enableLogging(enableLogging)
-                .workContext(workContext)
-                .uiContext(uiContext)
-                .publishableKeyProvider(publishableKeyProvider)
-                .productUsage(productUsage)
-                .isInstantApp(isInstantApp)
-                .includePaymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers)
-                .build()
+            val component = DaggerNextActionHandlerComponent.factory()
+                .create(
+                    context = context,
+                    analyticsRequestFactory = paymentAnalyticsRequestFactory,
+                    enableLogging = enableLogging,
+                    workContext = workContext,
+                    uiContext = uiContext,
+                    apiConfiguration = apiConfigurationState,
+                    productUsage = productUsage,
+                    isInstantApp = isInstantApp,
+                    includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,
+                )
             return component.registry
         }
     }
@@ -148,7 +150,8 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
 @Suppress("TooGenericExceptionCaught")
 private fun paymentSheetNextActionHandlers(
     includePaymentSheetNextActionHandlers: Boolean,
-    applicationContext: Context
+    applicationContext: Context,
+    apiConfiguration: ApiConfiguration.State,
 ): Map<NextActionHandlerKey, NextActionHandler> {
     return try {
         if (includePaymentSheetNextActionHandlers) {
@@ -161,7 +164,10 @@ private fun paymentSheetNextActionHandlers(
             emptyMap()
         }
     } catch (e: Exception) {
-        ErrorReporter.createFallbackInstance(applicationContext)
+        ErrorReporter.createFallbackInstance(
+            context = applicationContext,
+            apiConfigurationProvider = { apiConfiguration },
+        )
             .report(
                 // [PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND] will not be changed to avoid skewed metrics
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND,

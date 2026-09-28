@@ -4,19 +4,21 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.ApiConfigurationFixtures.DEFAULT_REQUEST_OPTIONS
 import com.stripe.android.paymentmethodmessaging.element.DefaultPaymentMethodMessagingCoordinator
 import com.stripe.android.paymentmethodmessaging.element.FakeStripeRepository
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingContent
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -27,6 +29,9 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(ExperimentalCoroutinesApi::class, PaymentMethodMessagingElementPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMessageAnalyticsTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -187,9 +192,9 @@ internal class PaymentMethodMessageAnalyticsTest {
         val errorReporter = FakeErrorReporter()
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
-            paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_123_test") },
+            requestOptionsProvider = { DEFAULT_REQUEST_OPTIONS },
             eventReporter = eventReporter,
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = errorReporter
         )
 

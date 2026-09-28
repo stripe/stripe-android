@@ -51,14 +51,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
@@ -196,7 +194,6 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ShopPayPreview::class)
     @Composable
     private fun rememberFlowControllerBuilder(
         preparePaymentMethodHandler: PreparePaymentMethodHandler,
@@ -208,7 +205,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                     onPaymentOptionChanged(result)
                 },
                 resultCallback = {}
-            ).shopPayHandlers(ShopPayData.shopPayHandlers())
+            )
                 .preparePaymentMethodHandler { paymentMethod, shippingAddress ->
                     preparePaymentMethodHandler.onPreparePaymentMethod(paymentMethod, shippingAddress)
                 }

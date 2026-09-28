@@ -82,8 +82,19 @@ internal class LinkActivityViewModel @Inject constructor(
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
 
-    private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
+    private val _linkAppBarState = MutableStateFlow(
+        LinkAppBarState.initial(linkConfiguration.effectiveLinkBrand(linkAccount))
+    )
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            linkAccountManager.linkAccountInfo.collect { accountUpdate ->
+                val linkBrand = linkConfiguration.effectiveLinkBrand(accountUpdate.account)
+                _linkAppBarState.update { it.copy(linkBrand = linkBrand) }
+            }
+        }
+    }
 
     // Enable replay because the result can be emitted during `onCreate` while observation occurs
     // in the Compose UI, which is invoked after `onCreate`.
@@ -92,7 +103,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     val navigationFlow = navigationManager.navigationFlow
 
-    private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.FullScreen(LinkScreen.Loading))
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
 
     val linkAccount: LinkAccount?
@@ -155,16 +166,34 @@ internal class LinkActivityViewModel @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
+        val shouldDismiss = when (linkLaunchMode) {
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Authorization,
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full -> true
+            is LinkLaunchMode.PaymentMethodSelection -> linkLaunchMode.canContinueWithoutLink
+        }
+
         GlobalScope.launch {
             linkAccountManager.logOut()
         }
-
-        dismissWithResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+        if (shouldDismiss) {
+            dismissWithResult(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                )
             )
-        )
+        } else {
+            savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+            navigate(LinkScreen.SignUp, clearStack = true)
+            viewModelScope.launch {
+                // Wait for the Wallet exit animation to finish. Clearing earlier triggers NoLinkAccountFoundException
+                // from the Wallet composable's null-check while it's still in composition.
+                delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+                linkAccountHolder.set(LinkAccountUpdate.Value(null, LoggedOut))
+            }
+        }
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntryUpdate) {
@@ -174,7 +203,8 @@ internal class LinkActivityViewModel @Inject constructor(
             LinkAppBarState.create(
                 currentEntry = currentEntry,
                 previousEntryRoute = previousEntry,
-                consumerIsSigningUp = linkAccount?.completedSignup == true
+                consumerIsSigningUp = linkAccount?.completedSignup == true,
+                linkBrand = linkConfiguration.effectiveLinkBrand(linkAccount),
             )
         }
     }
@@ -248,12 +278,27 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun changeEmail() {
         savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+        linkAccount?.let { linkAccount ->
+            viewModelScope.launch {
+                linkAccountManager.logOut(linkAccount)
+            }
+        }
         if (linkScreenState.value is ScreenState.VerificationDialog) {
-            linkAccountHolder.set(LinkAccountUpdate.Value(null))
+            clearAccountAfterChangeEmail(loggedOut = false)
             _linkScreenState.value = ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
         } else {
+            clearAccountAfterChangeEmail(loggedOut = true)
             navigate(LinkScreen.SignUp, clearStack = true)
         }
+    }
+
+    private fun clearAccountAfterChangeEmail(loggedOut: Boolean) {
+        linkAccountHolder.set(
+            LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = if (loggedOut) LoggedOut else null,
+            )
+        )
     }
 
     fun unregisterActivity() {
@@ -412,7 +457,7 @@ internal class LinkActivityViewModel @Inject constructor(
     ): ScreenState? {
         return when (linkLaunchMode) {
             is LinkLaunchMode.Authentication -> {
-                if (accountStatus.hasVerifiedSMSSession) {
+                if (accountStatus.meetsMinimumAuthenticationLevel) {
                     dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
                     return null
                 }
@@ -537,20 +582,20 @@ internal class LinkActivityViewModel @Inject constructor(
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
                 DaggerNativeLinkComponent
-                    .builder()
-                    .configuration(args.configuration)
-                    .paymentMethodMetadata(args.paymentMethodMetadata)
-                    .requestSurface(args.requestSurface)
-                    .publishableKeyProvider { args.publishableKey }
-                    .stripeAccountIdProvider { args.stripeAccountId }
-                    .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
-                    .savedStateHandle(handle)
-                    .context(app)
-                    .application(app)
-                    .linkExpressMode(args.linkExpressMode)
-                    .linkLaunchMode(args.launchMode)
-                    .linkAccountUpdate(args.linkAccountInfo)
-                    .build()
+                    .factory()
+                    .create(
+                        configuration = args.configuration,
+                        paymentMethodMetadata = args.paymentMethodMetadata,
+                        paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                        context = app,
+                        savedStateHandle = handle,
+                        application = app,
+                        linkExpressMode = args.linkExpressMode,
+                        linkLaunchMode = args.launchMode,
+                        linkAccountUpdate = args.linkAccountInfo,
+                        requestSurface = args.requestSurface,
+                        statusBarColor = args.statusBarColor,
+                    )
                     .viewModel
             }
         }
@@ -560,7 +605,6 @@ internal class LinkActivityViewModel @Inject constructor(
 internal sealed interface ScreenState {
     data class VerificationDialog(val linkAccount: LinkAccount) : ScreenState
     data class FullScreen(val initialDestination: LinkScreen) : ScreenState
-    data object Loading : ScreenState
 }
 
 internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")

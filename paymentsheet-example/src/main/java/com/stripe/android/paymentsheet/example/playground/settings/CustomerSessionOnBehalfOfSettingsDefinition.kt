@@ -13,8 +13,15 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
     override val key: String = "onBehalfOfAccountSetting"
     override val defaultValue: OnBehalfOf = OnBehalfOf.NO_CONNECTED_ACCOUNT
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isCustomerFlow() || configurationData.integrationType.isPaymentFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isCustomerFlow() && !configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun convertToString(value: OnBehalfOf): String {

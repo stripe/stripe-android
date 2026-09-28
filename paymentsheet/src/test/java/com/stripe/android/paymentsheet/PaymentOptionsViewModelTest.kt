@@ -5,10 +5,15 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -30,24 +35,29 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletLocation
@@ -55,14 +65,22 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -72,6 +90,7 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -88,11 +107,17 @@ internal class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val standardTestDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val customerRepository = mock<CustomerRepository>()
+    private val savedPaymentMethodRepository = mock<SavedPaymentMethodRepository>()
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
 
     private val linkGate = FakeLinkGate()
@@ -233,7 +258,7 @@ internal class PaymentOptionsViewModelTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
         )
 
-        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.updateSelection(PaymentSelection.Link(brand = LinkBrand.Link))
         viewModel.onUserSelection()
 
         verify(linkPaymentLauncher).present(
@@ -242,6 +267,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             linkExpressMode = eq(LinkExpressMode.ENABLED),
+            statusBarColor = anyOrNull(),
         )
     }
 
@@ -252,7 +278,7 @@ internal class PaymentOptionsViewModelTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.updateSelection(PaymentSelection.Link(brand = LinkBrand.Link))
         viewModel.paymentOptionsActivityResult.test {
             viewModel.onUserSelection()
             val result = awaitItem()
@@ -281,6 +307,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = any(),
             launchMode = any(),
             linkExpressMode = any(),
+            statusBarColor = anyOrNull(),
         )
     }
 
@@ -343,7 +370,7 @@ internal class PaymentOptionsViewModelTest {
             ),
         )
 
-        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -353,7 +380,7 @@ internal class PaymentOptionsViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -470,7 +497,7 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `currentScreen is Form if payment methods is empty and supportedPaymentMethods contains one in automatic`() =
+    fun `currentScreen is AddFirstPaymentMethod if no SPMs and one supportedPaymentMethod in automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -487,12 +514,12 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.navigationHandler.currentScreen.test {
-                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+                assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             }
         }
 
     @Test
-    fun `currentScreen is VerticalMode if payment methods is not empty in automatic`() =
+    fun `currentScreen is SelectSavedPaymentMethods if just one payment method in automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -509,12 +536,12 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.navigationHandler.currentScreen.test {
-                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+                assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
             }
         }
 
     @Test
-    fun `currentScreen is VerticalMode if supportedPaymentMethods is greater than 1 in Automatic`() =
+    fun `currentScreen is VerticalMode if supportedPaymentMethods is greater than 2 in Automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -525,7 +552,7 @@ internal class PaymentOptionsViewModelTest {
                     isGooglePayReady = false,
                     linkState = null,
                     stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
-                        paymentMethodTypes = listOf("card", "cashapp")
+                        paymentMethodTypes = listOf("card", "cashapp", "klarna")
                     ),
                 )
             )
@@ -605,16 +632,16 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
 
-            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link()) }
+            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link(brand = LinkBrand.Link)) }
 
             viewModel.paymentOptionsActivityResult.test {
                 viewModel.handlePaymentMethodSelected(selection)
                 expectNoEvents()
 
-                viewModel.handlePaymentMethodSelected(PaymentSelection.Link())
+                viewModel.handlePaymentMethodSelected(PaymentSelection.Link(brand = LinkBrand.Link))
 
                 val result = awaitItem() as? PaymentOptionsActivityResult.Succeeded
-                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link())
+                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
             }
         }
 
@@ -801,7 +828,9 @@ internal class PaymentOptionsViewModelTest {
         val cards = PaymentMethodFactory.cards(3)
         val paymentMethodToRemove = cards.first()
 
-        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id), eq(false))).thenReturn(
+        whenever(
+            savedPaymentMethodRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id))
+        ).thenReturn(
             Result.success(paymentMethodToRemove)
         )
 
@@ -860,7 +889,12 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.walletsState.test {
             val state = awaitItem()
-            assertThat(state?.link(WalletLocation.HEADER)).isEqualTo(WalletsState.Link(state = LinkButtonState.Default))
+            assertThat(state?.link(WalletLocation.HEADER)).isEqualTo(
+                WalletsState.Link(
+                    state = LinkButtonState.Default,
+                    linkBrand = LinkBrand.Link
+                )
+            )
             assertThat(state?.googlePay(WalletLocation.HEADER)).isNull()
         }
     }
@@ -911,7 +945,13 @@ internal class PaymentOptionsViewModelTest {
             linkAccountUpdate = linkAccountUpdate,
             selectedPayment = null
         )
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(),
+                signupMode = null,
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
         viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(result)
             val succeeded = awaitItem() as PaymentOptionsActivityResult.Succeeded
@@ -1087,36 +1127,45 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `On register for activity result, should register link launcher & autocomplete launcher`() = runTest {
+    fun `On register for activity result, should register various launchers`() = runTest {
         DummyActivityResultCaller.test {
-            val lifecycleOwner = TestLifecycleOwner()
+            FakeTapToAddHelper.Factory.test {
+                val lifecycleOwner = TestLifecycleOwner()
 
-            val viewModel = createViewModel(
-                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    linkState = LinkState(
-                        configuration = mock(),
-                        signupMode = null,
-                        loginState = LinkState.LoginState.NeedsVerification,
+                val viewModel = createViewModel(
+                    args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                        linkState = LinkState(
+                            configuration = mock(),
+                            signupMode = null,
+                            loginState = LinkState.LoginState.NeedsVerification,
+                        ),
+                        isGooglePayReady = true,
                     ),
-                    isGooglePayReady = true,
+                    tapToAddHelperFactory = tapToAddHelperFactory,
                 )
-            )
 
-            viewModel.registerForActivityResult(
-                activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner,
-            )
+                viewModel.registerForActivityResult(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                )
 
-            assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
+                assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
 
-            val autocompleteLauncher = awaitNextRegisteredLauncher()
+                val autocompleteLauncher = awaitNextRegisteredLauncher()
 
-            verify(linkPaymentLauncher).register(eq(activityResultCaller), any())
+                verify(linkPaymentLauncher)
+                    .register(eq(activityResultCaller), any())
 
-            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-            assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
-            verify(linkPaymentLauncher).unregister()
+                assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
+                verify(linkPaymentLauncher).unregister()
+
+                val createCall = createCalls.awaitItem()
+
+                assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Continue)
+                assertThat(createCall.coroutineScope).isEqualTo(viewModel.viewModelScope)
+            }
         }
     }
 
@@ -1142,6 +1191,117 @@ internal class PaymentOptionsViewModelTest {
                 assertThat(awaitItem()).isNotNull()
             }
         }
+
+    @Test
+    fun `Tap to add helper is created with mode continue`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            val createCall = createCalls.awaitItem()
+            assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Continue)
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Continue, activity completes with the selection chosen`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            val customerStateHolder = FakeCustomerStateHolder()
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+            val selection = SELECTION_SAVED_PAYMENT_METHOD
+
+            viewModel.paymentOptionsActivityResult.test {
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Continue(selection)
+                )
+
+                val result = awaitItem()
+                assertThat(result).isInstanceOf<PaymentOptionsActivityResult.Succeeded>()
+
+                val succeededResult = result as PaymentOptionsActivityResult.Succeeded
+                assertThat(succeededResult.paymentSelection).isEqualTo(selection)
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    selection.paymentMethod
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Complete, error is reported`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        FakeTapToAddHelper.Factory.test {
+            createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                errorReporter = errorReporter,
+            )
+
+            createCalls.awaitItem()
+
+            tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(TapToAddNextStep.Complete)
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT.eventName
+            )
+        }
+    }
+
+    @Test
+    fun `When tap to add next step is confirm spm, screens are updated`() = runTest {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add next step is show spm, screens are updated`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ShowSavedPaymentMethods(
+                        PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
+            }
+        }
+    }
 
     @OptIn(WalletButtonsPreview::class)
     private fun testWalletVisibility(
@@ -1215,10 +1375,12 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createLinkViewModel()
 
         val linkInlineHandler = LinkInlineHandler.create()
-        val formHelper = DefaultFormHelper.create(
-            viewModel = viewModel,
+        val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+            coroutineScope = viewModel.viewModelScope,
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
             linkInlineHandler = linkInlineHandler,
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
+            paymentMethodMessagePromotionsHelper = null
         )
 
         viewModel.selection.test {
@@ -1227,7 +1389,7 @@ internal class PaymentOptionsViewModelTest {
             formHelper.onFormFieldValuesChanged(
                 formValues = FormFieldValues(
                     fieldValuePairs = mapOf(
-                        IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                        FormFieldId.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
                     ),
                     userRequestedReuse = expectedCustomerRequestedSave,
                 ),
@@ -1267,8 +1429,8 @@ internal class PaymentOptionsViewModelTest {
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified(true, null),
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_PASSTHROUGH_PAYMENT_DETAILS),
+            accountStatus = AccountStatus.Verified(consentPresentation = null),
         )
 
         return createViewModel(
@@ -1285,7 +1447,10 @@ internal class PaymentOptionsViewModelTest {
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.paymentMethodMetadata.linkState,
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        workContext: CoroutineContext = testDispatcher
+        workContext: CoroutineContext = testDispatcher,
+        tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        customerStateHolder: CustomerStateHolder? = null,
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -1297,16 +1462,30 @@ internal class PaymentOptionsViewModelTest {
                 )
             ),
             eventReporter = eventReporter,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             workContext = workContext,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            tapToAddHelperFactory = tapToAddHelperFactory,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            mode = EventReporter.Mode.Complete,
+            errorReporter = errorReporter,
+            customerStateHolderFactory = object : CustomerStateHolder.Factory {
+                override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+                    return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
+                }
+            },
+            customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            placesClient = null,
+            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+            addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )
-    }
+    }.also { viewModelStoreRule.track(it) }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
@@ -1356,6 +1535,7 @@ internal class PaymentOptionsViewModelTest {
                 lastUpdateReason = null
             ),
             walletButtonsRendered = false,
+            promotions = null
         )
         private val AVAILABLE_LINK_STATE = LinkState(
             configuration = TestFactory.LINK_CONFIGURATION,

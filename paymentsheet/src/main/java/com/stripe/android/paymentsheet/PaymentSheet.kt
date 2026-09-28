@@ -9,6 +9,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -19,13 +20,15 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -33,12 +36,12 @@ import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -309,7 +312,6 @@ class PaymentSheet internal constructor(
          * @param callback Called when a user confirms payment for a custom payment method. Use with
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
@@ -354,6 +356,16 @@ class PaymentSheet internal constructor(
             handler: PreparePaymentMethodHandler
         ) = apply {
             callbacksBuilder.preparePaymentMethodHandler(handler)
+        }
+
+        /**
+         * @param callback called when the customer attempts to save their card by tapping it on their device.
+         */
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            callbacksBuilder.createCardPresentSetupIntentCallback(callback)
         }
 
         /**
@@ -706,19 +718,16 @@ class PaymentSheet internal constructor(
          * The default value is the name of your app.
          */
         internal val merchantDisplayName: String,
-
         /**
          * If set, the customer can select a previously saved payment method within PaymentSheet.
          */
         internal val customer: CustomerConfiguration? = ConfigurationDefaults.customer,
-
         /**
          * Configuration related to the Stripe Customer making a payment.
          *
          * If set, PaymentSheet displays Google Pay as a payment option.
          */
         internal val googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
-
         /**
          * The billing information for the customer.
          *
@@ -728,7 +737,6 @@ class PaymentSheet internal constructor(
          * the PaymentSheet UI.
          */
         internal val defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
-
         /**
          * The shipping information for the customer.
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
@@ -736,7 +744,6 @@ class PaymentSheet internal constructor(
          * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
          */
         internal val shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
-
         /**
          * If true, allows payment methods that do not move money at the end of the checkout.
          * Defaults to false.
@@ -750,7 +757,6 @@ class PaymentSheet internal constructor(
          * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
          */
         internal val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
-
         /**
          * If `true`, allows payment methods that require a shipping address, like Afterpay and
          * Affirm. Defaults to `false`.
@@ -763,12 +769,10 @@ class PaymentSheet internal constructor(
          */
         internal val allowsPaymentMethodsRequiringShippingAddress: Boolean =
             ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
-
         /**
          * Describes the appearance of Payment Sheet.
          */
         internal val appearance: Appearance = ConfigurationDefaults.appearance,
-
         /**
          * The label to use for the primary button.
          *
@@ -776,7 +780,6 @@ class PaymentSheet internal constructor(
          * intents.
          */
         internal val primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
-
         /**
          * Describes how billing details should be collected.
          * All values default to `automatic`.
@@ -785,7 +788,6 @@ class PaymentSheet internal constructor(
          */
         internal val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             ConfigurationDefaults.billingDetailsCollectionConfiguration,
-
         /**
          * A list of preferred networks that should be used to process payments
          * made with a co-branded card if your user hasn't selected a network
@@ -796,34 +798,22 @@ class PaymentSheet internal constructor(
          * the network.
          */
         internal val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
-
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
-
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
-
         internal val paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout,
-
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
-
+        internal val allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
-
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
-
         internal val walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons,
-
-        internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
-
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
-
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
-
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
-
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration.State? = null,
     ) : Parcelable {
 
         @JvmOverloads
@@ -834,19 +824,16 @@ class PaymentSheet internal constructor(
              * The default value is the name of your app.
              */
             merchantDisplayName: String,
-
             /**
              * If set, the customer can select a previously saved payment method within PaymentSheet.
              */
             customer: CustomerConfiguration? = ConfigurationDefaults.customer,
-
             /**
              * Configuration related to the Stripe Customer making a payment.
              *
              * If set, PaymentSheet displays Google Pay as a payment option.
              */
             googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
-
             /**
              * The billing information for the customer.
              *
@@ -856,7 +843,6 @@ class PaymentSheet internal constructor(
              * the PaymentSheet UI.
              */
             defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
-
             /**
              * The shipping information for the customer.
              * If set, PaymentSheet will pre-populate the form fields with the values provided.
@@ -864,7 +850,6 @@ class PaymentSheet internal constructor(
              * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
              */
             shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
-
             /**
              * If true, allows payment methods that do not move money at the end of the checkout.
              * Defaults to false.
@@ -878,7 +863,6 @@ class PaymentSheet internal constructor(
              * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
              */
             allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
-
             /**
              * If `true`, allows payment methods that require a shipping address, like Afterpay and
              * Affirm. Defaults to `false`.
@@ -891,12 +875,10 @@ class PaymentSheet internal constructor(
              */
             allowsPaymentMethodsRequiringShippingAddress: Boolean =
                 ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
-
             /**
              * Describes the appearance of Payment Sheet.
              */
             appearance: Appearance = ConfigurationDefaults.appearance,
-
             /**
              * The label to use for the primary button.
              *
@@ -904,7 +886,6 @@ class PaymentSheet internal constructor(
              * intents.
              */
             primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
-
             /**
              * Describes how billing details should be collected.
              * All values default to `automatic`.
@@ -913,7 +894,6 @@ class PaymentSheet internal constructor(
              */
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration,
-
             /**
              * A list of preferred networks that should be used to process payments
              * made with a co-branded card if your user hasn't selected a network
@@ -939,6 +919,7 @@ class PaymentSheet internal constructor(
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
             externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
             customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
+            apiConfiguration = null,
         )
 
         /**
@@ -966,14 +947,15 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
-            private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration.State? = null
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1078,11 +1060,27 @@ class PaymentSheet internal constructor(
             }
 
             /**
+             * By default, PaymentSheet will accept cards of all funding types (credit, debit,
+             * prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param cardFundingTypes The list of allowed card funding types.
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                cardFundingTypes: List<CardFundingType>
+            ): Builder = apply {
+                this.allowedCardFundingTypes = cardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
@@ -1105,17 +1103,10 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Configuration related to `ShopPay`
-             */
-            @ShopPayPreview
-            fun shopPayConfiguration(shopPayConfiguration: ShopPayConfiguration) = apply {
-                this.shopPayConfiguration = shopPayConfiguration
-            }
-
-            /**
-             * Google Places API key to support autocomplete when collecting billing details
+             * Google Places API key. This is no longer required for address autocomplete.
              */
             @AddressAutocompletePreview
+            @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
@@ -1142,6 +1133,17 @@ class PaymentSheet internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            /**
+             * Sets the API credentials to use for PaymentSheet or FlowController.
+             *
+             * When not set, the payment element uses the credentials initialized through
+             * [com.stripe.android.PaymentConfiguration].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+                this.apiConfiguration = apiConfiguration.build()
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1159,14 +1161,15 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
-                shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -1179,9 +1182,9 @@ class PaymentSheet internal constructor(
 
         @OptIn(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
-            ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
-            ShopPayPreview::class
+            CardFundingFilteringPrivatePreview::class,
+            AddressAutocompletePreview::class,
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1198,12 +1201,22 @@ class PaymentSheet internal constructor(
             .externalPaymentMethods(externalPaymentMethods)
             .paymentMethodLayout(paymentMethodLayout)
             .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(allowedCardFundingTypes)
             .customPaymentMethods(customPaymentMethods)
             .link(link)
             .walletButtons(walletButtons)
+            .termsDisplay(termsDisplay)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
-                shopPayConfiguration?.let { shopPayConfiguration(it) }
+                @Suppress("DEPRECATION")
+                googlePlacesApiKey?.let { googlePlacesApiKey(it) }
+                userOverrideCountry?.let { userOverrideCountry(it) }
+                apiConfiguration?.let {
+                    apiConfiguration(
+                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                    )
+                }
             }
     }
 
@@ -1229,6 +1242,35 @@ class PaymentSheet internal constructor(
         Automatic
     }
 
+    /**
+     * Determines which color set Payment Element should use.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class ThemeMode {
+        /**
+         * Use the system light or dark mode setting. This will use value from [AppCompatDelegate.getDefaultNightMode].
+         */
+        Automatic,
+
+        /**
+         * Always use the light color set. This will override value from [AppCompatDelegate.getDefaultNightMode]
+         * for Payment Element only.
+         */
+        AlwaysLight,
+
+        /**
+         * Always use the dark color set. This will override value from [AppCompatDelegate.getDefaultNightMode] for
+         * Payment Element only.
+         */
+        AlwaysDark;
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            val default = Automatic
+        }
+    }
+
     @Parcelize
     @Poko
     class Appearance
@@ -1239,54 +1281,48 @@ class PaymentSheet internal constructor(
          * Describes the colors used while the system is in light mode.
          */
         internal val colorsLight: Colors = Colors.defaultLight,
-
         /**
          * Describes the colors used while the system is in dark mode.
          */
         internal val colorsDark: Colors = Colors.defaultDark,
-
+        /**
+         * Determines which color set Payment Element should use.
+         */
+        internal val themeMode: ThemeMode = ThemeMode.default,
         /**
          * Describes the appearance of shapes.
          */
         internal val shapes: Shapes = Shapes.default,
-
         /**
          * Describes the typography used for text.
          */
         internal val typography: Typography = Typography.default,
-
         /**
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
         internal val primaryButton: PrimaryButton = PrimaryButton(),
-
         /**
          * Describes the appearance of the Embedded Payment Element
          */
         internal val embeddedAppearance: Embedded = Embedded.default,
-
         /**
          * Describes the inset values used for all forms
          */
         internal val formInsetValues: Insets = Insets.defaultFormInsetValues,
-
         /**
          * Defines spacing between conceptual sections of a form. This does not control padding
          * between input fields. Negative values will also be ignored and default spacing will
          * be applied.
          */
         internal val sectionSpacing: Spacing = Spacing.defaultSectionSpacing,
-
         /**
          * Defines spacing inside the input fields of a form.
          */
         internal val textFieldInsets: Insets = Insets.defaultTextFieldInsets,
-
         /**
          * Defines the visual style of icons in Payment Element
          */
         internal val iconStyle: IconStyle = IconStyle.default,
-
         internal val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
     ) : Parcelable {
         constructor() : this(
@@ -2022,6 +2058,7 @@ class PaymentSheet internal constructor(
         class Builder {
             private var colorsLight = Colors.defaultLight
             private var colorsDark = Colors.defaultDark
+            private var themeMode = ThemeMode.default
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
@@ -2046,6 +2083,15 @@ class PaymentSheet internal constructor(
 
             fun colorsDark(colors: Colors) = apply {
                 this.colorsDark = colors
+            }
+
+            /**
+             * Determines which color set Payment Element should use.
+             * Defaults to [ThemeMode.Automatic], which follows the system light/dark mode setting.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun themeMode(themeMode: ThemeMode) = apply {
+                this.themeMode = themeMode
             }
 
             fun shapes(shapes: Shapes) = apply {
@@ -2093,6 +2139,7 @@ class PaymentSheet internal constructor(
                 return Appearance(
                     colorsLight = colorsLight,
                     colorsDark = colorsDark,
+                    themeMode = themeMode,
                     shapes = shapes,
                     typography = typography,
                     primaryButton = primaryButton,
@@ -2481,7 +2528,6 @@ class PaymentSheet internal constructor(
              * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
              */
             cornerRadiusDp: Float,
-
             /**
              * The border used for inputs, tabs, and other components in PaymentSheet.
              */
@@ -2910,24 +2956,30 @@ class PaymentSheet internal constructor(
                 /**
                  * Creates a [Builder] prepopulated with default light mode values.
                  */
-                fun light(): Builder = Builder(
-                    background = null,
-                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                )
+                fun light(): Builder {
+                    val colors = StripeThemeDefaults.primaryButtonStyle.colorsLight
+                    return Builder(
+                        background = null,
+                        onBackground = colors.onBackground.toArgb(),
+                        border = colors.border.toArgb(),
+                        successBackgroundColor = colors.successBackground.toArgb(),
+                        onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
+                    )
+                }
 
                 /**
                  * Creates a [Builder] prepopulated with default dark mode values.
                  */
-                fun dark(): Builder = Builder(
-                    background = null,
-                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                    border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                )
+                fun dark(): Builder {
+                    val colors = StripeThemeDefaults.primaryButtonStyle.colorsDark
+                    return Builder(
+                        background = null,
+                        onBackground = colors.onBackground.toArgb(),
+                        border = colors.border.toArgb(),
+                        successBackgroundColor = colors.successBackground.toArgb(),
+                        onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
+                    )
+                }
             }
         }
 
@@ -2983,7 +3035,6 @@ class PaymentSheet internal constructor(
          */
         @FontRes
         internal val fontResId: Int? = null,
-
         /**
          * The font size in the primary button.
          * Note: If 'null', {@link Typography#sizeScaleFactor} is used.
@@ -3174,22 +3225,18 @@ class PaymentSheet internal constructor(
          * How to collect the name field.
          */
         internal val name: CollectionMode = CollectionMode.Automatic,
-
         /**
          * How to collect the phone field.
          */
         internal val phone: CollectionMode = CollectionMode.Automatic,
-
         /**
          * How to collect the email field.
          */
         internal val email: CollectionMode = CollectionMode.Automatic,
-
         /**
          * How to collect the billing address.
          */
         internal val address: AddressCollectionMode = AddressCollectionMode.Automatic,
-
         /**
          * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
          * should be attached to the payment method, this includes fields that aren't displayed in the form.
@@ -3197,7 +3244,6 @@ class PaymentSheet internal constructor(
          * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
          */
         internal val attachDefaultsToPaymentMethod: Boolean = false,
-
         /**
          * A list of two-letter country codes representing countries the customers can select.
          *
@@ -3210,22 +3256,18 @@ class PaymentSheet internal constructor(
              * How to collect the name field.
              */
             name: CollectionMode = CollectionMode.Automatic,
-
             /**
              * How to collect the phone field.
              */
             phone: CollectionMode = CollectionMode.Automatic,
-
             /**
              * How to collect the email field.
              */
             email: CollectionMode = CollectionMode.Automatic,
-
             /**
              * How to collect the billing address.
              */
             address: AddressCollectionMode = AddressCollectionMode.Automatic,
-
             /**
              * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
              * should be attached to the payment method, this includes fields that aren't displayed in the form.
@@ -3304,6 +3346,7 @@ class PaymentSheet internal constructor(
 
         internal fun copy(
             name: CollectionMode = this.name,
+            attachDefaultsToPaymentMethod: Boolean = this.attachDefaultsToPaymentMethod,
         ): BillingDetailsCollectionConfiguration {
             return BillingDetailsCollectionConfiguration(
                 name = name,
@@ -3430,6 +3473,42 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * Card funding categories that can be filtered.
+     */
+    @Parcelize
+    enum class CardFundingType : Parcelable {
+        /**
+         * Debit cards
+         */
+        Debit,
+
+        /**
+         * Credit cards
+         */
+        Credit,
+
+        /**
+         * Prepaid cards
+         */
+        Prepaid,
+
+        /**
+         * Unknown funding type
+         */
+        Unknown;
+
+        internal val cardFunding: CardFunding
+            get() {
+                return when (this) {
+                    Debit -> CardFunding.Debit
+                    Credit -> CardFunding.Credit
+                    Prepaid -> CardFunding.Prepaid
+                    Unknown -> CardFunding.Unknown
+                }
+            }
+    }
+
+    /**
      * Defines a custom payment method type that can be displayed in Payment Element.
      */
     @Poko
@@ -3439,7 +3518,6 @@ class PaymentSheet internal constructor(
         internal val subtitle: ResolvableString?,
         internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -3447,12 +3525,10 @@ class PaymentSheet internal constructor(
              * Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
              */
             id: String,
-
             /**
              * Optional subtitle text to be displayed below the custom payment method's display name.
              */
             @StringRes subtitle: Int?,
-
             /**
              * When true, Payment Element will not collect billing details for this custom payment method type
              * irregardless of the [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] settings.
@@ -3467,7 +3543,6 @@ class PaymentSheet internal constructor(
             disableBillingDetailCollection = disableBillingDetailCollection,
         )
 
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -3475,13 +3550,11 @@ class PaymentSheet internal constructor(
              * Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
              */
             id: String,
-
             /**
              * Optional subtitle text string resource to be resolved and displayed below the custom payment method's
              * display name.
              */
             subtitle: String?,
-
             /**
              * When true, Payment Element will not collect billing details for this custom payment method type
              * irregardless of the [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] settings.
@@ -3521,12 +3594,10 @@ class PaymentSheet internal constructor(
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
          */
         internal val id: String,
-
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
          */
         internal val ephemeralKeySecret: String,
-
         internal val accessType: CustomerAccessType,
     ) : Parcelable {
         constructor(
@@ -3665,6 +3736,7 @@ class PaymentSheet internal constructor(
             get() = when (display) {
                 Display.Automatic -> true
                 Display.Never -> false
+                Display.WalletButtonHidden -> true
             }
 
         class Builder {
@@ -3711,12 +3783,19 @@ class PaymentSheet internal constructor(
             /**
              * Link will never be displayed.
              */
-            Never;
+            Never,
+
+            /**
+             * Link remains enabled, including automatic verification and inline sign-up.
+             * Its button or row is shown when an existing Link user is detected and hidden otherwise.
+             */
+            WalletButtonHidden;
 
             internal val analyticsValue: String
                 get() = when (this) {
                     Automatic -> "automatic"
                     Never -> "never"
+                    WalletButtonHidden -> "wallet_button_hidden"
                 }
         }
     }
@@ -3761,12 +3840,10 @@ class PaymentSheet internal constructor(
          * wallet option as the default payment option.
          */
         internal val willDisplayExternally: Boolean = false,
-
         /**
          * Controls visibility of wallets within Payment Element and `WalletButtons`.
          */
         val visibility: Visibility = Visibility(),
-
         /**
          * Theme configuration for wallet buttons
          */
@@ -3782,7 +3859,6 @@ class PaymentSheet internal constructor(
              * Defaults to an empty map.
              */
             val paymentElement: Map<Wallet, PaymentElementVisibility> = emptyMap(),
-
             /**
              * Configures how wallets are shown in the wallet buttons view. Wallets that don't have a provided
              * visibility will have theirs automatically determined.
@@ -3833,89 +3909,6 @@ class PaymentSheet internal constructor(
         enum class Wallet {
             Link,
             GooglePay,
-            ShopPay
-        }
-    }
-
-    /**
-     * Configuration related to Shop Pay, which only applies when using wallet buttons.
-     *
-     * @param shopId The corresponding store's shopId.
-     * @param billingAddressRequired Whether or not billing address is required. Defaults to `true`.
-     * @param emailRequired Whether or not email is required. Defaults to `true`.
-     * @param shippingAddressRequired Whether or not to collect the customer's shipping address.
-     * @param lineItems An array of [LineItem] objects. These are shown as line items in the
-     * payment interface, if line items are supported. You can represent discounts as negative
-     * amount [LineItem]s.
-     * @param shippingRates A list of [ShippingRate] objects. The first shipping rate listed
-     * appears in the payment interface as the default option.
-     */
-    @Poko
-    @Parcelize
-    class ShopPayConfiguration(
-        val shopId: String,
-        val billingAddressRequired: Boolean = true,
-        val emailRequired: Boolean = true,
-        val shippingAddressRequired: Boolean,
-        val allowedShippingCountries: List<String>,
-        val lineItems: List<LineItem>,
-        val shippingRates: List<ShippingRate>
-    ) : Parcelable {
-        /**
-         * A type used to describe a single item for in the Shop Pay wallet UI.
-         */
-        @Poko
-        @Parcelize
-        class LineItem(
-            val name: String,
-            val amount: Int
-        ) : Parcelable
-
-        /**
-         * A shipping rate option.
-         */
-        @Poko
-        @Parcelize
-        class ShippingRate(
-            val id: String,
-            val amount: Int,
-            val displayName: String,
-            val deliveryEstimate: DeliveryEstimate?
-        ) : Parcelable
-
-        /**
-         * Type used to describe DeliveryEstimates for shipping.
-         * See https://docs.stripe.com/js/elements_object/create_express_checkout_element#express_checkout_element_create-options-shippingRates-deliveryEstimate
-         */
-        sealed interface DeliveryEstimate : Parcelable {
-            @Poko
-            @Parcelize
-            class Range(
-                val maximum: DeliveryEstimateUnit?,
-                val minimum: DeliveryEstimateUnit?
-            ) : DeliveryEstimate
-
-            @Poko
-            @Parcelize
-            class Text(
-                val value: String
-            ) : DeliveryEstimate
-
-            @Poko
-            @Parcelize
-            class DeliveryEstimateUnit(
-                val unit: TimeUnit,
-                val value: Int
-            ) : Parcelable {
-
-                enum class TimeUnit {
-                    HOUR,
-                    DAY,
-                    BUSINESS_DAY,
-                    WEEK,
-                    MONTH
-                }
-            }
         }
     }
 
@@ -4037,7 +4030,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback Called when a user confirms payment for a custom payment method.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
                 callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }
@@ -4070,14 +4062,6 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * @param handlers Handlers for shop-pay specific events like shipping method and contact updates.
-             */
-            @ShopPayPreview
-            fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
-                callbacksBuilder.shopPayHandlers(handlers)
-            }
-
-            /**
              * @param handler Called when a user calls confirm and their payment method is being handed off
              * to an external provider to handle payment/setup.
              */
@@ -4086,6 +4070,16 @@ class PaymentSheet internal constructor(
                 handler: PreparePaymentMethodHandler
             ) = apply {
                 callbacksBuilder.preparePaymentMethodHandler(handler)
+            }
+
+            /**
+             * @param callback called when the customer attempts to save their card by tapping it on their device.
+             */
+            @TapToAddPreview
+            fun createCardPresentSetupIntentCallback(
+                callback: CreateCardPresentSetupIntentCallback,
+            ) = apply {
+                callbacksBuilder.createCardPresentSetupIntentCallback(callback)
             }
 
             /**
@@ -4467,7 +4461,7 @@ class PaymentSheet internal constructor(
          * @param context the Application [Context].
          */
         fun resetCustomer(context: Context) {
-            LinkStore(context).clear()
+            DefaultLinkStore(context).clear()
         }
     }
 }

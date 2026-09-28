@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Script to record Paparazzi screenshots for a test class
+# Usage: ./scripts/recordScreenshots <ClassName>
+# Example: ./scripts/recordScreenshots SavedPaymentMethodConfirmUIScreenshotTest
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Error: No test class name provided"
+    echo "Usage: ./scripts/recordScreenshots <ClassName>"
+    echo "Example: ./scripts/recordScreenshots SavedPaymentMethodConfirmUIScreenshotTest"
+    exit 1
+fi
+
+CLASS_NAME="$1"
+
+# Remove .kt extension if provided
+CLASS_NAME="${CLASS_NAME%.kt}"
+
+echo "Searching for test class: ${CLASS_NAME}"
+
+# Find the test file
+TEST_FILE=$(find . -name "${CLASS_NAME}.kt" -path "*/src/test/*" -type f 2>/dev/null | head -1)
+
+if [ -z "$TEST_FILE" ]; then
+    echo "Error: Could not find test class '${CLASS_NAME}'"
+    echo "Make sure the test file exists in a module's src/test directory"
+    exit 1
+fi
+
+echo "Found test file: ${TEST_FILE}"
+
+# Extract module name (first directory after ./)
+MODULE=$(echo "$TEST_FILE" | sed 's|^\./||' | cut -d'/' -f1)
+
+echo "Module: ${MODULE}"
+
+# Extract package path from the file path
+# The path structure is: ./{module}/src/test/java/{package}/{ClassName}.kt
+# We need to extract everything between /java/ and the filename
+PACKAGE_PATH=$(echo "$TEST_FILE" | sed 's|.*/src/test/java/||' | sed 's|/[^/]*\.kt$||' | tr '/' '.')
+FULL_CLASS_NAME="${PACKAGE_PATH}.${CLASS_NAME}"
+
+echo "Full test class: ${FULL_CLASS_NAME}"
+echo ""
+echo "Running: ./gradlew :${MODULE}:recordPaparazziDebug --tests=\"${FULL_CLASS_NAME}\""
+echo ""
+
+# Run the Gradle command
+./gradlew ":${MODULE}:recordPaparazziDebug" --tests="${FULL_CLASS_NAME}"
+
+echo ""
+echo "✓ Screenshot recording complete for ${CLASS_NAME}"

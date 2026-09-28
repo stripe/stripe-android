@@ -7,7 +7,8 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
@@ -42,9 +43,7 @@ internal class CustomerSheetAnalyticsTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -89,13 +88,13 @@ internal class CustomerSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "seti_12345"),
+            analyticsPayloadField("intent_id", "seti_12345"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.setup_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "seti_12345"),
+            analyticsPayloadField("intent_id", "seti_12345"),
         )
         validateAnalyticsRequest(eventName = "cs_add_payment_method_via_setup_intent_success")
 

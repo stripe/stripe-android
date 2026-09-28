@@ -1,11 +1,16 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 
 data class LinkControllerPlaygroundState(
     val controllerState: LinkController.State? = null,
-    val configureResult: LinkController.ConfigureResult? = null,
+    val selectedPaymentMethodPreview: LinkController.PaymentMethodPreview? = null,
+    val configureResult: Result<Unit>? = null,
     val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
+    val presentResult: LinkController.PresentResult? = null,
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
     val createPaymentMethodResult: LinkController.CreatePaymentMethodResult? = null,
     val authenticationResult: LinkController.AuthenticationResult? = null,

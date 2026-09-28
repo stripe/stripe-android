@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">A számlaszámát most nem sikerült lekérni</string>
   <string name="stripe_close_dialog_networking_desc">Ha most megszakítja, a számlája kapcsolva lesz a(z) %1$s kereskedőhöz, de nem lesz mentve a Linkben.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Ha most megszakítja, a számláját összekapcsoljuk a kereskedővel, de nem lesz mentve a Linkben.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Ha most megszakítja, a számlája összekapcsolásra kerül ezzel a vállalkozással, de nem kerül mentésre ide: %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Ha most megszakítja, a számlája összekapcsolásra kerül %1$s vállalkozással, de nem kerül mentésre ide: %2$s.</string>
   <string name="stripe_error_cta_close">Bezárás</string>
   <string name="stripe_error_cta_manual_entry">Banki adatok kézi bevitele</string>
   <string name="stripe_error_cta_retry">Próbálja újra</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Banki adatok megadása</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Mégse</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Folytatás a Linkkel</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Folytatás ezzel: %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Most nem</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Használja az előzőleg a Link számlájához mentett adatokat.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Használja az előzőleg a(z) %1$s számlájára mentett adatokat.</string>
   <string name="stripe_networking_link_login_warmup_title">Folytatás a Linkkel</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Folytatás ezzel: %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Most nem</string>
   <string name="stripe_networking_save_to_link_verification_title">Igazolja, hogy Ön az</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Másik bank választása</string>
   <string name="stripe_search">Keresés</string>
   <string name="stripe_success_pane_desc_link_error_plural">A számlái össze voltak kapcsolva, de nem lehetett elmenteni őket a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">A számlái összekapcsolásra kerültek, de nem sikerült menteni őket a következővel: %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">A számlája össze volt kapcsolva, de nem lehetett elmenteni a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">A számlája összekapcsolásra került, de azt nem sikerült menteni a következővel: %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">A számlái össze voltak kapcsolva, és mentésre kerültek a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">A számlái összekapcsolásra és mentésre kerültek a következővel: %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">A számlája össze volt kapcsolva, és mentésre került a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">A számlája összekapcsolásra és mentésre került a következővel: %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Várhatóan 1–2 napon belül megérkeznek a mikroösszegű utalások a(z) %1$s bankszámlára. A további teendőkről e-mailben tájékoztatjuk.</string>
   <string name="stripe_success_pane_desc_plural">A számlái össze voltak kapcsolva</string>
   <string name="stripe_success_pane_desc_singular">A számlája össze volt kapcsolva</string>

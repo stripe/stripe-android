@@ -10,11 +10,8 @@
 /payments-ui-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 /paymentsheet/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 /paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-
-# CardScan SDK
-/stripecardscan/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan-example/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan-tflite/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Identity SDK
 /identity/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
@@ -25,5 +22,5 @@
 /financial-connections-example/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Stripe Connect SDK
-/connect/ @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/connect-example/ @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/connect-example/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers

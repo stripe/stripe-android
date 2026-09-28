@@ -45,10 +45,11 @@ internal object CustomerSheetHacks {
         when (integration) {
             is CustomerSheetIntegration.Adapter -> {
                 val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
-                    .builder()
-                    .application(application)
-                    .adapter(integration.adapter)
-                    .build()
+                    .factory()
+                    .create(
+                        application = application,
+                        adapter = integration.adapter,
+                    )
 
                 _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
                 _paymentMethodDataSource.value = adapterDataSourceComponent.customerSheetPaymentMethodDataSource
@@ -57,10 +58,11 @@ internal object CustomerSheetHacks {
             }
             is CustomerSheetIntegration.CustomerSession -> {
                 val customerSessionDataSourceComponent = DaggerCustomerSessionDataSourceComponent
-                    .builder()
-                    .application(application)
-                    .customerSessionProvider(integration.customerSessionProvider)
-                    .build()
+                    .factory()
+                    .create(
+                        application = application,
+                        customerSessionProvider = integration.customerSessionProvider,
+                    )
 
                 _initializationDataSource.value =
                     customerSessionDataSourceComponent.customerSheetInitializationDataSource

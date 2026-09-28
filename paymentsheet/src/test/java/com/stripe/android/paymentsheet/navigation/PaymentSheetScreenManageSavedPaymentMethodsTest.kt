@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.navigation
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -79,12 +80,13 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
             paymentMethods = paymentMethods.map { paymentMethod ->
                 DisplayableSavedPaymentMethod.create(
                     displayName = paymentMethod.id.resolvableString,
-                    paymentMethod = paymentMethod
+                    paymentMethod = paymentMethod,
                 )
             },
             currentSelection = null,
             isEditing = isEditing,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
         )
     }
 }

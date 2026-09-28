@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
@@ -10,32 +9,32 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 internal fun clientAttributionMetadataParamsInPaymentMethodData(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][elements_session_config_id]"),
-            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
+            "payment_method_data[client_attribution_metadata][elements_session_config_id]",
+            "e961790f-43ed-4fcc-a534-74eeca28d042"
         ),
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][payment_intent_creation_flow]"),
-            urlEncode("standard")
+            "payment_method_data[client_attribution_metadata][payment_intent_creation_flow]",
+            "standard"
         ),
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][payment_method_selection_flow]"),
-            urlEncode("automatic")
+            "payment_method_data[client_attribution_metadata][payment_method_selection_flow]",
+            "automatic"
         ),
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][merchant_integration_source]"),
-            urlEncode("elements")
+            "payment_method_data[client_attribution_metadata][merchant_integration_source]",
+            "elements"
         ),
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][merchant_integration_subtype]"),
-            urlEncode("mobile")
+            "payment_method_data[client_attribution_metadata][merchant_integration_subtype]",
+            "mobile"
         ),
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][merchant_integration_version]"),
-            urlEncode("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+            "payment_method_data[client_attribution_metadata][merchant_integration_version]",
+            "stripe-android/${StripeSdkVersion.VERSION_NAME}"
         ),
         bodyPart(
-            urlEncode("payment_method_data[client_attribution_metadata][client_session_id]"),
-            urlEncode(AnalyticsRequestFactory.sessionId.toString())
+            "payment_method_data[client_attribution_metadata][client_session_id]",
+            AnalyticsRequestFactory.sessionId.toString()
         ),
     )
 }
@@ -43,32 +42,32 @@ internal fun clientAttributionMetadataParamsInPaymentMethodData(): RequestMatche
 internal fun topLevelClientAttributionMetadataParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(
-            urlEncode("client_attribution_metadata[elements_session_config_id]"),
-            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
+            "client_attribution_metadata[elements_session_config_id]",
+            "e961790f-43ed-4fcc-a534-74eeca28d042"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[payment_intent_creation_flow]"),
-            urlEncode("standard")
+            "client_attribution_metadata[payment_intent_creation_flow]",
+            "standard"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[payment_method_selection_flow]"),
-            urlEncode("automatic")
+            "client_attribution_metadata[payment_method_selection_flow]",
+            "automatic"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[merchant_integration_source]"),
-            urlEncode("elements")
+            "client_attribution_metadata[merchant_integration_source]",
+            "elements"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[merchant_integration_subtype]"),
-            urlEncode("mobile")
+            "client_attribution_metadata[merchant_integration_subtype]",
+            "mobile"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[merchant_integration_version]"),
-            urlEncode("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+            "client_attribution_metadata[merchant_integration_version]",
+            "stripe-android/${StripeSdkVersion.VERSION_NAME}"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[client_session_id]"),
-            urlEncode(AnalyticsRequestFactory.sessionId.toString())
+            "client_attribution_metadata[client_session_id]",
+            AnalyticsRequestFactory.sessionId.toString()
         ),
     )
 }
@@ -76,32 +75,32 @@ internal fun topLevelClientAttributionMetadataParams(): RequestMatcher {
 internal fun clientAttributionMetadataParamsForDeferredIntent(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(
-            urlEncode("client_attribution_metadata[elements_session_config_id]"),
-            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
+            "client_attribution_metadata[elements_session_config_id]",
+            "e961790f-43ed-4fcc-a534-74eeca28d042"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[payment_intent_creation_flow]"),
-            urlEncode("deferred")
+            "client_attribution_metadata[payment_intent_creation_flow]",
+            "deferred"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[payment_method_selection_flow]"),
-            urlEncode("merchant_specified")
+            "client_attribution_metadata[payment_method_selection_flow]",
+            "merchant_specified"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[merchant_integration_source]"),
-            urlEncode("elements")
+            "client_attribution_metadata[merchant_integration_source]",
+            "elements"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[merchant_integration_subtype]"),
-            urlEncode("mobile")
+            "client_attribution_metadata[merchant_integration_subtype]",
+            "mobile"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[merchant_integration_version]"),
-            urlEncode("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+            "client_attribution_metadata[merchant_integration_version]",
+            "stripe-android/${StripeSdkVersion.VERSION_NAME}"
         ),
         bodyPart(
-            urlEncode("client_attribution_metadata[client_session_id]"),
-            urlEncode(AnalyticsRequestFactory.sessionId.toString())
+            "client_attribution_metadata[client_session_id]",
+            AnalyticsRequestFactory.sessionId.toString()
         ),
     )
 }

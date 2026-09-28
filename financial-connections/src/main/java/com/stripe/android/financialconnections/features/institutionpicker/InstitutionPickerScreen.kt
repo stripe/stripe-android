@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
@@ -174,7 +175,14 @@ private fun LoadedContent(
         lazyListState = listState,
         bodyPadding = PaddingValues(horizontal = 16.dp),
     ) {
-        item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
+        item {
+            SearchTitle(
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("loaded_picker_title")
+                    .padding(horizontal = 8.dp)
+            )
+        }
         item { Spacer(modifier = Modifier.height(24.dp)) }
         stickyHeader(key = "searchRow") {
             SearchRow(
@@ -402,7 +410,7 @@ private fun ClearSearchButton(
     Box(
         Modifier
             .size(16.dp)
-            .clickable { onQueryChanged("") }
+            .clickable(role = Role.Button) { onQueryChanged("") }
             .background(
                 color = colors.textSubdued,
                 shape = CircleShape
@@ -429,6 +437,7 @@ private fun ManualEntryRow(
             .fillMaxSize()
             .clickable(
                 enabled = enabled,
+                role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onManualEntryClick
@@ -471,6 +480,7 @@ private fun SearchMoreRow(
             .fillMaxSize()
             .clickable(
                 enabled = enabled,
+                role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
@@ -509,6 +519,7 @@ private fun InstitutionResultTile(
             .testTag(institution.id)
             .clickable(
                 enabled = enabled && loading.not(),
+                role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
             ) {
@@ -566,7 +577,6 @@ private fun InstitutionResultShimmer(modifier: Modifier) {
                         .height(16.dp)
                         .clip(RoundedCornerShape(6.dp))
                         .background(shimmer)
-
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Box(

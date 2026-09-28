@@ -17,6 +17,7 @@ internal const val FIELD_COLLECT_NAME = "name"
 internal const val FIELD_COLLECT_EMAIL = "email"
 internal const val FIELD_COLLECT_PHONE = "phone"
 internal const val FIELD_COLLECT_ADDRESS = "address"
+internal const val FIELD_MERCHANT_ALLOWED_COUNTRIES = "allowed_countries"
 internal const val FIELD_EMBEDDED_PAYMENT_ELEMENT = "embedded_payment_element"
 internal const val FIELD_STYLE = "style"
 internal const val FIELD_ROW_STYLE = "row_style"
@@ -72,13 +73,16 @@ internal fun PaymentSheet.Appearance.Embedded.RowStyle.toAnalyticsValue(): Strin
 }
 
 internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
-    return mapOf(
-        FIELD_ATTACH_DEFAULTS to attachDefaultsToPaymentMethod,
-        FIELD_COLLECT_NAME to name.name,
-        FIELD_COLLECT_EMAIL to email.name,
-        FIELD_COLLECT_PHONE to phone.name,
-        FIELD_COLLECT_ADDRESS to address.name,
-    )
+    return buildMap {
+        put("attach_defaults", attachDefaultsToPaymentMethod)
+        put("name", name.name)
+        put("email", email.name)
+        put("phone", phone.name)
+        put("address", address.name)
+        if (allowedBillingCountries.isNotEmpty()) {
+            put("allowed_countries", allowedBillingCountries.joinToString(","))
+        }
+    }
 }
 
 internal fun List<CardBrand>.toAnalyticsValue(): String? {

@@ -12,11 +12,14 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
@@ -301,6 +304,12 @@ internal class GooglePayLauncherViewModel(
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = stripeAccountId,
+                    )
+                },
                 productUsage = productUsageTokens
             )
 
@@ -310,8 +319,11 @@ internal class GooglePayLauncherViewModel(
                 billingAddressParameters = args.config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
+                googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
                 errorReporter = errorReporter,
-                logger = logger
+                logger = logger,
+                cardFundingFilter = DefaultCardFundingFilter,
+                cardBrandFilter = DefaultCardBrandFilter
             )
 
             return GooglePayLauncherViewModel(

@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Ο αριθμός λογαριασμού σας δεν μπορεί να προσπελαστεί αυτή τη στιγμή</string>
   <string name="stripe_close_dialog_networking_desc">Αν ακυρώσετε τώρα, ο λογαριασμός σας θα συνδεθεί με την %1$s αλλά δε θα αποθηκευτεί στο Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Αν ακυρώσετε τώρα, ο λογαριασμός σας θα συνδεθεί με αυτήν την επιχείρηση αλλά δε θα αποθηκευτεί στο Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Αν ακυρώσετε τώρα, ο λογαριασμός σας θα συνδεθεί με αυτήν την επιχείρηση, αλλά δεν θα αποθηκευτεί σε %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Αν ακυρώσετε τώρα, ο λογαριασμός σας θα συνδεθεί με %1$s αλλά δεν θα αποθηκευτεί σε %2$s.</string>
   <string name="stripe_error_cta_close">Κλείσιμο</string>
   <string name="stripe_error_cta_manual_entry">Εισαγάγετε στοιχεία τράπεζας με μη αυτόματο τρόπο</string>
   <string name="stripe_error_cta_retry">Δοκιμάστε ξανά</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Εισαγάγετε στοιχεία τράπεζας</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Ακύρωση</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Συνέχεια με το Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Συνέχεια με %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Όχι τώρα</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Χρησιμοποιήστε τα στοιχεία που είχατε αποθηκεύσει προηγουμένως με τον λογαριασμό σας στο Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Χρησιμοποιήστε τα στοιχεία που είχατε αποθηκεύσει προηγουμένως με τον λογαριασμό σας %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Συνέχεια με το Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Συνέχεια με %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Όχι τώρα</string>
   <string name="stripe_networking_save_to_link_verification_title">Επιβεβαιώστε ότι είστε εσείς</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Επιλέξτε διαφορετική τράπεζα</string>
   <string name="stripe_search">Αναζήτηση</string>
   <string name="stripe_success_pane_desc_link_error_plural">Οι λογαριασμοί σας συνδέθηκαν, αλλά δεν ήταν δυνατή η αποθήκευσή τους με το Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Οι λογαριασμοί σας ήταν συνδεδεμένοι, αλλά δεν ήταν δυνατή η αποθήκευση τους σε %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Ο λογαριασμός σας συνδέθηκε, αλλά δεν ήταν δυνατή η αποθήκευσή του με το Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Ο λογαριασμός σας συνδέθηκε, αλλά δεν ήταν δυνατή η αποθήκευση του σε %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Οι λογαριασμοί σας συνδέθηκαν και αποθηκεύτηκαν με το Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Οι λογαριασμοί σας συνδέθηκαν και αποθηκεύτηκαν με %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Ο λογαριασμός σας συνδέθηκε και αποθηκεύτηκε με το Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Ο λογαριασμός σας συνδέθηκε και αποθηκεύτηκε με %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Μπορείτε να αναμένετε μικροκαταθέσεις στον λογαριασμό ••••%1$s σε 1–2 ημέρες και ένα email με περαιτέρω οδηγίες.</string>
   <string name="stripe_success_pane_desc_plural">Οι λογαριασμοί σας συνδέθηκαν</string>
   <string name="stripe_success_pane_desc_singular">Ο λογαριασμός σας συνδέθηκε</string>

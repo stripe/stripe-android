@@ -9,6 +9,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
@@ -32,7 +33,9 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `performNextActionOnResumed uses Modern starter when launcher is set`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                apiConfigProvider = {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
                 uiContext = testDispatcher,
                 productUsageTokens = PRODUCT_USAGE
             )
@@ -56,7 +59,12 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             )
 
             val launchArgs = awaitLaunchCall() as IntentConfirmationChallengeActivityContract.Args
-            assertThat(launchArgs.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            assertThat(launchArgs.apiConfiguration).isEqualTo(
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                )
+            )
             assertThat(launchArgs.intent).isEqualTo(paymentIntent)
         }
     }
@@ -64,7 +72,9 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     @Test
     fun `performNextActionOnResumed uses Legacy starter when launcher is null`() = runTest {
         val handler = IntentConfirmationChallengeNextActionHandler(
-            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            apiConfigProvider = {
+                ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            },
             uiContext = testDispatcher,
             productUsageTokens = PRODUCT_USAGE
         )
@@ -87,7 +97,9 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `onNewActivityResultCaller registers for activity result and handles Success`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                apiConfigProvider = {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
                 uiContext = testDispatcher,
                 productUsageTokens = PRODUCT_USAGE
             )
@@ -121,7 +133,9 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `onNewActivityResultCaller registers for activity result and handles Failed`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                apiConfigProvider = {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
                 uiContext = testDispatcher,
                 productUsageTokens = PRODUCT_USAGE
             )
@@ -139,6 +153,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             // Simulate failed result
             val testError = Throwable("Test error")
             val failedResult = IntentConfirmationChallengeActivityResult.Failed(
+                clientSecret = null,
                 error = testError
             )
             val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
@@ -153,10 +168,46 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     }
 
     @Test
+    fun `onNewActivityResultCaller registers for activity result and handles Canceled`() = runTest {
+        DummyActivityResultCaller.test {
+            val handler = IntentConfirmationChallengeNextActionHandler(
+                apiConfigProvider = {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
+                uiContext = testDispatcher,
+                productUsageTokens = PRODUCT_USAGE
+            )
+
+            val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
+            handler.onNewActivityResultCaller(
+                activityResultCaller = activityResultCaller,
+                activityResultCallback = { result -> resultCallback.add(result) }
+            )
+
+            val registerCall = awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+            assertThat(registerCall.contract).isInstanceOf(IntentConfirmationChallengeActivityContract::class.java)
+
+            // Simulate canceled result
+            val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
+            callback.onActivityResult(
+                IntentConfirmationChallengeActivityResult.Canceled(clientSecret = "pi_test_secret")
+            )
+
+            assertThat(resultCallback).hasSize(1)
+            val capturedResult = resultCallback[0]
+            assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
+            assertThat(capturedResult.exception).isNull()
+        }
+    }
+
+    @Test
     fun `onNewActivityResultCaller sets the launcher on handler`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                apiConfigProvider = {
+                    ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+                },
                 uiContext = testDispatcher,
                 productUsageTokens = PRODUCT_USAGE
             )
@@ -173,7 +224,11 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
 
     private fun createTestPaymentIntent(): PaymentIntent {
         return PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            nextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+            nextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                    captchaVendorName = "hcaptcha"
+                )
+            )
         )
     }
 

@@ -10,6 +10,7 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
     data class ScanStartedCall(val implementation: String)
     data class ApiCheckSucceededCall(val implementation: String)
     data class ApiCheckFailedCall(val implementation: String, val error: Throwable?)
+    data object ScanButtonShownCall
 
     private val _scanCancelledCalls = Turbine<ScanCancelledCall>()
     val scanCancelledCalls: ReceiveTurbine<ScanCancelledCall> = _scanCancelledCalls
@@ -29,6 +30,9 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
     private val _apiCheckFailedCalls = Turbine<ApiCheckFailedCall>()
     val apiCheckFailedCalls: ReceiveTurbine<ApiCheckFailedCall> = _apiCheckFailedCalls
 
+    private val _scanButtonShownCalls = Turbine<ScanButtonShownCall>()
+    val scanButtonShownCalls: ReceiveTurbine<ScanButtonShownCall> = _scanButtonShownCalls
+
     fun validate() {
         _scanCancelledCalls.ensureAllEventsConsumed()
         _scanFailedCalls.ensureAllEventsConsumed()
@@ -36,6 +40,7 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
         _scanStartedCalls.ensureAllEventsConsumed()
         _apiCheckSucceededCalls.ensureAllEventsConsumed()
         _apiCheckFailedCalls.ensureAllEventsConsumed()
+        _scanButtonShownCalls.ensureAllEventsConsumed()
     }
 
     override fun onCardScanCancelled(implementation: String) {
@@ -60,5 +65,9 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
 
     override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
         _apiCheckFailedCalls.add(ApiCheckFailedCall(implementation, error))
+    }
+
+    override fun onCardScanButtonShown() {
+        _scanButtonShownCalls.add(ScanButtonShownCall)
     }
 }

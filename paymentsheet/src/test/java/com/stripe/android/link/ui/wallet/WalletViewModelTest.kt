@@ -31,13 +31,16 @@ import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -54,7 +57,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -65,16 +67,25 @@ class WalletViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
         val linkAccountManager = WalletLinkAccountManager()
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        )
 
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
         )
 
         assertThat(linkAccountManager.listPaymentDetailsCalls)
-            .containsExactly(TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet())
+            .containsExactly(setOf(ConsumerPaymentDetails.Card.TYPE))
 
         val state = viewModel.uiState.value
 
@@ -84,7 +95,7 @@ class WalletViewModelTest {
                 email = "email@stripe.com",
                 allowLogOut = true,
                 selectedItemId = null,
-                cardBrandFilter = TestFactory.LINK_CONFIGURATION.cardBrandFilter,
+                cardBrandFilter = configuration.cardBrandFilter,
                 isProcessing = false,
                 hasCompleted = false,
                 userSetIsExpanded = false,
@@ -99,6 +110,8 @@ class WalletViewModelTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                linkBrand = LinkBrand.Link,
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())
@@ -144,9 +157,16 @@ class WalletViewModelTest {
             navScreen = screen
         }
 
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        )
+
         createViewModel(
             linkAccountManager = linkAccountManager,
-            navigateAndClearStack = ::navigateAndClearStack
+            navigateAndClearStack = ::navigateAndClearStack,
+            configuration = configuration,
         )
 
         assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
@@ -185,6 +205,7 @@ class WalletViewModelTest {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
+                    preCollectedConsent = null,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
@@ -303,9 +324,7 @@ class WalletViewModelTest {
                 linkAccount = account,
                 configuration = configuration.copy(stripeIntent = stripeIntent.copy(linkFundingSources = emptyList()))
             ).uiState.value.addPaymentMethodOptions
-        ).containsExactly(
-            AddPaymentMethodOption.Card, // Card is available by default.
-        )
+        ).isEmpty()
     }
 
     @Test
@@ -331,8 +350,11 @@ class WalletViewModelTest {
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("12", isComplete = false))
 
-        viewModel.expiryDateController.onRawValueChange("12/25")
-        assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("1225", isComplete = true))
+        val futureYear = getTwoDigitFutureYear()
+
+        viewModel.expiryDateController.onRawValueChange("12/$futureYear")
+        assertThat(viewModel.uiState.value.expiryDateInput)
+            .isEqualTo(FormFieldEntry("12$futureYear", isComplete = true))
     }
 
     @Test
@@ -352,10 +374,13 @@ class WalletViewModelTest {
     fun `expiryDateController and cvcController reset when new item is selected`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
-        viewModel.expiryDateController.onRawValueChange("12/25")
+        val futureYear = getTwoDigitFutureYear()
+
+        viewModel.expiryDateController.onRawValueChange("12/$futureYear")
         viewModel.cvcController.onRawValueChange("123")
 
-        assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("1225", isComplete = true))
+        assertThat(viewModel.uiState.value.expiryDateInput)
+            .isEqualTo(FormFieldEntry("12$futureYear", isComplete = true))
         assertThat(viewModel.uiState.value.cvcInput).isEqualTo(FormFieldEntry("123", isComplete = true))
 
         val newCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "new_card_id")
@@ -599,10 +624,10 @@ class WalletViewModelTest {
         val linkAccountManager = object : WalletLinkAccountManager() {
             override suspend fun updatePaymentDetails(
                 updateParams: ConsumerPaymentDetailsUpdateParams,
-                billingPhone: String?
+                phone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(CARD_PROCESSING_DELAY)
-                return super.updatePaymentDetails(updateParams, billingPhone)
+                return super.updatePaymentDetails(updateParams, phone)
             }
         }
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -951,6 +976,9 @@ class WalletViewModelTest {
             true to resolvableString(R.string.stripe_wallet_prefer_debit_card_hint),
         ).forEach { (enableHint, expectedHint) ->
             val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                    linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+                ),
                 flags = mapOf("link_show_prefer_debit_card_hint" to enableHint)
             )
 
@@ -965,67 +993,14 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `marks auto-selection attempted when skipWalletInFlowController is enabled`() = runTest(dispatcher) {
-        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
-
-        val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
-        )
-
-        val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            skipWalletInFlowController = true
-        )
-
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            configuration = configuration,
-            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
-        )
-
-        // Wait for async operations to complete
-        advanceUntilIdle()
-
-        // Verify auto-selection was attempted
-        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isTrue()
-    }
-
-    @Test
-    fun `does not auto-select when skipWalletInFlowController is disabled`() = runTest(dispatcher) {
-        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
-
-        val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
-        )
-
-        val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            skipWalletInFlowController = false // Disabled
-        )
-
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            configuration = configuration,
-            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
-        )
-
-        // Wait for async operations to complete
-        advanceUntilIdle()
-
-        // Verify auto-selection was NOT attempted when flag is disabled
-        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isFalse()
-        assertThat(viewModel.uiState.value.isAutoSelecting).isFalse()
-    }
-
-    @Test
     fun `secondaryButtonLabel is present based on shouldShowSecondaryCta`() = runTest(dispatcher) {
         val launchMode = LinkLaunchMode.PaymentMethodSelection(
             selectedPayment = null,
-            shouldShowSecondaryCta = true
+            canContinueWithoutLink = true
         )
         listOf(
             launchMode to resolvableString(R.string.stripe_wallet_continue_another_way),
-            launchMode.copy(shouldShowSecondaryCta = false) to null,
+            launchMode.copy(canContinueWithoutLink = false) to null,
         ).forEach { (mode, expected) ->
             assertThat(createViewModel(linkLaunchMode = mode).uiState.value.secondaryButtonLabel)
                 .isEqualTo(expected)
@@ -1039,7 +1014,7 @@ class WalletViewModelTest {
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.Card
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             )
         )
 
@@ -1054,7 +1029,7 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilter = null)
+            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilters = null)
         )
 
         advanceUntilIdle()
@@ -1069,12 +1044,19 @@ class WalletViewModelTest {
             ConsumerPaymentDetails(paymentDetails = listOf(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT))
         )
 
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        )
+
         var navigatedScreen: LinkScreen? = null
 
         createViewModel(
             linkAccountManager = linkAccountManager,
+            configuration = configuration,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.Card
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             ),
             navigateAndClearStack = { screen -> navigatedScreen = screen }
         )
@@ -1102,7 +1084,7 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
             navigateAndClearStack = {}
         )
@@ -1128,7 +1110,7 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
             dismissWithResult = { result -> dismissResult = result }
         )
@@ -1177,10 +1159,10 @@ class WalletViewModelTest {
 
     private fun createPaymentMethodSelectionMode(
         selectedPayment: ConsumerPaymentDetails.PaymentDetails? = null,
-        paymentMethodFilter: LinkPaymentMethodFilter? = null
+        paymentMethodFilters: List<LinkPaymentMethodFilter>? = null
     ) = LinkLaunchMode.PaymentMethodSelection(
         selectedPayment = selectedPayment,
-        paymentMethodFilter = paymentMethodFilter
+        paymentMethodFilters = paymentMethodFilters
     )
 
     private fun createViewModel(
@@ -1216,7 +1198,7 @@ class WalletViewModelTest {
                 configuration = configuration,
                 linkLaunchMode = linkLaunchMode
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private suspend fun testAddBankAccount(

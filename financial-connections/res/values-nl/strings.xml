@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">We hebben op dit moment geen toegang tot je rekeningnummer</string>
   <string name="stripe_close_dialog_networking_desc">Als je nu annuleert, wordt je rekening gekoppeld aan %1$s, maar niet opgeslagen in Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Als je nu annuleert, wordt je rekening gekoppeld aan deze onderneming, maar niet opgeslagen in Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Als je nu annuleert, wordt je account gekoppeld aan deze onderneming, maar niet opgeslagen in %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Als je nu annuleert, wordt je account gekoppeld aan %1$s, maar niet opgeslagen in %2$s.</string>
   <string name="stripe_error_cta_close">Sluiten</string>
   <string name="stripe_error_cta_manual_entry">Voer de bankgegevens handmatig in</string>
   <string name="stripe_error_cta_retry">Opnieuw proberen</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Bankgegevens invoeren</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Annuleren</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Doorgaan met Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Doorgaan met %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Niet nu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Gebruik informatie die je eerder hebt opgeslagen met je Link-account.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Gebruik gegevens die je eerder hebt opgeslagen met je %1$s-account.</string>
   <string name="stripe_networking_link_login_warmup_title">Doorgaan met Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Doorgaan met %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Niet nu</string>
   <string name="stripe_networking_save_to_link_verification_title">Bevestig dat jij het bent</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Een andere bank kiezen</string>
   <string name="stripe_search">Zoeken</string>
   <string name="stripe_success_pane_desc_link_error_plural">Je rekeningen zijn gekoppeld, maar kunnen niet worden opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Je accounts zijn gekoppeld, maar kunnen niet worden opgeslagen met %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Je rekening is gekoppeld, maar kan niet worden opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Je account is gekoppeld, maar kan niet worden opgeslagen met %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Je rekeningen zijn gekoppeld en opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Je accounts zijn gekoppeld en opgeslagen met %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Je rekening is gekoppeld en opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Je account is gekoppeld en opgeslagen met %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Er worden binnen 1-2 dagen microstortingen gedaan op rekening ••••%1$s. Je ontvangt vervolgens een e-mail met verdere instructies.</string>
   <string name="stripe_success_pane_desc_plural">Je rekeningen zijn gekoppeld</string>
   <string name="stripe_success_pane_desc_singular">Je rekening is gekoppeld</string>

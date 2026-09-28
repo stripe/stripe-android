@@ -102,6 +102,7 @@ class CurrencyFormatterTest {
     @Test
     fun `HUF is effectively 0 decimal places, but Stripe treats it as 2`() {
         val amountCurrency = Currency.getInstance("HUF")
+        assertThat(CurrencyFormatter.getDefaultDecimalDigits(amountCurrency)).isEqualTo(2)
         assertThat(
             CurrencyFormatter.format(
                 123412L,
@@ -109,7 +110,7 @@ class CurrencyFormatterTest {
                 LOCALE_WITH_3_DECIMAL_CURRENCY
             )
         )
-            .isEqualTo("HUF 1,234.12")
+            .isEqualTo("HUF 1,234.12")
     }
 
     @Test
@@ -122,7 +123,7 @@ class CurrencyFormatterTest {
                 LOCALE_WITH_3_DECIMAL_CURRENCY
             )
         )
-            .isEqualTo("UGX 1,234.12")
+            .isEqualTo("UGX 1,234.12")
     }
 
     @Test
@@ -142,7 +143,7 @@ class CurrencyFormatterTest {
                 LOCALE_WITH_3_DECIMAL_CURRENCY
             )
         )
-            .isEqualTo("US$ 1,234.12")
+            .isEqualTo("US$ 1,234.12")
     }
 
     @Test
@@ -187,7 +188,7 @@ class CurrencyFormatterTest {
                 Locale("is-IS", "IS")
             )
         )
-            .isEqualTo("US$ 1,234.12")
+            .isEqualTo("US\$ 1,234.12")
     }
 
     @Test
@@ -211,7 +212,7 @@ class CurrencyFormatterTest {
                 LOCALE_AUSTRALIA_LANGUAGE_COUNTRY
             )
         )
-            .isEqualTo("US$ 1,234.12")
+            .isEqualTo("US$ 1,234.12")
 
         assertThat(
             CurrencyFormatter.format(

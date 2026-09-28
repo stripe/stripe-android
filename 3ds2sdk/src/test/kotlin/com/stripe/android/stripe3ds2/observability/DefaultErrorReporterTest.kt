@@ -76,7 +76,7 @@ class DefaultErrorReporterTest {
             reporter.createSentryAuthHeader()
         ).isEqualTo(
             "Sentry sentry_key=abc, sentry_version=7, sentry_timestamp=1600103536.978037, " +
-                "sentry_client=Android3ds2Sdk $VERSION_NAME, sentry_secret=def"
+                "sentry_client=Android3ds2Sdk $VERSION_NAME"
         )
     }
 
@@ -109,8 +109,7 @@ class DefaultErrorReporterTest {
 
     private class FakeSentryConfig : SentryConfig {
         override val projectId: String = "123"
-        override val key: String = "abc"
-        override val secret: String = "def"
+        override val publicKey: String = "abc"
         override val version: String = "7"
 
         override fun getTimestamp(): String = "1600103536.978037"

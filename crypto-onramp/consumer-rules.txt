@@ -1,0 +1,59 @@
+# Samsung Pay 2.22.00 is an optional, client-supplied SDK accessed through reflection.
+# Keep only the API surface used by the crypto-onramp reflection adapter.
+-keep class com.samsung.android.sdk.samsungpay.v2.PartnerInfo {
+    public <init>(java.lang.String, android.os.Bundle);
+}
+-keep class com.samsung.android.sdk.samsungpay.v2.SpaySdk {
+    public static final int ERROR_USER_CANCELED;
+    public static final int ERROR_SPAY_SETUP_NOT_COMPLETED;
+    public static final int ERROR_SPAY_APP_NEED_TO_UPDATE;
+    public static final int SPAY_NOT_SUPPORTED;
+    public static final int SPAY_NOT_READY;
+    public static final int SPAY_READY;
+    public static final int SPAY_NOT_ALLOWED_TEMPORALLY;
+    public static final java.lang.String EXTRA_ERROR_REASON;
+    public static final java.lang.String PARTNER_SERVICE_TYPE;
+    public static final java.lang.String PARTNER_SDK_API_LEVEL;
+}
+-keep enum com.samsung.android.sdk.samsungpay.v2.SpaySdk$ServiceType { *; }
+-keep enum com.samsung.android.sdk.samsungpay.v2.SpaySdk$SdkApiLevel { *; }
+-keep enum com.samsung.android.sdk.samsungpay.v2.SpaySdk$Brand { *; }
+-keep class com.samsung.android.sdk.samsungpay.v2.SamsungPay {
+    public <init>(android.content.Context, com.samsung.android.sdk.samsungpay.v2.PartnerInfo);
+    public void getSamsungPayStatus(com.samsung.android.sdk.samsungpay.v2.StatusListener);
+}
+-keep interface com.samsung.android.sdk.samsungpay.v2.StatusListener { *; }
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.PaymentManager {
+    public <init>(android.content.Context, com.samsung.android.sdk.samsungpay.v2.PartnerInfo);
+    public void startInAppPayWithCustomSheet(...);
+    public void updateSheet(com.samsung.android.sdk.samsungpay.v2.payment.sheet.CustomSheet);
+}
+-keep interface com.samsung.android.sdk.samsungpay.v2.payment.PaymentManager$CustomSheetTransactionInfoListener { *; }
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo$Builder {
+    public <init>();
+    public * setMerchantId(java.lang.String);
+    public * setMerchantName(java.lang.String);
+    public * setOrderNumber(java.lang.String);
+    public * setAddressInPaymentSheet(com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo$AddressInPaymentSheet);
+    public * setAllowedCardBrands(java.util.List);
+    public * setCardHolderNameEnabled(boolean);
+    public * setRecurringEnabled(boolean);
+    public * setCustomSheet(com.samsung.android.sdk.samsungpay.v2.payment.sheet.CustomSheet);
+    public * setExtraPaymentInfo(android.os.Bundle);
+    public com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo build();
+}
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo
+-keep enum com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo$AddressInPaymentSheet { *; }
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.sheet.CustomSheet {
+    public <init>();
+    public void addControl(com.samsung.android.sdk.samsungpay.v2.payment.sheet.SheetControl);
+}
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.sheet.SheetControl
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.sheet.AmountBoxControl {
+    public <init>(java.lang.String, java.lang.String);
+    public void addItem(java.lang.String, java.lang.String, double, java.lang.String);
+    public void setAmountTotal(double, java.lang.String);
+}
+-keep class com.samsung.android.sdk.samsungpay.v2.payment.sheet.AmountConstants {
+    public static final java.lang.String FORMAT_TOTAL_PRICE_ONLY;
+}

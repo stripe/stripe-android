@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -61,7 +62,7 @@ class HCaptchaConfirmationInterceptorTest {
     ): ConfirmSetupIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                         currency = "usd",
@@ -90,9 +91,10 @@ class HCaptchaConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = SetupIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
             ),
             shippingValues = null,
         )
@@ -104,7 +106,7 @@ class HCaptchaConfirmationInterceptorTest {
     ): ConfirmPaymentIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -133,9 +135,10 @@ class HCaptchaConfirmationInterceptorTest {
         val nextStep = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
             ),
             shippingValues = null,
         )

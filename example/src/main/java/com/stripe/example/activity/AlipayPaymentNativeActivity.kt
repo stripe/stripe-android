@@ -2,6 +2,9 @@ package com.stripe.example.activity
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Observer
 import com.alipay.sdk.app.PayTask
 import com.stripe.android.ApiResultCallback
@@ -36,6 +39,12 @@ class AlipayPaymentNativeActivity : StripeIntentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(top = insets.top, bottom = insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         viewBinding.confirmWithPaymentButton.text =
             resources.getString(R.string.confirm_alipay_button)

@@ -6,7 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
@@ -122,6 +124,23 @@ interface PaymentLauncher {
         ).create(publishableKey, stripeAccountId)
 
         /**
+         * Create a [PaymentLauncher] instance with [ComponentActivity].
+         *
+         * This API registers an [ActivityResultLauncher] into the [ComponentActivity], it needs
+         * to be called before the [ComponentActivity] is created.
+         *
+         * The publishable key and Stripe account ID are read lazily from [PaymentConfiguration].
+         */
+        @JvmStatic
+        fun create(
+            activity: ComponentActivity,
+            callback: PaymentResultCallback
+        ) = PaymentLauncherFactory(
+            activity = activity,
+            callback = callback.toInternalResultCallback()
+        ).create(activity.applicationContext)
+
+        /**
          * Create a [PaymentLauncher] used for Jetpack Compose.
          *
          * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
@@ -202,5 +221,38 @@ fun rememberPaymentLauncher(
             hostActivityLauncher = activityResultLauncher,
             statusBarColor = activity?.window?.statusBarColor,
         ).create(publishableKey, stripeAccountId)
+    }
+}
+
+/**
+ * Creates a [PaymentLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * The publishable key and Stripe account ID are read lazily from [PaymentConfiguration].
+ *
+ * @param callback Called with the result of the payment operation
+ */
+@Composable
+fun rememberPaymentLauncher(
+    callback: PaymentLauncher.PaymentResultCallback
+): PaymentLauncher {
+    val activity = rememberActivityOrNull()
+    val context = LocalContext.current.applicationContext
+
+    val launcherCallback = remember(callback) {
+        callback.toInternalResultCallback()
+    }
+
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        PaymentLauncherContract(),
+        launcherCallback::onPaymentResult
+    )
+
+    return remember {
+        PaymentLauncherFactory(
+            hostActivityLauncher = activityResultLauncher,
+            statusBarColor = activity?.window?.statusBarColor,
+        ).create(context)
     }
 }

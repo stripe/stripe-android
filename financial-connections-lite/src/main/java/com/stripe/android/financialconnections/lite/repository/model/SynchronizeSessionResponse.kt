@@ -13,10 +13,8 @@ internal data class SynchronizeSessionResponse(
 internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "cancel_url")
     val cancelUrl: String? = null,
-
     @SerialName(value = "hosted_auth_url")
     val hostedAuthUrl: String? = null,
-
     @SerialName(value = "success_url")
     val successUrl: String? = null,
 )

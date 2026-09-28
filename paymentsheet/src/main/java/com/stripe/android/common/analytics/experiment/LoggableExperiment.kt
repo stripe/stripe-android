@@ -1,6 +1,10 @@
 package com.stripe.android.common.analytics.experiment
 
+import com.stripe.android.common.nfcscan.analytics.NfcScanningExperimentDimensions
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.utils.filterNotNullValues
 
 /**
@@ -12,6 +16,7 @@ internal sealed class LoggableExperiment(
     open val group: String,
     open val dimensions: Map<String, String>
 ) {
+
     data class LinkHoldback(
         override val arbId: String,
         override val group: String,
@@ -60,4 +65,55 @@ internal sealed class LoggableExperiment(
             ).joinToString(" ")
         }
     }
+
+    data class ConnectionsFCLiteVsNative(
+        override val arbId: String,
+        override val group: String,
+        override val experiment: ExperimentAssignment,
+        val elementsSessionId: String,
+        val mobileSessionId: String,
+        val mobileSdkVersion: String,
+        val fcSdkAvailability: String,
+        val availableLpms: String,
+    ) : LoggableExperiment(
+        arbId = arbId,
+        group = group,
+        experiment = experiment,
+        dimensions = mapOf(
+            "elements_session_id" to elementsSessionId,
+            "mobile_session_id" to mobileSessionId,
+            "mobile_sdk_version" to mobileSdkVersion,
+            "fc_sdk_availability" to fcSdkAvailability,
+            "available_lpms" to availableLpms,
+        )
+    )
+
+    data class OcsMobilePaymentMethodMessagingPromotions(
+        val experimentsData: ElementsSession.ExperimentsData,
+        override val group: String,
+        val metadata: PaymentMethodMetadata,
+        val mode: EventReporter.Mode,
+        val layout: String,
+    ) : LoggableExperiment(
+        arbId = experimentsData.arbId,
+        experiment = ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS,
+        group = group,
+        dimensions = CommonElementsDimensions.getDimensions(metadata, mode) + mapOf(
+            "in_app_elements_layout" to layout,
+        ).filterNotNullValues()
+    )
+
+    data class OcsMobileNfcScanningFeatureHoldback(
+        val experimentsData: ElementsSession.ExperimentsData,
+        override val group: String,
+        val canUseNfcScanner: Boolean,
+        val metadata: PaymentMethodMetadata,
+        val mode: EventReporter.Mode,
+    ) : LoggableExperiment(
+        arbId = experimentsData.arbId,
+        experiment = ExperimentAssignment.OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK,
+        group = group,
+        dimensions = CommonElementsDimensions.getDimensions(metadata, mode) +
+            NfcScanningExperimentDimensions.getDimensions(canUseNfcScanner, metadata),
+    )
 }

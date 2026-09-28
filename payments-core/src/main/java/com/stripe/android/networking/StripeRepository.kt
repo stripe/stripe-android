@@ -2,11 +2,13 @@ package com.stripe.android.networking
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -19,8 +21,6 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.MobileCardElementConfig
@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -147,6 +148,12 @@ interface StripeRepository {
         options: ApiRequest.Options,
     ): Result<Customer>
 
+    suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options,
+    ): Result<PaymentMethod>
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createToken(
         tokenParams: TokenParams,
@@ -205,8 +212,17 @@ interface StripeRepository {
     suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun setDefaultCustomerSource(
@@ -401,10 +417,13 @@ interface StripeRepository {
     ): Result<PaymentMethodMessage>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options,
-    ): Result<ElementsSession>
+    suspend fun retrievePaymentMethodMessagePromotionsForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveCardMetadata(
@@ -444,6 +463,20 @@ interface StripeRepository {
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentIntent>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String

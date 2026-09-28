@@ -3,11 +3,19 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -21,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -32,6 +41,7 @@ import org.junit.Test
 internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
@@ -82,6 +92,48 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     }
 
     @Test
+    fun displaysScannedCardPill() {
+        val metadata = PaymentMethodMetadataFactory.create()
+
+        val state = createState(
+            metadata = metadata,
+            previousPaymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                code = "card",
+                billingDetails = null,
+                requiresMandate = false,
+                productUsage = emptySet(),
+                overrideParamMap = mapOf(
+                    "type" to "card",
+                    "card" to mapOf(
+                        "number" to "4242424242424242",
+                        "exp_month" to "07",
+                        "exp_year" to "2050",
+                    ),
+                ),
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+                    paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                    paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+                    checkoutSessionId = null,
+                )
+            ),
+            previousPaymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                fromValidatedScan = true,
+            )
+        )
+
+        val interactor = FakeAddPaymentMethodInteractor(initialState = state)
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
     fun displaysError() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState())
@@ -112,7 +164,8 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
 
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
-                state = LinkButtonState.Email("email@email.com"),
+                state = LinkButtonState.Email(email = "email@email.com"),
+                linkBrand = LinkBrand.Link
             ),
             googlePay = null,
             buttonsEnabled = true,
@@ -120,6 +173,8 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
             onLinkPressed = {},
             onGooglePayPressed = {},
             walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         customPrimaryButtonHeightPaparazziRule.snapshot {

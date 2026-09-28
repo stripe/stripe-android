@@ -3,16 +3,20 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.LinkSignupDisabledReason
@@ -26,8 +30,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -57,6 +61,8 @@ class DefaultAnalyticsMetadataFactoryTest {
 
         assertThat(resultMap["google_pay_enabled"]).isEqualTo(false)
 
+        assertThat(resultMap["tap_to_add_available"]).isEqualTo(false)
+
         assertThat(resultMap["link_enabled"]).isEqualTo(false)
 
         assertThat(resultMap["set_as_default_enabled"]).isEqualTo(false)
@@ -68,6 +74,23 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
         assertThat(appearance).doesNotContainKey("embedded_payment_element")
+    }
+
+    @Test
+    fun `create returns ECE configuration analytics metadata`() = runScenario {
+        val commonConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                paymentMethodOrder = listOf("link", "card"),
+            )
+        ).commonConfiguration
+
+        val resultMap = createAnalyticsMetadata(
+            configuration = PaymentElementLoader.Configuration.ExpressCheckoutElement(commonConfiguration)
+        )
+
+        val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
+        assertThat(mpeConfig?.get("payment_method_order")).isEqualTo("link,card")
     }
 
     @Test
@@ -123,7 +146,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -149,7 +172,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -184,7 +207,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -252,6 +275,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(billingConfig?.get("email")).isEqualTo("Automatic")
         assertThat(billingConfig?.get("phone")).isEqualTo("Automatic")
         assertThat(billingConfig?.get("address")).isEqualTo("Automatic")
+        assertThat(billingConfig?.get("allowed_countries")).isNull()
     }
 
     @Test
@@ -264,6 +288,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = true,
+                allowedCountries = setOf("US", "CA", "UK", "JP")
             )
         )
 
@@ -281,6 +306,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(billingConfig?.get("email")).isEqualTo("Never")
         assertThat(billingConfig?.get("phone")).isEqualTo("Always")
         assertThat(billingConfig?.get("address")).isEqualTo("Full")
+        assertThat(billingConfig?.get("allowed_countries")).isEqualTo("US,CA,UK,JP")
     }
 
     @Test
@@ -494,7 +520,6 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(mpeConfig?.get("external_payment_methods")).isEqualTo("external_pm1,external_pm2")
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `create returns custom payment methods`() = runScenario {
         val customPaymentMethod = ElementsSession.CustomPaymentMethod.Available(
@@ -554,6 +579,44 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(resultMap).containsKey("mpe_config")
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         assertThat(mpeConfig?.get("preferred_networks")).isEqualTo("cartes_bancaires,visa")
+    }
+
+    @Test
+    fun `create returns true for tap_to_add_available when isTapToAddAvailable is true`() = runScenario {
+        val isTapToAddAvailableMetadata = createAnalyticsMetadata(isTapToAddAvailable = true)["tap_to_add_available"]
+
+        assertThat(isTapToAddAvailableMetadata).isEqualTo(true)
+    }
+
+    @Test
+    fun `create returns false for card_funding_acceptance when using default all types`() = cardFundingAcceptanceTest(
+        expectedAnswer = false
+    )
+
+    @Test
+    fun `create returns true for card_funding_acceptance when customized`() = cardFundingAcceptanceTest(
+        cardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit, PaymentSheet.CardFundingType.Credit),
+        expectedAnswer = true
+    )
+
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    private fun cardFundingAcceptanceTest(
+        cardFundingTypes: List<PaymentSheet.CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
+        expectedAnswer: Boolean
+    ) = runScenario {
+        val configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Test Merchant")
+            .allowedCardFundingTypes(cardFundingTypes)
+            .build()
+        val resultMap = createAnalyticsMetadata(
+            configuration = PaymentElementLoader.Configuration.PaymentSheet(configuration = configuration)
+        )
+
+        assertThat(getMpeConfigValue(resultMap, "card_funding_acceptance")).isEqualTo(expectedAnswer)
+    }
+
+    private fun getMpeConfigValue(resultMap: Map<String, Any?>, key: String): Any? {
+        val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
+        return mpeConfig?.get(key)
     }
 
     @Test
@@ -625,6 +688,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             configuration = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName = "Test Merchant")
                 .build(),
             isRowSelectionImmediateAction = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
         val resultMap = createAnalyticsMetadata(
             configuration = configuration
@@ -659,6 +723,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 )
                 .build(),
             isRowSelectionImmediateAction = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
         val resultMap = createAnalyticsMetadata(
             configuration = configuration
@@ -672,6 +737,20 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(embeddedAppearance?.get("style")).isEqualTo(true)
         assertThat(embeddedAppearance?.get("row_style")).isEqualTo("floating_button")
         assertThat(appearance?.get("usage")).isEqualTo(true)
+    }
+
+    @Test
+    fun `create returns true for link_native_available when native link is available`() = runScenario {
+        val fakeLinkGate = FakeLinkGate().apply {
+            setUseNativeLink(true)
+        }
+        val linkGateFactory = FakeLinkGate.Factory(fakeLinkGate)
+
+        val resultMap = createAnalyticsMetadata(
+            linkGateFactory = linkGateFactory
+        )
+
+        assertThat(resultMap["link_native_available"]).isEqualTo(true)
     }
 
     private fun runScenario(
@@ -696,11 +775,14 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mode: EventReporter.Mode,
     )
 
-    private fun Scenario.createFactory(): DefaultAnalyticsMetadataFactory {
+    private fun Scenario.createFactory(
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory()
+    ): DefaultAnalyticsMetadataFactory {
         return DefaultAnalyticsMetadataFactory(
             cvcRecollectionHandler = cvcRecollectionHandler,
             mode = mode,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
+            linkGateFactory = linkGateFactory,
         )
     }
 
@@ -718,8 +800,10 @@ class DefaultAnalyticsMetadataFactoryTest {
         ),
         customerMetadata: CustomerMetadata? = null,
         linkStateResult: LinkStateResult? = null,
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory(),
+        isTapToAddAvailable: Boolean = false,
     ): Map<String, Any?> {
-        val factory = createFactory()
+        val factory = createFactory(linkGateFactory = linkGateFactory)
         return factory.create(
             initializationMode = initializationMode,
             integrationMetadata = integrationMetadata,
@@ -728,6 +812,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             linkStateResult = linkStateResult,
+            isTapToAddAvailable = isTapToAddAvailable,
         ).paramsMap
     }
 
@@ -743,7 +828,6 @@ class DefaultAnalyticsMetadataFactoryTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = linkSettings,
-            paymentMethodSpecs = null,
             externalPaymentMethodData = externalPaymentMethodData,
             stripeIntent = stripeIntent,
             orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
@@ -765,23 +849,22 @@ class DefaultAnalyticsMetadataFactoryTest {
 
     private fun createCustomerMetadata(
         isPaymentMethodSetAsDefaultEnabled: Boolean
-    ): CustomerMetadata = CustomerMetadata(
+    ): CustomerMetadata = CustomerMetadata.CustomerSession(
         id = "cus_1234",
         ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_132_secret_123",
         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-        permissions = CustomerMetadata.Permissions(
-            removePaymentMethod = PaymentMethodRemovePermission.Full,
-            canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = true,
-            canUpdateFullPaymentMethodDetails = true,
-        )
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
+        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod = true,
+        canUpdateCardExpiryAndBillingDetails = true,
     )
 
     private fun createElementsSessionCustomer(): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_123",
                 apiKey = "ek_test_1234",
@@ -824,16 +907,17 @@ class DefaultAnalyticsMetadataFactoryTest {
             suppress2faModal = false,
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
-            linkMobileSkipWalletInFlowController = false,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
+            linkBrand = LinkBrand.Link,
         )
     }
 
     private fun createLinkState(
         signupModeResult: LinkSignupModeResult = LinkSignupModeResult.Enabled(
-            LinkSignupMode.InsteadOfSaveForFutureUse
+            LinkSignupMode.InsteadOfSaveForFutureUse,
+            availableForSavedPaymentMethods = true,
         )
     ): LinkState {
         return LinkState(
@@ -870,13 +954,16 @@ class DefaultAnalyticsMetadataFactoryTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = false,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
-                skipWalletInFlowController = false,
                 customerId = null,
                 linkAppearance = null,
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 forceSetupFutureUseBehaviorAndNewMandate = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+                linkBrand = LinkBrand.Link,
+                apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+                shouldDisplay = true,
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,

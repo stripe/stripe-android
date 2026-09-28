@@ -28,10 +28,14 @@
   <string name="stripe_blik_code">BLIK 코드</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
+  <string name="stripe_card_brand_icons_content_description">지원되는 카드: %1$s</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(허용되지 않음)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s(허용되지 않음)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">탭하거나 수동으로 입력</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">계속하면 이 승인이 취소될 때까지 %2$s의 약관에 따라 이 결제 및 향후 결제에 대해 %1$s이(가) Cash App 계좌에서 인출하도록 승인하는 것입니다. 이는 Cash App 설정에서 언제든지 변경할 수 있습니다.</string>
   <!-- Title for the contact information section -->
@@ -42,14 +46,14 @@
   <string name="stripe_eps_bank">EPS 은행</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX 은행</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">GCash로 결제를 확인하시면 %s 이(가) 해당 약관에 따라 향후 결제에 대해 귀하의 GCash 계정에 대금 청구하는 것을 허용하시는 것입니다.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">입력한 IBAN이 불완전합니다.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"%s\"은(는) 지원되는 국가 코드가 아닙니다.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL 은행</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK 코드가 불완전합니다.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -65,8 +69,16 @@
   <string name="stripe_klarna_pay_later">Klarna로 나중에 결제</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">전화번호</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">NICEPAY로 결제를 확인하면 %s에서 해당 약관에 따라 향후 결제에 대해 이 결제 방식으로 대금 청구하는 것을 허용하시는 것입니다.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">카드 명의자</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">원하는 결제 방식 선택:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[결제를 확인하시면 Global Stack Services Limited가 기록상 판매자로서 <a href=\"%s\">이용 약관</a>에 따라 귀하의 거래를 처리하는 데 동의하시는 것입니다.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[결제를 확인하시면 Global Stack Services Limited가 기록상 판매자로서 <a href=\"%s\">약관</a>에 따라 귀하의 거래를 처리하는 데 동의하시는 것입니다.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 은행</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -83,8 +95,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">미국 은행 계좌 추가</string>
-  <!-- Header text shown above a UPI ID text field -->
-  <string name="stripe_paymentsheet_buy_using_upi_id">UPI ID를 사용하여 구매</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 자동 이체</string>
   <!-- Payment Method type brand name -->
@@ -95,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">제출 후에는 다음 단계를 안전하게 완료할 수 있도록 리디렉션됩니다.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">PayPal 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 PayPal 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Revolut mandate text -->
@@ -105,12 +117,20 @@
   <string name="stripe_save_payment_details_to_merchant_name">향후 구매를 위해 결제 세부사항 %s에 저장</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">카드 스캔</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">스캔한 카드 지우기</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) %s 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">결제 방식 기본값으로 설정</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">설정</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Touch \'n Go로 결제를 확인하시면 %s 이(가) 해당 약관에 따라 향후 결제에 대해 귀하의 Touch \'n Go 계정에 대금 청구하는 것을 허용하시는 것입니다.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">TrueMoney로 결제를 확인하시면 %s 이(가) 해당 약관에 따라 향후 결제에 대해 귀하의 TrueMoney 계정에 대금 청구하는 것을 허용하시는 것입니다.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">계속 진행하시면, 귀하는 %1$s이(가) 귀하의 구매 또는 구독 플랜에 따라 정기적으로 Twint 잔액을 자동으로 출금하는 것을 승인하는 것입니다.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

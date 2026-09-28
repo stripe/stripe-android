@@ -7,7 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -19,7 +19,7 @@ import com.stripe.android.core.R as CoreR
 
 class TransformAddressToElementTest {
     private data class TestTextSpec(
-        val apiPath: IdentifierSpec,
+        val apiPath: FormFieldId,
         val label: Int,
         val keyboardCapitalization: KeyboardCapitalization,
         val keyboardType: KeyboardType,
@@ -31,7 +31,7 @@ class TransformAddressToElementTest {
         val simpleTextList = AddressSchemaRegistry.get("US")!!.transformToElementList("US")
 
         val addressLine1 = TestTextSpec(
-            IdentifierSpec.Line1,
+            FormFieldId.Line1,
             CoreR.string.stripe_address_label_address_line1,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -39,7 +39,7 @@ class TransformAddressToElementTest {
         )
 
         val addressLine2 = TestTextSpec(
-            IdentifierSpec.Line2,
+            FormFieldId.Line2,
             R.string.stripe_address_label_address_line2,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -47,7 +47,7 @@ class TransformAddressToElementTest {
         )
 
         val city = TestTextSpec(
-            IdentifierSpec.City,
+            FormFieldId.City,
             CoreR.string.stripe_address_label_city,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -55,7 +55,7 @@ class TransformAddressToElementTest {
         )
 
         val zip = TestTextSpec(
-            IdentifierSpec.PostalCode,
+            FormFieldId.PostalCode,
             CoreR.string.stripe_address_label_zip_code,
             KeyboardCapitalization.None,
             KeyboardType.NumberPassword,
@@ -86,6 +86,21 @@ class TransformAddressToElementTest {
         val stateDropdownController = stateDropdownElement.controller
         assertThat(stateDropdownController.displayItems).isEqualTo(
             AdministrativeAreaConfig.Country.US().administrativeAreas.map { it.second }
+        )
+        assertThat(stateDropdownController.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_state)
+        )
+    }
+
+    @Test
+    fun `Read BR schema has state dropdown`() = runBlocking {
+        val simpleTextList = AddressSchemaRegistry.get("BR")!!.transformToElementList("BR")
+
+        // BR has state dropdown
+        val stateDropdownElement = simpleTextList.filterIsInstance<AdministrativeAreaElement>().single()
+        val stateDropdownController = stateDropdownElement.controller
+        assertThat(stateDropdownController.displayItems).isEqualTo(
+            AdministrativeAreaConfig.Country.Brazil().administrativeAreas.map { it.second }
         )
         assertThat(stateDropdownController.label.first()).isEqualTo(
             resolvableString(CoreR.string.stripe_address_label_state)

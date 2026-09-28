@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Tilinumeroasi ei voitu käsitellä juuri nyt</string>
   <string name="stripe_close_dialog_networking_desc">Jos peruutat nyt, tilisi linkitetään yritykseen %1$s, mutta sitä ei tallenneta Link-palveluun.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Jos peruutat nyt, tilisi linkitetään tähän yritykseen, mutta sitä ei tallenneta Link-palveluun.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Jos peruutat nyt, tilisi yhdistetään tähän yritykseen, mutta sitä ei tallenneta kohteeseen %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Jos peruutat nyt, tilisi yhdistetään kohteeseen %1$s, mutta sitä ei tallenneta kohteeseen %2$s.</string>
   <string name="stripe_error_cta_close">Sulje</string>
   <string name="stripe_error_cta_manual_entry">Syötä pankkitiedot manuaalisesti</string>
   <string name="stripe_error_cta_retry">Yritä uudelleen</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Anna pankkitiedot</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Peruuta</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Jatka Link-palvelulla</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Jatka kohteella %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ei nyt</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Käytä Link-tilille aiemmin tallennettuja tietoja.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Käytä aiemmin tallentamiasi tietoja tililläsi %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Jatka Link-palvelulla</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Jatka kohteella %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ei nyt</string>
   <string name="stripe_networking_save_to_link_verification_title">Vahvista, että se olet sinä</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Valitse toinen pankki</string>
   <string name="stripe_search">Etsi</string>
   <string name="stripe_success_pane_desc_link_error_plural">Tilisi on yhdistetty, mutta niitä ei voitu tallentaa Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Tilisi oli yhdistetty, mutta niitä ei voitu tallentaa kohteella %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Tilisi on yhdistetty, mutta sitä ei voitu tallentaa Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Tilisi oli yhdistetty, mutta sitä ei voitu tallentaa kohteella %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Tilisi on yhdistetty ja tallennettu Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Tilisi yhdistettiin ja tallennettiin kohteella %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Tilisi on yhdistetty ja tallennettu Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Tilisi yhdistettiin ja tallennettiin kohteella %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Voit odottaa mikrotalletuksia tilillesi ••••%1$s 1–2 päivän kuluessa ja sähköpostiviestin, joka sisältää tarkemmat ohjeet.</string>
   <string name="stripe_success_pane_desc_plural">Tilisi on yhdistetty</string>
   <string name="stripe_success_pane_desc_singular">Tilisi on yhdistetty</string>

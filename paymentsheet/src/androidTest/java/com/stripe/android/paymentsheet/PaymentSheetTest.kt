@@ -5,14 +5,21 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainHeader
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -24,6 +31,7 @@ import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.FormPage
 import okhttp3.mockwebserver.SocketPolicy
 import org.json.JSONArray
@@ -32,14 +40,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetTest {
+internal class PaymentSheetTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
+    private val networkRule = NetworkRule()
+
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(IntentsRule())
     }
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -53,22 +65,19 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -87,23 +96,52 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    fun testSuccessfulLpmPayment() = runPaymentSheetTest(
+    fun testSuccessfulPayByBankPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-pay_by_bank.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
+            )
+        }
+
+        page.clickOnLpm("pay_by_bank")
+
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            clientAttributionMetadataParamsInPaymentMethodData(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulLpmPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -123,27 +161,26 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulUsBankPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         UsBankAccountFormTestUtils.setupSuccessfulCompletionOfUsBankAccountForm()
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                    allowsDelayedPaymentMethods = true,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        allowsDelayedPaymentMethods = true,
+                    )
                 ),
             )
         }
@@ -169,21 +206,19 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSocketErrorCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -204,21 +239,19 @@ internal class PaymentSheetTest {
 
     @Test
     fun testInsufficientFundsCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -233,29 +266,27 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Your card was declined")
+        page.waitForText("Your card has insufficient funds.")
         page.assertNoText("StripeException", substring = true)
         testContext.markTestSucceeded()
     }
 
     @Test
     fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         successTimeoutSeconds = 10L,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -280,14 +311,12 @@ internal class PaymentSheetTest {
 
     @Test
     fun testFailureWhenSetupRequestsFail() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -301,39 +330,36 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
 
     @Test
-    fun testPaymentIntentWithCardBrandChoiceSuccess() = runPaymentSheetTest(
+    fun testPaymentIntentWithCardBrandChoiceSuccess_Selector() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
-        page.fillOutCardDetailsWithCardBrandChoice()
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                urlEncode("payment_method_data[card][networks][preferred]"),
+                "payment_method_data[card][networks][preferred]",
                 "cartes_bancaires"
             ),
         ) { response ->
@@ -344,23 +370,57 @@ internal class PaymentSheetTest {
     }
 
     @Test
+    fun testPaymentIntentWithCardBrandChoiceSuccess_PreferredBrands_Deselect() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        preferredNetworks = listOf(CardBrand.CartesBancaires)
+                    )
+                ),
+            )
+        }
+
+        // Cartes Bancaire selected by default, re-click will deselect
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm")
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
     fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-payment_intent_success.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
@@ -369,28 +429,28 @@ internal class PaymentSheetTest {
     fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
         repeat(2) {
             runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
                 networkRule = networkRule,
                 integrationType = integrationType,
                 resultCallback = ::assertCompleted,
             ) { testContext ->
-                networkRule.enqueue(
-                    host("api.stripe.com"),
-                    method("GET"),
-                    path("/v1/elements/sessions"),
-                ) { response ->
+                networkRule.elementsSession { response ->
                     response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
                 }
 
                 testContext.presentPaymentSheet {
                     presentWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = defaultConfiguration,
+                        configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                     )
                 }
 
                 networkRule.enqueue(
                     method("GET"),
-                    path("edge-internal/card-metadata")
+                    path("edge-internal/card-metadata"),
+                    header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+                    doesNotContainHeader("Stripe-Account"),
+                    applyDefaultAuthorization = false,
                 ) { response ->
                     response.testBodyFromFile("card-metadata-get.json")
                 }
@@ -415,15 +475,12 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPaymentIntentWithCvcRecollection() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
 
@@ -431,20 +488,26 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -452,7 +515,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+            bodyPart("payment_method_options[card][cvc]", "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -463,6 +526,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testDeferredIntentWithCvcRecollection() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
         builder = {
@@ -471,11 +535,8 @@ internal class PaymentSheetTest {
             }
         }
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-            query(urlEncode("deferred_intent[payment_method_options][card][require_cvc_recollection]"), "true")
+        networkRule.elementsSession(
+            query("deferred_intent[payment_method_options][card][require_cvc_recollection]", "true")
         ) { response ->
             val cardsArray = JSONArray()
 
@@ -506,19 +567,21 @@ internal class PaymentSheetTest {
                     ),
                     requireCvcRecollection = true,
                 ),
-                configuration = defaultConfiguration.newBuilder()
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                            id = "cus_1",
-                            clientSecret = "cuss_654321",
+                configuration = apiConfigurationTestType.applyTo(
+                    defaultConfiguration.newBuilder()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                                id = "cus_1",
+                                clientSecret = "cuss_654321",
+                            )
                         )
-                    )
-                    .link(
-                        PaymentSheet.LinkConfiguration.Builder()
-                            .display(PaymentSheet.LinkConfiguration.Display.Never)
-                            .build()
-                    )
-                    .build(),
+                        .link(
+                            PaymentSheet.LinkConfiguration.Builder()
+                                .display(PaymentSheet.LinkConfiguration.Display.Never)
+                                .build()
+                        )
+                        .build()
+                ),
             )
         }
 
@@ -534,7 +597,7 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+            bodyPart("payment_method_options[card][cvc]", "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -544,15 +607,12 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedUsBankAccountMandateNotDisplayDuringCardCheckout() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -574,21 +634,25 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -611,15 +675,12 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedUsBankPayment_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -641,21 +702,25 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -674,15 +739,12 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedCardPayment_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-                networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -694,6 +756,8 @@ internal class PaymentSheetTest {
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -707,18 +771,20 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -737,22 +803,19 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -775,15 +838,12 @@ internal class PaymentSheetTest {
 
     @Test
     fun testFocusFirstEditBadgeOnEdit() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
 
@@ -791,20 +851,26 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -821,6 +887,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testTermsDisplayNeverHidesMandate() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -830,11 +897,7 @@ internal class PaymentSheetTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -858,7 +921,7 @@ internal class PaymentSheetTest {
                         setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                     )
                 ),
-                configuration = configurationWithTermsDisplayNever,
+                configuration = apiConfigurationTestType.applyTo(configurationWithTermsDisplayNever),
             )
         }
 
@@ -868,27 +931,26 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSocketErrorElementsSessions() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
         }
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
 
     @Test
     fun testOBO_PassedToElementsSessionCall() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -900,11 +962,8 @@ internal class PaymentSheetTest {
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+        networkRule.elementsSession(
+            query("deferred_intent[on_behalf_of]", oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -918,12 +977,75 @@ internal class PaymentSheetTest {
                     ),
                     onBehalfOf = oboMerchantID
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
         page.waitForCardForm()
 
         testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testSavedCard_isDisplayedForDashboard() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card"),
+            header("Authorization", "Bearer uk_12345"),
+            applyDefaultAuthorization = false,
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.USBankAccount.code,
+            applyDefaultAuthorization = false,
+        )
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.SepaDebit.code,
+            applyDefaultAuthorization = false,
+        )
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
+                    )
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = "uk_12345",
+                            )
+                        )
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
+            )
+        }
+
+        page.assertSavedSelection("pm_12345")
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
     }
 }

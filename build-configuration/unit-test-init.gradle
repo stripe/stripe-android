@@ -1,0 +1,15 @@
+apply from: new File(gradle.startParameter.currentDir, "build-configuration/quarantined-tests-json.gradle")
+
+def load = gradle.ext.quarantinedTestsLoad
+
+allprojects {
+    tasks.withType(Test).configureEach { task ->
+        if (load.status != 'OK') {
+            return
+        }
+
+        load.cases.each { testCase ->
+            task.filter.excludeTestsMatching("${testCase.className}.${testCase.testCaseName}")
+        }
+    }
+}

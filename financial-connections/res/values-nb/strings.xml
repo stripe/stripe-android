@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Kunne ikke hente kontonummeret ditt akkurat nå</string>
   <string name="stripe_close_dialog_networking_desc">Hvis du avbryter nå, kobles kontoen din til %1$s, men den lagres ikke til Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Hvis du avbryter nå, kobles kontoen din til bedriften, men den lagres ikke til Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Hvis du avslutter nå, blir kontoen koblet til denne bedriften, men den lagres ikke hos %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Hvis du avslutter nå, blir kontoen koblet til %1$s, men den lagres ikke hos %2$s.</string>
   <string name="stripe_error_cta_close">Lukk</string>
   <string name="stripe_error_cta_manual_entry">Skriv inn bankopplysninger manuelt</string>
   <string name="stripe_error_cta_retry">Prøv igjen</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Skriv inn bankopplysninger</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Avbryt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Fortsett med Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Fortsett med %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ikke nå</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Bruk informasjon du tidligere har lagret i Link-kontoen din.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Bruk informasjon du tidligere har lagret på %1$s-kontoen din.</string>
   <string name="stripe_networking_link_login_warmup_title">Fortsett med Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Fortsett med %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ikke nå</string>
   <string name="stripe_networking_save_to_link_verification_title">Bekreft at det er deg</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Velg en annen bank</string>
   <string name="stripe_search">Søk</string>
   <string name="stripe_success_pane_desc_link_error_plural">Kontoene dine ble koblet til, men de kunne ikke lagres med Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Kontoene dine ble koblet til, men kan ikke lagres hos %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Kontoen din ble koblet til, men den kunne ikke lagres med Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Kontoen din ble koblet til, men kan ikke lagres hos %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Kontoene dine ble koblet til og lagret med Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Kontoene dine ble koblet til og lagret hos %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Kontoen din ble koblet til og lagret med Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Kontoen din ble koblet til og lagret hos %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Du kan forvente mikroinnskudd til kontoen ••••%1$s om 1–2 virkedager og en e-post med flere instruksjoner.</string>
   <string name="stripe_success_pane_desc_plural">Kontoene dine ble koblet til</string>
   <string name="stripe_success_pane_desc_singular">Kontoen din ble koblet til</string>

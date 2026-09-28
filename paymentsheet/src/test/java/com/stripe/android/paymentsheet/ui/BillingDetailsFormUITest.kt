@@ -85,6 +85,7 @@ internal class BillingDetailsFormUITest {
             collectEmail = false,
             collectPhone = false,
             allowedBillingCountries = emptySet(),
+            autocompleteAddressInteractorFactory = null,
         )
         composeRule.setContent {
             BillingDetailsFormUI(

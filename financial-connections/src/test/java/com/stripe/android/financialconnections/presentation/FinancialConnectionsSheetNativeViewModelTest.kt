@@ -17,6 +17,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
@@ -39,6 +41,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -60,12 +64,16 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @get:Rule
     val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        preCollectedConsent = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
@@ -317,6 +325,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -375,6 +384,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -430,6 +440,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -477,6 +488,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.DefaultLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = false,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -496,10 +508,67 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
     }
 
+    @Test
+    fun `topAppBarState uses current linkBrand over state linkBrand`() = runTest {
+        val initialState = stateWithLinkBrand(LinkBrand.Link)
+        val viewModel = createViewModel(
+            initialState = initialState,
+            currentLinkBrand = FakeCurrentLinkBrand(LinkBrand.Onelink),
+        )
+
+        assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `topAppBarState falls back to state linkBrand`() = runTest {
+        val initialState = stateWithLinkBrand(LinkBrand.Onelink)
+        val viewModel = createViewModel(
+            initialState = initialState,
+            currentLinkBrand = FakeCurrentLinkBrand(LinkBrand.Onelink),
+        )
+
+        assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `topAppBarState updates reactively when current linkBrand changes`() = runTest {
+        val initialState = stateWithLinkBrand(LinkBrand.Link)
+        val currentLinkBrand = FakeCurrentLinkBrand(LinkBrand.Link)
+        val viewModel = createViewModel(
+            initialState = initialState,
+            currentLinkBrand = currentLinkBrand,
+        )
+
+        viewModel.topAppBarState.test {
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
+
+            currentLinkBrand.set(LinkBrand.Onelink)
+
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Onelink)
+        }
+    }
+
     @After
     fun tearDown() {
         liveEvents.clear()
     }
+
+    private fun stateWithLinkBrand(linkBrand: LinkBrand) = FinancialConnectionsSheetNativeState(
+        flowType = FinancialConnectionsSheetFlowType.ForData,
+        webAuthFlow = WebAuthFlowState.Uninitialized,
+        firstInit = true,
+        configuration = configuration,
+        reducedBranding = false,
+        testMode = false,
+        viewEffect = null,
+        completed = false,
+        initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+        theme = Theme.LinkLight,
+        linkBrand = linkBrand,
+        isLinkWithStripe = true,
+        manualEntryUsesMicrodeposits = false,
+        elementsSessionContext = null,
+    )
 
     private fun intent(url: String): Intent = Intent().apply { data = Uri.parse(url) }
 
@@ -515,6 +584,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         createInstantDebitsResult: CreateInstantDebitsResult = CreateInstantDebitsResult {
             error("Unexpected call to create InstantDebitsResult")
         },
+        currentLinkBrand: CurrentLinkBrand =
+            FakeCurrentLinkBrand(initialState.linkBrand),
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
         activityRetainedComponent = mock(),
@@ -524,8 +595,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
         navigationManager = TestNavigationManager(),
+        currentLinkBrand = currentLinkBrand,
         savedStateHandle = SavedStateHandle(),
         initialState = initialState,
         createInstantDebitsResult = createInstantDebitsResult,
-    )
+    ).also { viewModelStoreRule.track(it) }
 }

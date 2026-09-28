@@ -1,5 +1,11 @@
 apply from: configs.androidLibrary
 
+android {
+    buildFeatures {
+        buildConfig = true
+    }
+}
+
 dependencies {
     implementation project(":stripe-core")
 

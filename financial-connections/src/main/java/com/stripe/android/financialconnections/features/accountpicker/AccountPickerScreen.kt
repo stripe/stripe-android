@@ -22,7 +22,10 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -33,6 +36,7 @@ import com.stripe.android.financialconnections.exception.AccountNoneEligibleForP
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
@@ -40,6 +44,7 @@ import com.stripe.android.financialconnections.features.common.NoSupportedPaymen
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -117,7 +122,13 @@ private fun AccountPickerContent(
                         onSelectAnotherBank = onSelectAnotherBank
                     )
 
-                    else -> UnclassifiedErrorContent { onCloseFromErrorClick(error) }
+                    // The server described an error screen for us and the view model is navigating
+                    // to it, so don't flash one of our own on the way out.
+                    else -> if (error.genericErrorPane() != null) {
+                        FullScreenGenericLoading()
+                    } else {
+                        UnclassifiedErrorContent { onCloseFromErrorClick(error) }
+                    }
                 }
             }
 
@@ -191,7 +202,10 @@ private fun LazyListScope.accountPickerContent(
     item("header") {
         if (payload != null) {
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("loaded_picker_title")
+                    .fillMaxWidth(),
                 text = stringResource(
                     when (payload.selectionMode) {
                         SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
@@ -255,6 +269,8 @@ private fun Footer(
             loading = submitLoading,
             onClick = onSubmit,
             modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("connect_account_button")
                 .fillMaxWidth()
         ) {
             Text(

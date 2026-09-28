@@ -1,5 +1,6 @@
 package com.stripe.android.stripe3ds2.views
 
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.children
@@ -150,6 +151,19 @@ class ChallengeActivityTest {
 
             assertThat(actionBar.title)
                 .isEqualTo("Secure Checkout")
+        }
+    }
+
+    @Test
+    fun `activity finishes gracefully when required args are missing`() {
+        ActivityScenario.launchActivityForResult<ChallengeActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                ChallengeActivity::class.java
+            )
+        ).use { scenario ->
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
         }
     }
 

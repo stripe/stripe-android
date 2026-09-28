@@ -3,6 +3,7 @@ package com.stripe.android.challenge.passive.warmer
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
 
 internal class DefaultPassiveChallengeWarmer : PassiveChallengeWarmer {
@@ -16,13 +17,13 @@ internal class DefaultPassiveChallengeWarmer : PassiveChallengeWarmer {
 
     override fun start(
         passiveCaptchaParams: PassiveCaptchaParams,
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         productUsage: Set<String>
     ) {
         launcher?.launch(
             PassiveChallengeWarmerContract.Args(
                 passiveCaptchaParams = passiveCaptchaParams,
-                publishableKey = publishableKey,
+                apiConfiguration = apiConfiguration,
                 productUsage = productUsage
             )
         )

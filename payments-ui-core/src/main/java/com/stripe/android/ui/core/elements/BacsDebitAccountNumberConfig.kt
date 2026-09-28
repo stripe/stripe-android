@@ -41,7 +41,7 @@ class BacsDebitAccountNumberConfig : TextFieldConfig {
             input.length < LENGTH -> TextFieldStateConstants.Error.Incomplete(
                 R.string.stripe_bacs_account_number_incomplete
             )
-            else -> TextFieldStateConstants.Valid.Full
+            else -> TextFieldStateConstants.Valid.Full()
         }
     }
 

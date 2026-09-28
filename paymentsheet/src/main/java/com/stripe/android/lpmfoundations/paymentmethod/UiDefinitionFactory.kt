@@ -1,14 +1,17 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
+import com.stripe.android.lpmfoundations.InitialValuesFactory
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -18,34 +21,56 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
+import kotlinx.coroutines.CoroutineScope
 
 internal sealed interface UiDefinitionFactory {
-    class Arguments(
+    fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+    ): SupportedPaymentMethod
+
+    fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
+        customerHasSavedPaymentMethods: Boolean,
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation
+
+    fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: Arguments,
+    ): List<FormElement>
+
+    data class Arguments(
+        val coroutineScope: CoroutineScope,
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-        val initialValues: Map<IdentifierSpec, String?>,
+        val initialValues: Map<FormFieldId, String?>,
         val initialLinkUserInput: UserInput?,
-        val shippingValues: Map<IdentifierSpec, String?>?,
+        val shippingValues: Map<FormFieldId, String?>?,
         val saveForFutureUseInitialValue: Boolean,
         val merchantName: String,
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        val requiresBillingAddressForAutomaticTax: Boolean,
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
+        val cardFundingFilter: CardFundingFilter,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         val linkInlineHandler: LinkInlineHandler?,
         val isLinkUI: Boolean = false,
         val previousLinkSignupCheckboxSelection: Boolean? = null,
         val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        val tapToAddHelper: TapToAddHelper? = null,
+        val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+        val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
     ) {
         interface Factory {
             fun create(
@@ -54,6 +79,7 @@ internal sealed interface UiDefinitionFactory {
             ): Arguments
 
             class Default(
+                private val coroutineScope: CoroutineScope,
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val linkInlineHandler: LinkInlineHandler?,
@@ -69,12 +95,16 @@ internal sealed interface UiDefinitionFactory {
                 private val previousLinkSignupCheckboxSelection: Boolean? = null,
                 private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? =
                     null,
+                private val tapToAddHelper: TapToAddHelper? = null,
+                private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+                private val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
                     requiresMandate: Boolean,
                 ): Arguments {
                     return Arguments(
+                        coroutineScope = coroutineScope,
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         linkConfigurationCoordinator = linkConfigurationCoordinator,
                         merchantName = metadata.merchantName,
@@ -87,9 +117,11 @@ internal sealed interface UiDefinitionFactory {
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
                         saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(),
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+                        requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
+                        cardFundingFilter = metadata.cardFundingFilter,
                         initialLinkUserInput = initialLinkUserInput,
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
@@ -97,6 +129,9 @@ internal sealed interface UiDefinitionFactory {
                         isLinkUI = isLinkUI,
                         previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                        tapToAddHelper = tapToAddHelper,
+                        paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper,
+                        isNfcScanningAvailable = isNfcScanningAvailable,
                     )
                 }
 
@@ -109,143 +144,49 @@ internal sealed interface UiDefinitionFactory {
         }
     }
 
-    interface RequiresSharedDataSpec : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(
+    abstract class Simple : UiDefinitionFactory {
+        protected open val supportsAutomaticTaxBillingAddress: Boolean = true
+
+        abstract override fun createSupportedPaymentMethod(
             metadata: PaymentMethodMetadata,
-            sharedDataSpec: SharedDataSpec,
         ): SupportedPaymentMethod
 
-        fun createFormHeaderInformation(
+        override fun createFormHeaderInformation(
             metadata: PaymentMethodMetadata,
-            sharedDataSpec: SharedDataSpec,
-            incentive: PaymentMethodIncentive?,
-        ): FormHeaderInformation {
-            return createSupportedPaymentMethod(metadata, sharedDataSpec).asFormHeaderInformation(incentive)
-        }
-
-        fun createFormElements(
-            metadata: PaymentMethodMetadata,
-            sharedDataSpec: SharedDataSpec,
-            transformSpecToElements: TransformSpecToElements,
-            arguments: Arguments,
-        ): List<FormElement> {
-            return createFormElements(
-                metadata = metadata,
-                sharedDataSpec = sharedDataSpec,
-                transformSpecToElements = transformSpecToElements,
-            )
-        }
-
-        fun createFormElements(
-            metadata: PaymentMethodMetadata,
-            sharedDataSpec: SharedDataSpec,
-            transformSpecToElements: TransformSpecToElements,
-        ): List<FormElement> {
-            return transformSpecToElements.transform(
-                metadata = metadata,
-                specs = sharedDataSpec.fields,
-                termsDisplay = metadata.termsDisplayForCode(sharedDataSpec.type),
-            )
-        }
-    }
-
-    interface Simple : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(): SupportedPaymentMethod
-
-        fun createFormHeaderInformation(
             customerHasSavedPaymentMethods: Boolean,
             incentive: PaymentMethodIncentive?,
         ): FormHeaderInformation {
-            return createSupportedPaymentMethod().asFormHeaderInformation(incentive)
+            return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
 
-        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
-    }
-
-    fun canBeDisplayedInUi(
-        definition: PaymentMethodDefinition,
-        sharedDataSpecs: List<SharedDataSpec>,
-    ): Boolean = when (this) {
-        is Simple -> {
-            true
-        }
-
-        is RequiresSharedDataSpec -> {
-            sharedDataSpecs.firstOrNull { it.type == definition.type.code } != null
-        }
-    }
-
-    fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        definition: PaymentMethodDefinition,
-        sharedDataSpecs: List<SharedDataSpec>,
-    ): SupportedPaymentMethod? = when (this) {
-        is Simple -> {
-            createSupportedPaymentMethod()
-        }
-
-        is RequiresSharedDataSpec -> {
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
-            if (sharedDataSpec != null) {
-                createSupportedPaymentMethod(metadata, sharedDataSpec)
-            } else {
-                null
-            }
-        }
-    }
-
-    fun formHeaderInformation(
-        definition: PaymentMethodDefinition,
-        metadata: PaymentMethodMetadata,
-        sharedDataSpecs: List<SharedDataSpec>,
-        customerHasSavedPaymentMethods: Boolean,
-    ): FormHeaderInformation? = when (this) {
-        is Simple -> {
-            createFormHeaderInformation(
-                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
-                incentive = metadata.paymentMethodIncentive,
-            )
-        }
-
-        is RequiresSharedDataSpec -> {
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
-            if (sharedDataSpec != null) {
-                createFormHeaderInformation(
-                    metadata = metadata,
-                    sharedDataSpec = sharedDataSpec,
-                    incentive = metadata.paymentMethodIncentive,
-                )
-            } else {
-                null
-            }
-        }
-    }
-
-    fun formElements(
-        definition: PaymentMethodDefinition,
-        metadata: PaymentMethodMetadata,
-        sharedDataSpecs: List<SharedDataSpec>,
-        arguments: Arguments,
-    ): List<FormElement>? = when (this) {
-        is Simple -> {
-            createFormElements(
-                metadata = metadata,
+        final override fun createFormElements(
+            metadata: PaymentMethodMetadata,
+            arguments: Arguments,
+        ): List<FormElement> {
+            val builder = FormElementsBuilder(
                 arguments = arguments,
+                supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
             )
+
+            buildFormElements(metadata, arguments, builder)
+
+            return builder.build()
         }
 
-        is RequiresSharedDataSpec -> {
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
-            if (sharedDataSpec != null) {
-                createFormElements(
-                    metadata = metadata,
-                    sharedDataSpec = sharedDataSpec,
-                    transformSpecToElements = TransformSpecToElements(arguments),
-                    arguments = arguments,
-                )
-            } else {
-                null
-            }
+        protected open fun buildFormElements(
+            metadata: PaymentMethodMetadata,
+            arguments: Arguments,
+            builder: FormElementsBuilder,
+        ) {}
+    }
+
+    interface Custom : UiDefinitionFactory {
+        override fun createFormHeaderInformation(
+            metadata: PaymentMethodMetadata,
+            customerHasSavedPaymentMethods: Boolean,
+            incentive: PaymentMethodIncentive?,
+        ): FormHeaderInformation {
+            return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
     }
 }

@@ -1,7 +1,10 @@
 package com.stripe.android.paymentelement.embedded.manage
 
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -20,8 +23,10 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
+    private val linkAccountHolder: LinkAccountHolder,
     private val eventReporter: EventReporter,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val launchMode: EmbeddedLaunchMode,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
         return DefaultManageScreenInteractor(
@@ -31,20 +36,22 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             editing = savedPaymentMethodMutator.editing,
             canEdit = savedPaymentMethodMutator.canEdit,
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
-            providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             onSelectPaymentMethod = {
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                selectionHolder.set(savedPmSelection)
+                selectionHolder.setSelection(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
-                manageNavigatorProvider.get().performAction(
-                    ManageNavigator.Action.Close(shouldInvokeRowSelectionCallback = true)
-                )
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
-                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+                val action = when (launchMode) {
+                    EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
+                    EmbeddedLaunchMode.Manage,
+                    is EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(true)
+                }
+                embeddedNavigatorProvider.get().performAction(action)
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
+            linkAccount = linkAccountHolder.linkAccountInfo,
         )
     }
 }

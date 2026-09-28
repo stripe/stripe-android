@@ -25,6 +25,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -49,6 +50,9 @@ internal class SignUpScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `only email field displayed when controllers are empty`() = runTest(dispatcher) {
@@ -361,7 +365,7 @@ internal class SignUpScreenTest {
             linkLaunchMode = LinkLaunchMode.Full,
             dismissWithResult = {},
             verifyDuringSignUp = {},
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")

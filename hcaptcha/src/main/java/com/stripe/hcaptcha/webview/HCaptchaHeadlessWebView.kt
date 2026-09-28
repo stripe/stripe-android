@@ -4,7 +4,6 @@ import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
@@ -24,6 +23,7 @@ internal class HCaptchaHeadlessWebView(
 ) : IHCaptchaVerifier {
     private val webViewHelper: HCaptchaWebViewHelper
     private var webViewLoaded = false
+    private var destroyed = false
     private var shouldExecuteOnLoad = false
     private var shouldResetOnLoad = false
 
@@ -44,6 +44,9 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun startVerification(activity: FragmentActivity) {
+        if (destroyed) {
+            return
+        }
         if (webViewLoaded) {
             // Safe to execute
             webViewHelper.resetAndExecute()
@@ -53,6 +56,9 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun onFailure(exception: HCaptchaException) {
+        if (destroyed) {
+            return
+        }
         val silentRetry = webViewHelper.shouldRetry(exception)
         if (silentRetry) {
             webViewHelper.resetAndExecute()
@@ -62,10 +68,16 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun onSuccess(result: String) {
+        if (destroyed) {
+            return
+        }
         listener.onSuccess(result)
     }
 
     override fun onLoaded() {
+        if (destroyed) {
+            return
+        }
         webViewLoaded = true
         if (shouldResetOnLoad) {
             shouldResetOnLoad = false
@@ -77,18 +89,28 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun onOpen() {
+        if (destroyed) {
+            return
+        }
         listener.onOpen()
     }
 
     override fun reset() {
+        if (destroyed) {
+            return
+        }
         if (webViewLoaded) {
-            webViewHelper.reset()
-            val webView: WebView = webViewHelper.webView
-            if (webView.parent != null) {
-                (webView.parent as ViewGroup).removeView(webView)
-            }
+            destroyWebView()
         } else {
             shouldResetOnLoad = true
         }
+    }
+
+    private fun destroyWebView() {
+        destroyed = true
+        webViewLoaded = false
+        shouldExecuteOnLoad = false
+        shouldResetOnLoad = false
+        webViewHelper.destroy()
     }
 }

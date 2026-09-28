@@ -4,8 +4,8 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -37,7 +37,7 @@ import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal data class InterceptorTestScenario(
-    val ephemeralKeySecret: String? = null,
+    val customerMetadata: CustomerMetadata? = null,
     val stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     val publishableKeyProvider: () -> String = { "pk" },
     val errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -55,7 +55,7 @@ internal fun runInterceptorScenario(
 ) = runTest {
     val interceptor = createIntentConfirmationInterceptor(
         integrationMetadata = integrationMetadata,
-        ephemeralKeySecret = scenario.ephemeralKeySecret,
+        customerMetadata = scenario.customerMetadata,
         stripeRepository = scenario.stripeRepository,
         publishableKeyProvider = scenario.publishableKeyProvider,
         errorReporter = scenario.errorReporter,
@@ -82,9 +82,9 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
     ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = intercept(
     intent = PaymentIntentFactory.create(),
     confirmationOption = PaymentMethodConfirmationOption.Saved(
+        shippingInformation = null,
         paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         optionsParams = null,
-        hCaptchaToken = null,
     ),
     shippingValues = null,
 )
@@ -159,21 +159,28 @@ internal fun stripeRepositoryReturning(
     }
 }
 
+internal fun assertRadarOptionsEquals(
+    confirmParams: ConfirmStripeIntentParams?,
+    expectedRadarOptions: RadarOptions
+) {
+    assertThat(confirmParams?.radarOptions()).isEqualTo(expectedRadarOptions)
+}
+
 internal fun assertRadarOptionsEquals(confirmParams: ConfirmStripeIntentParams?, expectedToken: String) {
-    assertThat(confirmParams?.radarOptions())
-        .isEqualTo(
-            RadarOptionsFactory.create(
-                hCaptchaToken = expectedToken,
-                verificationObject = AndroidVerificationObject(null)
-            )
+    assertRadarOptionsEquals(
+        confirmParams = confirmParams,
+        expectedRadarOptions = RadarOptionsFactory.create(
+            hCaptchaToken = expectedToken,
+            verificationObject = null
         )
+    )
 }
 
 internal fun assertRadarOptionsIsNull(confirmParams: ConfirmStripeIntentParams?) {
     assertThat(confirmParams?.radarOptions()).isEqualTo(
         RadarOptionsFactory.create(
             hCaptchaToken = null,
-            verificationObject = AndroidVerificationObject(null)
+            verificationObject = null
         )
     )
 }

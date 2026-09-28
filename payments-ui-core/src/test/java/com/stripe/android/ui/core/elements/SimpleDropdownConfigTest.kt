@@ -8,20 +8,11 @@ import org.junit.Test
 
 class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
-        resolvableString(R.string.stripe_ideal_bank),
+        resolvableString(R.string.stripe_payment_method_bank),
         listOf(
-            DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
-            DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),
-            DropdownItemSpec(displayText = "Bunq", apiValue = "bunq"),
-            DropdownItemSpec(displayText = "Handelsbanken", apiValue = "handelsbanken"),
-            DropdownItemSpec(displayText = "ING", apiValue = "ing"),
-            DropdownItemSpec(displayText = "Knab", apiValue = "knab"),
-            DropdownItemSpec(displayText = "Rabobank", apiValue = "rabobank"),
-            DropdownItemSpec(displayText = "Revolut", apiValue = "revolut"),
-            DropdownItemSpec(displayText = "RegioBank", apiValue = "regiobank"),
-            DropdownItemSpec(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
-            DropdownItemSpec(displayText = "Triodos Bank", apiValue = "triodos_bank"),
-            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot")
+            DropdownItem(displayText = "Option A", apiValue = "option_a"),
+            DropdownItem(displayText = "Option B", apiValue = "option_b"),
+            DropdownItem(displayText = "Option C", apiValue = "option_c"),
         )
     )
 
@@ -30,25 +21,16 @@ class SimpleDropdownConfigTest {
         assertThat(config.displayItems)
             .isEqualTo(
                 listOf(
-                    "ABN AMRO",
-                    "ASN Bank",
-                    "Bunq",
-                    "Handelsbanken",
-                    "ING",
-                    "Knab",
-                    "Rabobank",
-                    "Revolut",
-                    "RegioBank",
-                    "SNS Bank (De Volksbank)",
-                    "Triodos Bank",
-                    "Van Lanschot"
+                    "Option A",
+                    "Option B",
+                    "Option C",
                 )
             )
     }
 
     @Test
     fun `Verify convert from value returns appropriate string`() {
-        assertThat(config.convertFromRaw("asn_bank"))
-            .isEqualTo("ASN Bank")
+        assertThat(config.convertFromRaw("option_b"))
+            .isEqualTo("Option B")
     }
 }

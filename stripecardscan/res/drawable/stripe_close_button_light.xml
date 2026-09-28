@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="64dp"
+        android:height="64dp"
+        android:viewportWidth="100.0"
+        android:viewportHeight="100.0">
+    <path
+        android:pathData="
+           M 36,36
+           L 64,64
+           M 36,64
+           L 64,36"
+        android:strokeColor="@color/stripeCloseButtonLightColor"
+        android:strokeWidth="@integer/stripeIconStrokeWidth"
+        android:strokeLineCap="round" />
+</vector>

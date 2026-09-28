@@ -129,6 +129,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         publishableKey = args.publishableKey,
                         stripeAccountId = args.stripeAccountId,
                         elementsSessionContext = elementsSessionContext,
+                        preCollectedConsent = args.preCollectedConsent.takeIf {
+                            args.hostedSurface == null && args.configuration !is InstantDebits
+                        },
                     )
                 )
             }
@@ -292,11 +295,13 @@ internal class CollectBankAccountViewModel @Inject constructor(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            return DaggerCollectBankAccountComponent.builder()
-                .savedStateHandle(savedStateHandle)
-                .application(application)
-                .viewEffect(MutableSharedFlow())
-                .configuration(argsSupplier()).build()
+            return DaggerCollectBankAccountComponent.factory()
+                .create(
+                    application = application,
+                    viewEffect = MutableSharedFlow(),
+                    savedStateHandle = savedStateHandle,
+                    configuration = argsSupplier(),
+                )
                 .viewModel as T
         }
     }

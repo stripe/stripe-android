@@ -9,14 +9,13 @@ import dagger.Subcomponent
 internal interface AutocompleteViewModelSubcomponent {
     val autoCompleteViewModel: AutocompleteViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun configuration(configuration: AutocompleteViewModel.Args): Builder
-
-        fun build(): AutocompleteViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            configuration: AutocompleteViewModel.Args,
+        ): AutocompleteViewModelSubcomponent
     }
 }

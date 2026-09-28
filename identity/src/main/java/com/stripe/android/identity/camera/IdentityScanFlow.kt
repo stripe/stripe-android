@@ -3,6 +3,7 @@ package com.stripe.android.identity.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.AggregateResultListener
@@ -16,7 +17,9 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.ml.MediaPipeFaceDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.CoroutineScope
@@ -76,6 +79,7 @@ internal class IdentityScanFlow(
      */
     private var loopJob: Job? = null
 
+    @Suppress("LongMethod", "TooGenericExceptionCaught")
     override fun startFlow(
         context: Context,
         imageStream: Flow<CameraPreviewImage<Bitmap>>,
@@ -101,13 +105,24 @@ internal class IdentityScanFlow(
                 analyzerPool =
                     AnalyzerPool.of(
                         if (parameters == IdentityScanState.ScanType.SELFIE) {
-                            FaceDetectorAnalyzer.Factory(
-                                requireNotNull(faceDetectorModelFile) {
-                                    "Failed to initialize FaceDetectorAnalyzer, " +
-                                        "faceDetectorModelFile is null"
-                                },
-                                modelPerformanceTracker
-                            )
+                            if (verificationPage.enable3DFaceCapture()) {
+                                Log.d(
+                                    TAG,
+                                    "3D face capture is enabled; using MediaPipe face detector only."
+                                )
+                                MediaPipeFaceDetectorAnalyzer.Factory(
+                                    context,
+                                    modelPerformanceTracker
+                                )
+                            } else {
+                                FaceDetectorAnalyzer.Factory(
+                                    requireNotNull(faceDetectorModelFile) {
+                                        "Failed to initialize FaceDetectorAnalyzer, " +
+                                            "faceDetectorModelFile is null"
+                                    },
+                                    modelPerformanceTracker
+                                )
+                            }
                         } else {
                             IDDetectorAnalyzer.Factory(
                                 idDetectorModelFile,
@@ -118,7 +133,20 @@ internal class IdentityScanFlow(
                             )
                         }
                     )
-            } catch (e: IllegalStateException) {
+            } catch (e: Exception) {
+                identityAnalyticsRequestFactory.genericError(
+                    throwable = e,
+                    overrideMessage = "Analyzer creation failed, likely due to model file issue: ${e.message}",
+                    additionalMetadata = mapOf(
+                        IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_SCANNER_LOAD,
+                        IdentityAnalyticsRequestFactory.PARAM_SCANNER_NAME to
+                            IdentityAnalyticsRequestFactory.scannerNameForScanType(parameters),
+                        IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to
+                            IdentityAnalyticsRequestFactory.screenNameForScanType(parameters)
+                    )
+                )
+
                 withContext(Dispatchers.Main) {
                     errorHandler(e)
                 }
@@ -170,5 +198,9 @@ internal class IdentityScanFlow(
             }
         }
         loopJob = null
+    }
+
+    private companion object {
+        val TAG: String = IdentityScanFlow::class.java.simpleName
     }
 }

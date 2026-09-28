@@ -9,13 +9,16 @@ import kotlinx.coroutines.flow.StateFlow
  * This class provides the logic behind the fields.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface InputController : SectionFieldErrorController {
+interface InputController : SectionFieldValidationController {
     val label: StateFlow<ResolvableString>
     val fieldValue: StateFlow<String>
     val rawFieldValue: StateFlow<String?>
     val isComplete: StateFlow<Boolean>
     val showOptionalLabel: Boolean
     val formFieldValue: StateFlow<FormFieldEntry>
+
+    val enforceLeftToRightTextDirection: Boolean
+        get() = false
 
     fun onRawValueChange(rawValue: String)
 }

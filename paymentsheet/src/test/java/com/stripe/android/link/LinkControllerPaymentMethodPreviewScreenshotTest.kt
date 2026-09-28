@@ -13,10 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.isSystemDarkTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,7 +51,17 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
             MaterialTheme {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     cases.forEach { details ->
-                        PaymentMethodPreview(details.toPreview(context))
+                        PaymentMethodPreview(
+                            details.toPreview(
+                                context,
+                                iconLoader = PaymentSelection.IconLoader(
+                                    resources = LocalResources.current,
+                                    imageLoader = DefaultStripeImageLoader(context),
+                                ),
+                                reduceLinkBranding = true,
+                                isDarkTheme = context.isSystemDarkTheme(),
+                            )
+                        )
                     }
                 }
             }

@@ -1,0 +1,432 @@
+package com.stripe.android.model
+
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
+
+class ElementsSessionTest {
+
+    @Test
+    fun `passiveCaptchaParams returns passiveCaptcha when flag is enabled`() {
+        val passiveCaptcha = PassiveCaptchaParams(
+            siteKey = "test_site_key",
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
+        )
+
+        val session = createElementsSession(
+            passiveCaptcha = passiveCaptcha,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true)
+        )
+
+        assertThat(session.passiveCaptchaParams).isEqualTo(passiveCaptcha)
+    }
+
+    @Test
+    fun `passiveCaptchaParams returns null when elements flag is disabled`() {
+        val passiveCaptcha = PassiveCaptchaParams(
+            siteKey = "test_site_key",
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
+        )
+
+        val session = createElementsSession(
+            passiveCaptcha = passiveCaptcha,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to false)
+        )
+
+        assertThat(session.passiveCaptchaParams).isNull()
+    }
+
+    @Test
+    fun `passiveCaptchaParams returns null when elements flag is missing`() {
+        val passiveCaptcha = PassiveCaptchaParams(
+            siteKey = "test_site_key",
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
+        )
+
+        val session = createElementsSession(
+            passiveCaptcha = passiveCaptcha,
+            flags = emptyMap()
+        )
+
+        assertThat(session.passiveCaptchaParams).isNull()
+    }
+
+    @Test
+    fun `passiveCaptchaParams returns null when passiveCaptcha is null even if flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true)
+        )
+
+        assertThat(session.passiveCaptchaParams).isNull()
+    }
+
+    @Test
+    fun `ELEMENTS_ENABLE_PASSIVE_CAPTCHA flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA.flagValue)
+            .isEqualTo("elements_enable_passive_captcha")
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION.flagValue)
+            .isEqualTo("elements_mobile_attest_on_intent_confirmation")
+    }
+
+    @Test
+    fun `enableAttestationOnIntentConfirmation returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to true)
+        )
+
+        assertThat(session.enableAttestationOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `enableAttestationOnIntentConfirmation returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to false)
+        )
+
+        assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `enableAttestationOnIntentConfirmation returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `onBehalfOf is null when account and merchant are the same`() {
+        val session = createElementsSession(
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
+        )
+        assertThat(session.onBehalfOf).isNull()
+    }
+
+    @Test
+    fun `onBehalfOf is accountId when account and merchant are not the same`() {
+        val session = createElementsSession(
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1HvTI7Lu5o3P18Zp",
+        )
+        assertThat(session.onBehalfOf).isEqualTo("acct_1SGP1sPvdtoA7EjP")
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_CARD_FUND_FILTERING flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING.flagValue)
+            .isEqualTo("elements_mobile_card_funding_filtering")
+    }
+
+    @Test
+    fun `enableCardFundFiltering returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to true)
+        )
+
+        assertThat(session.enableCardFundFiltering).isTrue()
+    }
+
+    @Test
+    fun `enableCardFundFiltering returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to false)
+        )
+
+        assertThat(session.enableCardFundFiltering).isFalse()
+    }
+
+    @Test
+    fun `enableCardFundFiltering returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.enableCardFundFiltering).isFalse()
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED.flagValue)
+            .isEqualTo("elements_mobile_android_tap_to_add_enabled")
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN.flagValue)
+            .isEqualTo("elements_mobile_android_prefer_nfc_over_camera_scan")
+    }
+
+    @Test
+    fun `isTapToAddEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true)
+        )
+
+        assertThat(session.isTapToAddEnabled).isTrue()
+    }
+
+    @Test
+    fun `isTapToAddEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false)
+        )
+
+        assertThat(session.isTapToAddEnabled).isFalse()
+    }
+
+    @Test
+    fun `isTapToAddEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isTapToAddEnabled).isFalse()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED to true)
+        )
+
+        assertThat(session.isNfcScanningEnabled).isTrue()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED to false)
+        )
+
+        assertThat(session.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to true
+            )
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isTrue()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to false
+            )
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN.flagValue)
+            .isEqualTo("elements_mobile_allow_stripecardscan")
+    }
+
+    @Test
+    fun `isStripeCardScanAllowed returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN to true)
+        )
+
+        assertThat(session.isStripeCardScanAllowed).isTrue()
+    }
+
+    @Test
+    fun `isStripeCardScanAllowed returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN to false)
+        )
+
+        assertThat(session.isStripeCardScanAllowed).isFalse()
+    }
+
+    @Test
+    fun `isStripeCardScanAllowed returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.isStripeCardScanAllowed).isFalse()
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT.flagValue)
+            .isEqualTo("elements_mobile_cardscan_use_mlkit")
+    }
+
+    @Test
+    fun `enableMlKitCardScan returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT to true)
+        )
+
+        assertThat(session.enableMlKitCardScan).isTrue()
+    }
+
+    @Test
+    fun `enableMlKitCardScan returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT to false)
+        )
+
+        assertThat(session.enableMlKitCardScan).isFalse()
+    }
+
+    @Test
+    fun `enableMlKitCardScan returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.enableMlKitCardScan).isFalse()
+    }
+
+    @Test
+    fun `ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR.flagValue)
+            .isEqualTo("elements_mobile_cardscan_disable_ssdocr")
+    }
+
+    @Test
+    fun `disableSsdOcrCardScan returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR to true)
+        )
+
+        assertThat(session.disableSsdOcrCardScan).isTrue()
+    }
+
+    @Test
+    fun `disableSsdOcrCardScan returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR to false)
+        )
+
+        assertThat(session.disableSsdOcrCardScan).isFalse()
+    }
+
+    @Test
+    fun `disableSsdOcrCardScan returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.disableSsdOcrCardScan).isFalse()
+    }
+
+    @Test
+    fun `OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS flag has correct value`() {
+        assertThat(
+            ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS.flagValue
+        ).isEqualTo("ocs_mobile_should_use_autocomplete_proxy_endpoints")
+    }
+
+    @Test
+    fun `shouldUseAutocompleteProxyEndpoints returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(
+                ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS to true
+            )
+        )
+
+        assertThat(session.shouldUseAutocompleteProxyEndpoints).isTrue()
+    }
+
+    @Test
+    fun `shouldUseAutocompleteProxyEndpoints returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(
+                ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS to false
+            )
+        )
+
+        assertThat(session.shouldUseAutocompleteProxyEndpoints).isFalse()
+    }
+
+    @Test
+    fun `shouldUseAutocompleteProxyEndpoints returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.shouldUseAutocompleteProxyEndpoints).isFalse()
+    }
+
+    private fun createElementsSession(
+        passiveCaptcha: PassiveCaptchaParams? = null,
+        flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
+        accountId: String? = "acct_1SGP1sPvdtoA7EjP",
+        merchantId: String? = "acct_1SGP1sPvdtoA7EjP",
+    ): ElementsSession {
+        return ElementsSession(
+            linkSettings = null,
+            externalPaymentMethodData = null,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            orderedPaymentMethodTypesAndWallets = emptyList(),
+            flags = flags,
+            experimentsData = null,
+            customer = null,
+            merchantCountry = null,
+            merchantLogoUrl = null,
+            cardBrandChoice = null,
+            isGooglePayEnabled = false,
+            sessionsError = null,
+            customPaymentMethods = emptyList(),
+            elementsSessionId = "elements_session_test",
+            passiveCaptcha = passiveCaptcha,
+            elementsSessionConfigId = null,
+            accountId = accountId,
+            merchantId = merchantId,
+        )
+    }
+}

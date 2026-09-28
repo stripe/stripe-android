@@ -25,7 +25,6 @@ import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -35,13 +34,13 @@ internal class SepaMandateActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val merchantName = runCatching {
+        val args = runCatching {
             requireNotNull(SepaMandateContract.Args.fromIntent(intent)) {
                 "SepaMandateActivity was started without arguments."
             }
-        }.getOrNull()?.merchantName
+        }.getOrNull()
 
-        if (merchantName == null) {
+        if (args == null) {
             finish()
             return
         }
@@ -49,7 +48,7 @@ internal class SepaMandateActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = args.appearance) {
                 val bottomSheetState = rememberStripeBottomSheetState()
 
                 ElementsBottomSheetLayout(
@@ -57,7 +56,7 @@ internal class SepaMandateActivity : AppCompatActivity() {
                     onDismissed = this::finish,
                 ) {
                     SepaMandateScreen(
-                        merchantName = merchantName,
+                        merchantName = args.merchantName,
                         acknowledgedCallback = {
                             val result = Intent().putExtra(
                                 SepaMandateContract.EXTRA_RESULT,

@@ -17,6 +17,7 @@ sealed class PaymentMethodMessage : StripeModel {
         val darkImage: PaymentMethodMessageImage,
         val flatImage: PaymentMethodMessageImage,
         val learnMore: PaymentMethodMessageLearnMore,
+        val legalDisclosure: PaymentMethodMessageLegalDisclosure?,
         val paymentMethods: List<String>,
     ) : PaymentMethodMessage()
 
@@ -29,6 +30,7 @@ sealed class PaymentMethodMessage : StripeModel {
         val darkImages: List<PaymentMethodMessageImage>,
         val flatImages: List<PaymentMethodMessageImage>,
         val learnMore: PaymentMethodMessageLearnMore,
+        val legalDisclosure: PaymentMethodMessageLegalDisclosure?,
         val paymentMethods: List<String>
     ) : PaymentMethodMessage()
 
@@ -66,3 +68,29 @@ constructor(
     val url: String,
     val message: String
 ) : Parcelable
+
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodMessageLegalDisclosure
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
+    val message: String
+) : Parcelable
+
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodMessagePromotion
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
+    val paymentMethodType: String,
+    val message: String,
+    val learnMore: PaymentMethodMessageLearnMore
+) : Parcelable
+
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodMessagePromotionList
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
+    val promotions: List<PaymentMethodMessagePromotion>
+) : StripeModel

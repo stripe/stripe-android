@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.parcelize.Parcelize
 
 internal sealed class IntegrationMetadata : Parcelable {
@@ -10,26 +11,47 @@ internal sealed class IntegrationMetadata : Parcelable {
         val clientSecret: String,
     ) : IntegrationMetadata()
 
-    @Parcelize
-    data class DeferredIntentWithPaymentMethod(
-        val intentConfiguration: IntentConfiguration,
-    ) : IntegrationMetadata()
+    sealed class DeferredIntent : IntegrationMetadata() {
+        abstract val intentConfiguration: IntentConfiguration
 
-    @Parcelize
-    data class DeferredIntentWithSharedPaymentToken(
-        val intentConfiguration: IntentConfiguration,
-    ) : IntegrationMetadata()
+        @Parcelize
+        data class WithPaymentMethod(
+            override val intentConfiguration: IntentConfiguration,
+        ) : DeferredIntent()
 
-    @Parcelize
-    data class DeferredIntentWithConfirmationToken(
-        val intentConfiguration: IntentConfiguration,
-    ) : IntegrationMetadata()
+        @Parcelize
+        data class WithSharedPaymentToken(
+            override val intentConfiguration: IntentConfiguration,
+        ) : DeferredIntent()
+
+        @Parcelize
+        data class WithConfirmationToken(
+            override val intentConfiguration: IntentConfiguration,
+        ) : DeferredIntent()
+    }
 
     // CustomerSheet doesn't really fit the bill of any of the other integrations, so making it's own, even though it's
     // not ideal.
     @Parcelize
-    object CustomerSheet : IntegrationMetadata()
+    data class CustomerSheet(
+        val attachmentStyle: AttachmentStyle,
+    ) : IntegrationMetadata() {
+        enum class AttachmentStyle {
+            SetupIntent,
+            CreateAttach
+        }
+    }
 
     @Parcelize
     object CryptoOnramp : IntegrationMetadata()
+
+    @Parcelize
+    object StandaloneLink : IntegrationMetadata()
+
+    @Parcelize
+    data class CheckoutSession(
+        val id: String,
+        val instancesKey: String,
+        val checkoutSessionResponse: CheckoutSessionResponse,
+    ) : IntegrationMetadata()
 }

@@ -47,6 +47,12 @@ def update_changelog()
         )
     end
 
+    replace_in_file(
+        "CHANGELOG.md",
+        /^NEXT_VERSION_BUMP:\s*(PATCH|MINOR|MAJOR)\s*$/i,
+        "NEXT_VERSION_BUMP: PATCH"
+    )
+
     execute_or_fail("git add CHANGELOG.md")
 end
 

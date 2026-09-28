@@ -46,6 +46,7 @@ class WebLinkActivityContractTest {
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             launchMode = LinkLaunchMode.Full,
+            statusBarColor = null,
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)

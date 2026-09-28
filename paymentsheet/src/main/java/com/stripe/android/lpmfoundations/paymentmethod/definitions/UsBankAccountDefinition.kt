@@ -2,7 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -27,11 +27,15 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = UsBankAccountUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = UsBankAccountUiDefinitionFactory
 }
 
-private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod = SupportedPaymentMethod(
+private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Custom {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata
+    ): SupportedPaymentMethod = SupportedPaymentMethod(
         code = UsBankAccountDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
@@ -43,10 +47,11 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
     )
 
     override fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
         customerHasSavedPaymentMethods: Boolean,
         incentive: PaymentMethodIncentive?,
     ): FormHeaderInformation {
-        return createSupportedPaymentMethod().asFormHeaderInformation(incentive).copy(
+        return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive).copy(
             displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
             shouldShowIcon = false,
         )

@@ -15,8 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
@@ -65,7 +68,10 @@ internal fun TestModeBanner(
             text = buttonLabel,
             color = FinancialConnectionsTheme.colors.textAction,
             style = FinancialConnectionsTheme.typography.bodyMediumEmphasized,
-            modifier = Modifier.clickable(enabled = enabled, onClick = onButtonClick)
+            modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("test_mode_fill_button")
+                .clickable(enabled = enabled, onClick = onButtonClick)
         )
     }
 }

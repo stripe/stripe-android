@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.stripePrimaryButtonStyle
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val REMOVE_BUTTON_LOADING = "REMOVE_BUTTON_LOADING"
@@ -74,7 +74,7 @@ internal fun RemoveButton(
                         color = MaterialTheme.colors.error.copy(
                             LocalContentAlpha.current
                         ),
-                        style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
+                        style = MaterialTheme.stripePrimaryButtonStyle.getComposeTextStyle(),
                     )
                 }
             }

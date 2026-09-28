@@ -7,7 +7,11 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
@@ -51,8 +55,14 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val label: String? = null,
         internal val transactionId: String? = null,
         internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        internal val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         internal val clientAttributionMetadata: ClientAttributionMetadata? = null,
         internal val isElements: Boolean = false,
+        internal val apiConfiguration: ApiConfiguration.State,
+        internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
+        internal val billingEmailOverride: String? = null,
+        internal val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
+        internal val dynamicCallbackId: String? = null,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

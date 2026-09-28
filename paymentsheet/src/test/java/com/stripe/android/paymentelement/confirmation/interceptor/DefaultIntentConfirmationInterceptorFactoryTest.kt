@@ -27,7 +27,7 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
     @Test
     fun `create() with sharedPaymentToken returns SharedPaymentTokenConfirmationInterceptor`() =
         runScenario(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -48,7 +48,7 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
     @Test
     fun `create() with DeferredIntent returns DeferredIntentConfirmationInterceptor`() =
         runScenario(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -68,7 +68,7 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
     @Test
     fun `create() with DeferredIntent returns ConfirmationTokenConfirmationInterceptor`() =
         runScenario(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,

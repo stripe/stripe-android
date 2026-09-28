@@ -4,46 +4,72 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.Executors
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormHelperTest {
+
+    @get:Rule
+    val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableKlarnaFormRemoval,
+        isEnabled = false
+    )
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `formElementsForCode with unknown code returns empty list`() = runTest {
@@ -55,6 +81,7 @@ internal class FormHelperTest {
 
     @Test
     fun `formElementsForCode returns klarna form elements`() = runTest {
+        enableKlarnaFormRemovalRule.setEnabled(true)
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -64,19 +91,22 @@ internal class FormHelperTest {
             newPaymentSelectionProvider = { null },
         )
         val formElements = formHelper.formElementsForCode("klarna")
-        assertThat(formElements).hasSize(3)
-        // Email field has an empty string for value
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
+        assertThat(formElements).hasSize(0)
+        enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
     @Test
     fun `formElementsForCode returns klarna form elements without using current selection values`() = runTest {
+        enableKlarnaFormRemovalRule.setEnabled(true)
+
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             newPaymentSelectionProvider = {
                 NewPaymentOptionSelection.New(
@@ -97,18 +127,24 @@ internal class FormHelperTest {
             },
         )
         val formElements = formHelper.formElementsForCode("klarna")
-        assertThat(formElements).hasSize(3)
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
+
+        enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
     @Test
     fun `formElementsForCode returns klarna form elements using current selection values`() = runTest {
+        enableKlarnaFormRemovalRule.setEnabled(true)
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             newPaymentSelectionProvider = {
                 NewPaymentOptionSelection.New(
@@ -129,19 +165,21 @@ internal class FormHelperTest {
             },
         )
         val formElements = formHelper.formElementsForCode("klarna")
-        assertThat(formElements).hasSize(3)
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].second.value).isEqualTo("example@email.com")
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("example@email.com")
+        enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
     @Test
     fun `createFormArguments produces the correct form arguments when payment intent is off-session`() = runTest {
         val observedArgs = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION
             )
         ).createFormArguments(
-            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
+            paymentMethodCode = SupportedPaymentMethodFixtures.card.code,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -164,8 +202,8 @@ internal class FormHelperTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                IdentifierSpec.Name to FormFieldEntry(name, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.Name to FormFieldEntry(name, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -184,12 +222,73 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `first onFormFieldValuesChanged call is not dropped on a real async dispatcher`() {
+        // A regular TestDispatcher runs launched coroutines eagerly/inline, so it can't catch a
+        // regression here: the bug this guards against is a genuine scheduling gap between the
+        // init{} collector's launch and it actually subscribing, which only shows up with a real
+        // dispatcher. lastFormValues' replay = 1 is what keeps this update from being lost even if
+        // the very first call to onFormFieldValuesChanged races ahead of that subscription.
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(executor.asCoroutineDispatcher()))
+            val cardBrand = "visa"
+            val name = "Joe"
+            val receivedSelection = CompletableDeferred<PaymentSelection?>()
+            val linkInlineHandler = LinkInlineHandler.create()
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+
+            val formHelper = DefaultFormHelper(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = linkInlineHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
+                selectionUpdater = { selection -> receivedSelection.complete(selection) },
+                eventReporter = FakeEventReporter(),
+                savedStateHandle = SavedStateHandle(),
+                formDefinitionFactory = DefaultFormDefinitionFactory(
+                    coroutineScope = coroutineScope,
+                    linkInlineHandler = linkInlineHandler,
+                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    newPaymentSelectionProvider = { null },
+                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                    setAsDefaultMatchesSaveForFutureUse = false,
+                    autocompleteAddressInteractorFactory = null,
+                    isLinkUI = false,
+                    automaticallyLaunchedCardScanFormDataHelper = null,
+                    tapToAddHelper = null,
+                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                    isNfcScanningAvailable = null,
+                ),
+            )
+
+            val formFieldValues = FormFieldValues(
+                fieldValuePairs = mapOf(
+                    FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                    FormFieldId.Name to FormFieldEntry(name, true),
+                ),
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+            formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+
+            val selection = runBlocking {
+                withTimeoutOrNull(5_000) { receivedSelection.await() }
+            } as? PaymentSelection.New.Card
+
+            assertThat(selection).isNotNull()
+            assertThat(selection?.brand?.code).isEqualTo(cardBrand)
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
     fun `onPaymentMethodFormCompleted event emitted when form is filled`() = runScenario {
+        enableKlarnaFormRemovalRule.setEnabled(true)
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -197,7 +296,10 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
@@ -206,16 +308,21 @@ internal class FormHelperTest {
         formHelper.onFormFieldValuesChanged(formFieldValues, "klarna")
         val event = eventReporter.formCompletedCalls.awaitItem()
         assertThat(event.code).isEqualTo("klarna")
+        enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
     @Test
     fun `onPaymentMethodFormCompleted event should not be emitted when form is filled twice`() = runScenario {
+        enableKlarnaFormRemovalRule.setEnabled(true)
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
@@ -224,8 +331,8 @@ internal class FormHelperTest {
 
         val firstFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -235,22 +342,27 @@ internal class FormHelperTest {
 
         val secondFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("UK", true),
-                IdentifierSpec.Email to FormFieldEntry("Joey@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("UK", true),
+                FormFieldId.Email to FormFieldEntry("Joey@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
         formHelper.onFormFieldValuesChanged(secondFormFieldValues, "klarna")
+        enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
     @Test
     fun `onPaymentMethodFormCompleted event emitted when different forms are filled`() = runScenario {
+        enableKlarnaFormRemovalRule.setEnabled(true)
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
@@ -259,8 +371,8 @@ internal class FormHelperTest {
 
         val klarnaFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+                FormFieldId.Country to FormFieldEntry("US", true),
+                FormFieldId.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -270,22 +382,23 @@ internal class FormHelperTest {
 
         val cardFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("joe", true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
         formHelper.onFormFieldValuesChanged(cardFormFieldValues, "card")
         val cardEvent = eventReporter.formCompletedCalls.awaitItem()
         assertThat(cardEvent.code).isEqualTo("card")
+        enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
     @Test
     fun `onFormFieldValuesChanged & onLinkStateChanged calls create Link Inline selection when card`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -309,6 +422,7 @@ internal class FormHelperTest {
                 userInput = userInput,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             ),
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -335,8 +449,8 @@ internal class FormHelperTest {
     fun `Skips Link if not being used`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -359,6 +473,7 @@ internal class FormHelperTest {
                 isExpanded = false,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -384,7 +499,7 @@ internal class FormHelperTest {
     fun `onFormFieldValuesChanged & onLinkStateChanged calls create generic selection when not card`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -413,6 +528,7 @@ internal class FormHelperTest {
                 ),
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -438,8 +554,8 @@ internal class FormHelperTest {
     fun `Creates null selection if Link input is null when expanded`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.Name to FormFieldEntry("Joe", true),
+                FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                FormFieldId.Name to FormFieldEntry("Joe", true),
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
         )
@@ -494,6 +610,7 @@ internal class FormHelperTest {
                     isExpanded = true,
                     allowsDefaultOptIn = false,
                     linkSignUpOptInFeatureEnabled = false,
+                    linkBrand = LinkBrand.Link,
                 )
             )
 
@@ -510,8 +627,8 @@ internal class FormHelperTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-                IdentifierSpec.Name to FormFieldEntry(name, true),
+                FormFieldId.CardBrand to FormFieldEntry(cardBrand, true),
+                FormFieldId.Name to FormFieldEntry(name, true),
             ),
             userRequestedReuse = customerRequestedSave,
         )
@@ -570,12 +687,13 @@ internal class FormHelperTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "klarna"),
+                    paymentMethodTypes = listOf("card", "afterpay_clearpay"),
                 ),
             ),
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        assertThat(formHelper.formTypeForCode("afterpay_clearpay"))
+            .isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
     @Test
@@ -585,6 +703,35 @@ internal class FormHelperTest {
         )
         assertThat(formHelper.formTypeForCode("us_bank_account")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `formElementsForCode returns PMM promotion header if available`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "afterpay_clearpay"),
+                )
+            ),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                promotions = listOf(
+                    PaymentMethodMessagePromotion(
+                        paymentMethodType = "AFTERPAY_CLEARPAY",
+                        message = "This is a message",
+                        learnMore = PaymentMethodMessageLearnMore(
+                            message = "Click me",
+                            url = "https://test.com"
+                        )
+                    )
+                )
+            ),
+            newPaymentSelectionProvider = { null }
+        )
+
+        val elements = formHelper.formElementsForCode(PaymentMethod.Type.AfterpayClearpay.code)
+        val header = elements[0] as PaymentMethodMessageHeaderElement
+        assertThat(header).isInstanceOf<PaymentMethodMessageHeaderElement>()
+        assertThat(header.promotion).isNotNull()
     }
 
     private fun runLinkInlineTest(
@@ -622,22 +769,36 @@ internal class FormHelperTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
-        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
+        tapToAddHelper: TapToAddHelper? = null,
+        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper(),
+        newPaymentSelectionProvider: (PaymentMethodCode) -> NewPaymentOptionSelection? =
+            { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher()))
         return DefaultFormHelper(
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = newPaymentSelectionProvider,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
-            setAsDefaultMatchesSaveForFutureUse = false,
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
-            autocompleteAddressInteractorFactory = null,
-            automaticallyLaunchedCardScanFormDataHelper = null,
+            formDefinitionFactory = DefaultFormDefinitionFactory(
+                coroutineScope = coroutineScope,
+                linkInlineHandler = linkInlineHandler,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = newPaymentSelectionProvider,
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                setAsDefaultMatchesSaveForFutureUse = false,
+                autocompleteAddressInteractorFactory = null,
+                isLinkUI = false,
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = tapToAddHelper,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                isNfcScanningAvailable = null,
+            ),
         )
     }
 

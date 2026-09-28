@@ -5,15 +5,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.EmbeddedContentPage
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -25,9 +24,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 @RunWith(TestParameterInjector::class)
-internal class CustomPaymentMethodsTest {
+internal class CustomPaymentMethodsTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -54,6 +55,7 @@ internal class CustomPaymentMethodsTest {
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             builder = {
@@ -76,11 +78,7 @@ internal class CustomPaymentMethodsTest {
                 assertCompleted(it)
             },
         ) { context ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-cpms.json")
             }
 
@@ -95,6 +93,7 @@ internal class CustomPaymentMethodsTest {
             page.clickPrimaryButton()
 
             context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
+            context.consumeNullPaymentOptionEventForFlowController()
         }
     }
 
@@ -114,6 +113,7 @@ internal class CustomPaymentMethodsTest {
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             builder = {
@@ -145,11 +145,7 @@ internal class CustomPaymentMethodsTest {
                 assertCompleted(it)
             },
         ) { context ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-cpms.json")
             }
 
@@ -174,6 +170,7 @@ internal class CustomPaymentMethodsTest {
             page.clickPrimaryButton()
 
             context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
+            context.consumeNullPaymentOptionEventForFlowController()
         }
     }
 
@@ -193,6 +190,7 @@ internal class CustomPaymentMethodsTest {
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = integrationType,
             builder = {
@@ -215,11 +213,7 @@ internal class CustomPaymentMethodsTest {
                 assertCompleted(it)
             },
         ) { context ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-cpms.json")
             }
 
@@ -242,6 +236,7 @@ internal class CustomPaymentMethodsTest {
             page.clickPrimaryButton()
 
             context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
+            context.consumeNullPaymentOptionEventForFlowController()
         }
     }
 
@@ -259,6 +254,7 @@ internal class CustomPaymentMethodsTest {
 
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
                     calledConfirmCallback = true
@@ -282,11 +278,7 @@ internal class CustomPaymentMethodsTest {
                 assertCompleted(it)
             },
         ) { context ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-cpms.json")
             }
 
@@ -299,6 +291,7 @@ internal class CustomPaymentMethodsTest {
 
             embeddedContentPage.clickOnLpm("cpmt_123")
             embeddedContentPage.assertHasSelectedLpm("cpmt_123")
+            context.consumePaymentOptionEvent("cpmt_123", "TestPay")
 
             context.confirm()
         }

@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
@@ -64,6 +65,7 @@ class BacsConfirmationDefinitionTest {
 
                 definition.createLauncher(
                     activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = onResult,
                 )
 
@@ -95,7 +97,7 @@ class BacsConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = createBacsConfirmationOption(),
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = createBacsMandateData(),
             result = BacsMandateConfirmationResult.Confirmed,
         )
 
@@ -124,7 +126,7 @@ class BacsConfirmationDefinitionTest {
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                deferredIntentConfirmationType = null,
+                launcherArgs = createBacsMandateData(),
                 result = BacsMandateConfirmationResult.Cancelled,
             )
 
@@ -143,7 +145,7 @@ class BacsConfirmationDefinitionTest {
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                deferredIntentConfirmationType = null,
+                launcherArgs = createBacsMandateData(),
                 result = BacsMandateConfirmationResult.ModifyDetails,
             )
 
@@ -221,7 +223,6 @@ class BacsConfirmationDefinitionTest {
         assertThat(mandateData.sortCode).isEqualTo("108800")
         assertThat(mandateData.accountNumber).isEqualTo("00012345")
 
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
         assertThat(launchAction.receivesResultInProcess).isTrue()
     }
 
@@ -290,6 +291,13 @@ class BacsConfirmationDefinitionTest {
             optionsParams = null,
         )
     }
+
+    private fun createBacsMandateData() = BacsMandateData(
+        name = "John Doe",
+        email = "johndoe@email.com",
+        accountNumber = "00012345",
+        sortCode = "108800",
+    )
 
     private fun ConfirmationHandler.Option.asNewPaymentMethodOption(): PaymentMethodConfirmationOption.New {
         return this as PaymentMethodConfirmationOption.New

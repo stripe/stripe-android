@@ -1,0 +1,47 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonException
+
+def raw = System.getenv("BITRISE_QUARANTINED_TESTS_JSON")
+def quarantinedJson = raw?.trim()
+
+def load
+
+if (!quarantinedJson) {
+    load = [
+        status    : 'ENV_UNSET',
+        cases     : [],
+    ]
+
+    println "BITRISE_QUARANTINED_TESTS_JSON is not set"
+} else {
+    try {
+        def data = new JsonSlurper().parseText(quarantinedJson)
+
+        def cases = data.collect { testCase ->
+            [
+                className   : testCase.className as String,
+                testCaseName: testCase.testCaseName as String,
+            ]
+        }
+
+        load = [
+            status    : cases.isEmpty() ? 'OK_EMPTY' : 'OK',
+            cases     : cases,
+        ]
+
+        if (load.status == 'OK_EMPTY') {
+            println "No quarantined tests in BITRISE_QUARANTINED_TESTS_JSON"
+        } else {
+            println "Loaded ${cases.size()} quarantined test(s) from BITRISE_QUARANTINED_TESTS_JSON"
+        }
+    } catch (JsonException e) {
+        load = [
+            status    : 'PARSE_ERROR',
+            cases     : [],
+        ]
+
+        println "Invalid JSON in BITRISE_QUARANTINED_TESTS_JSON: ${e.message}"
+    }
+}
+
+gradle.ext.quarantinedTestsLoad = load

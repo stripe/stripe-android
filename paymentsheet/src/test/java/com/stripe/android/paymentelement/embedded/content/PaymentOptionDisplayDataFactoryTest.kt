@@ -1,35 +1,66 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionDisplayDataFactoryTest {
 
-    private val displayDataFactory = PaymentOptionDisplayDataFactory(
-        iconLoader = mock(),
-        context = ApplicationProvider.getApplicationContext(),
-    )
+    private val displayDataFactory = createFactory()
+    private val appearance = PaymentSheet.Appearance()
+
+    @Test
+    fun `create uses link account brand for saved Link passthrough card label`() {
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply {
+            set(LinkAccountUpdate.Value(createLinkAccount(linkBrand = LinkBrand.Onelink)))
+        }
+
+        val option = createFactory(linkAccountHolder = linkAccountHolder).create(
+            selection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true),
+            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkBrand = LinkBrand.Link,
+            ),
+            appearance = appearance,
+        )
+
+        assertThat(option?.label).isEqualTo("Onelink")
+    }
 
     @Test
     fun `create attaches PaymentMethod BillingDetails as PaymentSheet BillingDetails `() {
@@ -42,6 +73,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
                 )
             ),
             paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.billingDetails).isEqualTo(paymentSheetBillingDetails)
@@ -51,17 +83,8 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `create does not attach BillingDetails for Google Pay`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.GooglePay,
-            paymentMethodMetadata = paymentMethodMetadata
-        )
-
-        assertThat(option?.billingDetails).isNull()
-    }
-
-    @Test
-    fun `create does not attach BillingDetails for ShopPay`() {
-        val option = displayDataFactory.create(
-            selection = PaymentSelection.ShopPay,
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.billingDetails).isNull()
@@ -71,7 +94,8 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `selecting saved card does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.mandateText).isNull()
@@ -81,7 +105,8 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `selecting new card does attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.mandateText).isNotNull()
@@ -91,17 +116,8 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `selecting google pay does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.GooglePay,
-            paymentMethodMetadata = paymentMethodMetadata
-        )
-
-        assertThat(option?.mandateText).isNull()
-    }
-
-    @Test
-    fun `selecting shop pay does not attach mandate to paymentMethodMetadata`() {
-        val option = displayDataFactory.create(
-            selection = PaymentSelection.ShopPay,
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.mandateText).isNull()
@@ -112,6 +128,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `create adds shipping details for verified Link user`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null,
@@ -132,7 +149,8 @@ internal class PaymentOptionDisplayDataFactoryTest {
                     unredactedPhoneNumber = "+15555555555",
                 ),
             ),
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.shippingDetails).isEqualTo(
@@ -157,16 +175,114 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `create adds no shipping details for unverified Link user`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = null,
                 shippingAddress = null,
             ),
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = paymentMethodMetadata,
+            appearance = appearance,
         )
 
         assertThat(option?.shippingDetails).isNull()
     }
 
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `always dark with dark component uses dark icon on light system`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        lightComponent = Color.White,
+        darkComponent = Color.Black,
+    ) {
+        assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `always light with light component uses light icon on dark system`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+        lightComponent = Color.White,
+        darkComponent = Color.Black,
+    ) {
+        assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `automatic with light component uses light icon on light system`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.Automatic,
+        lightComponent = Color.White,
+        darkComponent = Color.Black,
+    ) {
+        assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `automatic with dark component uses dark icon on dark system`() = runIconScenario(
+        themeMode = PaymentSheet.ThemeMode.Automatic,
+        lightComponent = Color.White,
+        darkComponent = Color.Black,
+    ) {
+        assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    private fun runIconScenario(
+        themeMode: PaymentSheet.ThemeMode,
+        lightComponent: Color,
+        darkComponent: Color,
+        block: IconScenario.() -> Unit,
+    ) = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val imageLoader = FakeStripeImageLoader()
+        val factory = createFactory(
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = imageLoader,
+            ),
+        )
+        val appearance = PaymentSheet.Appearance.Builder()
+            .colorsLight(PaymentSheet.Colors.Builder.light().component(lightComponent).build())
+            .colorsDark(PaymentSheet.Colors.Builder.dark().component(darkComponent).build())
+            .themeMode(themeMode)
+            .build()
+        val selection = PaymentSelection.CustomPaymentMethod(
+            id = "cpm_123",
+            billingDetails = null,
+            label = "CPM".resolvableString,
+            lightThemeIconUrl = LIGHT_ICON_URL,
+            darkThemeIconUrl = DARK_ICON_URL,
+        )
+
+        requireNotNull(
+            factory.create(
+                selection = selection,
+                paymentMethodMetadata = paymentMethodMetadata,
+                appearance = appearance,
+            )
+        ).imageLoader()
+
+        IconScenario(loadedUrl = imageLoader.awaitLoadCall().url).apply(block)
+        imageLoader.ensureAllEventsConsumed()
+    }
+
     companion object {
+        private fun createFactory(
+            iconLoader: PaymentSelection.IconLoader = mock(),
+            cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader = PaymentOptionCardArtDrawableLoader { null },
+            linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        ) = PaymentOptionDisplayDataFactory(
+            iconLoader = iconLoader,
+            cardArtDrawableLoader = cardArtDrawableLoader,
+            context = ApplicationProvider.getApplicationContext(),
+            linkAccountHolder = linkAccountHolder,
+        )
+
+        private fun createLinkAccount(linkBrand: LinkBrand?): LinkAccount {
+            return LinkAccount(
+                TestFactory.CONSUMER_SESSION.copy(linkBrand = linkBrand),
+            )
+        }
+
         private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(
             name = "Jenny Rosen",
             email = "foo@bar.com",
@@ -196,5 +312,12 @@ internal class PaymentOptionDisplayDataFactoryTest {
             isGooglePayReady = true,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         )
+
+        private const val LIGHT_ICON_URL = "light_icon_url"
+        private const val DARK_ICON_URL = "dark_icon_url"
     }
+
+    private data class IconScenario(
+        val loadedUrl: String,
+    )
 }

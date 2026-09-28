@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Jūsu konta numuram šoreiz nevar piekļūt</string>
   <string name="stripe_close_dialog_networking_desc">Ja atcelsiet tagad, jūsu konts tiks savienots ar %1$s, bet tas netiks saglabāts Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Ja atcelsiet tagad, jūsu konts tiks savienots ar uzņēmumu, bet tas netiks saglabāts Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Ja atcelsiet tūlīt, jūsu konts tiks saistīts ar šo uzņēmumu, bet tas netiks saglabāts uz %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Ja atcelsiet tūlīt, jūsu konts tiks saistīts ar %1$s, bet tas netiks saglabāts uz %2$s.</string>
   <string name="stripe_error_cta_close">Aizvērt</string>
   <string name="stripe_error_cta_manual_entry">Manuāli ievadīt bankas rekvizītus</string>
   <string name="stripe_error_cta_retry">Mēģināt vēlreiz</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Ievadiet bankas rekvizītus</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Atcelt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Turpināt ar Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Turpināt ar %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ne tagad</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Izmantojiet iepriekš Link kontā saglabāto informāciju.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Izmantojiet informāciju, ko iepriekš saglabājāt savā %1$s kontā.</string>
   <string name="stripe_networking_link_login_warmup_title">Turpināt ar Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Turpināt ar %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ne tagad</string>
   <string name="stripe_networking_save_to_link_verification_title">Apstipriniet, ka tas esat jūs</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Izvēlieties citu banku</string>
   <string name="stripe_search">Meklēšana</string>
   <string name="stripe_success_pane_desc_link_error_plural">Jūsu konti tika savienoti, bet tos nevarēja saglabāt Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Jūsu konti bija savienoti, bet tos nevarēja saglabāt ar %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Jūsu konts tika savienots, bet to nevarēja saglabāt Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Jūsu konts bija savienots, bet to nevarēja saglabāt ar %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Jūsu konti tika savienoti un saglabāti Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Jūsu konti tika savienoti un saglabāti ar %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Jūsu konts tika savienots un saglabāts Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Jūsu konts tika savienots un saglabāts ar %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Varat sagaidīt mikrodepozītus savā kontā, kas beidzas ar ••••%1$s pēc 1–2 dienām, un e-pastu ar turpmākiem norādījumiem.</string>
   <string name="stripe_success_pane_desc_plural">Jūsu konti tika savienoti</string>
   <string name="stripe_success_pane_desc_singular">Jūsu konts tika savienots</string>

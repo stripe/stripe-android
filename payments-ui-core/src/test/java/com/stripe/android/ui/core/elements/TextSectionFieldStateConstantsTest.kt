@@ -10,12 +10,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify incomplete errors are shown when don't have focus`() {
         assertThat(
-            Error.Incomplete(-1).shouldShowError(
+            Error.Incomplete(-1).shouldShowValidationMessage(
                 true
             )
         ).isFalse()
         assertThat(
-            Error.Incomplete(-1).shouldShowError(
+            Error.Incomplete(-1).shouldShowValidationMessage(
                 false
             )
         ).isTrue()
@@ -24,12 +24,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify malformed are shown when you do and don't have focus`() {
         assertThat(
-            Error.Invalid(-1).shouldShowError(
+            Error.Invalid(-1).shouldShowValidationMessage(
                 true
             )
         ).isTrue()
         assertThat(
-            Error.Invalid(-1).shouldShowError(
+            Error.Invalid(-1).shouldShowValidationMessage(
                 false
             )
         ).isTrue()
@@ -38,12 +38,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify blank and required errors are never shown`() {
         assertThat(
-            Error.Blank.shouldShowError(
+            Error.Blank.shouldShowValidationMessage(
                 true
             )
         ).isFalse()
         assertThat(
-            Error.Blank.shouldShowError(
+            Error.Blank.shouldShowValidationMessage(
                 false
             )
         ).isFalse()
@@ -52,12 +52,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify Limitless states are never shown as error`() {
         assertThat(
-            Valid.Limitless.shouldShowError(
+            Valid.Limitless.shouldShowValidationMessage(
                 true
             )
         ).isFalse()
         assertThat(
-            Valid.Limitless.shouldShowError(
+            Valid.Limitless.shouldShowValidationMessage(
                 false
             )
         ).isFalse()

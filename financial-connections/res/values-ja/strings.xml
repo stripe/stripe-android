@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">現時点で、ご利用の口座番号にアクセスできていません</string>
   <string name="stripe_close_dialog_networking_desc">ここでキャンセルすると、口座は %1$s に連結されますが、Link には保存されません。</string>
   <string name="stripe_close_dialog_networking_desc_no_business">ここでキャンセルすると、口座はこのビジネスに連結されますが、Link には保存されません。</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">今キャンセルすると、お客様のアカウントはこのビジネスにリンクされますが、%1$s には保存されません。</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">今キャンセルすると、お客様のアカウントは%1$s にリンクされますが、%2$s には保存されません。</string>
   <string name="stripe_error_cta_close">閉じる</string>
   <string name="stripe_error_cta_manual_entry">銀行情報を手入力する</string>
   <string name="stripe_error_cta_retry">もう一度試してみる</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">銀行口座情報を入力する</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">キャンセル</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Link で続ける</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">%1$s で続行</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">今はやめておく</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Link アカウントにすでに保存されている情報を使用します。</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">%1$s アカウントに以前保存した情報を使用。</string>
   <string name="stripe_networking_link_login_warmup_title">Link で続ける</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">%1$s で続行</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">今はやめておく</string>
   <string name="stripe_networking_save_to_link_verification_title">ご本人様の確認</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">別の銀行を選択する</string>
   <string name="stripe_search">検索</string>
   <string name="stripe_success_pane_desc_link_error_plural">口座は連結されましたが、Link に保存できませんでした。</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">いくつかのアカウントは連結されましたが、%1$s に保存できませんでした。</string>
   <string name="stripe_success_pane_desc_link_error_singular">口座は連結されましたが、Link に保存できませんでした。</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">アカウントは連結されましたが、%1$s に保存できませんでした。</string>
   <string name="stripe_success_pane_desc_link_success_plural">口座が連結され、Link に保存されました。</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">お客様のアカウントは %1$s で連結され、保存されました。</string>
   <string name="stripe_success_pane_desc_link_success_singular">口座が連結され、Link に保存されました。</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">アカウントは%1$s で連結され、保存されました。</string>
   <string name="stripe_success_pane_desc_microdeposits">1 ～ 2 日以内に ••••%1$s の口座に少額入金を行い、その後の手順を記載したメールをお送りします。</string>
   <string name="stripe_success_pane_desc_plural">口座が連結されました</string>
   <string name="stripe_success_pane_desc_singular">口座が連結されました</string>

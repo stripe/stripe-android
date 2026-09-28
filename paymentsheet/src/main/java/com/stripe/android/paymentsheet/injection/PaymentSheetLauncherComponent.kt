@@ -2,17 +2,19 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.di.ApplicationIdModule
-import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
+import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -21,18 +23,23 @@ import javax.inject.Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
+        ApiRequestOptionsModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
+        GooglePayPaymentDataUpdateNoOpModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
-        ApplicationIdModule::class,
-        MobileSessionIdModule::class,
+        ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentSheetViewModelModule::class,
+        PaymentSheetAutocompleteModule::class,
+        TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,
+        PaymentMethodMessagePromotionsHelperModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface PaymentSheetLauncherComponent {

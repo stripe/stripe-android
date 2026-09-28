@@ -11,6 +11,7 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -43,8 +44,8 @@ class WebIntentNextActionHandlerTest {
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = context,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -110,6 +111,21 @@ class WebIntentNextActionHandlerTest {
     }
 
     @Test
+    fun authenticate_whenRedirectingToAlipay() {
+        // The fixture's next_action.return_url is "example://return_url"; asserting the SDK default
+        // instead proves the handler no longer trusts next_action.return_url (the EVO trampoline).
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T" +
+                "?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
+        )
+    }
+
+    @Test
     fun authenticate_whenRedirectingToWeChatPay() {
         val mockResolvedUrl = "https://resolved_url.wow"
 
@@ -167,7 +183,9 @@ class WebIntentNextActionHandlerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            apiConfigProvider = {
+                ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            },
             isInstantApp = false,
             defaultReturnUrl = DefaultReturnUrl("some_package_name"),
             redirectResolver = redirectResolver,
@@ -195,6 +213,9 @@ class WebIntentNextActionHandlerTest {
         assertThat(args.url).isEqualTo(expectedUrl)
         assertThat(args.referrer).isEqualTo(expectedReferrer)
         assertThat(args.returnUrl).isEqualTo(expectedReturnUrl)
+        assertThat(args.apiConfiguration).isEqualTo(
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ACCOUNT_ID)
+        )
         assertThat(args.shouldCancelIntentOnUserNavigation).isEqualTo(
             expectedShouldCancelIntentOnUserNavigation
         )

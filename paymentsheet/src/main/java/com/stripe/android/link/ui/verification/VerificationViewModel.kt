@@ -15,13 +15,15 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConsumerSessionRefresh
-import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +45,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkLaunchMode: LinkLaunchMode,
     private val webLinkAuthChannel: WebLinkAuthChannel,
     private val isDialog: Boolean,
+    private val linkBrand: LinkBrand,
     private val onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit,
     private val onChangeEmailRequested: () -> Unit,
     private val onDismissClicked: () -> Unit,
@@ -62,12 +65,13 @@ internal class VerificationViewModel @Inject constructor(
             defaultPayment = null,
             isDialog = isDialog,
             allowLogout = !isDialog || linkLaunchMode is LinkLaunchMode.PaymentMethodSelection,
-            consentSection = (linkAccount.consentPresentation as? ConsentPresentation.Inline)?.consentSection
+            consentSection = (linkAccount.consentPresentation as? ConsentPresentation.Inline)?.consentSection,
+            linkBrand = linkBrand,
         )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
 
-    val otpElement = OTPSpec.transform()
+    val otpElement = OTPElementFactory.create()
 
     private val otpCode: StateFlow<String?> =
         otpElement.otpCompleteFlow.stateIn(viewModelScope, SharingStarted.Lazily, null)
@@ -224,9 +228,6 @@ internal class VerificationViewModel @Inject constructor(
     fun onChangeEmailButtonClicked() {
         clearError()
         onChangeEmailRequested()
-        viewModelScope.launch {
-            linkAccountManager.logOut()
-        }
     }
 
     fun onFocusRequested() {
@@ -308,6 +309,7 @@ internal class VerificationViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkLaunchMode = parentComponent.linkLaunchMode,
                         webLinkAuthChannel = parentComponent.webLinkAuthChannel,
+                        linkBrand = parentComponent.configuration.effectiveLinkBrand(linkAccount),
                         onVerificationSucceeded = parentComponent.viewModel::onVerificationSucceeded,
                         onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,

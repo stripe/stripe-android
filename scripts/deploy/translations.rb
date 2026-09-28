@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'octokit'
-
 require_relative 'common'
 
 def validate_translations_merged

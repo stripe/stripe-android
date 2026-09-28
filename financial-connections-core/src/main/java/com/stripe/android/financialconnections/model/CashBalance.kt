@@ -20,5 +20,4 @@ import kotlinx.serialization.Serializable
 data class CashBalance(
     @SerialName("available")
     val available: Map<String, Int>? = null
-
 ) : StripeModel, Parcelable

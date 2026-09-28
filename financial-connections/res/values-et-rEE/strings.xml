@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Teie kontonumbrile ei saadud praegu juurdepääsu</string>
   <string name="stripe_close_dialog_networking_desc">Kui tühistate praegu, lingitakse teie konto ettevõttega %1$s, kuid seda ei salvestata Linki.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Kui tühistate praegu, lingitakse teie konto selle ettevõttega, kuid seda ei salvestata Linki.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Kui tühistate nüüd, seotakse konto selle ettevõttega, kuid see ei jää %1$s peale.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Kui tühistate nüüd, seotakse konto %1$s-iga, kuid seda ei salvestata %2$s-i.</string>
   <string name="stripe_error_cta_close">Sulge</string>
   <string name="stripe_error_cta_manual_entry">Sisesta pangaandmed käsitsi</string>
   <string name="stripe_error_cta_retry">Proovi uuesti</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Sisestage pangaandmed</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Tühista</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Jätka Linkiga</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Jätka %1$s-iga</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Mitte praegu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Kasutage teavet, mille olete varem oma Linki kontole salvestanud.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Kasutage infot, mida olete varem oma %1$s kontoga salvestanud.</string>
   <string name="stripe_networking_link_login_warmup_title">Jätka Linkiga</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Jätka %1$s-iga</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Mitte praegu</string>
   <string name="stripe_networking_save_to_link_verification_title">Kinnitage, et see olete teie</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Vali teine pank</string>
   <string name="stripe_search">Otsing</string>
   <string name="stripe_success_pane_desc_link_error_plural">Teie kontod on ühendatud, kuid neid ei saanud Linki salvestada.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Kontod olid ühendatud, kuid neid ei saanud %1$s salvestada.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Teie konto on ühendatud, kuid seda ei saanud Linki salvestada.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Konto oli ühendatud, kuid seda ei saanud %1$s salvestada.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Teie kontod on ühendatud ja Linki salvestatud.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Kontod olid ühendatud ja salvestatud %1$s-iga.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Teie konto on ühendatud ja Linki salvestatud.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Konto oli ühendatud ja salvestatud %1$s-ga.</string>
   <string name="stripe_success_pane_desc_microdeposits">Saate minikanded kontole lõpuga ••••%1$s 1–2 päeva jooksul ja meili täiendavate juhistega.</string>
   <string name="stripe_success_pane_desc_plural">Teie kontod on ühendatud</string>
   <string name="stripe_success_pane_desc_singular">Teie konto on ühendatud</string>

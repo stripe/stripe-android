@@ -1,12 +1,17 @@
 package com.stripe.android.utils
 
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -18,7 +23,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
 internal class FakePaymentElementLoader(
-    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+    private var stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,
     private var customer: CustomerState? = null,
     private var paymentSelection: PaymentSelection? = null,
@@ -30,7 +35,16 @@ internal class FakePaymentElementLoader(
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
     private val shippingDetails: AddressDetails? = null,
+    private val experimentsData: ElementsSession.ExperimentsData? = null,
+    private val integrationMetadata: IntegrationMetadata? = null,
 ) : PaymentElementLoader {
+
+    var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
+        private set
+
+    fun updateStripeIntent(intent: StripeIntent) {
+        this.stripeIntent = intent
+    }
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
         this.customer = customer?.copy(
@@ -41,11 +55,46 @@ internal class FakePaymentElementLoader(
         }
     }
 
+    private fun createPaymentMethodMetadata(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        configuration: CommonConfiguration,
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = customer != null,
+            stripeIntent = stripeIntent,
+            billingDetailsCollectionConfiguration = configuration
+                .billingDetailsCollectionConfiguration,
+            allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = configuration
+                .allowsPaymentMethodsRequiringShippingAddress,
+            paymentMethodOrder = configuration.paymentMethodOrder,
+            isGooglePayReady = isGooglePayAvailable,
+            cbcEligibility = cbcEligibility,
+            linkState = linkState,
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata =
+                clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            shippingDetails = shippingDetails,
+            experimentsData = experimentsData,
+            integrationMetadata = integrationMetadata
+                ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
+            paymentMethodLayout = when (integrationConfiguration) {
+                is PaymentElementLoader.Configuration.CryptoOnramp,
+                is PaymentElementLoader.Configuration.ExpressCheckoutElement,
+                is PaymentElementLoader.Configuration.StandaloneLink,
+                is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
+                is PaymentElementLoader.Configuration.PaymentSheet ->
+                    integrationConfiguration.configuration.paymentMethodLayout
+            }
+        )
+    }
+
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
+        lastIntegrationConfiguration = integrationConfiguration
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))
@@ -57,22 +106,16 @@ internal class FakePaymentElementLoader(
                     customer = customer,
                     paymentSelection = paymentSelection,
                     validationError = validationError,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        hasCustomerConfiguration = customer != null,
-                        stripeIntent = stripeIntent,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = isGooglePayAvailable,
-                        cbcEligibility = cbcEligibility,
-                        linkState = linkState,
-                        passiveCaptchaParams = passiveCaptchaParams,
-                        clientAttributionMetadata =
-                        clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-                        shippingDetails = shippingDetails,
-                    ),
+                    paymentMethodMetadata = createPaymentMethodMetadata(
+                        integrationConfiguration,
+                        configuration
+                    ).let { metadata ->
+                        if (integrationMetadata != null) {
+                            metadata.copy(integrationMetadata = integrationMetadata)
+                        } else {
+                            metadata
+                        }
+                    },
                 )
             )
         }

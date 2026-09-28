@@ -3,6 +3,7 @@ package com.stripe.android.link.theme
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,10 +18,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
-import com.stripe.android.link.ui.image.LocalStripeImageLoader
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 
-internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance?> { null }
+internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance.State?> { null }
 
 internal val LocalLinkTypography = staticCompositionLocalOf<LinkTypography> {
     error("No Typography provided")
@@ -39,12 +40,12 @@ internal val AppBarHeight = 70.dp
 internal val HorizontalPadding = 20.dp
 
 @Composable
-internal fun DefaultLinkTheme(
-    appearance: LinkAppearance? = LocalLinkAppearance.current,
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun DefaultLinkTheme(
+    appearance: LinkAppearance.State? = LocalLinkAppearance.current,
     content: @Composable () -> Unit
 ) {
-    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
-        .getOrElse { StripeImageLoader(LocalContext.current) }
+    val stripeImageLoader = DefaultStripeImageLoader(LocalContext.current)
     val isDark = isLinkDarkTheme(appearance)
 
     // Colors
@@ -56,7 +57,8 @@ internal fun DefaultLinkTheme(
                 textBrand = overrides.primary,
                 onButtonBrand = overrides.contentOnPrimary,
                 buttonBrand = overrides.primary,
-                borderSelected = overrides.borderSelected
+                borderSelected = overrides.borderSelected,
+                iconBrand = overrides.primary,
             )
         }
         ?: defaultColors
@@ -103,11 +105,16 @@ internal fun DefaultLinkTheme(
 }
 
 @Composable
-internal fun isLinkDarkTheme(appearance: LinkAppearance?): Boolean {
-    return when (appearance?.style) {
+internal fun isLinkDarkTheme(appearance: LinkAppearance.State?): Boolean {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    return appearance?.style.isDarkTheme(isSystemInDarkTheme)
+}
+
+internal fun LinkAppearance.Style?.isDarkTheme(isSystemDarkTheme: Boolean): Boolean {
+    return when (this) {
+        LinkAppearance.Style.AUTOMATIC, null -> isSystemDarkTheme
         LinkAppearance.Style.ALWAYS_LIGHT -> false
         LinkAppearance.Style.ALWAYS_DARK -> true
-        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
     }
 }
 

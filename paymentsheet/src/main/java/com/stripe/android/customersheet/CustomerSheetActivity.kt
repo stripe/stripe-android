@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.customersheet.CustomerSheetViewAction.OnDismissed
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
@@ -51,6 +51,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        val args = args
         if (args == null) {
             finishWithResult(
                 InternalCustomerSheetResult.Error(
@@ -66,7 +67,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         )
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = args.configuration.appearance) {
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = {
                         if (it == ModalBottomSheetValue.Hidden) {

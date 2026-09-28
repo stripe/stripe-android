@@ -8,8 +8,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.NetworkImageDecoder
-import com.stripe.android.uicore.image.StripeImageLoader
 
 /**
  * Provides the entire context needed to render a preview.
@@ -28,7 +28,7 @@ internal fun FinancialConnectionsPreview(
         CompositionLocalProvider(
             LocalNavHostController provides navController,
             LocalTestMode provides testMode,
-            LocalImageLoader provides StripeImageLoader(
+            LocalImageLoader provides DefaultStripeImageLoader(
                 context = LocalContext.current,
                 logger = Logger.noop(),
                 memoryCache = null,

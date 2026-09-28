@@ -12,7 +12,10 @@ internal object CurrencySettingsDefinition :
     PlaygroundSettingDefinition.Displayable<Currency> {
     override val displayName: String = "Currency"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 
@@ -39,6 +42,7 @@ enum class Currency(val displayName: String, override val value: String) : Value
     MXN("MXN", "mxn"),
     BRL("BRL", "brl"),
     JPY("JPY", "jpy"),
+    KRW("KRW", "krw"),
     SEK("SEK", "sek"),
     CNY("CNY", "cny"),
     CHF("CHF", "chf"),

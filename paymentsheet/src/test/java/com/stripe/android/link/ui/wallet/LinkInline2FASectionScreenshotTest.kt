@@ -7,11 +7,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
@@ -33,7 +34,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testDefault() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController()
         )
 
@@ -48,6 +49,7 @@ class LinkInline2FASectionScreenshotTest {
             defaultPayment = null,
             isDialog = false,
             allowLogout = true,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -62,7 +64,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testWithPaymentDetailsMastercard() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController()
         )
 
@@ -84,7 +86,8 @@ class LinkInline2FASectionScreenshotTest {
             email = "test@stripe.com",
             isDialog = false,
             allowLogout = true,
-            defaultPayment = paymentUI
+            defaultPayment = paymentUI,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -99,7 +102,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testWithPaymentDetailsBank() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController()
         )
 
@@ -121,7 +124,8 @@ class LinkInline2FASectionScreenshotTest {
             email = "test@stripe.com",
             isDialog = false,
             allowLogout = true,
-            defaultPayment = paymentUI
+            defaultPayment = paymentUI,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -136,7 +140,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testProcessingState() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController().apply {
                 onValueChanged(0, "123456")
             }
@@ -160,7 +164,8 @@ class LinkInline2FASectionScreenshotTest {
             email = "payment@example.com",
             isDialog = false,
             allowLogout = true,
-            defaultPayment = paymentUI
+            defaultPayment = paymentUI,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -175,7 +180,7 @@ class LinkInline2FASectionScreenshotTest {
     @Test
     fun testErrorState() {
         val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController().apply {
                 onValueChanged(0, "123")
             }
@@ -192,6 +197,7 @@ class LinkInline2FASectionScreenshotTest {
             defaultPayment = null,
             isDialog = false,
             allowLogout = true,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {

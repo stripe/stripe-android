@@ -17,8 +17,10 @@ internal class AddPaymentMethodOptions @AssistedInject constructor(
 ) {
     val values: List<AddPaymentMethodOption> = run {
         val stripeIntent = configuration.stripeIntent
-        val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
-        val paymentMethodFilter = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
+        val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(
+            linkAccount.supportedPaymentDetailsTypes
+        )
+        val paymentMethodFilters = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilters
 
         buildList {
             @Suppress("ComplexCondition")
@@ -26,12 +28,12 @@ internal class AddPaymentMethodOptions @AssistedInject constructor(
                 linkAccount.consumerPublishableKey != null &&
                 configuration.financialConnectionsAvailability != null &&
                 supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE) &&
-                (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.BankAccount)
+                (paymentMethodFilters == null || paymentMethodFilters.contains(LinkPaymentMethodFilter.BankAccount))
             ) {
                 add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))
             }
             if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE) &&
-                (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.Card)
+                (paymentMethodFilters == null || paymentMethodFilters.contains(LinkPaymentMethodFilter.Card))
             ) {
                 add(AddPaymentMethodOption.Card)
             }

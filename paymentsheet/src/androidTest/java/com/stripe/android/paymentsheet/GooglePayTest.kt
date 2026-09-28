@@ -21,16 +21,16 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_FORM_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitUntilWithIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -48,7 +49,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class GooglePayTest {
+internal class GooglePayTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
@@ -123,7 +127,7 @@ internal class GooglePayTest {
             intendedGooglePayToBeLaunched()
             intendedPaymentConfirmationToBeLaunched()
 
-            composeTestRule.waitUntil(UI_TIMEOUT) {
+            composeTestRule.waitUntilWithIdle {
                 resultCallbackCalled
             }
         }
@@ -131,7 +135,7 @@ internal class GooglePayTest {
 
     private fun runGooglePayFlowTest(
         paymentResultCallback: (PaymentSheetResult) -> Unit,
-        test: (GooglePayFlowScenario) -> Unit
+        test: suspend (GooglePayFlowScenario) -> Unit
     ) {
         runGooglePayTest(
             isGooglePayReady = true,
@@ -155,6 +159,8 @@ internal class GooglePayTest {
 
                         context.confirm()
                     }
+
+                    context.consumeNullPaymentOptionEventForFlowController()
                 }
             )
         }
@@ -187,7 +193,7 @@ internal class GooglePayTest {
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
         paymentResultCallback: (PaymentSheetResult) -> Unit,
-        test: (context: ProductIntegrationTestRunnerContext) -> Unit,
+        test: suspend (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
         GooglePayRepository.googlePayAvailabilityClientFactory =
             FakeGooglePayAvailabilityClient.Factory(isGooglePayReady)
@@ -195,6 +201,7 @@ internal class GooglePayTest {
         enqueueElementsSession(isGooglePayEnabledInElementsSession)
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = testRules.networkRule,
             integrationType = integrationType,
             resultCallback = paymentResultCallback,
@@ -220,11 +227,7 @@ internal class GooglePayTest {
     }
 
     private fun enqueueElementsSession(isGooglePayEnabledInElementsSession: Boolean) {
-        testRules.networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        testRules.networkRule.elementsSession { response ->
             val replacements = if (isGooglePayEnabledInElementsSession) {
                 listOf()
             } else {
@@ -245,7 +248,7 @@ internal class GooglePayTest {
     }
 
     private fun waitUntilLoaded() {
-        composeTestRule.waitUntil(UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(
                     hasTestTag(PAYMENT_SHEET_FORM_TEST_TAG)
@@ -275,7 +278,7 @@ internal class GooglePayTest {
     }
 
     private fun intendedGooglePayToBeLaunched() {
-        composeTestRule.waitUntil(UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             try {
                 intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
                 true
@@ -311,7 +314,7 @@ internal class GooglePayTest {
     }
 
     private class GooglePayFlowScenario(
-        val confirm: () -> Unit,
+        val confirm: suspend () -> Unit,
     )
 
     private companion object {
@@ -322,6 +325,5 @@ internal class GooglePayTest {
             "com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
 
         const val GOOGLE_PAY_SAVED_OPTION_TEST_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay"
-        const val UI_TIMEOUT = 5000L
     }
 }

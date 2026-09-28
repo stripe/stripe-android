@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 
 internal class IntentConfirmationChallengeActivityContract :
@@ -13,25 +14,37 @@ internal class IntentConfirmationChallengeActivityContract :
         >() {
 
     override fun createIntent(context: Context, input: Args): Intent {
+        val nextActionData = input.intent.nextActionData
+            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        val captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
+
         return IntentConfirmationChallengeActivity.createIntent(
             context,
             IntentConfirmationChallengeArgs(
-                input.publishableKey,
+                input.apiConfiguration,
                 input.productUsage.toList(),
-                input.intent
+                input.intent,
+                captchaVendorName
             )
         )
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): IntentConfirmationChallengeActivityResult {
         val result = intent?.extras?.let {
-            BundleCompat.getParcelable(it, EXTRA_RESULT, IntentConfirmationChallengeActivityResult::class.java)
+            BundleCompat.getParcelable(
+                it,
+                EXTRA_RESULT,
+                IntentConfirmationChallengeActivityResult::class.java
+            )
         }
-        return result ?: IntentConfirmationChallengeActivityResult.Failed(Throwable("No result"))
+        return result ?: IntentConfirmationChallengeActivityResult.Failed(
+            clientSecret = null,
+            error = Throwable("No result")
+        )
     }
 
     data class Args(
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val productUsage: Set<String>,
         val intent: StripeIntent
     )

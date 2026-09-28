@@ -1,5 +1,16 @@
 # Migration Guide
 
+## Migrating from versions < 23.17.0
+- Changes to `googlePlacesApiKey`:
+  * `PaymentSheet.Configuration.Builder.googlePlacesApiKey`, `AddressLauncher.Configuration.Builder.googlePlacesApiKey`, and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key are deprecated and will be removed in a future release.
+  * Remove the builder call or constructor argument from your integration. Address autocomplete continues to work without a Google Places API key, and integrations that did not provide one receive autocomplete automatically.
+
+## Migrating from versions < 23.0.0
+- The SDK now requires Android 6.0+ (API level 23+)
+- The SDK now targets `compileSdkVersion` and `targetSdkVersion` 36
+  - The minimum [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) version is now 8.9.1 (previously 8.1)
+  - The minimum [Gradle](https://gradle.org/releases/) version is now 8.11.1 (previously 8.0)
+
 ## Migrating from versions < 22.0.0
 SDK v22 introduces breaking changes organized into four categories:
 
@@ -109,6 +120,44 @@ val id = paymentMethod.id
 val type = paymentMethod.type
 val card = paymentMethod.card
 ```
+
+**Overriding a Subset of Colors**
+
+If you previously used `.copy()` to override a subset of colors while keeping other default values, use the new builder pattern with `.light()` or `.dark()` factory methods:
+
+```kotlin
+// before - using copy() to override specific colors
+return PaymentSheet.Appearance(
+    colorsLight = PaymentSheet.Colors.defaultLight.copy(
+        primary = yourBrandColor,
+        surface = yourBackgroundColor,
+        onSurface = yourTextColor,
+        error = yourErrorColor,
+    ),
+    ...
+)
+
+// after - using Builder.light() to start with defaults
+return PaymentSheet.Appearance.Builder()
+    .colorsLight(
+        PaymentSheet.Colors.Builder.light()
+            .primary(yourBrandColor)
+            .surface(yourBackgroundColor)
+            .onSurface(yourTextColor)
+            .error(yourErrorColor)
+            .build()
+    )
+    .build()
+```
+
+The same pattern applies to these classes:
+- `PaymentSheet.Colors`
+- `PaymentSheet.PrimaryButtonColors`
+- `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors`
+- `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors`
+- `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors`
+
+> Note: While `defaultLight` and `defaultDark` in the classes above still exist, we recommend using the builder pattern with `.light()` or `.dark()` for better forward compatibility.
 
 **PaymentMethod.id Non-Nullable**
 `PaymentMethod.id` is now non-nullable:

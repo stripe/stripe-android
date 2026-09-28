@@ -9,6 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,69 +18,94 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Provider
 
 @Composable
 internal fun InputAddressScreen(
+    appearance: PaymentSheet.Appearance,
     primaryButtonEnabled: Boolean,
+    primaryButtonLoading: Boolean,
     primaryButtonText: String,
     title: String,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
     topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
-    bottomContent: @Composable ColumnScope.() -> Unit
+    bottomContent: @Composable ColumnScope.() -> Unit,
+    saveError: ResolvableString?,
 ) {
     val focusManager = LocalFocusManager.current
-    Scaffold(
-        modifier = Modifier
-            .fillMaxHeight()
-            .imePadding(),
-        backgroundColor = MaterialTheme.colors.surface,
-        topBar = {
-            AddressOptionsAppBar(
-                isRootScreen = true,
-                onButtonClick = {
-                    focusManager.clearFocus()
-                    onCloseClick()
-                }
-            )
-        }
-    ) {
-        ScrollableColumn(
-            modifier = Modifier.padding(it)
-        ) {
-            Column(
-                Modifier.padding(StripeTheme.getOuterFormInsets()).padding(top = StripeTheme.formInsets.top.dp)
-            ) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                topContent()
-                formContent()
-                bottomContent()
-                PrimaryButton(
-                    isEnabled = primaryButtonEnabled,
-                    label = primaryButtonText,
+    PaymentElementTheme(appearance = appearance) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxHeight()
+                .imePadding(),
+            backgroundColor = MaterialTheme.colors.surface,
+            topBar = {
+                AddressOptionsAppBar(
+                    isRootScreen = true,
                     onButtonClick = {
                         focusManager.clearFocus()
-                        onPrimaryButtonClick()
-                    },
-                    modifier = Modifier.padding(vertical = 16.dp),
+                        onCloseClick()
+                    }
                 )
+            }
+        ) {
+            ScrollableColumn(
+                modifier = Modifier.padding(it)
+            ) {
+                Column(
+                    Modifier
+                        .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+                        .padding(top = MaterialTheme.stripeFormInsets.top.dp)
+                        .padding(bottom = MaterialTheme.stripeFormInsets.bottom.dp)
+                ) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.h4,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    topContent()
+                    formContent()
+                    bottomContent()
+                    saveError?.let {
+                        ErrorMessage(
+                            error = it.resolve(),
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                    }
+                    PrimaryButton(
+                        isEnabled = primaryButtonEnabled,
+                        isLoading = primaryButtonLoading,
+                        label = primaryButtonText,
+                        onButtonClick = {
+                            focusManager.clearFocus()
+                            onPrimaryButtonClick()
+                        },
+                        canClickWhileDisabled = !primaryButtonLoading,
+                        onDisabledButtonClick = {
+                            focusManager.clearFocus()
+                            onDisabledButtonClick()
+                        },
+                        modifier = Modifier.padding(vertical = 16.dp),
+                    )
+                }
             }
         }
     }
@@ -87,13 +113,17 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>
+    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
-            inputAddressViewModelSubcomponentBuilderProvider
+            inputAddressViewModelSubcomponentFactoryProvider
         )
     )
+    LaunchedEffect(Unit) {
+        viewModel.onScreenShown()
+    }
+
     val formController = viewModel.addressFormController
 
     val completeValues by formController.completeFormValues.collectAsState()
@@ -104,11 +134,14 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
-        primaryButtonEnabled = completeValues != null,
+        appearance = viewModel.args.config?.appearance ?: PaymentSheet.Appearance(),
+        primaryButtonEnabled = completeValues != null && formEnabled,
+        primaryButtonLoading = !formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -117,7 +150,15 @@ internal fun InputAddressScreen(
                 checkboxChecked
             )
         },
-        onCloseClick = { viewModel.navigator.dismiss() },
+        onDisabledButtonClick = {
+            viewModel.clickPrimaryButton(
+                completedFormValues = null,
+                checkboxChecked = checkboxChecked
+            )
+        },
+        onCloseClick = {
+            viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+        },
         topContent = {
             val currentState = billingSameAsShippingState
 
@@ -159,6 +200,7 @@ internal fun InputAddressScreen(
                     }
                 )
             }
-        }
+        },
+        saveError = saveError,
     )
 }

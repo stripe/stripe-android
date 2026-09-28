@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Dostop do številke vašega računa trenutno ni mogoč</string>
   <string name="stripe_close_dialog_networking_desc">Če postopek prekličete zdaj, bo vaš račun povezan s podjetjem %1$s, vendar ne bo shranjen v storitev Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Če postopek prekličete zdaj, bo vaš račun povezan s tem podjetjem, vendar ne bo shranjen v storitev Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Če prekličete zdaj, bo vaš račun povezan s tem podjetjem, vendar ne bo shranjen na %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Če prekličete zdaj, bo vaš račun povezan z %1$s, vendar ne bo shranjen na %2$s.</string>
   <string name="stripe_error_cta_close">Zapri</string>
   <string name="stripe_error_cta_manual_entry">Ročno vnesite podatke o banki</string>
   <string name="stripe_error_cta_retry">Poskusi znova</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Vnesite podatke o banki</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Prekliči</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Nadaljuj s storitvijo Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Nadaljujte z %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Trenutno ne</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Uporabite podatke, ki ste jih shranili v račun Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Uporabite podatke, ki ste jih prej shranili v svojem računu %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Nadaljuj s storitvijo Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Nadaljujte z %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Trenutno ne</string>
   <string name="stripe_networking_save_to_link_verification_title">Potrdite svojo identiteto</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Izberite drugo banko</string>
   <string name="stripe_search">Iskanje</string>
   <string name="stripe_success_pane_desc_link_error_plural">Vaši računi so bili povezani, vendar jih ni bilo mogoče shraniti s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Vaši računi so bili povezani, vendar jih ni bilo mogoče shraniti z %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Vaš račun je bil povezan, vendar ga ni bilo mogoče shraniti s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Vaš račun je bil povezan, vendar ga ni bilo mogoče shraniti z %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Vaši računi so bili povezani in shranjeni s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Vaši računi so bili povezani in shranjeni z %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Vaš račun je bil povezan in shranjen s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Vaš račun je bil povezan in shranjen z %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Mikro pologe na račun ••••%1$s lahko pričakujete v 1–2 dneh in e-poštno sporočilo z nadaljnjimi navodili.</string>
   <string name="stripe_success_pane_desc_plural">Vaši računi so bili povezani</string>
   <string name="stripe_success_pane_desc_singular">Vaš račun je bil povezan</string>

@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -57,6 +58,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
                 country = "GB"
             )
         )
@@ -180,6 +182,7 @@ internal class RemoteCardAccountRangeSourceTest {
                                     ),
                                     panLength = 16,
                                     brandInfo = AccountRange.BrandInfo.Visa,
+                                    funding = CardFunding.Unknown,
                                     country = "GB"
                                 )
                             )

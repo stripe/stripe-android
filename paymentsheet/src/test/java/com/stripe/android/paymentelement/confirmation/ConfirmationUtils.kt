@@ -2,20 +2,24 @@ package com.stripe.android.paymentelement.confirmation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -24,6 +28,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefin
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.ConfirmationTokenConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
@@ -41,8 +46,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
@@ -51,8 +58,7 @@ import javax.inject.Provider
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal suspend fun createIntentConfirmationInterceptor(
     integrationMetadata: IntegrationMetadata,
-    customerId: String? = null,
-    ephemeralKeySecret: String? = null,
+    customerMetadata: CustomerMetadata? = null,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     publishableKeyProvider: () -> String = { "pk" },
     errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -71,7 +77,6 @@ internal suspend fun createIntentConfirmationInterceptor(
         intentCreateIntentWithConfirmationTokenCallback = intentCreationConfirmationTokenCallbackProvider,
         preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
         errorReporter = errorReporter,
-        requestOptionsProvider = { requestOptions },
     )
     return DefaultIntentConfirmationInterceptorFactory(
         deferredIntentCallbackRetriever = deferredIntentCallbackRetriever,
@@ -107,15 +112,13 @@ internal suspend fun createIntentConfirmationInterceptor(
             override fun create(
                 intentConfiguration: PaymentSheet.IntentConfiguration,
                 createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-                customerId: String?,
-                ephemeralKeySecret: String?,
+                customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): ConfirmationTokenConfirmationInterceptor {
                 return ConfirmationTokenConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
-                    customerId = customerId,
                     createIntentCallback = createIntentCallback,
-                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerMetadata = customerMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
@@ -138,11 +141,43 @@ internal suspend fun createIntentConfirmationInterceptor(
                 )
             }
         },
+        checkoutSessionConfirmationInterceptorFactory = object : CheckoutSessionConfirmationInterceptor.Factory {
+            override fun create(
+                integrationMetadata: IntegrationMetadata.CheckoutSession,
+                customerMetadata: CustomerMetadata?,
+                clientAttributionMetadata: ClientAttributionMetadata,
+            ): CheckoutSessionConfirmationInterceptor {
+                val checkoutSessionRepository = CheckoutSessionRepository(
+                    stripeNetworkClient = DefaultStripeNetworkClient(),
+                    analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                    paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                        context = ApplicationProvider.getApplicationContext(),
+                        publishableKey = "pk",
+                    ),
+                    apiRequestOptionsProvider = {
+                        ApiRequest.Options(
+                            apiKey = DEFAULT_API_CONFIG.publishableKey,
+                            stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                        )
+                    },
+                )
+                return CheckoutSessionConfirmationInterceptor(
+                    integrationMetadata = integrationMetadata,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                    context = ApplicationProvider.getApplicationContext(),
+                    stripeRepository = stripeRepository,
+                    checkoutSessionRepository = checkoutSessionRepository,
+                    checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+                    requestOptions = requestOptions,
+                )
+            }
+        },
     ).create(
         integrationMetadata = integrationMetadata,
-        customerId = customerId,
-        ephemeralKeySecret = ephemeralKeySecret,
+        customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        isLiveMode = requestOptions.apiKeyIsLiveMode,
     )
 }
 
@@ -152,11 +187,10 @@ internal fun createTestConfirmationHandlerFactory(
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-    googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory,
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     linkLauncher: LinkPaymentLauncher,
-    paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
     errorReporter: ErrorReporter
 ): ConfirmationHandler.Factory {
@@ -165,10 +199,9 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentLauncherFactory = { launcher ->
+                    paymentLauncherFactory = { launcher, _, apiConfiguration ->
                         stripePaymentLauncherAssistedFactory.create(
-                            publishableKey = { paymentConfiguration.publishableKey },
-                            stripeAccountId = { paymentConfiguration.stripeAccountId },
+                            apiConfigurationProvider = { apiConfiguration },
                             hostActivityLauncher = launcher,
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,
@@ -179,6 +212,8 @@ internal fun createTestConfirmationHandlerFactory(
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 ),
                 GooglePayConfirmationDefinition(
+                    instanceId = paymentElementCallbackIdentifier,
+                    context = ApplicationProvider.getApplicationContext(),
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     userFacingLogger = FakeUserFacingLogger(),
                 ),

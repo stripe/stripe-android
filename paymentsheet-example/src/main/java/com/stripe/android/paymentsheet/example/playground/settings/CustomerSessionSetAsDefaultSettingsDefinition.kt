@@ -3,27 +3,36 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
-internal object CustomerSessionSetAsDefaultSettingsDefinition : BooleanSettingsDefinition(
-    defaultValue = false,
-    displayName = "Customer Session Set As Default Feature",
-    key = "customer_session_set_as_default"
-) {
+internal object CustomerSessionSetAsDefaultSettingsDefinition :
+    PlaygroundSettingDefinition<FeatureState>,
+    PlaygroundSettingDefinition.Saveable<FeatureState> by EnumSaveable(
+        key = "customer_session_set_as_default",
+        values = FeatureState.entries.toTypedArray(),
+        defaultValue = FeatureState.Disabled,
+    ),
+    PlaygroundSettingDefinition.Displayable<FeatureState> {
+    override val displayName: String = "Customer Session Set As Default Feature"
+
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
-        PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
-    )
-
-    override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        if (value) {
-            checkoutRequestBuilder.paymentMethodSetAsDefaultFeature(FeatureState.Enabled)
-        } else {
-            checkoutRequestBuilder.paymentMethodSetAsDefaultFeature(FeatureState.Disabled)
+    ): List<PlaygroundSettingDefinition.Displayable.Option<FeatureState>> {
+        return FeatureState.entries.map { featureState ->
+            option(name = featureState.name, value = featureState)
         }
     }
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+    override fun configure(value: FeatureState, checkoutRequestBuilder: CheckoutRequest.Builder) {
+        checkoutRequestBuilder.paymentMethodSetAsDefaultFeature(value)
+    }
+
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 }

@@ -1,11 +1,13 @@
 package com.stripe.android.connect
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.annotation.RestrictTo
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 
 /**
@@ -34,8 +36,17 @@ class StripeConnectRedirectActivity : Activity() {
             //  - this activity having launchMode="singleTask"
             //  - intent flags FLAG_ACTIVITY_SINGLE_TOP and FLAG_ACTIVITY_CLEAR_TOP
             // With the task cleared, the activity finishes in `onNewIntent()`
-            val customTabsIntent = CustomTabsIntent.Builder().build()
-            customTabsIntent.launchUrl(this, Uri.parse(customTabUrl))
+            try {
+                val customTabsIntent = CustomTabsIntent.Builder().build()
+                CustomTabsClient.getPackageName(this, null)?.let { browserPackage ->
+                    customTabsIntent.intent.setPackage(browserPackage)
+                }
+                customTabsIntent.launchUrl(this, Uri.parse(customTabUrl))
+            } catch (_: ActivityNotFoundException) {
+                finish()
+            } catch (_: SecurityException) {
+                finish()
+            }
         } else {
             // Shouldn't happen under normal circumstances -- just finish.
             finish()

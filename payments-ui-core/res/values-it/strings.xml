@@ -28,10 +28,14 @@
   <string name="stripe_blik_code">Codice BLIK</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
+  <string name="stripe_card_brand_icons_content_description">Carte supportate: %1$s</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(non accettata)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (non accettata)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Tocca o inserisci manualmente</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Continuando, autorizzi %1$s ad addebitare questo pagamento e i pagamenti futuri sul tuo conto Cash App conformemente ai termini di %2$s, fino alla revoca di tale autorizzazione. Puoi modificarla in qualsiasi momento nelle impostazioni di Cash app.</string>
   <!-- Title for the contact information section -->
@@ -42,14 +46,14 @@
   <string name="stripe_eps_bank">Banca EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Banca FBX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Confermando il pagamento con GCash, autorizzi %s ad addebitare i pagamenti futuri sul tuo account GCash in conformità ai suoi termini.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">L\'IBAN inserito è incompleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">L\'IBAN inserito non è valido; \"%s\" non è un codice di paese valido.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">L\'IBAN deve iniziare con un codice di paese di due lettere.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">Banca iDEAL</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Il codice BLIK non è completo.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -65,8 +69,16 @@
   <string name="stripe_klarna_pay_later">Paga dopo con Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefono</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Confermando il tuo pagamento con NICEPAY, consenti a %s di addebitare i pagamenti futuri su questo metodo di pagamento in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nome sulla carta</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Seleziona quanto vuoi pagare:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Confermando il pagamento, accetti che la tua transazione venga gestita da Global Stack Services Limited in qualità di merchant of record e in conformità ai suoi <a href=\"%s\">termini di utilizzo</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Confermando il pagamento, accetti che la tua transazione venga gestita da Global Stack Services Limited in qualità di merchant of record e in conformità ai suoi <a href=\"%s\">termini</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banca Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -83,8 +95,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">Dati della carta</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">Aggiungi un conto bancario degli Stati Uniti</string>
-  <!-- Header text shown above a UPI ID text field -->
-  <string name="stripe_paymentsheet_buy_using_upi_id">Acquista utilizzando un ID UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Addebito diretto AU BECS</string>
   <!-- Payment Method type brand name -->
@@ -95,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Addebito SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Una volta inviata la richiesta, si aprirà un\'altra pagina in cui completare i passaggi successivi in tutta sicurezza.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Confermando il tuo pagamento con PayPal, consenti a %s di addebitare i pagamenti futuri sul tuo conto PayPal in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Revolut mandate text -->
@@ -105,12 +117,20 @@
   <string name="stripe_save_payment_details_to_merchant_name">Salva i dati di pagamento su %s per acquisti futuri</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scansiona carta</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Cancella carta scansionata</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Fornendo le informazioni di pagamento e confermando questo pagamento, autorizzi (A) %s e Stripe, il nostro fornitore di servizi di pagamento, a inviare istruzioni alla tua banca per l\'addebito sul tuo conto e (B) la tua banca a procedere con tale addebito conformemente alle istruzioni fornite. Tra gli altri diritti, hai anche diritto a un rimborso dalla tua banca in base ai termini e condizioni dell\'accordo sottoscritto con l\'istituto. Un eventuale rimborso va richiesto entro otto settimane a decorrere dalla data di addebito in conto. I tuoi diritti sono consultabili in una dichiarazione che puoi richiedere alla tua banca. Accetti di ricevere una notifica per addebiti futuri fino a 2 giorni prima.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Imposta come metodo di pagamento predefinito</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Imposta</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Confermando il pagamento con Touch \'n Go, autorizzi %s ad addebitare i pagamenti futuri sul tuo account Touch \'n Go in conformità ai suoi termini.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Confermando il pagamento con TrueMoney, autorizzi %s ad addebitare i pagamenti futuri sul tuo account TrueMoney in conformità ai suoi termini.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Continuando, autorizzi %1$s a effettuare automaticamente addebiti sul tuo saldo Twint su base ricorrente in conformità con il tuo piano di acquisto o abbonamento.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">ID UPI</string>
 </resources>

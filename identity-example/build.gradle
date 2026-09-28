@@ -24,6 +24,7 @@ emerge {
 android {
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
+        minSdkVersion 24
         versionCode 20
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -32,6 +33,7 @@ android {
     buildFeatures {
         viewBinding true
         compose true
+        buildConfig = true
     }
 
     flavorDimensions += "theme"

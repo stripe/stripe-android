@@ -14,7 +14,9 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
@@ -34,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -46,9 +49,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.isSupportedImageUrl
@@ -65,7 +71,8 @@ sealed class EmbeddableImage {
     data class Drawable(
         @DrawableRes val id: Int,
         @StringRes val contentDescription: Int,
-        val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null
+        val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null,
+        val verticalOffset: Dp = 0.dp,
     ) : EmbeddableImage()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -78,24 +85,27 @@ sealed class EmbeddableImage {
 private fun rememberDrawableImages(
     drawableImageLoader: Map<String, EmbeddableImage.Drawable>,
     imageAlign: PlaceholderVerticalAlign,
-    textStyle: TextStyle,
 ): Map<String, InlineTextContent> {
     return drawableImageLoader.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
         val height = painter.intrinsicSize.height
         val width = painter.intrinsicSize.width
+        val aspectRatio = width / height
 
-        val lineHeight = textStyle.fontSize
-        val newWidth = lineHeight * (width / height)
+        val newHeightEm = 1.em
+        val newWidthEm = newHeightEm * aspectRatio
 
         key to InlineTextContent(
             placeholder = Placeholder(
-                width = newWidth,
-                height = lineHeight,
+                width = newWidthEm,
+                height = newHeightEm,
                 placeholderVerticalAlign = imageAlign
             ),
             children = {
                 Image(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .offset(y = -value.verticalOffset),
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
@@ -286,7 +296,7 @@ fun HtmlWithCustomOnClick(
     val annotatedText = annotatedStringResource(html, imageLoader, urlSpanStyle)
     val remoteImagesLoaded = remember { mutableStateOf(false) }
     val stripeImageLoader = remember {
-        StripeImageLoader(
+        DefaultStripeImageLoader(
             context = context,
             diskCache = null
         )
@@ -298,7 +308,6 @@ fun HtmlWithCustomOnClick(
             it is EmbeddableImage.Drawable
         } as Map<String, EmbeddableImage.Drawable>,
         imageAlign = imageAlign,
-        textStyle = style,
     )
 
     @Suppress("UNCHECKED_CAST")
@@ -324,7 +333,18 @@ fun HtmlWithCustomOnClick(
         ClickableText(
             annotatedText,
             modifier = modifier
-                .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
+                .semantics(mergeDescendants = true) {
+                    onClick {
+                        onClick(
+                            annotatedText.getStringAnnotations(
+                                LINK_TAG,
+                                0,
+                                annotatedText.length
+                            )
+                        )
+                        true
+                    }
+                },
             inlineContent = drawableImages + bitmapImages + remoteImages,
             color = color,
             style = style,
@@ -356,6 +376,7 @@ fun annotatedStringResource(
     return remember(spanned) {
         buildAnnotatedString {
             var currentStart = 0
+            var offset = 0
             spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
                 val end = spanned.getSpanEnd(span)
@@ -365,13 +386,15 @@ fun annotatedStringResource(
                 ) {
                     append(spanned.toString().substring(currentStart, start))
                     currentStart = start
+                    val offsetStart = start + offset
+                    val offsetEnd = end + offset
                     when (span) {
                         is StyleSpan -> when (span.style) {
                             Typeface.BOLD -> {
-                                addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+                                addStyle(SpanStyle(fontWeight = FontWeight.Bold), offsetStart, offsetEnd)
                             }
                             Typeface.ITALIC -> {
-                                addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
+                                addStyle(SpanStyle(fontStyle = FontStyle.Italic), offsetStart, offsetEnd)
                             }
                             Typeface.BOLD_ITALIC -> {
                                 addStyle(
@@ -379,24 +402,25 @@ fun annotatedStringResource(
                                         fontWeight = FontWeight.Bold,
                                         fontStyle = FontStyle.Italic
                                     ),
-                                    start,
-                                    end
+                                    offsetStart,
+                                    offsetEnd
                                 )
                             }
                         }
                         is UnderlineSpan -> {
                             addStyle(
                                 SpanStyle(textDecoration = TextDecoration.Underline),
-                                start,
-                                end
+                                offsetStart,
+                                offsetEnd
                             )
                         }
                         is BulletSpan -> {
                             // append a bullet and a tab character in front
                             append("\u2022\t")
+                            offset += 2
                         }
                         is ForegroundColorSpan -> {
-                            addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
+                            addStyle(SpanStyle(color = Color(span.foregroundColor)), offsetStart, offsetEnd)
                         }
                         is ImageSpan -> {
                             currentStart = end
@@ -410,14 +434,14 @@ fun annotatedStringResource(
                         is URLSpan -> {
                             addStyle(
                                 urlSpanStyle,
-                                start,
-                                end
+                                offsetStart,
+                                offsetEnd
                             )
                             addStringAnnotation(
                                 tag = LINK_TAG,
                                 annotation = span.url,
-                                start = start,
-                                end = end
+                                start = offsetStart,
+                                end = offsetEnd
                             )
                         }
                     }

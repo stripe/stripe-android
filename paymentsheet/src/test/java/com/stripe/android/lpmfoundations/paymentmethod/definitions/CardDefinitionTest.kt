@@ -2,14 +2,22 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.common.nfcscan.NfcScanningAction
+import com.stripe.android.common.nfcscan.NfcScanningAvailability
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -21,26 +29,47 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardScanAction
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.lpmfoundations.paymentmethod.formElements as createFormElements
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardDefinitionTest {
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val cleanupRule = coroutineScopeCleanupRule
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
+
     @Test
     fun `createFormElements returns minimal set of fields`() {
         val formElements = CardDefinition.formElements(
@@ -81,7 +110,7 @@ class CardDefinitionTest {
         val contactElement = formElements[1] as SectionElement
         assertThat(contactElement.fields).hasSize(1)
 
-        val cardBillingElement = contactElement.fields[0] as CardBillingAddressElement
+        val cardBillingElement = contactElement.fields[0] as BillingAddressElement
         val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
 
         assertThat(billingElements.size).isEqualTo(7)
@@ -120,7 +149,7 @@ class CardDefinitionTest {
         val contactInformationElement = formElements[1] as SectionElement
         val contactInformationFields = contactInformationElement.fields
 
-        val cardBillingElement = contactInformationFields[0] as CardBillingAddressElement
+        val cardBillingElement = contactInformationFields[0] as BillingAddressElement
         val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
 
         assertThat(billingElements.size).isEqualTo(6)
@@ -403,12 +432,64 @@ class CardDefinitionTest {
         )
 
         val cardBillingAddressElements = formElements.filterIsInstance<SectionElement>().map {
-            it.fields.filterIsInstance<CardBillingAddressElement>().firstOrNull()
+            it.fields.filterIsInstance<BillingAddressElement>().firstOrNull()
         }
 
         assertThat(cardBillingAddressElements).hasSize(1)
         assertThat(cardBillingAddressElements.firstOrNull()?.addressElement)
             .isInstanceOf<AutocompleteAddressElement>()
+    }
+
+    @Test
+    fun `createFormElements shows only postal code for CA when automatic tax billing address is required`() {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse(),
+        )
+        cardBillingElement.countryElement.controller.onRawValueChange("CA")
+
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly(
+            "billing_details[address][country]",
+            "billing_details[address][postal_code]",
+        )
+    }
+
+    @Test
+    fun `createFormElements shows line1, city, state, and postal code for US when automatic tax billing is required`() {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse(),
+        )
+        cardBillingElement.countryElement.controller.onRawValueChange("US")
+
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly(
+            "billing_details[address][country]",
+            "billing_details[address][line1]",
+            "billing_details[address][city]",
+            "billing_details[address][postal_code]",
+            "billing_details[address][state]",
+        )
+    }
+
+    @Test
+    fun `createFormElements does not show additional fields for a country not requiring them`() {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = automaticTaxCheckoutSessionResponse(),
+        )
+        cardBillingElement.countryElement.controller.onRawValueChange("FR")
+
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly("billing_details[address][country]")
+    }
+
+    @Test
+    fun `createFormElements does not union tax fields when requiresBillingAddressForAutomaticTax is false`() {
+        val cardBillingElement = createAutomaticCardBillingAddressElement(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+        cardBillingElement.countryElement.controller.onRawValueChange("FR")
+
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly("billing_details[address][country]")
     }
 
     @Test
@@ -432,9 +513,9 @@ class CardDefinitionTest {
         val sectionFields = sectionElement.fields
 
         assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val addressElement = sectionFields.first() as CardBillingAddressElement
+        val addressElement = sectionFields.first() as BillingAddressElement
 
         assertThat(addressElement.countryElement.controller.displayItems)
             .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -461,9 +542,9 @@ class CardDefinitionTest {
         val sectionFields = sectionElement.fields
 
         assertThat(sectionFields.size).isEqualTo(1)
-        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val addressElement = sectionFields.first() as CardBillingAddressElement
+        val addressElement = sectionFields.first() as BillingAddressElement
 
         assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
             "\uD83C\uDDFA\uD83C\uDDF8 United States",
@@ -564,70 +645,256 @@ class CardDefinitionTest {
 
     @Test
     fun `createFormElements shouldAutomaticallyLaunchCardScan in CardDetailsSectionController`() {
+        val helper = AutomaticallyLaunchedCardScanFormDataHelper(
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            openCardScanAutomaticallyConfig = true,
+            savedStateHandle = SavedStateHandle()
+        )
+
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 )
             ),
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                hasAutomaticallyLaunchedCardScanInitialValue = false,
-                openCardScanAutomaticallyConfig = true,
-                savedStateHandle = SavedStateHandle()
-            )
+            automaticallyLaunchedCardScanFormDataHelper = helper,
         )
         assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
-        assertThat(
-            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
-        ).isTrue()
+        assertThat(helper.shouldLaunchCardScanAutomatically).isTrue()
     }
 
     @Test
     fun `createFormElements should not automaticallyLaunchCardScan when config is false`() {
+        val helper = AutomaticallyLaunchedCardScanFormDataHelper(
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            openCardScanAutomaticallyConfig = false,
+            savedStateHandle = SavedStateHandle()
+        )
+
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 )
             ),
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                hasAutomaticallyLaunchedCardScanInitialValue = false,
-                openCardScanAutomaticallyConfig = false,
-                savedStateHandle = SavedStateHandle()
-            )
+            automaticallyLaunchedCardScanFormDataHelper = helper,
         )
         assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
-        assertThat(
-            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
-        ).isFalse()
+        assertThat(helper.shouldLaunchCardScanAutomatically).isFalse()
     }
 
     @Test
     fun `createFormElements should not automaticallyLaunchCardScan when has automaticallyLaunchedCardScan`() {
+        val helper = AutomaticallyLaunchedCardScanFormDataHelper(
+            hasAutomaticallyLaunchedCardScanInitialValue = true,
+            openCardScanAutomaticallyConfig = true,
+            savedStateHandle = SavedStateHandle()
+        )
+
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 )
             ),
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                hasAutomaticallyLaunchedCardScanInitialValue = true,
-                openCardScanAutomaticallyConfig = true,
-                savedStateHandle = SavedStateHandle()
-            )
+            automaticallyLaunchedCardScanFormDataHelper = helper,
         )
         assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
-        assertThat(
-            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
-        ).isFalse()
+        assertThat(helper.shouldLaunchCardScanAutomatically).isFalse()
+    }
+
+    @Test
+    fun `createSupportedPaymentMethod returns expected supported PM when tap to add is not supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = false)
+        val supportedPaymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
+            metadata = metadata,
+        )
+
+        assertThat(supportedPaymentMethod.iconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card)
+        assertThat(supportedPaymentMethod.outlinedIconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined)
+        assertThat(supportedPaymentMethod.subtitle).isNull()
+    }
+
+    @Test
+    fun `createSupportedPaymentMethod returns tap to add icon when tap to add is supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
+        val supportedPaymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
+            metadata = metadata,
+        )
+
+        assertThat(supportedPaymentMethod.iconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
+        assertThat(supportedPaymentMethod.outlinedIconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
+        assertThat(supportedPaymentMethod.subtitle)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually.resolvableString)
+    }
+
+    @Test
+    fun `createFormElements has CardScanAction when tap to add & NFC Scanning are not supported`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = false,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<CardScanAction>()
+        }
+
+    @Test
+    fun `createFormElements has CardScanAction when tapToAddHelper is null but tap to add is supported`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = true,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            tapToAddHelper = null,
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<CardScanAction>()
+        }
+
+    @Test
+    fun `createFormElements has NfcScanningAction when NFC scanning enabled and tap to add is off`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = false,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<NfcScanningAction>()
+        }
+
+    @Test
+    fun `createFormElements has NfcScanningAction when NFC scanning is primary and card scan is allowed`() =
+        cardDetailsActionTest(
+            isStripeCardScanAllowed = true,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<NfcScanningAction>()
+        }
+
+    @Test
+    fun `createFormElements has CardScanAction when NFC scanning is a secondary option`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = false,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(
+                result = NfcScanningAvailability.Available(
+                    shouldBePrimaryScanningOption = false,
+                )
+            ),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<CardScanAction>()
+        }
+
+    @Test
+    fun `createFormElements has TapToAddCardDetailsAction when NFC scanning is the primary option`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = true,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<TapToAddCardDetailsAction>()
+        }
+
+    private fun cardDetailsActionTest(
+        isTapToAddSupported: Boolean = false,
+        isStripeCardScanAllowed: Boolean = false,
+        isNfcScanningAvailable: IsNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        tapToAddHelper: TapToAddHelper? = null,
+        block: (CardDetailsAction?) -> Unit,
+    ) {
+        val metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = isTapToAddSupported,
+            isStripeCardScanAllowed = isStripeCardScanAllowed,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+            ),
+        )
+
+        val formElements = CardDefinition.formElements(
+            metadata = metadata,
+            tapToAddHelper = tapToAddHelper,
+            isNfcScanningAvailable = isNfcScanningAvailable,
+        )
+
+        assertThat(formElements).hasSize(1)
+        val controller = (formElements[0] as CardDetailsSectionElement).controller
+
+        block(controller.cardDetailsAction)
+    }
+
+    private fun createAutomaticCardBillingAddressElement(
+        checkoutSessionResponse: CheckoutSessionResponse?,
+    ): BillingAddressElement {
+        val integrationMetadata = checkoutSessionResponse?.let { response ->
+            IntegrationMetadata.CheckoutSession(
+                id = response.id,
+                instancesKey = "CardDefinitionTest",
+                checkoutSessionResponse = response,
+            )
+        } ?: IntegrationMetadata.IntentFirst("pi_123_secret_456")
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                integrationMetadata = integrationMetadata,
+            )
+        )
+
+        return formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<BillingAddressElement>()
+            .first()
+    }
+
+    private fun automaticTaxCheckoutSessionResponse(): CheckoutSessionResponse {
+        return CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+    }
+
+    private fun BillingAddressElement.shownIdentifierParamPaths(): List<String> {
+        return addressController.value.fieldsFlowable.value
+            .filterOutHiddenIdentifiers(hiddenIdentifiers.value)
+            .flatMap { field ->
+                when (field) {
+                    is RowElement -> field.fields.map { it.identifier.v1 }
+                    else -> listOf(field.identifier.v1)
+                }
+            }
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        )
+    }
+
+    private fun CardDefinition.formElements(
+        metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        tapToAddHelper: TapToAddHelper? = null,
+        isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+    ): List<FormElement> {
+        return createFormElements(
+            coroutineScope = coroutineScope,
+            metadata = metadata,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
+            paymentMethodExtraParams = paymentMethodExtraParams,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
+            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 

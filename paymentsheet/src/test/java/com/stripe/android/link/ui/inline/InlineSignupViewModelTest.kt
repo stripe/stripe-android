@@ -15,6 +15,7 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.flow.first
@@ -35,6 +36,9 @@ class InlineSignupViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `When email and phone are provided it should prefill all values`() =
@@ -65,7 +69,7 @@ class InlineSignupViewModelTest {
                 logger = Logger.noop(),
                 initialUserInput = null,
                 previousLinkSignupCheckboxSelection = null,
-            )
+            ).also { viewModelStoreRule.track(it) }
 
             linkAccountManager.lookupResult = Result.success(null)
 
@@ -551,7 +555,7 @@ class InlineSignupViewModelTest {
         logger = Logger.noop(),
         initialUserInput = initialUserInput,
         previousLinkSignupCheckboxSelection = null,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private fun mockConsumerSessionWithVerificationSession(
         type: ConsumerSession.VerificationSession.SessionType,

@@ -11,7 +11,6 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
-import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,20 +37,10 @@ internal class SelfieScanViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val scanFeedback = scannerState.mapLatest {
-        when (it) {
-            is State.Scanning -> {
-                when (it.scanState) {
-                    is IdentityScanState.Finished -> R.string.stripe_selfie_capture_complete
-                    is IdentityScanState.Found -> R.string.stripe_capturing
-                    is IdentityScanState.Initial -> R.string.stripe_position_selfie
-                    is IdentityScanState.Satisfied -> R.string.stripe_selfie_capture_complete
-                    is IdentityScanState.TimeOut -> null
-                    is IdentityScanState.Unsatisfied -> null
-                    null -> R.string.stripe_selfie_capture_complete
-                }
-            }
-            is State.Scanned -> R.string.stripe_selfie_capture_complete
-            else -> null
+        if (it is State.Scanning && it.scanState == null) {
+            R.string.stripe_position_selfie
+        } else {
+            null
         }
     }.distinctUntilChanged()
         .stateIn(

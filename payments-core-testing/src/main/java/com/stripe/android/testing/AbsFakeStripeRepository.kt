@@ -1,11 +1,13 @@
 package com.stripe.android.testing
 
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -18,8 +20,6 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.MobileCardElementConfig
@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -206,8 +207,26 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
 
@@ -432,10 +451,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options
-    ): Result<ElementsSession> {
+    override suspend fun retrievePaymentMethodMessagePromotionsForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList> {
         TODO("Not yet implemented")
     }
 
@@ -485,6 +507,22 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentIntent> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 }

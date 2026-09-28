@@ -28,10 +28,14 @@
   <string name="stripe_blik_code">Kód BLIK</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
+  <string name="stripe_card_brand_icons_content_description">Podporované karty: %1$s</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(neprijaté)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (neprijaté)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Ťuknite alebo zadajte manuálne</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Pokračovaním oprávňujete spoločnosť %1$s, aby zaúčtovala túto platbu a budúce platby na debet vášho účtu Cash App v súlade s podmienkami spoločnosti %2$s, až do odvolania tohto oprávnenia. Toto oprávnenie môžete kedykoľvek zmeniť v nastaveniach aplikácie Cash App.</string>
   <!-- Title for the contact information section -->
@@ -42,14 +46,14 @@
   <string name="stripe_eps_bank">EPS banka</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Potvrdením platby prostredníctvom služby GCash umožňujete spoločnosti %s spoplatniť váš účet GCash za budúce platby v súlade s jej podmienkami.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Zadaný IBAN je neúplný.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">Zadaný IBAN je neplatný, „%s“ nie je podporovaný kód krajiny.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Váš IBAN by mal začínať dvojpísmenovým kódom krajiny.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL banka</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Váš kód BLIK je neúplný.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -65,8 +69,16 @@
   <string name="stripe_klarna_pay_later">Zaplatiť neskôr pomocou služby Klarna</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefón</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Potvrdením platby prostredníctvom služby NICEPAY umožňujete spoločnosti %s spoplatniť tento spôsob platby pri budúcich platbách v súlade s jej podmienkami.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Meno na karte</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Vyberte, ako chcete platiť:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Potvrdením platby súhlasíte s tým, že vašu transakciu spracuje spoločnosť Global Stack Services Limited ako registrovaný obchodník v súlade s jej <a href=\"%s\">podmienkami používania</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Potvrdením platby súhlasíte s tým, že vašu transakciu spracuje spoločnosť Global Stack Services Limited ako registrovaný obchodník v súlade s jej <a href=\"%s\">podmienkami</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -83,8 +95,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informácie o karte</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">Pridať americký bankový účet</string>
-  <!-- Header text shown above a UPI ID text field -->
-  <string name="stripe_paymentsheet_buy_using_upi_id">Zakúpiť prostredníctvom identifikačného čísla UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS inkaso</string>
   <!-- Payment Method type brand name -->
@@ -95,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA inkaso</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Po odoslaní budete presmerovaní na bezpečné dokončenie ďalších krokov.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Potvrdením platby prostredníctvom služby PayPal povolíte spoločnosti %s, aby z vášho účtu PayPal účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
   <!-- Revolut mandate text -->
@@ -107,12 +119,20 @@
   <string name="stripe_save_payment_details_to_merchant_name">Uložiť údaje o platbe na %s pre budúce nákupy</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Naskenovať kartu</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Vymazať naskenovanú kartu</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Poskytnutím informácií o platbe a potvrdením tejto platby splnomocňujete (A) spoločnosti %s a Stripe, nášho poskytovateľa platobných služieb, na posielanie platobných príkazov do vašej banky na odpísanie finančných prostriedkov z vášho účtu a (B) vašu banku na odpísanie finančných prostriedkov z vášho účtu v súlade s pokynmi. V rámci vašich práv máte právo na refundáciu od vašej banky podľa zmluvných podmienok uvedených v zmluve s vašou bankou. Refundáciu si musíte vyžiadať do 8 týždňov odo dňa, kedy boli finančné prostriedky odpísané z vášho účtu. Vaše práva sú vysvetlené vo vyhlásení, ktoré môžete získať od svojej banky. Súhlasíte s tým, že budete dostávať oznámenia o budúcich debetných platbách až 2 dni pred ich uskutočnením.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nastaviť ako predvolený spôsob platby</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastaviť</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Potvrdením platby prostredníctvom služby Touch \'n Go umožňujete spoločnosti %s spoplatniť váš účet Touch \'n Go za budúce platby v súlade s jej podmienkami.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Potvrdením platby proň služby TrueMoney umožňujete spoločnosti %s spoplatniť váš účet TrueMoney za budúce platby v súlade s jej podmienkami.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Pokračovaním oprávňujete %1$s na automatické opakované odpísanie vášho zostatku Twint Balance v súlade s vaším nákupom alebo plánom predplatného.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">Identifikačné číslo UPI</string>
 </resources>

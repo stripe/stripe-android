@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -29,6 +31,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerAdapter: CustomerAdapter,
     private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetInitializationDataSource,
     CustomerSheetSavedSelectionDataSource,
@@ -67,7 +70,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     // Always `Full` for `Adapter` use case
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     // Payment Method Update is customer sessions-only feature, so this value is unused.
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardExpiryAndBillingDetails = false,
                 ),
                 // Default payment methods are a customer sessions-only feature, so this value is unused.
                 defaultPaymentMethodId = null,
@@ -132,6 +135,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             customPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = apiConfigurationProvider.get(),
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,

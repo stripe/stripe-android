@@ -10,20 +10,18 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_PAYMENT_METHOD_METADATA_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -202,37 +200,6 @@ internal class DefaultEmbeddedSelectionChooserTest {
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
-    }
-
-    @Test
-    fun `ShopPay selection returns null when used as previous selection`() = runScenario {
-        val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            paymentMethods = PaymentMethodFixtures.createCards(3),
-            previousSelection = PaymentSelection.ShopPay,
-            newSelection = null,
-            newConfiguration = defaultConfiguration,
-            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
-        )
-        assertThat(selection).isNull()
-    }
-
-    @Test
-    fun `Uses new selection when previous selection is ShopPay`() = runScenario {
-        val paymentMethod = PaymentMethodFixtures.createCard()
-        val newSelection = PaymentSelection.Saved(paymentMethod)
-
-        val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                hasCustomerConfiguration = true,
-            ),
-            paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
-            previousSelection = PaymentSelection.ShopPay,
-            newSelection = newSelection,
-            newConfiguration = defaultConfiguration,
-            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
-        )
-        assertThat(selection).isEqualTo(newSelection)
     }
 
     @Test
@@ -510,17 +477,15 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val savedStateHandle = SavedStateHandle()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
+            embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
                 savedStateHandle = savedStateHandle,
                 formHelperFactory = formHelperFactory,
-                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-                eventReporter = FakeEventReporter(),
                 internalRowSelectionCallback = { internalRowSelectionCallback }
             ),
             savedStateHandle = savedStateHandle,

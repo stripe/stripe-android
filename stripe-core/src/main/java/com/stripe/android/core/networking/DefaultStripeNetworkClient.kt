@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.net.URI
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -62,29 +63,29 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     private fun makeRequest(
         request: StripeRequest
     ): StripeResponse<String> {
-        return parseResponse(connectionFactory.create(request), request.url)
+        return parseResponse(connectionFactory.create(request), request)
     }
 
     private fun makeRequestForFile(
         request: StripeRequest,
         outputFile: File
     ): StripeResponse<File> {
-        return parseResponse(connectionFactory.createForFile(request, outputFile), request.url)
+        return parseResponse(connectionFactory.createForFile(request, outputFile), request)
     }
 
     private fun <BodyType> parseResponse(
         connection: StripeConnection<BodyType>,
-        baseUrl: String?
+        request: StripeRequest
     ): StripeResponse<BodyType> =
         runCatching {
             val stripeResponse = connection.response
-            logger.info(stripeResponse.toString())
+            logger.info(stripeResponse.toLogString(request))
             stripeResponse
         }.getOrElse { error ->
             logger.error("Exception while making Stripe API request", error)
 
             throw when (error) {
-                is IOException -> APIConnectionException.create(error, baseUrl)
+                is IOException -> APIConnectionException.create(error, request.url)
                 else -> error
             }
         }
@@ -97,3 +98,56 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
         private const val DEFAULT_MAX_RETRIES = 3
     }
 }
+
+private fun <BodyType> StripeResponse<BodyType>.toLogString(
+    request: StripeRequest
+): String {
+    return "Request: ${request.method.code} ${request.sanitizedLogTarget()}, " +
+        "${StripeResponse.HEADER_REQUEST_ID}: ${requestId?.value ?: "absent"}, " +
+        "Status Code: $code"
+}
+
+private fun StripeRequest.sanitizedLogTarget(): String {
+    val uri = runCatching {
+        URI(url)
+    }.getOrNull()
+
+    val host = uri?.host
+    val path = uri?.rawPath
+        ?.takeIf { it.isNotBlank() }
+        ?.redactSensitivePathSegments()
+        ?: "/"
+
+    return if (host == null || host == "api.stripe.com") {
+        path
+    } else {
+        "$host$path"
+    }
+}
+
+private fun String.redactSensitivePathSegments(): String {
+    return split("/")
+        .joinToString("/") { segment ->
+            if (segment.shouldRedactPathSegment()) {
+                REDACTED_PATH_SEGMENT
+            } else {
+                segment
+            }
+        }
+}
+
+private fun String.shouldRedactPathSegment(): Boolean {
+    return STRIPE_ID_PATH_SEGMENT_REGEX.matches(this) ||
+        HIGH_ENTROPY_PATH_SEGMENT_REGEX.matches(this)
+}
+
+private const val REDACTED_PATH_SEGMENT = "[redacted]"
+
+private val STRIPE_ID_PATH_SEGMENT_REGEX = Regex(
+    pattern = "^(acct|ba|btok|card|cn|cs|ct|ctoken|cus|cvsess|ephkey|es|fca|fcsess|" +
+        "in|link|pi|pm|req|seti|si|src|tok)_[A-Za-z0-9_]+$"
+)
+
+private val HIGH_ENTROPY_PATH_SEGMENT_REGEX = Regex(
+    pattern = "^(?=.*\\d)[A-Za-z0-9_-]{16,}$"
+)

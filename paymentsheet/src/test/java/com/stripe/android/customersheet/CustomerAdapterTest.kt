@@ -9,6 +9,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -191,7 +192,8 @@ class CustomerAdapterTest {
     fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
-        whenever(customerRepository.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
+        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any(), any()))
+            .thenReturn(Result.success(emptyList()))
 
         val adapter = createAdapter(
             customerRepository = customerRepository,
@@ -199,13 +201,15 @@ class CustomerAdapterTest {
         )
         adapter.retrievePaymentMethods()
         verify(customerRepository).getPaymentMethods(
-            customerInfo = any(),
+            customerId = any(),
+            ephemeralKeySecret = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,
                 )
             ),
             silentlyFail = any(),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
         )
     }
 
@@ -248,7 +252,8 @@ class CustomerAdapterTest {
         adapter.retrievePaymentMethods()
 
         verify(customerRepository).getPaymentMethods(
-            customerInfo = any(),
+            customerId = any(),
+            ephemeralKeySecret = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,
@@ -256,6 +261,7 @@ class CustomerAdapterTest {
                 )
             ),
             silentlyFail = eq(false),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
         )
     }
 
@@ -275,37 +281,22 @@ class CustomerAdapterTest {
 
     @Test
     fun `attachPaymentMethod succeeds when the payment method is attached`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onAttachPaymentMethod = {
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        )
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onAttachPaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            )
+            customerRepository = customerRepository,
         )
         val result = adapter.attachPaymentMethod("pm_1234")
         assertThat(result.getOrNull()).isNotNull()
+        assertThat(customerRepository.attachRequests.awaitItem().apiConfiguration)
+            .isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
-    fun `attachPaymentMethod fails with default message when the payment method couldn't be attached`() = runTest {
-        val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onAttachPaymentMethod = {
-                    Result.failure(
-                        APIException(
-                            message = "could not attach payment method",
-                        )
-                    )
-                }
-            )
-        )
-        val result = adapter.attachPaymentMethod("pm_1234")
-        assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Something went wrong")
-    }
-
-    @Test
-    fun `attachPaymentMethod fails with Stripe message when the payment method couldn't be attached`() = runTest {
+    fun `attachPaymentMethod fails with generic message when the payment method couldn't be attached`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onAttachPaymentMethod = {
@@ -320,44 +311,29 @@ class CustomerAdapterTest {
         )
         val result = adapter.attachPaymentMethod("pm_1234")
         assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Unable to attach payment method")
+            .isEqualTo("Something went wrong")
     }
 
     @Test
     fun `detachPaymentMethod succeeds when the payment method is detached`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onDetachPaymentMethod = {
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        )
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onDetachPaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            )
+            customerRepository = customerRepository,
         )
         val result = adapter.detachPaymentMethod("pm_1234")
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
+        assertThat(customerRepository.detachRequests.awaitItem().apiConfiguration)
+            .isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
-    fun `detachPaymentMethod fails with default message when the payment method couldn't be detached`() = runTest {
-        val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onDetachPaymentMethod = {
-                    Result.failure(
-                        APIException(
-                            message = "could not detach payment method",
-                        )
-                    )
-                }
-            )
-        )
-        val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Something went wrong")
-    }
-
-    @Test
-    fun `detachPaymentMethod fails with Stripe message when the payment method couldn't be detached`() = runTest {
+    fun `detachPaymentMethod fails with generic message when the payment method couldn't be detached`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onDetachPaymentMethod = {
@@ -372,17 +348,18 @@ class CustomerAdapterTest {
         )
         val result = adapter.detachPaymentMethod("pm_1234")
         assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Unable to detach payment method")
+            .isEqualTo("Something went wrong")
     }
 
     @Test
     fun `updatePaymentMethod succeeds when the payment method is update`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onUpdatePaymentMethod = {
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        )
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onUpdatePaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            )
+            customerRepository = customerRepository,
         )
         val result = adapter.updatePaymentMethod(
             paymentMethodId = "pm_1234",
@@ -391,31 +368,12 @@ class CustomerAdapterTest {
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
+        assertThat(customerRepository.updateRequests.awaitItem().apiConfiguration)
+            .isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
-    fun `updatePaymentMethod fails with default message when the payment method couldn't be updated`() = runTest {
-        val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onUpdatePaymentMethod = {
-                    Result.failure(
-                        APIException(
-                            message = "could not update payment method",
-                        )
-                    )
-                }
-            )
-        )
-        val result = adapter.updatePaymentMethod(
-            paymentMethodId = "pm_1234",
-            params = PaymentMethodUpdateParams.createCard()
-        )
-        assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Something went wrong")
-    }
-
-    @Test
-    fun `updatePaymentMethod fails with Stripe message when the payment method couldn't be updated`() = runTest {
+    fun `updatePaymentMethod fails with generic message when the payment method couldn't be updated`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onUpdatePaymentMethod = {
@@ -433,7 +391,7 @@ class CustomerAdapterTest {
             params = PaymentMethodUpdateParams.createCard()
         )
         assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Unable to update payment method")
+            .isEqualTo("Something went wrong")
     }
 
     @Test
@@ -583,8 +541,6 @@ class CustomerAdapterTest {
     fun `PersistablePaymentMethodOption to SavedSelection`() {
         assertThat(CustomerAdapter.PaymentOption.GooglePay.toSavedSelection())
             .isEqualTo(SavedSelection.GooglePay)
-        assertThat(CustomerAdapter.PaymentOption.Link.toSavedSelection())
-            .isEqualTo(SavedSelection.Link)
         assertThat(CustomerAdapter.PaymentOption.StripeId("pm_1234").toSavedSelection())
             .isEqualTo(SavedSelection.PaymentMethod("pm_1234"))
     }
@@ -593,8 +549,6 @@ class CustomerAdapterTest {
     fun `SavedSelection to PersistablePaymentMethodOption`() {
         assertThat(SavedSelection.GooglePay.toPaymentOption())
             .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
-        assertThat(SavedSelection.Link.toPaymentOption())
-            .isEqualTo(CustomerAdapter.PaymentOption.Link)
         assertThat(SavedSelection.PaymentMethod("pm_1234").toPaymentOption())
             .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
     }
@@ -667,22 +621,23 @@ class CustomerAdapterTest {
         val savedPaymentOption = CustomerAdapter.PaymentOption.StripeId(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
         )
-        val savedSelection = savedPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val savedSelection = savedPaymentOption.toPaymentSelection(
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(savedSelection)
             .isInstanceOf<PaymentSelection.Saved>()
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
-        val googleSelection = googlePaymentOption.toPaymentSelection(paymentMethodProvider)
+        val googleSelection = googlePaymentOption.toPaymentSelection(
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(googleSelection)
             .isInstanceOf<PaymentSelection.GooglePay>()
 
-        val linkPaymentOption = CustomerAdapter.PaymentOption.Link
-        val linkSelection = linkPaymentOption.toPaymentSelection(paymentMethodProvider)
-        assertThat(linkSelection)
-            .isInstanceOf<PaymentSelection.Link>()
-
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
-        val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(nullSavedSelection)
             .isNull()
     }
@@ -834,6 +789,7 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             workContext = testDispatcher
         )
     }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -27,7 +28,7 @@ internal fun EventReporter.reportPaymentResult(
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> onPaymentSuccess(
                 paymentSelection = selection,
-                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                 intentId = result.intent.id,
             )
             is ConfirmationHandler.Result.Failed -> {

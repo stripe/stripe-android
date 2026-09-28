@@ -20,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -392,6 +393,38 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `createPaymentDetails from payment method sends all parameters`() = runTest {
+        val clientSecret = "secret"
+        val paymentMethodId = "pm_123"
+        val requestSurface = "android_payment_element"
+        val ephemeralKey = "ek_test_abc"
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/from_payment_method"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
+            bodyPart("request_surface", requestSurface),
+            bodyPart("payment_method_id", paymentMethodId),
+            bodyPart("customer_ephemeral_key_secret", ephemeralKey),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString())
+        }
+
+        val paymentDetails = consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = clientSecret,
+            paymentMethodId = paymentMethodId,
+            requestSurface = requestSurface,
+            requestOptions = DEFAULT_OPTIONS,
+            customerEphemeralKey = ephemeralKey,
+        ).getOrThrow()
+
+        val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card
+        assertThat(cardDetails.last4).isEqualTo("4242")
+    }
+
+    @Test
     fun testConsumerSessionLookupUrl() {
         assertThat("https://api.stripe.com/v1/consumers/sessions/lookup")
             .isEqualTo(ConsumersApiServiceImpl.consumerSessionLookupUrl)
@@ -410,7 +443,7 @@ class ConsumersApiServiceImplTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
         private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

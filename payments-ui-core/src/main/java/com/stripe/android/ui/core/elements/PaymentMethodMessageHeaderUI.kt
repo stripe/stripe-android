@@ -1,0 +1,63 @@
+package com.stripe.android.ui.core.elements
+
+import androidx.annotation.RestrictTo
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.uicore.stripeThemeIsDark
+
+@Composable
+internal fun PaymentMethodMessageHeaderUI(
+    element: PaymentMethodMessageHeaderElement,
+    modifier: Modifier
+) {
+    PaymentMethodMessagePromotionText(element.promotion, modifier)
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
+fun PaymentMethodMessagePromotionText(
+    promotion: PaymentMethodMessagePromotion,
+    modifier: Modifier = Modifier
+) {
+    val message = buildAnnotatedString {
+        append(promotion.message.maybeAddPeriod())
+        withLink(
+            LinkAnnotation.Url(
+                url = promotion.learnMore.url + getThemeParam(),
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colors.primary,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ),
+            )
+        ) {
+            append(promotion.learnMore.message)
+        }
+    }
+    Text(
+        text = message,
+        style = MaterialTheme.typography.body1,
+        modifier = modifier
+    )
+}
+
+private fun String.maybeAddPeriod(): String {
+    return if (endsWith('.')) this else "$this. "
+}
+
+@Composable
+private fun getThemeParam(): String {
+    return if (MaterialTheme.stripeThemeIsDark) "&theme=night" else "&theme=stripe"
+}

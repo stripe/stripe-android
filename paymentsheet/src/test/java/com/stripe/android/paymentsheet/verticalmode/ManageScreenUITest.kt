@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -42,10 +43,14 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = false,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
@@ -66,6 +71,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = false,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -83,10 +89,14 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = false,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethodsWithDefault.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethodsWithDefault) {
@@ -112,6 +122,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -131,6 +142,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -147,10 +159,14 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
@@ -168,6 +184,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = false,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -190,6 +207,7 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -211,6 +229,7 @@ class ManageScreenUITest {
             currentSelection = displayableSavedPaymentMethods[1],
             isEditing = false,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -227,6 +246,7 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()

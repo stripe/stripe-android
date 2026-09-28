@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.PaymentSheet
 
@@ -22,7 +21,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
  * re-start this activity with the result. This class then finishes and the class that launched this activity is
  * responsible for responding to that result.
  */
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
 
     private var hasConfirmStarted: Boolean = false

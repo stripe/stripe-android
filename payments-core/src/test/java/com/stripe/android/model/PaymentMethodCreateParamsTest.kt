@@ -26,6 +26,45 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun createFromGooglePay_withBillingEmailOverride_overridesGooglePayEmail() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayResult = GooglePayResult.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
+            ),
+            clientAttributionMetadata = null,
+            billingEmailOverride = "checkout@example.com",
+        )
+
+        assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun createFromGooglePay_withBillingEmailOverride_usedWhenGooglePayHasNoEmail() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayResult = GooglePayResult.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+            ),
+            clientAttributionMetadata = null,
+            billingEmailOverride = "checkout@example.com",
+        )
+
+        assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun createFromGooglePay_withNullOverride_keepsGooglePayEmail() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayResult = GooglePayResult.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
+            ),
+            clientAttributionMetadata = null,
+            billingEmailOverride = null,
+        )
+
+        assertThat(params.billingDetails?.email).isEqualTo("stripe@example.com")
+    }
+
+    @Test
     fun createFromGooglePay_withFullBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(
@@ -76,6 +115,54 @@ class PaymentMethodCreateParamsTest {
                     "sepa_debit" to mapOf("iban" to "my_iban")
                 )
             )
+    }
+
+    @Test
+    fun `createEps() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createEps().toParamMap())
+            .isEqualTo(mapOf("type" to "eps"))
+    }
+
+    @Test
+    fun `createBancontact() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createBancontact().toParamMap())
+            .isEqualTo(mapOf("type" to "bancontact"))
+    }
+
+    @Test
+    fun `createP24() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createP24().toParamMap())
+            .isEqualTo(mapOf("type" to "p24"))
+    }
+
+    @Test
+    fun `createPayco() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createPayco().toParamMap())
+            .isEqualTo(mapOf("type" to "payco"))
+    }
+
+    @Test
+    fun `createScalapay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createScalapay().toParamMap())
+            .isEqualTo(mapOf("type" to "scalapay"))
+    }
+
+    @Test
+    fun `createKakaoPay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createKakaoPay().toParamMap())
+            .isEqualTo(mapOf("type" to "kakao_pay"))
+    }
+
+    @Test
+    fun `createKrCard() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createKrCard().toParamMap())
+            .isEqualTo(mapOf("type" to "kr_card"))
+    }
+
+    @Test
+    fun `createNaverPay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createNaverPay().toParamMap())
+            .isEqualTo(mapOf("type" to "naver_pay"))
     }
 
     @Test
@@ -255,15 +342,16 @@ class PaymentMethodCreateParamsTest {
             )
         )
 
-        assertThat(
-            PaymentMethodCreateParams.createLink(
-                paymentDetailsId,
-                consumerSessionClientSecret,
-                clientAttributionMetadata,
-                billingDetails,
-                extraParams,
-            ).toParamMap()
-        ).isEqualTo(
+        val params = PaymentMethodCreateParams.createLink(
+            paymentDetailsId,
+            consumerSessionClientSecret,
+            clientAttributionMetadata,
+            billingDetails,
+            extraParams,
+            originalPaymentMethodCode = "card",
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(
             mapOf(
                 "type" to "link",
                 "link" to mapOf(
@@ -290,6 +378,7 @@ class PaymentMethodCreateParamsTest {
                 "client_attribution_metadata" to clientAttributionMetadata.toParamMap(),
             )
         )
+        assertThat(params.link?.originalPaymentMethodCode).isEqualTo("card")
     }
 
     @Test
@@ -485,6 +574,7 @@ class PaymentMethodCreateParamsTest {
             elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            checkoutSessionId = null,
         )
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "card",
@@ -509,6 +599,7 @@ class PaymentMethodCreateParamsTest {
         elementsSessionConfigId = "elements_session_123",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        checkoutSessionId = null,
     )
 
     private fun createFpx(): PaymentMethodCreateParams {

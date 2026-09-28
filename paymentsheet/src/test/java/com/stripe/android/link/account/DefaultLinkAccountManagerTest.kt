@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkAccountUpdate
@@ -29,9 +30,12 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -68,7 +72,7 @@ class DefaultLinkAccountManagerTest {
                 TestFactory.EMAIL,
                 linkAuth = fakeLinkAuth
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified(true, null))
+        ).isEqualTo(AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true))
 
         assertThat(fakeLinkAuth.lookupCalls).hasSize(1)
         assertThat(fakeLinkAuth.lookupCalls[0].email).isEqualTo(TestFactory.EMAIL)
@@ -166,6 +170,27 @@ class DefaultLinkAccountManagerTest {
         }
         val fakeLinkAuth = fakeLinkAuth()
         fakeLinkAuth.lookupResult = Result.failure(Exception())
+
+        accountManager(linkAuth = fakeLinkAuth, linkEventsReporter = linkEventsReporter)
+            .lookupByEmail(
+                email = TestFactory.EMAIL,
+                emailSource = EmailSource.USER_ACTION,
+                startSession = false,
+                customerId = null
+            )
+
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `lookupConsumer sends analytics event when call succeeds`() = runSuspendTest {
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun onAccountLookupComplete() {
+                callCount += 1
+            }
+        }
+        val fakeLinkAuth = fakeLinkAuth()
 
         accountManager(linkAuth = fakeLinkAuth, linkEventsReporter = linkEventsReporter)
             .lookupByEmail(
@@ -334,7 +359,10 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.exceptionOrNull()).isEqualTo(
             AlreadyLoggedInLinkException(
                 email = TestFactory.EMAIL,
-                accountStatus = AccountStatus.Verified(true, null)
+                accountStatus = AccountStatus.Verified(
+                    consentPresentation = null,
+                    meetsMinimumAuthenticationLevel = true,
+                )
             )
         )
     }
@@ -410,6 +438,7 @@ class DefaultLinkAccountManagerTest {
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {
@@ -423,7 +452,8 @@ class DefaultLinkAccountManagerTest {
                 linkAuthIntentId: String?,
                 sessionId: String,
                 customerId: String?,
-                supportedVerificationTypes: List<String>?
+                supportedVerificationTypes: List<String>?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSessionLookup> {
                 callCount += 1
                 return super.lookupConsumer(
@@ -431,7 +461,8 @@ class DefaultLinkAccountManagerTest {
                     linkAuthIntentId = linkAuthIntentId,
                     sessionId = sessionId,
                     customerId = customerId,
-                    supportedVerificationTypes = supportedVerificationTypes
+                    supportedVerificationTypes = supportedVerificationTypes,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -450,10 +481,69 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
+    fun `createPaymentDetailsFromPaymentMethod returns success when account exists`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            var createPaymentDetailsFromPaymentMethodCallCount = 0
+            var capturedCustomerEphemeralKey = "not_called"
+            override suspend fun createPaymentDetailsFromPaymentMethod(
+                paymentMethod: PaymentMethod,
+                userEmail: String,
+                stripeIntent: StripeIntent,
+                consumerSessionClientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
+                customerEphemeralKey: String,
+                apiConfiguration: ApiConfiguration.State,
+            ): Result<LinkPaymentDetails.Saved> {
+                createPaymentDetailsFromPaymentMethodCallCount += 1
+                capturedCustomerEphemeralKey = customerEphemeralKey
+                return Result.success(
+                    LinkPaymentDetails.Saved(
+                        paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                        paymentMethod = paymentMethod,
+                    )
+                )
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val ephemeralKey = "ek_test_key"
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(
+            customerEphemeralKey = ephemeralKey,
+            paymentMethod = paymentMethod,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(linkRepository.createPaymentDetailsFromPaymentMethodCallCount).isEqualTo(1)
+        assertThat(linkRepository.capturedCustomerEphemeralKey).isEqualTo(ephemeralKey)
+    }
+
+    @Test
+    fun `createPaymentDetailsFromPaymentMethod returns failure when link account is null`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setTestAccount(null, null)
+
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(
+            customerEphemeralKey = "ek_test_key",
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("non-null Link account")
+    }
+
+    @Test
     fun `shareCardPaymentDetails makes correct calls`() = runSuspendTest {
         val newPaymentDetails = LinkPaymentDetails.New(
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
-            paymentMethodCreateParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+            confirmParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.confirmParams,
             originalParams = PaymentMethodCreateParams.create(
                 card = PaymentMethodCreateParamsFixtures.CARD,
             )
@@ -465,7 +555,8 @@ class DefaultLinkAccountManagerTest {
                 id: String,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
-            ): Result<LinkPaymentDetails.Saved> {
+                apiConfiguration: ApiConfiguration.State,
+            ): Result<LinkPaymentDetails.Passthrough> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
@@ -476,6 +567,7 @@ class DefaultLinkAccountManagerTest {
                     id = id,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -492,7 +584,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.isSuccess).isTrue()
         val linkPaymentDetails = result.getOrThrow()
         assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
+            .isEqualTo(TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.paymentDetails.id)
 
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
@@ -504,10 +596,11 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun startVerification(
                 consumerSessionClientSecret: String,
-                isResendSmsCode: Boolean
+                isResendSmsCode: Boolean,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.startVerification(consumerSessionClientSecret, isResendSmsCode)
+                return super.startVerification(consumerSessionClientSecret, isResendSmsCode, apiConfiguration)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -580,13 +673,15 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consentGranted: Boolean?
+                consentGranted: Boolean?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
                 return super.confirmVerification(
                     verificationCode = verificationCode,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    consentGranted = consentGranted
+                    consentGranted = consentGranted,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -616,7 +711,8 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consentGranted: Boolean?
+                consentGranted: Boolean?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
                 return Result.failure(error)
@@ -646,6 +742,7 @@ class DefaultLinkAccountManagerTest {
             override suspend fun listPaymentDetails(
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.failure(error)
@@ -668,6 +765,7 @@ class DefaultLinkAccountManagerTest {
             override suspend fun listPaymentDetails(
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -876,8 +974,9 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             override suspend fun createLinkAccountSession(
                 consumerSessionClientSecret: String,
-                stripeIntent: StripeIntent,
+                intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
             }
@@ -914,6 +1013,65 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
+    fun `createLinkAccountSession passes intent client secret as intent token`() = runSuspendTest {
+        var capturedIntentToken: String? = null
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                intentToken: String?,
+                linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
+            ): Result<LinkAccountSession> {
+                capturedIntentToken = intentToken
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            stripeIntent = PaymentIntentFactory.create(clientSecret = "pi_123_secret_abc"),
+            linkRepository = linkRepository,
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        accountManager.createLinkAccountSession()
+
+        assertThat(capturedIntentToken).isEqualTo("pi_123_secret_abc")
+    }
+
+    @Test
+    fun `createLinkAccountSession falls back to elements session ID when intent client secret is null`() =
+        runSuspendTest {
+        var capturedIntentToken: String? = null
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                intentToken: String?,
+                linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
+            ): Result<LinkAccountSession> {
+                capturedIntentToken = intentToken
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            stripeIntent = PaymentIntentFactory.create(clientSecret = null),
+            linkRepository = linkRepository,
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        accountManager.createLinkAccountSession()
+
+        assertThat(capturedIntentToken).isEqualTo(TestFactory.LINK_CONFIGURATION.elementsSessionId)
+    }
+
+    @Test
     fun `setLinkAccountFromLookupResult creates LinkAccount with LinkAuthIntentInfo`() = runSuspendTest {
         val accountManager = accountManager()
         val consentSection = ConsentUi.ConsentSection("disclaimer")
@@ -942,7 +1100,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = true,
-            expectedStatus = AccountStatus.Verified(true, null),
+            expectedStatus = AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -951,7 +1109,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = false,
-            expectedStatus = AccountStatus.Verified(true, null),
+            expectedStatus = AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -998,6 +1156,101 @@ class DefaultLinkAccountManagerTest {
         assertThat(accountManagerWithEditsDisabled).isNotNull()
     }
 
+    @Test
+    fun `linkBrand is null when new session has null linkBrand`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        // Set initial account with linkBrand = Onelink
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        // Update with same email but null linkBrand (simulates verification response)
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = null),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val account = accountManager.linkAccountInfo.value.account
+        assertThat(account?.linkBrand).isNull()
+    }
+
+    @Test
+    fun `linkBrand is NOT carried forward when new session has non-null linkBrand`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        // Update with explicit LinkBrand.Link — should NOT carry forward old value
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Link),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val account = accountManager.linkAccountInfo.value.account
+        assertThat(account?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `linkBrand is null for different user with null linkBrand`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        // Set account for user A with linkBrand = Onelink
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = "userA@test.com",
+                    linkBrand = LinkBrand.Onelink,
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        // Switch to user B with null linkBrand
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = "userB@test.com",
+                    linkBrand = null,
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val account = accountManager.linkAccountInfo.value.account
+        assertThat(account?.linkBrand).isNull()
+    }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()
     }
@@ -1009,7 +1262,7 @@ class DefaultLinkAccountManagerTest {
         linkRepository: LinkRepository = FakeLinkRepository(),
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter(),
         allowUserEmailEdits: Boolean = true,
-        linkAuth: LinkAuth = fakeLinkAuth()
+        linkAuth: LinkAuth = fakeLinkAuth(),
     ): DefaultLinkAccountManager {
         val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
             email = customerEmail,
@@ -1020,7 +1273,7 @@ class DefaultLinkAccountManagerTest {
                 stripeIntent = stripeIntent,
                 passthroughModeEnabled = passthroughModeEnabled,
                 customerInfo = customerInfo,
-                allowUserEmailEdits = allowUserEmailEdits
+                allowUserEmailEdits = allowUserEmailEdits,
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,
@@ -1092,6 +1345,8 @@ private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
     override fun onAccountLookupFailure(error: Throwable) {
         lookupFailureTurbine.add(error)
     }
+
+    override fun onAccountLookupComplete() = Unit
 
     override fun on2FAStartFailure() = Unit
     override fun on2FAStart() = Unit

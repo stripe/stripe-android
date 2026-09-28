@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -17,7 +18,7 @@ import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
-import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -38,7 +39,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter
 ) : LinkInlineInteractor {
 
-    override val otpElement = OTPSpec.transform()
+    override val otpElement = OTPElementFactory.create()
 
     override val state: StateFlow<LinkInlineState> = savedStateHandle.getStateFlow(
         key = LINK_EMBEDDED_STATE_KEY,
@@ -118,6 +119,9 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                     linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
                     linkExpressMode = LinkExpressMode.ENABLED,
+                    // Selection-only launch; Link returns a selection here and never confirms, so
+                    // there is no auth surface to color.
+                    statusBarColor = null,
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->
@@ -149,6 +153,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 linkConfiguration.enableDisplayableDefaultValuesInEce
             ),
             allowLogout = true,
+            linkBrand = linkConfiguration.effectiveLinkBrand(this@initial2FAState),
         )
     )
 

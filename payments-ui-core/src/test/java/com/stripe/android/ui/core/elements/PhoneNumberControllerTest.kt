@@ -16,6 +16,13 @@ import org.robolectric.annotation.Config
 internal class PhoneNumberControllerTest {
 
     @Test
+    fun `Controller should enforce Ltr text direction`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController()
+
+        assertThat(phoneNumberController.enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
     fun `when new country is selected then phoneNumberFormatter is updated`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",
@@ -139,7 +146,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("1")
@@ -214,17 +221,17 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("123")
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
 
             phoneNumberController.onFocusChange(true)
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
         }
     }
 
@@ -234,7 +241,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onFocusChange(true)
@@ -250,7 +257,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onFocusChange(true)
@@ -267,7 +274,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             // Set complete phone number
@@ -289,7 +296,7 @@ internal class PhoneNumberControllerTest {
             acceptAnyInput = true,
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("1")

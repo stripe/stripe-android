@@ -44,8 +44,6 @@ dependencies {
 
     debugImplementation libs.leakCanary
 
-    testImplementation testLibs.androidx.core
-
     androidTestImplementation testLibs.androidx.core
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.junit

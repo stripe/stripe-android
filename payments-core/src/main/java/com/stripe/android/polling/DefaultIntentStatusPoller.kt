@@ -1,7 +1,6 @@
 package com.stripe.android.polling
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -13,13 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultIntentStatusPoller @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfigProvider: Provider<PaymentConfiguration>,
+    private val requestOptions: ApiRequest.Options,
     private val config: IntentStatusPoller.Config,
     private val dispatcher: CoroutineDispatcher,
 ) : IntentStatusPoller {
@@ -56,13 +54,9 @@ class DefaultIntentStatusPoller @Inject constructor(
     }
 
     private suspend fun fetchIntentStatus(): StripeIntent.Status? {
-        val paymentConfig = paymentConfigProvider.get()
         val paymentIntent = stripeRepository.retrievePaymentIntent(
             clientSecret = config.clientSecret,
-            options = ApiRequest.Options(
-                publishableKeyProvider = { paymentConfig.publishableKey },
-                stripeAccountIdProvider = { paymentConfig.stripeAccountId },
-            ),
+            options = requestOptions,
         )
         return paymentIntent.getOrNull()?.status
     }

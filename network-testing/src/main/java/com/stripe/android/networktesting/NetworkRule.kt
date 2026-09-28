@@ -2,6 +2,7 @@ package com.stripe.android.networktesting
 
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.ConnectionFactory
 import com.stripe.android.core.networking.StripeRequest
@@ -23,6 +24,7 @@ import kotlin.time.Duration
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
+    private val defaultMatcher: RequestMatcher,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
@@ -32,7 +34,11 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
-    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout)
+    ) : this(
+        hostsToTrack.map { it.hostFromUrl() }.toSet(),
+        validationTimeout,
+        RequestMatchers.stripeApiKey(),
+    )
 
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
@@ -48,10 +54,12 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        applyDefaultAuthorization: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*requestMatcher) { response ->
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        mockWebServer.dispatcher.enqueue(*matchers) { response ->
             responseFactory(response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
@@ -61,14 +69,27 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        applyDefaultAuthorization: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*requestMatcher) { request, response ->
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        mockWebServer.dispatcher.enqueue(*matchers) { request, response ->
             responseFactory(request, response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
             }
+        }
+    }
+
+    private fun withDefaultAuthorization(
+        requestMatcher: Array<out RequestMatcher>,
+        applyDefaultAuthorization: Boolean,
+    ): Array<out RequestMatcher> {
+        return if (applyDefaultAuthorization) {
+            arrayOf(defaultMatcher, *requestMatcher)
+        } else {
+            requestMatcher
         }
     }
 
@@ -95,7 +116,10 @@ private class NetworkStatement(
 ) : Statement() {
     override fun evaluate() {
         try {
-            if (!hostsToTrack.contains(AnalyticsRequest.HOST.hostFromUrl())) {
+            if (
+                !hostsToTrack.contains(AnalyticsRequest.HOST.hostFromUrl()) &&
+                !hostsToTrack.contains(AnalyticsRequestV2.ANALYTICS_HOST.hostFromUrl())
+            ) {
                 AnalyticsRequestExecutor.ENABLED = false
             }
             setup()

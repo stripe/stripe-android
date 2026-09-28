@@ -6,31 +6,34 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.AnalyticEventCallbackRule
-import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -53,15 +56,16 @@ internal class EmbeddedContentUiTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
-                embeddedContentHelper.dataLoaded(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                    embeddedViewDisplaysMandateText = true,
+                state.value = EmbeddedContentHelperStateFactory.create(
+                    embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 )
                 val content = awaitItem()
                 assertThat(content).isNotNull()
@@ -81,10 +85,8 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
+            state.value = EmbeddedContentHelperStateFactory.create(
+                embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -104,10 +106,8 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
-                embeddedViewDisplaysMandateText = true,
+            state.value = EmbeddedContentHelperStateFactory.create(
+                embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -125,67 +125,93 @@ internal class EmbeddedContentUiTest {
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
+        val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Suppress("LongMethod")
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()
+        val viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
         val immediateActionHandler =
             DefaultEmbeddedRowSelectionImmediateActionHandler(
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null }
             )
+        val customerStateHolder = DefaultCustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
+        )
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val sheetStateHolder = SheetStateHolder(savedStateHandle)
+
+        val state = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(null)
+        val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
+            eventReporter = eventReporter,
+            workContext = Dispatchers.Unconfined,
+            uiContext = Dispatchers.Unconfined,
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
+            selectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            linkAccountHolder = linkAccountHolder,
+            coroutineScope = viewModelScope,
+            sheetStateHolder = sheetStateHolder,
+        )
+        val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
+            eventReporter = eventReporter,
+            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            confirmationHandler = confirmationHandler,
+            selectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
+                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                completionAction = immediateActionHandler::invoke,
+            ),
+            coroutineScope = viewModelScope,
+            sheetStateHolder = sheetStateHolder,
+            savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
+            linkAccountHolder = linkAccountHolder,
+            hostProcessing = stateFlowOf(false),
+            savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
+        )
 
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
-                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-                savedStateHandle = savedStateHandle,
-                eventReporter = eventReporter,
-                workContext = Dispatchers.Unconfined,
-                uiContext = Dispatchers.Unconfined,
-                customerRepository = FakeCustomerRepository(),
-                selectionHolder = selectionHolder,
-                embeddedLinkHelper = object : EmbeddedLinkHelper {
-                    override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-                },
+                coroutineScope = viewModelScope,
+                state = state,
+                verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
                 embeddedWalletsHelper = { stateFlowOf(null) },
-                customerStateHolder = CustomerStateHolder(
-                    savedStateHandle = savedStateHandle,
-                    selection = selectionHolder.selection,
-                    customerMetadataPermissions = stateFlowOf(
-                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
-                    ),
-                ),
-                embeddedFormHelperFactory = embeddedFormHelperFactory,
-                confirmationHandler = confirmationHandler,
-                confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                    savedStateHandle = savedStateHandle,
-                    selectionHolder = selectionHolder,
-                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-                ),
-                rowSelectionImmediateActionHandler = immediateActionHandler,
-                errorReporter = errorReporter,
                 internalRowSelectionCallback = { internalRowSelectionCallback },
-                linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
-                analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                paymentOptionsPresenter = DefaultEmbeddedPaymentOptionsPresenter(
+                    state = state,
+                    sheetStateHolder = sheetStateHolder,
+                    customerStateHolder = customerStateHolder,
+                    selectionHolder = selectionHolder,
+                    errorReporter = errorReporter,
+                ),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
+            state = state,
         ).block()
     }
 }

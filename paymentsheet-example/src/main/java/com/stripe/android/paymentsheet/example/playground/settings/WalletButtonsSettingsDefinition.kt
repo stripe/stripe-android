@@ -20,11 +20,14 @@ internal object WalletButtonsSettingsDefinition :
         option(it.displayName, it)
     }
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return when (configurationData.integrationType) {
-            PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,
             PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> true
+            PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
             PlaygroundConfigurationData.IntegrationType.CustomerSheet,
             PlaygroundConfigurationData.IntegrationType.LinkController -> false
@@ -84,22 +87,18 @@ enum class WalletButtonsPlaygroundType(
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                 ),
                 walletButtonsView = mapOf(
                     PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                 ),
             )
         ),
     ),
-    GPayAlwaysLinkAutoNeverShopPayAuto(
-        displayName = "Google Pay (Always), Link (Never in Wallets, Auto in MPE), Shop Pay (Automatic)",
+    GPayAlwaysLinkNever(
+        displayName = "Google Pay (Always), Link (Never in Wallets, Auto in MPE)",
         configuration = PaymentSheet.WalletButtonsConfiguration(
             willDisplayExternally = true,
             visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
@@ -108,16 +107,12 @@ enum class WalletButtonsPlaygroundType(
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
                 ),
                 walletButtonsView = mapOf(
                     PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                 ),
             )
         ),

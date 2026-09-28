@@ -26,6 +26,7 @@ import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -102,6 +103,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             confirmationHandler.start(
                 ConfirmationHandler.Args(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
+                    statusBarColor = null,
                     paymentMethodMetadata = paymentMethodMetadata,
                 )
             )
@@ -117,6 +119,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
@@ -128,7 +131,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
             assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
@@ -186,12 +189,12 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             configuration = TestFactory.LINK_CONFIGURATION,
                             paymentMethodMetadata = paymentMethodMetadata,
                             requestSurface = RequestSurface.PaymentElement,
-                            publishableKey = PUBLISHABLE_KEY,
-                            stripeAccountId = null,
+                            apiConfiguration = TestFactory.LINK_CONFIGURATION.apiConfiguration,
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
                             launchMode = LinkLaunchMode.Full,
+                            statusBarColor = null,
                         )
                     )
                 )

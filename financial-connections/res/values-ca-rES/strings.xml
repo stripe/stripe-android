@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">No s\'ha pogut accedir al número de compte en aquest moment</string>
   <string name="stripe_close_dialog_networking_desc">Si cancel·leu ara, el vostre compte s\'enllaçarà a %1$s, però no es desarà a Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Si cancel·leu ara, el compte s\'enllaçarà a aquesta empresa, però no es desarà a Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Si cancel·leu ara, el vostre compte quedarà enllaçat a aquest negoci però no es desarà a %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Si cancel·leu ara, el vostre compte quedarà enllaçat a %1$s però no es desarà a %2$s.</string>
   <string name="stripe_error_cta_close">Tanca</string>
   <string name="stripe_error_cta_manual_entry">Introdueix les dades bancàries manualment</string>
   <string name="stripe_error_cta_retry">Torna-ho a intentar</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Introduïu les dades bancàries</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel·la</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continua amb Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continua amb %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ara no</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Feu servir la informació que hàgiu desat prèviament amb el vostre compte de Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Utilitzeu la informació que heu desat anteriorment al vostre compte de %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Continua amb Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Continua amb %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ara no</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirmeu la vostra identitat</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Tria un banc diferent</string>
   <string name="stripe_search">Cerca</string>
   <string name="stripe_success_pane_desc_link_error_plural">Els vostres comptes s\'han connectat, però no s\'han pogut desar amb Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Els vostres comptes s\'han connectat, però no s\'han pogut desar a %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">El vostre compte s\'ha connectat, però no s\'ha pogut desar amb Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">El vostre compte s\'ha connectat, però no s\'ha pogut desar a %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Els vostres comptes s\'han connectat i desat amb Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Els vostres comptes s\'han connectat i desat amb %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">El vostre compte s\'ha connectat i desat amb Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">El vostre compte s\'ha connectat i desat amb %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Rebreu microdipòsits al compte ••••%1$s en 1-2 dies i un correu electrònic amb més instruccions.</string>
   <string name="stripe_success_pane_desc_plural">Els vostres comptes s\'han connectat</string>
   <string name="stripe_success_pane_desc_singular">El vostre compte s\'ha connectat</string>

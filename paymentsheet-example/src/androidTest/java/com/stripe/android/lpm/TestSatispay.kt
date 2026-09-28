@@ -41,7 +41,7 @@ internal class TestSatispay : BasePlaygroundTest() {
     fun testSatispayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
         )
     }

@@ -1,3 +1,5 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Context
@@ -6,6 +8,7 @@ import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -14,8 +17,14 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectionModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomCustomerIdSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -49,10 +58,11 @@ internal sealed interface PlaygroundState : Parcelable {
     @Parcelize
     data class Payment(
         override val snapshot: PlaygroundSettings.Snapshot,
-        val amount: Long,
+        val amount: Long?,
         val paymentMethodTypes: List<String>,
         val customerConfig: PaymentSheet.CustomerConfiguration?,
         val clientSecret: String,
+        val terminalLocationId: String?,
         private val defaultEndpoint: String,
     ) : PlaygroundState {
         override val integrationType
@@ -82,6 +92,9 @@ internal sealed interface PlaygroundState : Parcelable {
         val onBehalfOf: String?
             get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
                 .value.takeIf { it.isNotBlank() }
+
+        val canUseTapToAdd: Boolean
+            get() = !isCollectBillingInfo()
 
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
@@ -122,6 +135,22 @@ internal sealed interface PlaygroundState : Parcelable {
                 PlaygroundConfigurationData.IntegrationType.PaymentSheet,
                 PlaygroundConfigurationData.IntegrationType.FlowController,
             )
+        }
+
+        private fun isCollectBillingInfo(): Boolean {
+            return isCollectingContactInfo(CollectNameSettingsDefinition) ||
+                isCollectingContactInfo(CollectPhoneSettingsDefinition) ||
+                isCollectingContactInfo(CollectEmailSettingsDefinition) ||
+                isCollectingFullAddress()
+        }
+
+        private fun isCollectingContactInfo(definition: CollectionModeSettingsDefinition): Boolean {
+            return snapshot[definition] == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        }
+
+        private fun isCollectingFullAddress(): Boolean {
+            return snapshot[CollectAddressSettingsDefinition] ==
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         }
     }
 
@@ -205,7 +234,7 @@ internal sealed interface PlaygroundState : Parcelable {
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),
-                paymentMethodTypes = listOf("card", "shop_pay")
+                paymentMethodTypes = listOf("card")
             )
         }
     }
@@ -219,7 +248,11 @@ internal sealed interface PlaygroundState : Parcelable {
     }
 
     fun customerId(): String? {
-        return (snapshot[CustomerSettingsDefinition] as? CustomerType.Existing)?.value
+        return when (val customerType = snapshot[CustomerSettingsDefinition]) {
+            is CustomerType.Existing -> customerType.customerId
+            CustomerType.CUSTOM -> snapshot[CustomCustomerIdSettingsDefinition]
+            else -> null
+        }
     }
 
     companion object {
@@ -239,8 +272,9 @@ internal sealed interface PlaygroundState : Parcelable {
                 amount = amount,
                 paymentMethodTypes = paymentMethodTypes,
                 customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
-                clientSecret = intentClientSecret,
-                defaultEndpoint = defaultEndpoint
+                clientSecret = clientSecret,
+                terminalLocationId = terminalLocationId,
+                defaultEndpoint = defaultEndpoint,
             )
         }
     }

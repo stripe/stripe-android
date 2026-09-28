@@ -52,22 +52,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         origin = ORIGIN,
     )
 
-    override fun onInit() {
-        fireEvent(
-            event = PaymentSheetEvent.Init(
-                mode = mode,
-            ),
-            paymentMethodMetadata = null, // We won't have a value on init, and using null prevents a stack overflow.
-        )
-    }
-
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
+    override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
             event = PaymentSheetEvent.LoadStarted(
                 initializedViaCompose = initializedViaCompose
             ),
             paymentMethodMetadata = null, // We don't have these details until load is complete.
+            publishableKey = publishableKey,
         )
     }
 
@@ -83,7 +75,9 @@ internal class DefaultEventReporter @Inject internal constructor(
             event = PaymentSheetEvent.LoadSucceeded(
                 paymentSelection = paymentSelection,
                 duration = duration,
-                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
+                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty(),
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -91,15 +85,69 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadFailed(
         error: Throwable,
+        publishableKey: String,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
         fireEvent(
             event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error,
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
+            publishableKey = publishableKey,
         )
+    }
+
+    private fun buildLoadTimings(): Map<String, Int> {
+        return DurationProvider.Key.entries.map { entry ->
+            entry to (
+                when (entry) {
+                    // These are all shared with iOS
+                    DurationProvider.Key.PaymentSheetLoadSessionLoad -> "fetchElementsSession"
+                    DurationProvider.Key.PaymentSheetLoadPrefetchPMs -> "fetchSavedPaymentMethods"
+                    DurationProvider.Key.PaymentSheetLoadCreateLinkState -> "lookUpLinkAccount"
+                    DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "filterPaymentMethods"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveCustomer -> "retrieveCustomer"
+                    DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes -> "computePaymentMethodTypes"
+                    // These are specific to Android
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported -> "isGooglePaySupported"
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePayReady -> "isGooglePayReady"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection ->
+                        "retrieveSavedPaymentMethodSelection"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection ->
+                        "retrieveInitialPaymentSelection"
+                    // We don't send load timings for these.
+                    DurationProvider.Key.Loading,
+                    DurationProvider.Key.Checkout,
+                    DurationProvider.Key.NfcScan,
+                    DurationProvider.Key.NfcScanAttempt,
+                    DurationProvider.Key.LinkSignup,
+                    DurationProvider.Key.ConfirmButtonClicked,
+                    DurationProvider.Key.TapToAdd,
+                    DurationProvider.Key.CardScan,
+                    DurationProvider.Key.Captcha,
+                    DurationProvider.Key.CaptchaAttach,
+                    DurationProvider.Key.PaymentLauncher,
+                    DurationProvider.Key.PrepareAttestation,
+                    DurationProvider.Key.Attest,
+                    DurationProvider.Key.ExpressCheckoutElement,
+                    DurationProvider.Key.IntentConfirmationChallenge,
+                    DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
+                    DurationProvider.Key.PaymentMethodMessaging,
+                    DurationProvider.Key.AddressAutocompleteSession,
+                    DurationProvider.Key.AddressAutocompleteFetch,
+                    DurationProvider.Key.AddressAutocompleteDetailsFetch,
+                    DurationProvider.Key.AddressElementCompletion -> null
+                }
+                )
+        }.mapNotNull { (key, name) ->
+            name?.let {
+                durationProvider.completedDuration(key)?.let { duration ->
+                    name to duration.inWholeMilliseconds.toInt()
+                }
+            }
+        }.toMap()
     }
 
     override fun onElementsSessionLoadFailed(error: Throwable) {
@@ -222,6 +270,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onWalletButtonTapped(walletType: String) {
+        fireEvent(
+            PaymentSheetEvent.WalletButtonTapped(
+                walletType = walletType,
+            )
+        )
+    }
+
     override fun onPressConfirmButton(paymentSelection: PaymentSelection) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
@@ -231,6 +287,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         )
     }
@@ -240,17 +297,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intentId: String?,
     ) {
-        // Wallets are treated as a saved payment method after confirmation, so we need
-        // to "reset" to the correct PaymentSelection for accurate reporting.
-        val savedSelection = (paymentSelection as? PaymentSelection.Saved)
-
-        val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
-                paymentSelection = realSelection,
+                paymentSelection = paymentSelection,
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
@@ -274,15 +326,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                 deferredIntentConfirmationType = null,
                 intentId = null,
             )
-        )
-    }
-
-    override fun onLpmSpecFailure(errorMessage: String?) {
-        fireEvent(
-            event = PaymentSheetEvent.LpmSerializeFailureEvent(
-                errorMessage = errorMessage
-            ),
-            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
@@ -415,6 +458,43 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onTapToAddButtonShown() {
+        fireEvent(PaymentSheetEvent.TapToAdd.ButtonShown(mode))
+    }
+
+    override fun onTapToAddStarted() {
+        durationProvider.start(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.Started(mode))
+    }
+
+    override fun onCardAddedWithTapToAdd(canCollectLinkInput: Boolean) {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.CardAdded(mode, duration, canCollectLinkInput))
+    }
+
+    override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.Canceled(mode, source, duration))
+    }
+
+    override fun onTapToAddContinueAfterCardAdded(completedLinkInput: Boolean?) {
+        fireEvent(PaymentSheetEvent.TapToAdd.ContinueAfterCardAdded(mode, completedLinkInput))
+    }
+
+    override fun onTapToAddConfirm(recollectedCvc: Boolean) {
+        fireEvent(PaymentSheetEvent.TapToAdd.Confirm(mode, recollectedCvc))
+    }
+
+    override fun onFailedToAddCardWithTapToAdd(message: String) {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.FailedToAddCard(mode, message, duration))
+    }
+
+    override fun onTapToAddAttemptWithUnsupportedDevice() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.AttemptWithUnsupportedDevice(mode, duration))
+    }
+
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
@@ -424,22 +504,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                 )
             )
         }
-    }
-
-    override fun onShopPayWebViewLoadAttempt() {
-        fireEvent(PaymentSheetEvent.ShopPayWebviewLoadAttempt())
-    }
-
-    override fun onShopPayWebViewConfirmSuccess() {
-        fireEvent(PaymentSheetEvent.ShopPayWebviewConfirmSuccess())
-    }
-
-    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
-        fireEvent(
-            PaymentSheetEvent.ShopPayWebviewCancelled(
-                didReceiveECEClick = didReceiveECEClick,
-            )
-        )
     }
 
     override fun onCardScanStarted(implementation: String) {
@@ -484,6 +548,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onCardScanButtonShown() {
+        fireEvent(PaymentSheetEvent.CardScanButtonShown())
+    }
+
+    override fun onNfcScanButtonShown() {
+        fireEvent(PaymentSheetEvent.NfcScanButtonShown())
+    }
+
     override fun onCardScanApiCheckSucceeded(implementation: String) {
         fireEvent(
             PaymentSheetEvent.CardScanApiCheckSucceeded(
@@ -504,33 +576,70 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    override fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.BillingAddressCompleted(
+                addressCountryCode = addressCountryCode,
+                autocompleteResultSelected = autocompleteResultSelected,
+                editDistance = editDistance,
+            )
+        )
+    }
+
+    override fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String) {
+        durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
+        fireEvent(
+            event = PaymentSheetEvent.PaymentMethodMessaging.Fetched(),
+            publishableKey = publishableKey,
+        )
+    }
+
+    override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
+        val duration = durationProvider.elapsed(DurationProvider.Key.PaymentMethodMessaging)
+        fireEvent(
+            PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
+        )
+    }
+
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
-        return paymentMethodMetadata?.analyticsMetadata?.paramsMap ?: emptyMap()
+        return if (paymentMethodMetadata != null) {
+            paymentMethodMetadata.analyticsMetadata.paramsMap +
+                ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
+        } else {
+            emptyMap()
+        }
     }
 
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
+        publishableKey: String? = null,
     ) {
+        val publishableKeyOverride = publishableKey ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+                    publishableKeyOverride = publishableKeyOverride,
                 )
             )
         }
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
+        val executor = analyticsRequestV2Executor
+        val request = analyticsRequestV2Factory.createRequest(
+            eventName = event.eventName,
+            additionalParams = defaultParams(paymentMethodMetadataProvider.get()) + event.params,
+        )
+
         CoroutineScope(workContext).launch {
-            val paymentMethodMetadata = paymentMethodMetadataProvider.get()
-            analyticsRequestV2Executor.enqueue(
-                analyticsRequestV2Factory.createRequest(
-                    eventName = event.eventName,
-                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
-                )
-            )
+            executor.enqueue(request)
         }
     }
 

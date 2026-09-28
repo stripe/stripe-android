@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Numărul dvs. de cont nu a putut fi accesat în acest moment</string>
   <string name="stripe_close_dialog_networking_desc">Dacă anulați acum, contul dvs. va fi asociat la %1$s, dar nu va fi salvat în Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Dacă anulați acum, contul dvs. va fi asociat la această întreprindere, dar nu va fi salvat în Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Dacă anulați acum, contul dvs. va fi asociat cu această afacere, dar nu va fi salvat în %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Dacă anulați acum, contul dvs. va fi asociat cu %1$s, dar nu va fi salvat în %2$s.</string>
   <string name="stripe_error_cta_close">Închidere</string>
   <string name="stripe_error_cta_manual_entry">Introduceți detaliile bancare manual</string>
   <string name="stripe_error_cta_retry">Încercați din nou</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Introduceți detaliile bancare</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Anulare</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continuare cu Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continuați cu %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Nu acum</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Utilizați informațiile pe care le-ați salvat anterior cu contul dvs. Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Folosiți informațiile pe care le-ați salvat anterior cu contul dvs. %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Continuare cu Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Continuați cu %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Nu acum</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirmați că sunteți dvs.</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Alegeți o altă bancă</string>
   <string name="stripe_search">Căutare</string>
   <string name="stripe_success_pane_desc_link_error_plural">Conturile dvs. au fost conectate, dar nu au putut fi salvate cu Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Conturile dvs. au fost conectate, dar nu au putut fi salvate cu %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Contul dvs. a fost conectat, dar nu a putut fi salvat cu Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Contul dvs. a fost conectat, dar nu a putut fi salvat cu %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Conturile dvs. au fost conectate și salvate cu Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Conturile dvs. au fost conectate și salvate cu %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Contul dvs. a fost conectat și salvat cu Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Contul dvs. a fost conectat și salvat cu %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Vă puteți aștepta la două micro-depuneri în contul care se termină în ••••%1$s în 1-2 zile și la un e-mail cu instrucțiuni suplimentare.</string>
   <string name="stripe_success_pane_desc_plural">Conturile dvs. au fost conectate</string>
   <string name="stripe_success_pane_desc_singular">Contul dvs. a fost conectat</string>

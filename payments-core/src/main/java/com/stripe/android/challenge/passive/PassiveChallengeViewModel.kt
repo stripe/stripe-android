@@ -25,7 +25,8 @@ internal class PassiveChallengeViewModel @Inject constructor(
         val result = hCaptchaService.performPassiveHCaptcha(
             activity = activity,
             siteKey = passiveCaptchaParams.siteKey,
-            rqData = passiveCaptchaParams.rqData
+            rqData = passiveCaptchaParams.rqData,
+            tokenTimeoutSeconds = passiveCaptchaParams.tokenTimeoutSeconds
         )
         when (result) {
             is HCaptchaService.Result.Failure -> {
@@ -49,12 +50,13 @@ internal class PassiveChallengeViewModel @Inject constructor(
                 val args: PassiveChallengeArgs = getArgs(createSavedStateHandle())
                     ?: throw NoArgsException()
                 val app = this[APPLICATION_KEY] as Application
-                DaggerPassiveChallengeComponent.builder()
-                    .passiveCaptchaParams(args.passiveCaptchaParams)
-                    .context(app)
-                    .publishableKeyProvider { args.publishableKey }
-                    .productUsage(args.productUsage.toSet())
-                    .build()
+                DaggerPassiveChallengeComponent.factory()
+                    .create(
+                        context = app,
+                        apiConfiguration = args.apiConfiguration,
+                        productUsage = args.productUsage.toSet(),
+                        passiveCaptchaParams = args.passiveCaptchaParams,
+                    )
                     .passiveChallengeViewModel
             }
         }
