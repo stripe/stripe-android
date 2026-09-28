@@ -203,6 +203,28 @@ class AddressElementViewModelModuleTest {
         }
 
     @Test
+    fun `provideAddressElementEventReporter preserves existing lifecycle analytics`() = runTest {
+        val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+        val reporter = module.provideAddressElementEventReporter(addressLauncherEventReporter)
+        reporter.onShown(country = "CA")
+        reporter.onSaveCompleted(
+            country = "US",
+            autocompleteResultSelected = true,
+            editDistance = 1,
+        )
+
+        assertThat(addressLauncherEventReporter.showCalls.awaitItem()).isEqualTo("CA")
+        assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+            FakeAddressLauncherEventReporter.CompletedCall(
+                country = "US",
+                autocompleteResultSelected = true,
+                editDistance = 1,
+            )
+        )
+        addressLauncherEventReporter.validate()
+    }
+
+    @Test
     fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
         val googlePlacesClient = mock<PlacesClientProxy>()
         val placesClient = module.provideInlinePlacesClient(
@@ -269,7 +291,7 @@ class AddressElementViewModelModuleTest {
         args = args,
         navigator = mock<AddressElementNavigator>(),
         resultStateHolder = resultStateHolder,
-        eventReporter = mock(),
+        eventReporter = module.provideAddressElementEventReporter(mock()),
         placesClient = null,
         primaryButtonAction = module.providePrimaryButtonAction(
             args = args,
