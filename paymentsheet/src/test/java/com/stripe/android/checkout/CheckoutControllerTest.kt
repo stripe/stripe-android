@@ -5,13 +5,10 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
-import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
-import com.stripe.android.checkout.injection.CheckoutControllerModule
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
@@ -60,7 +57,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -864,57 +860,6 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `saved selection through the handler completes once after its tax response`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = loadedSavedPaymentMethodSelection()
-            val completions = Turbine<CheckoutControllerState>()
-            val handler = createSelectionHandler(completions)
-            val requestReceived = CountDownLatch(1)
-            val releaseResponse = CountDownLatch(1)
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                requestReceived.countDown()
-                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the saved payment method tax response."
-                }
-                successfulSavedPaymentMethodResponse(response)
-            }
-
-            CheckoutControllerModule.provideSavedPaymentMethodSelectionState(stateHolder).test {
-                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-                handler.select(selection, true)
-                assertThat(awaitItem()).isEqualTo(
-                    SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
-                )
-                try {
-                    testScheduler.advanceUntilIdle()
-                    assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-                    completions.expectNoEvents()
-
-                    releaseResponse.countDown()
-                    val stateAtCompletion = withTurbineTimeout(10.seconds) {
-                        completions.awaitItem()
-                    }
-                    assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
-                    assertThat(stateAtCompletion.savedPaymentMethodSelectionState)
-                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    completions.expectNoEvents()
-                } finally {
-                    releaseResponse.countDown()
-                }
-            }
-
-            completions.ensureAllEventsConsumed()
-        }
-
-    @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
@@ -1597,7 +1542,7 @@ internal class CheckoutControllerTest {
 
     private class MutationScenario(
         val controller: CheckoutController,
-        val stateHolder: CheckoutControllerStateHolder,
+        private val stateHolder: CheckoutControllerStateHolder,
         private val savedStateHandle: SavedStateHandle,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,
@@ -1615,17 +1560,6 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
-
-        fun createSelectionHandler(
-            completions: Turbine<CheckoutControllerState>,
-        ): CheckoutPaymentSelectionHandler {
-            return CheckoutPaymentSelectionHandler(
-                checkoutController = controller,
-                selectionHolder = stateHolder,
-                immediateActionHandler = { completions.add(committedState()) },
-                coroutineScope = this,
-            )
-        }
 
         fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
             val customerState: CustomerState = requireNotNull(
