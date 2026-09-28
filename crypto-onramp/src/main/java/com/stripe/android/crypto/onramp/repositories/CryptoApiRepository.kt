@@ -101,10 +101,6 @@ internal class CryptoApiRepository @Inject constructor(
         encodeDefaults = true
     }
 
-    private val kycSubmissionJson = Json {
-        explicitNulls = false
-    }
-
     /**
      * Grants the provided session merchant permissions.
      *
@@ -154,7 +150,7 @@ internal class CryptoApiRepository @Inject constructor(
                     stripeAccount = apiConfigProvider.get().stripeAccountId,
                     idempotencyKey = null,
                 ),
-                params = kycSubmissionJson.encodeToJsonElement(request).jsonObject.toMap(),
+                params = request.toParamMap(),
             ),
             responseSerializer = Unit.serializer(),
         )

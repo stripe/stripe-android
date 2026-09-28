@@ -53,10 +53,10 @@ class CryptoApiRepositoryAdditionalKycTest {
     }
 
     @Test
-    fun `optional document subtype and additional requirements are omitted`() = runScenario {
+    fun `document subtype is included and optional additional requirements are omitted`() = runScenario {
         val result = repository.fulfillAdditionalKycRequirement(
             requirements = mapOf(
-                "proof_of_address" to requirement(documents = listOf(document(null, "file_1")))
+                "proof_of_address" to requirement(documents = listOf(document("utility_provider", "file_1")))
             ),
             linkSessionKey = LINK_SESSION_KEY,
         )
@@ -68,7 +68,9 @@ class CryptoApiRepositoryAdditionalKycTest {
                 "requirements" to mapOf(
                     "proof_of_address" to mapOf(
                         "requested_by" to "swapped",
-                        "documents" to listOf(mapOf("file_ids" to listOf("file_1"))),
+                        "documents" to listOf(
+                            mapOf("document_subtype" to "utility_provider", "file_ids" to listOf("file_1"))
+                        ),
                     )
                 )
             )
@@ -76,19 +78,21 @@ class CryptoApiRepositoryAdditionalKycTest {
     }
 
     @Test
-    fun `questionnaire without documents stays associated with its requirement`() = runScenario {
+    fun `questionnaire-only submission omits documents from the request body`() = runScenario {
         val result = repository.fulfillAdditionalKycRequirement(
             requirements = mapOf("source_of_funds" to requirement(emptyList(), questionnaire())),
             linkSessionKey = LINK_SESSION_KEY,
         )
         val request = network.requests.awaitItem() as ApiRequest
-        val requirements = request.params?.get("requirements") as Map<*, *>
-        val sourceOfFunds = requirements["source_of_funds"] as Map<*, *>
 
         assertThat(result.getOrThrow()).isEqualTo(Unit)
-        assertThat(requirements.keys).containsExactly("source_of_funds")
-        assertThat(sourceOfFunds["documents"]).isEqualTo(emptyList<Any>())
-        assertThat(sourceOfFunds["additional_requirements"]).isNotNull()
+        assertThat(decodedBody(request).split('&')).containsExactly(
+            "requirements[source_of_funds][requested_by]=swapped",
+            "requirements[source_of_funds][additional_requirements][questionnaire][answers][0]" +
+                "[question_id]=purchase_purpose",
+            "requirements[source_of_funds][additional_requirements][questionnaire][answers][0]" +
+                "[value]=Personal investment",
+        )
     }
 
     @Test
@@ -165,12 +169,16 @@ class CryptoApiRepositoryAdditionalKycTest {
                 )
             )
         )
-        val body = ByteArrayOutputStream().also(request::writePostBody).toString(Charsets.UTF_8.name())
-        val decodedBody = URLDecoder.decode(body, Charsets.UTF_8.name())
+        val decodedBody = decodedBody(request)
         assertThat(decodedBody).contains("requirements[source_of_funds][documents][0][file_ids][]=file_payslip_1")
         assertThat(decodedBody).doesNotContain("consumer_session_client_secret")
         assertThat(decodedBody).doesNotContain("liquidity_provider")
         assertThat(decodedBody).doesNotContain("[document_type]")
+    }
+
+    private fun decodedBody(request: ApiRequest): String {
+        val body = ByteArrayOutputStream().also(request::writePostBody).toString(Charsets.UTF_8.name())
+        return URLDecoder.decode(body, Charsets.UTF_8.name())
     }
 
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
@@ -216,7 +224,7 @@ class CryptoApiRepositoryAdditionalKycTest {
             additionalRequirements: AdditionalKycCollectionSubmissionRequest? = null,
         ) = AdditionalKycRequirementSubmissionRequest("swapped", documents, additionalRequirements)
 
-        fun document(subtype: String?, vararg fileIds: String) =
+        fun document(subtype: String, vararg fileIds: String) =
             AdditionalKycDocumentSubmissionRequest(subtype, fileIds.toList())
 
         fun questionnaire() = AdditionalKycCollectionSubmissionRequest(

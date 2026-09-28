@@ -1,12 +1,29 @@
 package com.stripe.android.crypto.onramp.model
 
+import com.stripe.android.core.networking.toMap
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
-@Serializable
 internal data class FulfillAdditionalKycRequirementRequest(
     val requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
-)
+) {
+    fun toParamMap(): Map<String, *> {
+        return mapOf(
+            "requirements" to requirements.mapValues { (_, requirement) ->
+                val params = json.encodeToJsonElement(requirement).jsonObject.toMap()
+                // Omit empty document lists for questionnaire-only submissions.
+                if (requirement.documents.isEmpty()) params - "documents" else params
+            }
+        )
+    }
+
+    private companion object {
+        val json = Json { explicitNulls = false }
+    }
+}
 
 @Serializable
 internal data class AdditionalKycRequirementSubmissionRequest(
@@ -20,7 +37,7 @@ internal data class AdditionalKycRequirementSubmissionRequest(
 @Serializable
 internal data class AdditionalKycDocumentSubmissionRequest(
     @SerialName("document_subtype")
-    val documentSubtype: String?,
+    val documentSubtype: String,
     @SerialName("file_ids")
     val fileIds: List<String>,
 )

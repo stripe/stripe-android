@@ -13,7 +13,7 @@ internal data class AdditionalKycRequirementSubmission(
 )
 
 internal data class AdditionalKycDocumentSubmission(
-    val documentSubtype: String?,
+    val documentSubtype: String,
     val files: List<File>,
 )
 
