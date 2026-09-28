@@ -1117,6 +1117,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             isNfcScanningEnabled = false,
+            preferNfcOverCameraScan = false,
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
@@ -1276,6 +1277,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             isNfcScanningEnabled = false,
+            preferNfcOverCameraScan = false,
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
@@ -2080,6 +2082,15 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement prefers NFC over camera scan when server flag is enabled`() {
+        val metadata = createPaymentElementMetadata(
+            preferNfcOverCameraScanFlag = true,
+        )
+
+        assertThat(metadata.preferNfcOverCameraScan).isTrue()
+    }
+
+    @Test
     fun `createForPaymentElement disables NFC scanning when kill switch is enabled`() {
         disableNfcScanningFeatureFlagRule.setEnabled(true)
         val metadata = createPaymentElementMetadata(
@@ -2304,6 +2315,7 @@ internal class PaymentMethodMetadataTest {
     private fun createPaymentElementMetadata(
         attestOnIntentConfirmationFlag: Boolean? = null,
         nfcScanningFlag: Boolean? = null,
+        preferNfcOverCameraScanFlag: Boolean? = null,
         elementsSession: ElementsSession? = null,
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
@@ -2321,6 +2333,9 @@ internal class PaymentMethodMetadataTest {
                     }
                     nfcScanningFlag?.let {
                         put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED, it)
+                    }
+                    preferNfcOverCameraScanFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN, it)
                     }
                 }
             )

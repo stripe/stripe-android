@@ -30,6 +30,26 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun getNextActionType_whenMbWayAwaitsAuthorization() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            isLiveMode = false,
+            id = "pi_mb_way",
+            currency = "eur",
+            countryCode = "PT",
+            paymentMethodTypes = listOf(PaymentMethod.Type.MbWay.code),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.MbWayAwaitAuthorization,
+        )
+
+        assertThat(paymentIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.MbWayAwaitAuthorization)
+    }
+
+    @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
         val clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId

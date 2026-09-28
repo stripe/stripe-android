@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet.addresselement
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
@@ -123,6 +125,9 @@ internal class InputAddressViewModel @Inject constructor(
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
 
+    private val _saveError = MutableStateFlow<ResolvableString?>(null)
+    val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
+
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
@@ -163,6 +168,8 @@ internal class InputAddressViewModel @Inject constructor(
 
         viewModelScope.launch {
             addressFormController.uncompletedFormValues.collectLatest { formValues ->
+                _saveError.value = null
+
                 val currentBillingSameAsShippingState = _shippingSameAsBillingState.value
 
                 if (currentBillingSameAsShippingState is ShippingSameAsBillingState.Show) {
@@ -215,6 +222,7 @@ internal class InputAddressViewModel @Inject constructor(
         checkboxChecked: Boolean
     ) {
         if (!_formEnabled.value) return
+        _saveError.value = null
         if (completedFormValues == null) {
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
@@ -241,7 +249,10 @@ internal class InputAddressViewModel @Inject constructor(
                         result = result,
                     )
                 },
-                onFailure = { _formEnabled.value = true },
+                onFailure = { error ->
+                    _saveError.value = error.stripeErrorMessage()
+                    _formEnabled.value = true
+                },
             )
         }
     }

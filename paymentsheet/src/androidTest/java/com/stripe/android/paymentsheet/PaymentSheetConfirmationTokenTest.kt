@@ -169,19 +169,21 @@ internal class PaymentSheetConfirmationTokenTest(
                     },
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .also {
-                        if (customerType == CustomerType.ReturningCustomer) {
-                            it.customer(
-                                PaymentSheet.CustomerConfiguration(
-                                    "cus_foobar",
-                                    TestApiKeys.EPHEMERAL
+                configuration = testContext.apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .also {
+                            if (customerType == CustomerType.ReturningCustomer) {
+                                it.customer(
+                                    PaymentSheet.CustomerConfiguration(
+                                        "cus_foobar",
+                                        TestApiKeys.EPHEMERAL
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                    .build()
+                        .build()
+                )
             )
         }
     }

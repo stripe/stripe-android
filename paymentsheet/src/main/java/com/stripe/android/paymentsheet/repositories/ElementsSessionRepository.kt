@@ -44,16 +44,12 @@ internal interface ElementsSessionRepository {
 }
 
 internal class RealElementsSessionRepository @Inject constructor(
-    application: Application,
+    private val application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
-
-    private val fraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(application, workContext)
-
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
@@ -71,7 +67,11 @@ internal class RealElementsSessionRepository @Inject constructor(
         apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
-        fraudDetectionDataRepository.refresh()
+        DefaultFraudDetectionDataRepository(
+            context = application,
+            apiConfigurationProvider = { apiConfiguration },
+            workContext = workContext,
+        ).refresh()
 
         val params = initializationMode.toElementsSessionParams(
             customer = customer,

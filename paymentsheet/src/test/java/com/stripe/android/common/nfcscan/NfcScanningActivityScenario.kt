@@ -13,6 +13,7 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.common.nfcscan.ui.ERROR_BANNER_TEST_TAG
 import com.stripe.android.common.nfcscan.ui.NFC_CLOSE_BUTTON_TEST_TAG
 import com.stripe.android.common.nfcscan.ui.NFC_COIL_CONTACTLESS_ICON_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.testing.waitUntilWithIdle
 import org.robolectric.Shadows.shadowOf
@@ -41,9 +42,12 @@ internal class NfcScanningActivityScenario(
 
     fun waitForUi() {
         composeRule.waitUntilWithIdle {
-            composeRule.onAllNodesWithTag(NFC_CLOSE_BUTTON_TEST_TAG)
+            val closeButtonNodes = composeRule.onAllNodesWithTag(NFC_CLOSE_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
+            val developerOptionsNodes = composeRule.onAllNodesWithTag(NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+
+            closeButtonNodes.isNotEmpty() || developerOptionsNodes.isNotEmpty()
         }
     }
 
