@@ -37,7 +37,6 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
     }
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
-        // Undispatched so Pending is set within the tap when the checkout lock is free.
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             checkoutController.selectSavedPaymentMethod(selection).onSuccess {
                 onSelectionComplete()
