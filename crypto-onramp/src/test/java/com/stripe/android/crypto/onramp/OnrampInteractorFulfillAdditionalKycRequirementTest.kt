@@ -5,19 +5,21 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
 import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
-import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingLinkSessionKeyException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.UnexpectedException
+import com.stripe.android.crypto.onramp.model.AdditionalKycCollectionSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswerRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmission
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
@@ -26,7 +28,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -40,7 +41,6 @@ import java.io.File
 class OnrampInteractorFulfillAdditionalKycRequirementTest {
     @Test
     fun `documents are uploaded in order before submission`() = runScenario {
-        val response = submissionResponse()
         val expectedDocuments = documentRequests(fileIds = listOf("file_1", "file_2"))
         val expectedQuestionnaire = questionnaireRequest()
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
@@ -49,39 +49,77 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             .thenReturn(Result.success(StripeFile(id = "file_2")))
         whenever(
             cryptoApiRepository.fulfillAdditionalKycRequirement(
-                liquidityProvider = "swapped",
-                documents = expectedDocuments,
-                questionnaire = expectedQuestionnaire,
-                consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
+                requirements = requirementRequests(expectedDocuments, expectedQuestionnaire),
+                linkSessionKey = LINK_SESSION_KEY,
             )
-        ).thenReturn(Result.success(response))
+        ).thenReturn(Result.success(Unit))
 
         val result = interactor.fulfillAdditionalKycRequirement(
             documentSubmission(files = listOf(firstFile, secondFile))
         )
 
-        assertThat(result.getOrThrow()).isSameInstanceAs(response)
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
         inOrder(cryptoApiRepository) {
             verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY)
             verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY)
             verify(cryptoApiRepository).fulfillAdditionalKycRequirement(
-                liquidityProvider = "swapped",
-                documents = expectedDocuments,
-                questionnaire = expectedQuestionnaire,
-                consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
+                requirements = requirementRequests(expectedDocuments, expectedQuestionnaire),
+                linkSessionKey = LINK_SESSION_KEY,
             )
         }
     }
 
     @Test
-    fun `missing consumer secret fails before uploading`() = runScenario(
-        consumerSessionClientSecret = null,
+    fun `multiple requirements preserve their documents and questionnaire`() = runScenario {
+        val sourceOfFunds = documentSubmission(listOf(secondFile)).requirements.getValue("source_of_funds")
+        val submission = AdditionalKycSubmission(
+            requirements = mapOf(
+                "proof_of_address" to AdditionalKycRequirementSubmission(
+                    requestedBy = "swapped",
+                    documents = listOf(AdditionalKycDocumentSubmission("utility_provider", listOf(firstFile))),
+                    questionnaire = null,
+                ),
+                "source_of_funds" to sourceOfFunds,
+            )
+        )
+        val expectedRequirements = mapOf(
+            "proof_of_address" to AdditionalKycRequirementSubmissionRequest(
+                requestedBy = "swapped",
+                documents = listOf(AdditionalKycDocumentSubmissionRequest("utility_provider", listOf("file_poa"))),
+                additionalRequirements = null,
+            ),
+            "source_of_funds" to AdditionalKycRequirementSubmissionRequest(
+                requestedBy = "swapped",
+                documents = documentRequests(listOf("file_sof")),
+                additionalRequirements = AdditionalKycCollectionSubmissionRequest(questionnaireRequest()),
+            ),
+        )
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
+            .thenReturn(Result.success(StripeFile(id = "file_poa")))
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY))
+            .thenReturn(Result.success(StripeFile(id = "file_sof")))
+        whenever(cryptoApiRepository.fulfillAdditionalKycRequirement(expectedRequirements, LINK_SESSION_KEY))
+            .thenReturn(Result.success(Unit))
+
+        val result = interactor.fulfillAdditionalKycRequirement(submission)
+
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
+        inOrder(cryptoApiRepository) {
+            verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY)
+            verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY)
+            verify(cryptoApiRepository).fulfillAdditionalKycRequirement(expectedRequirements, LINK_SESSION_KEY)
+        }
+    }
+
+    @Test
+    fun `unverified Link account fails before uploading`() = runScenario(
+        linkSessionState = LinkController.SessionState.NeedsVerification,
     ) {
         val result = interactor.fulfillAdditionalKycRequirement(
             documentSubmission(files = listOf(firstFile))
         )
 
-        assertUnexpectedError<MissingConsumerSecretException>(result.exceptionOrNull())
+        assertUnexpectedError<LinkAccountNotVerifiedException>(result.exceptionOrNull())
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
         verifyFulfillmentWasNotRequested()
     }
@@ -129,10 +167,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             .thenReturn(Result.success(StripeFile(id = "file_1")))
         whenever(
             cryptoApiRepository.fulfillAdditionalKycRequirement(
-                liquidityProvider = "swapped",
-                documents = documents,
-                questionnaire = questionnaire,
-                consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
+                requirements = requirementRequests(documents, questionnaire),
+                linkSessionKey = LINK_SESSION_KEY,
             )
         ).thenReturn(Result.failure(submissionError))
 
@@ -171,37 +207,42 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     }
 
     @Test
-    fun `questionnaire submission does not require a Link session key`() = runScenario(
+    fun `questionnaire submission requires a Link session key`() = runScenario(
         linkSessionKey = null,
     ) {
-        val response = submissionResponse()
-        whenever(
-            cryptoApiRepository.fulfillAdditionalKycRequirement(
-                liquidityProvider = "swapped",
-                documents = emptyList(),
-                questionnaire = questionnaireRequest(),
-                consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
-            )
-        ).thenReturn(Result.success(response))
+        val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
 
-        val result = interactor.fulfillAdditionalKycRequirement(
-            documentSubmission(files = emptyList()).copy(documents = emptyList())
-        )
+        assertUnexpectedError<MissingLinkSessionKeyException>(result.exceptionOrNull())
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
+        verifyFulfillmentWasNotRequested()
+    }
 
-        assertThat(result.getOrThrow()).isSameInstanceAs(response)
+    @Test
+    fun `questionnaire submission uses Link session key without a consumer secret`() = runScenario(
+        consumerSessionClientSecret = null,
+    ) {
+        val requirements = requirementRequests(emptyList(), questionnaireRequest())
+        whenever(cryptoApiRepository.fulfillAdditionalKycRequirement(requirements, LINK_SESSION_KEY))
+            .thenReturn(Result.success(Unit))
+
+        val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
+
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
+        verify(cryptoApiRepository).fulfillAdditionalKycRequirement(requirements, LINK_SESSION_KEY)
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
     }
 
     private fun runScenario(
         consumerSessionClientSecret: String? = CONSUMER_SESSION_CLIENT_SECRET,
         linkSessionKey: String? = LINK_SESSION_KEY,
+        linkSessionState: LinkController.SessionState = LinkController.SessionState.LoggedIn,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val application = createApplication()
         val linkController = mock<LinkController>()
         val cryptoApiRepository = mock<CryptoApiRepository>()
         whenever(linkController.state(any())).thenReturn(
-            MutableStateFlow(linkState(consumerSessionClientSecret, linkSessionKey))
+            MutableStateFlow(linkState(consumerSessionClientSecret, linkSessionKey, linkSessionState))
         )
 
         Scenario(
@@ -228,10 +269,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     ) {
         suspend fun verifyFulfillmentWasNotRequested() {
             verify(cryptoApiRepository, never()).fulfillAdditionalKycRequirement(
-                liquidityProvider = any(),
-                documents = any(),
-                questionnaire = anyOrNull(),
-                consumerSessionClientSecret = any(),
+                requirements = any(),
+                linkSessionKey = any(),
             )
         }
     }
@@ -258,7 +297,6 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         fun documentRequests(fileIds: List<String>): List<AdditionalKycDocumentSubmissionRequest> {
             return listOf(
                 AdditionalKycDocumentSubmissionRequest(
-                    documentType = "source_of_funds",
                     documentSubtype = "bank_statement",
                     fileIds = fileIds,
                 )
@@ -276,45 +314,61 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             )
         }
 
+        fun requirementRequests(
+            documents: List<AdditionalKycDocumentSubmissionRequest>,
+            questionnaire: AdditionalKycQuestionnaireSubmissionRequest,
+        ): Map<String, AdditionalKycRequirementSubmissionRequest> {
+            return mapOf(
+                "source_of_funds" to AdditionalKycRequirementSubmissionRequest(
+                    requestedBy = "swapped",
+                    documents = documents,
+                    additionalRequirements = AdditionalKycCollectionSubmissionRequest(questionnaire),
+                )
+            )
+        }
+
         fun documentSubmission(files: List<File>): AdditionalKycSubmission {
             return AdditionalKycSubmission(
-                liquidityProvider = "swapped",
-                documents = listOf(
-                    AdditionalKycDocumentSubmission(
-                        documentType = "source_of_funds",
-                        documentSubtype = "bank_statement",
-                        files = files,
-                    )
-                ),
-                questionnaire = AdditionalKycQuestionnaireSubmission(
-                    answers = listOf(
-                        AdditionalKycQuestionnaireAnswer(
-                            questionId = "purchase_purpose",
-                            value = "Long-term savings",
-                        )
+                requirements = mapOf(
+                    "source_of_funds" to AdditionalKycRequirementSubmission(
+                        requestedBy = "swapped",
+                        documents = listOf(
+                            AdditionalKycDocumentSubmission(
+                                documentSubtype = "bank_statement",
+                                files = files,
+                            )
+                        ),
+                        questionnaire = AdditionalKycQuestionnaireSubmission(
+                            answers = listOf(
+                                AdditionalKycQuestionnaireAnswer(
+                                    questionId = "purchase_purpose",
+                                    value = "Long-term savings",
+                                )
+                            )
+                        ),
                     )
                 ),
             )
         }
 
-        fun submissionResponse(): AdditionalKycSubmissionResponse {
-            return AdditionalKycSubmissionResponse(
-                id = "kyc_submission_123",
-                objectType = "crypto_onramp_kyc_submission",
-                liquidityProvider = "swapped",
-                documents = null,
-                questionnaire = null,
-                status = "pending_verification",
-                created = 1_786_998_400,
+        fun questionnaireSubmission(): AdditionalKycSubmission {
+            return AdditionalKycSubmission(
+                requirements = documentSubmission(emptyList()).requirements.mapValues { (_, requirement) ->
+                    requirement.copy(documents = emptyList())
+                },
             )
         }
 
-        fun linkState(consumerSessionClientSecret: String?, linkSessionKey: String?): LinkController.State {
+        fun linkState(
+            consumerSessionClientSecret: String?,
+            linkSessionKey: String?,
+            linkSessionState: LinkController.SessionState,
+        ): LinkController.State {
             return LinkController.State(
                 internalLinkAccount = LinkController.LinkAccount(
                     email = "test@example.com",
                     redactedPhoneNumber = "***-***-1234",
-                    sessionState = LinkController.SessionState.LoggedIn,
+                    sessionState = linkSessionState,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     linkSessionKey = linkSessionKey,
                 ),

@@ -26,13 +26,14 @@ import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
+import com.stripe.android.crypto.onramp.model.AdditionalKycCollectionSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswerRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -472,36 +473,44 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun fulfillAdditionalKycRequirement(
         submission: AdditionalKycSubmission,
-    ): Result<AdditionalKycSubmissionResponse> {
+    ): Result<Unit> {
         val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
-        val linkAccount = storedLinkAccount?.takeIf { it.consumerSessionClientSecret != null }
+        val linkAccount = storedLinkAccount?.takeIf { !it.linkSessionKey.isNullOrBlank() }
             ?: linkController.state(application).value.internalLinkAccount
-        val secret = linkAccount?.consumerSessionClientSecret
-            ?: return fulfillAdditionalKycRequirementFailure(MissingConsumerSecretException())
+        val linkSessionKey = linkAccount?.linkSessionKey?.takeIf { it.isNotBlank() }
+            ?: return fulfillAdditionalKycRequirementFailure(MissingLinkSessionKeyException())
 
         if (linkAccount.sessionState != LinkController.SessionState.LoggedIn) {
             return fulfillAdditionalKycRequirementFailure(LinkAccountNotVerifiedException())
         }
 
-        val documents = uploadAdditionalKycDocuments(submission.documents, linkAccount.linkSessionKey)
-            .getOrElse { error -> return fulfillAdditionalKycRequirementFailure(error) }
+        val requirements = submission.requirements.mapValues { (_, requirement) ->
+            val documents = uploadAdditionalKycDocuments(requirement.documents, linkSessionKey)
+                .getOrElse { error -> return fulfillAdditionalKycRequirementFailure(error) }
 
-        val questionnaire = submission.questionnaire?.let { questionnaire ->
-            AdditionalKycQuestionnaireSubmissionRequest(
-                answers = questionnaire.answers.map { answer ->
-                    AdditionalKycQuestionnaireAnswerRequest(
-                        questionId = answer.questionId,
-                        value = answer.value,
+            val additionalRequirements = requirement.questionnaire?.let { questionnaire ->
+                AdditionalKycCollectionSubmissionRequest(
+                    questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
+                        answers = questionnaire.answers.map { answer ->
+                            AdditionalKycQuestionnaireAnswerRequest(
+                                questionId = answer.questionId,
+                                value = answer.value,
+                            )
+                        }
                     )
-                }
+                )
+            }
+
+            AdditionalKycRequirementSubmissionRequest(
+                requestedBy = requirement.requestedBy,
+                documents = documents,
+                additionalRequirements = additionalRequirements,
             )
         }
 
         return cryptoApiRepository.fulfillAdditionalKycRequirement(
-            liquidityProvider = submission.liquidityProvider,
-            documents = documents,
-            questionnaire = questionnaire,
-            consumerSessionClientSecret = secret,
+            requirements = requirements,
+            linkSessionKey = linkSessionKey,
         ).fold(
             onSuccess = { response -> Result.success(response) },
             onFailure = { error -> fulfillAdditionalKycRequirementFailure(error) },
@@ -510,15 +519,12 @@ internal class OnrampInteractor @Inject constructor(
 
     private suspend fun uploadAdditionalKycDocuments(
         documents: List<AdditionalKycDocumentSubmission>,
-        linkSessionKey: String?,
+        linkSessionKey: String,
     ): Result<List<AdditionalKycDocumentSubmissionRequest>> {
         val requests = mutableListOf<AdditionalKycDocumentSubmissionRequest>()
         for (document in documents) {
             val fileIds = mutableListOf<String>()
             for (file in document.files) {
-                if (linkSessionKey.isNullOrBlank()) {
-                    return Result.failure(MissingLinkSessionKeyException())
-                }
                 val uploadedFile = cryptoApiRepository.uploadAdditionalKycDocument(file, linkSessionKey)
                     .getOrElse { error -> return Result.failure(error) }
                 val fileId = uploadedFile.id
@@ -527,7 +533,6 @@ internal class OnrampInteractor @Inject constructor(
                 fileIds += fileId
             }
             requests += AdditionalKycDocumentSubmissionRequest(
-                documentType = document.documentType,
                 documentSubtype = document.documentSubtype,
                 fileIds = fileIds,
             )

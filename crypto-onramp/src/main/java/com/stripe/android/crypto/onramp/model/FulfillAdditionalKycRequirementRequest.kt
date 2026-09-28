@@ -5,21 +5,29 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class FulfillAdditionalKycRequirementRequest(
-    val credentials: CryptoCustomerRequestParams.Credentials,
-    @SerialName("liquidity_provider")
-    val liquidityProvider: String,
+    val requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
+)
+
+@Serializable
+internal data class AdditionalKycRequirementSubmissionRequest(
+    @SerialName("requested_by")
+    val requestedBy: String,
     val documents: List<AdditionalKycDocumentSubmissionRequest>,
-    val questionnaire: AdditionalKycQuestionnaireSubmissionRequest? = null,
+    @SerialName("additional_requirements")
+    val additionalRequirements: AdditionalKycCollectionSubmissionRequest?,
 )
 
 @Serializable
 internal data class AdditionalKycDocumentSubmissionRequest(
-    @SerialName("document_type")
-    val documentType: String,
     @SerialName("document_subtype")
-    val documentSubtype: String? = null,
+    val documentSubtype: String?,
     @SerialName("file_ids")
     val fileIds: List<String>,
+)
+
+@Serializable
+internal data class AdditionalKycCollectionSubmissionRequest(
+    val questionnaire: AdditionalKycQuestionnaireSubmissionRequest,
 )
 
 @Serializable

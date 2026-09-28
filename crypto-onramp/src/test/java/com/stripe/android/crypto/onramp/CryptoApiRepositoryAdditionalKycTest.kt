@@ -1,17 +1,19 @@
 package com.stripe.android.crypto.onramp
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.AdditionalKycCollectionSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswerRequest
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository.Companion.CRYPTO_ONRAMP_API_VERSION
 import com.stripe.android.link.LinkController
@@ -19,281 +21,208 @@ import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.net.URLDecoder
 
 @RunWith(RobolectricTestRunner::class)
 class CryptoApiRepositoryAdditionalKycTest {
     @Test
-    fun `document and questionnaire submission is sent and parsed`() = runScenario(
-        responseBody = documentSubmissionResponse,
-    ) {
+    fun `keyed requirements use Link authentication and accept an empty response`() = runScenario {
         val result = repository.fulfillAdditionalKycRequirement(
-            liquidityProvider = "swapped",
-            documents = listOf(
-                AdditionalKycDocumentSubmissionRequest(
-                    documentType = "source_of_funds",
-                    documentSubtype = "bank_statement",
-                    fileIds = listOf("file_1", "file_2"),
-                )
-            ),
-            questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                answers = listOf(
-                    AdditionalKycQuestionnaireAnswerRequest(
-                        questionId = "purchase_purpose",
-                        value = "Personal investment",
-                    )
-                )
-            ),
-            consumerSessionClientSecret = "secret_123",
-        )
-
-        assertDocumentAndQuestionnaireRequest(captureRequest())
-        assertDocumentAndQuestionnaireResponse(result.getOrThrow())
-    }
-
-    @Test
-    fun `fulfillment response missing required fields fails parsing`() = runScenario(
-        responseBody = missingIdSubmissionResponse,
-    ) {
-        val result = repository.fulfillAdditionalKycRequirement(
-            liquidityProvider = "swapped",
-            documents = emptyList(),
-            questionnaire = null,
-            consumerSessionClientSecret = "secret_123",
-        )
-
-        assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
-    fun `optional document subtype and questionnaire are omitted`() = runScenario(
-        responseBody = documentSubmissionWithoutOptionalFieldsResponse,
-    ) {
-        val result = repository.fulfillAdditionalKycRequirement(
-            liquidityProvider = "swapped",
-            documents = listOf(
-                AdditionalKycDocumentSubmissionRequest(
-                    documentType = "proof_of_address",
-                    documentSubtype = null,
-                    fileIds = listOf("file_1"),
-                )
-            ),
-            questionnaire = null,
-            consumerSessionClientSecret = "secret_123",
-        )
-
-        assertThat(captureRequest().params).isEqualTo(
-            mapOf(
-                "credentials" to mapOf("consumer_session_client_secret" to "secret_123"),
-                "liquidity_provider" to "swapped",
-                "documents" to listOf(
-                    mapOf(
-                        "document_type" to "proof_of_address",
-                        "file_ids" to listOf("file_1"),
-                    )
+            requirements = mapOf(
+                "proof_of_address" to requirement(
+                    documents = listOf(document("utility_provider", "file_poa")),
                 ),
+                "source_of_funds" to requirement(
+                    documents = listOf(
+                        document("payslip", "file_payslip_1", "file_payslip_2"),
+                        document("bank_statement", "file_bank_statement"),
+                    ),
+                    additionalRequirements = questionnaire(),
+                ),
+            ),
+            linkSessionKey = LINK_SESSION_KEY,
+        )
+        val request = network.requests.awaitItem() as ApiRequest
+
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
+        assertSubmissionRequest(request)
+    }
+
+    @Test
+    fun `optional document subtype and additional requirements are omitted`() = runScenario {
+        val result = repository.fulfillAdditionalKycRequirement(
+            requirements = mapOf(
+                "proof_of_address" to requirement(documents = listOf(document(null, "file_1")))
+            ),
+            linkSessionKey = LINK_SESSION_KEY,
+        )
+        val request = network.requests.awaitItem() as ApiRequest
+
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
+        assertThat(request.params).isEqualTo(
+            mapOf(
+                "requirements" to mapOf(
+                    "proof_of_address" to mapOf(
+                        "requested_by" to "swapped",
+                        "documents" to listOf(mapOf("file_ids" to listOf("file_1"))),
+                    )
+                )
             )
         )
-        assertThat(requireNotNull(result.getOrThrow().documents).single().documentSubtype).isNull()
     }
 
     @Test
-    fun `minimal submission response is parsed`() = runScenario(
-        responseBody = minimalSubmissionResponse,
-    ) {
+    fun `questionnaire without documents stays associated with its requirement`() = runScenario {
         val result = repository.fulfillAdditionalKycRequirement(
-            liquidityProvider = "swapped",
-            documents = emptyList(),
-            questionnaire = null,
-            consumerSessionClientSecret = "secret_123",
+            requirements = mapOf("source_of_funds" to requirement(emptyList(), questionnaire())),
+            linkSessionKey = LINK_SESSION_KEY,
+        )
+        val request = network.requests.awaitItem() as ApiRequest
+        val requirements = request.params?.get("requirements") as Map<*, *>
+        val sourceOfFunds = requirements["source_of_funds"] as Map<*, *>
+
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
+        assertThat(requirements.keys).containsExactly("source_of_funds")
+        assertThat(sourceOfFunds["documents"]).isEqualTo(emptyList<Any>())
+        assertThat(sourceOfFunds["additional_requirements"]).isNotNull()
+    }
+
+    @Test
+    fun `unknown success metadata is ignored`() = runScenario {
+        network.response = StripeResponse(200, """{"submitted_at":1723264800}""")
+
+        val result = repository.fulfillAdditionalKycRequirement(emptyMap(), LINK_SESSION_KEY)
+        network.requests.awaitItem()
+
+        assertThat(result.getOrThrow()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `fulfillment API error is propagated`() = runScenario {
+        network.response = StripeResponse(
+            400,
+            """{"error":{"message":"Invalid file","type":"invalid_request_error"}}""",
         )
 
-        val response = result.getOrThrow()
-        assertThat(response.id).isEqualTo("submission_123")
-        assertThat(response.objectType).isEqualTo("crypto_onramp_kyc_submission")
-        assertThat(response.status).isEqualTo("pending_verification")
-        assertThat(response.liquidityProvider).isNull()
-        assertThat(response.created).isNull()
+        val result = repository.fulfillAdditionalKycRequirement(emptyMap(), LINK_SESSION_KEY)
+        network.requests.awaitItem()
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
+        assertThat((result.exceptionOrNull() as APIException).statusCode).isEqualTo(400)
     }
 
     @Test
-    fun `submission response with only an ID is parsed`() = runScenario(
-        responseBody = """{"id":"submission_123"}""",
-    ) {
-        val response = repository.fulfillAdditionalKycRequirement(
-            liquidityProvider = "swapped",
-            documents = emptyList(),
-            questionnaire = null,
-            consumerSessionClientSecret = "secret_123",
-        ).getOrThrow()
+    fun `malformed fulfillment response fails parsing`() = runScenario {
+        network.response = StripeResponse(200, "not JSON")
 
-        assertThat(response.id).isEqualTo("submission_123")
-        assertThat(response.objectType).isNull()
-        assertThat(response.status).isNull()
-        assertThat(response.liquidityProvider).isNull()
-        assertThat(response.created).isNull()
-        assertThat(response.documents).isNull()
-        assertThat(response.questionnaire).isNull()
+        val result = repository.fulfillAdditionalKycRequirement(emptyMap(), LINK_SESSION_KEY)
+        network.requests.awaitItem()
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
     }
 
-    private fun assertDocumentAndQuestionnaireRequest(request: ApiRequest) {
+    private fun assertSubmissionRequest(request: ApiRequest) {
         assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
         assertThat(request.baseUrl).isEqualTo(
-            "https://api.stripe.com/v1/crypto/internal/fulfill_additional_kyc_requirement"
+            "https://api.stripe.com/v1/crypto/internal/fulfill_kyc_requirements"
         )
+        assertThat(request.headers["Authorization"]).isEqualTo("Bearer $LINK_SESSION_KEY")
+        assertThat(request.headers["Stripe-Account"]).isEqualTo("acct_123")
         assertThat(request.headers[HEADER_STRIPE_VERSION]).isEqualTo(CRYPTO_ONRAMP_API_VERSION)
         assertThat(request.params).isEqualTo(
             mapOf(
-                "credentials" to mapOf("consumer_session_client_secret" to "secret_123"),
-                "liquidity_provider" to "swapped",
-                "documents" to listOf(
-                    mapOf(
-                        "document_type" to "source_of_funds",
-                        "document_subtype" to "bank_statement",
-                        "file_ids" to listOf("file_1", "file_2"),
-                    )
-                ),
-                "questionnaire" to mapOf(
-                    "answers" to listOf(
-                        mapOf(
-                            "question_id" to "purchase_purpose",
-                            "value" to "Personal investment",
-                        )
-                    )
-                ),
+                "requirements" to mapOf(
+                    "proof_of_address" to mapOf(
+                        "requested_by" to "swapped",
+                        "documents" to listOf(
+                            mapOf("document_subtype" to "utility_provider", "file_ids" to listOf("file_poa"))
+                        ),
+                    ),
+                    "source_of_funds" to mapOf(
+                        "requested_by" to "swapped",
+                        "documents" to listOf(
+                            mapOf(
+                                "document_subtype" to "payslip",
+                                "file_ids" to listOf("file_payslip_1", "file_payslip_2"),
+                            ),
+                            mapOf(
+                                "document_subtype" to "bank_statement",
+                                "file_ids" to listOf("file_bank_statement"),
+                            ),
+                        ),
+                        "additional_requirements" to mapOf(
+                            "questionnaire" to mapOf(
+                                "answers" to listOf(
+                                    mapOf("question_id" to "purchase_purpose", "value" to "Personal investment")
+                                )
+                            )
+                        ),
+                    ),
+                )
             )
         )
+        val body = ByteArrayOutputStream().also(request::writePostBody).toString(Charsets.UTF_8.name())
+        val decodedBody = URLDecoder.decode(body, Charsets.UTF_8.name())
+        assertThat(decodedBody).contains("requirements[source_of_funds][documents][0][file_ids][]=file_payslip_1")
+        assertThat(decodedBody).doesNotContain("consumer_session_client_secret")
+        assertThat(decodedBody).doesNotContain("liquidity_provider")
+        assertThat(decodedBody).doesNotContain("[document_type]")
     }
 
-    private fun assertDocumentAndQuestionnaireResponse(response: AdditionalKycSubmissionResponse) {
-        assertThat(response.id).isEqualTo("cks_123")
-        assertThat(response.objectType).isEqualTo("crypto.kyc_submission")
-        assertThat(response.liquidityProvider).isEqualTo("swapped")
-        val document = requireNotNull(response.documents).single()
-        assertThat(document.documentType).isEqualTo("source_of_funds")
-        assertThat(document.documentSubtype).isEqualTo("bank_statement")
-        assertThat(document.fileIds).containsExactly("file_1", "file_2").inOrder()
-        assertThat(document.status).isEqualTo("pending_verification")
-        val questionnaire = requireNotNull(response.questionnaire)
-        assertThat(questionnaire.answers.single().questionId).isEqualTo("purchase_purpose")
-        assertThat(questionnaire.answers.single().value).isEqualTo("Personal investment")
-        assertThat(response.status).isEqualTo("pending_verification")
-        assertThat(response.created).isEqualTo(1_723_264_800L)
-    }
-
-    private fun runScenario(
-        responseBody: String,
-        block: suspend Scenario.() -> Unit,
-    ) = runTest {
-        val stripeNetworkClient = mock<StripeNetworkClient>()
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(
-            StripeResponse(
-                code = 200,
-                body = responseBody,
-                headers = emptyMap(),
-            )
-        )
-
-        val requestCaptor = argumentCaptor<ApiRequest>()
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+        val network = FakeKycNetworkClient()
         Scenario(
             repository = CryptoApiRepository(
-                stripeNetworkClient = stripeNetworkClient,
+                stripeNetworkClient = network,
                 stripeRepository = mock<StripeRepository>(),
                 linkController = mock<LinkController>(),
-                apiConfigProvider = {
-                    ApiConfiguration.State(
-                        publishableKey = PUBLISHABLE_KEY,
-                        stripeAccountId = null,
-                    )
-                },
+                apiConfigProvider = { ApiConfiguration.State("pk_test_123", "acct_123") },
                 apiVersion = CRYPTO_ONRAMP_API_VERSION,
-                sdkVersion = StripeSdkVersion.VERSION,
                 appInfo = null,
             ),
-            stripeNetworkClient = stripeNetworkClient,
-            requestCaptor = requestCaptor,
+            network = network,
         ).block()
+        network.requests.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val repository: CryptoApiRepository,
-        val stripeNetworkClient: StripeNetworkClient,
-        val requestCaptor: KArgumentCaptor<ApiRequest>,
-    ) {
-        suspend fun captureRequest(): ApiRequest {
-            verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
-            return requestCaptor.firstValue
+        val network: FakeKycNetworkClient,
+    )
+
+    internal class FakeKycNetworkClient : StripeNetworkClient {
+        val requests = Turbine<StripeRequest>()
+        var response = StripeResponse(200, "{}")
+
+        override suspend fun executeRequest(request: StripeRequest): StripeResponse<String> {
+            requests.add(request)
+            return response
+        }
+
+        override suspend fun executeRequestForFile(request: StripeRequest, outputFile: File): StripeResponse<File> {
+            error("Unexpected download")
         }
     }
 
     private companion object {
-        const val PUBLISHABLE_KEY = "pk_test_123"
+        const val LINK_SESSION_KEY = "lsk_test_123"
 
-        val documentSubmissionResponse =
-            """
-                {
-                  "id": "cks_123",
-                  "object": "crypto.kyc_submission",
-                  "liquidity_provider": "swapped",
-                  "status": "pending_verification",
-                  "documents": [
-                    {
-                      "document_type": "source_of_funds",
-                      "document_subtype": "bank_statement",
-                      "file_ids": ["file_1", "file_2"],
-                      "status": "pending_verification"
-                    }
-                  ],
-                  "questionnaire": {
-                    "answers": [
-                      {
-                        "question_id": "purchase_purpose",
-                        "value": "Personal investment"
-                      }
-                    ]
-                  },
-                  "created": 1723264800
-                }
-            """.trimIndent()
+        fun requirement(
+            documents: List<AdditionalKycDocumentSubmissionRequest>,
+            additionalRequirements: AdditionalKycCollectionSubmissionRequest? = null,
+        ) = AdditionalKycRequirementSubmissionRequest("swapped", documents, additionalRequirements)
 
-        val documentSubmissionWithoutOptionalFieldsResponse =
-            """
-                {
-                  "id": "cks_125",
-                  "object": "crypto.kyc_submission",
-                  "liquidity_provider": "swapped",
-                  "status": "pending_verification",
-                  "documents": [
-                    {
-                      "document_type": "proof_of_address",
-                      "file_ids": ["file_1"],
-                      "status": "pending_verification"
-                    }
-                  ],
-                  "created": 1723264802
-                }
-            """.trimIndent()
+        fun document(subtype: String?, vararg fileIds: String) =
+            AdditionalKycDocumentSubmissionRequest(subtype, fileIds.toList())
 
-        val missingIdSubmissionResponse =
-            """
-                {
-                  "object": "crypto_onramp_kyc_submission"
-                }
-            """.trimIndent()
-
-        val minimalSubmissionResponse =
-            """
-                {
-                  "id": "submission_123",
-                  "object": "crypto_onramp_kyc_submission",
-                  "status": "pending_verification"
-                }
-            """.trimIndent()
+        fun questionnaire() = AdditionalKycCollectionSubmissionRequest(
+            questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
+                answers = listOf(AdditionalKycQuestionnaireAnswerRequest("purchase_purpose", "Personal investment"))
+            )
+        )
     }
 }
