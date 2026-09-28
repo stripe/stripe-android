@@ -84,42 +84,55 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun state_reflects_saved_payment_method_selection_state_transitions() = runScenario(
+    fun state_marksDisplayedSavedPaymentMethodPendingWhenSelectionIsPending() = runScenario(
         initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
-        val expectedErrorMessage = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
-
         interactor.state.test {
-            awaitItem().run {
-                assertThat(isProcessing).isFalse()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-                assertThat(selectionError).isNull()
-            }
-
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(
-                expectedErrorMessage,
-            )
-
-            awaitItem().run {
-                assertThat(isProcessing).isFalse()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-                assertThat(selectionError).isEqualTo(expectedErrorMessage)
-            }
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-                assertThat(selectionError).isNull()
-            }
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
 
     @Test
-    fun state_marksProcessingWhenSelectionIsPendingWithoutDisplayedSavedPaymentMethod() = runScenario {
+    fun state_exposesSelectionErrorOnlyWhileSelectionFailed() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
+        val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
+
+        interactor.state.test {
+            assertThat(awaitItem().selectionError).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            assertThat(awaitItem().selectionError).isEqualTo(error)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            )
+
+            assertThat(awaitItem().selectionError).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            assertThat(awaitItem().selectionError).isEqualTo(error)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
+
+            assertThat(awaitItem().selectionError).isNull()
+        }
+    }
+
+    @Test
+    fun state_doesNotMarkMissingDisplayedSavedPaymentMethodPending() = runScenario {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
 
@@ -127,10 +140,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 "pm_missing",
             )
 
-            awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(displayedSavedPaymentMethod).isNull()
-            }
+            expectNoEvents()
+            assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
         }
     }
 
@@ -2023,8 +2034,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
         initialProcessing: Boolean = false,
         initialSelection: PaymentSelection? = null,
-        initialSavedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
-            SavedPaymentMethodSelectionState.Idle,
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
         formTypeForCode: (code: String) -> FormHelper.FormType = { FormHelper.FormType.Empty },
@@ -2046,7 +2055,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
         val savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
-            initialSavedPaymentMethodSelectionState
+            SavedPaymentMethodSelectionState.Idle
         )
         val temporarySelection: MutableStateFlow<PaymentMethodCode?> = MutableStateFlow(null)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)

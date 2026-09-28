@@ -10,4 +10,10 @@ internal sealed class SavedPaymentMethodSelectionState : Parcelable {
 
     @Parcelize
     data class Pending(val paymentMethodId: String) : SavedPaymentMethodSelectionState()
+
+    @Parcelize
+    data class Failed(val error: ResolvableString) : SavedPaymentMethodSelectionState()
 }
+
+internal val SavedPaymentMethodSelectionState.error: ResolvableString?
+    get() = (this as? SavedPaymentMethodSelectionState.Failed)?.error

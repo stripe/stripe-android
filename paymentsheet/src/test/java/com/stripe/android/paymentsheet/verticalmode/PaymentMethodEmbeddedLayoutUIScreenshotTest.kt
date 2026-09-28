@@ -331,11 +331,14 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayablePaymentMethods = paymentMethods,
                 isProcessing = false,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
-                displayedSavedPaymentMethod = savedPaymentMethod,
+                displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+                    displayName = savedPaymentMethod.displayName,
+                    paymentMethod = savedPaymentMethod.paymentMethod,
+                ),
+                selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = "Mandate".resolvableString,
-                selectionError = R.string.stripe_something_went_wrong.resolvableString,
                 linkBrand = LinkBrand.Link,
             ),
             viewActionRecorder = ViewActionRecorder(),

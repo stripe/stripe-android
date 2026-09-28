@@ -391,7 +391,6 @@ class CheckoutController @Inject internal constructor(
             additionalStateMutations = {
                 copy(
                     paymentSelection = null,
-                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                     temporarySelection = null,
                     previousNewSelections = Bundle(),
                 )
@@ -1071,7 +1070,6 @@ class CheckoutController @Inject internal constructor(
                 resultCallback = resultCallback,
                 rowSelectionBehavior = rowSelectionBehavior,
                 checkoutControllerSavedState = checkoutControllerSavedState,
-                errorReporterOverride = null,
             )
 
             return component.checkoutController

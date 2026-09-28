@@ -257,16 +257,7 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combineAsStateFlow(
             val flow6Value = values[5] as T6
             val flow7Value = values[6] as T7
             val flow8Value = values[7] as T8
-            transform(
-                flow1Value,
-                flow2Value,
-                flow3Value,
-                flow4Value,
-                flow5Value,
-                flow6Value,
-                flow7Value,
-                flow8Value,
-            )
+            transform(flow1Value, flow2Value, flow3Value, flow4Value, flow5Value, flow6Value, flow7Value, flow8Value)
         },
         produceValue = {
             transform(

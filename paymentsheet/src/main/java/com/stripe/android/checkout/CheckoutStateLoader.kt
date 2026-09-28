@@ -106,13 +106,6 @@ internal class CheckoutStateLoader @Inject constructor(
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
-        val savedPaymentMethodSelectionState = when {
-            carryForward.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending ->
-                SavedPaymentMethodSelectionState.Pending
-            carryForward.previousSelection == selection ->
-                carryForward.savedPaymentMethodSelectionState
-            else -> SavedPaymentMethodSelectionState.Idle
-        }
 
         stateHolder.state = CheckoutControllerState(
             configuration = configuration,
@@ -123,7 +116,7 @@ internal class CheckoutStateLoader @Inject constructor(
             expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
-            // A committed session update ends a pending saved selection.
+            // A committed session update supersedes a failed saved selection.
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
