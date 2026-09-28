@@ -325,7 +325,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     )
 
     class PaneNotFound(paneName: String) : FinancialConnectionsAnalyticsEvent(
-        name = "error.pane_not_found",
+        name = "error.unexpected",
         params = mapOf(
             "pane" to paneName,
             "error" to "PaneNotFound",
