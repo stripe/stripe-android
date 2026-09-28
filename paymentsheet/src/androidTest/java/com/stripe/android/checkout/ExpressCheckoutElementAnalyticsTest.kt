@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import okhttp3.mockwebserver.MockResponse
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -45,21 +46,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testSuccessfulGooglePayPayment() {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-            validateLoadingAnalyticsRequests()
-            validateLinkAccountLookupAnalyticsRequest()
-        }
-
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
-        ) {
+        runExpressCheckoutElementAnalyticsTest {
             val paymentMethod = PaymentMethodFactory.card()
 
             enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
@@ -89,21 +76,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-            validateLoadingAnalyticsRequests()
-            validateLinkAccountLookupAnalyticsRequest()
-        }
-
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
-        ) {
+        runExpressCheckoutElementAnalyticsTest {
             enqueueSuccessfulNativeLinkPayment()
 
             networkRule.checkoutInit()
@@ -132,21 +105,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testFailedGooglePayPayment() {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-            validateLoadingAnalyticsRequests()
-            validateLinkAccountLookupAnalyticsRequest()
-        }
+        runExpressCheckoutElementAnalyticsTest {
 
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
-        ) {
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
             networkRule.checkoutInit()
@@ -172,21 +132,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testFailedNativeLinkPayment() {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-            validateLoadingAnalyticsRequests()
-            validateLinkAccountLookupAnalyticsRequest()
-        }
-
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
-        ) {
+        runExpressCheckoutElementAnalyticsTest {
             enqueueFailedNativeLinkPayment(IllegalStateException("Link failed"))
 
             networkRule.checkoutInit()
@@ -218,22 +164,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testGooglePayUpdatesAutomaticTaxForRequiredShippingAddress() {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-            validateLoadingAnalyticsRequests()
-            validateLinkAccountLookupAnalyticsRequest()
-        }
-
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
+        runExpressCheckoutElementAnalyticsTest(
             initialCheckoutSessionResponseFactory =
                 ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
             val shippingInformation = createShippingInformation()
@@ -296,19 +229,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testGooglePaySendsRequiredBillingAddressForAutomaticTax() {
-        // Link is unavailable, but we still load twice: once for PE and once for ECE.
-        repeat(2) {
-            validateLoadingAnalyticsRequests()
-        }
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
+        runExpressCheckoutElementAnalyticsTest(
+            linkEnabled = false,
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()
 
@@ -348,19 +272,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
     @Test
     fun testGooglePayFailsWhenAutomaticTaxUpdateChangesTotal() {
-        // Link is unavailable, but we still load twice: once for PE and once for ECE.
-        repeat(2) {
-            validateLoadingAnalyticsRequests()
-        }
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
-
-        runExpressCheckoutElementTest(
-            networkRule = networkRule,
+        runExpressCheckoutElementAnalyticsTest(
+            linkEnabled = false,
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
-            resultCallback = {
-                // We expect the result callback to be called but test the result in other tests.
-            },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()
 
@@ -391,6 +306,36 @@ internal class ExpressCheckoutElementAnalyticsTest {
         }
 
         assertGooglePayCalledWithRequiredBillingAddress()
+    }
+
+    private fun runExpressCheckoutElementAnalyticsTest(
+        linkEnabled: Boolean = true,
+        initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
+        block: () -> Unit,
+    ) {
+        enqueueInitialRequests(linkEnabled = linkEnabled)
+
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory = initialCheckoutSessionResponseFactory,
+            resultCallback = {
+                // We expect the result callback to be called but test the result in other tests.
+            },
+        ) {
+            block()
+        }
+    }
+
+    private fun enqueueInitialRequests(linkEnabled: Boolean) {
+        // We load twice, once for PE and once for ECE. So all these requests are made twice.
+        repeat(2) {
+            if (linkEnabled) {
+                networkRule.enqueueLinkAccountLookup()
+                validateLinkAccountLookupAnalyticsRequest()
+            }
+            validateLoadingAnalyticsRequests()
+        }
+        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
     }
 
     private fun validateLoadingAnalyticsRequests() {
