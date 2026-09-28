@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -31,6 +32,17 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
+    init {
+        // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
+        state?.let { restoredState ->
+            if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+                state = restoredState.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                )
+            }
+        }
+    }
+
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
