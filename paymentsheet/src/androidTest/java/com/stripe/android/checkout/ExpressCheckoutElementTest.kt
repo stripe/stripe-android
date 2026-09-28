@@ -11,8 +11,6 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
-import com.stripe.android.model.Address
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -133,7 +131,6 @@ internal class ExpressCheckoutElementTest {
         }
     }
 
-    // TODO-codex: Add this test to ECEAnalyticsTest
     @Test
     fun testFailedGooglePayPayment() {
         repeat(2) {
@@ -162,7 +159,6 @@ internal class ExpressCheckoutElementTest {
         assertGooglePayCalled()
     }
 
-    // TODO-codex: Add this test to ECEAnalyticsTest
     @Test
     fun testFailedNativeLinkPayment() {
         repeat(2) {
@@ -260,7 +256,6 @@ internal class ExpressCheckoutElementTest {
         )
     }
 
-    // TODO-codex: Add this test to ECEAnalyticsTest
     @Test
     fun testGooglePayUpdatesAutomaticTaxForRequiredShippingAddress() {
         repeat(2) {
@@ -354,7 +349,6 @@ internal class ExpressCheckoutElementTest {
         assertGooglePayCalledWithRequiredBillingAddress()
     }
 
-    // TODO-codex: Add this test to ECEAnalyticsTest
     @Test
     fun testGooglePaySendsRequiredBillingAddressForAutomaticTax() {
         runExpressCheckoutElementTest(
@@ -391,7 +385,6 @@ internal class ExpressCheckoutElementTest {
         assertGooglePayCalledWithRequiredBillingAddress()
     }
 
-    // TODO-codex: Add this test to ECEAnalyticsTest. Make sure to include in the analytics event for the failed event that we are sending info about the specific error.
     @Test
     fun testGooglePayFailsWhenAutomaticTaxUpdateChangesTotal() {
         runExpressCheckoutElementTest(
@@ -454,19 +447,4 @@ internal class ExpressCheckoutElementTest {
 
         assertNativeLinkCalledWithRequiredBillingAddress()
     }
-}
-
-private fun createShippingInformation(): ShippingInformation {
-    return ShippingInformation(
-        address = Address(
-            city = "San Francisco",
-            country = "US",
-            line1 = "510 Townsend St",
-            line2 = "Floor 3",
-            postalCode = "94103",
-            state = "CA",
-        ),
-        name = "Jenny Rosen",
-        phone = null,
-    )
 }
