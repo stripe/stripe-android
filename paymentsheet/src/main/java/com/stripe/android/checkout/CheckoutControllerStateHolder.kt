@@ -121,6 +121,7 @@ private class CheckoutSessionProjection(
     // `.value` reads must not advance the last option seen by an active collector.
     @Volatile
     private var latestCollectedPaymentOption: PreviousPaymentOption? = null
+
     @Volatile
     private var latestValuePaymentOption: PreviousPaymentOption? = null
 
@@ -216,8 +217,9 @@ private fun PaymentOptionDisplayData?.hasSameVisibleContentAs(
 ): Boolean = when {
     this === other -> true
     this == null || other == null -> false
-    else -> label == other.label &&
-        billingDetails == other.billingDetails &&
-        paymentMethodType == other.paymentMethodType &&
-        mandateText == other.mandateText
+    else ->
+        label == other.label &&
+            billingDetails == other.billingDetails &&
+            paymentMethodType == other.paymentMethodType &&
+            mandateText == other.mandateText
 }
