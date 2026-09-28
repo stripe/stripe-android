@@ -6,12 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.UpdateCallbacks
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
+import java.util.UUID
 
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
@@ -123,7 +125,13 @@ internal fun internalRememberPaymentSheet(
     callbacks: PaymentElementCallbacks,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    val viewModel = viewModel<PaymentSheet.StoreViewModel>(factory = PaymentSheet.StoreViewModel.Factory)
+    val storeKey = rememberSaveable {
+        UUID.randomUUID().toString()
+    }
+    val viewModel = viewModel<PaymentSheet.StoreViewModel>(
+        key = storeKey,
+        factory = PaymentSheet.StoreViewModel.Factory,
+    )
 
     UpdateCallbacks(viewModel.paymentElementCallbackIdentifier, callbacks)
 
