@@ -36,7 +36,7 @@ class OnrampInteractorAdditionalKycRequirementsTest {
             customerResponse(
                 entries = listOf(
                     requirement(description = "proof_of_address", awaitingActionFrom = "user"),
-                    requirement(description = "proof_of_address", awaitingActionFrom = "partner"),
+                    requirement(description = "source_of_funds", awaitingActionFrom = "partner"),
                 )
             )
         )
@@ -44,7 +44,7 @@ class OnrampInteractorAdditionalKycRequirementsTest {
         val result = interactor.retrieveAdditionalKycRequirements().getOrThrow()
 
         assertThat(result.userActionRequired.single().description).isEqualTo("proof_of_address")
-        assertThat(result.pendingPartnerAction.single().description).isEqualTo("proof_of_address")
+        assertThat(result.pendingPartnerAction.single().description).isEqualTo("source_of_funds")
         assertThat(result.pendingStripeAction).isEmpty()
         assertThat(result.unrecognizedActionOwner).isEmpty()
         verify(cryptoApiRepository).retrieveAdditionalKycRequirements(
@@ -56,7 +56,7 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     fun `customer with no requirement entries returns empty classifications`() = runScenario(
         repositoryResult = Result.success(
             RetrieveAdditionalKycRequirementsResponse(
-                requirements = AdditionalKycRequirementsResponse(entries = emptyList())
+                requirements = AdditionalKycRequirementsResponse(entries = emptyMap())
             )
         ),
     ) {
@@ -185,19 +185,18 @@ class OnrampInteractorAdditionalKycRequirementsTest {
         }
 
         fun customerResponse(
-            entries: List<AdditionalKycRequirementResponse> = emptyList(),
+            entries: List<Pair<String, AdditionalKycRequirementResponse>> = emptyList(),
         ): RetrieveAdditionalKycRequirementsResponse {
             return RetrieveAdditionalKycRequirementsResponse(
-                requirements = AdditionalKycRequirementsResponse(entries),
+                requirements = AdditionalKycRequirementsResponse(entries.toMap()),
             )
         }
 
         fun requirement(
             description: String,
             awaitingActionFrom: String,
-        ): AdditionalKycRequirementResponse {
-            return AdditionalKycRequirementResponse(
-                description = description,
+        ): Pair<String, AdditionalKycRequirementResponse> {
+            return description to AdditionalKycRequirementResponse(
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
                 errors = emptyList(),
