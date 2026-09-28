@@ -70,6 +70,7 @@ class CheckoutPlaygroundScenariosTest {
             .filterIsInstance<CheckoutPlaygroundScenario.Leaf>()
             .single { it.key == "save_remove" }
 
+        settings.reset()
         settings.applyPreset(saveAndRemove.preset)
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isNull()
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
