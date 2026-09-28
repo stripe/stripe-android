@@ -68,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">确认您的信息</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">社会保障号码 (SSN) 最后 4 位</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">条款和条件</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">服务条款</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">登录或注册</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -100,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">退出 Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">退出 %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">请在 %s 内通过 MB WAY 应用确认支付，以完成购买。</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出错了。检查您的连接并重试。</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">出于安全考虑，必须关闭开发者选项，才能使用“轻触添加”。</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">打开设置</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">关闭开发者选项</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">银行卡已过期。请尝试使用其他银行卡。</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">拍卡</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">卡片被拒绝。请尝试使用其他卡片。</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -275,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">银行卡品牌未更新，请重试。</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">请在 %s 内通过您的银行或支付应用确认付款，以完成购买。</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">使用 Pix 完成付款即可完成购买。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">设置为默认支付方式</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

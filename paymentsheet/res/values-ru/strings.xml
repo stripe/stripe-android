@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Выйти из Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Выйти из %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Чтобы завершить покупку, подтвердите оплату в приложении MB WAY в течение %s.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Произошла ошибка. Проверьте подключение и попробуйте еще раз.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">В целях безопасности отключите параметры разработчика, чтобы использовать добавление касанием.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Открыть настройки</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Отключить параметры разработчика</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Срок действия карты истек. Попробуйте использовать другую карту.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Приложите карту</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Карта отклонена. Попробуйте использовать другую карту.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Бренд карты не был обновлен. Попробуйте еще раз.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Чтобы завершить оформление покупки, подтвердите платеж в банковском или платежном приложении в течение %s.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Оплатите покупку с помощью Pix, чтобы завершить оформление.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Назначить способом оплаты по умолчанию</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

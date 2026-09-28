@@ -279,6 +279,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Značka karty nebyla aktualizována. Zkuste to prosím znovu.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %s.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Dokončete platbu pomocí Pix, abyste nákup dokončili.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastavit jako výchozí způsob platby</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
