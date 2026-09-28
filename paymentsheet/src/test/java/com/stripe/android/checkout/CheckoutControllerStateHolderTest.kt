@@ -9,6 +9,7 @@ import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -82,6 +83,150 @@ internal class CheckoutControllerStateHolderTest {
             )
 
             assertThat(stateHolder.session.value).isNotNull()
+        }
+    }
+
+    @Test
+    fun `session does not emit when temporary selection changes`() = testScenario(
+        paymentOptionFactory = freshPaymentOptionFactory(),
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        stateHolder.session.test {
+            val initialPaymentOption = awaitItem()?.paymentOption
+            assertThat(initialPaymentOption?.label).isEqualTo("Google Pay")
+
+            stateHolder.setTemporarySelection("card")
+
+            assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(initialPaymentOption)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `session value reuses the payment option without a collector`() = testScenario(
+        paymentOptionFactory = freshPaymentOptionFactory(),
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        val initialPaymentOption = stateHolder.session.value?.paymentOption
+
+        assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(initialPaymentOption)
+
+        stateHolder.session.test {
+            assertThat(awaitItem()?.paymentOption).isSameInstanceAs(initialPaymentOption)
+        }
+    }
+
+    @Test
+    fun `clearing session state does not reuse the previous payment option`() = testScenario(
+        paymentOptionFactory = freshPaymentOptionFactory(),
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        val originalPaymentOption = stateHolder.session.value?.paymentOption
+
+        stateHolder.state = null
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        val newPaymentOption = stateHolder.session.value?.paymentOption
+        assertThat(newPaymentOption).isNotSameInstanceAs(originalPaymentOption)
+    }
+
+    @Test
+    fun `session does not emit when metadata changes without changing the payment option`() = testScenario(
+        paymentOptionFactory = freshPaymentOptionFactory(),
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        stateHolder.session.test {
+            assertThat(awaitItem()?.paymentOption?.label).isEqualTo("Google Pay")
+
+            val currentState = requireNotNull(stateHolder.state)
+            stateHolder.state = currentState.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    paymentMethodOrder = listOf("card"),
+                ),
+            )
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `session emits when payment option label changes for the same selection`() = run {
+        var label = "Google Pay"
+        val paymentOptionFactory = CheckoutPaymentOptionDisplayDataFactory { selection, _ ->
+            selection?.let { selected ->
+                PaymentOptionDisplayData(
+                    imageLoader = { error("Not expected to load an image for $selected") },
+                    label = label,
+                    billingDetails = null,
+                    paymentMethodType = "google_pay",
+                    mandateText = null,
+                )
+            }
+        }
+
+        testScenario(paymentOptionFactory = paymentOptionFactory) {
+            stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+            stateHolder.session.test {
+                assertThat(awaitItem()?.paymentOption?.label).isEqualTo("Google Pay")
+
+                label = "Updated Google Pay"
+                stateHolder.setTemporarySelection("card")
+
+                assertThat(awaitItem()?.paymentOption?.label).isEqualTo("Updated Google Pay")
+            }
+        }
+    }
+
+    @Test
+    fun `session emits the new payment option when selection changes`() = testScenario(
+        paymentOptionFactory = freshPaymentOptionFactory(),
+    ) {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+        stateHolder.session.test {
+            assertThat(awaitItem()?.paymentOption?.label).isEqualTo("Google Pay")
+
+            stateHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+
+            val updatedSession = awaitItem()
+            assertThat(updatedSession?.paymentOption?.label).isEqualTo("Cash App")
+            assertThat(updatedSession?.paymentOption?.paymentMethodType).isEqualTo("cashapp")
+        }
+    }
+
+    @Test
+    fun `session emits when card brand changes even though its label stays the same`() = testScenario(
+        paymentOptionFactory = CheckoutPaymentOptionDisplayDataFactory { selection, _ ->
+            (selection as? PaymentSelection.New.Card)?.let { card ->
+                PaymentOptionDisplayData(
+                    imageLoader = { error("Not expected to load an image for ${card.brand}") },
+                    label = "···· ${card.last4}",
+                    billingDetails = null,
+                    paymentMethodType = "card",
+                    mandateText = null,
+                )
+            }
+        },
+    ) {
+        val visaSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION.copy(brand = CardBrand.Visa)
+        val amexSelection = visaSelection.copy(brand = CardBrand.AmericanExpress)
+        stateHolder.state = committedState(paymentSelection = visaSelection)
+
+        stateHolder.session.test {
+            val initialSession = awaitItem()
+            val initialLabel = initialSession?.paymentOption?.label
+            assertThat(initialLabel).isEqualTo("···· ${visaSelection.last4}")
+
+            stateHolder.setSelection(amexSelection)
+
+            val updatedSession = awaitItem()
+            assertThat(updatedSession?.paymentOption?.label).isEqualTo(initialLabel)
+            assertThat(updatedSession?.paymentOption)
+                .isNotSameInstanceAs(initialSession?.paymentOption)
         }
     }
 
@@ -227,6 +372,19 @@ internal class CheckoutControllerStateHolderTest {
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,
     )
+
+    private fun freshPaymentOptionFactory() = CheckoutPaymentOptionDisplayDataFactory { selection, _ ->
+        selection?.let { selected ->
+            val isGooglePay = selected == PaymentSelection.GooglePay
+            PaymentOptionDisplayData(
+                imageLoader = { error("Not expected to load an image for $selected") },
+                label = if (isGooglePay) "Google Pay" else "Cash App",
+                billingDetails = null,
+                paymentMethodType = if (isGooglePay) "google_pay" else "cashapp",
+                mandateText = null,
+            )
+        }
+    }
 
     private fun testScenario(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
