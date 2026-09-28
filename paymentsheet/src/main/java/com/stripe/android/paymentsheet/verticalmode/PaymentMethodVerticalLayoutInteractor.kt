@@ -64,7 +64,6 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val isProcessing: Boolean,
         val selection: Selection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
-        val savedPaymentMethodSelectionError: ResolvableString?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
         val linkBrand: LinkBrand,
@@ -233,22 +232,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
-    // Derives the pending row and the error from one emission so they never disagree mid-update.
-    private val savedPaymentMethodSelection = combineAsStateFlow(
+    private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
         savedPaymentMethodSelectionState,
     ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
-        val displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
+        getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending,
+            selectionError = selectionState.error,
         )
-        displayedSavedPaymentMethod to selectionState.error
     }
-
-    private val displayedSavedPaymentMethod = savedPaymentMethodSelection.mapAsStateFlow { it.first }
 
     private val availableSavedPaymentMethodAction = combineAsStateFlow(
         paymentMethods,
@@ -296,13 +292,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayablePaymentMethods,
         processing,
         verticalModeScreenSelection,
-        savedPaymentMethodSelection,
+        displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
         linkAccount,
-    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, savedPaymentMethodSelection, action,
+    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
         temporarySelectionCode, linkAccount ->
-        val (displayedSavedPaymentMethod, savedPaymentMethodSelectionError) = savedPaymentMethodSelection
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -322,7 +317,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             isProcessing = isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
-            savedPaymentMethodSelectionError = savedPaymentMethodSelectionError,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
@@ -487,6 +481,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
         isSelectionPending: Boolean,
+        selectionError: ResolvableString?,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -496,6 +491,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             defaultPaymentMethodId = null,
             isSelectionPending = isSelectionPending,
+            selectionError = selectionError,
         )
     }
 

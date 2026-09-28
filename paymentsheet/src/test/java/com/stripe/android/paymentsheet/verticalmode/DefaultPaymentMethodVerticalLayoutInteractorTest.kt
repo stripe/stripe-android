@@ -109,25 +109,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
-            assertThat(awaitItem().savedPaymentMethodSelectionError).isNull()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().savedPaymentMethodSelectionError).isEqualTo(error)
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(awaitItem().savedPaymentMethodSelectionError).isNull()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().savedPaymentMethodSelectionError).isEqualTo(error)
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(awaitItem().savedPaymentMethodSelectionError).isNull()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
         }
     }
 

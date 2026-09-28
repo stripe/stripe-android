@@ -36,7 +36,6 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 isProcessing = false,
                 selection = selection,
                 displayedSavedPaymentMethod = null,
-                savedPaymentMethodSelectionError = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = mandate,
