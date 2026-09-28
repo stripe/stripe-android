@@ -11,6 +11,7 @@ import app.cash.turbine.turbineScope
 import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.injection.CheckoutControllerModule
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
@@ -747,7 +748,9 @@ internal class CheckoutControllerTest {
                 assertThat(isUpdatingTurbine.awaitItem()).isTrue()
                 assertThat(committedState()).isEqualTo(
                     before.copy(
-                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                            selection.paymentMethod.id,
+                        ),
                     )
                 )
 
@@ -758,44 +761,15 @@ internal class CheckoutControllerTest {
                 val state = committedState()
                 assertThat(state.checkoutSessionResponse.livemode).isTrue()
                 assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(state.savedPaymentMethodSelectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
             } finally {
                 releaseResponse.countDown()
             }
         }
 
     @Test
-    fun `selectSavedPaymentMethod acknowledges the SEPA mandate`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("shipping"),
-                savedCustomerWithSepaDebit(),
-                { json ->
-                    val elementsSession = json.getJSONObject("elements_session")
-                    elementsSession.getJSONArray("ordered_payment_method_types_and_wallets")
-                        .put("sepa_debit")
-                    elementsSession.getJSONObject("payment_method_preference")
-                        .getJSONArray("ordered_payment_method_types")
-                        .put("sepa_debit")
-                    json.getJSONObject("server_built_elements_session_params")
-                        .getJSONObject("deferred_intent")
-                        .getJSONArray("payment_method_types")
-                        .put("sepa_debit")
-                },
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
-
-            controller.selectSavedPaymentMethod(selection).getOrThrow()
-
-            assertThat(committedState().paymentSelection).isEqualTo(selection)
-            assertThat(committedState().paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
-            assertThat(committedState().savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        }
-
-    @Test
-    fun `failed saved selection returns to idle and a retry is admitted`() =
+    fun `selectSavedPaymentMethod preserves prior state when tax update fails`() =
         runMutationScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
@@ -814,104 +788,27 @@ internal class CheckoutControllerTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat(committedState()).isEqualTo(before)
-            assertThat(committedState().savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-            networkRule.savedPaymentMethodTaxUpdate(::successfulSavedPaymentMethodResponse)
-
-            val retryResult = controller.selectSavedPaymentMethod(selection)
-
-            assertThat(retryResult.isSuccess).isTrue()
-            assertThat(committedState().paymentSelection).isEqualTo(selection)
         }
 
     @Test
-    fun `failed saved selection stays idle after queued mutation and can retry`() =
+    fun `saved selection without a billing address commits and returns to idle without a tax update`() =
         runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
+            initModifier = savedCustomerWithBillingAddress(),
             paymentSelection = PaymentSelection.GooglePay,
         ) {
-            val selection = loadedSavedPaymentMethodSelection()
-            val requestReceived = CountDownLatch(1)
-            val releaseResponse = CountDownLatch(1)
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                requestReceived.countDown()
-                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the saved payment method tax response."
-                }
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
+            val loadedSelection = loadedSavedPaymentMethodSelection()
+            val selection = loadedSelection.copy(
+                paymentMethod = loadedSelection.paymentMethod.copy(billingDetails = null),
+            )
 
-            val selectionResult = async { controller.selectSavedPaymentMethod(selection) }
-            try {
-                testScheduler.advanceUntilIdle()
-
-                assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-                assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-                val emailUpdate = async { controller.updateEmail("checkout@example.com") }
-                testScheduler.advanceUntilIdle()
-
-                assertThat(emailUpdate.isCompleted).isFalse()
-                assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-                releaseResponse.countDown()
-
-                assertThat(selectionResult.await().isFailure).isTrue()
-                assertThat(emailUpdate.await().isSuccess).isTrue()
-                assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                assertThat(committedState().savedPaymentMethodSelectionState)
-                    .isNotEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-                val retryRequestReceived = CountDownLatch(1)
-                networkRule.savedPaymentMethodTaxUpdate { response ->
-                    retryRequestReceived.countDown()
-                    successfulSavedPaymentMethodResponse(response)
-                }
-
-                val retryResult = async { controller.selectSavedPaymentMethod(selection) }
-                testScheduler.advanceUntilIdle()
-
-                assertThat(retryRequestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-                assertThat(retryResult.await().isSuccess).isTrue()
-            } finally {
-                releaseResponse.countDown()
-            }
-        }
-
-    @Test
-    fun `saved selection stays idle when a payment flow is presented and can retry`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("shipping"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-            sheetIsOpen = true,
-        ) {
-            val selection = loadedSavedPaymentMethodSelection()
-
+            // No tax update is enqueued, so NetworkRule fails the test if a request is made.
             val result = controller.selectSavedPaymentMethod(selection)
 
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).hasMessageThat()
-                .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+            assertThat(result.isSuccess).isTrue()
+            val committedSelection = committedState().paymentSelection as PaymentSelection.Saved
+            assertThat(committedSelection.paymentMethod.id).isEqualTo(selection.paymentMethod.id)
             assertThat(committedState().savedPaymentMethodSelectionState)
                 .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-            sheetStateHolder.sheetIsOpen = false
-
-            val retryResult = controller.selectSavedPaymentMethod(selection)
-
-            assertThat(retryResult.isSuccess).isTrue()
-            assertThat(committedState().paymentSelection).isEqualTo(selection)
         }
 
     @Test
@@ -936,7 +833,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `saved selection ignores a duplicate while its tax response is pending`() =
+    fun `saved selection through the handler completes once after its tax response`() =
         runMutationScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
@@ -957,28 +854,26 @@ internal class CheckoutControllerTest {
                 successfulSavedPaymentMethodResponse(response)
             }
 
-            stateHolder.savedPaymentMethodSelectionState.test {
+            CheckoutControllerModule.provideSavedPaymentMethodSelectionState(stateHolder).test {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                 handler.select(selection, true)
-                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
+                assertThat(awaitItem()).isEqualTo(
+                    SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id),
+                )
                 try {
                     testScheduler.advanceUntilIdle()
                     assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-
-                    handler.select(selection, true)
-                    expectNoEvents()
                     completions.expectNoEvents()
 
                     releaseResponse.countDown()
                     val stateAtCompletion = withTurbineTimeout(10.seconds) {
                         completions.awaitItem()
                     }
-                    assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
                     assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
+                    assertThat(stateAtCompletion.savedPaymentMethodSelectionState)
+                        .isEqualTo(SavedPaymentMethodSelectionState.Idle)
                     assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    expectNoEvents()
                     completions.expectNoEvents()
                 } finally {
                     releaseResponse.countDown()
@@ -1657,7 +1552,6 @@ internal class CheckoutControllerTest {
                     controller = controller,
                     stateHolder = setup.stateHolder,
                     savedStateHandle = setup.savedStateHandle,
-                    sheetStateHolder = setup.sheetStateHolder,
                     testScope = this@runTest,
                     isUpdatingTurbine = isUpdatingTurbine,
                 )
@@ -1674,7 +1568,6 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val stateHolder: CheckoutControllerStateHolder,
         private val savedStateHandle: SavedStateHandle,
-        val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {

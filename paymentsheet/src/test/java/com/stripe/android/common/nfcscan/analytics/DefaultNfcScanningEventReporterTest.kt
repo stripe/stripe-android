@@ -26,6 +26,14 @@ internal class DefaultNfcScanningEventReporterTest {
     }
 
     @Test
+    fun `onNfcScanBlocked fires event`() = runScenario {
+        reporter.onNfcScanBlocked()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_blocked")
+    }
+
+    @Test
     fun `onNfcScanSucceeded ends duration and fires event with duration and number of attempts`() = runScenario {
         durationProvider.start(DurationProvider.Key.NfcScan)
 
@@ -55,6 +63,9 @@ internal class DefaultNfcScanningEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_started")
+        assertThat(loggedParams).containsEntry("manufacturer", "Google")
+        assertThat(loggedParams).containsEntry("model", "Pixel 10")
+        assertThat(loggedParams).containsEntry("sdk_version", 36)
     }
 
     @Test
@@ -70,6 +81,9 @@ internal class DefaultNfcScanningEventReporterTest {
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_succeeded")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
+        assertThat(loggedParams).containsEntry("manufacturer", "Google")
+        assertThat(loggedParams).containsEntry("model", "Pixel 10")
+        assertThat(loggedParams).containsEntry("sdk_version", 36)
     }
 
     @Test
@@ -90,6 +104,9 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_failed")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("error_code", "expiredCard")
+        assertThat(loggedParams).containsEntry("manufacturer", "Google")
+        assertThat(loggedParams).containsEntry("model", "Pixel 10")
+        assertThat(loggedParams).containsEntry("sdk_version", 36)
     }
 
     @Test
@@ -156,6 +173,9 @@ internal class DefaultNfcScanningEventReporterTest {
                 pluginTypeProvider = { null },
             ),
             eventPrefix = "mc_",
+            deviceManufacturer = "Google",
+            deviceModel = "Pixel 10",
+            sdkVersion = 36,
         )
 
         block(

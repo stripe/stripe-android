@@ -1496,6 +1496,24 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("displayed_successfully", true)
     }
 
+    @Test
+    fun `onPaymentMethodMessagePromotionsFetchBegin uses provided publishable key`() = runScenario {
+        val publishableKey = "pk_test_payment_method_messaging"
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.PaymentMethodMessaging,
+                reset = true,
+            )
+        )
+
+        eventReporter.onPaymentMethodMessagePromotionsFetchBegin(publishableKey)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "payment_method_messaging_fetch_begin")
+        assertThat(request.params).containsEntry("publishable_key", publishableKey)
+    }
+
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
         block: suspend Scenario.() -> Unit

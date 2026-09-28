@@ -4,8 +4,6 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,8 +14,6 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
 ) : EmbeddedSelectionHolder {
     override val selection: StateFlow<PaymentSelection?> =
         savedStateHandle.getStateFlow(EMBEDDED_SELECTION_KEY, null)
-    override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
-        stateFlowOf(SavedPaymentMethodSelectionState.Idle)
     override val temporarySelection: StateFlow<String?> =
         savedStateHandle.getStateFlow(EMBEDDED_TEMPORARY_SELECTION_KEY, null)
     override val previousNewSelections: Bundle = savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY]
