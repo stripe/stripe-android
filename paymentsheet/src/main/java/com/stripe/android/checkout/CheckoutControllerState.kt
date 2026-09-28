@@ -53,7 +53,8 @@ internal data class CheckoutControllerState(
 }
 
 /**
- * Acknowledges the passed selection's SEPA mandate and stashes new selections.
+ * Acknowledges the passed selection's SEPA mandate, stashes new selections, and returns the saved
+ * payment method selection state to [SavedPaymentMethodSelectionState.Idle] when the selection changes.
  */
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutControllerState.commitSelection(
@@ -65,6 +66,12 @@ internal fun CheckoutControllerState.commitSelection(
     }
     return copy(
         paymentSelection = selection,
+        // Re-applying the current selection (e.g. rebuilt embedded content) keeps a failure.
+        savedPaymentMethodSelectionState = if (selection == paymentSelection) {
+            savedPaymentMethodSelectionState
+        } else {
+            SavedPaymentMethodSelectionState.Idle
+        },
         previousNewSelections = updatedPreviousNewSelections,
     )
 }

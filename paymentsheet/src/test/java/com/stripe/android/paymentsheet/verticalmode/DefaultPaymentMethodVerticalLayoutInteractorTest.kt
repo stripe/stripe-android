@@ -103,6 +103,35 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun state_exposesSelectionErrorOnlyWhileSelectionFailed() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
+        val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
+
+        interactor.state.test {
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isEqualTo(error)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            )
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isEqualTo(error)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
+        }
+    }
+
+    @Test
     fun state_doesNotMarkMissingDisplayedSavedPaymentMethodPending() = runScenario {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()

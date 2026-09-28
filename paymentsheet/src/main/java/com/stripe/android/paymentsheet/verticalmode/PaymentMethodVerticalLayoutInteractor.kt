@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMet
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.state.error
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -241,6 +242,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending,
+            selectionError = selectionState.error,
         )
     }
 
@@ -479,6 +481,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
         isSelectionPending: Boolean,
+        selectionError: ResolvableString?,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -488,6 +491,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             defaultPaymentMethodId = null,
             isSelectionPending = isSelectionPending,
+            selectionError = selectionError,
         )
     }
 

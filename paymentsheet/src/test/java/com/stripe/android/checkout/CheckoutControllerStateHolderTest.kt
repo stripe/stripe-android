@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -103,6 +105,53 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `setSelection with the current selection keeps a saved selection failure`() = testScenario {
+        val failure = SavedPaymentMethodSelectionState.Failed(
+            IllegalStateException("Selection failed").stripeErrorMessage(),
+        )
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = failure,
+        )
+
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState).isEqualTo(failure)
+    }
+
+    @Test
+    fun `setSelection with a different selection resets a saved selection failure to idle`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                IllegalStateException("Selection failed").stripeErrorMessage(),
+            ),
+        )
+
+        stateHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `failed selection error survives saved state restoration`() = runTest {
+        val handle = SavedStateHandle()
+        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
+        val error = APIConnectionException()
+        holder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
+        )
+
+        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
+
+        assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(restored.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
     }
 
     @Test

@@ -13,6 +13,7 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -30,6 +31,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -796,7 +798,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `selectSavedPaymentMethod preserves prior state when tax update fails`() =
+    fun `selectSavedPaymentMethod preserves prior state and records failure when tax update fails`() =
         runMutationScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
@@ -814,7 +816,16 @@ internal class CheckoutControllerTest {
             val result = controller.selectSavedPaymentMethod(selection)
 
             assertThat(result.isFailure).isTrue()
-            assertThat(committedState()).isEqualTo(before)
+            assertThat(
+                committedState().copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                ),
+            ).isEqualTo(before)
+            assertThat(committedState().savedPaymentMethodSelectionState).isEqualTo(
+                SavedPaymentMethodSelectionState.Failed(
+                    R.string.stripe_something_went_wrong.resolvableString,
+                ),
+            )
         }
 
     @Test

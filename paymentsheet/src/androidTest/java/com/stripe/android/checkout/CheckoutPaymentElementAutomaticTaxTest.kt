@@ -198,6 +198,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
                 .isEqualTo(INITIAL_TOTAL.toDouble())
             immediateActionCalls.expectNoEvents()
+            contentPage.assertHasSavedPaymentMethodSelectionError(
+                applicationContext.getString(R.string.stripe_something_went_wrong)
+            )
 
             enqueueSavedPaymentMethodTaxUpdate(
                 automaticTaxResponse(
@@ -208,6 +211,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 )
             )
             contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+            contentPage.assertNoSavedPaymentMethodSelectionError()
         }
     }
 
