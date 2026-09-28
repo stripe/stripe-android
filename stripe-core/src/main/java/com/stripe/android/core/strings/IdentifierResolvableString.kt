@@ -14,8 +14,14 @@ internal data class IdentifierResolvableString(
 ) : ResolvableString {
     @Suppress("SpreadOperator")
     override fun resolve(context: Context): String {
+        val resolvedString = if (args.isEmpty()) {
+            context.getString(id)
+        } else {
+            context.getString(id, *resolveArgs(context, args))
+        }
+
         return transformations.fold(
-            initial = context.getString(id, *resolveArgs(context, args))
+            initial = resolvedString
         ) { currentValue, transformation ->
             transformation.transform(currentValue)
         }
