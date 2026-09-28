@@ -818,27 +818,6 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `saved selection without a billing address commits and returns to idle without a tax update`() =
-        runMutationScenario(
-            initModifier = savedCustomerWithBillingAddress(),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val loadedSelection = loadedSavedPaymentMethodSelection()
-            val selection = loadedSelection.copy(
-                paymentMethod = loadedSelection.paymentMethod.copy(billingDetails = null),
-            )
-
-            // No tax update is enqueued, so NetworkRule fails the test if a request is made.
-            val result = controller.selectSavedPaymentMethod(selection)
-
-            assertThat(result.isSuccess).isTrue()
-            val committedSelection = committedState().paymentSelection as PaymentSelection.Saved
-            assertThat(committedSelection.paymentMethod.id).isEqualTo(selection.paymentMethod.id)
-            assertThat(committedState().savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        }
-
-    @Test
     fun `selectSavedPaymentMethod skips tax update when automatic tax targets shipping`() =
         runMutationScenario(
             initModifier = combine(
@@ -857,6 +836,27 @@ internal class CheckoutControllerTest {
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(before)
             assertThat(state.paymentSelection).isEqualTo(selection)
+        }
+
+    @Test
+    fun `saved selection without a billing address commits and returns to idle without a tax update`() =
+        runMutationScenario(
+            initModifier = savedCustomerWithBillingAddress(),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val loadedSelection = loadedSavedPaymentMethodSelection()
+            val selection = loadedSelection.copy(
+                paymentMethod = loadedSelection.paymentMethod.copy(billingDetails = null),
+            )
+
+            // No tax update is enqueued, so NetworkRule fails the test if a request is made.
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isSuccess).isTrue()
+            val committedSelection = committedState().paymentSelection as PaymentSelection.Saved
+            assertThat(committedSelection.paymentMethod.id).isEqualTo(selection.paymentMethod.id)
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
 
     @Test
