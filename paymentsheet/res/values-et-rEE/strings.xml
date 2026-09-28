@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Logi Link välja</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Logi %sst välja</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Kinnitage makse oma MB WAY rakenduses %s jooksul, et ost lõpule viia.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ilmnes viga. Kontrollige oma ühendust ja proovige uuesti.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Turvalisuse huvides peavad arendaja valikud olema välja lülitatud, et kasutada puudutusega lisamist.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Avage seaded</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Lülita Arendaja valikud välja</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kaart on aegunud. Proovige teist kaarti.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Puuduta kaarti</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kaart lükati tagasi. Proovige teist kaarti.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kaardi kaubamärki ei värskendatud. Proovige uuesti.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Ostu lõpuleviimiseks kinnitage makse oma pangas või makserakenduses %s jooksul.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Ostu lõpetamiseks viige makse Pixi abil lõpule.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Määra vaikemakseviisiks</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Deconectare de la Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Deconectați-vă de la %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Confirmați plata în aplicația MB WAY în %s pentru a finaliza achiziția.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">A apărut o eroare. Verificați conexiunea și încercați din nou.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Pentru securitate, opțiunile pentru dezvoltator trebuie să fie dezactivate pentru a utiliza Atingeți pentru a adăuga.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Deschideți setările</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Dezactivați opțiunile pentru Dezvoltator</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Card expirat. Încercați alt card.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Atingeți cardul</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Card respins. Încercați alt card.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Marca cardului nu a fost actualizată. Vă rugăm să încercați din nou.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Confirmați plata în banca dvs. sau în aplicația de plată în termen de %s pentru a finaliza achiziția.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Finalizați plata folosind Pix pentru a încheia achiziția.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Setează ca metodă de plată implicită</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
