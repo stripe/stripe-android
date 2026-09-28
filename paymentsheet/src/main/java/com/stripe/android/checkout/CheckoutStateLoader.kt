@@ -116,7 +116,6 @@ internal class CheckoutStateLoader @Inject constructor(
             expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
-            // A committed session update ends a pending saved selection.
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
