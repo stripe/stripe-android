@@ -251,6 +251,7 @@ internal class PollingViewModel @Inject constructor(
 
             val config = IntentStatusPoller.Config(
                 clientSecret = args.clientSecret,
+                pollingInterval = args.pollingInterval,
             )
 
             return DaggerPollingComponent
@@ -274,6 +275,7 @@ internal class PollingViewModel @Inject constructor(
         val clientSecret: String,
         val timeLimit: Duration,
         val initialDelay: Duration,
+        val pollingInterval: Duration,
         @StringRes val ctaText: Int,
         val requestOptions: ApiRequest.Options,
         val qrCodeUrl: String?,
