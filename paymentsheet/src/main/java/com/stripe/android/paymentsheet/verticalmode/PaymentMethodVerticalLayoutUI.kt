@@ -221,9 +221,10 @@ private fun EditButton(
     isEnabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val color = MaterialTheme.colors.primary.copy(alpha = if (isEnabled) 1.0f else 0.6f)
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
-        color = MaterialTheme.colors.primary,
+        color = color,
         style = MaterialTheme.typography.subtitle1,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
@@ -240,6 +241,7 @@ private fun ViewMoreButton(
     showChevron: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
+    val color = MaterialTheme.colors.primary.copy(alpha = if (isEnabled) 1.0f else 0.6f)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -250,7 +252,7 @@ private fun ViewMoreButton(
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
-            color = MaterialTheme.colors.primary,
+            color = color,
             style = MaterialTheme.typography.subtitle1,
             fontWeight = FontWeight.Medium,
         )
@@ -258,7 +260,7 @@ private fun ViewMoreButton(
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_chevron_right),
                 contentDescription = null,
-                tint = MaterialTheme.colors.primary,
+                tint = color,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
         }

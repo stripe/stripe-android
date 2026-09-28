@@ -189,6 +189,54 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testViewMoreDisabledWhileProcessing() {
+        val imageLoader = FakeStripeImageLoader()
+
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction =
+                    PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                linkBrand = LinkBrand.Link,
+                isEnabled = false,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = imageLoader,
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+
+        imageLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun testEditDisabledWhileProcessing() {
+        val imageLoader = FakeStripeImageLoader()
+
+        paparazziRule.snapshot {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction =
+                    PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                linkBrand = LinkBrand.Link,
+                isEnabled = false,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = imageLoader,
+                appearance = getEmbeddedAppearance(FlatWithDisclosure::class),
+            )
+        }
+
+        imageLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
