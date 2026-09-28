@@ -140,8 +140,12 @@ internal class DefaultCreateLinkState @Inject constructor(
         }
 
         val collectsExtraBillingDetails = configuration.billingDetailsCollectionConfiguration.collectsAnything
-        if (collectsExtraBillingDetails && useWebLink) {
-            // Extra billing details collection isn't currently supported in the web flow.
+        val requiresCheckoutSessionEmail =
+            initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession &&
+                initializationMode.checkoutSessionResponse.customerEmail == null &&
+                configuration.defaultBillingDetails?.email == null
+        if ((collectsExtraBillingDetails || requiresCheckoutSessionEmail) && useWebLink) {
+            // Billing details collection isn't currently supported in the web flow.
             add(LinkDisabledReason.BillingDetailsCollection)
         }
 
