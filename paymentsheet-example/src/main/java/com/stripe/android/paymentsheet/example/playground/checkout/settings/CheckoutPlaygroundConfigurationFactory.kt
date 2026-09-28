@@ -232,6 +232,7 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
                 .disallowFundingSourceCreation(this[Controller.express.link.disallowedFunding].toSet())
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
+        .paymentMethodOrder(this[Controller.express.paymentMethodOrder])
         .appearance(
             ExpressCheckoutElement.Configuration.Appearance()
                 .buttonTheme(this[Controller.express.appearance.theme])

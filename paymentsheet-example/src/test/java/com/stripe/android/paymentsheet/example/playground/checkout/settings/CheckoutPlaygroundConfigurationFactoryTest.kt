@@ -23,6 +23,10 @@ class CheckoutPlaygroundConfigurationFactoryTest {
             Color(0xFF112233),
         )
         settings.update(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius, 8f)
+        settings.update(
+            CheckoutPlaygroundDefinitions.Controller.express.paymentMethodOrder,
+            listOf("link", "google_pay"),
+        )
 
         val configuration = settings.snapshot().checkoutControllerConfiguration()
 
