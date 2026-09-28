@@ -91,11 +91,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
             // We also re-load Link state since the confirmation was for a Link payment method.
-            repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
-                validateLoadingAnalyticsRequests()
-                validateLinkAccountLookupAnalyticsRequest()
-            }
+            enqueueLoadingRequests(linkEnabled = true)
 
             page.clickLinkButton()
         }
@@ -118,11 +114,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             )
 
             // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
-                validateLoadingAnalyticsRequests()
-                validateLinkAccountLookupAnalyticsRequest()
-            }
+            enqueueLoadingRequests(linkEnabled = true)
 
             page.clickGooglePayButton()
         }
@@ -313,7 +305,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
         block: () -> Unit,
     ) {
-        enqueueInitialRequests(linkEnabled = linkEnabled)
+        enqueueLoadingRequests(linkEnabled = linkEnabled)
+        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -326,7 +319,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         }
     }
 
-    private fun enqueueInitialRequests(linkEnabled: Boolean) {
+    private fun enqueueLoadingRequests(linkEnabled: Boolean) {
         // We load twice, once for PE and once for ECE. So all these requests are made twice.
         repeat(2) {
             if (linkEnabled) {
@@ -335,7 +328,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             validateLoadingAnalyticsRequests()
         }
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
     }
 
     private fun validateLoadingAnalyticsRequests() {
