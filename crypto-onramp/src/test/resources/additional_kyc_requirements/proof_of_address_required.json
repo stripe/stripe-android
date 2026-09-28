@@ -1,30 +1,54 @@
 {
   "requirements": {
-    "entries": [
-      {
-        "description": "proof_of_address",
-        "requested_by": "swapped",
-        "awaiting_action_from": "user",
-        "errors": [],
-        "document": {
-          "accepted_subtypes": [
-            {
-              "id": "utility_bill",
-              "label": "Utility bill"
-            },
-            {
-              "id": "bank_statement",
-              "label": "Bank statement"
-            }
-          ],
-          "accepted_formats": ["pdf", "jpeg", "png"],
-          "min_documents": 1,
-          "instructions": [
-            "Documents must have your full name and address on them",
-            "Documents must have been issued within the last 12 months"
-          ]
-        }
+    "proof_of_address": {
+      "requested_by": "swapped",
+      "awaiting_action_from": "user",
+      "errors": [],
+      "document": {
+        "accepted_subtypes": [
+          {
+            "id": "id_documents",
+            "label": "ID documents",
+            "description": "ID card, passport, residence permit, or driver's license."
+          },
+          {
+            "id": "government_organization_documents",
+            "label": "Government organization documents",
+            "description": "Statement, voter registration, or tax bill."
+          },
+          {
+            "id": "utility_provider",
+            "label": "Utility provider",
+            "description": "Telecom or utility bill."
+          },
+          {
+            "id": "bank",
+            "label": "Bank",
+            "description": "Bank statement or bank letter."
+          },
+          {
+            "id": "lease_agreement",
+            "label": "Lease agreement",
+            "description": null
+          }
+        ],
+        "accepted_formats": [
+          "pdf",
+          "jpeg",
+          "png"
+        ],
+        "instructions": [
+          "Documents must include your full name and address.",
+          "ID documents must be valid and in date.",
+          "Other documents must have been issued in the last 12 months.",
+          "For physical documents, all four corners must be visible.",
+          "For digital documents, upload the original PDF; screenshots aren't accepted."
+        ],
+        "min_document_types": 1,
+        "max_document_types": 2,
+        "max_file_size_bytes": 50000000,
+        "file_requirements": "PDF, JPEG/JPG, or PNG, up to 50 MB per file."
       }
-    ]
+    }
   }
 }

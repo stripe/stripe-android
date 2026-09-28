@@ -5,10 +5,8 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
-import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
@@ -59,7 +57,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -745,7 +742,13 @@ internal class CheckoutControllerTest {
 
                 assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
                 assertThat(isUpdatingTurbine.awaitItem()).isTrue()
-                assertThat(committedState()).isEqualTo(before)
+                assertThat(committedState()).isEqualTo(
+                    before.copy(
+                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                            selection.paymentMethod.id,
+                        ),
+                    )
+                )
 
                 releaseResponse.countDown()
                 result.await().getOrThrow()
@@ -754,9 +757,42 @@ internal class CheckoutControllerTest {
                 val state = committedState()
                 assertThat(state.checkoutSessionResponse.livemode).isTrue()
                 assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(state.savedPaymentMethodSelectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
             } finally {
                 releaseResponse.countDown()
             }
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod acknowledges the SEPA mandate`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithSepaDebit(),
+                { json ->
+                    val elementsSession = json.getJSONObject("elements_session")
+                    elementsSession.getJSONArray("ordered_payment_method_types_and_wallets")
+                        .put("sepa_debit")
+                    elementsSession.getJSONObject("payment_method_preference")
+                        .getJSONArray("ordered_payment_method_types")
+                        .put("sepa_debit")
+                    json.getJSONObject("server_built_elements_session_params")
+                        .getJSONObject("deferred_intent")
+                        .getJSONArray("payment_method_types")
+                        .put("sepa_debit")
+                },
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+            controller.selectSavedPaymentMethod(selection).getOrThrow()
+
+            assertThat(committedState().paymentSelection).isEqualTo(selection)
+            assertThat(committedState().paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
 
     @Test
@@ -800,59 +836,6 @@ internal class CheckoutControllerTest {
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(before)
             assertThat(state.paymentSelection).isEqualTo(selection)
-        }
-
-    @Test
-    fun `saved selection ignores a duplicate while its tax response is pending`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithBillingAddress(),
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = loadedSavedPaymentMethodSelection()
-            val completions = Turbine<CheckoutControllerState>()
-            val handler = createSelectionHandler(completions)
-            val requestReceived = CountDownLatch(1)
-            val releaseResponse = CountDownLatch(1)
-            networkRule.savedPaymentMethodTaxUpdate { response ->
-                requestReceived.countDown()
-                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the saved payment method tax response."
-                }
-                successfulSavedPaymentMethodResponse(response)
-            }
-
-            handler.state.test {
-                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-                handler.select(selection, true)
-                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-                try {
-                    testScheduler.advanceUntilIdle()
-                    assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
-
-                    handler.select(selection, true)
-                    expectNoEvents()
-                    completions.expectNoEvents()
-
-                    releaseResponse.countDown()
-                    val stateAtCompletion = withTurbineTimeout(10.seconds) {
-                        completions.awaitItem()
-                    }
-                    assertThat(stateAtCompletion.checkoutSessionResponse.livemode).isTrue()
-                    assertThat(stateAtCompletion.paymentSelection).isEqualTo(selection)
-                    assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                    expectNoEvents()
-                    completions.expectNoEvents()
-                } finally {
-                    releaseResponse.countDown()
-                }
-            }
-
-            completions.ensureAllEventsConsumed()
         }
 
     @Test
@@ -1329,8 +1312,26 @@ internal class CheckoutControllerTest {
         json.put("customer", savedCustomerJson())
     }
 
-    private fun savedCustomerJson(): JSONObject {
-        val paymentMethod = JSONObject()
+    private fun savedCustomerWithSepaDebit(): (JSONObject) -> Unit = { json ->
+        json.put(
+            "customer",
+            savedCustomerJson(
+                paymentMethod = JSONObject(PaymentMethodFixtures.SEPA_DEBIT_JSON.toString()),
+            ),
+        )
+    }
+
+    private fun savedCustomerJson(
+        paymentMethod: JSONObject = savedCardPaymentMethodJson(),
+    ): JSONObject {
+        return JSONObject()
+            .put("id", "cus_saved_customer")
+            .put("payment_methods", JSONArray().put(paymentMethod))
+            .put("can_detach_payment_method", true)
+    }
+
+    private fun savedCardPaymentMethodJson(): JSONObject {
+        return JSONObject()
             .put("id", "pm_saved_card")
             .put("object", "payment_method")
             .put("created", 1)
@@ -1356,10 +1357,6 @@ internal class CheckoutControllerTest {
                         .put("country", "US")
                 )
             )
-        return JSONObject()
-            .put("id", "cus_saved_customer")
-            .put("payment_methods", JSONArray().put(paymentMethod))
-            .put("can_detach_payment_method", true)
     }
 
     @Suppress("RestrictedApi")
@@ -1542,17 +1539,6 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
-
-        fun createSelectionHandler(
-            completions: Turbine<CheckoutControllerState>,
-        ): CheckoutPaymentSelectionHandler {
-            return CheckoutPaymentSelectionHandler(
-                checkoutController = controller,
-                selectionHolder = stateHolder,
-                immediateActionHandler = { completions.add(committedState()) },
-                coroutineScope = this,
-            )
-        }
 
         fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
             val customerState: CustomerState = requireNotNull(

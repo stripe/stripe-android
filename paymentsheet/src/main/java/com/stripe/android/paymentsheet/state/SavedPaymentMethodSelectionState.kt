@@ -1,7 +1,12 @@
 package com.stripe.android.paymentsheet.state
 
-internal sealed class SavedPaymentMethodSelectionState {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+internal sealed class SavedPaymentMethodSelectionState : Parcelable {
+    @Parcelize
     data object Idle : SavedPaymentMethodSelectionState()
 
-    data object Pending : SavedPaymentMethodSelectionState()
+    @Parcelize
+    data class Pending(val paymentMethodId: String) : SavedPaymentMethodSelectionState()
 }

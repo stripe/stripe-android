@@ -24,13 +24,17 @@ internal data class AdditionalKycRequirementError(
 internal data class AdditionalKycDocumentRequirement(
     val acceptedSubtypes: List<AdditionalKycDocumentSubtype>,
     val acceptedFormats: List<String>,
-    val minDocuments: Int,
+    val minDocumentTypes: Int,
+    val maxDocumentTypes: Int,
+    val maxFileSizeBytes: Long,
+    val fileRequirements: String,
     val instructions: List<String>,
 )
 
 internal data class AdditionalKycDocumentSubtype(
     val id: String,
     val label: String,
+    val description: String?,
 )
 
 internal data class AdditionalKycQuestionnaire(
