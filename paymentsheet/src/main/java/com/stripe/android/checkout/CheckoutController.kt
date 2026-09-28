@@ -221,15 +221,14 @@ class CheckoutController @Inject internal constructor(
     internal suspend fun selectSavedPaymentMethod(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {
-        mutationPreconditionFailure()?.let { return it }
-        if (!stateHolder.tryBeginSavedSelection()) {
-            return kotlin.Result.failure(
-                IllegalStateException("A saved payment method selection is already pending.")
-            )
-        }
         return withCheckoutState(
-            additionalStateMutations = { withSelection(selection) },
+            additionalStateMutations = { commitSelection(selection) },
         ) {
+            stateHolder.state = copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                    selection.paymentMethod.id,
+                ),
+            )
             val address = selection.billingDetails?.address?.toCheckoutAddress()
             if (address == null) {
                 if (
@@ -238,10 +237,10 @@ class CheckoutController @Inject internal constructor(
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                     )
                 ) {
-                    // Saved payment methods without a billing address are filtered out when tax depends on it.
+                    // Billing-tax filtering should prevent this state from reaching selection.
                     errorReporter.report(
                         errorEvent = ErrorReporter.UnexpectedErrorEvent
-                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_TAX_ADDRESS,
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
                     )
                 }
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
@@ -316,7 +315,15 @@ class CheckoutController @Inject internal constructor(
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
         block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> {
-        mutationPreconditionFailure()?.let { return it }
+        stateHolder.state
+            ?: return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate checkout session before it is configured.")
+            )
+        if (sheetStateHolder.sheetIsOpen) {
+            return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
+            )
+        }
         return operationCoordinator.runMutation {
             runCatching {
                 // Re-read the latest committed state inside the lock so serialized mutations
@@ -331,20 +338,6 @@ class CheckoutController @Inject internal constructor(
                 checkoutStateLoader.reload(newState)
             }
         }
-    }
-
-    private fun mutationPreconditionFailure(): kotlin.Result<Nothing>? {
-        if (stateHolder.state == null) {
-            return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        }
-        if (sheetStateHolder.sheetIsOpen) {
-            return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
-            )
-        }
-        return null
     }
 
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(

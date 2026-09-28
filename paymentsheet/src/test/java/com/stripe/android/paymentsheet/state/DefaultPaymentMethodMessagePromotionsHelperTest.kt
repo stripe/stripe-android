@@ -26,12 +26,13 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
-    fun `fetchPromotionsAsync calls repository`() = runScenario {
+    fun `fetchPromotionsAsync calls repository and reports publishable key`() = runScenario {
         helper.fetchPromotionsAsync(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             DEFAULT_API_CONFIG
         )
-        eventReporter.pmmPromotionsFetched.awaitItem()
+        assertThat(eventReporter.pmmPromotionsFetched.awaitItem())
+            .isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         val request = fakeRepository.calls.awaitItem()
         assertThat(request.amount).isEqualTo(1099)
         assertThat(request.currency).isEqualTo("usd")

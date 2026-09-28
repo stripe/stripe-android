@@ -64,6 +64,19 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
+    fun `insecure device reports blocked only on initial creation`() = runScenario(
+        isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
+        consumeInitialBlockedEvent = false,
+    ) {
+        assertThat(fakeEventReporter.onNfcScanBlockedCalls.awaitItem()).isNotNull()
+
+        viewModel.register(mock())
+        viewModel.register(mock())
+
+        fakeEventReporter.onNfcScanBlockedCalls.expectNoEvents()
+    }
+
+    @Test
     fun `register does not start card scanner when device is not secure`() = runScenario(
         isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
     ) {
@@ -466,6 +479,7 @@ internal class NfcScanningViewModelTest {
     private fun runScenario(
         tapZone: TapZone = TapZone(xBias = 0.5f, yBias = 0.5f),
         isDeviceSecureForNfc: FakeIsDeviceSecureForNfc = FakeIsDeviceSecureForNfc(),
+        consumeInitialBlockedEvent: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest(dispatcher) {
         val scannerState = MutableSharedFlow<NfcCardScanner.State>()
@@ -485,6 +499,9 @@ internal class NfcScanningViewModelTest {
         if (isDeviceSecureForNfc.result) {
             assertThat(fakeTimeoutManager.startCalls.awaitItem()).isNotNull()
         } else {
+            if (consumeInitialBlockedEvent) {
+                assertThat(fakeEventReporter.onNfcScanBlockedCalls.awaitItem()).isNotNull()
+            }
             fakeTimeoutManager.startCalls.expectNoEvents()
         }
 

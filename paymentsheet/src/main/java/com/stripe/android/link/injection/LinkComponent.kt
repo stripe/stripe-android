@@ -22,6 +22,7 @@ internal annotation class LinkScope
 @Subcomponent(
     modules = [
         LinkModule::class,
+        LinkAccountAnalyticsModule::class,
         ApplicationIdModule::class,
     ]
 )

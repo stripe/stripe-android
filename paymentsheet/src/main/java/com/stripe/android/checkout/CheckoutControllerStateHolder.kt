@@ -32,6 +32,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
     init {
+        // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
         state?.let { restoredState ->
             if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
                 state = restoredState.copy(
@@ -51,33 +52,12 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
     val session: StateFlow<Session?> =
-        stateFlow
-            .mapAsStateFlow {
-                it?.copy(savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle)
-            }
-            .mapAsStateFlow {
-                it?.asCheckoutSession(
-                    paymentOptionFactory,
-                    availableExpressButtonTypesFactory,
-                )
-            }
-
-    override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
         stateFlow.mapAsStateFlow {
-            it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
+            it?.asCheckoutSession(
+                paymentOptionFactory,
+                availableExpressButtonTypesFactory,
+            )
         }
-
-    fun tryBeginSavedSelection(): Boolean {
-        val current = state ?: return false
-        if (current.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-            return false
-        }
-
-        state = current.copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-        )
-        return true
-    }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }
@@ -90,7 +70,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
-        state = current.withSelection(updatedSelection)
+        state = current.commitSelection(updatedSelection)
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {

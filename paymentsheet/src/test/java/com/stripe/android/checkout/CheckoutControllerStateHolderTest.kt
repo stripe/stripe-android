@@ -90,38 +90,13 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `saved selection state guards pending operations`() = testScenario {
-        stateHolder.state = committedState()
-        stateHolder.savedPaymentMethodSelectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-            assertThat(stateHolder.tryBeginSavedSelection()).isFalse()
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `session does not emit when saved selection becomes pending`() = testScenario {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
-
-        stateHolder.session.test {
-            assertThat(awaitItem()).isNotNull()
-
-            assertThat(stateHolder.tryBeginSavedSelection()).isTrue()
-
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `restored pending saved selection is reset to idle and can be retried`() = runTest {
+    fun `restored pending saved selection is reset to idle`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = committedState().copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                "pm_restored",
+            ),
         )
 
         val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
@@ -130,9 +105,6 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(restoredStateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        assertThat(restoredStateHolder.tryBeginSavedSelection()).isTrue()
     }
 
     @Test
@@ -216,21 +188,6 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    @Test
-    fun `setSelection returns a pending saved selection to idle`() = testScenario {
-        stateHolder.state = committedState().copy(
-            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending,
-        )
-
-        stateHolder.savedPaymentMethodSelectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending)
-
-            stateHolder.setSelection(PaymentSelection.GooglePay)
-
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-        }
     }
 
     @Test
@@ -336,8 +293,6 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(stateHolder.temporarySelection.value).isEqualTo("card")
-        assertThat(stateHolder.savedPaymentMethodSelectionState.value)
-            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }

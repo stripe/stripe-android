@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.em
@@ -25,11 +24,11 @@ internal const val TAP_TO_BUTTON_UI_TEST_TAG = "tap_to_button_ui"
 private const val NFC_ICON_INLINE_CONTENT_ID = "nfc_icon"
 
 @Composable
-internal fun TapToButtonUI(
+internal fun TapButtonUI(
+    label: String,
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val label = stringResource(R.string.stripe_tap_to_add_card_button_label)
     val contentColor = if (enabled) {
         MaterialTheme.colors.primary
     } else {
