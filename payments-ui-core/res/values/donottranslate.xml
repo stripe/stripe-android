@@ -44,6 +44,7 @@
     <string name="stripe_paymentsheet_payment_method_kr_card">Korean cards</string>
     <string name="stripe_paymentsheet_payment_method_naver_pay">Naver Pay</string>
     <string name="stripe_paymentsheet_payment_method_scalapay">Scalapay</string>
+    <string name="stripe_paymentsheet_payment_method_pix">Pix</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <string name="stripe_scanned_card_masked_last4">\u2066•••• %1$s\u2069</string>

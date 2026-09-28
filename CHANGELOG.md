@@ -10,6 +10,9 @@ NEXT_VERSION_BUMP: PATCH
 ### Payments
 * [ADDED] Added API bindings for Pix.
 
+### PaymentSheet
+* [ADDED] Added support for Pix payments.
+
 ## 23.20.0 - 2026-09-21
 
 ### Payments
